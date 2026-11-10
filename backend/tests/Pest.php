@@ -32,5 +32,6 @@ function member(Role $role = Role::Owner, ?Tenant $tenant = null, bool $canEditP
         'can_edit_prices' => $canEditPrices,
     ]);
 
-    return [$user, $tenant, $membership];
+    // Reload, as a real request would: a just-created model lacks columns with DB defaults.
+    return [$user->fresh(), $tenant->fresh(), $membership];
 }
