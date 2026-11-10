@@ -1,19 +1,22 @@
 @echo off
 rem Menu - run every check (same as CI, minus browser tests) after pulling a branch.
-rem Run from the repository root:  .\check.bat
+rem   .\check.bat            backend + frontend
+rem   .\check.bat backend    backend only
+rem   .\check.bat frontend   frontend only
 rem Output: check-log.txt (not committed).
 setlocal
 cd /d "%~dp0"
 set "LOG=%~dp0check-log.txt"
-echo Menu checks %date% %time%> "%LOG%"
+echo Menu checks %date% %time% [%~1]> "%LOG%"
 git rev-parse --abbrev-ref HEAD>> "%LOG%" 2>&1
 git log --oneline -1>> "%LOG%" 2>&1
+if /i "%~1"=="frontend" goto frontend
 echo.>> "%LOG%"
-echo ################ Start containers ################>> "%LOG%"
-echo == Start containers ==
-echo   start...
+echo ################ Backend (in Docker) ################>> "%LOG%"
+echo == Backend (in Docker) ==
+echo   start containers...
 echo.>> "%LOG%"
-echo ===== start =====>> "%LOG%"
+echo ===== start containers =====>> "%LOG%"
 pushd "%~dp0"
 (docker compose up -d app web db mail) >> "%LOG%" 2>&1
 echo [exit code %errorlevel%]>> "%LOG%"
@@ -25,21 +28,11 @@ pushd "%~dp0"
 (docker compose exec -T db sh -c "i=0; until mysql -uroot -proot -e 'select 1' >/dev/null 2>&1; do i=$((i+1)); [ $i -gt 90 ] && exit 1; sleep 2; done; echo MySQL is ready") >> "%LOG%" 2>&1
 echo [exit code %errorlevel%]>> "%LOG%"
 popd
-echo.>> "%LOG%"
-echo ################ Backend (in Docker) ################>> "%LOG%"
-echo == Backend (in Docker) ==
-echo   laravel/fortify (approved, Partition 2)...
-echo.>> "%LOG%"
-echo ===== laravel/fortify (approved, Partition 2) =====>> "%LOG%"
-pushd "%~dp0"
-(findstr /c:"laravel/fortify" backend\composer.json >nul && (echo already required) || (docker compose exec -T app composer require laravel/fortify --no-interaction --no-progress)) >> "%LOG%" 2>&1
-echo [exit code %errorlevel%]>> "%LOG%"
-popd
 echo   composer install...
 echo.>> "%LOG%"
 echo ===== composer install =====>> "%LOG%"
 pushd "%~dp0"
-(docker compose exec -T app composer install --no-interaction --no-progress) >> "%LOG%" 2>&1
+(docker compose exec -T app sh -c "cmp -s composer.lock vendor/.installed.lock && echo up to date || (composer install --no-interaction --no-progress && cp composer.lock vendor/.installed.lock)") >> "%LOG%" 2>&1
 echo [exit code %errorlevel%]>> "%LOG%"
 popd
 echo   migrate:fresh...
@@ -91,6 +84,8 @@ pushd "%~dp0"
 (docker compose exec -T app php artisan test) >> "%LOG%" 2>&1
 echo [exit code %errorlevel%]>> "%LOG%"
 popd
+if /i "%~1"=="backend" goto git
+:frontend
 echo.>> "%LOG%"
 echo ################ Frontend (on Windows) ################>> "%LOG%"
 echo == Frontend (on Windows) ==
@@ -98,7 +93,7 @@ echo   pnpm install...
 echo.>> "%LOG%"
 echo ===== pnpm install =====>> "%LOG%"
 pushd "%~dp0"
-(cd frontend && call pnpm install) >> "%LOG%" 2>&1
+(cd frontend && call pnpm install --prefer-offline) >> "%LOG%" 2>&1
 echo [exit code %errorlevel%]>> "%LOG%"
 popd
 echo   pnpm format...
@@ -122,6 +117,7 @@ pushd "%~dp0"
 (cd frontend && call pnpm build) >> "%LOG%" 2>&1
 echo [exit code %errorlevel%]>> "%LOG%"
 popd
+:git
 echo.>> "%LOG%"
 echo ################ Git ################>> "%LOG%"
 echo == Git ==
