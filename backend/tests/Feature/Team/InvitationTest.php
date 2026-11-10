@@ -101,3 +101,14 @@ it('treats expired invitations as gone', function () {
 
     $this->getJson('/api/v1/invitations/expired-token')->assertNotFound();
 });
+
+it('links the invitation email to the SPA invitation page', function () {
+    [$owner, $tenant] = member(Role::Owner);
+
+    invite($owner, $tenant->id, ['email' => 'link@example.com', 'role' => 'staff'])->assertCreated();
+    $token = sentInvitationToken('link@example.com');
+
+    Notification::assertSentOnDemand(InvitationNotification::class, function (InvitationNotification $n) use ($token) {
+        return $n->toMail(new stdClass)->actionUrl === url('/auth/invite/'.$token);
+    });
+});

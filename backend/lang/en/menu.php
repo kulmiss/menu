@@ -23,6 +23,7 @@ return [
     ],
     'invitation' => [
         'wrong_account' => 'This invitation was sent to a different email address.',
+        'invalid' => 'This invitation is no longer valid. Ask for a new one.',
         'mail_subject' => 'You are invited to :restaurant',
         'mail_line' => ':inviter invited you to help manage :restaurant as :role.',
         'mail_action' => 'Accept invitation',

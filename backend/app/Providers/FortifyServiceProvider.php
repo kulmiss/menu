@@ -24,7 +24,7 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
 
         // Password reset links open the SPA, not a Blade view.
-        ResetPassword::createUrlUsing(fn ($user, string $token) => url('/app/reset-password?'.http_build_query([
+        ResetPassword::createUrlUsing(fn ($user, string $token) => url('/auth/reset-password?'.http_build_query([
             'token' => $token,
             'email' => $user->getEmailForPasswordReset(),
         ])));
