@@ -1,6 +1,8 @@
 # Handover
 
-_Last updated: 2026-11-10 16:10 EAT. Clean stopping point: Partition 3 complete (#5 ready), CI green._
+_Last updated: 2026-11-10 16:30 EAT. Clean stopping point: speed plan + first budgets (#6), CI green._
+
+> **Speed is now the top priority (owner, 2026-11-10): PLAN.md §15 applies to every partition and every partition report must include the §15.5 numbers.**
 
 ## Where we are
 | Part | Branch | PR | State |
@@ -12,7 +14,9 @@ _Last updated: 2026-11-10 16:10 EAT. Clean stopping point: Partition 3 complete 
 | 3c photos | `feat/menu-data` | #5 | CI green |
 | 3d import/export (openspout) | `feat/menu-data` | #5 | CI green |
 
-**#5 is ready** and contains #3 and #4: merge only #5, with *Create a merge commit*.
+| Performance plan + first budgets | `feat/performance` | #6 | CI green |
+
+**#6 is the newest** and contains #3, #4 and #5: merge only #6, with *Create a merge commit*.
 
 ## Claude's workspace can now run everything
 Since 2026-11-10 the cloud workspace can: `pnpm install` (npm registry), `composer install --prefer-source` (git clones of public GitHub repos; Packagist metadata is blocked, so **`composer require` of new packages still needs the owner's PC**), MariaDB 10.11 (`apt-get install mariadb-server`), Chromium for Vitest browser tests (`PLAYWRIGHT_BROWSERS_PATH` pointing at `/opt/pw-browsers` with a `chromium_headless_shell-1217` symlink to `-1243`), and a real-browser smoke test against `php artisan serve`.
@@ -38,16 +42,23 @@ Setup recipe used: `composer config -g use-github-api false`; `phpstan/phpstan` 
 Backend: Pint, Larastan 6, migrate → rollback → migrate, Pest **150**. Frontend: lint, Prettier, build, Vitest **150**. Browser smoke (375 px): sign-up → menu editor (categories, items, tags, allergens, sold out, keyboard/mouse reorder, bulk +10 %) → import CSV → export Excel → photo upload (3000×2000 → cropped 2048×1536, all sizes written). No errors.
 Vitest browser tests pre-bundle a few deps in `vite.config.ts` (`optimizeDeps.include`) so Vite never reloads mid-run; add a dep there if CI ever logs "Vite unexpectedly reloaded".
 
+## Speed work done (#6)
+- PLAN.md §15 written (targets, honest limits with closest achievable targets, design, CI gates).
+- Admin first load 285 → 241 KB gzip; CI ceiling 245 KB (`frontend/scripts/bundle-size.mjs`, `pnpm size`).
+- Query-count tests (no N+1); photos WebP q72 / JPEG q75 / AVIF when available / < 300-byte placeholder (`media.placeholder`); `.htaccess` + Nginx immutable caching and compression.
+
 ## Next steps (in order)
-1. **Partition 2 leftovers** (small PR stacked on `feat/menu-data`): personal settings pages — profile, password, **2FA setup** (Fortify endpoints exist), interface language — and translate the config drawer. Needed before Super Admin (2FA required).
-2. **Partition 4 — customer menu page**: Blade page `/{slug}`, inlined CSS + ~5 KB JS, layouts, search/filter, item sheet, HTML cache by `cache_version`, view beacon, SEO, `/q/{code}`; budget check in CI.
+1. **Owner decision: admin budget option (PLAN §15.6).** If A: replace axios with a small fetch wrapper (keep the interceptor features: Idempotency-Key, 419 retry; tests use `fakeApi` — adapt it), lazy-load more widgets, lower the CI ceiling to 225 KB.
+2. **Partition 2 leftovers**: personal settings + 2FA setup (+ optimistic price edits, §15.3).
+3. **Partition 4 — customer menu page per §15.2**: static files in `public/menu-cache` (+ `.gz`/`.br`) served by `.htaccess`/Nginx without PHP, rebuilt on every change and by the daily cron; inline CSS; ≤ 5 KB JS; service worker; `/q/{code}` via a tiny PHP file + pre-built map; demo menu seeder; **Lighthouse CI** (`@lhci/cli`, mobile throttled, 3 runs) and the 30 KB gate in CI; report the §15.5 numbers.
 
 ## Blockers / owner actions
-- Merge #5 (contains #3 and #4).
+- Merge #6 (contains #3, #4, #5).
+- Choose the admin budget option (PLAN §15.6): A (recommended) / B / C.
 - `main` branch protection still to add.
 
 ## Pinned references
 - shadcn-admin `e16c87f` (v2.2.1, MIT); Laravel skeleton v13.11.0 `06d016a`; design mockups https://claude.ai/artifact/HKJ6v8zV9y2b7oQoYb33B5
 
 ## Prompt for the next chat
-> Continue the Menu project in kulmiss/menu from handover.md (branch feat/menu-data, PR #5 ready). Same rules as PLAN.md and QUESTIONS.md: stacked PRs (I merge only the newest), CI checks every PR, tests in every partition, shared hosting is the main target. Do the Partition 2 leftovers (settings + 2FA setup), then Partition 4 (customer menu page). Stop only for new packages, big architecture choices, licence doubts, or steps that can't be undone.
+> Continue the Menu project in kulmiss/menu from handover.md (branch feat/performance, PR #6). Speed is the top priority: follow PLAN.md §15 in everything and report the §15.5 numbers. Admin budget: option <A/B/C>. Then the Partition 2 leftovers, then Partition 4 (customer menu page) with Lighthouse CI. Same rules: stacked PRs (I merge only the newest), CI checks every PR, tests in every partition, shared hosting is the main target. Stop only for new packages, big architecture choices, licence doubts, or steps that can't be undone.
