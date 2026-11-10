@@ -20,7 +20,8 @@ vi.mock('@tanstack/react-router', async (importOriginal) => {
   }
 })
 
-vi.mock('@/context/theme-provider', () => ({
+vi.mock('@/context/theme-provider', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/context/theme-provider')>()),
   useTheme: () => ({ setTheme: mocks.setTheme }),
 }))
 
