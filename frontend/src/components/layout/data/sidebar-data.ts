@@ -4,11 +4,10 @@ import {
   LayoutDashboard,
   ListPlus,
   Tags,
-  Palette,
   Settings,
+  ShieldCheck,
   UserCog,
   Users,
-  Wrench,
 } from 'lucide-react'
 import { type SidebarData } from '../types'
 
@@ -61,14 +60,9 @@ export const sidebarData: SidebarData = {
           items: [
             { title: 'nav.profile', url: '/admin/settings', icon: UserCog },
             {
-              title: 'nav.account',
-              url: '/admin/settings/account',
-              icon: Wrench,
-            },
-            {
-              title: 'nav.appearance',
-              url: '/admin/settings/appearance',
-              icon: Palette,
+              title: 'nav.security',
+              url: '/admin/settings/security',
+              icon: ShieldCheck,
             },
           ],
         },

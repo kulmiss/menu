@@ -66,7 +66,7 @@ Restaurants and cafés publish a fast, clean menu that customers open from a QR 
 - Images: `<picture>` with AVIF (when the server can make it) + WebP + JPEG fallback, `srcset`/`sizes` 320/640/1280, explicit width/height, inline blurred placeholder (< 300 bytes); first visible images eager with `fetchpriority="high"`, the rest `loading="lazy" decoding="async"` (§15.2).
 - SEO: `<title>`, meta description, canonical (strips `table`), Open Graph + Twitter card with the cover image (1200×630 crop), `hreflang` per enabled language, JSON-LD `Restaurant` + `Menu`, `robots.txt`, `sitemap.xml` of active restaurants.
 - Light/dark follows the phone setting (`prefers-color-scheme`), with both palettes in the inlined CSS and brand colours adjusted per mode to keep ≥ 4.5:1.
-- Fonts: **system fonts by default**; optional curated self-hosted list (Inter, Manrope, Lora, Nunito), subset WOFF2, preloaded, `font-display: swap`. **Noto Sans Ethiopic** and **Noto Sans Arabic** load through `unicode-range`, so they download only when Amharic or Arabic text is on the page.
+- Fonts: **system fonts by default**; optional curated self-hosted list (Inter, Manrope, Lora, Nunito), subset WOFF2, preloaded, `font-display: swap`.
 
 ### 3.4 Deploy targets (documented in Partition 13)
 - **Shared hosting (cPanel):** CI produces `menu-release-<version>.zip` (vendor installed with `--no-dev`, SPA built, public CSS/JS built). Upload, point the domain's document root at `menu/public` (or copy `public/` into `public_html` with the documented `index.php` path change), set `.env`, run migrations from cPanel Terminal or the provided one-time web installer guarded by a setup token (deleted after use), add the cron line.
@@ -212,7 +212,7 @@ Plan limits are checked on create (and on import) server-side; over the limit af
 1. **Menu page** — cover, logo, name, open/closed pill, today's special banner; sticky category tabs (scrollspy); items in the chosen layout (list / grid / large photos) with photo, name, summary, price (or "from"), tags, sold-out state; search button; filter sheet (dietary tags, "hide allergens…"); menu switcher when several menus are active (e.g. Breakfast / Drinks).
 2. **Item sheet** — large photo, full description, variants with prices, add-on groups (min/max shown as information), allergens, calories, prep time.
 3. **Info sheet** — hours per day with breaks + holiday notice, address + "Open in Maps", phone, WhatsApp, Telegram, socials, Wi-Fi (tap to copy password).
-4. **Language switch** (enabled languages; RTL for Arabic), **branch switch** (if several).
+4. **Language switch** — hidden while the restaurant has one language (English only for now, §11); **branch switch** (if several).
 5. **States** — closed now, holiday closure, menu not scheduled now ("Breakfast starts at 07:00"), empty search, menu unavailable, 404 slug.
 6. **Terms / Privacy** pages.
 
@@ -258,8 +258,11 @@ Every minute: drain queue (emails). Hourly: purge expired idempotency keys. Dail
 Jobs on every PR to `develop`: `backend` (composer validate, Pint, Larastan level 6, Pest with MySQL 8 service), `migrations` (migrate → rollback → migrate), `frontend` (pnpm install --frozen-lockfile, ESLint, Prettier check, `tsc -b`, Vitest, build), `public` (build CSS/JS, 30 KB budget, **Lighthouse CI mobile throttled** on the demo menu — §15.5), admin bundle budget in `frontend` (§15.3), `release` (on tags only: builds the shared-hosting zip as a workflow artifact).
 
 ## 11. Internationalisation
-- Admin interface: **English** (source), **Somali**, **Amharic**, **Arabic** (RTL proof). Non-English files start with `"_status": "machine_draft"`; the language picker shows "(draft)" until the owner marks them reviewed.
-- Menu content: any language the restaurant enables (plan-limited), JSON columns per field, fallback to the default language.
+**English only for now (owner, 2026-11-10; QUESTIONS #14, #15).** Admin, Super Admin and the customer menu ship in English. No Somali/Amharic/Arabic files, extra fonts or right-to-left work in this build.
+Ready for more languages later without rewriting:
+- Every interface text goes through `t()` (SPA) / `__()` (Laravel); adding one is a new locale file. The admin's language switch and the profile's language field appear by themselves once there are two languages (machine-draft marking via `_status` still works).
+- Menu content keeps **JSON columns per field, keyed by language** (`{"en": "Macchiato"}`), with fallback to the default language.
+- The customer menu's language switch and the admin's menu-translation screens stay **hidden until a restaurant has more than one language enabled** (Partition 8 is deferred; see §12).
 - Numbers and money with `Intl` (Western digits), Gregorian calendar, 24 h or 12 h per locale. ETB shown as "Br 120" by default (symbol/position/decimals configurable per restaurant).
 
 ## 12. Partitions (each = one or more small PRs into `develop`)
@@ -274,7 +277,7 @@ Jobs on every PR to `develop`: `backend` (composer validate, Pint, Larastan leve
 | 5 | **Appearance + live preview** | appearance settings, themes, fonts, contrast guard, preview iframe | contrast unit, preview render |
 | 6 | **Branches + QR codes** | branches, overrides, tables, QR PNG/SVG/PDF, table cards | overrides resolution, PDF render |
 | 7 | **Restaurant info + hours** | profile, contacts, Wi-Fi, hours with breaks/overnight, closures | hours units (incl. midnight) |
-| 8 | **Translations** | languages, translation grid, fallback, RTL | fallback, missing filter |
+| 8 | **Translations** — *deferred (English only, §11)* | languages, translation grid, fallback; hidden while one language | fallback, missing filter |
 | 9 | **Promotions** | specials/announcements, badges | date windows |
 | 10 | **Insights** | stats aggregation, charts, scans per table | counting, bot filter |
 | 11 | **Super Admin** | dashboard, restaurants, plans, features, payments, themes, announcements, log, settings, log-in-as, subscription states | platform policies, impersonation limits, state machine |

@@ -20,8 +20,8 @@ Open items are at the bottom.
 | 11 | Activity log | **Custom table.** (Rec) |
 | 12 | Auth flows | **Laravel Fortify (headless).** (Rec) |
 | 13 | Image storage | **Local `public/media` disk, swappable to S3; 320/640/1280 WebP + JPEG; 8 MB max.** (Rec) |
-| 14 | Menu languages | **Any number (plan-limited), RTL, no machine translation.** (Rec) |
-| 15 | Admin UI languages | **English, Somali, Amharic + Arabic (RTL proof). Non-English marked "machine draft" until reviewed.** (Owner) |
+| 14 | Menu languages | **English only for now** (owner, 2026-11-10; was: any number, RTL). Texts stay stored per language (JSON per field), so languages can be added later without data changes; the customer language switch and translation screens stay hidden until a restaurant has more than one language. |
+| 15 | Admin UI languages | **English only for now** (owner, 2026-11-10; was: en + so/am/ar with RTL). All texts stay in `t()`; Somali/Amharic/Arabic files, fonts and right-to-left work removed. Adding a language later = one locale file; the switch appears by itself. |
 | 16 | Currency | **Platform default ETB; each restaurant picks its own; no conversion.** (Owner) |
 | 17 | Allergens | **Fixed EU-14 + custom tags.** (Rec) |
 | 18 | Map location | **Maps link or lat/lng; "Open in Maps" link; no embedded map.** (Rec) |
@@ -52,7 +52,7 @@ New rules added by the owner (now in PLAN.md §2): Docker is for local developme
 | 36 | Item text | **`summary` (short, list) + `description` (full, sheet).** |
 | 37 | Price when variants exist | Item price empty; list shows **"from" lowest variant**. |
 | 38 | Restaurant-level QR with several branches | Opens the **default branch** with a branch switch. |
-| 39 | Fonts for Amharic / Arabic | **Noto Sans Ethiopic / Noto Sans Arabic via `unicode-range`**, downloaded only when needed. |
+| 39 | Fonts for Amharic / Arabic | *Not needed while English only (#14).* When a language needs them: Noto Sans Ethiopic / Arabic via `unicode-range`, downloaded only when shown. |
 | 40 | Calendar & digits | **Gregorian calendar, Western digits** in all locales (Ethiopian calendar not in scope). |
 | 41 | Default time zone | **Africa/Addis_Ababa**, per restaurant. |
 | 42 | Who can invite | Owner: managers + staff; Manager: staff only. One owner per restaurant. |

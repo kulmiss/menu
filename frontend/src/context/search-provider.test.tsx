@@ -128,10 +128,10 @@ describe('SearchProvider and CommandMenu', () => {
 
     await openCommandPalette(screen)
 
-    await userEvent.click(getByRole('option', { name: 'Settings Account' }))
+    await userEvent.click(getByRole('option', { name: 'Settings Security' }))
 
     expect(mocks.navigate).toHaveBeenCalledWith({
-      to: '/admin/settings/account',
+      to: '/admin/settings/security',
     })
     await expect
       .element(getByPlaceholder(COMMAND_MENU_PLACEHOLDER))

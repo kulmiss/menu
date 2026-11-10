@@ -25,8 +25,7 @@ import { Route as AdminSettingsRouteRouteImport } from './routes/admin/settings/
 import { Route as AdminSettingsIndexRouteImport } from './routes/admin/settings/index'
 import { Route as AdminMenuIndexRouteImport } from './routes/admin/menu/index'
 import { Route as AuthInviteTokenRouteImport } from './routes/auth/invite/$token'
-import { Route as AdminSettingsAppearanceRouteImport } from './routes/admin/settings/appearance'
-import { Route as AdminSettingsAccountRouteImport } from './routes/admin/settings/account'
+import { Route as AdminSettingsSecurityRouteImport } from './routes/admin/settings/security'
 
 const AdminRouteRoute = AdminRouteRouteImport.update({
   id: '/admin',
@@ -108,14 +107,9 @@ const AuthInviteTokenRoute = AuthInviteTokenRouteImport.update({
   path: '/auth/invite/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminSettingsAppearanceRoute = AdminSettingsAppearanceRouteImport.update({
-  id: '/appearance',
-  path: '/appearance',
-  getParentRoute: () => AdminSettingsRouteRoute,
-} as any)
-const AdminSettingsAccountRoute = AdminSettingsAccountRouteImport.update({
-  id: '/account',
-  path: '/account',
+const AdminSettingsSecurityRoute = AdminSettingsSecurityRouteImport.update({
+  id: '/security',
+  path: '/security',
   getParentRoute: () => AdminSettingsRouteRoute,
 } as any)
 
@@ -133,8 +127,7 @@ export interface FileRoutesByFullPath {
   '/auth/sign-up': typeof AuthSignUpRoute
   '/auth/two-factor': typeof AuthTwoFactorRoute
   '/admin/': typeof AdminIndexRoute
-  '/admin/settings/account': typeof AdminSettingsAccountRoute
-  '/admin/settings/appearance': typeof AdminSettingsAppearanceRoute
+  '/admin/settings/security': typeof AdminSettingsSecurityRoute
   '/auth/invite/$token': typeof AuthInviteTokenRoute
   '/admin/menu/': typeof AdminMenuIndexRoute
   '/admin/settings/': typeof AdminSettingsIndexRoute
@@ -151,8 +144,7 @@ export interface FileRoutesByTo {
   '/auth/sign-up': typeof AuthSignUpRoute
   '/auth/two-factor': typeof AuthTwoFactorRoute
   '/admin': typeof AdminIndexRoute
-  '/admin/settings/account': typeof AdminSettingsAccountRoute
-  '/admin/settings/appearance': typeof AdminSettingsAppearanceRoute
+  '/admin/settings/security': typeof AdminSettingsSecurityRoute
   '/auth/invite/$token': typeof AuthInviteTokenRoute
   '/admin/menu': typeof AdminMenuIndexRoute
   '/admin/settings': typeof AdminSettingsIndexRoute
@@ -172,8 +164,7 @@ export interface FileRoutesById {
   '/auth/sign-up': typeof AuthSignUpRoute
   '/auth/two-factor': typeof AuthTwoFactorRoute
   '/admin/': typeof AdminIndexRoute
-  '/admin/settings/account': typeof AdminSettingsAccountRoute
-  '/admin/settings/appearance': typeof AdminSettingsAppearanceRoute
+  '/admin/settings/security': typeof AdminSettingsSecurityRoute
   '/auth/invite/$token': typeof AuthInviteTokenRoute
   '/admin/menu/': typeof AdminMenuIndexRoute
   '/admin/settings/': typeof AdminSettingsIndexRoute
@@ -194,8 +185,7 @@ export interface FileRouteTypes {
     | '/auth/sign-up'
     | '/auth/two-factor'
     | '/admin/'
-    | '/admin/settings/account'
-    | '/admin/settings/appearance'
+    | '/admin/settings/security'
     | '/auth/invite/$token'
     | '/admin/menu/'
     | '/admin/settings/'
@@ -212,8 +202,7 @@ export interface FileRouteTypes {
     | '/auth/sign-up'
     | '/auth/two-factor'
     | '/admin'
-    | '/admin/settings/account'
-    | '/admin/settings/appearance'
+    | '/admin/settings/security'
     | '/auth/invite/$token'
     | '/admin/menu'
     | '/admin/settings'
@@ -232,8 +221,7 @@ export interface FileRouteTypes {
     | '/auth/sign-up'
     | '/auth/two-factor'
     | '/admin/'
-    | '/admin/settings/account'
-    | '/admin/settings/appearance'
+    | '/admin/settings/security'
     | '/auth/invite/$token'
     | '/admin/menu/'
     | '/admin/settings/'
@@ -364,32 +352,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthInviteTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/settings/appearance': {
-      id: '/admin/settings/appearance'
-      path: '/appearance'
-      fullPath: '/admin/settings/appearance'
-      preLoaderRoute: typeof AdminSettingsAppearanceRouteImport
-      parentRoute: typeof AdminSettingsRouteRoute
-    }
-    '/admin/settings/account': {
-      id: '/admin/settings/account'
-      path: '/account'
-      fullPath: '/admin/settings/account'
-      preLoaderRoute: typeof AdminSettingsAccountRouteImport
+    '/admin/settings/security': {
+      id: '/admin/settings/security'
+      path: '/security'
+      fullPath: '/admin/settings/security'
+      preLoaderRoute: typeof AdminSettingsSecurityRouteImport
       parentRoute: typeof AdminSettingsRouteRoute
     }
   }
 }
 
 interface AdminSettingsRouteRouteChildren {
-  AdminSettingsAccountRoute: typeof AdminSettingsAccountRoute
-  AdminSettingsAppearanceRoute: typeof AdminSettingsAppearanceRoute
+  AdminSettingsSecurityRoute: typeof AdminSettingsSecurityRoute
   AdminSettingsIndexRoute: typeof AdminSettingsIndexRoute
 }
 
 const AdminSettingsRouteRouteChildren: AdminSettingsRouteRouteChildren = {
-  AdminSettingsAccountRoute: AdminSettingsAccountRoute,
-  AdminSettingsAppearanceRoute: AdminSettingsAppearanceRoute,
+  AdminSettingsSecurityRoute: AdminSettingsSecurityRoute,
   AdminSettingsIndexRoute: AdminSettingsIndexRoute,
 }
 

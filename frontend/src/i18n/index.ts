@@ -2,14 +2,17 @@ import en from '@/locales/en/common.json'
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
 
-export const LANGUAGES = [
+/**
+ * Interface languages. English only for now (owner, 2026-11-10; QUESTIONS
+ * #15). Every text already goes through t(): adding a language is a new
+ * src/locales/<code>/common.json plus a line here — the language switch
+ * appears by itself once there are two.
+ */
+export const LANGUAGES: readonly { code: string; dir: 'ltr' | 'rtl' }[] = [
   { code: 'en', dir: 'ltr' },
-  { code: 'so', dir: 'ltr' },
-  { code: 'am', dir: 'ltr' },
-  { code: 'ar', dir: 'rtl' },
-] as const
+]
 
-export type LanguageCode = (typeof LANGUAGES)[number]['code']
+export type LanguageCode = string
 
 const STORAGE_KEY = 'ui_language'
 

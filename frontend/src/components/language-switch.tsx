@@ -19,6 +19,12 @@ import {
 } from '@/components/ui/dropdown-menu'
 
 export function LanguageSwitch() {
+  // Hidden until a second language exists.
+  if (LANGUAGES.length < 2) return null
+  return <LanguageMenu />
+}
+
+function LanguageMenu() {
   const { t, i18n } = useTranslation()
   const { setDir } = useDirection()
 

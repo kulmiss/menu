@@ -15,7 +15,9 @@ return [
 
     'idempotency_hours' => 24,
 
-    'locales' => ['en', 'so', 'am', 'ar'],
+    // Interface + default menu language. English only for now (QUESTIONS #14, #15);
+    // menu texts are stored per language, so adding one needs no data change.
+    'locales' => ['en'],
 
     'default_currency' => env('MENU_DEFAULT_CURRENCY', 'ETB'),
 

@@ -21,7 +21,8 @@
     "addons": "Add-ons",
     "tags": "Tags",
     "restaurant": "Restaurant",
-    "import": "Import & export"
+    "import": "Import & export",
+    "security": "Security"
   },
   "language": {
     "label": "Language",
@@ -37,7 +38,35 @@
   },
   "settings": {
     "title": "Settings",
-    "intro": "Manage your profile and how the app looks."
+    "intro": "Your own account: name, language, password and sign-in security.",
+    "saved": "Saved.",
+    "email_changed": "Saved. Confirm the new address with the link we emailed.",
+    "profile_title": "Profile",
+    "profile_intro": "Your name and email, and the language of this app.",
+    "interface_language": "App language",
+    "password_title": "Password",
+    "password_intro": "Use at least 10 characters.",
+    "current_password": "Current password",
+    "password_saved": "Password changed.",
+    "twofa_title": "Two-factor sign-in",
+    "twofa_intro": "After your password, also enter a code from an authenticator app (Google Authenticator, Microsoft Authenticator, 1Password…).",
+    "twofa_status_on": "On",
+    "twofa_status_off": "Off",
+    "twofa_required": "Required for platform administrators.",
+    "twofa_enable": "Turn on",
+    "twofa_disable": "Turn off",
+    "twofa_show_codes": "Show recovery codes",
+    "twofa_scan": "Scan this code with your authenticator app, then enter the 6-digit code it shows.",
+    "twofa_qr": "QR code for your authenticator app",
+    "twofa_manual": "Can't scan? Enter this key:",
+    "twofa_on": "Two-factor sign-in is on.",
+    "twofa_off": "Two-factor sign-in is off.",
+    "twofa_codes_intro": "Keep these codes somewhere safe. Each one lets you sign in once if you lose your phone.",
+    "twofa_new_codes": "New codes",
+    "done": "Done",
+    "confirm_password": "Confirm your password",
+    "confirm_password_intro": "For your security, enter your password to continue.",
+    "wrong_password": "The password is not correct."
   },
   "roles": {
     "owner": "Owner",
@@ -412,5 +441,23 @@
     "col_sold_out": "Sold out",
     "col_calories": "Calories",
     "col_prep_minutes": "Preparation"
+  },
+  "drawer": {
+    "open": "Display settings",
+    "title": "Display",
+    "intro": "Adjust how the admin looks on this device.",
+    "reset": "Reset",
+    "reset_all": "Reset all display settings",
+    "reset_named": "Reset {{name}}",
+    "sidebar": "Sidebar",
+    "inset": "Inset",
+    "floating": "Floating",
+    "layout": "Layout",
+    "default": "Default",
+    "compact": "Compact",
+    "full": "Full width",
+    "direction": "Direction",
+    "ltr": "Left to right",
+    "rtl": "Right to left"
   }
 }
