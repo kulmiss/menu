@@ -1,5 +1,6 @@
 import {
   BookOpen,
+  FileSpreadsheet,
   LayoutDashboard,
   ListPlus,
   Tags,
@@ -35,6 +36,12 @@ export const sidebarData: SidebarData = {
           title: 'nav.tags',
           url: '/admin/tags',
           icon: Tags,
+          roles: ['owner', 'manager'],
+        },
+        {
+          title: 'nav.import',
+          url: '/admin/import',
+          icon: FileSpreadsheet,
           roles: ['owner', 'manager'],
         },
       ],

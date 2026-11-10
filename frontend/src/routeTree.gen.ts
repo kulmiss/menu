@@ -19,6 +19,7 @@ import { Route as AuthResetPasswordRouteImport } from './routes/auth/reset-passw
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
 import { Route as AdminTeamRouteImport } from './routes/admin/team'
 import { Route as AdminTagsRouteImport } from './routes/admin/tags'
+import { Route as AdminImportRouteImport } from './routes/admin/import'
 import { Route as AdminAddonsRouteImport } from './routes/admin/addons'
 import { Route as AdminSettingsRouteRouteImport } from './routes/admin/settings/route'
 import { Route as AdminSettingsIndexRouteImport } from './routes/admin/settings/index'
@@ -77,6 +78,11 @@ const AdminTagsRoute = AdminTagsRouteImport.update({
   path: '/tags',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminImportRoute = AdminImportRouteImport.update({
+  id: '/import',
+  path: '/import',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdminAddonsRoute = AdminAddonsRouteImport.update({
   id: '/addons',
   path: '/addons',
@@ -118,6 +124,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteRouteWithChildren
   '/admin/settings': typeof AdminSettingsRouteRouteWithChildren
   '/admin/addons': typeof AdminAddonsRoute
+  '/admin/import': typeof AdminImportRoute
   '/admin/tags': typeof AdminTagsRoute
   '/admin/team': typeof AdminTeamRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
@@ -135,6 +142,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin/addons': typeof AdminAddonsRoute
+  '/admin/import': typeof AdminImportRoute
   '/admin/tags': typeof AdminTagsRoute
   '/admin/team': typeof AdminTeamRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
@@ -155,6 +163,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteRouteWithChildren
   '/admin/settings': typeof AdminSettingsRouteRouteWithChildren
   '/admin/addons': typeof AdminAddonsRoute
+  '/admin/import': typeof AdminImportRoute
   '/admin/tags': typeof AdminTagsRoute
   '/admin/team': typeof AdminTeamRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
@@ -176,6 +185,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/settings'
     | '/admin/addons'
+    | '/admin/import'
     | '/admin/tags'
     | '/admin/team'
     | '/auth/forgot-password'
@@ -193,6 +203,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin/addons'
+    | '/admin/import'
     | '/admin/tags'
     | '/admin/team'
     | '/auth/forgot-password'
@@ -212,6 +223,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/settings'
     | '/admin/addons'
+    | '/admin/import'
     | '/admin/tags'
     | '/admin/team'
     | '/auth/forgot-password'
@@ -310,6 +322,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminTagsRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/import': {
+      id: '/admin/import'
+      path: '/import'
+      fullPath: '/admin/import'
+      preLoaderRoute: typeof AdminImportRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/addons': {
       id: '/admin/addons'
       path: '/addons'
@@ -380,6 +399,7 @@ const AdminSettingsRouteRouteWithChildren =
 interface AdminRouteRouteChildren {
   AdminSettingsRouteRoute: typeof AdminSettingsRouteRouteWithChildren
   AdminAddonsRoute: typeof AdminAddonsRoute
+  AdminImportRoute: typeof AdminImportRoute
   AdminTagsRoute: typeof AdminTagsRoute
   AdminTeamRoute: typeof AdminTeamRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -389,6 +409,7 @@ interface AdminRouteRouteChildren {
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminSettingsRouteRoute: AdminSettingsRouteRouteWithChildren,
   AdminAddonsRoute: AdminAddonsRoute,
+  AdminImportRoute: AdminImportRoute,
   AdminTagsRoute: AdminTagsRoute,
   AdminTeamRoute: AdminTeamRoute,
   AdminIndexRoute: AdminIndexRoute,

@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\InvitationController;
 use App\Http\Controllers\Api\MeController;
 use App\Http\Controllers\Api\Menu\AddonGroupController;
 use App\Http\Controllers\Api\Menu\CategoryController;
+use App\Http\Controllers\Api\Menu\ImportController;
 use App\Http\Controllers\Api\Menu\ItemController;
 use App\Http\Controllers\Api\Menu\MediaController;
 use App\Http\Controllers\Api\Menu\MenuController;
@@ -80,6 +81,11 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
 
             Route::post('media', [MediaController::class, 'store'])->middleware('throttle:30,1');
             Route::delete('media/{media}', [MediaController::class, 'destroy'])->whereNumber('media');
+
+            Route::get('import/template', [ImportController::class, 'template']);
+            Route::get('export', [ImportController::class, 'export']);
+            Route::post('import/preview', [ImportController::class, 'preview'])->middleware('throttle:20,1');
+            Route::post('import/commit', [ImportController::class, 'commit']);
 
             Route::get('tags', [TagController::class, 'index']);
             Route::post('tags', [TagController::class, 'store']);

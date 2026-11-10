@@ -85,6 +85,8 @@ New rules added by the owner (now in PLAN.md §2): Docker is for local developme
 | 59 | Menu ↔ branch links (`menu_branch`) | Built with branches in **Partition 6**; until then every menu is shown at every branch. |
 | 60 | Plan feature switches (#24) | **Counts** (menus, items, photos…) are enforced from Partition 3 via `plans.limits` (402 on create). On/off **features** (`plan_features`, overrides) arrive with the Super Admin in Partition 11. |
 | 61 | Who may bulk-change prices | Anyone allowed to edit prices: owners, managers and staff with *can edit prices*. Staff use a price-only endpoint; full item edits stay owner/manager. |
+| 62 | XLSX library for import/export | **openspout/openspout `^5.3`** (MIT, streaming, low memory) — owner's choice, 2026-11-10. 5.3 is the last line that runs on PHP 8.3; `config.platform.php = 8.3.0` keeps `composer update` from moving past it. Needs ext-zip, xmlreader, dom (present in CI and the Docker image; standard on cPanel). |
+| 63 | Import rules | One row per item; matched by menu + category + item name in the main language; **blank cell = keep current value**; sizes as `Small=60; Large=80`; unknown tags become custom tags; any row error blocks the whole import (fix the file, upload again). Preview kept 30 min. |
 
 ## Open
 
