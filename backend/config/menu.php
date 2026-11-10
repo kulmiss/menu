@@ -20,6 +20,30 @@ return [
     'default_currency' => env('MENU_DEFAULT_CURRENCY', 'ETB'),
 
     /*
+    | Allergens: the fixed EU-14 list (QUESTIONS #17). Names are translated
+    | by the apps; the database stores these keys.
+    */
+    'allergens' => [
+        'gluten', 'crustaceans', 'eggs', 'fish', 'peanuts', 'soy', 'milk',
+        'nuts', 'celery', 'mustard', 'sesame', 'sulphites', 'lupin', 'molluscs',
+    ],
+
+    /*
+    | Tags every restaurant gets, translated by the apps. Restaurants can add
+    | their own (with a name per language) next to these.
+    */
+    'system_tags' => ['vegan', 'vegetarian', 'spicy', 'halal', 'gluten_free', 'new', 'popular'],
+
+    /*
+    | Plan limits (plans.limits JSON) checked when something is created.
+    | A missing key or null means unlimited.
+    */
+    'limit_keys' => ['menus', 'items', 'branches', 'languages', 'photos', 'members'],
+
+    // Largest price accepted, in minor units (100 000 000 = 1 000 000.00).
+    'max_price_minor' => 100_000_000,
+
+    /*
     | Slugs a restaurant can never take: they collide with platform routes.
     */
     'reserved_slugs' => [

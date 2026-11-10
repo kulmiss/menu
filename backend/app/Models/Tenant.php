@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Enums\SubscriptionState;
+use App\Support\SystemTags;
+use App\Tenancy\CurrentTenant;
 use Carbon\CarbonInterface;
 use Database\Factories\TenantFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -47,6 +49,14 @@ class Tenant extends Model
         'status' => self::STATUS_ACTIVE,
         'cache_version' => 1,
     ];
+
+    protected static function booted(): void
+    {
+        // Every new restaurant starts with the built-in tags (vegan, spicy…).
+        static::created(function (Tenant $tenant): void {
+            app(CurrentTenant::class)->runAs($tenant, fn () => SystemTags::ensure());
+        });
+    }
 
     protected function casts(): array
     {

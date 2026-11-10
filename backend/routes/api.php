@@ -5,6 +5,11 @@ use App\Http\Controllers\Api\AccountController;
 use App\Http\Controllers\Api\ActivityController;
 use App\Http\Controllers\Api\InvitationController;
 use App\Http\Controllers\Api\MeController;
+use App\Http\Controllers\Api\Menu\AddonGroupController;
+use App\Http\Controllers\Api\Menu\CategoryController;
+use App\Http\Controllers\Api\Menu\ItemController;
+use App\Http\Controllers\Api\Menu\MenuController;
+use App\Http\Controllers\Api\Menu\TagController;
 use App\Http\Controllers\Api\TeamController;
 use App\Http\Controllers\Api\TenantController;
 use Illuminate\Support\Facades\Route;
@@ -36,6 +41,46 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::patch('account/slug', [AccountController::class, 'updateSlug']);
 
             Route::get('activity', ActivityController::class);
+
+            // Menu data (Partition 3). Ids are checked inside the current restaurant.
+            Route::get('menus', [MenuController::class, 'index']);
+            Route::post('menus', [MenuController::class, 'store']);
+            Route::post('menus/reorder', [MenuController::class, 'reorder']);
+            Route::get('menus/{menu}', [MenuController::class, 'show'])->whereNumber('menu');
+            Route::get('menus/{menu}/tree', [MenuController::class, 'tree'])->whereNumber('menu');
+            Route::patch('menus/{menu}', [MenuController::class, 'update'])->whereNumber('menu');
+            Route::delete('menus/{menu}', [MenuController::class, 'destroy'])->whereNumber('menu');
+            Route::post('menus/{menu}/duplicate', [MenuController::class, 'duplicate'])->whereNumber('menu');
+            Route::put('menus/{menu}/schedules', [MenuController::class, 'schedules'])->whereNumber('menu');
+
+            Route::post('categories', [CategoryController::class, 'store']);
+            Route::post('categories/reorder', [CategoryController::class, 'reorder']);
+            Route::patch('categories/{category}', [CategoryController::class, 'update'])->whereNumber('category');
+            Route::delete('categories/{category}', [CategoryController::class, 'destroy'])->whereNumber('category');
+            Route::post('categories/{category}/duplicate', [CategoryController::class, 'duplicate'])->whereNumber('category');
+
+            Route::post('items', [ItemController::class, 'store']);
+            Route::post('items/reorder', [ItemController::class, 'reorder']);
+            Route::post('items/bulk', [ItemController::class, 'bulk']);
+            Route::post('items/bulk-price', [ItemController::class, 'bulkPrice']);
+            Route::get('items/{item}', [ItemController::class, 'show'])->whereNumber('item');
+            Route::patch('items/{item}', [ItemController::class, 'update'])->whereNumber('item');
+            Route::delete('items/{item}', [ItemController::class, 'destroy'])->whereNumber('item');
+            Route::post('items/{item}/duplicate', [ItemController::class, 'duplicate'])->whereNumber('item');
+            Route::patch('items/{item}/sold-out', [ItemController::class, 'soldOut'])->whereNumber('item');
+            Route::patch('items/{item}/price', [ItemController::class, 'price'])->whereNumber('item');
+
+            Route::get('addon-groups', [AddonGroupController::class, 'index']);
+            Route::post('addon-groups', [AddonGroupController::class, 'store']);
+            Route::post('addon-groups/reorder', [AddonGroupController::class, 'reorder']);
+            Route::patch('addon-groups/{group}', [AddonGroupController::class, 'update'])->whereNumber('group');
+            Route::delete('addon-groups/{group}', [AddonGroupController::class, 'destroy'])->whereNumber('group');
+            Route::patch('addon-options/{option}/sold-out', [AddonGroupController::class, 'optionSoldOut'])->whereNumber('option');
+
+            Route::get('tags', [TagController::class, 'index']);
+            Route::post('tags', [TagController::class, 'store']);
+            Route::patch('tags/{tag}', [TagController::class, 'update'])->whereNumber('tag');
+            Route::delete('tags/{tag}', [TagController::class, 'destroy'])->whereNumber('tag');
         });
     });
 });
