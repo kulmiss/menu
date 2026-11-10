@@ -1,6 +1,6 @@
 # Handover
 
-_Last updated: 2026-11-10 12:57 EAT, Step 3 · Partitions 1–2 in progress._
+_Last updated: 2026-11-10 13:45 EAT, Step 3 · Partition 2 backend done (PR #3), SPA part next._
 
 ## Where we are
 - Steps 1–2: done and approved.
@@ -28,14 +28,18 @@ _Last updated: 2026-11-10 12:57 EAT, Step 3 · Partitions 1–2 in progress._
 - Laravel skeleton: `laravel/laravel` v13.11.0 @ `06d016a364a37430eec9cbc52209adce3d7667ce` (framework `^13.17`; exact versions in `composer.lock` once generated).
 - Design mockups: https://claude.ai/artifact/HKJ6v8zV9y2b7oQoYb33B5
 
-## Partition 2 (auth & tenancy): drafted, not yet run
-Branch `feat/auth-tenancy` (on top of `feat/setup`), pushed. Contains migrations (users extra columns, plans, tenants, slug history, feature overrides, memberships, invitations, idempotency_keys, activity_log), `BelongsToTenant` + `CurrentTenant` (fails closed), `ResolveTenant` (404 for non-members), `EnsureTenantWritable` (402 when read-only), `EnsureIdempotency`, Fortify actions (sign-up creates owner + restaurant on trial), team/invitation/slug/activity endpoints with gates, Pest suites (isolation, idempotency, team, invitations, slug, subscription states), SPA `src/lib/api.ts` with tests.
-**Before it can run:** `composer require laravel/fortify` in `backend/` (approved package), then pint, phpstan, tests. Expect a round of fixes: none of it has executed yet.
-Still to do in Partition 2: rewrite the SPA auth screens (sign in, sign up with restaurant + slug, forgot/reset, verify email, 2FA, accept invitation) against the API, auth store from `/me`, restaurant switcher, routes under `/admin`, remove social-login buttons, team screen.
+## Partition 2 (auth & tenancy)
+**Backend: done and green** on the owner's PC (PR #3, branch `feat/auth-tenancy`): 70 Pest tests, Larastan level 6 clean, Pint clean, migrate → rollback → migrate. Fortify v1.41 installed.
+**Next (Partition 2b, branch `feat/auth-spa` stacked on `feat/auth-tenancy`):** SPA auth screens against the API (sign in, sign up with restaurant name + slug, forgot/reset password, verify email, 2FA, accept invitation), auth store from `/api/v1/me`, restaurant switcher, routes under `/admin`, Laravel SPA catch-all for `/admin`, `/platform`, `/auth`, remove social-login buttons, team page, i18n for every string touched. Then `check.bat` (both halves).
+
+## How we work (owner's PC)
+- Owner pulls with `git fetch origin` + `git reset --hard origin/<branch>` (only after Claude has copied back any files the run changed), then runs `check.bat [backend|frontend]`; Claude reads `check-log.txt` through the connected folder `C:/laragon/www/menu`.
+- Files a run changes (Pint/Prettier fixes, lockfiles) are copied back by Claude with a tar in `_to_delete/` and `device_stage_files`.
+- Stacked PRs: the owner merges only the newest PR, with *Create a merge commit* (QUESTIONS #55).
 
 ## Blockers / owner actions
 - **GitHub Actions is disabled by a billing problem on the account** ("recent account payments have failed or your spending limit needs to be increased"). CI cannot run until fixed (Settings → Billing and plans). Until then, the owner's PC is the only place tests run.
-- PR #1 still open; `main` not protected yet.
+- `main` not protected yet. PR #1 merged; PRs #2 and #3 open (merge only #3).
 - Owner's PC: Docker Desktop works but downloads from deb.debian.org are very slow (~20–30 KB/s); the PHP image is now built and cached. Laragon's PHP could not write `backend/vendor` (Windows "Permission denied", likely antivirus) — use Docker.
 
 ## Fixes queued for the setup scripts (apply when the current run ends)
