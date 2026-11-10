@@ -41,7 +41,7 @@ services:
   mail:
     image: axllent/mailpit:v1
     ports:
-      - "8025:8025"
+      - "8026:8025"
 
   vite:
     image: node:22-bookworm

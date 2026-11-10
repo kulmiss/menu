@@ -21,7 +21,7 @@ Digital menu SaaS for restaurants and cafés: a fast public QR menu, a phone-fri
 ### Docker Desktop (any OS)
 1. Start Docker Desktop.
 2. Windows: `.\setup-docker.bat` (other systems: run the same `docker compose` commands it lists).
-3. Read `setup-log.txt`. App: http://localhost:8080 · Mail: http://localhost:8025 · Admin dev server: `docker compose up -d vite` → http://localhost:5173/app/
+3. Read `setup-log.txt`. App: http://localhost:8080 · Mail: http://localhost:8026 · Admin dev server: `docker compose up -d vite` → http://localhost:5173/app/
 
 ## Checks (same as CI)
 Backend (`backend/`): `vendor/bin/pint --test`, `vendor/bin/phpstan analyse`, `php artisan test`
