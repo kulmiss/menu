@@ -73,6 +73,7 @@ New rules added by the owner (now in PLAN.md §2): Docker is for local developme
 | 52 | Laravel skeleton extras | Removed the skeleton's own Vite/npm setup, CLAUDE.md/AGENTS.md, StyleCI and GitHub files; public-menu CSS/JS tooling arrives in Partition 4. |
 | 53 | Social login buttons in template auth forms | Not in scope; removed in Partition 2. |
 | 54 | Local PHP version | Owner's Laragon has **PHP 8.5**; CI runs **8.3** (the minimum we support) so we never depend on newer features. |
+| 55 | How PRs are merged | **Stacked PRs** (owner, 2026-11-10): each new branch is built on the previous one, so the newest PR always contains all earlier ones. The owner merges **only the newest PR** with *Create a merge commit* (not squash); GitHub then marks the earlier PRs as merged automatically. PRs stay small for review because each shows only its own commits once the earlier ones are in `develop`. |
 
 ## Open
 
