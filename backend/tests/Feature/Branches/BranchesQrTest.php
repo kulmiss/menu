@@ -173,3 +173,35 @@ it('keeps branches, tables and codes to the right people and restaurant', functi
     $this->actingAs($owner)->get(t($ownTenant, "qr-codes/{$foreignCode->id}.png"))->assertNotFound();
     $this->actingAs($owner)->postJson(t($ownTenant, "branches/{$foreign->id}/tables"), ['label' => '1'], idem())->assertNotFound();
 });
+
+it('gives a branch its own price per size (QUESTIONS #78)', function () {
+    [$owner, $tenant] = member(Role::Owner);
+    [, $category] = sampleMenu($tenant);
+    $branchId = $this->actingAs($owner)->postJson(t($tenant, 'branches'), branchPayload(), idem())->json('data.id');
+    [$juice, $small, $large] = asTenant($tenant, function () use ($category) {
+        $item = Item::create(['category_id' => $category->id, 'name' => ['en' => 'Juice']]);
+        $s = $item->variants()->create(['name' => ['en' => 'Small'], 'price_minor' => 6000, 'sort' => 0]);
+        $l = $item->variants()->create(['name' => ['en' => 'Large'], 'price_minor' => 9000, 'sort' => 1]);
+
+        return [$item, $s, $l];
+    });
+    $other = asTenant($tenant, fn () => Item::where('name->en', 'Macchiato')->firstOrFail());
+
+    $this->actingAs($owner)->putJson(t($tenant, "branches/{$branchId}/overrides"), ['overrides' => [
+        ['item_id' => $juice->id, 'price_minor' => null, 'is_sold_out' => null, 'is_hidden' => null, 'sizes' => [$small->id => 5000, $large->id => null]],
+    ]], idem())->assertOk()
+        ->assertJsonPath('data.0.sizes', [(string) $small->id => 5000]);
+
+    // A size of another item is refused.
+    $this->actingAs($owner)->putJson(t($tenant, "branches/{$branchId}/overrides"), ['overrides' => [
+        ['item_id' => $other->id, 'sizes' => [$small->id => 100]],
+    ]], idem())->assertInvalid('overrides.0.sizes');
+
+    $branchPage = $this->get('/'.$tenant->slug.'/piassa')->assertOk()->assertSee('from Br 50')->getContent();
+    expect($branchPage)->toContain('["Small","Br 50"]')->toContain('["Large","Br 90"]');
+    $this->get('/'.$tenant->slug)->assertSee('from Br 60');
+
+    // The item list carries the sizes, so the admin can show one field per size.
+    $this->actingAs($owner)->getJson(t($tenant, "menus/{$category->menu_id}/tree"))->assertOk()
+        ->assertJsonPath('data.categories.0.items.1.variants.0.id', $small->id);
+});

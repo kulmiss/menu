@@ -150,7 +150,8 @@ Conventions: `id` BIGINT unsigned; money in **minor units** (`price_minor`, ETB 
 | `tags` | tenant_id, key (system key or null), name (json, used when key is null), sort — system tags (vegan, vegetarian, spicy, halal, gluten-free, new, popular) seeded per tenant and translated by i18n |
 | `item_tag` | tenant_id, item_id, tag_id |
 | `item_allergens` | tenant_id, item_id, allergen — fixed EU-14 keys (gluten, crustaceans, eggs, fish, peanuts, soy, milk, nuts, celery, mustard, sesame, sulphites, lupin, molluscs) |
-| `branch_item_overrides` | tenant_id, branch_id, item_id, item_variant_id (null), price_minor (null = inherit), is_sold_out (null = inherit), is_hidden (null = inherit) |
+| `branch_item_overrides` | tenant_id, branch_id, item_id, price_minor (null = inherit), is_sold_out (null = inherit), is_hidden (null = inherit) |
+| `branch_variant_prices` | tenant_id, branch_id, item_variant_id, price_minor — a branch's price for one size (QUESTIONS #78) |
 
 ### 4.7 Promotions
 | Table | Key columns |

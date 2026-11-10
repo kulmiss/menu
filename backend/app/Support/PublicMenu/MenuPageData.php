@@ -6,6 +6,7 @@ use App\Models\AddonGroup;
 use App\Models\AddonOption;
 use App\Models\Branch;
 use App\Models\BranchItemOverride;
+use App\Models\BranchVariantPrice;
 use App\Models\Category;
 use App\Models\Closure;
 use App\Models\Item;
@@ -59,6 +60,20 @@ class MenuPageData
 
             // This branch's own prices, sold-out and hidden items (null = as the main menu).
             $overrides = $branchId === null ? collect() : BranchItemOverride::where('branch_id', $branchId)->get()->keyBy('item_id');
+            $sizePrices = $branchId === null ? collect() : BranchVariantPrice::where('branch_id', $branchId)->pluck('price_minor', 'item_variant_id');
+            if ($sizePrices->isNotEmpty()) {
+                foreach ($menus as $menu) {
+                    foreach ($menu->categories as $category) {
+                        foreach ($category->items as $item) {
+                            foreach ($item->variants as $variant) {
+                                if ($sizePrices->has($variant->id)) {
+                                    $variant->price_minor = (int) $sizePrices->get($variant->id);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
             if ($overrides->isNotEmpty()) {
                 foreach ($menus as $menu) {
                     foreach ($menu->categories as $category) {

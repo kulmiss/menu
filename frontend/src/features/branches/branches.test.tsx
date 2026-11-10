@@ -62,11 +62,73 @@ let fake: ReturnType<typeof fakeApi>
 function render(ui: React.ReactNode) {
   fake = fakeApi({
     'GET /t/1/branches': { data: { data: BRANCHES } },
-    'GET /t/1/menus': { data: { data: [] } },
+    'GET /t/1/menus': {
+      data: {
+        data: [
+          {
+            id: 5,
+            name: { en: 'All day' },
+            slug: 'all-day',
+            schedule_mode: 'always',
+            is_visible: true,
+            sort: 0,
+          },
+        ],
+      },
+    },
     'GET /t/1/branches/1/tables': { data: { data: [] } },
     'POST /t/1/branches/1/tables': { status: 201, data: { data: [] } },
     'POST /t/1/branches': { status: 201, data: { data: branch(3, 'Bole') } },
     'GET /t/1/qr-codes': { data: { data: CODES } },
+    'GET /t/1/branches/2/overrides': { data: { data: [] } },
+    'PUT /t/1/branches/2/overrides': { data: { data: [] } },
+    'GET /t/1/menus/5/tree': {
+      data: {
+        data: {
+          menu: {
+            id: 5,
+            name: { en: 'All day' },
+            slug: 'all-day',
+            schedule_mode: 'always',
+            is_visible: true,
+            sort: 0,
+          },
+          categories: [
+            {
+              id: 9,
+              menu_id: 5,
+              name: { en: 'Drinks' },
+              description: {},
+              icon: null,
+              media_id: null,
+              is_visible: true,
+              sort: 0,
+              items: [
+                {
+                  id: 40,
+                  category_id: 9,
+                  name: { en: 'Juice' },
+                  summary: {},
+                  price_minor: null,
+                  from_price_minor: 6000,
+                  variants_count: 2,
+                  media_id: null,
+                  is_sold_out: false,
+                  is_visible: true,
+                  is_new: false,
+                  is_popular: false,
+                  sort: 0,
+                  variants: [
+                    { id: 401, name: { en: 'Small' }, price_minor: 6000 },
+                    { id: 402, name: { en: 'Large' }, price_minor: 9000 },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      },
+    },
   })
   return renderWithQuery(ui, { me: meFixture({ tenants: [tenantFixture()] }) })
 }
@@ -114,6 +176,37 @@ describe('BranchesPage', () => {
         name: { en: 'Bole Atlas' },
         slug: 'bole-atlas',
         is_active: true,
+      })
+  })
+})
+
+describe('Branch prices', () => {
+  beforeEach(() => useTenantStore.setState({ currentTenantId: 1 }))
+  afterEach(() => fake.restore())
+
+  it('sets a branch price for one size and leaves the other blank', async () => {
+    const screen = await render(<BranchesPage />)
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Prices & availability' }).nth(1)
+    )
+    await userEvent.type(
+      screen.getByLabelText('Price at this branch for Juice, Small'),
+      '50'
+    )
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }))
+
+    await expect
+      .poll(() => fake.calls.find((c) => c.method === 'PUT')?.data)
+      .toEqual({
+        overrides: [
+          {
+            item_id: 40,
+            price_minor: null,
+            is_sold_out: null,
+            is_hidden: null,
+            sizes: { '401': 5000 },
+          },
+        ],
       })
   })
 })

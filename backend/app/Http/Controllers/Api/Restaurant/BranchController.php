@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\Menu\RecordsChanges;
 use App\Http\Controllers\Controller;
 use App\Models\Branch;
 use App\Models\BranchItemOverride;
+use App\Models\BranchVariantPrice;
+use App\Models\ItemVariant;
 use App\Models\DiningTable;
 use App\Models\Menu;
 use App\Models\QrCode;
@@ -169,7 +171,23 @@ class BranchController extends Controller
         Gate::authorize('restaurant.manage');
         $model = Branch::findOrFail($branch);
 
-        return response()->json(['data' => BranchItemOverride::where('branch_id', $model->id)->get(['item_id', 'price_minor', 'is_sold_out', 'is_hidden'])]);
+        $sizes = BranchVariantPrice::query()
+            ->join('item_variants', 'item_variants.id', '=', 'branch_variant_prices.item_variant_id')
+            ->where('branch_variant_prices.branch_id', $model->id)
+            ->get(['item_variants.item_id', 'branch_variant_prices.item_variant_id', 'branch_variant_prices.price_minor'])
+            ->groupBy('item_id');
+        $rows = BranchItemOverride::where('branch_id', $model->id)->get(['item_id', 'price_minor', 'is_sold_out', 'is_hidden'])->keyBy('item_id');
+
+        $data = $rows->keys()->merge($sizes->keys())->unique()->sort()->values()->map(fn ($itemId) => [
+            'item_id' => (int) $itemId,
+            'price_minor' => $rows->get($itemId)?->price_minor,
+            'is_sold_out' => $rows->get($itemId)?->is_sold_out,
+            'is_hidden' => $rows->get($itemId)?->is_hidden,
+            // Size id → this branch's price (QUESTIONS #78).
+            'sizes' => (object) ($sizes->get($itemId)?->mapWithKeys(fn ($r) => [(string) $r->item_variant_id => (int) $r->price_minor])->all() ?? []),
+        ]);
+
+        return response()->json(['data' => $data]);
     }
 
     /** Replaces the branch's overrides; rows with nothing set are dropped. */
@@ -183,11 +201,30 @@ class BranchController extends Controller
             'overrides.*.price_minor' => ['nullable', 'integer', 'min:0', 'max:'.config('menu.max_price_minor')],
             'overrides.*.is_sold_out' => ['nullable', 'boolean'],
             'overrides.*.is_hidden' => ['nullable', 'boolean'],
+            'overrides.*.sizes' => ['sometimes', 'nullable', 'array'],
+            'overrides.*.sizes.*' => ['nullable', 'integer', 'min:0', 'max:'.config('menu.max_price_minor')],
         ]);
+
+        // Sizes must belong to the item they are listed under.
+        $sizeIds = collect($data['overrides'])->flatMap(fn ($row) => array_keys($row['sizes'] ?? []))->map(fn ($id) => (int) $id);
+        $owners = ItemVariant::whereIn('id', $sizeIds)->pluck('item_id', 'id');
+        foreach ($data['overrides'] as $i => $row) {
+            foreach (array_keys($row['sizes'] ?? []) as $variantId) {
+                if ((int) ($owners[(int) $variantId] ?? 0) !== (int) $row['item_id']) {
+                    throw ValidationException::withMessages(["overrides.$i.sizes" => __('validation.exists', ['attribute' => 'size'])]);
+                }
+            }
+        }
 
         DB::transaction(function () use ($model, $data) {
             BranchItemOverride::where('branch_id', $model->id)->delete();
+            BranchVariantPrice::where('branch_id', $model->id)->delete();
             foreach ($data['overrides'] as $row) {
+                foreach ($row['sizes'] ?? [] as $variantId => $price) {
+                    if ($price !== null) {
+                        BranchVariantPrice::create(['branch_id' => $model->id, 'item_variant_id' => (int) $variantId, 'price_minor' => (int) $price]);
+                    }
+                }
                 $values = array_intersect_key($row, array_flip(['price_minor', 'is_sold_out', 'is_hidden']));
                 if (array_filter($values, fn ($v) => $v !== null) === []) {
                     continue;

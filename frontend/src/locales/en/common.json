@@ -543,9 +543,8 @@
     "delete_table_title": "Delete {{label}}?",
     "delete_table_desc": "Its printed QR code stops working.",
     "overrides_of": "Prices & availability — {{name}}",
-    "overrides_hint": "Leave blank to use the main menu. Items with sizes keep the main prices.",
+    "overrides_hint": "Leave a price blank to use the main menu price.",
     "main_price": "Main menu:",
-    "sizes_inherit": "Sizes: main prices",
     "branch_price": "Price at this branch for {{name}}",
     "availability": "Availability of {{name}}",
     "same": "As main menu",
@@ -554,7 +553,8 @@
     "hide": "Hide",
     "no_items": "The menu has no items yet.",
     "overrides_saved": "Saved. Guests at this branch see it now.",
-    "tables_count": "{{count}} tables"
+    "tables_count": "{{count}} tables",
+    "size_price": "Price at this branch for {{name}}, {{size}}"
   },
   "qr": {
     "title": "QR codes",

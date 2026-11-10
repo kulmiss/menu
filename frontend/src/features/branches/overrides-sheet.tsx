@@ -131,7 +131,7 @@ function OverridesForm({
               return (
                 <div
                   key={item.id}
-                  className='grid grid-cols-1 items-center gap-2 border-b py-2 sm:grid-cols-[1fr_8rem_9rem_auto]'
+                  className='grid grid-cols-1 items-center gap-2 border-b py-2 sm:grid-cols-[1fr_11rem_9rem_auto]'
                 >
                   <div className='min-w-0'>
                     <p className='truncate text-sm font-medium'>
@@ -147,9 +147,28 @@ function OverridesForm({
                     </p>
                   </div>
                   {sized ? (
-                    <p className='text-xs text-muted-foreground'>
-                      {t('branches.sizes_inherit')}
-                    </p>
+                    <div className='grid gap-1'>
+                      {(item.variants ?? []).map((v) => (
+                        <div key={v.id} className='flex items-center gap-2'>
+                          <span className='w-16 truncate text-xs text-muted-foreground'>
+                            {tr(v.name, locale)}
+                          </span>
+                          <MoneyInput
+                            label={t('branches.size_price', {
+                              name: tr(item.name, locale),
+                              size: tr(v.name, locale),
+                            })}
+                            hideLabel
+                            className='flex-1'
+                            value={o.sizes?.[v.id] ?? null}
+                            currency={currency}
+                            onChange={(p) =>
+                              set(item.id, { sizes: { ...o.sizes, [v.id]: p } })
+                            }
+                          />
+                        </div>
+                      ))}
+                    </div>
                   ) : (
                     <MoneyInput
                       label={t('branches.branch_price', {

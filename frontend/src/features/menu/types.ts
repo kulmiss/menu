@@ -34,6 +34,8 @@ export type ItemSummary = {
   price_minor: number | null
   from_price_minor: number | null
   variants_count: number
+  /** Sizes (id, name, main price) — used by the branch price screen. */
+  variants?: { id: number; name: Translations; price_minor: number }[]
   media_id: number | null
   media?: Media | null
   is_sold_out: boolean

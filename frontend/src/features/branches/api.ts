@@ -36,6 +36,8 @@ export type Override = {
   price_minor: number | null
   is_sold_out: boolean | null
   is_hidden: boolean | null
+  /** Size id → this branch's price; missing = the main price. */
+  sizes?: Record<string, number | null>
 }
 
 export type QrCodeRow = {
