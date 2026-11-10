@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
@@ -15,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $subject_type
  * @property int|null $subject_id
  * @property array<string, mixed>|null $changes
- * @property \Illuminate\Support\Carbon $created_at
+ * @property Carbon $created_at
  * @property-read User|null $actor
  *
  * Append-only record of important changes. tenant_id is null for

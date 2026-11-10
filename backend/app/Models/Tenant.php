@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
@@ -19,9 +20,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $name
  * @property string $status
  * @property int|null $plan_id
- * @property \Illuminate\Support\Carbon|null $trial_ends_at
- * @property \Illuminate\Support\Carbon|null $paid_until
- * @property \Illuminate\Support\Carbon|null $suspended_at
+ * @property Carbon|null $trial_ends_at
+ * @property Carbon|null $paid_until
+ * @property Carbon|null $suspended_at
  * @property string|null $suspended_reason
  * @property string $timezone
  * @property string $default_locale

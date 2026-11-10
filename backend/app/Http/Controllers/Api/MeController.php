@@ -13,7 +13,8 @@ class MeController extends Controller
     public function __invoke(Request $request): JsonResponse
     {
         $user = $request->user();
-        $memberships = $user->memberships()->with('tenant')->get()->filter(fn ($m) => $m->tenant !== null);
+        // whereHas skips restaurants that were deleted (soft delete).
+        $memberships = $user->memberships()->whereHas('tenant')->with('tenant')->get();
 
         return response()->json([
             'data' => [

@@ -56,11 +56,12 @@ class AcceptInvitationController extends Controller
     private function find(string $token): Invitation
     {
         $invitation = Invitation::withoutTenancy()
+            ->whereHas('tenant')
             ->with('tenant')
             ->where('token_hash', Invitation::hashToken($token))
             ->first();
 
-        abort_if($invitation === null || ! $invitation->isOpen() || $invitation->tenant === null, 404);
+        abort_if($invitation === null || ! $invitation->isOpen(), 404);
 
         return $invitation;
     }
