@@ -14,6 +14,21 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
+ * @property int $id
+ * @property string $slug
+ * @property string $name
+ * @property string $status
+ * @property int|null $plan_id
+ * @property \Illuminate\Support\Carbon|null $trial_ends_at
+ * @property \Illuminate\Support\Carbon|null $paid_until
+ * @property \Illuminate\Support\Carbon|null $suspended_at
+ * @property string|null $suspended_reason
+ * @property string $timezone
+ * @property string $default_locale
+ * @property string $currency_code
+ * @property array<string, mixed>|null $currency_format
+ * @property int $cache_version
+ *
  * A restaurant: the tenant every restaurant-owned row belongs to.
  */
 #[Fillable(['slug', 'name', 'plan_id', 'trial_ends_at', 'paid_until', 'timezone', 'default_locale', 'currency_code', 'currency_format'])]
@@ -90,7 +105,7 @@ class Tenant extends Model
             return SubscriptionState::Trial;
         }
 
-        $expiredAt = collect([$this->paid_until, $this->trial_ends_at])->filter()->max();
+        $expiredAt = $this->expiredAt();
 
         // Created by the Super Admin without dates: active until dates are set.
         if ($expiredAt === null) {
@@ -111,7 +126,7 @@ class Tenant extends Model
     public function subscriptionStageEndsAt(?CarbonInterface $now = null): ?CarbonInterface
     {
         $state = $this->subscriptionState($now);
-        $expiredAt = collect([$this->paid_until, $this->trial_ends_at])->filter()->max();
+        $expiredAt = $this->expiredAt();
 
         return match ($state) {
             SubscriptionState::Active => $this->paid_until,
@@ -120,6 +135,18 @@ class Tenant extends Model
             SubscriptionState::ReadOnly => $expiredAt?->copy()->addDays((int) config('menu.grace_days') + (int) config('menu.read_only_days')),
             default => null,
         };
+    }
+
+    /** The later of trial end and paid-until: when the subscription ran out. */
+    private function expiredAt(): ?CarbonInterface
+    {
+        $dates = array_filter([$this->paid_until, $this->trial_ends_at]);
+
+        if ($dates === []) {
+            return null;
+        }
+
+        return max($dates);
     }
 
     /** Any change to menu data calls this so the cached public page is rebuilt. */

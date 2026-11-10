@@ -1,5 +1,5 @@
-import { afterEach, describe, expect, it } from 'vitest'
 import type { AxiosAdapter, InternalAxiosRequestConfig } from 'axios'
+import { afterEach, describe, expect, it } from 'vitest'
 import { api, IDEMPOTENCY_HEADER, withIdempotencyKey } from './api'
 
 let seen: InternalAxiosRequestConfig[] = []

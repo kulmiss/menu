@@ -3,7 +3,6 @@
 namespace App\Actions\Fortify;
 
 use App\Models\User;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Laravel\Fortify\Contracts\UpdatesUserProfileInformation;
@@ -30,7 +29,7 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
             'email_verified_at' => $emailChanged ? null : $user->email_verified_at,
         ])->save();
 
-        if ($emailChanged && $user instanceof MustVerifyEmail) {
+        if ($emailChanged) {
             $user->sendEmailVerificationNotification();
         }
     }

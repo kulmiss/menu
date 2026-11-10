@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Notifications\InvitationNotification;
 use App\Tenancy\CurrentTenant;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Testing\TestResponse;
 
 beforeEach(fn () => Notification::fake());
 
@@ -26,7 +27,7 @@ function sentInvitationToken(string $email): string
     return $token;
 }
 
-function invite(User $by, int $tenantId, array $data): Illuminate\Testing\TestResponse
+function invite(User $by, int $tenantId, array $data): TestResponse
 {
     return test()->actingAs($by)->postJson("/api/v1/t/{$tenantId}/invitations", $data, idem());
 }

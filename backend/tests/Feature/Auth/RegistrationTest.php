@@ -5,8 +5,9 @@ use App\Models\ActivityLog;
 use App\Models\Membership;
 use App\Models\Tenant;
 use App\Models\User;
+use Illuminate\Testing\TestResponse;
 
-function signUp(array $overrides = []): Illuminate\Testing\TestResponse
+function signUp(array $overrides = []): TestResponse
 {
     return test()->postJson('/api/v1/auth/register', array_merge([
         'name' => 'Selam Tesfaye',

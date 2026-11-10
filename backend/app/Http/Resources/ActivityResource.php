@@ -19,7 +19,7 @@ class ActivityResource extends JsonResource
             'changes' => $this->changes,
             'actor' => $this->actor ? ['id' => $this->actor->id, 'name' => $this->actor->name] : null,
             'impersonated' => $this->impersonator_id !== null,
-            'created_at' => $this->created_at?->toIso8601String(),
+            'created_at' => $this->created_at->toIso8601String(),
         ];
     }
 }

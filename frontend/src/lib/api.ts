@@ -1,4 +1,7 @@
-import axios, { type AxiosRequestConfig, type InternalAxiosRequestConfig } from 'axios'
+import axios, {
+  type AxiosRequestConfig,
+  type InternalAxiosRequestConfig,
+} from 'axios'
 
 /**
  * HTTP client for the Laravel API (same domain, Sanctum cookie auth).
@@ -52,5 +55,8 @@ export function withIdempotencyKey(
   key: string,
   config: AxiosRequestConfig = {}
 ): AxiosRequestConfig {
-  return { ...config, headers: { ...config.headers, [IDEMPOTENCY_HEADER]: key } }
+  return {
+    ...config,
+    headers: { ...config.headers, [IDEMPOTENCY_HEADER]: key },
+  }
 }

@@ -9,6 +9,7 @@ use App\Models\Membership;
 use App\Models\Tenant;
 use App\Support\ActivityLogger;
 use App\Tenancy\CurrentTenant;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
@@ -74,7 +75,7 @@ class TeamController extends Controller
         return response()->noContent();
     }
 
-    /** @return \Illuminate\Database\Eloquent\Builder<Membership> */
+    /** @return Builder<Membership> */
     private function members()
     {
         return Membership::query()->where('tenant_id', $this->current->id());

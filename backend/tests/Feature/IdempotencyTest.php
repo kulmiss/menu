@@ -1,8 +1,8 @@
 <?php
 
 use App\Enums\Role;
-use App\Models\Invitation;
 use App\Models\IdempotencyKey;
+use App\Models\Invitation;
 use Illuminate\Support\Facades\Notification;
 
 beforeEach(fn () => Notification::fake());

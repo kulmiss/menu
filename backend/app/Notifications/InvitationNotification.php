@@ -18,7 +18,7 @@ class InvitationNotification extends Notification implements ShouldQueue
         public readonly string $token,
         public readonly string $restaurantName,
         public readonly string $inviterName,
-        public readonly string $locale = 'en',
+        public readonly string $mailLocale = 'en',
     ) {}
 
     /** @return list<string> */
@@ -32,14 +32,14 @@ class InvitationNotification extends Notification implements ShouldQueue
         $replace = [
             'restaurant' => $this->restaurantName,
             'inviter' => $this->inviterName,
-            'role' => __('menu.roles.'.$this->invitation->role->value, [], $this->locale),
+            'role' => __('menu.roles.'.$this->invitation->role->value, [], $this->mailLocale),
             'date' => $this->invitation->expires_at->toFormattedDateString(),
         ];
 
         return (new MailMessage)
-            ->subject(__('menu.invitation.mail_subject', $replace, $this->locale))
-            ->line(__('menu.invitation.mail_line', $replace, $this->locale))
-            ->action(__('menu.invitation.mail_action', [], $this->locale), url('/app/invite/'.$this->token))
-            ->line(__('menu.invitation.mail_expiry', $replace, $this->locale));
+            ->subject(__('menu.invitation.mail_subject', $replace, $this->mailLocale))
+            ->line(__('menu.invitation.mail_line', $replace, $this->mailLocale))
+            ->action(__('menu.invitation.mail_action', [], $this->mailLocale), url('/app/invite/'.$this->token))
+            ->line(__('menu.invitation.mail_expiry', $replace, $this->mailLocale));
     }
 }

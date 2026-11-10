@@ -1,13 +1,16 @@
 <?php
 
 use App\Enums\Role;
+use App\Models\ActivityLog;
+use App\Models\Concerns\BelongsToTenant;
 use App\Models\Invitation;
 use App\Models\Membership;
 use App\Models\Tenant;
+use App\Models\TenantSlugHistory;
 use App\Models\User;
-use App\Models\Concerns\BelongsToTenant;
 use App\Tenancy\CurrentTenant;
 use App\Tenancy\MissingTenantException;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Schema;
@@ -86,11 +89,11 @@ it('shows each restaurant only its own rows', function () {
 });
 
 it('makes every model with a tenant_id column use BelongsToTenant (except the documented bridges)', function () {
-    $bridges = [Membership::class, App\Models\ActivityLog::class, App\Models\TenantSlugHistory::class];
+    $bridges = [Membership::class, ActivityLog::class, TenantSlugHistory::class];
 
     $offenders = collect(File::files(app_path('Models')))
         ->map(fn ($file) => 'App\\Models\\'.$file->getFilenameWithoutExtension())
-        ->filter(fn ($class) => is_subclass_of($class, Illuminate\Database\Eloquent\Model::class))
+        ->filter(fn ($class) => is_subclass_of($class, Model::class))
         ->reject(fn ($class) => in_array($class, $bridges, true) || $class === User::class || $class === Tenant::class)
         ->filter(fn ($class) => Schema::hasColumn((new $class)->getTable(), 'tenant_id'))
         ->reject(fn ($class) => in_array(BelongsToTenant::class, class_uses_recursive($class), true))

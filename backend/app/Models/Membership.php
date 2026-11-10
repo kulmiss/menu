@@ -10,6 +10,17 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
+ * @property int $id
+ * @property int $tenant_id
+ * @property int $user_id
+ * @property Role $role
+ * @property bool $can_edit_prices
+ * @property int|null $invited_by
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read Tenant $tenant
+ * @property-read User $user
+ *
  * Links a user to a restaurant with a role. It is the bridge used to find a
  * user's restaurants, so it is read by user and by tenant explicitly rather
  * than through the tenant scope.

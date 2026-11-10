@@ -9,6 +9,18 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $tenant_id
+ * @property string $email
+ * @property Role $role
+ * @property bool $can_edit_prices
+ * @property string $token_hash
+ * @property \Illuminate\Support\Carbon $expires_at
+ * @property \Illuminate\Support\Carbon|null $accepted_at
+ * @property int|null $invited_by
+ * @property-read Tenant $tenant
+ */
 #[Fillable(['email', 'role', 'can_edit_prices', 'token_hash', 'expires_at', 'invited_by'])]
 #[Hidden(['token_hash'])]
 class Invitation extends Model
