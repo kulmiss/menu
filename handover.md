@@ -8,7 +8,7 @@ _Last updated: 2026-11-10, end of Step 2._
 - **Step 3** (build): not started. Owner will enable package installs and start a new session.
 
 ## Repo
-- `main`: one bootstrap commit (README, LICENSE, .gitignore). Protected.
+- `main`: one bootstrap commit (README, LICENSE, .gitignore). **Not protected yet**: this session's GitHub access cannot change branch settings. Owner: Settings → Branches → add a rule for `main` (require a pull request, block force pushes and deletion).
 - `develop`: created from `main`. All work arrives here through small PRs.
 - PR #1 `docs/plan` → `develop`: PLAN.md, QUESTIONS.md, handover.md.
 

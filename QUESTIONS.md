@@ -66,4 +66,5 @@ New rules added by the owner (now in PLAN.md §2): Docker is for local developme
 
 ## Open
 
-None blocking. Waiting for Step 2 approval.
+- Owner action: protect `main` in GitHub settings (require PR, no force push, no deletion). Claude's access can't change branch settings.
+- Waiting for Step 2 approval.
