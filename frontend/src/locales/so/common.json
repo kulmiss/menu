@@ -1,0 +1,26 @@
+{
+  "_status": "machine_draft",
+  "app": {
+    "name": "Menu"
+  },
+  "nav": {
+    "general": "Guud",
+    "dashboard": "Dashboard",
+    "settings": "Dejinta",
+    "profile": "Astaanta",
+    "account": "Akoon",
+    "appearance": "Muuqaalka"
+  },
+  "language": {
+    "label": "Luqadda",
+    "draft": "qabyo",
+    "en": "Ingiriisi",
+    "so": "Soomaali",
+    "am": "Axmaari",
+    "ar": "Carabi"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "intro": "Guudmarka makhaayaddaada halkan ayuu ka muuqan doonaa."
+  }
+}

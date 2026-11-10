@@ -1,0 +1,26 @@
+{
+  "_status": "machine_draft",
+  "app": {
+    "name": "Menu"
+  },
+  "nav": {
+    "general": "አጠቃላይ",
+    "dashboard": "ዳሽቦርድ",
+    "settings": "ቅንብሮች",
+    "profile": "መገለጫ",
+    "account": "መለያ",
+    "appearance": "ገጽታ"
+  },
+  "language": {
+    "label": "ቋንቋ",
+    "draft": "ረቂቅ",
+    "en": "እንግሊዝኛ",
+    "so": "ሶማሊኛ",
+    "am": "አማርኛ",
+    "ar": "ዓረብኛ"
+  },
+  "dashboard": {
+    "title": "ዳሽቦርድ",
+    "intro": "የምግብ ቤትዎ አጠቃላይ እይታ እዚህ ይታያል።"
+  }
+}

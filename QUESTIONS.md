@@ -64,7 +64,18 @@ New rules added by the owner (now in PLAN.md §2): Docker is for local developme
 | 48 | Repo layout | Monorepo: `backend/` (Laravel), `frontend/` (SPA), `public-menu/` assets built into `backend/public`. |
 | 49 | Demo photos | Generated or royalty-free food images only, licences listed; no people. |
 
+## Decisions taken at Step 3 · Partition 1 (Claude, changeable)
+
+| # | Question | Decision |
+|---|---|---|
+| 50 | Package versions when Claude can't reach the registries | The setup script runs `composer require` / `pnpm add` without guessed versions; the **lockfiles pin the exact versions** and are committed. |
+| 51 | Test database | **MySQL `menu_test`** locally and in CI (composite FKs and JSON need MySQL, not SQLite). |
+| 52 | Laravel skeleton extras | Removed the skeleton's own Vite/npm setup, CLAUDE.md/AGENTS.md, StyleCI and GitHub files; public-menu CSS/JS tooling arrives in Partition 4. |
+| 53 | Social login buttons in template auth forms | Not in scope; removed in Partition 2. |
+| 54 | Local PHP version | Owner's Laragon has **PHP 8.5**; CI runs **8.3** (the minimum we support) so we never depend on newer features. |
+
 ## Open
 
 - Owner action: protect `main` in GitHub settings (require PR, no force push, no deletion). Claude's access can't change branch settings.
-- Waiting for Step 2 approval.
+- PR #1 is still open: merge it into `develop`.
+- MySQL must be running in Laragon for `setup-local.bat`.
