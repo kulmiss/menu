@@ -116,6 +116,7 @@ it('loads the page with a fixed number of queries, however big the menu (no N+1)
         return count(DB::getQueryLog());
     };
 
+    $count(); // warm-up: platform settings and features are cached after the first build
     $small = $count();
     asTenant($tenant, function () use ($menu) {
         for ($c = 0; $c < 4; $c++) {

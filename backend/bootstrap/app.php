@@ -1,7 +1,10 @@
 <?php
 
 use App\Http\Middleware\EnsureIdempotency;
+use App\Http\Middleware\EnsureSuperAdmin;
 use App\Http\Middleware\EnsureTenantWritable;
+use App\Http\Middleware\GuardImpersonation;
+use App\Http\Middleware\RequireFeature;
 use App\Http\Middleware\ResolveTenant;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -19,8 +22,14 @@ return Application::configure(basePath: dirname(__DIR__))
         // Sanctum cookie auth for the SPA on the same domain.
         $middleware->statefulApi();
 
+        // "Log in as": time limit and blocked actions, for the API and Fortify (web).
+        $middleware->api(append: [GuardImpersonation::class]);
+        $middleware->web(append: [GuardImpersonation::class]);
+
         $middleware->alias([
             'idempotent' => EnsureIdempotency::class,
+            'feature' => RequireFeature::class,
+            'platform' => EnsureSuperAdmin::class,
             'tenant' => ResolveTenant::class,
             'tenant.writable' => EnsureTenantWritable::class,
         ]);

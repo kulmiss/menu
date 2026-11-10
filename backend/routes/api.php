@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AcceptInvitationController;
 use App\Http\Controllers\Api\AccountController;
 use App\Http\Controllers\Api\ActivityController;
+use App\Http\Controllers\Api\AnnouncementController;
 use App\Http\Controllers\Api\BeaconController;
 use App\Http\Controllers\Api\InvitationController;
 use App\Http\Controllers\Api\MeController;
@@ -21,6 +22,9 @@ use App\Http\Controllers\Api\Restaurant\PromotionController;
 use App\Http\Controllers\Api\Restaurant\QrCodeController;
 use App\Http\Controllers\Api\TeamController;
 use App\Http\Controllers\Api\TenantController;
+use App\Http\Controllers\Platform\PaymentController;
+use App\Http\Controllers\Platform\PlatformController;
+use App\Http\Controllers\Platform\RestaurantController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
@@ -43,6 +47,38 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('me', MeController::class);
+        Route::post('impersonation/stop', [AnnouncementController::class, 'stopImpersonating']);
+
+        // Super Admin (PLAN.md §7.3): Super Admins with two-factor sign-in only.
+        Route::prefix('platform')->middleware('platform')->group(function () {
+            Route::get('dashboard', [PlatformController::class, 'dashboard']);
+            Route::get('restaurants', [RestaurantController::class, 'index']);
+            Route::post('restaurants', [RestaurantController::class, 'store']);
+            Route::get('restaurants/{restaurant}', [RestaurantController::class, 'show'])->whereNumber('restaurant');
+            Route::patch('restaurants/{restaurant}', [RestaurantController::class, 'update'])->whereNumber('restaurant');
+            Route::delete('restaurants/{restaurant}', [RestaurantController::class, 'destroy'])->whereNumber('restaurant');
+            Route::post('restaurants/{restaurant}/restore', [RestaurantController::class, 'restore'])->whereNumber('restaurant');
+            Route::post('restaurants/{restaurant}/suspend', [RestaurantController::class, 'suspend'])->whereNumber('restaurant');
+            Route::post('restaurants/{restaurant}/unsuspend', [RestaurantController::class, 'unsuspend'])->whereNumber('restaurant');
+            Route::put('restaurants/{restaurant}/features', [RestaurantController::class, 'features'])->whereNumber('restaurant');
+            Route::post('restaurants/{restaurant}/payments', [PaymentController::class, 'store'])->whereNumber('restaurant');
+            Route::post('restaurants/{restaurant}/impersonate', [RestaurantController::class, 'impersonate'])->whereNumber('restaurant');
+            Route::get('payments', [PaymentController::class, 'index']);
+            Route::get('payments.csv', [PaymentController::class, 'export']);
+            Route::get('plans', [PlatformController::class, 'plans']);
+            Route::post('plans', [PlatformController::class, 'savePlan']);
+            Route::patch('plans/{plan}', [PlatformController::class, 'savePlan'])->whereNumber('plan');
+            Route::get('themes', [PlatformController::class, 'themes']);
+            Route::post('themes', [PlatformController::class, 'saveTheme']);
+            Route::patch('themes/{theme}', [PlatformController::class, 'saveTheme'])->whereNumber('theme');
+            Route::get('announcements', [PlatformController::class, 'announcements']);
+            Route::post('announcements', [PlatformController::class, 'saveAnnouncement']);
+            Route::patch('announcements/{announcement}', [PlatformController::class, 'saveAnnouncement'])->whereNumber('announcement');
+            Route::delete('announcements/{announcement}', [PlatformController::class, 'deleteAnnouncement'])->whereNumber('announcement');
+            Route::get('activity', [PlatformController::class, 'activity']);
+            Route::get('settings', [PlatformController::class, 'settings']);
+            Route::put('settings', [PlatformController::class, 'saveSettings']);
+        });
         Route::post('invitations/{token}/accept', [AcceptInvitationController::class, 'accept']);
 
         Route::prefix('t/{tenant}')->middleware(['tenant', 'tenant.writable'])->group(function () {
@@ -98,13 +134,13 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::post('media', [MediaController::class, 'store'])->middleware('throttle:30,1');
             Route::delete('media/{media}', [MediaController::class, 'destroy'])->whereNumber('media');
 
-            Route::get('import/template', [ImportController::class, 'template']);
-            Route::get('export', [ImportController::class, 'export']);
-            Route::post('import/preview', [ImportController::class, 'preview'])->middleware('throttle:20,1');
-            Route::post('import/commit', [ImportController::class, 'commit']);
+            Route::get('import/template', [ImportController::class, 'template'])->middleware('feature:import_export');
+            Route::get('export', [ImportController::class, 'export'])->middleware('feature:import_export');
+            Route::post('import/preview', [ImportController::class, 'preview'])->middleware(['throttle:20,1', 'feature:import_export']);
+            Route::post('import/commit', [ImportController::class, 'commit'])->middleware('feature:import_export');
 
             Route::get('branches', [BranchController::class, 'index']);
-            Route::post('branches', [BranchController::class, 'store']);
+            Route::post('branches', [BranchController::class, 'store'])->middleware('feature:branches');
             Route::patch('branches/{branch}', [BranchController::class, 'update']);
             Route::delete('branches/{branch}', [BranchController::class, 'destroy']);
             Route::get('branches/{branch}/tables', [BranchController::class, 'tables']);
@@ -121,13 +157,16 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::delete('qr-codes/{qr}', [QrCodeController::class, 'destroy']);
             Route::get('qr-codes/{qr}.{format}', [QrCodeController::class, 'download'])->whereIn('format', ['svg', 'png', 'pdf']);
 
-            Route::get('insights', [InsightsController::class, 'index']);
+            Route::get('announcements', [AnnouncementController::class, 'index']);
+            Route::post('announcements/{announcement}/read', [AnnouncementController::class, 'read'])->whereNumber('announcement');
+
+            Route::get('insights', [InsightsController::class, 'index'])->middleware('feature:insights');
             Route::get('dashboard', [InsightsController::class, 'dashboard']);
 
             Route::get('promotions', [PromotionController::class, 'index']);
-            Route::post('promotions', [PromotionController::class, 'store']);
-            Route::post('promotions/reorder', [PromotionController::class, 'reorder']);
-            Route::patch('promotions/{promotion}', [PromotionController::class, 'update']);
+            Route::post('promotions', [PromotionController::class, 'store'])->middleware('feature:promotions');
+            Route::post('promotions/reorder', [PromotionController::class, 'reorder'])->middleware('feature:promotions');
+            Route::patch('promotions/{promotion}', [PromotionController::class, 'update'])->middleware('feature:promotions');
             Route::delete('promotions/{promotion}', [PromotionController::class, 'destroy']);
 
             Route::get('profile', [InfoController::class, 'profile']);

@@ -20,6 +20,7 @@ use App\Models\Tag;
 use App\Models\Tenant;
 use App\Models\TenantAppearance;
 use App\Models\TenantProfile;
+use App\Support\Features;
 use App\Tenancy\CurrentTenant;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -169,7 +170,8 @@ class MenuPageData
                 }
             }
             $localNow = now($tenant->timezone)->format('Y-m-d H:i');
-            $promotions = Promotion::with('media')->where('is_active', true)
+            $features = Features::for($tenant);
+            $promotions = ! $features['promotions'] ? [] : Promotion::with('media')->where('is_active', true)
                 ->where(fn ($q) => $q->whereNull('branch_id')->orWhere('branch_id', $branchId))
                 ->where(fn ($q) => $q->whereNull('ends_at')->orWhere('ends_at', '>', $localNow))
                 ->orderBy('sort')->orderBy('id')->get()
@@ -193,6 +195,7 @@ class MenuPageData
                 'tenant' => $tenant,
                 'theme' => $theme,
                 'promotions' => $promotions,
+                'branding' => ! $features['remove_branding'],
                 'branch' => $branch && $branches->count() > 1 ? $text($branch->name) : null,
                 'branches' => $branches->count() > 1 ? $branches->map(fn (Branch $b) => [
                     'name' => $text($b->name),
