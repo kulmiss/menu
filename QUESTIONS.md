@@ -93,7 +93,7 @@ New rules added by the owner (now in PLAN.md §2): Docker is for local developme
 | 67 | Menus served at set times (e.g. Breakfast) on the guest page | **Shown with a "Not served right now" label**, not hidden: the page is one static file for all hours, and hiding sections after load would cause layout shift. Easy to change. |
 | 68 | INP target in CI | Lighthouse lab runs can't measure INP (it needs real taps), so CI gates **TBT ≤ 100 ms** as the stand-in; real INP comes from the beacon later (Partition 10). |
 | 69 | Demo login | `DemoSeeder` creates **demo@example.com / password** for the demo café. It is only run by hand (`php artisan db:seed --class=DemoSeeder`) and in CI; **never run it on a live server**, or change the password right after. |
-| 70 | Lighthouse CI package | **`@lhci/cli` 0.16.0 (Apache-2.0)** run with `npx` in CI only, pinned to the exact version; it is not added to the project's dependencies. |
+| 70 | Lighthouse CI package | **`@lhci/cli` 0.16.0 (Apache-2.0)**, CI only, in its own `ci/lighthouse/package.json` + lockfile (`npm ci`), not in the app. `puppeteer-core` is held at 25.16.0 because 25.17.0 points at a broken npm upload. |
 
 ## Open
 

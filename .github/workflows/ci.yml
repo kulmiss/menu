@@ -156,7 +156,9 @@ jobs:
           curl -sfI -H 'Accept-Encoding: gzip' http://localhost:8124/demo
       - name: Lighthouse CI
         working-directory: ci/lighthouse
-        run: npx --yes @lhci/cli@0.16.0 autorun --config=./lighthouserc.json
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npx --no-install lhci autorun --config=./lighthouserc.json
       - name: Lighthouse reports
         if: always()
         uses: actions/upload-artifact@v4

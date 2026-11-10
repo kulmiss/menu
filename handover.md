@@ -53,7 +53,7 @@ Backend: Pint, Larastan 6, Pest **170**. Frontend (unchanged since #7): lint, Pr
 | @dnd-kit/sortable | 10.0.0 | MIT | admin |
 | @dnd-kit/utilities | 3.2.2 | MIT | admin |
 | react-easy-crop | 6.2.5 | MIT | admin, photo crop |
-| @lhci/cli | 0.16.0 | Apache-2.0 | CI only, via `npx` (not a dependency) |
+| @lhci/cli | 0.16.0 | Apache-2.0 | CI only, `ci/lighthouse/package.json` + lockfile (puppeteer-core held at 25.16.0) |
 Removed: axios. `package.json` uses caret ranges for the dnd-kit packages; the exact versions are pinned in `pnpm-lock.yaml` (`--frozen-lockfile` in CI).
 
 ## Claude's workspace notes
