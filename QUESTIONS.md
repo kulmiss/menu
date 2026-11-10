@@ -98,6 +98,7 @@ New rules added by the owner (now in PLAN.md §2): Docker is for local developme
 | 72 | Brand colours that are hard to read | The owner may pick any colour. The guest page **automatically uses the nearest darker shade on white and a lighter shade in dark mode** so text stays ≥ 4.5:1; the admin shows a warning only for the light page. |
 | 73 | Live preview | The preview frame loads the real guest page with the unsaved settings in the address (`GET appearance/preview`), never cached or counted; saving clears the static page so guests see it at once. |
 | 74 | Theme presets | Five starting looks (Classic, Bistro, Fresh, Espresso, Berry) seeded by the migration; Super Admin manages them in Partition 11. Picking one fills colour, font and layout; the owner can still change each. |
+| 75 | QR codes and PDFs without new packages | PLAN.md lists no QR or PDF library, and only listed packages may be added. **Plan for Partition 6:** a small own QR encoder (byte mode, error correction M, versions 1–10, standard masking), checked against reference matrices; PNG via GD, SVG as text; table-card PDFs written directly (vector squares + built-in Helvetica, no font files). If the owner prefers a library (e.g. `chillerlan/php-qrcode` MIT, `dompdf` LGPL), that is an easy swap behind the same service. |
 
 ## Open
 

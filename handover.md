@@ -68,6 +68,14 @@ Removed: axios. `package.json` uses caret ranges for the dnd-kit packages; the e
 ## Claude's workspace notes
 Workspace can run `pnpm install`, `composer install --prefer-source` (Packagist blocked: new Composer packages need the owner's PC or the lock-entry trick used for openspout), MariaDB (`service mariadb start` after idle), Chromium (`PLAYWRIGHT_BROWSERS_PATH=/tmp/pw` with a `chromium_headless_shell-1217` → `-1243` symlink), Nginx, Lighthouse (`npx lighthouse@12.8.2 --chrome-path=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome`).
 
+## Partition 6 plan (next, branch `feat/branches-qr` from `feat/appearance`)
+- Tables per PLAN §4.5/§4.6: `branches` (default branch created for every restaurant, incl. existing ones in the migration), `dining_tables`, `qr_codes` (8-char code from an unambiguous alphabet, unique, never reused), `branch_item_overrides` (price / sold out / hidden, null = inherit), `menu_branch`.
+- `/q/{code}` per §15.2.11: `public/q.php`-style tiny script reading a pre-built map file (`storage/app/qr-map.php`, rewritten on every QR/branch/slug change) → one 302 to `/{slug}?b=…&t=…`, no Laravel, no database; Laravel route as fallback. Scan counted later by the beacon (Partition 10).
+- Guest page per branch: static copy per branch (`menu-cache/{slug}/{branch}/`), overrides applied, branch switch when several (QUESTIONS #38).
+- QR output without packages (QUESTIONS #75): own encoder + PNG (GD) / SVG / PDF; table cards PDF (logo colour, restaurant name, table label, "Scan to see the menu").
+- Admin: Branches list/editor (info, tables, overrides grid), QR codes screen (download PNG/SVG/PDF, table cards).
+- Tests: override resolution, encoder vs reference matrices (generate fixtures with Python `qrcode` locally), PDF structure, map file + redirect, isolation, roles, plan limits (`branches`, `tables`).
+
 ## Next steps (in order)
 6 Branches + QR (`/q/{code}` without the database) → 7 Restaurant info + hours → 8 Translations (deferred; note only) → 9 Promotions → 10 Insights (beacon counting) → 11 Super Admin → 12 Demo data (extend DemoSeeder) → 13 Docs (deploy, OPcache, Cloudflare, cron for `schedule:run`) → 14 Final QA → Step 4 final report.
 Still open from §15.3: optimistic price edits in the admin.
