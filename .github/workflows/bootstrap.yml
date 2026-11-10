@@ -1,0 +1,56 @@
+# One-time bootstrap for Partition 1: installs dependencies on GitHub's servers,
+# generates the lockfiles and Sanctum's files, and uploads the result as a patch
+# artifact. It never commits. Removed again before the PR is merged.
+name: Bootstrap lockfiles
+
+on:
+  push:
+    branches: [feat/setup]
+
+permissions:
+  contents: read
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: gd, intl, pdo_mysql, zip, exif, bcmath
+          coverage: none
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: frontend/package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Backend dependencies + Sanctum
+        working-directory: backend
+        run: |
+          if [ ! -f composer.lock ]; then
+            composer install --no-interaction --no-progress
+            php artisan install:api --without-migration-prompt --no-interaction
+            composer require --dev pestphp/pest pestphp/pest-plugin-laravel larastan/larastan --with-all-dependencies --no-interaction --no-progress
+          fi
+          vendor/bin/pint
+
+      - name: Frontend dependencies
+        working-directory: frontend
+        run: |
+          pnpm install --no-frozen-lockfile
+          if ! grep -q '"i18next"' package.json; then pnpm add i18next react-i18next; fi
+          pnpm format
+          pnpm build
+
+      - name: Collect changes as a patch
+        run: |
+          git add -A -- . ':!backend/vendor' ':!frontend/node_modules' ':!backend/public/app'
+          git diff --cached --binary > bootstrap.patch
+          git diff --cached --stat
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bootstrap-patch
+          path: bootstrap.patch

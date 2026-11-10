@@ -1,32 +1,34 @@
 # Handover
 
-_Last updated: 2026-11-10, end of Step 2._
+_Last updated: 2026-11-10, Step 3 · Partition 1 (project setup) in progress._
 
 ## Where we are
-- **Step 1** (safety check + questions): done; answers in QUESTIONS.md.
-- **Step 2** (PLAN.md + mockups): done, **waiting for owner approval**.
-- **Step 3** (build): not started. Owner will enable package installs and start a new session.
+- Steps 1–2: done and approved.
+- **Partition 1 (project setup)**: code written, waiting for the first local run of `setup-local.bat` on the owner's PC (Windows + Laragon: PHP 8.5.11, Composer 2.10.3, Node 26.13.0).
+- Claude's workspaces cannot install packages (cloud container and the desktop VM both blocked), so the owner runs the installs; Claude reads `setup-log.txt` from `C:\laragon\www\menu` and fixes errors.
 
 ## Repo
-- `main`: one bootstrap commit (README, LICENSE, .gitignore). **Not protected yet**: this session's GitHub access cannot change branch settings. Owner: Settings → Branches → add a rule for `main` (require a pull request, block force pushes and deletion).
-- `develop`: created from `main`. All work arrives here through small PRs.
-- PR #1 `docs/plan` → `develop`: PLAN.md, QUESTIONS.md, handover.md.
+- `main`: bootstrap commit. Owner still to add branch protection.
+- `develop`: bootstrap commit. PR #1 (`docs/plan`) **still open** — merge it.
+- Partition 1 will be branch `feat/setup` → PR into `develop` (owner commits and pushes from the PC; commands in the chat).
 
-## Design
-- Mockups on the design canvas: https://claude.ai/artifact/HKJ6v8zV9y2b7oQoYb33B5 (customer menu light + dark, item sheet, admin menu editor desktop + phone, Super Admin dashboard).
+## What Partition 1 contains
+- `backend/`: Laravel skeleton v13.11.0 (`06d016a`), MySQL `.env.example`, database cache/sessions/queue, public disk at `public/media` (no symlink), Pest + Larastan (level 6) + Pint, tests: health, MySQL migrations, config, architecture. Sanctum via `php artisan install:api` (run by the setup script).
+- `frontend/`: shadcn-admin @ `e16c87f` with Clerk, tasks/apps/chats/users/help-center demos, sign-in-2, notifications/display settings, demo dashboard, faker and unused brand icons removed. i18next wired (en source; so/am/ar marked `machine_draft`), language switch with RTL for Arabic, tests for it and for locale key parity. Vite `base: /app/`, build output `backend/public/app`.
+- `docker-compose.yml` (dev only), `.github/workflows/ci.yml` (checks only), `THIRD_PARTY_NOTICES.md`, `setup-local.bat`, `scripts/create-databases.php`.
+
+## Known follow-ups (later partitions)
+- Template pages still have English strings (auth forms, settings, errors). They are rewritten through i18n when rebuilt in Partition 2 (auth) and later partitions.
+- Social-login buttons (GitHub/Facebook) in the template auth forms are removed in Partition 2.
+- `recharts` stays for Insights (Partition 10).
+- Routes move under `/admin` and `/platform` in Partition 2.
 
 ## Pinned references
-- shadcn-admin: `https://github.com/satnaing/shadcn-admin` @ `e16c87f213a5ba5e45964e9b67c792105ec74d26` (v2.2.1, 2026-06-11, MIT).
-- Laravel 13 (latest stable at build time; pin exact version in composer.lock in Partition 1).
+- shadcn-admin: `https://github.com/satnaing/shadcn-admin` @ `e16c87f213a5ba5e45964e9b67c792105ec74d26` (v2.2.1, MIT).
+- Laravel skeleton: `laravel/laravel` v13.11.0 @ `06d016a364a37430eec9cbc52209adce3d7667ce` (framework `^13.17`; exact versions in `composer.lock` once generated).
+- Design mockups: https://claude.ai/artifact/HKJ6v8zV9y2b7oQoYb33B5
 
-## Next session: start Partition 1 (project setup)
-1. Confirm package installs work (`composer --version`, `pnpm --version`, network to packagist/npm).
-2. Branch `feat/setup` from `develop`.
-3. Create `backend/` with Laravel 13, `frontend/` from shadcn-admin at the pinned commit; remove Clerk and demo features; add i18n wiring.
-4. Docker dev compose, CI workflow (checks only), THIRD_PARTY_NOTICES, `.env.example`.
-5. Ask before adding any package not listed in PLAN.md §3.
-
-## Notes for whoever continues
-- Shared hosting is the main target: never depend on Node, Redis, queue workers or Docker at runtime.
-- Every restaurant-owned table needs `tenant_id` + `UNIQUE(tenant_id, id)` + composite FKs.
-- Every mutating endpoint needs the idempotency middleware (architecture test will enforce it).
+## Next steps
+1. Owner runs `setup-local.bat`; Claude fixes anything in `setup-log.txt` until every step passes.
+2. Owner commits on `feat/setup` (lockfiles included), pushes, opens PR into `develop`; CI must be green.
+3. Partition 2: auth & tenancy.

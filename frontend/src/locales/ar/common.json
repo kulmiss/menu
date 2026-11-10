@@ -1,0 +1,26 @@
+{
+  "_status": "machine_draft",
+  "app": {
+    "name": "Menu"
+  },
+  "nav": {
+    "general": "عام",
+    "dashboard": "لوحة التحكم",
+    "settings": "الإعدادات",
+    "profile": "الملف الشخصي",
+    "account": "الحساب",
+    "appearance": "المظهر"
+  },
+  "language": {
+    "label": "اللغة",
+    "draft": "مسودة",
+    "en": "الإنجليزية",
+    "so": "الصومالية",
+    "am": "الأمهرية",
+    "ar": "العربية"
+  },
+  "dashboard": {
+    "title": "لوحة التحكم",
+    "intro": "ستظهر هنا نظرة عامة على مطعمك."
+  }
+}

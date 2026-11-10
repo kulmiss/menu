@@ -1,0 +1,25 @@
+{
+  "app": {
+    "name": "Menu"
+  },
+  "nav": {
+    "general": "General",
+    "dashboard": "Dashboard",
+    "settings": "Settings",
+    "profile": "Profile",
+    "account": "Account",
+    "appearance": "Appearance"
+  },
+  "language": {
+    "label": "Language",
+    "draft": "draft",
+    "en": "English",
+    "so": "Somali",
+    "am": "Amharic",
+    "ar": "Arabic"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "intro": "Your restaurant at a glance will appear here."
+  }
+}

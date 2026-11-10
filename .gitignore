@@ -33,3 +33,7 @@ coverage/
 .vite/
 playwright-report/
 test-results/
+
+# Local setup log (setup-local.bat)
+setup-log.txt
+_to_delete/
