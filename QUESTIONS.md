@@ -73,6 +73,20 @@ New rules added by the owner (now in PLAN.md §2): Docker is for local developme
 | 52 | Laravel skeleton extras | Removed the skeleton's own Vite/npm setup, CLAUDE.md/AGENTS.md, StyleCI and GitHub files; public-menu CSS/JS tooling arrives in Partition 4. |
 | 53 | Social login buttons in template auth forms | Not in scope; removed in Partition 2. |
 | 54 | Local PHP version | Owner's Laragon has **PHP 8.5**; CI runs **8.3** (the minimum we support) so we never depend on newer features. |
+| 55 | How PRs are merged | **Stacked PRs** (owner, 2026-11-10): each new branch is built on the previous one, so the newest PR always contains all earlier ones. The owner merges **only the newest PR** with *Create a merge commit* (not squash); GitHub then marks the earlier PRs as merged automatically. PRs stay small for review because each shows only its own commits once the earlier ones are in `develop`. |
+
+## Decisions taken in Partitions 2b–3 (Claude, changeable)
+
+| # | Question | Decision |
+|---|---|---|
+| 56 | Invited person without an account | **Signs up from the invitation** (`invitation_token`): no restaurant is created, they join the inviting one, and the email counts as verified. |
+| 57 | Image processing library | **Plain GD, no package** (PLAN §3.1 named Intervention Image). Resize, orientation fix, WebP + JPEG and EXIF stripping are a few GD calls; Composer can't reach Packagist from Claude's workspace anyway. Imagick support can be added later if wanted. |
+| 58 | Items without a price | **Allowed** (e.g. "ask the waiter"); the public page shows no price. With sizes, the item price is empty and the list shows "from" the lowest size (#37). |
+| 59 | Menu ↔ branch links (`menu_branch`) | Built with branches in **Partition 6**; until then every menu is shown at every branch. |
+| 60 | Plan feature switches (#24) | **Counts** (menus, items, photos…) are enforced from Partition 3 via `plans.limits` (402 on create). On/off **features** (`plan_features`, overrides) arrive with the Super Admin in Partition 11. |
+| 61 | Who may bulk-change prices | Anyone allowed to edit prices: owners, managers and staff with *can edit prices*. Staff use a price-only endpoint; full item edits stay owner/manager. |
+| 62 | XLSX library for import/export | **openspout/openspout `^5.3`** (MIT, streaming, low memory) — owner's choice, 2026-11-10. 5.3 is the last line that runs on PHP 8.3; `config.platform.php = 8.3.0` keeps `composer update` from moving past it. Needs ext-zip, xmlreader, dom (present in CI and the Docker image; standard on cPanel). |
+| 63 | Import rules | One row per item; matched by menu + category + item name in the main language; **blank cell = keep current value**; sizes as `Small=60; Large=80`; unknown tags become custom tags; any row error blocks the whole import (fix the file, upload again). Preview kept 30 min. |
 
 ## Open
 

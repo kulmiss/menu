@@ -22,6 +22,17 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  // Bundle these up front: the browser tests reach them only through the
+  // translation-key scan (all source files), so Vite would otherwise find
+  // them mid-run and reload the page, failing a random test.
+  optimizeDeps: {
+    include: [
+      'react-dom/client',
+      '@tanstack/react-query-devtools',
+      '@tanstack/react-router-devtools',
+      'react-top-loading-bar',
+    ],
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

@@ -1,0 +1,161 @@
+<?php
+
+namespace App\Support;
+
+use GdImage;
+use Illuminate\Support\Facades\Storage;
+use RuntimeException;
+
+/**
+ * Turns one upload into the sizes the public menu uses (PLAN.md §3.3, §4.8),
+ * with plain GD so it runs on any shared host (QUESTIONS #57):
+ * - 320 / 640 / 1280 px wide WebP for `srcset`,
+ * - 640 px JPEG for old browsers,
+ * - 1200×630 JPEG for link previews (Open Graph),
+ * plus the average colour as a placeholder. Re-encoding drops all metadata
+ * (EXIF, GPS); phone photos are turned upright first.
+ */
+class ImageProcessor
+{
+    /** Longest side kept from the original. The browser already downscales to this. */
+    public const MAX_SIDE = 2048;
+
+    public const WIDTHS = [320, 640, 1280];
+
+    /**
+     * @return array{width: int, height: int, variants: array<int|string, string>, dominant_color: string}
+     */
+    public function process(string $path, string $mime, string $disk, string $folder): array
+    {
+        $image = $this->load($path, $mime);
+        $image = $this->orient($image, $path, $mime);
+        $image = $this->fit($image, self::MAX_SIDE);
+
+        $width = imagesx($image);
+        $height = imagesy($image);
+        $variants = [];
+
+        foreach (self::WIDTHS as $target) {
+            // Never enlarge; a small photo still gets every name.
+            $scaled = $this->scaleToWidth($image, min($target, $width));
+            $variants[(string) $target] = $this->store($scaled, 'webp', $disk, "{$folder}/{$target}.webp");
+            if ($target === 640) {
+                $variants['jpg'] = $this->store($scaled, 'jpeg', $disk, "{$folder}/640.jpg");
+            }
+        }
+        $variants['og'] = $this->store($this->cover($image, 1200, 630), 'jpeg', $disk, "{$folder}/og.jpg");
+
+        return [
+            'width' => $width,
+            'height' => $height,
+            'variants' => array_map(fn (string $p) => basename($p), $variants),
+            'dominant_color' => $this->averageColor($image),
+        ];
+    }
+
+    private function load(string $path, string $mime): GdImage
+    {
+        $image = match ($mime) {
+            'image/jpeg' => @imagecreatefromjpeg($path),
+            'image/png' => @imagecreatefrompng($path),
+            'image/webp' => @imagecreatefromwebp($path),
+            default => false,
+        };
+
+        if (! $image instanceof GdImage) {
+            throw new RuntimeException('Unreadable image.');
+        }
+
+        // Flatten transparency onto white (JPEG copies have no alpha).
+        if ($mime !== 'image/jpeg') {
+            $flat = imagecreatetruecolor(imagesx($image), imagesy($image));
+            imagefill($flat, 0, 0, (int) imagecolorallocate($flat, 255, 255, 255));
+            imagecopy($flat, $image, 0, 0, 0, 0, imagesx($image), imagesy($image));
+            $image = $flat;
+        }
+
+        return $image;
+    }
+
+    /** Phone cameras store "rotate me" in EXIF instead of rotating the pixels. */
+    private function orient(GdImage $image, string $path, string $mime): GdImage
+    {
+        if ($mime !== 'image/jpeg' || ! function_exists('exif_read_data')) {
+            return $image;
+        }
+
+        $exif = @exif_read_data($path);
+        $orientation = is_array($exif) ? (int) ($exif['Orientation'] ?? 1) : 1;
+
+        $rotated = match ($orientation) {
+            3 => imagerotate($image, 180, 0),
+            6 => imagerotate($image, -90, 0),
+            8 => imagerotate($image, 90, 0),
+            default => $image,
+        };
+
+        return $rotated instanceof GdImage ? $rotated : $image;
+    }
+
+    private function fit(GdImage $image, int $max): GdImage
+    {
+        $w = imagesx($image);
+        $h = imagesy($image);
+        if (max($w, $h) <= $max) {
+            return $image;
+        }
+
+        return $w >= $h ? $this->scaleToWidth($image, $max) : $this->resample($image, (int) round($w * $max / $h), $max);
+    }
+
+    private function scaleToWidth(GdImage $image, int $width): GdImage
+    {
+        $w = imagesx($image);
+        if ($width >= $w) {
+            return $image;
+        }
+
+        return $this->resample($image, $width, max(1, (int) round(imagesy($image) * $width / $w)));
+    }
+
+    /** Fills exactly width×height, cropping the overflow around the centre. */
+    private function cover(GdImage $image, int $width, int $height): GdImage
+    {
+        $w = imagesx($image);
+        $h = imagesy($image);
+        $scale = max($width / $w, $height / $h);
+        $cropW = (int) round($width / $scale);
+        $cropH = (int) round($height / $scale);
+
+        $out = imagecreatetruecolor($width, $height);
+        imagecopyresampled($out, $image, 0, 0, (int) (($w - $cropW) / 2), (int) (($h - $cropH) / 2), $width, $height, $cropW, $cropH);
+
+        return $out;
+    }
+
+    private function resample(GdImage $image, int $width, int $height): GdImage
+    {
+        $out = imagecreatetruecolor($width, $height);
+        imagecopyresampled($out, $image, 0, 0, 0, 0, $width, $height, imagesx($image), imagesy($image));
+
+        return $out;
+    }
+
+    private function averageColor(GdImage $image): string
+    {
+        $pixel = imagecreatetruecolor(1, 1);
+        imagecopyresampled($pixel, $image, 0, 0, 0, 0, 1, 1, imagesx($image), imagesy($image));
+        $rgb = imagecolorat($pixel, 0, 0);
+
+        return sprintf('#%02x%02x%02x', ($rgb >> 16) & 0xFF, ($rgb >> 8) & 0xFF, $rgb & 0xFF);
+    }
+
+    private function store(GdImage $image, string $format, string $disk, string $path): string
+    {
+        ob_start();
+        $format === 'webp' ? imagewebp($image, null, 80) : imagejpeg($image, null, 82);
+        Storage::disk($disk)->put($path, (string) ob_get_clean());
+
+        return $path;
+    }
+}

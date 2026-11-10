@@ -1,21 +1,12 @@
 import { type LinkProps } from '@tanstack/react-router'
-
-type User = {
-  name: string
-  email: string
-  avatar: string
-}
-
-type Team = {
-  name: string
-  logo: React.ElementType
-  plan: string
-}
+import { type Role } from '@/features/auth/api'
 
 type BaseNavItem = {
   title: string
   badge?: string
   icon?: React.ElementType
+  /** Only these roles see the item (server checks again). All when unset. */
+  roles?: Role[]
 }
 
 type NavLink = BaseNavItem & {
@@ -36,8 +27,6 @@ type NavGroup = {
 }
 
 type SidebarData = {
-  user: User
-  teams: Team[]
   navGroups: NavGroup[]
 }
 

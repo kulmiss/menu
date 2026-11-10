@@ -1,90 +1,45 @@
 import { AxiosError } from 'axios'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { handleServerError } from './handle-server-error'
+import { errorKey, handleServerError } from './handle-server-error'
 
 const toastError = vi.hoisted(() => vi.fn())
 
-vi.mock('sonner', () => ({
-  toast: {
-    error: toastError,
-  },
-}))
+vi.mock('sonner', () => ({ toast: { error: toastError } }))
 
-beforeEach(() => {
-  vi.mocked(toastError).mockClear()
-})
+function axiosError(status: number, data: unknown = {}) {
+  const error = new AxiosError('Request failed')
+  error.response = { status, data } as AxiosError['response']
+  return error
+}
+
+beforeEach(() => toastError.mockClear())
 
 describe('handleServerError', () => {
-  it('shows a generic message when the error is not recognised', () => {
-    handleServerError(new Error('network'))
-
-    expect(toastError).toHaveBeenCalledWith('Something went wrong!')
+  it('shows a network message when there is no response', () => {
+    handleServerError(new AxiosError('Network Error'))
+    expect(toastError).toHaveBeenCalledWith(
+      'No connection. Check your internet and try again.'
+    )
   })
 
-  it('maps a plain object with status 204 to the no-content message', () => {
-    handleServerError({ status: 204 })
-
-    expect(toastError).toHaveBeenCalledWith('No content.')
+  it("shows the server's message for client errors", () => {
+    handleServerError(axiosError(422, { message: 'The slug is taken.' }))
+    expect(toastError).toHaveBeenCalledWith('The slug is taken.')
   })
 
-  it('prefers the API title when the error is an Axios error with response data', () => {
-    const error = new AxiosError('Bad request')
-    error.response = {
-      status: 422,
-      data: { title: 'Validation failed' },
-    } as AxiosError['response']
-
-    handleServerError(error)
-
-    expect(toastError).toHaveBeenCalledWith('Validation failed')
+  it('never shows raw server messages for 5xx errors', () => {
+    handleServerError(axiosError(500, { message: 'SQLSTATE[42S02]' }))
+    expect(toastError).toHaveBeenCalledWith(
+      'Something went wrong. Please try again.'
+    )
   })
 
-  it('falls back to the generic message when Axios response has no data.title', () => {
-    const error = new AxiosError('Request failed')
-    error.response = {
-      status: 500,
-      data: {},
-    } as AxiosError['response']
-
-    handleServerError(error)
-
-    expect(toastError).toHaveBeenCalledWith('Something went wrong!')
-  })
-
-  it('falls back to the generic message when Axios data.title is an empty string', () => {
-    const error = new AxiosError('Bad request')
-    error.response = {
-      status: 400,
-      data: { title: '' },
-    } as AxiosError['response']
-
-    handleServerError(error)
-
-    expect(toastError).toHaveBeenCalledWith('Something went wrong!')
-  })
-
-  it('logs the error to the console in development', () => {
-    const log = vi.spyOn(console, 'log').mockImplementation(() => {})
-    const err = new Error('logged')
-
-    handleServerError(err)
-
-    expect(log).toHaveBeenCalledTimes(1)
-    expect(log).toHaveBeenCalledWith(err)
-
-    log.mockRestore()
-  })
-
-  it('does not log the error to the console in production', () => {
-    vi.stubEnv('DEV', false)
-
-    const log = vi.spyOn(console, 'log').mockImplementation(() => {})
-    const err = new Error('not logged')
-
-    handleServerError(err)
-
-    expect(log).not.toHaveBeenCalled()
-
-    log.mockRestore()
+  it('maps status codes to messages', () => {
+    expect(errorKey(axiosError(402))).toBe('errors.read_only')
+    expect(errorKey(axiosError(403))).toBe('errors.forbidden')
+    expect(errorKey(axiosError(409))).toBe('errors.in_progress')
+    expect(errorKey(axiosError(429))).toBe('errors.too_many')
+    expect(errorKey(new AxiosError('Network Error'))).toBe('errors.network')
+    expect(errorKey(new Error('x'))).toBe('errors.generic')
   })
 })

@@ -1,31 +1,46 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { type NavItem, type SidebarData } from '../types'
+import { type Role } from '@/features/auth/api'
+import { useRole } from '@/features/auth/use-me'
+import { type NavGroup, type NavItem, type SidebarData } from '../types'
 import { sidebarData } from './sidebar-data'
 
-/** Sidebar data with every title translated into the current UI language. */
+const allowed = (item: { roles?: Role[] }, role: Role | null) =>
+  !item.roles || (role !== null && item.roles.includes(role))
+
+/** Navigation translated into the UI language and filtered by role. */
+export function filterNav(
+  groups: NavGroup[],
+  role: Role | null,
+  t: (key: string) => string
+): NavGroup[] {
+  const translateItem = (item: NavItem): NavItem =>
+    item.items
+      ? {
+          ...item,
+          title: t(item.title),
+          items: item.items
+            .filter((sub) => allowed(sub, role))
+            .map((sub) => ({ ...sub, title: t(sub.title) })),
+        }
+      : { ...item, title: t(item.title) }
+
+  return groups
+    .map((group) => ({
+      ...group,
+      title: t(group.title),
+      items: group.items.filter((i) => allowed(i, role)).map(translateItem),
+    }))
+    .filter((group) => group.items.length > 0)
+}
+
 export function useSidebarData(): SidebarData {
   const { t, i18n } = useTranslation()
+  const role = useRole()
 
-  return useMemo(() => {
-    const translateItem = (item: NavItem): NavItem =>
-      item.items
-        ? {
-            ...item,
-            title: t(item.title),
-            items: item.items.map((sub) => ({ ...sub, title: t(sub.title) })),
-          }
-        : { ...item, title: t(item.title) }
-
-    return {
-      ...sidebarData,
-      teams: sidebarData.teams.map((team) => ({ ...team, name: t(team.name) })),
-      navGroups: sidebarData.navGroups.map((group) => ({
-        ...group,
-        title: t(group.title),
-        items: group.items.map(translateItem),
-      })),
-    }
+  return useMemo(
+    () => ({ navGroups: filterNav(sidebarData.navGroups, role, t) }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [t, i18n.language])
+    [t, i18n.language, role]
+  )
 }

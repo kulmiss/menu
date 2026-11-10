@@ -1,78 +1,83 @@
 import { StrictMode } from 'react'
 import ReactDOM from 'react-dom/client'
-import { AxiosError } from 'axios'
 import {
+  MutationCache,
   QueryCache,
   QueryClient,
   QueryClientProvider,
 } from '@tanstack/react-query'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { toast } from 'sonner'
-import { useAuthStore } from '@/stores/auth-store'
+import { errorStatus, validationErrors } from '@/lib/api'
 import { handleServerError } from '@/lib/handle-server-error'
 import { DirectionProvider } from './context/direction-provider'
 import { FontProvider } from './context/font-provider'
 import { ThemeProvider } from './context/theme-provider'
 // i18n (must load before the first render)
-import './i18n'
+import i18n from './i18n'
 // Generated Routes
 import { routeTree } from './routeTree.gen'
 // Styles
 import './styles/index.css'
 
+declare module '@tanstack/react-query' {
+  interface Register {
+    queryMeta: {
+      /** false: a 401 is expected (signed-out page) — don't redirect. */
+      authRedirect?: boolean
+    }
+    mutationMeta: {
+      /** true: the form shows 422 field errors itself — no toast for those. */
+      inlineErrors?: boolean
+    }
+  }
+}
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: (failureCount, error) => {
-        // eslint-disable-next-line no-console
-        if (import.meta.env.DEV) console.log({ failureCount, error })
-
-        if (failureCount >= 0 && import.meta.env.DEV) return false
-        if (failureCount > 3 && import.meta.env.PROD) return false
-
-        return !(
-          error instanceof AxiosError &&
-          [401, 403].includes(error.response?.status ?? 0)
-        )
+        if (import.meta.env.DEV) return false
+        if (failureCount > 2) return false
+        // Retry network trouble and server errors, not answers like 401/403/404.
+        const status = errorStatus(error)
+        return status === 0 || status >= 500
       },
       refetchOnWindowFocus: import.meta.env.PROD,
       staleTime: 10 * 1000, // 10s
     },
-    mutations: {
-      onError: (error) => {
-        handleServerError(error)
-
-        if (error instanceof AxiosError) {
-          if (error.response?.status === 304) {
-            toast.error('Content not modified!')
-          }
-        }
-      },
-    },
   },
+  // One place for failed saves: sign-in again on 401, else one toast —
+  // except validation errors a form already shows under its fields.
+  mutationCache: new MutationCache({
+    onError: (error, _variables, _result, mutation) => {
+      if (errorStatus(error) === 401) return sessionExpired()
+      if (mutation.meta?.inlineErrors && validationErrors(error)) return
+      handleServerError(error)
+    },
+  }),
   queryCache: new QueryCache({
-    onError: (error) => {
-      if (error instanceof AxiosError) {
-        if (error.response?.status === 401) {
-          toast.error('Session expired!')
-          useAuthStore.getState().auth.reset()
-          const redirect = `${router.history.location.href}`
-          router.navigate({ to: '/sign-in', search: { redirect } })
-        }
-        if (error.response?.status === 500) {
-          toast.error('Internal Server Error!')
-          // Only navigate to error page in production to avoid disrupting HMR in development
-          if (import.meta.env.PROD) {
-            router.navigate({ to: '/500' })
-          }
-        }
-        if (error.response?.status === 403) {
-          // router.navigate("/forbidden", { replace: true });
-        }
+    onError: (error, query) => {
+      if (errorStatus(error) === 401) {
+        if (query.meta?.authRedirect !== false) sessionExpired()
+        return
       }
+      if (errorStatus(error) >= 500) toast.error(i18n.t('errors.generic'))
     },
   }),
 })
+
+/** Signed out on the server (expired session, signed out elsewhere). */
+function sessionExpired() {
+  const { pathname } = router.history.location
+  if (pathname.startsWith('/auth/')) return
+  queryClient.clear()
+  toast.error(i18n.t('auth.session_expired'))
+  void router.navigate({
+    to: '/auth/sign-in',
+    search: { redirect: router.history.location.href },
+  })
+}
 
 // Create a new router instance
 const router = createRouter({

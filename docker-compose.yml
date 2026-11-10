@@ -5,6 +5,10 @@ services:
     build: docker/php
     volumes:
       - ./:/var/www
+      # vendor/ and Composer's cache live in Docker volumes: far faster than a
+      # Windows folder, and they survive container restarts.
+      - vendor:/var/www/backend/vendor
+      - composer-cache:/root/.composer/cache
     environment:
       DB_HOST: db
       DB_USERNAME: menu
@@ -54,3 +58,5 @@ services:
 
 volumes:
   db-data:
+  vendor:
+  composer-cache:

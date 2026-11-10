@@ -1,9 +1,11 @@
+import { meFixture } from '@/test-utils/fixtures'
+import { renderWithQuery } from '@/test-utils/render'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { render, type RenderResult } from 'vitest-browser-react'
+import { type RenderResult } from 'vitest-browser-react'
 import { userEvent } from 'vitest/browser'
 import { SearchProvider } from '@/context/search-provider'
 
-const COMMAND_MENU_PLACEHOLDER = 'Type a command or search...'
+const COMMAND_MENU_PLACEHOLDER = 'Type a command or search…'
 
 const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
@@ -18,14 +20,17 @@ vi.mock('@tanstack/react-router', async (importOriginal) => {
   }
 })
 
-vi.mock('@/context/theme-provider', () => ({
+vi.mock('@/context/theme-provider', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/context/theme-provider')>()),
   useTheme: () => ({ setTheme: mocks.setTheme }),
 }))
 
 type ShortcutModifier = 'Control' | 'Meta'
 
 async function renderWithSearchProvider() {
-  return await render(<SearchProvider>{null}</SearchProvider>)
+  return await renderWithQuery(<SearchProvider>{null}</SearchProvider>, {
+    me: meFixture(),
+  })
 }
 
 /**
@@ -111,7 +116,7 @@ describe('SearchProvider and CommandMenu', () => {
 
     await userEvent.click(screen.getByText('Dashboard'))
 
-    expect(mocks.navigate).toHaveBeenCalledWith({ to: '/' })
+    expect(mocks.navigate).toHaveBeenCalledWith({ to: '/admin' })
     await expect
       .element(screen.getByPlaceholder(COMMAND_MENU_PLACEHOLDER))
       .not.toBeInTheDocument()
@@ -125,7 +130,9 @@ describe('SearchProvider and CommandMenu', () => {
 
     await userEvent.click(getByRole('option', { name: 'Settings Account' }))
 
-    expect(mocks.navigate).toHaveBeenCalledWith({ to: '/settings/account' })
+    expect(mocks.navigate).toHaveBeenCalledWith({
+      to: '/admin/settings/account',
+    })
     await expect
       .element(getByPlaceholder(COMMAND_MENU_PLACEHOLDER))
       .not.toBeInTheDocument()
