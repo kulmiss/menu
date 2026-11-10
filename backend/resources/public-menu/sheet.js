@@ -25,4 +25,6 @@ window.mS = function (li, D) {
   if (x.p) m.push(T.pm.replace(':count', x.p));
   if (m.length) add(el('p', 'mu', m.join(' · ')));
   if (dl.showModal) dl.showModal(); else dl.setAttribute('open', '');
+  // Insights: count that this dish's details were opened (not in the admin preview).
+  if (!D.p && navigator.sendBeacon) navigator.sendBeacon('/api/v1/beacon', JSON.stringify({ t: D.id, b: D.b, i: +li.dataset.i }));
 };

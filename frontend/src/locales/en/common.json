@@ -26,7 +26,8 @@
     "branches": "Branches",
     "qr_codes": "QR codes",
     "info": "Restaurant info",
-    "promotions": "Promotions"
+    "promotions": "Promotions",
+    "insights": "Insights"
   },
   "language": {
     "label": "Language",
@@ -38,7 +39,19 @@
   },
   "dashboard": {
     "title": "Dashboard",
-    "intro": "Your restaurant at a glance will appear here."
+    "intro": "Today at your restaurant.",
+    "today_views": "Menu views today",
+    "today_scans": "QR scans today",
+    "yesterday_one": "Yesterday: {{count}}",
+    "yesterday_other": "Yesterday: {{count}}",
+    "yesterday": "Yesterday: {{count}}",
+    "sold_out": "Sold out now",
+    "sold_out_hint": "Guests see these as sold out. Tap when they are back.",
+    "nothing_sold_out": "Nothing is sold out.",
+    "available_again": "Available again",
+    "view_menu": "View menu",
+    "open_insights": "Insights",
+    "open_qr": "QR codes"
   },
   "roles": {
     "owner": "Owner",

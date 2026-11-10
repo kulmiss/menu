@@ -200,6 +200,7 @@ class MenuPageData
                     'current' => $b->id === $branchId,
                 ])->values()->all() : [],
                 'canonical' => $branch ? $branch->path($tenant) : '/'.$tenant->slug,
+                'branch_id' => $branchId,
                 'hours' => $hours,
                 'closures' => $closures->map(fn (Closure $c) => [$c->starts_on->toDateString(), $c->ends_on->toDateString()])->values()->all(),
                 'week' => self::week($hours),
