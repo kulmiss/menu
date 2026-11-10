@@ -10,6 +10,7 @@ import {
 } from 'react-hook-form'
 import * as LabelPrimitive from '@radix-ui/react-label'
 import { Slot } from '@radix-ui/react-slot'
+import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import { Label } from '@/components/ui/label'
 
@@ -134,7 +135,11 @@ function FormDescription({ className, ...props }: React.ComponentProps<'p'>) {
 
 function FormMessage({ className, ...props }: React.ComponentProps<'p'>) {
   const { error, formMessageId } = useFormField()
-  const body = error ? String(error?.message ?? '') : props.children
+  const { t, i18n } = useTranslation()
+  const raw = error ? String(error?.message ?? '') : props.children
+  // Client rules use i18n keys; server messages arrive already translated.
+  const body =
+    typeof raw === 'string' && raw !== '' && i18n.exists(raw) ? t(raw) : raw
 
   if (!body) {
     return null

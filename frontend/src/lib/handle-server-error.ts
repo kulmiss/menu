@@ -1,29 +1,42 @@
-import { AxiosError } from 'axios'
+import { isAxiosError } from 'axios'
+import i18n from '@/i18n'
 import { toast } from 'sonner'
+import { errorStatus, serverMessage } from '@/lib/api'
 
+/** i18n key for a failed request, by HTTP status. */
+export function errorKey(error: unknown): string {
+  if (!isAxiosError(error)) return 'errors.generic'
+  switch (errorStatus(error)) {
+    case 0:
+      return 'errors.network'
+    case 402:
+      return 'errors.read_only'
+    case 403:
+      return 'errors.forbidden'
+    case 404:
+      return 'errors.not_found'
+    case 409:
+      return 'errors.in_progress'
+    case 429:
+      return 'errors.too_many'
+    default:
+      return 'errors.generic'
+  }
+}
+
+/**
+ * Shows one toast for a failed request: the server's own (translated)
+ * message when it sent one, otherwise a message for the status code.
+ * 5xx messages are never shown as-is (they may be technical).
+ */
 export function handleServerError(error: unknown) {
   if (import.meta.env.DEV) {
     // eslint-disable-next-line no-console
     console.log(error)
   }
 
-  let errMsg = 'Something went wrong!'
+  const status = errorStatus(error)
+  const message = status > 0 && status < 500 ? serverMessage(error) : null
 
-  if (
-    error &&
-    typeof error === 'object' &&
-    'status' in error &&
-    Number(error.status) === 204
-  ) {
-    errMsg = 'No content.'
-  }
-
-  if (error instanceof AxiosError) {
-    const title = error.response?.data?.title
-    if (typeof title === 'string' && title.length > 0) {
-      errMsg = title
-    }
-  }
-
-  toast.error(errMsg)
+  toast.error(message ?? i18n.t(errorKey(error)))
 }

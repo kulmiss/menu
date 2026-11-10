@@ -1,6 +1,13 @@
 import type { AxiosAdapter, InternalAxiosRequestConfig } from 'axios'
-import { afterEach, describe, expect, it } from 'vitest'
-import { api, IDEMPOTENCY_HEADER, withIdempotencyKey } from './api'
+import { fakeApi, invalid } from '@/test-utils/fake-api'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import {
+  api,
+  applyFieldErrors,
+  IDEMPOTENCY_HEADER,
+  tenantUrl,
+  withIdempotencyKey,
+} from './api'
 
 let seen: InternalAxiosRequestConfig[] = []
 const originalAdapter = api.defaults.adapter
@@ -51,5 +58,72 @@ describe('api client', () => {
   it('talks to the versioned API with cookies', () => {
     expect(api.defaults.baseURL).toBe('/api/v1')
     expect(api.defaults.withCredentials).toBe(true)
+  })
+})
+
+describe('api helpers', () => {
+  it('builds restaurant URLs', () => {
+    expect(tenantUrl(3)).toBe('/t/3')
+    expect(tenantUrl(3, '/members/9')).toBe('/t/3/members/9')
+  })
+
+  it('puts Laravel 422 messages on matching form fields only', async () => {
+    const fake = fakeApi({
+      'POST /x': invalid({ email: 'Taken.', other: 'Ignored.' }),
+    })
+    const setError = vi.fn()
+    try {
+      await api.post('/x', {})
+    } catch (error) {
+      expect(applyFieldErrors(error, setError, ['email', 'password'])).toBe(
+        true
+      )
+    } finally {
+      fake.restore()
+    }
+    expect(setError).toHaveBeenCalledOnce()
+    expect(setError).toHaveBeenCalledWith('email', {
+      type: 'server',
+      message: 'Taken.',
+    })
+  })
+
+  it('refreshes an expired CSRF cookie and repeats the request with the same key', async () => {
+    let attempts = 0
+    const fake = fakeApi({
+      'POST /things': () =>
+        ++attempts === 1 ? { status: 419 } : { status: 201 },
+    })
+    try {
+      const response = await api.post(
+        '/things',
+        {},
+        withIdempotencyKey('same-key-123')
+      )
+      expect(response.status).toBe(201)
+    } finally {
+      fake.restore()
+    }
+    expect(fake.calls.map((c) => c.url)).toEqual([
+      '/things',
+      '/sanctum/csrf-cookie',
+      '/things',
+    ])
+    const keys = fake.calls
+      .filter((c) => c.url === '/things')
+      .map((c) => c.headers.get(IDEMPOTENCY_HEADER))
+    expect(keys).toEqual(['same-key-123', 'same-key-123'])
+  })
+
+  it('gives up after one CSRF retry', async () => {
+    const fake = fakeApi({ 'POST /things': { status: 419 } })
+    try {
+      await expect(api.post('/things', {})).rejects.toMatchObject({
+        response: { status: 419 },
+      })
+    } finally {
+      fake.restore()
+    }
+    expect(fake.calls.filter((c) => c.url === '/things')).toHaveLength(2)
   })
 })

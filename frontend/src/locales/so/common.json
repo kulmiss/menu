@@ -3,24 +3,188 @@
   "app": {
     "name": "Menu"
   },
+  "common": {
+    "cancel": "Jooji",
+    "continue": "Sii wad"
+  },
   "nav": {
     "general": "Guud",
-    "dashboard": "Dashboard",
+    "dashboard": "Shaashadda guud",
+    "team": "Kooxda",
     "settings": "Dejinta",
     "profile": "Astaanta",
-    "account": "Akoon",
-    "appearance": "Muuqaalka"
+    "account": "Akoonka",
+    "appearance": "Muuqaalka",
+    "user_menu": "Akoonkaaga"
   },
   "language": {
     "label": "Luqadda",
     "draft": "qabyo",
     "en": "Ingiriisi",
     "so": "Soomaali",
-    "am": "Axmaari",
+    "am": "Amxaari",
     "ar": "Carabi"
   },
   "dashboard": {
-    "title": "Dashboard",
-    "intro": "Guudmarka makhaayaddaada halkan ayuu ka muuqan doonaa."
+    "title": "Shaashadda guud",
+    "intro": "Koobitaanka maqaaxidaada halkan ayuu ka muuqan doonaa."
+  },
+  "settings": {
+    "title": "Dejinta",
+    "intro": "Maamul astaantaada iyo muuqaalka barnaamijka."
+  },
+  "roles": {
+    "owner": "Milkiile",
+    "manager": "Maamule",
+    "staff": "Shaqaale"
+  },
+  "auth": {
+    "email": "Iimayl",
+    "email_placeholder": "magac@tusaale.com",
+    "password": "Furaha sirta",
+    "password_confirm": "Xaqiiji furaha sirta",
+    "new_password": "Furaha sirta cusub",
+    "remember": "Igu hay gudaha qalabkan",
+    "sign_in": "Gal",
+    "sign_in_intro": "Geli iimaylkaaga iyo furaha sirta. Akoon ma lihid?",
+    "sign_up": "Is diiwaangeli",
+    "sign_up_title": "Samee maqaaxidaada",
+    "sign_up_intro": "Bilow tijaabadaada bilaashka ah. Akoon ma leedahay?",
+    "create_account": "Samee akoon",
+    "restaurant_name": "Magaca maqaaxida",
+    "slug": "Cinwaanka menu-ga",
+    "slug_hint": "Menu-gaagu wuxuu ahaan doonaa {{url}}. Xarfo yaryar, tirooyin iyo xariijin.",
+    "your_name": "Magacaaga",
+    "forgot_link": "Ma ilowday furaha sirta?",
+    "forgot_title": "Furaha sirta waa la ilaaway",
+    "forgot_intro": "Geli iimaylkaaga, waxaan kuu soo diri doonnaa xiriiriye aad ku doorato furo cusub.",
+    "send_reset_link": "Dir xiriiriyaha",
+    "reset_link_sent": "Haddii akoon u jiro {{email}}, xiriiriye dib-u-dejin ayaa kuu socda. Eeg sanduuqaaga iyo spam-ka.",
+    "back_to_sign_in": "Ku noqo galitaanka",
+    "reset_title": "Dooro furo sir cusub",
+    "save_password": "Kaydi furaha sirta",
+    "password_changed": "Furaha sirta waa la beddelay. Ku gal furahaaga cusub.",
+    "reset_link_invalid": "Xiriiriyahan dib-u-dejinta waa dhiman yahay ama wuu dhacay.",
+    "request_new_link": "Codso xiriiriye cusub",
+    "two_factor_title": "Xaqiijinta laba-tallaabo",
+    "two_factor_intro": "Geli koodhka 6-da god ah ee ka yimid app-ka xaqiijinta.",
+    "auth_code": "Koodhka xaqiijinta",
+    "recovery_code": "Koodhka soo-celinta",
+    "use_recovery_code": "Isticmaal koodhka soo-celinta",
+    "use_auth_code": "Isticmaal koodhka xaqiijinta",
+    "verify": "Xaqiiji",
+    "sign_out": "Ka bax",
+    "sign_out_confirm": "Ka bax akoonkaaga qalabkan?",
+    "session_expired": "Fadhigaagu wuu dhammaaday. Fadlan mar kale gal.",
+    "legal": "Markaad sii wadato waxaad ogolaatay <terms>Shuruudaha Adeegga</terms> iyo <privacy>Siyaasadda Asturnaanta</privacy>."
+  },
+  "validation": {
+    "email": "Geli iimayl sax ah.",
+    "password_required": "Geli furahaaga sirta.",
+    "password_min": "Isticmaal ugu yaraan 10 xaraf.",
+    "password_match": "Furayaasha sirta isma laha.",
+    "name_required": "Geli magacaaga.",
+    "restaurant_required": "Geli magaca maqaaxida.",
+    "slug": "Isticmaal 3–50 xaraf yar, tiro iyo xariijin keli ah, aan bilowga ama dhammaadka ahayn.",
+    "code": "Geli koodhka 6-da god ah.",
+    "recovery_code": "Geli koodhka soo-celinta."
+  },
+  "verify": {
+    "banner": "Fadlan xaqiiji iimaylkaaga ({{email}}) adigoo isticmaalaya xiriiriyaha aan kuu dirnay.",
+    "resend": "Dir mar kale",
+    "sent": "Xiriiriye cusub ayaa loo diray {{email}}.",
+    "sent_short": "Waa la diray"
+  },
+  "invite": {
+    "title": "Ku biir {{restaurant}}",
+    "title_plain": "Casuumad",
+    "as_role": "Waxaa laguu casuumay sidii {{role}}.",
+    "accept": "Aqbal casuumadda",
+    "invalid": "Casuumaddan hadda ma shaqeyso. Maqaaxida ka codso mid cusub.",
+    "wrong_account": "Casuumaddan waxaa loo diray {{invited}}, laakiin waxaad ku jirtaa {{current}}.",
+    "switch_account": "Ku gal akoon kale",
+    "signed_out": "Casuumaddan waxay u socotaa {{email}} ({{role}}).",
+    "create_account": "Samee akoon",
+    "have_account": "Akoon ma leedahay?",
+    "sign_up_intro": "Samee akoonkaaga si aad kooxda ugu biirto. Mid ma leedahay?",
+    "join": "Samee akoon oo ku biir"
+  },
+  "switcher": {
+    "label": "Beddel maqaaxida",
+    "title": "Maqaaxiyahaaga",
+    "current": "Maqaaxida hadda"
+  },
+  "no_restaurant": {
+    "title": "Weli maqaaxi ma jirto",
+    "text": "Akoonkaagu kama mid aha maqaaxi. Milkiile ama maamule ha ku casuumo, kadibna fur xiriiriyaha iimaylka."
+  },
+  "subscription": {
+    "grace": "Rukummadaadu way dhacday. Cusboonaysii ka hor {{date}} si aad wax uga beddelato.",
+    "read_only": "Rukummadaadu way dhacday. Maamulku waa akhris-keliya ilaa aad cusboonaysiiso; menu-gu wuu xirmayaa {{date}}.",
+    "unavailable": "Rukummadaadu way dhacday, menu-guna waa xiran yahay. Cusboonaysii si uu u soo noqdo."
+  },
+  "team": {
+    "title": "Kooxda",
+    "intro": "Dadka maamuli kara {{restaurant}}.",
+    "members": "Xubnaha",
+    "you": "adiga",
+    "role": "Doorka",
+    "role_of": "Doorka {{name}}",
+    "can_edit_prices": "Beddeli karaa qiimaha",
+    "role_hint": {
+      "manager": "Maamulayaashu waxay beddelaan menu-ga, laamaha iyo dejinta, waxayna casuumi karaan shaqaale.",
+      "staff": "Shaqaaluhu waxay calaamadiyaan alaabta dhammaatay. U oggolow inay qiimaha beddelaan haddii loo baahdo."
+    },
+    "invite": "Casuun",
+    "invite_title": "Casuun qof",
+    "invite_intro": "Waxaan u diri doonnaa xiriiriye ku shaqeeya 7 maalmood.",
+    "send_invite": "Dir casuumadda",
+    "invite_sent": "Casuumadda waxaa loo diray {{email}}.",
+    "pending": "Casuumado sugaya",
+    "pending_intro": "Casuumado aan weli la aqbalin.",
+    "expires": "Wuu dhacayaa {{date}}",
+    "revoke_named": "Jooji casuumadda {{email}}",
+    "remove": "Ka saar kooxda",
+    "remove_named": "Ka saar {{name}}",
+    "remove_confirm": "Ka saar {{name}} kooxda? Isla markiiba wuu lumin doonaa gelitaanka.",
+    "leave": "Ka tag maqaaxida",
+    "leave_confirm": "Ka tag {{restaurant}}? Waxaad u baahan doontaa casuumad cusub si aad u soo noqoto."
+  },
+  "errors": {
+    "generic": "Wax baa khaldamay. Fadlan isku day mar kale.",
+    "network": "Xiriir ma jiro. Hubi internetkaaga oo isku day mar kale.",
+    "read_only": "Rukummadaadu way dhacday, sidaa darteed isbeddellada lama kaydin karo.",
+    "forbidden": "Ogolaansho uma lihid inaad taas samayso.",
+    "not_found": "Shaygan hadda ma jiro.",
+    "in_progress": "Weli waxaa la kaydinayaa isbeddelkii hore. Isku day dhawaan.",
+    "too_many": "Isku dayo aad u badan. Sug daqiiqad oo isku day mar kale.",
+    "go_back": "Dib u noqo",
+    "home": "Ku noqo shaashadda guud",
+    "page": {
+      "not_found": {
+        "title": "Bogga lama helin",
+        "text": "Bogga aad raadinayso ma jiro ama waa la raray."
+      },
+      "forbidden": {
+        "title": "Gelitaan ma lihid",
+        "text": "Doorkaaga maqaaxidan ma furi karo boggan."
+      },
+      "general": {
+        "title": "Wax baa khaldamay",
+        "text": "Fadlan isku day mar kale. Haddii ay sii socoto, la xiriir taageerada."
+      }
+    }
+  },
+  "search": {
+    "button": "Raadi",
+    "placeholder": "Qor amar ama raadi…",
+    "empty": "Wax natiijo ah lama helin."
+  },
+  "theme": {
+    "title": "Midabka",
+    "toggle": "Beddel midabka",
+    "light": "Iftiin",
+    "dark": "Mugdi",
+    "system": "Nidaamka"
   }
 }

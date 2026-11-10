@@ -3,13 +3,19 @@
   "app": {
     "name": "Menu"
   },
+  "common": {
+    "cancel": "ይቅር",
+    "continue": "ቀጥል"
+  },
   "nav": {
     "general": "አጠቃላይ",
     "dashboard": "ዳሽቦርድ",
+    "team": "ቡድን",
     "settings": "ቅንብሮች",
     "profile": "መገለጫ",
     "account": "መለያ",
-    "appearance": "ገጽታ"
+    "appearance": "ገጽታ",
+    "user_menu": "የእርስዎ መለያ"
   },
   "language": {
     "label": "ቋንቋ",
@@ -22,5 +28,163 @@
   "dashboard": {
     "title": "ዳሽቦርድ",
     "intro": "የምግብ ቤትዎ አጠቃላይ እይታ እዚህ ይታያል።"
+  },
+  "settings": {
+    "title": "ቅንብሮች",
+    "intro": "መገለጫዎን እና የመተግበሪያውን ገጽታ ያስተዳድሩ።"
+  },
+  "roles": {
+    "owner": "ባለቤት",
+    "manager": "ሥራ አስኪያጅ",
+    "staff": "ሠራተኛ"
+  },
+  "auth": {
+    "email": "ኢሜይል",
+    "email_placeholder": "name@example.com",
+    "password": "የይለፍ ቃል",
+    "password_confirm": "የይለፍ ቃል ያረጋግጡ",
+    "new_password": "አዲስ የይለፍ ቃል",
+    "remember": "በዚህ መሣሪያ ላይ እንደገባሁ አቆየኝ",
+    "sign_in": "ግባ",
+    "sign_in_intro": "ኢሜይልዎን እና የይለፍ ቃልዎን ያስገቡ። መለያ የለዎትም?",
+    "sign_up": "ተመዝገብ",
+    "sign_up_title": "ምግብ ቤትዎን ይፍጠሩ",
+    "sign_up_intro": "ነፃ ሙከራዎን ይጀምሩ። መለያ አለዎት?",
+    "create_account": "መለያ ፍጠር",
+    "restaurant_name": "የምግብ ቤቱ ስም",
+    "slug": "የምናሌ አድራሻ",
+    "slug_hint": "ምናሌዎ በ {{url}} ይገኛል። ትናንሽ የላቲን ፊደላት፣ ቁጥሮች እና ሰረዝ።",
+    "your_name": "ስምዎ",
+    "forgot_link": "የይለፍ ቃል ረሱ?",
+    "forgot_title": "የይለፍ ቃል ረሳሁ",
+    "forgot_intro": "ኢሜይልዎን ያስገቡ፤ አዲስ የይለፍ ቃል የሚመርጡበት ሊንክ እንልክልዎታለን።",
+    "send_reset_link": "ሊንክ ላክ",
+    "reset_link_sent": "ለ {{email}} መለያ ካለ የይለፍ ቃል መቀየሪያ ሊንክ ተልኳል። የገቢ ሳጥንዎን እና ስፓምን ይመልከቱ።",
+    "back_to_sign_in": "ወደ መግቢያ ተመለስ",
+    "reset_title": "አዲስ የይለፍ ቃል ይምረጡ",
+    "save_password": "የይለፍ ቃል አስቀምጥ",
+    "password_changed": "የይለፍ ቃል ተቀይሯል። በአዲሱ የይለፍ ቃል ይግቡ።",
+    "reset_link_invalid": "ይህ የመቀየሪያ ሊንክ ያልተሟላ ነው ወይም ጊዜው አልፏል።",
+    "request_new_link": "አዲስ ሊንክ ይጠይቁ",
+    "two_factor_title": "ባለሁለት ደረጃ ማረጋገጫ",
+    "two_factor_intro": "ከማረጋገጫ መተግበሪያዎ ባለ 6 አሃዝ ኮዱን ያስገቡ።",
+    "auth_code": "የማረጋገጫ ኮድ",
+    "recovery_code": "የመልሶ ማግኛ ኮድ",
+    "use_recovery_code": "በምትኩ የመልሶ ማግኛ ኮድ ይጠቀሙ",
+    "use_auth_code": "በምትኩ የማረጋገጫ ኮድ ይጠቀሙ",
+    "verify": "አረጋግጥ",
+    "sign_out": "ውጣ",
+    "sign_out_confirm": "በዚህ መሣሪያ ላይ ከመለያዎ ይውጡ?",
+    "session_expired": "ክፍለ ጊዜዎ አብቅቷል። እባክዎ እንደገና ይግቡ።",
+    "legal": "በመቀጠልዎ <terms>የአገልግሎት ውሉን</terms> እና <privacy>የግላዊነት ፖሊሲውን</privacy> ተቀብለዋል።"
+  },
+  "validation": {
+    "email": "ትክክለኛ ኢሜይል ያስገቡ።",
+    "password_required": "የይለፍ ቃልዎን ያስገቡ።",
+    "password_min": "ቢያንስ 10 ቁምፊዎችን ይጠቀሙ።",
+    "password_match": "የይለፍ ቃላቱ አይመሳሰሉም።",
+    "name_required": "ስምዎን ያስገቡ።",
+    "restaurant_required": "የምግብ ቤቱን ስም ያስገቡ።",
+    "slug": "ከ3–50 ትናንሽ የላቲን ፊደላት፣ ቁጥሮች እና ነጠላ ሰረዝ ይጠቀሙ፤ በመጀመሪያ ወይም በመጨረሻ ሰረዝ አይሁን።",
+    "code": "ባለ 6 አሃዝ ኮዱን ያስገቡ።",
+    "recovery_code": "የመልሶ ማግኛ ኮድ ያስገቡ።"
+  },
+  "verify": {
+    "banner": "እባክዎ በላክንልዎ ሊንክ ኢሜይልዎን ({{email}}) ያረጋግጡ።",
+    "resend": "እንደገና ላክ",
+    "sent": "አዲስ ሊንክ ወደ {{email}} ተልኳል።",
+    "sent_short": "ተልኳል"
+  },
+  "invite": {
+    "title": "{{restaurant}}ን ይቀላቀሉ",
+    "title_plain": "ግብዣ",
+    "as_role": "እንደ {{role}} ተጋብዘዋል።",
+    "accept": "ግብዣውን ተቀበል",
+    "invalid": "ይህ ግብዣ ከእንግዲህ አይሰራም። ምግብ ቤቱን አዲስ ይጠይቁ።",
+    "wrong_account": "ይህ ግብዣ ለ {{invited}} ተልኳል፤ እርስዎ ግን እንደ {{current}} ገብተዋል።",
+    "switch_account": "በሌላ መለያ ይግቡ",
+    "signed_out": "ይህ ግብዣ ለ {{email}} ({{role}}) ነው።",
+    "create_account": "መለያ ይፍጠሩ",
+    "have_account": "መለያ አለዎት?",
+    "sign_up_intro": "ቡድኑን ለመቀላቀል መለያዎን ይፍጠሩ። መለያ አለዎት?",
+    "join": "መለያ ፍጠርና ተቀላቀል"
+  },
+  "switcher": {
+    "label": "ምግብ ቤት ቀይር",
+    "title": "የእርስዎ ምግብ ቤቶች",
+    "current": "የአሁኑ ምግብ ቤት"
+  },
+  "no_restaurant": {
+    "title": "እስካሁን ምግብ ቤት የለም",
+    "text": "መለያዎ የማንኛውም ምግብ ቤት አካል አይደለም። ባለቤት ወይም ሥራ አስኪያጅ እንዲጋብዝዎ ይጠይቁ፣ ከዚያ በኢሜይሉ ያለውን ሊንክ ይክፈቱ።"
+  },
+  "subscription": {
+    "grace": "ምዝገባዎ ጊዜው አልፏል። ማስተካከል ለመቀጠል እስከ {{date}} ያድሱ።",
+    "read_only": "ምዝገባዎ ጊዜው አልፏል። እስኪያድሱ ድረስ አስተዳደሩ ለንባብ ብቻ ነው፤ ምናሌው በ {{date}} ከመስመር ውጭ ይሆናል።",
+    "unavailable": "ምዝገባዎ ጊዜው አልፏል እና ምናሌዎ ከመስመር ውጭ ነው። ለመመለስ ያድሱ።"
+  },
+  "team": {
+    "title": "ቡድን",
+    "intro": "{{restaurant}}ን ማስተዳደር የሚችሉ ሰዎች።",
+    "members": "አባላት",
+    "you": "እርስዎ",
+    "role": "ሚና",
+    "role_of": "የ{{name}} ሚና",
+    "can_edit_prices": "ዋጋ መቀየር ይችላል",
+    "role_hint": {
+      "manager": "ሥራ አስኪያጆች ምናሌውን፣ ቅርንጫፎችን እና ቅንብሮችን ያስተካክላሉ፤ ሠራተኞችንም መጋበዝ ይችላሉ።",
+      "staff": "ሠራተኞች ያለቁ ምግቦችን ምልክት ያደርጋሉ። ካስፈለገ ዋጋ እንዲቀይሩ ይፍቀዱ።"
+    },
+    "invite": "ጋብዝ",
+    "invite_title": "ሰው ይጋብዙ",
+    "invite_intro": "ለ7 ቀናት የሚሰራ ሊንክ በኢሜይል እንልክላቸዋለን።",
+    "send_invite": "ግብዣ ላክ",
+    "invite_sent": "ግብዣ ወደ {{email}} ተልኳል።",
+    "pending": "በመጠባበቅ ላይ ያሉ ግብዣዎች",
+    "pending_intro": "እስካሁን ያልተቀበሉ ግብዣዎች።",
+    "expires": "የሚያበቃው {{date}}",
+    "revoke_named": "የ{{email}} ግብዣን ሰርዝ",
+    "remove": "ከቡድኑ አስወግድ",
+    "remove_named": "{{name}}ን አስወግድ",
+    "remove_confirm": "{{name}}ን ከቡድኑ ያስወግዱ? መዳረሻቸውን ወዲያውኑ ያጣሉ።",
+    "leave": "ምግብ ቤቱን ልቀቅ",
+    "leave_confirm": "{{restaurant}}ን ይልቀቁ? ለመመለስ አዲስ ግብዣ ያስፈልግዎታል።"
+  },
+  "errors": {
+    "generic": "የሆነ ችግር ተፈጥሯል። እባክዎ እንደገና ይሞክሩ።",
+    "network": "ግንኙነት የለም። ኢንተርኔትዎን ፈትሸው እንደገና ይሞክሩ።",
+    "read_only": "ምዝገባዎ ጊዜው ስላለፈ ለውጦች ሊቀመጡ አይችሉም።",
+    "forbidden": "ይህን ለማድረግ ፈቃድ የለዎትም።",
+    "not_found": "ይህ ንጥል ከእንግዲህ የለም።",
+    "in_progress": "የቀደመው ለውጥ አሁንም እየተቀመጠ ነው። ትንሽ ቆይተው ይሞክሩ።",
+    "too_many": "በጣም ብዙ ሙከራዎች። አንድ ደቂቃ ጠብቀው እንደገና ይሞክሩ።",
+    "go_back": "ተመለስ",
+    "home": "ወደ ዳሽቦርድ ተመለስ",
+    "page": {
+      "not_found": {
+        "title": "ገጹ አልተገኘም",
+        "text": "የሚፈልጉት ገጽ የለም ወይም ተዛውሯል።"
+      },
+      "forbidden": {
+        "title": "መዳረሻ የለም",
+        "text": "በዚህ ምግብ ቤት ያለዎት ሚና ይህን ገጽ መክፈት አይችልም።"
+      },
+      "general": {
+        "title": "የሆነ ችግር ተፈጥሯል",
+        "text": "እባክዎ እንደገና ይሞክሩ። ከቀጠለ ድጋፍን ያግኙ።"
+      }
+    }
+  },
+  "search": {
+    "button": "ፈልግ",
+    "placeholder": "ትእዛዝ ይጻፉ ወይም ይፈልጉ…",
+    "empty": "ምንም ውጤት አልተገኘም።"
+  },
+  "theme": {
+    "title": "ገጽታ",
+    "toggle": "ገጽታ ቀይር",
+    "light": "ብርሃን",
+    "dark": "ጨለማ",
+    "system": "እንደ ሥርዓቱ"
   }
 }

@@ -5,14 +5,23 @@ import { LayoutProvider } from '@/context/layout-provider'
 import { SearchProvider } from '@/context/search-provider'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { AppSidebar } from '@/components/layout/app-sidebar'
+import { SubscriptionBanner } from '@/components/layout/subscription-banner'
 import { SkipToMain } from '@/components/skip-to-main'
+import { useCurrentTenant, useMe } from '@/features/auth/use-me'
+import { VerifyEmailBanner } from '@/features/auth/verify-email'
+import { NoRestaurant } from '@/features/errors/no-restaurant'
 
 type AuthenticatedLayoutProps = {
   children?: React.ReactNode
 }
 
 export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
+  const me = useMe()
+  const tenant = useCurrentTenant()
   const defaultOpen = getCookie('sidebar_state') !== 'false'
+
+  if (!tenant) return <NoRestaurant />
+
   return (
     <SearchProvider>
       <LayoutProvider>
@@ -33,6 +42,8 @@ export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
               'peer-data-[variant=inset]:has-data-[layout=fixed]:h-[calc(100svh-(var(--spacing)*4))]'
             )}
           >
+            {!me.email_verified && <VerifyEmailBanner email={me.email} />}
+            <SubscriptionBanner tenant={tenant} />
             {children ?? <Outlet />}
           </SidebarInset>
         </SidebarProvider>

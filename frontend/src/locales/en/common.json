@@ -2,13 +2,19 @@
   "app": {
     "name": "Menu"
   },
+  "common": {
+    "cancel": "Cancel",
+    "continue": "Continue"
+  },
   "nav": {
     "general": "General",
     "dashboard": "Dashboard",
+    "team": "Team",
     "settings": "Settings",
     "profile": "Profile",
     "account": "Account",
-    "appearance": "Appearance"
+    "appearance": "Appearance",
+    "user_menu": "Your account"
   },
   "language": {
     "label": "Language",
@@ -21,5 +27,163 @@
   "dashboard": {
     "title": "Dashboard",
     "intro": "Your restaurant at a glance will appear here."
+  },
+  "settings": {
+    "title": "Settings",
+    "intro": "Manage your profile and how the app looks."
+  },
+  "roles": {
+    "owner": "Owner",
+    "manager": "Manager",
+    "staff": "Staff"
+  },
+  "auth": {
+    "email": "Email",
+    "email_placeholder": "name@example.com",
+    "password": "Password",
+    "password_confirm": "Confirm password",
+    "new_password": "New password",
+    "remember": "Keep me signed in on this device",
+    "sign_in": "Sign in",
+    "sign_in_intro": "Enter your email and password. No account yet?",
+    "sign_up": "Sign up",
+    "sign_up_title": "Create your restaurant",
+    "sign_up_intro": "Start your free trial. Already have an account?",
+    "create_account": "Create account",
+    "restaurant_name": "Restaurant name",
+    "slug": "Menu address",
+    "slug_hint": "Your menu will be at {{url}}. Lower-case letters, numbers and hyphens.",
+    "your_name": "Your name",
+    "forgot_link": "Forgot password?",
+    "forgot_title": "Forgot password",
+    "forgot_intro": "Enter your email and we will send you a link to choose a new password.",
+    "send_reset_link": "Send link",
+    "reset_link_sent": "If an account exists for {{email}}, a link to reset the password is on its way. Check your inbox and spam folder.",
+    "back_to_sign_in": "Back to sign in",
+    "reset_title": "Choose a new password",
+    "save_password": "Save password",
+    "password_changed": "Password changed. Sign in with your new password.",
+    "reset_link_invalid": "This reset link is incomplete or has expired.",
+    "request_new_link": "Request a new link",
+    "two_factor_title": "Two-factor authentication",
+    "two_factor_intro": "Enter the 6-digit code from your authenticator app.",
+    "auth_code": "Authentication code",
+    "recovery_code": "Recovery code",
+    "use_recovery_code": "Use a recovery code instead",
+    "use_auth_code": "Use an authentication code instead",
+    "verify": "Verify",
+    "sign_out": "Sign out",
+    "sign_out_confirm": "Sign out of your account on this device?",
+    "session_expired": "Your session has ended. Please sign in again.",
+    "legal": "By continuing you agree to the <terms>Terms of Service</terms> and the <privacy>Privacy Policy</privacy>."
+  },
+  "validation": {
+    "email": "Enter a valid email address.",
+    "password_required": "Enter your password.",
+    "password_min": "Use at least 10 characters.",
+    "password_match": "The passwords do not match.",
+    "name_required": "Enter your name.",
+    "restaurant_required": "Enter the restaurant's name.",
+    "slug": "Use 3–50 lower-case letters, numbers and single hyphens, not at the start or end.",
+    "code": "Enter the 6-digit code.",
+    "recovery_code": "Enter a recovery code."
+  },
+  "verify": {
+    "banner": "Please confirm your email address ({{email}}) using the link we sent you.",
+    "resend": "Send again",
+    "sent": "A new link was sent to {{email}}.",
+    "sent_short": "Sent"
+  },
+  "invite": {
+    "title": "Join {{restaurant}}",
+    "title_plain": "Invitation",
+    "as_role": "You were invited as {{role}}.",
+    "accept": "Accept invitation",
+    "invalid": "This invitation is no longer valid. Ask the restaurant for a new one.",
+    "wrong_account": "This invitation was sent to {{invited}}, but you are signed in as {{current}}.",
+    "switch_account": "Sign in with another account",
+    "signed_out": "This invitation is for {{email}} ({{role}}).",
+    "create_account": "Create an account",
+    "have_account": "Already have an account?",
+    "sign_up_intro": "Create your account to join the team. Already have one?",
+    "join": "Create account and join"
+  },
+  "switcher": {
+    "label": "Switch restaurant",
+    "title": "Your restaurants",
+    "current": "Current restaurant"
+  },
+  "no_restaurant": {
+    "title": "No restaurant yet",
+    "text": "Your account is not part of any restaurant. Ask an owner or manager to invite you, then open the link in the email."
+  },
+  "subscription": {
+    "grace": "Your subscription has expired. Renew by {{date}} to keep editing.",
+    "read_only": "Your subscription has expired. The admin is read-only until you renew; the menu goes offline on {{date}}.",
+    "unavailable": "Your subscription has expired and your menu is offline. Renew to bring it back."
+  },
+  "team": {
+    "title": "Team",
+    "intro": "People who can manage {{restaurant}}.",
+    "members": "Members",
+    "you": "you",
+    "role": "Role",
+    "role_of": "Role of {{name}}",
+    "can_edit_prices": "Can edit prices",
+    "role_hint": {
+      "manager": "Managers edit the menu, branches and settings, and can invite staff.",
+      "staff": "Staff mark items sold out. Allow them to edit prices if needed."
+    },
+    "invite": "Invite",
+    "invite_title": "Invite someone",
+    "invite_intro": "We will email them a link that is valid for 7 days.",
+    "send_invite": "Send invitation",
+    "invite_sent": "Invitation sent to {{email}}.",
+    "pending": "Pending invitations",
+    "pending_intro": "Invitations that have not been accepted yet.",
+    "expires": "Expires {{date}}",
+    "revoke_named": "Cancel the invitation for {{email}}",
+    "remove": "Remove from team",
+    "remove_named": "Remove {{name}}",
+    "remove_confirm": "Remove {{name}} from the team? They lose access right away.",
+    "leave": "Leave restaurant",
+    "leave_confirm": "Leave {{restaurant}}? You will need a new invitation to come back."
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "network": "No connection. Check your internet and try again.",
+    "read_only": "Your subscription has expired, so changes cannot be saved.",
+    "forbidden": "You don't have permission to do that.",
+    "not_found": "This item no longer exists.",
+    "in_progress": "Still saving the previous change. Try again in a moment.",
+    "too_many": "Too many attempts. Wait a minute and try again.",
+    "go_back": "Go back",
+    "home": "Back to dashboard",
+    "page": {
+      "not_found": {
+        "title": "Page not found",
+        "text": "The page you are looking for does not exist or was moved."
+      },
+      "forbidden": {
+        "title": "No access",
+        "text": "Your role in this restaurant cannot open this page."
+      },
+      "general": {
+        "title": "Something went wrong",
+        "text": "Please try again. If it keeps happening, contact support."
+      }
+    }
+  },
+  "search": {
+    "button": "Search",
+    "placeholder": "Type a command or search…",
+    "empty": "No results found."
+  },
+  "theme": {
+    "title": "Theme",
+    "toggle": "Change theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
   }
 }
