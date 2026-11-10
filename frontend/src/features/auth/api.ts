@@ -30,6 +30,8 @@ export type Tenant = {
     role: Role
     can_edit_prices: boolean
   } | null
+  /** Plan features (with the Super Admin's overrides); missing = on. */
+  features?: Partial<Record<string, boolean>>
 }
 
 /** GET /api/v1/me */
@@ -41,6 +43,12 @@ export type Me = {
   email_verified: boolean
   two_factor_enabled: boolean
   is_super_admin: boolean
+  /** Set while a Super Admin is "logged in as" this user. */
+  impersonation?: {
+    tenant_id: number
+    user_name: string
+    ends_at: string
+  } | null
   tenants: Tenant[]
 }
 

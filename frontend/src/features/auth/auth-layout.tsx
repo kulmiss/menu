@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { LanguageSwitch } from '@/components/language-switch'
+import { LazyLanguageSwitch as LanguageSwitch } from '@/components/lazy-language-switch'
 import { ThemeSwitch } from '@/components/theme-switch'
 
 type AuthLayoutProps = {

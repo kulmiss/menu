@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { Store } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { signOut } from '@/features/auth/api'
 import { AuthLayout } from '@/features/auth/auth-layout'
+import { useMe } from '@/features/auth/use-me'
 
 /** Signed in, but not (or no longer) a member of any restaurant. */
 export function NoRestaurant() {
@@ -13,6 +14,7 @@ export function NoRestaurant() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [pending, setPending] = useState(false)
+  const me = useMe()
 
   return (
     <AuthLayout>
@@ -22,6 +24,11 @@ export function NoRestaurant() {
         <p className='text-sm text-muted-foreground'>
           {t('no_restaurant.text')}
         </p>
+        {me.is_super_admin && (
+          <Button asChild className='mt-2 min-h-11 sm:min-h-9'>
+            <Link to='/platform'>{t('nav.platform')}</Link>
+          </Button>
+        )}
         <Button
           variant='outline'
           className='mt-2 min-h-11 sm:min-h-9'

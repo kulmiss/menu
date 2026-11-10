@@ -30,6 +30,7 @@ export const sidebarData: SidebarData = {
         {
           title: 'nav.insights',
           url: '/admin/insights',
+          feature: 'insights',
           icon: BarChart3,
           roles: ['owner', 'manager'],
         },
@@ -54,12 +55,14 @@ export const sidebarData: SidebarData = {
         {
           title: 'nav.promotions',
           url: '/admin/promotions',
+          feature: 'promotions',
           icon: Megaphone,
           roles: ['owner', 'manager'],
         },
         {
           title: 'nav.import',
           url: '/admin/import',
+          feature: 'import_export',
           icon: FileSpreadsheet,
           roles: ['owner', 'manager'],
         },

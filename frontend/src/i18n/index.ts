@@ -84,6 +84,31 @@ export function loadScreenTexts(
   return promise
 }
 
+// Super Admin texts: only downloaded in the /platform area.
+const platformLoaders = import.meta.glob<{ default: Record<string, unknown> }>(
+  '../locales/*/platform.json'
+)
+let platformLoaded: Promise<void> | null = null
+
+export function loadPlatformTexts(): Promise<void> {
+  const code = i18n.language || 'en'
+  const loader =
+    platformLoaders[`../locales/${code}/platform.json`] ??
+    platformLoaders['../locales/en/platform.json']
+  platformLoaded ??= loader
+    ? loader().then((m) => {
+        i18n.addResourceBundle(
+          code,
+          'common',
+          { platform: m.default },
+          true,
+          false
+        )
+      })
+    : Promise.resolve()
+  return platformLoaded
+}
+
 /** Loads a language, then switches the interface to it. */
 export async function setLanguage(code: LanguageCode): Promise<void> {
   await Promise.all([loadLanguage(code), loadScreenTexts(code)])
