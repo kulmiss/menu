@@ -10,6 +10,7 @@ use App\Models\Menu;
 use App\Models\Tenant;
 use App\Rules\Translations;
 use App\Support\ActivityLogger;
+use App\Support\MediaJanitor;
 use App\Support\MenuCopier;
 use App\Support\PlanLimits;
 use App\Tenancy\CurrentTenant;
@@ -58,7 +59,11 @@ class CategoryController extends Controller
             $data['sort'] = $this->nextSort(Category::where('menu_id', $data['menu_id']));
         }
 
+        $oldMedia = $model->media_id;
         $model->fill($data)->save();
+        if ($oldMedia !== $model->media_id) {
+            MediaJanitor::releaseIfUnused($oldMedia);
+        }
         $this->recordChange('category.updated', $model, ActivityLogger::diff($model));
 
         return new CategoryResource($model);
@@ -67,8 +72,10 @@ class CategoryController extends Controller
     public function destroy(Tenant $tenant, int $category): Response
     {
         Gate::authorize('menu.manage');
-        $model = Category::findOrFail($category);
+        $model = Category::with('items')->findOrFail($category);
+        $photos = $model->items->pluck('media_id')->push($model->media_id)->filter()->unique();
         $model->delete();
+        $photos->each(fn ($id) => MediaJanitor::releaseIfUnused((int) $id));
         $this->recordChange('category.deleted', $model, ['name' => $model->name]);
 
         return response()->noContent();
@@ -115,6 +122,7 @@ class CategoryController extends Controller
             'name' => [...$sometimes, Translations::required(80)],
             'description' => ['sometimes', Translations::optional(500)],
             'icon' => ['sometimes', 'nullable', 'string', 'max:40', 'regex:/^[a-z0-9-]+$/'],
+            'media_id' => ['sometimes', 'nullable', 'integer', $this->existsHere('media')],
             'is_visible' => [...$sometimes, 'boolean'],
         ];
     }

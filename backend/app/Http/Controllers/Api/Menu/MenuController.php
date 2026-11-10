@@ -56,7 +56,9 @@ class MenuController extends Controller
     {
         $model = Menu::with([
             'schedules',
+            'categories.media',
             'categories.items.variants',
+            'categories.items.media',
         ])->findOrFail($menu);
 
         return response()->json(['data' => [

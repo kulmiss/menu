@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int|null $media_id
  * @property bool $is_visible
  * @property int $sort
+ * @property-read Media|null $media
  * @property-read Menu $menu
  * @property-read Collection<int, Item> $items
  */
@@ -36,6 +37,12 @@ class Category extends Model
             'is_visible' => 'boolean',
             'sort' => 'integer',
         ];
+    }
+
+    /** @return BelongsTo<Media, $this> */
+    public function media(): BelongsTo
+    {
+        return $this->belongsTo(Media::class);
     }
 
     /** @return BelongsTo<Menu, $this> */

@@ -52,6 +52,11 @@ return [
         'wrong_menu' => 'This category belongs to another menu.',
         'empty_window' => 'The end time must differ from the start time.',
     ],
+    'media' => [
+        'type' => 'Upload a JPEG, PNG or WebP photo.',
+        'heic' => 'iPhone HEIC photos cannot be used yet. In Settings › Camera › Formats choose "Most Compatible", or share the photo as JPEG.',
+        'unreadable' => 'This file could not be read as a photo.',
+    ],
     'spa' => [
         'not_built' => 'The admin app has not been built yet. Run the frontend build.',
     ],

@@ -67,6 +67,15 @@ export function ItemRow({
         onClick={selecting ? () => onSelect(!selected) : onOpen}
         disabled={!selecting && !canOpen}
       >
+        {item.media && (
+          <img
+            src={item.media.urls['320']}
+            alt=''
+            loading='lazy'
+            className='size-10 shrink-0 rounded object-cover'
+            style={{ backgroundColor: item.media.dominant_color ?? undefined }}
+          />
+        )}
         <span className='min-w-0 flex-1'>
           <span
             className={cn(

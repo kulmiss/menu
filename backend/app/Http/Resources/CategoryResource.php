@@ -19,6 +19,7 @@ class CategoryResource extends JsonResource
             'description' => (object) $this->description,
             'icon' => $this->icon,
             'media_id' => $this->media_id,
+            'media' => $this->whenLoaded('media', fn () => $this->media ? new MediaResource($this->media) : null),
             'is_visible' => $this->is_visible,
             'sort' => $this->sort,
             'items' => ItemSummaryResource::collection($this->whenLoaded('items')),

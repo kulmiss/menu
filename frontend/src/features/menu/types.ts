@@ -15,6 +15,15 @@ export type Menu = {
   items_count?: number
 }
 
+/** An uploaded photo with its sizes (MediaResource). */
+export type Media = {
+  id: number
+  width: number
+  height: number
+  dominant_color: string | null
+  urls: Partial<Record<'320' | '640' | '1280' | 'jpg' | 'og', string>>
+}
+
 export type ItemSummary = {
   id: number
   category_id: number
@@ -24,6 +33,7 @@ export type ItemSummary = {
   from_price_minor: number | null
   variants_count: number
   media_id: number | null
+  media?: Media | null
   is_sold_out: boolean
   is_visible: boolean
   is_new: boolean
@@ -58,6 +68,7 @@ export type Category = {
   description: Translations
   icon: string | null
   media_id: number | null
+  media?: Media | null
   is_visible: boolean
   sort: number
   items: ItemSummary[]

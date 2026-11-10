@@ -357,5 +357,18 @@
     "sulphites": "ሰልፋይት",
     "lupin": "ሉፒን",
     "molluscs": "ሞለስክ"
+  },
+  "photo": {
+    "label": "ፎቶ",
+    "add": "ፎቶ ጨምር",
+    "change": "ፎቶ ቀይር",
+    "remove": "ፎቶ አስወግድ",
+    "heic": "የአይፎን HEIC ፎቶዎችን መጠቀም አይቻልም። በSettings › Camera › Formats ውስጥ \"Most Compatible\" ይምረጡ ወይም JPEG ይምረጡ።",
+    "type": "JPEG፣ PNG ወይም WebP ፎቶ ይምረጡ።",
+    "too_big": "ይህ ፋይል በጣም ትልቅ ነው።",
+    "crop_title": "ፎቶውን ይከርክሙ",
+    "crop_intro": "ለማንቀሳቀስ ይጎትቱ፣ ለማጉላት ተንሸራታቹን ይጠቀሙ።",
+    "zoom": "አጉላ",
+    "use": "ፎቶውን ተጠቀም"
   }
 }

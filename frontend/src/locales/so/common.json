@@ -357,5 +357,18 @@
     "sulphites": "Sulfaytyo",
     "lupin": "Lupin",
     "molluscs": "Xayawaanka jilicsan ee badda"
+  },
+  "photo": {
+    "label": "Sawir",
+    "add": "Ku dar sawir",
+    "change": "Beddel sawirka",
+    "remove": "Ka saar sawirka",
+    "heic": "Sawirada iPhone HEIC lama isticmaali karo. Ka dooro \"Most Compatible\" Settings › Camera › Formats, ama dooro JPEG.",
+    "type": "Dooro sawir JPEG, PNG ama WebP ah.",
+    "too_big": "Faylkani aad buu u weyn yahay.",
+    "crop_title": "Jar sawirka",
+    "crop_intro": "Jiid si aad u dhaqaajiso, isticmaal slider-ka si aad u weyneyso.",
+    "zoom": "Weynee",
+    "use": "Isticmaal sawirka"
   }
 }

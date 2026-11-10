@@ -41,9 +41,16 @@ import {
   useUpdatePrice,
 } from '../api'
 import { MoneyInput } from '../components/money-input'
+import { PhotoField } from '../components/photo-field'
 import { TranslatableInput } from '../components/translatable-input'
 import { tagLabel, tr } from '../text'
-import { ALLERGENS, type Category, type Item, type Variant } from '../types'
+import {
+  ALLERGENS,
+  type Category,
+  type Item,
+  type Media,
+  type Variant,
+} from '../types'
 import { type MenuContext } from '../use-menu-context'
 
 type Draft = Required<
@@ -190,6 +197,7 @@ function ItemForm({
   const [draft, setDraft] = useState<Draft>(() =>
     item ? fromItem(item) : emptyDraft(newInCategory ?? categories[0]?.id ?? 0)
   )
+  const [photo, setPhoto] = useState<Media | null>(item?.media ?? null)
   const [tab, setTab] = useState<Tab>(priceOnly ? 'prices' : 'details')
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [confirmDelete, setConfirmDelete] = useState(false)
@@ -232,9 +240,16 @@ function ItemForm({
             .map((v) => ({ id: v.id, price_minor: v.price_minor })),
         })
       } else if (itemId) {
-        await update.mutateAsync({ id: itemId, ...draft })
+        await update.mutateAsync({
+          id: itemId,
+          ...draft,
+          media_id: photo?.id ?? null,
+        })
       } else {
-        const created = await create.mutateAsync(draft)
+        const created = await create.mutateAsync({
+          ...draft,
+          media_id: photo?.id ?? null,
+        })
         onCreated?.(created.id)
       }
       toast.success(t('menu.saved'))
@@ -280,6 +295,13 @@ function ItemForm({
 
         <div className='min-h-0 flex-1 overflow-y-auto p-4'>
           <TabsContent value='details' className='grid gap-4'>
+            <PhotoField
+              tenantId={ctx.tenantId}
+              label={t('photo.label')}
+              media={photo}
+              onChange={setPhoto}
+              disabled={!ctx.canWrite}
+            />
             <TranslatableInput
               label={t('menu.name')}
               locale={ctx.locale}

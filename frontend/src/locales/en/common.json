@@ -356,5 +356,18 @@
     "sulphites": "Sulphites",
     "lupin": "Lupin",
     "molluscs": "Molluscs"
+  },
+  "photo": {
+    "label": "Photo",
+    "add": "Add photo",
+    "change": "Change photo",
+    "remove": "Remove photo",
+    "heic": "iPhone HEIC photos can't be used. Choose \"Most Compatible\" in Settings › Camera › Formats, or pick a JPEG.",
+    "type": "Choose a JPEG, PNG or WebP photo.",
+    "too_big": "This file is too large.",
+    "crop_title": "Crop the photo",
+    "crop_intro": "Drag to move, use the slider to zoom.",
+    "zoom": "Zoom",
+    "use": "Use photo"
   }
 }

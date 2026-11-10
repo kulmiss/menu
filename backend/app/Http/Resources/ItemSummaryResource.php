@@ -26,6 +26,7 @@ class ItemSummaryResource extends JsonResource
             'from_price_minor' => $this->fromPriceMinor(),
             'variants_count' => $this->variants->count(),
             'media_id' => $this->media_id,
+            'media' => $this->whenLoaded('media', fn () => $this->media ? new MediaResource($this->media) : null),
             'is_sold_out' => $this->is_sold_out,
             'is_visible' => $this->is_visible,
             'is_new' => $this->is_new,

@@ -525,19 +525,29 @@ function MenuBody({
         }
         locale={ctx.locale}
         withDescription
+        tenantId={ctx.tenantId}
         initial={
           dialog?.kind === 'edit-category'
             ? {
                 name: dialog.category.name,
                 description: dialog.category.description,
                 is_visible: dialog.category.is_visible,
+                media: dialog.category.media ?? null,
               }
             : { name: {}, description: {}, is_visible: true }
         }
-        onSave={(v: NameValues) =>
+        onSave={({ media, ...v }: NameValues) =>
           dialog?.kind === 'edit-category'
-            ? updateCategory.mutateAsync({ id: dialog.category.id, ...v })
-            : createCategory.mutateAsync({ menu_id: menu.id, ...v })
+            ? updateCategory.mutateAsync({
+                id: dialog.category.id,
+                ...v,
+                media_id: media?.id ?? null,
+              })
+            : createCategory.mutateAsync({
+                menu_id: menu.id,
+                ...v,
+                media_id: media?.id ?? null,
+              })
         }
       />
       <ConfirmDialog

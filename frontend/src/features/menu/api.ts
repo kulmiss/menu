@@ -170,6 +170,7 @@ export type CategoryInput = {
   name?: Translations
   description?: Translations
   is_visible?: boolean
+  media_id?: number | null
 }
 
 export const useCreateCategory = (t: number) =>
@@ -262,6 +263,7 @@ export type ItemInput = {
   summary?: Translations
   description?: Translations
   price_minor?: number | null
+  media_id?: number | null
   calories?: number | null
   prep_minutes?: number | null
   is_visible?: boolean

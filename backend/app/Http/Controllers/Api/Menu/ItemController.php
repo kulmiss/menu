@@ -12,6 +12,7 @@ use App\Models\ItemVariant;
 use App\Models\Tenant;
 use App\Rules\Translations;
 use App\Support\ActivityLogger;
+use App\Support\MediaJanitor;
 use App\Support\MenuCopier;
 use App\Support\PlanLimits;
 use App\Tenancy\CurrentTenant;
@@ -34,7 +35,7 @@ class ItemController extends Controller
 {
     use RecordsChanges;
 
-    private const RELATIONS = ['variants', 'addonGroups', 'tags', 'allergenRows', 'category'];
+    private const RELATIONS = ['variants', 'addonGroups', 'tags', 'allergenRows', 'category', 'media'];
 
     public function __construct(private readonly CurrentTenant $current, private readonly PlanLimits $limits) {}
 
@@ -74,9 +75,13 @@ class ItemController extends Controller
             if (isset($fields['category_id']) && (int) $fields['category_id'] !== $model->category_id) {
                 $fields['sort'] = $this->nextSort(Item::where('category_id', $fields['category_id']));
             }
+            $oldMedia = $model->media_id;
             $model->fill($fields)->save();
             $changes = ActivityLogger::diff($model);
             $this->syncRelations($model, $data);
+            if ($oldMedia !== $model->media_id) {
+                MediaJanitor::releaseIfUnused($oldMedia);
+            }
 
             return $changes;
         });
@@ -90,6 +95,7 @@ class ItemController extends Controller
         Gate::authorize('menu.manage');
         $model = Item::findOrFail($item);
         $model->delete();
+        MediaJanitor::releaseIfUnused($model->media_id);
         $this->recordChange('item.deleted', $model, ['name' => $model->name]);
 
         return response()->noContent();
@@ -265,6 +271,7 @@ class ItemController extends Controller
             'summary' => ['sometimes', Translations::optional(160)],
             'description' => ['sometimes', Translations::optional(2000)],
             'price_minor' => ['sometimes', 'nullable', ...$this->priceRule()],
+            'media_id' => ['sometimes', 'nullable', 'integer', $this->existsHere('media')],
             'calories' => ['sometimes', 'nullable', 'integer', 'between:0,20000'],
             'prep_minutes' => ['sometimes', 'nullable', 'integer', 'between:0,600'],
             'is_sold_out' => ['sometimes', 'boolean'],
@@ -293,7 +300,7 @@ class ItemController extends Controller
     private function fields(array $data): array
     {
         $fields = collect($data)->only([
-            'category_id', 'name', 'summary', 'description', 'price_minor', 'calories', 'prep_minutes',
+            'category_id', 'name', 'summary', 'description', 'price_minor', 'media_id', 'calories', 'prep_minutes',
             'is_sold_out', 'is_visible', 'is_new', 'new_until', 'is_popular',
         ])->all();
 

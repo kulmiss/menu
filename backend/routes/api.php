@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\MeController;
 use App\Http\Controllers\Api\Menu\AddonGroupController;
 use App\Http\Controllers\Api\Menu\CategoryController;
 use App\Http\Controllers\Api\Menu\ItemController;
+use App\Http\Controllers\Api\Menu\MediaController;
 use App\Http\Controllers\Api\Menu\MenuController;
 use App\Http\Controllers\Api\Menu\TagController;
 use App\Http\Controllers\Api\TeamController;
@@ -76,6 +77,9 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::patch('addon-groups/{group}', [AddonGroupController::class, 'update'])->whereNumber('group');
             Route::delete('addon-groups/{group}', [AddonGroupController::class, 'destroy'])->whereNumber('group');
             Route::patch('addon-options/{option}/sold-out', [AddonGroupController::class, 'optionSoldOut'])->whereNumber('option');
+
+            Route::post('media', [MediaController::class, 'store'])->middleware('throttle:30,1');
+            Route::delete('media/{media}', [MediaController::class, 'destroy'])->whereNumber('media');
 
             Route::get('tags', [TagController::class, 'index']);
             Route::post('tags', [TagController::class, 'store']);

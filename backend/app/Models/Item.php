@@ -29,6 +29,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $new_until
  * @property bool $is_popular
  * @property int $sort
+ * @property-read Media|null $media
  * @property-read Category $category
  * @property-read Collection<int, ItemVariant> $variants
  * @property-read Collection<int, AddonGroup> $addonGroups
@@ -59,6 +60,12 @@ class Item extends Model
             'is_popular' => 'boolean',
             'sort' => 'integer',
         ];
+    }
+
+    /** @return BelongsTo<Media, $this> */
+    public function media(): BelongsTo
+    {
+        return $this->belongsTo(Media::class);
     }
 
     /** @return BelongsTo<Category, $this> */

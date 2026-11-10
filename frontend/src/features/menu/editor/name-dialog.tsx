@@ -12,13 +12,15 @@ import {
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
+import { PhotoField } from '../components/photo-field'
 import { TranslatableInput } from '../components/translatable-input'
-import { type Translations } from '../types'
+import { type Media, type Translations } from '../types'
 
 export type NameValues = {
   name: Translations
   description?: Translations
   is_visible: boolean
+  media?: Media | null
 }
 
 type Props = {
@@ -29,6 +31,8 @@ type Props = {
   initial: NameValues
   /** Categories have a description; menus don't. */
   withDescription?: boolean
+  /** Needed for the category photo upload. */
+  tenantId?: number
   onSave: (values: NameValues) => Promise<unknown>
 }
 
@@ -45,6 +49,7 @@ export function NameDialog(props: Props) {
 }
 
 function NameForm({
+  tenantId,
   onOpenChange,
   title,
   locale,
@@ -90,6 +95,15 @@ function NameForm({
         error={errors.name}
         autoFocus
       />
+      {withDescription && tenantId !== undefined && (
+        <PhotoField
+          tenantId={tenantId}
+          label={t('photo.label')}
+          aspect={16 / 9}
+          media={values.media ?? null}
+          onChange={(media) => setValues((v) => ({ ...v, media }))}
+        />
+      )}
       {withDescription && (
         <TranslatableInput
           label={t('menu.description')}

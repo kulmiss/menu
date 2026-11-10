@@ -191,6 +191,7 @@ describe('MenuEditorPage', () => {
         name: { en: 'Tea' },
         description: {},
         is_visible: true,
+        media_id: null,
       })
     )
   })
