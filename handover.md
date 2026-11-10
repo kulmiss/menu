@@ -1,69 +1,50 @@
 # Handover
 
-_Last updated: 2026-11-10 14:15 EAT. Clean stopping point: Partition 2 backend merged-ready (#3), 2b started (#4, draft)._
+_Last updated: 2026-11-10 15:40 EAT. Clean stopping point: Partition 3b pushed, CI green._
 
 ## Where we are
-- Steps 1–2: done and approved.
-- **Partition 1 (project setup)**: code written, waiting for the first local run of `setup-local.bat` on the owner's PC (Windows + Laragon: PHP 8.5.11, Composer 2.10.3, Node 26.13.0).
-- Claude's workspaces cannot install packages (cloud container and the desktop VM both blocked), so the owner runs the installs; Claude reads `setup-log.txt` from `C:\laragon\www\menu` and fixes errors.
+| Part | Branch | PR | State |
+|---|---|---|---|
+| 2 backend (auth & tenancy) | `feat/auth-tenancy` | #3 | green, contained in #4 |
+| 2b SPA auth, switcher, team | `feat/auth-spa` | #4 | **ready**, CI green |
+| 3a menu data model + API | `feat/menu-data` | #5 (draft) | CI green |
+| 3b admin menu editor | `feat/menu-data` | #5 (draft) | CI green |
+| 3c photos | — | — | next |
+| 3d import/export | — | — | **waiting for owner: XLSX library** |
 
-## Repo
-- `main`: bootstrap commit. Owner still to add branch protection.
-- `develop`: bootstrap commit. PR #1 (`docs/plan`) **still open** — merge it.
-- Partition 1 will be branch `feat/setup` → PR into `develop` (owner commits and pushes from the PC; commands in the chat).
+Stacked PRs: merge only the newest (#5 once ready; #4 now if you want 2b in `develop` first), *Create a merge commit*.
 
-## What Partition 1 contains
-- `backend/`: Laravel skeleton v13.11.0 (`06d016a`), MySQL `.env.example`, database cache/sessions/queue, public disk at `public/media` (no symlink), Pest + Larastan (level 6) + Pint, tests: health, MySQL migrations, config, architecture. Sanctum via `php artisan install:api` (run by the setup script).
-- `frontend/`: shadcn-admin @ `e16c87f` with Clerk, tasks/apps/chats/users/help-center demos, sign-in-2, notifications/display settings, demo dashboard, faker and unused brand icons removed. i18next wired (en source; so/am/ar marked `machine_draft`), language switch with RTL for Arabic, tests for it and for locale key parity. Vite `base: /app/`, build output `backend/public/app`.
-- `docker-compose.yml` (dev only), `.github/workflows/ci.yml` (checks only), `THIRD_PARTY_NOTICES.md`, `setup-local.bat`, `scripts/create-databases.php`.
+## Claude's workspace can now run everything
+Since 2026-11-10 the cloud workspace can: `pnpm install` (npm registry), `composer install --prefer-source` (git clones of public GitHub repos; Packagist metadata is blocked, so **`composer require` of new packages still needs the owner's PC**), MariaDB 10.11 (`apt-get install mariadb-server`), Chromium for Vitest browser tests (`PLAYWRIGHT_BROWSERS_PATH` pointing at `/opt/pw-browsers` with a `chromium_headless_shell-1217` symlink to `-1243`), and a real-browser smoke test against `php artisan serve`.
+Setup recipe used: `composer config -g use-github-api false`; `phpstan/phpstan` has no git source, so its zip was put into Composer's cache (`~/.cache/composer/files/phpstan/phpstan/<sha1 of dist url>.zip`, built with `git archive` of the tag).
 
-## Known follow-ups (later partitions)
-- Template pages still have English strings (auth forms, settings, errors). They are rewritten through i18n when rebuilt in Partition 2 (auth) and later partitions.
-- Social-login buttons (GitHub/Facebook) in the template auth forms are removed in Partition 2.
-- `recharts` stays for Insights (Partition 10).
-- Routes move under `/admin` and `/platform` in Partition 2.
+## What 2b contains (PR #4)
+- Routes `/admin/*`, `/auth/*` (sign-in, sign-up, forgot/reset password, two-factor, invite/$token); `/admin` guard on `GET /api/v1/me`; safe `?redirect=`.
+- Fortify forms with CSRF cookie and 422 → field errors; 419 refresh-and-retry once with the same Idempotency-Key.
+- Restaurant switcher (zustand, persisted), role-filtered sidebar, verify-email and subscription banners, "no restaurant" screen.
+- Team page (members, roles, can-edit-prices, invite, pending, revoke, leave).
+- Backend: reset/invite emails link to `/auth/...`; sign-up with `invitation_token` joins the inviting restaurant (QUESTIONS #56).
 
-## Pinned references
-- shadcn-admin: `https://github.com/satnaing/shadcn-admin` @ `e16c87f213a5ba5e45964e9b67c792105ec74d26` (v2.2.1, MIT).
-- Laravel skeleton: `laravel/laravel` v13.11.0 @ `06d016a364a37430eec9cbc52209adce3d7667ce` (framework `^13.17`; exact versions in `composer.lock` once generated).
-- Design mockups: https://claude.ai/artifact/HKJ6v8zV9y2b7oQoYb33B5
+## What Partition 3 contains so far (PR #5)
+- **3a API** under `/api/v1/t/{tenant}`: `menus` (+ `reorder`, `{id}/tree`, `{id}/duplicate`, `{id}/schedules`), `categories` (+ `reorder`, `duplicate`), `items` (+ `reorder`, `bulk`, `bulk-price`, `{id}/duplicate`, `{id}/sold-out`, `{id}/price`), `addon-groups` (+ options, `reorder`), `addon-options/{id}/sold-out`, `tags`. Composite FKs, plan limits (menus, items → 402), activity log + cache_version bump on every change.
+- **3b SPA**: `/admin/menu` (editor), `/admin/addons`, `/admin/tags`; item sheet with details / prices & sizes / add-ons / tags & allergens; drag reorder (dnd-kit); bulk actions; staff see sold-out switches only (plus a price-only form with *can edit prices*).
+- Decisions: QUESTIONS #56–61 (GD instead of Intervention, items may have no price, menu↔branch in Partition 6, feature switches in Partition 11).
 
-## Partition 2 (auth & tenancy)
-**Backend: done and green** on the owner's PC (PR #3, branch `feat/auth-tenancy`): 70 Pest tests, Larastan level 6 clean, Pint clean, migrate → rollback → migrate. Fortify v1.41 installed.
-**Next (Partition 2b, branch `feat/auth-spa` stacked on `feat/auth-tenancy`):** SPA auth screens against the API (sign in, sign up with restaurant name + slug, forgot/reset password, verify email, 2FA, accept invitation), auth store from `/api/v1/me`, restaurant switcher, routes under `/admin`, Laravel SPA catch-all for `/admin`, `/platform`, `/auth`, remove social-login buttons, team page, i18n for every string touched. Then `check.bat` (both halves).
+## Checks at this point
+Backend: Pint, Larastan 6, migrate → rollback → migrate, Pest **136**. Frontend: lint, Prettier, build, Vitest **141**. Browser smoke (375 px): sign-up → menu → categories → items with tags/allergens → sold out → keyboard and mouse reorder → bulk +10 % → item sheet. No errors.
 
-## How we work (owner's PC)
-- Owner pulls with `git fetch origin` + `git reset --hard origin/<branch>` (only after Claude has copied back any files the run changed), then runs `check.bat [backend|frontend]`; Claude reads `check-log.txt` through the connected folder `C:/laragon/www/menu`.
-- Files a run changes (Pint/Prettier fixes, lockfiles) are copied back by Claude with a tar in `_to_delete/` and `device_stage_files`.
-- Stacked PRs: the owner merges only the newest PR, with *Create a merge commit* (QUESTIONS #55).
-
-## Exact next steps for Partition 2b (branch `feat/auth-spa`, draft PR #4)
-Done: Laravel `SpaController` serves `public/app/index.html` for `/admin/*`, `/platform/*`, `/auth/*` (+ `SpaTest`). CI green.
-To do, in this order (each a commit; CI runs on every push to the PR):
-1. **Routes:** move `src/routes/_authenticated/*` to `src/routes/admin/*` (layout `admin/route.tsx`), auth pages to `src/routes/auth/*` (`sign-in`, `sign-up`, `forgot-password`, `reset-password`, `two-factor`, `invite/$token`); fix every `Link to=` / `navigate({ to })` (TypeScript will list them); `routeTree.gen.ts` is regenerated by `pnpm build`.
-2. **Auth state:** replace the template's fake `stores/auth-store.ts` with a TanStack Query `me` query on `GET /api/v1/me`; `admin/route.tsx` `beforeLoad` ensures it and redirects to `/auth/sign-in?redirect=` on 401; 401 handler in `main.tsx` goes to `/auth/sign-in`.
-3. **Forms** (keep the template's look, use `api` from `src/lib/api.ts`, call `ensureCsrfCookie()` first): sign-in → `POST /auth/login` (if `two_factor: true` go to `/auth/two-factor`); sign-up → `POST /auth/register` with `name, email, restaurant_name, slug (auto from name, editable), password, password_confirmation`; forgot → `POST /auth/forgot-password`; reset → `POST /auth/reset-password` (`token`, `email` from the URL); 2FA → `POST /auth/two-factor-challenge` (`code` or `recovery_code`); sign-out → `POST /auth/logout`. Map Laravel 422 `errors` onto form fields. Remove the GitHub/Facebook buttons.
-4. **Invitation page** `/auth/invite/$token`: `GET /invitations/{token}`; signed in → button `POST /invitations/{token}/accept` then go to `/admin`; else links to sign-in / sign-up with `redirect` back.
-5. **Restaurant switcher:** `TeamSwitcher` lists `me.tenants`; current tenant id in a small zustand store persisted to localStorage; API calls use `/t/{tenantId}/…`.
-6. **Team page** `/admin/team` (owner/manager): members table (role select, "can edit prices" switch for staff, remove), invite dialog (email, role), pending invitations with revoke. Hide actions the role can't do (server enforces anyway).
-7. **i18n:** every new string in `src/locales/en/common.json` and the same keys in `so`, `am`, `ar` (machine drafts; `locales.test.ts` enforces key parity).
-8. **Tests:** rewrite the template's auth form tests for the real API (mock `api` with a fake adapter as in `src/lib/api.test.ts`); tests for the route guard, switcher, team page permissions.
-9. Mark PR #4 ready, update this file, then Partition 3 (menu data model + admin editor) on a new branch stacked on `feat/auth-spa`.
-
-## Prompt for the next chat
-> Continue the Menu project in kulmiss/menu from handover.md (branch feat/auth-spa, draft PR #4). Same rules as PLAN.md and QUESTIONS.md: stacked PRs (I merge only the newest), CI checks every PR (repo is public), tests in every partition, shared hosting is the main target. My PC folder C:\laragon\www\menu is connected; use it only when packages must be installed (check.bat). Do Partition 2b, then continue with Partition 3. Stop only for new packages, big architecture choices, licence doubts, or steps that can't be undone.
+## Next steps (in order)
+1. **3c photos** (branch on `feat/menu-data`): `media` table + `media_id` FKs, upload endpoint (≤ 8 MB, jpeg/png/webp; HEIC refused with a message), GD: orient, strip EXIF, 320/640/1280 WebP + 640 JPEG + 1200×630 OG, dominant colour; plan limit `photos`; SPA: crop + downscale ≤ 2048 px in the browser with **react-easy-crop** (approved in PLAN §3.2), photo field on items and categories, thumbnails in the editor list.
+2. **3d import/export**, once the owner picks the XLSX approach (see Blockers): template download, upload CSV/XLSX → preview diff → commit; export.
+3. Mark #5 ready, then Partition 4 (customer menu page).
+4. Partition 2 leftovers, to do before Partition 11: personal settings pages (profile, password, **2FA setup**, which Super Admin needs) and the config drawer are still template stubs with English text.
 
 ## Blockers / owner actions
-- GitHub Actions: the private repo had hit the account's free monthly minutes (used by another repo). **Owner made `kulmiss/menu` public on 2026-11-10**, so Actions is free. CI on PR #3 is green: backend (Pint, Larastan, migrate/rollback/migrate, Pest) and frontend (lint, format, build, **Vitest browser tests**).
-- `main` not protected yet. PR #1 merged; PRs #2 and #3 open (merge only #3).
-- Owner's PC: Docker Desktop works but downloads from deb.debian.org are very slow (~20–30 KB/s); the PHP image is now built and cached. Laragon's PHP could not write `backend/vendor` (Windows "Permission denied", likely antivirus) — use Docker.
+- **Decide the XLSX library for import/export (3d).** Options: `openspout/openspout` (MIT, streaming, low memory, good for shared hosting; installed from the owner's PC with `composer require`), `phpoffice/phpspreadsheet` (MIT, heavier on memory), or no package (CSV only, or a small XLSX reader on PHP's built-in zip extension).
+- `main` branch protection still to add.
 
-## Fixes queued for the setup scripts (apply when the current run ends)
-- Mailpit port 8025 is taken on the owner's PC → map to 8026.
-- `wait for MySQL` returns too early on first start (root password not set yet) → loop on `mysql -uroot -proot -e "select 1"`.
-- Remove the temporary `.github/workflows/bootstrap.yml` before merging `feat/setup` (Actions is blocked anyway).
+## Pinned references
+- shadcn-admin `e16c87f` (v2.2.1, MIT); Laravel skeleton v13.11.0 `06d016a`; design mockups https://claude.ai/artifact/HKJ6v8zV9y2b7oQoYb33B5
 
-## Next steps
-1. Owner runs `setup-local.bat`; Claude fixes anything in `setup-log.txt` until every step passes.
-2. Owner commits on `feat/setup` (lockfiles included), pushes, opens PR into `develop`; CI must be green.
-3. Partition 2: auth & tenancy.
+## Prompt for the next chat
+> Continue the Menu project in kulmiss/menu from handover.md (branch feat/menu-data, draft PR #5). Same rules as PLAN.md and QUESTIONS.md: stacked PRs (I merge only the newest), CI checks every PR, tests in every partition, shared hosting is the main target. Do Partition 3c (photos), then 3d with the XLSX choice I give below, then mark #5 ready and start Partition 4. Stop only for new packages, big architecture choices, licence doubts, or steps that can't be undone.
