@@ -28,6 +28,9 @@ return [
         'mail_action' => 'Accept invitation',
         'mail_expiry' => 'This invitation expires on :date.',
     ],
+    'spa' => [
+        'not_built' => 'The admin app has not been built yet. Run the frontend build.',
+    ],
     'roles' => [
         'owner' => 'Owner',
         'manager' => 'Manager',
