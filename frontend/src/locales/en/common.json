@@ -24,7 +24,8 @@
     "import": "Import & export",
     "security": "Security",
     "branches": "Branches",
-    "qr_codes": "QR codes"
+    "qr_codes": "QR codes",
+    "info": "Restaurant info"
   },
   "language": {
     "label": "Language",
@@ -579,5 +580,63 @@
     "delete_title": "Delete this code?",
     "delete_desc": "Printed copies stop working. The code is never reused.",
     "print_tip": "Printing tip: print at 100 % size (no “fit to page”), on matt paper, at least 3 cm wide. Test-scan one card before printing many."
+  },
+  "info": {
+    "title": "Restaurant info",
+    "description": "What guests see under “Info & opening hours” on your menu.",
+    "about": "About and contact",
+    "about_hint": "Leave a field empty to hide it.",
+    "description_label": "Short description",
+    "address": "Address",
+    "maps": "Map link",
+    "phone": "Phone",
+    "email": "Email",
+    "socials": "Social media and website",
+    "social": {
+      "facebook": "Facebook",
+      "instagram": "Instagram",
+      "tiktok": "TikTok",
+      "x": "X",
+      "youtube": "YouTube",
+      "website": "Website"
+    },
+    "wifi_name": "Network name",
+    "wifi_password": "Password",
+    "show_wifi": "Show Wi-Fi on the menu",
+    "saved": "Saved. Guests see it now.",
+    "hours": "Opening hours",
+    "hours_hint": "Add a second time for a break. A closing time earlier than the opening time runs past midnight.",
+    "hours_for": "Hours for",
+    "all_branches": "All branches",
+    "uses_restaurant_hours": "This branch uses the hours for all branches. Add times to give it its own.",
+    "use_restaurant_hours": "Use the hours for all branches",
+    "days": {
+      "0": "Sunday",
+      "1": "Monday",
+      "2": "Tuesday",
+      "3": "Wednesday",
+      "4": "Thursday",
+      "5": "Friday",
+      "6": "Saturday"
+    },
+    "opens": "{{day}} opens",
+    "closes": "{{day}} closes",
+    "next_day": "next day",
+    "remove_time": "Remove a time on {{day}}",
+    "closed": "Closed",
+    "add_time": "Add hours",
+    "add_break": "Add time after a break",
+    "copy_weekdays": "Copy to Tuesday–Friday",
+    "save_hours": "Save hours",
+    "hours_saved": "Opening hours saved.",
+    "closures": "Holidays and closed days",
+    "closures_hint": "Guests see “Closed today” and a notice before the dates.",
+    "no_closures": "No closed days planned.",
+    "from": "From",
+    "to": "To (optional)",
+    "note": "Note",
+    "note_placeholder": "e.g. Timket holiday",
+    "add_closure": "Add",
+    "remove_closure": "Remove closure on {{date}}"
   }
 }

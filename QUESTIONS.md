@@ -103,6 +103,9 @@ New rules added by the owner (now in PLAN.md §2): Docker is for local developme
 | 77 | QR code format | 8 characters from `23456789ABCDEFGHJKMNPQRSTUVWXYZ` (no 0/O, 1/I/L): easy to read aloud and type from the small text under each code. Codes are soft-deleted, never reused. Each restaurant gets one code for the whole restaurant; each new branch and each table gets its own. Extra codes (window, flyer) can be added and deleted. |
 | 78 | Branch price for items with sizes | A branch can set its own **price for items without sizes**, and sold-out / hidden for any item; **items with sizes keep the main prices** at every branch (simpler screen). Per-size branch prices can be added later (`item_variant_id` column planned in §4.6). |
 | 79 | Branch addresses | Main branch = `/{restaurant}`; other branches = `/{restaurant}/{branch}` with their own static page; a switch between branches shows on the guest page when there is more than one active branch. A restaurant-level QR code opens the main branch (#38). |
+| 80 | Open / closed on the guest page | Worked out **in the browser** from the hours and closures embedded in the static page, in the restaurant's time zone (PLAN §2). Shows "Open now · until 22:00", "Closed · opens tomorrow 08:00", "Closed · opens Sun 08:00" or "Closed today". The logic lives in `backend/resources/public-menu/hours.js` and is unit-tested by Vitest. Known limit: the "opens …" hint doesn't skip future holidays (it does show "Closed today" on them). |
+| 81 | Branch info | A branch's own address, map link and phone replace the restaurant's on that branch's page; WhatsApp, Telegram, e-mail, social links and Wi-Fi are shared. Hours: a branch's own week if set, otherwise the restaurant's. |
+| 82 | Wi-Fi on the menu | Off by default; the owner switches it on. The password is shown as text (tap-and-hold to copy) — no copy button, to keep the page script under 5 KB. |
 
 ## Open
 

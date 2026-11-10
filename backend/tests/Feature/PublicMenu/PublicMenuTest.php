@@ -187,8 +187,8 @@ it('keeps the demo menu page within the 30 KB budget (PLAN.md §15.1)', function
     $gzip = strlen((string) gzencode((string) $html, 9));
 
     expect($gzip)->toBeLessThanOrEqual(30 * 1024);
-    preg_match('#<script>(.*?)</script>#s', (string) $html, $js);
-    expect(strlen($js[1] ?? ''))->toBeLessThan(5 * 1024);  // inline JS under 5 KB (§15.2.2)
+    expect(preg_match('#<script>(.*?)</script>#s', (string) $html, $js))->toBe(1);
+    expect(strlen($js[1]))->toBeLessThan(5 * 1024);  // inline JS under 5 KB (§15.2.2)
 });
 
 it('accepts the visit beacon without an idempotency key', function () {

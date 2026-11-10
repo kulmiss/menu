@@ -1,6 +1,6 @@
 # Handover
 
-_Last updated: 2026-11-10 19:10 EAT. Clean stopping point after Partition 6 (PR #10)._
+_Last updated: 2026-11-10 21:40 EAT. Clean stopping point after Partition 7 (PR #11)._
 
 > **Speed is the top priority (owner, 2026-11-10): PLAN.md §15 applies to every partition and every partition report includes the §15.5 numbers.**
 > **English only for now (owner, 2026-11-10):** texts stay in `t()` / `__()` and the database keeps per-language fields; language switches and translation screens are hidden while one language is enabled.
@@ -16,9 +16,19 @@ _Last updated: 2026-11-10 19:10 EAT. Clean stopping point after Partition 6 (PR 
 | Settings + 2FA; English only | `feat/settings` | #7 | CI green, contained |
 | 4 Customer menu page | `feat/public-menu` | #8 | CI green, contained |
 | 5 Appearance + live preview | `feat/appearance` | #9 | CI green, contained (still open on GitHub on 2026-11-10 18:05) |
-| **6 Branches + QR codes** | `feat/branches-qr` | **#10** | newest |
+| 6 Branches + QR codes | `feat/branches-qr` | #10 | CI green, contained |
+| **7 Restaurant info + hours** | `feat/info-hours` | **#11** | newest |
 
-**Merge only the newest PR (#10)** with *Create a merge commit*; it contains all earlier ones.
+**Merge only the newest PR (#11)** with *Create a merge commit*; it contains all earlier ones.
+
+## What Partition 7 contains (PR #11)
+- Tables `tenant_profiles`, `opening_hours` (breaks, past midnight; per branch or restaurant-wide), `closures`.
+- API `GET/PUT profile`, `GET/PUT hours[?branch_id]` (overlap check), `GET/POST/DELETE closures`; owners and managers.
+- Guest page: open/closed pill (browser-side, restaurant time zone, `hours.js`), closure notices, "Info & opening hours" section (about, week table, address + map, call/WhatsApp/Telegram/e-mail, socials, Wi-Fi when switched on).
+- Inline JS minifier is now token-aware (strings kept, comments and spacing removed): page script **5.0 KB raw / 2.3 KB gzip** — at the 5 KB limit; trim before adding more guest-page JS (Partition 10 beacon: keep it tiny).
+- Fixed: the controller served a stale static copy even with static pages switched off (affected tests).
+- Admin `/admin/info`: about/contact/socials/Wi-Fi form, week editor (add break, copy Monday to Tue–Fri, next-day hint, per-branch hours), holiday list.
+- Tests: backend **202**, frontend **170** (incl. 9 unit tests of the guest hours logic). Admin first load **222.3 KB** / 225 KB: Super Admin strings must load lazily in Partition 11.
 
 ## What Partition 6 contains (PR #10)
 - Tables `branches` (every restaurant has a main branch), `dining_tables`, `qr_codes` (soft-deleted, never reused), `menu_branch`, `branch_item_overrides`.
@@ -62,7 +72,7 @@ _Last updated: 2026-11-10 19:10 EAT. Clean stopping point after Partition 6 (PR 
 Measured locally with Nginx serving the static copy (same setup as CI). Note: without gzip (`php artisan serve`) LCP rises to ~1.4 s — compression on the server matters (on by default in `.htaccess`/Nginx).
 
 ## Checks at this point
-Backend: Pint, Larastan 6, Pest **196**. Frontend: lint, Prettier, build, Vitest **158**, bundle 221.5 KB. Lighthouse CI green (demo page unchanged). Browser check of the guest page at 390 px: list, search, sheet with photo/sizes/allergens, no console errors.
+Backend: Pint, Larastan 6, Pest **202**. Frontend: lint, Prettier, build, Vitest **170**, bundle 222.3 KB. Lighthouse CI green (demo page unchanged). Browser check of the guest page at 390 px: list, search, sheet with photo/sizes/allergens, no console errors.
 
 ## Packages added in this build (all pinned by the lockfiles)
 | Package | Version | Licence | Where |
@@ -82,11 +92,11 @@ Removed: axios. Composer constraints are `~6.0.1` / `~1.9.0` (patch updates only
 Workspace can run `pnpm install`, `composer install --prefer-source` (Packagist blocked: new Composer packages need the owner's PC or the lock-entry trick used for openspout), MariaDB (`service mariadb start` after idle), Chromium (`PLAYWRIGHT_BROWSERS_PATH=/tmp/pw` with a `chromium_headless_shell-1217` → `-1243` symlink), Nginx, Lighthouse (`npx lighthouse@12.8.2 --chrome-path=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome`).
 
 ## Next steps (in order)
-7 Restaurant info + hours → 8 Translations (deferred; note only) → 9 Promotions → 10 Insights (beacon counting) → 11 Super Admin → 12 Demo data (extend DemoSeeder) → 13 Docs (deploy, OPcache, Cloudflare, cron for `schedule:run`) → 14 Final QA → Step 4 final report.
+8 Translations (deferred; note only) → 9 Promotions → 10 Insights (beacon counting) → 11 Super Admin → 12 Demo data (extend DemoSeeder) → 13 Docs (deploy, OPcache, Cloudflare, cron for `schedule:run`) → 14 Final QA → Step 4 final report.
 Still open from §15.3: optimistic price edits in the admin.
 
 ## Blockers / owner actions
-- Merge #10 (contains #3–#9).
+- Merge #11 (contains #3–#10).
 - `main` branch protection still to add.
 - Production needs the Laravel scheduler cron (`* * * * * php artisan schedule:run`) for `menu:refresh-pages` (documented in Partition 13).
 
@@ -94,4 +104,4 @@ Still open from §15.3: optimistic price edits in the admin.
 - shadcn-admin `e16c87f` (v2.2.1, MIT); Laravel skeleton v13.11.0 `06d016a`; design mockups https://claude.ai/artifact/HKJ6v8zV9y2b7oQoYb33B5
 
 ## Prompt for the next chat
-> Continue the Menu project in kulmiss/menu from handover.md (newest PR #10, branch feat/branches-qr). Speed is the top priority (PLAN.md §15); English only. Work through all remaining partitions (7 → 14) without stopping for my OK, then write the Step 4 final report. Same rules: stacked PRs (I merge only the newest), CI checks every PR, tests in every partition, shared hosting is the main target.
+> Continue the Menu project in kulmiss/menu from handover.md (newest PR #11, branch feat/info-hours). Speed is the top priority (PLAN.md §15); English only. Work through all remaining partitions (8 → 14) without stopping for my OK, then write the Step 4 final report. Same rules: stacked PRs (I merge only the newest), CI checks every PR, tests in every partition, shared hosting is the main target.

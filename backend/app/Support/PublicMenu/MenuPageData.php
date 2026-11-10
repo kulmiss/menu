@@ -7,14 +7,17 @@ use App\Models\AddonOption;
 use App\Models\Branch;
 use App\Models\BranchItemOverride;
 use App\Models\Category;
+use App\Models\Closure;
 use App\Models\Item;
 use App\Models\ItemVariant;
 use App\Models\Media;
 use App\Models\Menu;
 use App\Models\MenuSchedule;
+use App\Models\OpeningHour;
 use App\Models\Tag;
 use App\Models\Tenant;
 use App\Models\TenantAppearance;
+use App\Models\TenantProfile;
 use App\Tenancy\CurrentTenant;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -76,6 +79,16 @@ class MenuPageData
                     }
                 }
             }
+
+            // Opening hours: the branch's own, else the restaurant's; closures still to come.
+            $allHours = OpeningHour::whereNull('branch_id')->orWhere('branch_id', $branchId)->orderBy('weekday')->orderBy('opens_at')->get();
+            $own = $allHours->where('branch_id', $branchId);
+            $hours = ($branchId !== null && $own->isNotEmpty() ? $own : $allHours->whereNull('branch_id'))
+                ->map(fn (OpeningHour $h) => [$h->weekday, substr($h->opens_at, 0, 5), substr($h->closes_at, 0, 5)])->values()->all();
+            $today = now($tenant->timezone)->toDateString();
+            $closures = Closure::where('ends_on', '>=', $today)->where(fn ($q) => $q->whereNull('branch_id')->orWhere('branch_id', $branchId))
+                ->orderBy('starts_on')->get();
+            $profile = TenantProfile::current();
 
             $tagsUsed = [];
             $money = fn (?int $minor): string => $theme['show_prices'] ? self::money($minor, $tenant->currency_code) : '';
@@ -140,6 +153,14 @@ class MenuPageData
                     'current' => $b->id === $branchId,
                 ])->values()->all() : [],
                 'canonical' => $branch ? $branch->path($tenant) : '/'.$tenant->slug,
+                'hours' => $hours,
+                'closures' => $closures->map(fn (Closure $c) => [$c->starts_on->toDateString(), $c->ends_on->toDateString()])->values()->all(),
+                'week' => self::week($hours),
+                'notices' => $closures->take(3)->map(fn (Closure $c) => [
+                    'dates' => $c->starts_on->equalTo($c->ends_on) ? $c->starts_on->format('D j M') : $c->starts_on->format('D j M').' – '.$c->ends_on->format('D j M'),
+                    'note' => $text($c->note),
+                ])->values()->all(),
+                'info' => self::info($profile, $branch, $text),
                 'locale' => $locale,
                 'menus' => $menuRows,
                 'tags' => $tagsUsed,
@@ -147,6 +168,64 @@ class MenuPageData
                 'items_count' => array_sum(array_map(fn ($m) => array_sum(array_map(fn ($c) => count($c['items']), $m['categories'])), $menuRows)),
             ];
         });
+    }
+
+    /**
+     * Opening hours per day for the info section, Monday first.
+     *
+     * @param  list<array{0: int, 1: string, 2: string}>  $hours
+     * @return list<array{day: string, times: string}>
+     */
+    private static function week(array $hours): array
+    {
+        if ($hours === []) {
+            return [];
+        }
+        $rows = [];
+        foreach ([1, 2, 3, 4, 5, 6, 0] as $wd) {
+            $times = array_map(fn ($h) => $h[1].'–'.$h[2], array_filter($hours, fn ($h) => $h[0] === $wd));
+            $rows[] = ['day' => __('public.days.'.$wd), 'times' => $times === [] ? __('public.closed') : implode(', ', $times)];
+        }
+
+        return $rows;
+    }
+
+    /**
+     * Contact and Wi-Fi for the info section; a branch's address and phone
+     * win over the restaurant's.
+     *
+     * @param  callable(array<string, string>|null): string  $text
+     * @return array<string, mixed>
+     */
+    private static function info(TenantProfile $p, ?Branch $branch, callable $text): array
+    {
+        $address = $branch && ! $branch->is_default && $text($branch->address) !== '' ? $text($branch->address) : $text($p->address);
+        $maps = $branch && ! $branch->is_default && $branch->maps_url ? $branch->maps_url
+            : ($p->maps_url ?: ($p->lat !== null && $p->lng !== null ? 'https://www.google.com/maps/search/?api=1&query='.$p->lat.','.$p->lng : null));
+        $phone = $branch && ! $branch->is_default && $branch->phone ? $branch->phone : $p->phone;
+        $digits = fn (?string $v): string => (string) preg_replace('/\D+/', '', (string) $v);
+
+        $links = array_values(array_filter([
+            $phone ? ['label' => __('public.call'), 'href' => 'tel:'.preg_replace('/[^0-9+]/', '', $phone), 'text' => $phone] : null,
+            $p->whatsapp ? ['label' => 'WhatsApp', 'href' => 'https://wa.me/'.$digits($p->whatsapp), 'text' => $p->whatsapp] : null,
+            $p->telegram ? ['label' => 'Telegram', 'href' => 'https://t.me/'.$p->telegram, 'text' => '@'.$p->telegram] : null,
+            $p->email ? ['label' => __('public.email'), 'href' => 'mailto:'.$p->email, 'text' => $p->email] : null,
+        ]));
+        $socials = [];
+        foreach (TenantProfile::SOCIALS as $key) {
+            if (! empty($p->socials[$key])) {
+                $socials[] = ['label' => __('public.socials.'.$key), 'href' => $p->socials[$key]];
+            }
+        }
+
+        return [
+            'about' => $text($p->description),
+            'address' => $address,
+            'maps' => $maps,
+            'links' => $links,
+            'socials' => $socials,
+            'wifi' => $p->show_wifi && $p->wifi_name ? ['name' => $p->wifi_name, 'password' => $p->wifi_password] : null,
+        ];
     }
 
     /** "Br 120" / "Br 120.50" — decimals only when needed (PLAN.md §11). */

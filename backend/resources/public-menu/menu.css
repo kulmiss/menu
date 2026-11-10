@@ -50,6 +50,24 @@ li[hidden],section[hidden]{display:none}
 .L-large .im{width:100%;height:auto;aspect-ratio:16/9;border-radius:1rem}
 .L-large li{padding-bottom:.5rem}
 .nr{color:var(--mu);padding:2rem 0;text-align:center}
+
+.st{display:inline-block;margin-top:.35rem;font-size:.8rem;font-weight:600;padding:.1rem .55rem;border-radius:99px;background:var(--card);border:1px solid var(--ln);color:var(--mu)}
+.st.op{color:#0f6b3a;border-color:#0f6b3a33;background:#0f6b3a14}
+@media (prefers-color-scheme:dark){.st.op{color:#6fd39b}}
+.nt{max-width:44rem;margin:.25rem auto 0;padding:.5rem 1rem;font-size:.875rem;background:var(--card);border-inline-start:3px solid var(--a)}
+.inf{margin-top:2rem;border-top:1px solid var(--ln);padding-top:1rem}
+.inf summary{cursor:pointer;font-weight:600;min-height:2.75rem;display:flex;align-items:center;list-style:none}
+.inf summary::after{content:"+";margin-inline-start:auto;font-size:1.25rem;color:var(--mu)}
+.inf[open] summary::after{content:"\2212"}
+.inf h3{font-size:.95rem;margin:1rem 0 .3rem}
+.inf table{border-collapse:collapse;font-size:.9rem}
+.inf th{text-align:start;font-weight:400;color:var(--mu);padding:.15rem 1.25rem .15rem 0}
+.inf td{padding:.15rem 0}
+.ln{list-style:none;margin:0;padding:0}
+.ln li{border:0;padding:.2rem 0}
+.inf a{color:var(--a);text-underline-offset:2px}
+.pw{user-select:all}
+.ab{white-space:pre-line}
 footer{color:var(--mu);font-size:.8rem;text-align:center;padding:2.5rem 0 3rem}
 dialog{position:fixed;border:0;padding:0;margin:auto auto 0;width:100%;max-width:44rem;max-height:92vh;border-radius:1rem 1rem 0 0;background:var(--bg);color:var(--fg)}
 dialog::backdrop{background:#0008}

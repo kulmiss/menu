@@ -2,10 +2,14 @@
 // Nothing heavy runs before the first paint: one delegated click handler now,
 // everything else on the next idle moment.
 (function () {
-  var d = document, w = window, D, dl = d.getElementById('s'), body = d.getElementById('sb'), seen = {};
+  var d = document, w = window, D, seen = {};
+  var id = function (x) { return d.getElementById(x); };
+  var on = function (e, n, f, o) { e.addEventListener(n, f, o); };
+  var dl = id('s'), body = id('sb');
+  var add = function (e) { body.appendChild(e); return e; };
   var $ = function (s, r) { return (r || d).querySelectorAll(s); };
   var el = function (t, c, x) { var e = d.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
-  var data = function () { return D || (D = JSON.parse(d.getElementById('d').textContent)); };
+  var data = function () { return D || (D = JSON.parse(id('d').textContent)); };
   var later = w.requestIdleCallback || function (f) { setTimeout(f, 1); };
 
   // Item details sheet, built from the data embedded in the page.
@@ -14,51 +18,50 @@
   function open(li) {
     var x = data().c[li.dataset.i] || {}, T = D.t;
     body.textContent = '';
-    if (x.i) { var im = el('img'); im.src = x.i; im.alt = ''; im.width = 1280; im.height = 853; body.appendChild(im); }
-    body.appendChild(el('h3', '', li.querySelector('.nm').textContent));
-    var pr = li.querySelector('.pr'); if (pr) body.appendChild(el('div', 'pr', pr.textContent));
-    if (x.d) body.appendChild(el('p', '', x.d));
-    if (x.v) { body.appendChild(el('h4', '', T.sz)); x.v.forEach(function (v) { body.appendChild(row(v[0], v[1])); }); }
+    if (x.i) { var im = el('img'); im.src = x.i; im.alt = ''; im.width = 1280; im.height = 853; add(im); }
+    add(el('h3', '', li.querySelector('.nm').textContent));
+    var pr = li.querySelector('.pr'); if (pr) add(el('div', 'pr', pr.textContent));
+    if (x.d) add(el('p', '', x.d));
+    if (x.v) { add(el('h4', '', T.sz)); x.v.forEach(function (v) { add(row(v[0], v[1])); }); }
     (x.a || []).forEach(function (g) {
-      body.appendChild(el('h4', '', g[0]));
+      add(el('h4', '', g[0]));
       var h = g[2] ? (g[1] === g[2] ? T.ex.replace(':count', g[2]) : g[1] ? T.ch.replace(':min', g[1]).replace(':max', g[2]) : T.up.replace(':max', g[2])) : '';
-      if (h) body.appendChild(el('div', 'mu', h));
-      g[3].forEach(function (o) { body.appendChild(row(o[0], o[1], o[2])); });
+      if (h) add(el('div', 'mu', h));
+      g[3].forEach(function (o) { add(row(o[0], o[1], o[2])); });
     });
-    if (x.al) { body.appendChild(el('h4', '', T.al)); body.appendChild(el('div', '', x.al.join(', '))); }
+    if (x.al) { add(el('h4', '', T.al)); add(el('div', '', x.al.join(', '))); }
     var m = [];
     if (x.k) m.push(T.kc.replace(':count', x.k));
     if (x.p) m.push(T.pm.replace(':count', x.p));
-    if (m.length) body.appendChild(el('p', 'mu', m.join(' · ')));
+    if (m.length) add(el('p', 'mu', m.join(' · ')));
     if (dl.showModal) dl.showModal(); else dl.setAttribute('open', '');
   }
-  d.addEventListener('click', function (e) {
+  on(d, 'click', function (e) {
     var b = e.target.closest && e.target.closest('.it');
     if (b) open(b.parentNode);
     else if (e.target.id === 'sx' || e.target === dl) dl.close();
   });
   ['pointerover', 'touchstart'].forEach(function (n) {
-    d.addEventListener(n, function (e) { var b = e.target.closest && e.target.closest('.it'); if (b) big(b.parentNode.dataset.i); }, { passive: true });
+    on(d, n, function (e) { var b = e.target.closest && e.target.closest('.it'); if (b) big(b.parentNode.dataset.i); }, { passive: true });
   });
 
   later(function () {
     data();
-    // Menus served at set times: label the ones not on now (restaurant's time zone).
+    // Menus served at set times, and the open / closed pill (restaurant's time zone).
     try {
-      var p = {};
-      new Intl.DateTimeFormat('en-GB', { timeZone: D.z, weekday: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(new Date()).forEach(function (x) { p[x.type] = x.value; });
-      var wd = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(p.weekday), now = p.hour + ':' + p.minute;
-      $('.mn[data-s]').forEach(function (m) {
-        m.classList.toggle('off', !JSON.parse(m.dataset.s).some(function (s) {
-          var a = s[1], b = s[2];
-          if (a < b) return s[0] === wd && now >= a && now < b;
-          return (s[0] === wd && now >= a) || (s[0] === (wd + 6) % 7 && now < b);
-        }));
-      });
+      var n = mhNow(D.z), T = D.t;
+      $('.mn[data-s]').forEach(function (m) { m.classList.toggle('off', !mhIn(JSON.parse(m.dataset.s), n)); });
+      var st = mhState(D.h || [], D.x || [], n), pill = id('st');
+      if (st && pill) {
+        pill.textContent = st[0] === 2 ? T.ct : st[0] === 1 ? T.on.replace(':time', st[1]) : st[1] == null ? T.cl
+          : T.cl + ' · ' + (st[2] === 0 ? T.oa : st[2] === 1 ? T.ot : T.od.replace(':day', T.dn[(n.w + st[2]) % 7])).replace(':time', st[1]);
+        pill.className = 'st' + (st[0] === 1 ? ' op' : '');
+        pill.hidden = false;
+      }
     } catch (e) {}
 
     // Search and tag filters.
-    var q = d.getElementById('q'), tag = '', items = $('li[data-i]');
+    var q = id('q'), tag = '', items = $('li[data-i]');
     function filter() {
       var s = q.value.trim().toLowerCase(), any = 0;
       items.forEach(function (li) {
@@ -67,11 +70,11 @@
         li.hidden = !ok; any |= ok;
       });
       $('section').forEach(function (sec) { sec.hidden = !sec.querySelector('li:not([hidden])'); });
-      d.getElementById('nr').hidden = !!any;
+      id('nr').hidden = !!any;
     }
-    q.addEventListener('input', filter);
+    on(q, 'input', filter);
     $('[data-tag]').forEach(function (b) {
-      b.addEventListener('click', function () {
+      on(b, 'click', function () {
         tag = tag === b.dataset.tag ? '' : b.dataset.tag;
         $('[data-tag]').forEach(function (x) { x.setAttribute('aria-pressed', x.dataset.tag === tag); });
         filter();
@@ -95,8 +98,8 @@
       $('section[id]').forEach(function (s) { io.observe(s); });
     }
 
-    function off() { d.getElementById('of').hidden = navigator.onLine; }
-    w.addEventListener('online', off); w.addEventListener('offline', off); off();
+    function off() { id('of').hidden = navigator.onLine; }
+    on(w, 'online', off); on(w, 'offline', off); off();
   });
 
   // A QR scan arrives as #q=CODE: remember it for the beacon, then tidy the address.
@@ -104,7 +107,7 @@
   if (scan && history.replaceState) history.replaceState(null, '', location.pathname + location.search);
 
   // Service worker and the visit beacon after load.
-  w.addEventListener('load', function () {
+  on(w, 'load', function () {
     if (data().p) return; // admin preview: no service worker, no visit counted
     later(function () {
       if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(function () {});

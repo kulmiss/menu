@@ -14,11 +14,16 @@
         'id' => $tenant->id,
         'p' => $preview ? 1 : 0,
         'z' => $timezone,
+        'h' => $hours,
+        'x' => $closures,
         'c' => (object) $sheets,
         't' => [
             'so' => __('public.sold_out'), 'sz' => __('public.sizes'), 'al' => __('public.allergens_title'),
             'kc' => __('public.calories'), 'pm' => __('public.prep'), 'ch' => __('public.choose'),
             'up' => __('public.choose_up_to'), 'ex' => __('public.choose_exactly'),
+            'on' => __('public.open_until'), 'cl' => __('public.closed'), 'ct' => __('public.closed_today'),
+            'oa' => __('public.opens_at'), 'ot' => __('public.opens_tomorrow'), 'od' => __('public.opens_day'),
+            'dn' => array_map(fn ($i) => __('public.days_short.'.$i), range(0, 6)),
         ],
     ];
 
@@ -51,8 +56,10 @@
 <header>
 @if ($theme['logo'])<img class="lg" src="{{ $theme['logo']['320'] ?? '' }}" alt="" width="56" height="56">@endif
 <div><h1>{{ $tenant->name }}</h1>
-@if ($branch)<p class="sub">{{ $branch }}</p>@endif</div>
+@if ($branch)<p class="sub">{{ $branch }}</p>@endif
+<p class="st" id="st" hidden></p></div>
 </header>
+@foreach ($notices as $n)<p class="nt">{{ __('public.closed_on', ['dates' => $n['dates']]) }}@if ($n['note'] !== '') · {{ $n['note'] }}@endif</p>@endforeach
 @if ($branches)
 <nav class="ch bs" aria-label="{{ __('public.branches') }}">@foreach ($branches as $b)<a href="{{ $b['path'] }}"@if ($b['current']) class="on" aria-current="page"@endif>{{ $b['name'] }}</a>@endforeach</nav>
 @endif
@@ -102,6 +109,16 @@
 @endforelse
 <p class="nr" id="nr" hidden>{{ __('public.no_results') }}</p>
 </main>
+@if ($week || $info['address'] || $info['links'] || $info['about'] || $info['wifi'] || $info['socials'])
+<details class="inf w" id="info"><summary>{{ __('public.info') }}</summary>
+@if ($info['about'] !== '')<p class="ab">{{ $info['about'] }}</p>@endif
+@if ($week)<h3>{{ __('public.hours') }}</h3><table>@foreach ($week as $row)<tr><th scope="row">{{ $row['day'] }}</th><td>{{ $row['times'] }}</td></tr>@endforeach</table>@endif
+@if ($info['address'] !== '' || $info['maps'])<h3>{{ __('public.address') }}</h3>@if ($info['address'] !== '')<p>{{ $info['address'] }}</p>@endif @if ($info['maps'])<p><a href="{{ $info['maps'] }}" rel="noopener" target="_blank">{{ __('public.open_maps') }}</a></p>@endif @endif
+@if ($info['links'])<h3>{{ __('public.contact') }}</h3><ul class="ln">@foreach ($info['links'] as $l)<li><a href="{{ $l['href'] }}" rel="noopener">{{ $l['label'] }}: {{ $l['text'] }}</a></li>@endforeach</ul>@endif
+@if ($info['wifi'])<h3>Wi-Fi</h3><p>{{ __('public.wifi_name') }}: <b>{{ $info['wifi']['name'] }}</b>@if ($info['wifi']['password'])<br>{{ __('public.wifi_password') }}: <b class="pw">{{ $info['wifi']['password'] }}</b>@endif</p>@endif
+@if ($info['socials'])<ul class="ln so2">@foreach ($info['socials'] as $l)<li><a href="{{ $l['href'] }}" rel="noopener" target="_blank">{{ $l['label'] }}</a></li>@endforeach</ul>@endif
+</details>
+@endif
 <footer>{{ __('public.powered', ['app' => config('app.name')]) }}</footer>
 <dialog id="s" aria-label="{{ $tenant->name }}"><div class="sh" id="sb"></div><button type="button" class="x" id="sx" aria-label="{{ __('public.close') }}">×</button></dialog>
 <div class="of" id="of" hidden>{{ __('public.offline') }}</div>

@@ -54,7 +54,7 @@ class PublicMenuController extends Controller
 
         // A server without the rewrite rules still gets the fast path.
         $cached = MenuPageCache::path($tenant->slug, $place?->slug);
-        $html = is_file($cached) ? (string) file_get_contents($cached) : null;
+        $html = MenuPageCache::enabled() && is_file($cached) ? (string) file_get_contents($cached) : null;
         if ($html === null) {
             $html = view('public.menu', $data->build($tenant, null, $place))->render();
             MenuPageCache::write($tenant->slug, $html, $place?->slug);

@@ -53,6 +53,19 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      // The guest page's own scripts (Blade-inlined), for their unit tests.
+      '@public-menu': path.resolve(
+        __dirname,
+        '../backend/resources/public-menu'
+      ),
+    },
+  },
+  server: {
+    fs: {
+      allow: [
+        path.resolve(__dirname, '.'),
+        path.resolve(__dirname, '../backend/resources/public-menu'),
+      ],
     },
   },
   test: {

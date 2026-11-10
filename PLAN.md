@@ -1,6 +1,6 @@
 # PLAN — Digital menu SaaS
 
-Status: **approved; in build (Partitions 1–6 done).** Progress is in [handover.md](handover.md). **Speed is the top priority** — see §15, which wins over any older figure in this file.
+Status: **approved; in build (Partitions 1–7 done).** Progress is in [handover.md](handover.md). **Speed is the top priority** — see §15, which wins over any older figure in this file.
 Decisions behind this plan are in [QUESTIONS.md](QUESTIONS.md). Progress and next steps are in [handover.md](handover.md).
 
 ---
@@ -277,7 +277,7 @@ Ready for more languages later without rewriting:
 | 4 ✅ | **Customer menu page** (PR #8) | Blade page rendered to **static files served without PHP**, inline CSS, ≤ 5 KB JS, layouts, search/filter, item sheet, service worker, beacon after load, SEO, `/q/{code}` without the database | HTML tests, **30 KB budget, Lighthouse CI**, JS units, query counts |
 | 5 ✅ | **Appearance + live preview** (PR #9) | appearance settings, themes, fonts, contrast guard, preview iframe | contrast unit, preview render |
 | 6 ✅ | **Branches + QR codes** (PR #10) | branches, overrides, tables, QR PNG/SVG/PDF, table cards | overrides resolution, PDF render |
-| 7 | **Restaurant info + hours** | profile, contacts, Wi-Fi, hours with breaks/overnight, closures | hours units (incl. midnight) |
+| 7 ✅ | **Restaurant info + hours** (PR #11) | profile, contacts, Wi-Fi, hours with breaks/overnight, closures | hours units (incl. midnight) |
 | 8 | **Translations** — *deferred (English only, §11)* | languages, translation grid, fallback; hidden while one language | fallback, missing filter |
 | 9 | **Promotions** | specials/announcements, badges | date windows |
 | 10 | **Insights** | stats aggregation, charts, scans per table | counting, bot filter |

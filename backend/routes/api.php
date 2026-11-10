@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\Menu\MenuController;
 use App\Http\Controllers\Api\Menu\TagController;
 use App\Http\Controllers\Api\Restaurant\AppearanceController;
 use App\Http\Controllers\Api\Restaurant\BranchController;
+use App\Http\Controllers\Api\Restaurant\InfoController;
 use App\Http\Controllers\Api\Restaurant\QrCodeController;
 use App\Http\Controllers\Api\TeamController;
 use App\Http\Controllers\Api\TenantController;
@@ -112,6 +113,14 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::patch('qr-codes/{qr}', [QrCodeController::class, 'update']);
             Route::delete('qr-codes/{qr}', [QrCodeController::class, 'destroy']);
             Route::get('qr-codes/{qr}.{format}', [QrCodeController::class, 'download'])->whereIn('format', ['svg', 'png', 'pdf']);
+
+            Route::get('profile', [InfoController::class, 'profile']);
+            Route::put('profile', [InfoController::class, 'saveProfile']);
+            Route::get('hours', [InfoController::class, 'hours']);
+            Route::put('hours', [InfoController::class, 'saveHours']);
+            Route::get('closures', [InfoController::class, 'closures']);
+            Route::post('closures', [InfoController::class, 'addClosure']);
+            Route::delete('closures/{closure}', [InfoController::class, 'deleteClosure']);
 
             Route::get('appearance', [AppearanceController::class, 'show']);
             Route::put('appearance', [AppearanceController::class, 'update']);
