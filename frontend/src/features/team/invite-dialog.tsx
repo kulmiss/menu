@@ -3,8 +3,8 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2, Send } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { toast } from 'sonner'
 import { applyFieldErrors } from '@/lib/api'
+import { toast } from '@/lib/toast'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,

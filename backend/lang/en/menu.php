@@ -34,6 +34,7 @@ return [
         'menus' => 'menus',
         'items' => 'items',
         'branches' => 'branches',
+        'tables' => 'tables',
         'languages' => 'languages',
         'photos' => 'photos',
         'members' => 'team members',

@@ -1,18 +1,18 @@
-import am from '@/locales/am/common.json'
-import ar from '@/locales/ar/common.json'
 import en from '@/locales/en/common.json'
-import so from '@/locales/so/common.json'
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
 
-export const LANGUAGES = [
+/**
+ * Interface languages. English only for now (owner, 2026-11-10; QUESTIONS
+ * #15). Every text already goes through t(): adding a language is a new
+ * src/locales/<code>/common.json plus a line here — the language switch
+ * appears by itself once there are two.
+ */
+export const LANGUAGES: readonly { code: string; dir: 'ltr' | 'rtl' }[] = [
   { code: 'en', dir: 'ltr' },
-  { code: 'so', dir: 'ltr' },
-  { code: 'am', dir: 'ltr' },
-  { code: 'ar', dir: 'rtl' },
-] as const
+]
 
-export type LanguageCode = (typeof LANGUAGES)[number]['code']
+export type LanguageCode = string
 
 const STORAGE_KEY = 'ui_language'
 
@@ -38,22 +38,62 @@ export function persistLanguage(code: LanguageCode) {
   }
 }
 
+// English ships with the app; other languages download when chosen, so
+// each visit loads only one translation file (PLAN.md §15).
+const loaders = import.meta.glob<{ default: Record<string, unknown> }>(
+  '../locales/*/common.json'
+)
 /** True while a locale file is still an unreviewed machine draft. */
 export function isDraftLanguage(code: string): boolean {
-  const bundle = i18n.getResourceBundle(code, 'common') as
-    | { _status?: string }
-    | undefined
-  return bundle?._status === 'machine_draft'
+  // Read from the files at build time (vite.config.ts), so the "(draft)"
+  // label needs no translation download.
+  return __LOCALE_STATUS__[code] === 'machine_draft'
+}
+
+/** Makes sure a language's texts are loaded. */
+export async function loadLanguage(code: string): Promise<void> {
+  if (code === 'en' || i18n.hasResourceBundle(code, 'common')) return
+  const loader = loaders[`../locales/${code}/common.json`]
+  if (!loader) return
+  const bundle = (await loader()).default
+  i18n.addResourceBundle(code, 'common', bundle, true, true)
+}
+
+// Texts of the restaurant screens (menu editor, branches, settings…) are a
+// second file, loaded in parallel with the admin area rather than in the
+// first download (PLAN.md §15.6). Same "common" namespace, so t() calls
+// don't change.
+const screenLoaders = import.meta.glob<{ default: Record<string, unknown> }>(
+  '../locales/*/screens.json'
+)
+const screensLoaded = new Map<string, Promise<void>>()
+
+/** Makes sure the screen texts of a language (default: current) are loaded. */
+export function loadScreenTexts(
+  code: string = i18n.language || 'en'
+): Promise<void> {
+  const known = screensLoaded.get(code)
+  if (known) return known
+  const loader = screenLoaders[`../locales/${code}/screens.json`]
+  const promise = loader
+    ? loader().then((m) => {
+        i18n.addResourceBundle(code, 'common', m.default, true, false)
+      })
+    : Promise.resolve()
+  screensLoaded.set(code, promise)
+  return promise
+}
+
+/** Loads a language, then switches the interface to it. */
+export async function setLanguage(code: LanguageCode): Promise<void> {
+  await Promise.all([loadLanguage(code), loadScreenTexts(code)])
+  await i18n.changeLanguage(code)
 }
 
 void i18n.use(initReactI18next).init({
-  resources: {
-    en: { common: en },
-    so: { common: so },
-    am: { common: am },
-    ar: { common: ar },
-  },
-  lng: storedLanguage(),
+  resources: { en: { common: en } },
+  partialBundledLanguages: true,
+  lng: 'en',
   fallbackLng: 'en',
   defaultNS: 'common',
   ns: ['common'],
@@ -65,5 +105,13 @@ i18n.on('languageChanged', (lng) => {
   document.documentElement.setAttribute('lang', lng)
 })
 document.documentElement.setAttribute('lang', i18n.language)
+
+/** Resolves once the remembered language is loaded (render after this). */
+export const i18nReady: Promise<void> = (() => {
+  const stored = storedLanguage()
+  return stored === 'en'
+    ? Promise.resolve()
+    : setLanguage(stored).catch(() => undefined)
+})()
 
 export default i18n

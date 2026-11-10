@@ -18,8 +18,51 @@
     RewriteCond %{REQUEST_URI} (.+)/$
     RewriteRule ^ %1 [L,R=301]
 
+    # QR links: one redirect from a pre-built map, no Laravel (PLAN.md §15.2.11).
+    RewriteRule ^[qQ]/([A-Za-z0-9]{8})$ qr.php?c=$1 [L]
+
+    # Guest menu pages: send the static copy without starting PHP (PLAN.md §15.2.1).
+    # Needs public/ as the document root (see docs/deploy.md).
+    RewriteCond %{REQUEST_METHOD} ^(GET|HEAD)$
+    RewriteCond %{QUERY_STRING} ^$
+    RewriteCond %{REQUEST_URI} ^/([a-z0-9-]+)$
+    RewriteCond %{DOCUMENT_ROOT}/menu-cache/%1/index.html -f
+    RewriteRule ^ menu-cache/%1/index.html [L]
+    RewriteCond %{REQUEST_METHOD} ^(GET|HEAD)$
+    RewriteCond %{QUERY_STRING} ^$
+    RewriteCond %{REQUEST_URI} ^/([a-z0-9-]+)/([a-z0-9-]+)$
+    RewriteCond %{DOCUMENT_ROOT}/menu-cache/%1/%2/index.html -f
+    RewriteRule ^ menu-cache/%1/%2/index.html [L]
+
     # Send Requests To Front Controller...
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
+
+# ---- Speed (PLAN.md §15) -------------------------------------------------
+# Hashed admin assets and photos never change under the same URL (new
+# uploads get a new folder), so browsers and CDNs may keep them for a year.
+<IfModule mod_headers.c>
+    <If "%{REQUEST_URI} =~ m#^/(app/assets|media|menu-assets)/#">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </If>
+    # Guest pages may change any minute: always check (the ETag makes it cheap).
+    <If "%{REQUEST_URI} =~ m#^/menu-cache/# || %{REQUEST_URI} == '/sw.js'">
+        Header set Cache-Control "public, max-age=0, must-revalidate"
+    </If>
+</IfModule>
+
+# Compress text responses (HTML, CSS, JS, JSON, SVG). Brotli where the host has it.
+<IfModule mod_brotli.c>
+    AddOutputFilterByType BROTLI_COMPRESS text/html text/plain text/css text/javascript application/javascript application/json image/svg+xml
+</IfModule>
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/css text/javascript application/javascript application/json image/svg+xml
+</IfModule>
+
+<IfModule mod_mime.c>
+    AddType image/avif .avif
+    AddType image/webp .webp
+</IfModule>
+

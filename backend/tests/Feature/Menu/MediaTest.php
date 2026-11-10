@@ -4,6 +4,7 @@ use App\Enums\Role;
 use App\Models\Media;
 use App\Models\Plan;
 use App\Models\Tenant;
+use App\Support\ImageProcessor;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
@@ -29,7 +30,13 @@ it('stores a photo in every size the menu needs', function () {
     [$w, $h] = getimagesizefromstring(Storage::disk('public')->get("{$media->base_path}/og.jpg"));
     expect([$w, $h])->toBe([1200, 630])
         ->and($res->json('data.dominant_color'))->toMatch('/^#[0-9a-f]{6}$/')
-        ->and($media->base_path)->toStartWith($tenant->id.'/');
+        ->and($media->base_path)->toStartWith($tenant->id.'/')
+        ->and($media->placeholder)->toStartWith('data:image/webp;base64,')
+        ->and(strlen((string) $media->placeholder))->toBeLessThan(300);
+
+    // AVIF only where GD can write it; WebP always.
+    $avif = ImageProcessor::supportsAvif();
+    expect(array_key_exists('avif640', $media->variants))->toBe($avif);
 });
 
 it('never enlarges small photos', function () {

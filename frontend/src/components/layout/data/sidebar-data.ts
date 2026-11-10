@@ -2,13 +2,17 @@ import {
   BookOpen,
   FileSpreadsheet,
   LayoutDashboard,
+  Megaphone,
+  Info,
+  MapPin,
+  QrCode,
+  Palette,
   ListPlus,
   Tags,
-  Palette,
   Settings,
+  ShieldCheck,
   UserCog,
   Users,
-  Wrench,
 } from 'lucide-react'
 import { type SidebarData } from '../types'
 
@@ -39,6 +43,12 @@ export const sidebarData: SidebarData = {
           roles: ['owner', 'manager'],
         },
         {
+          title: 'nav.promotions',
+          url: '/admin/promotions',
+          icon: Megaphone,
+          roles: ['owner', 'manager'],
+        },
+        {
           title: 'nav.import',
           url: '/admin/import',
           icon: FileSpreadsheet,
@@ -49,6 +59,30 @@ export const sidebarData: SidebarData = {
     {
       title: 'nav.restaurant',
       items: [
+        {
+          title: 'nav.info',
+          url: '/admin/info',
+          icon: Info,
+          roles: ['owner', 'manager'],
+        },
+        {
+          title: 'nav.branches',
+          url: '/admin/branches',
+          icon: MapPin,
+          roles: ['owner', 'manager'],
+        },
+        {
+          title: 'nav.qr_codes',
+          url: '/admin/qr-codes',
+          icon: QrCode,
+          roles: ['owner', 'manager'],
+        },
+        {
+          title: 'nav.appearance',
+          url: '/admin/appearance',
+          icon: Palette,
+          roles: ['owner', 'manager'],
+        },
         {
           title: 'nav.team',
           url: '/admin/team',
@@ -61,14 +95,9 @@ export const sidebarData: SidebarData = {
           items: [
             { title: 'nav.profile', url: '/admin/settings', icon: UserCog },
             {
-              title: 'nav.account',
-              url: '/admin/settings/account',
-              icon: Wrench,
-            },
-            {
-              title: 'nav.appearance',
-              url: '/admin/settings/appearance',
-              icon: Palette,
+              title: 'nav.security',
+              url: '/admin/settings/security',
+              icon: ShieldCheck,
             },
           ],
         },

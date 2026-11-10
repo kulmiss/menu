@@ -1,6 +1,6 @@
 # PLAN — Digital menu SaaS
 
-Status: **Step 2 — awaiting owner approval.** No application code yet.
+Status: **approved; in build (Partitions 1–7 and 9 done; 8 deferred).** Progress is in [handover.md](handover.md). **Speed is the top priority** — see §15, which wins over any older figure in this file.
 Decisions behind this plan are in [QUESTIONS.md](QUESTIONS.md). Progress and next steps are in [handover.md](handover.md).
 
 ---
@@ -49,6 +49,7 @@ Restaurants and cafés publish a fast, clean menu that customers open from a QR 
 - Cron (one line on cPanel): `* * * * * php /home/USER/menu/artisan schedule:run`. The scheduler runs `queue:work --stop-when-empty --max-time=50` every minute, plus the daily jobs in §8.
 - Images: **GD** via Intervention Image v3 (Imagick used automatically if present).
 - Filesystem: `public` disk rooted at `public/media` (no `storage:link`). An S3-compatible disk is a config change.
+- QR codes: **chillerlan/php-qrcode 6.0.1** (MIT/Apache-2.0; with chillerlan/php-settings-container 3.3.0, MIT). Table-card PDFs: **setasign/fpdf 1.9.0** (the original FPDF, MIT, pure PHP, no external programs or font files) — owner's decision, 2026-11-10 (QUESTIONS #75).
 
 ### 3.2 Admin + Super Admin SPA (one app)
 - Based on **shadcn-admin @ `e16c87f213a5ba5e45964e9b67c792105ec74d26`** (MIT, notice in `THIRD_PARTY_NOTICES`).
@@ -59,14 +60,14 @@ Restaurants and cafés publish a fast, clean menu that customers open from a QR 
 
 ### 3.3 Public menu
 - Blade view + one CSS file (Tailwind CLI in CI, inlined into `<head>`) + one vanilla JS file (≤ 6 KB gz, `defer`).
-- Rendered HTML cached per `tenant · branch · locale · cache_version` in the database/file cache. Any admin change bumps `tenants.cache_version`.
+- Each menu is written to a **static HTML file** (plus `.gz`/`.br`) per `tenant · branch · locale`, served by Apache/Nginx **without starting PHP** (§15.2). Any admin change bumps `tenants.cache_version` and rewrites the files.
 - Time-dependent parts (active menu by schedule, "Open now / Closed", promotion dates) are computed **in the browser** from data embedded in the page, in the restaurant's time zone. The server-rendered state (at render time) is the no-JS fallback. So caching never shows a wrong state for long.
-- Views are counted by a 1-request beacon (`navigator.sendBeacon` → `POST /api/v1/beacon`), so caching doesn't break insights. No cookies, no stored IPs.
-- **Budget (before images): ≤ 100 KB transferred.** HTML ≤ 55 KB gz (large menu), CSS ≤ 12 KB, JS ≤ 6 KB, one subset WOFF2 font ≤ 25 KB. CI fails if the demo menu page exceeds the budget.
-- Images: `<picture>` with WebP + JPEG fallback (old iOS), `srcset` 320/640/1280, `loading="lazy"`, explicit width/height, blurred 16 px placeholder colour.
+- Views are counted by a 1-request beacon (`navigator.sendBeacon` → `POST /api/v1/beacon`) sent **after the page has loaded**, so caching doesn't break insights. No cookies, no stored IPs.
+- **Budget (before images): ≤ 30 KB gzipped for HTML + CSS + JS** (hard, enforced in CI — §15). JS ≤ 5 KB. Fonts are extra and only when a custom font is chosen.
+- Images: `<picture>` with AVIF (when the server can make it) + WebP + JPEG fallback, `srcset`/`sizes` 320/640/1280, explicit width/height, inline blurred placeholder (< 300 bytes); first visible images eager with `fetchpriority="high"`, the rest `loading="lazy" decoding="async"` (§15.2).
 - SEO: `<title>`, meta description, canonical (strips `table`), Open Graph + Twitter card with the cover image (1200×630 crop), `hreflang` per enabled language, JSON-LD `Restaurant` + `Menu`, `robots.txt`, `sitemap.xml` of active restaurants.
 - Light/dark follows the phone setting (`prefers-color-scheme`), with both palettes in the inlined CSS and brand colours adjusted per mode to keep ≥ 4.5:1.
-- Fonts: curated self-hosted list (Inter, Manrope, Lora, Nunito, System). **Noto Sans Ethiopic** and **Noto Sans Arabic** load through `unicode-range`, so they download only when Amharic or Arabic text is on the page.
+- Fonts: **system fonts by default**; optional curated self-hosted list (Inter, Manrope, Lora, Nunito), subset WOFF2, preloaded, `font-display: swap`.
 
 ### 3.4 Deploy targets (documented in Partition 13)
 - **Shared hosting (cPanel):** CI produces `menu-release-<version>.zip` (vendor installed with `--no-dev`, SPA built, public CSS/JS built). Upload, point the domain's document root at `menu/public` (or copy `public/` into `public_html` with the documented `index.php` path change), set `.env`, run migrations from cPanel Terminal or the provided one-time web installer guarded by a setup token (deleted after use), add the cron line.
@@ -149,7 +150,8 @@ Conventions: `id` BIGINT unsigned; money in **minor units** (`price_minor`, ETB 
 | `tags` | tenant_id, key (system key or null), name (json, used when key is null), sort — system tags (vegan, vegetarian, spicy, halal, gluten-free, new, popular) seeded per tenant and translated by i18n |
 | `item_tag` | tenant_id, item_id, tag_id |
 | `item_allergens` | tenant_id, item_id, allergen — fixed EU-14 keys (gluten, crustaceans, eggs, fish, peanuts, soy, milk, nuts, celery, mustard, sesame, sulphites, lupin, molluscs) |
-| `branch_item_overrides` | tenant_id, branch_id, item_id, item_variant_id (null), price_minor (null = inherit), is_sold_out (null = inherit), is_hidden (null = inherit) |
+| `branch_item_overrides` | tenant_id, branch_id, item_id, price_minor (null = inherit), is_sold_out (null = inherit), is_hidden (null = inherit) |
+| `branch_variant_prices` | tenant_id, branch_id, item_variant_id, price_minor — a branch's price for one size (QUESTIONS #78) |
 
 ### 4.7 Promotions
 | Table | Key columns |
@@ -212,7 +214,7 @@ Plan limits are checked on create (and on import) server-side; over the limit af
 1. **Menu page** — cover, logo, name, open/closed pill, today's special banner; sticky category tabs (scrollspy); items in the chosen layout (list / grid / large photos) with photo, name, summary, price (or "from"), tags, sold-out state; search button; filter sheet (dietary tags, "hide allergens…"); menu switcher when several menus are active (e.g. Breakfast / Drinks).
 2. **Item sheet** — large photo, full description, variants with prices, add-on groups (min/max shown as information), allergens, calories, prep time.
 3. **Info sheet** — hours per day with breaks + holiday notice, address + "Open in Maps", phone, WhatsApp, Telegram, socials, Wi-Fi (tap to copy password).
-4. **Language switch** (enabled languages; RTL for Arabic), **branch switch** (if several).
+4. **Language switch** — hidden while the restaurant has one language (English only for now, §11); **branch switch** (if several).
 5. **States** — closed now, holiday closure, menu not scheduled now ("Breakfast starts at 07:00"), empty search, menu unavailable, 404 slug.
 6. **Terms / Privacy** pages.
 
@@ -252,14 +254,17 @@ Every minute: drain queue (emails). Hourly: purge expired idempotency keys. Dail
 - **Backend (Pest):** feature tests per endpoint (happy path, validation, each role, plan limits, idempotency replay/conflict), unit tests (hours/overnight/breaks, schedules, subscription states, price overrides, currency formatting, contrast), **tenant isolation suite** (two tenants; for every tenant resource: list/show/update/delete/attach across tenants → 404/422; composite FK rejects cross-tenant rows), **architecture tests** (every model under `App\Models\Tenant` uses `BelongsToTenant`; no `withoutScope` outside `Platform`; every mutating route has the idempotency middleware), migration test (migrate → rollback → migrate).
 - **SPA (Vitest browser):** components, forms, permission-aware rendering, i18n key coverage (no missing keys in `en`; other locales report drafts), axios idempotency interceptor.
 - **Public page:** Pest HTML tests (SEO tags, hreflang, layouts, sold-out, hidden prices), JS unit tests (open now, scheduling, search/filter), **size budget check** in CI.
-- **Final QA:** Playwright smoke on 375/768/1024/1280/1920, light/dark, RTL, all roles, throttled "Slow 3G" Lighthouse run on the demo menu (target: LCP < 2.5 s, CLS < 0.05, a11y ≥ 95).
+- **Final QA:** Playwright smoke on 375/768/1024/1280/1920, light/dark, RTL, all roles, Lighthouse on the demo menu with the profiles in §15.5 (targets in §15.1; a11y ≥ 95).
 
 ## 10. CI (GitHub Actions, checks only — never commits)
-Jobs on every PR to `develop`: `backend` (composer validate, Pint, Larastan level 6, Pest with MySQL 8 service), `migrations` (migrate → rollback → migrate), `frontend` (pnpm install --frozen-lockfile, ESLint, Prettier check, `tsc -b`, Vitest, build), `public` (build CSS/JS, budget check), `release` (on tags only: builds the shared-hosting zip as a workflow artifact).
+Jobs on every PR to `develop`: `backend` (composer validate, Pint, Larastan level 6, Pest with MySQL 8 service), `migrations` (migrate → rollback → migrate), `frontend` (pnpm install --frozen-lockfile, ESLint, Prettier check, `tsc -b`, Vitest, build), `public` (build CSS/JS, 30 KB budget, **Lighthouse CI mobile throttled** on the demo menu — §15.5), admin bundle budget in `frontend` (§15.3), `release` (on tags only: builds the shared-hosting zip as a workflow artifact).
 
 ## 11. Internationalisation
-- Admin interface: **English** (source), **Somali**, **Amharic**, **Arabic** (RTL proof). Non-English files start with `"_status": "machine_draft"`; the language picker shows "(draft)" until the owner marks them reviewed.
-- Menu content: any language the restaurant enables (plan-limited), JSON columns per field, fallback to the default language.
+**English only for now (owner, 2026-11-10; QUESTIONS #14, #15).** Admin, Super Admin and the customer menu ship in English. No Somali/Amharic/Arabic files, extra fonts or right-to-left work in this build.
+Ready for more languages later without rewriting:
+- Every interface text goes through `t()` (SPA) / `__()` (Laravel); adding one is a new locale file. The admin's language switch and the profile's language field appear by themselves once there are two languages (machine-draft marking via `_status` still works).
+- Menu content keeps **JSON columns per field, keyed by language** (`{"en": "Macchiato"}`), with fallback to the default language.
+- The customer menu's language switch and the admin's menu-translation screens stay **hidden until a restaurant has more than one language enabled** (Partition 8 is deferred; see §12).
 - Numbers and money with `Intl` (Western digits), Gregorian calendar, 24 h or 12 h per locale. ETB shown as "Br 120" by default (symbol/position/decimals configurable per restaurant).
 
 ## 12. Partitions (each = one or more small PRs into `develop`)
@@ -270,17 +275,17 @@ Jobs on every PR to `develop`: `backend` (composer validate, Pint, Larastan leve
 | 1 | **Project setup** | Monorepo (`backend/`, `frontend/`), Laravel 13 API skeleton, shadcn-admin imported at pinned commit with Clerk + demos removed, i18n wiring, Docker dev, CI, THIRD_PARTY_NOTICES, `.env.example` | CI green, migrate/rollback |
 | 2 | **Auth & tenancy** | Fortify + Sanctum, tenants, memberships, invitations, roles/policies, tenant middleware, `BelongsToTenant`, idempotency middleware, activity log, 2FA, auth screens, restaurant switcher | isolation suite base, idempotency, roles |
 | 3 | **Menu data model & admin editor** | menus, schedules, categories, items, variants, add-ons, tags, allergens, media upload + crop, reorder, duplicate, bulk price, sold-out, import/export | CRUD × roles × limits, import preview |
-| 4 | **Customer menu page** | Blade page, CSS/JS, layouts, search/filter, item sheet, caching, beacon, SEO, `/q/{code}` | HTML tests, budget, JS units |
-| 5 | **Appearance + live preview** | appearance settings, themes, fonts, contrast guard, preview iframe | contrast unit, preview render |
-| 6 | **Branches + QR codes** | branches, overrides, tables, QR PNG/SVG/PDF, table cards | overrides resolution, PDF render |
-| 7 | **Restaurant info + hours** | profile, contacts, Wi-Fi, hours with breaks/overnight, closures | hours units (incl. midnight) |
-| 8 | **Translations** | languages, translation grid, fallback, RTL | fallback, missing filter |
-| 9 | **Promotions** | specials/announcements, badges | date windows |
+| 4 ✅ | **Customer menu page** (PR #8) | Blade page rendered to **static files served without PHP**, inline CSS, ≤ 5 KB JS, layouts, search/filter, item sheet, service worker, beacon after load, SEO, `/q/{code}` without the database | HTML tests, **30 KB budget, Lighthouse CI**, JS units, query counts |
+| 5 ✅ | **Appearance + live preview** (PR #9) | appearance settings, themes, fonts, contrast guard, preview iframe | contrast unit, preview render |
+| 6 ✅ | **Branches + QR codes** (PR #10) | branches, overrides, tables, QR PNG/SVG/PDF, table cards | overrides resolution, PDF render |
+| 7 ✅ | **Restaurant info + hours** (PR #11) | profile, contacts, Wi-Fi, hours with breaks/overnight, closures | hours units (incl. midnight) |
+| 8 ⏸ | **Translations** — *deferred (English only, §11); nothing built* | languages, translation grid, fallback; hidden while one language | fallback, missing filter |
+| 9 ✅ | **Promotions** (PR #13) | specials/announcements, badges | date windows |
 | 10 | **Insights** | stats aggregation, charts, scans per table | counting, bot filter |
 | 11 | **Super Admin** | dashboard, restaurants, plans, features, payments, themes, announcements, log, settings, log-in-as, subscription states | platform policies, impersonation limits, state machine |
 | 12 | **Demo data** | fictional restaurants (see §13), seeders, demo images (generated, no real photos of people) | seeder runs on fresh DB |
 | 13 | **Docs** | README, admin user guide (en), deploy: shared hosting + VPS (with/without Docker), legal page placeholders | – |
-| 14 | **Final QA** | all sides, all roles, breakpoints, light/dark, RTL, slow 3G, fixes | Playwright smoke, Lighthouse |
+| 14 | **Final QA** | all sides, all roles, breakpoints, light/dark, RTL, the §15.5 network/CPU profiles, first and repeat visits, fixes | Playwright smoke, Lighthouse |
 | 15 | **Final report** | PRs in merge order, test summary, open questions, go-live checklist | – |
 
 ## 13. Demo data (fictional)
@@ -291,3 +296,70 @@ All names, addresses and phone numbers are invented (phones use reserved/test fo
 
 ## 14. Design
 Mockups live on the design canvas (link in handover.md): customer menu on phone (light + dark, list and item sheet), admin menu editor (desktop + phone), Super Admin dashboard — all with the demo data above, using the shadcn-admin colour tokens (slate, oklch) and Inter.
+
+## 15. Performance (top priority — owner, 2026-11-10)
+
+The customer menu must open almost instantly, also on slow mobile networks and old phones. This section applies to **every partition** and wins over older figures above. Every partition report lists the numbers in §15.5.
+
+### 15.1 Targets (customer menu, Lighthouse mobile)
+| Metric | Target | Can it be met? |
+|---|---|---|
+| Server time, cached page | < 50 ms | **Yes**: a static file read by Apache/Nginx, no PHP (typically 1–5 ms). Measured *at the server* — see note A |
+| Server time, uncached page | < 200 ms | **Yes** with OPcache + `php artisan optimize` + menu data cached; only the first request after a change is uncached |
+| LCP on 4G (Lighthouse "mobile", 150 ms RTT, 1.6 Mbps, 4× CPU) | < 1.2 s | **Yes, tight.** Needs the largest element to be text or a small first photo (≤ ~30 KB). Measured in CI every PR |
+| LCP on slow 3G | < 2.5 s | **Depends on the profile, see note B.** Repeat visits: yes |
+| CLS | < 0.02 | **Yes**: sizes on every image, no late fonts or banners |
+| INP | < 100 ms | **Yes**: ≤ 5 KB of plain JS |
+| HTML + CSS + JS before images | < 30 KB gzip | **Yes for the demo menu and menus up to ~100 items. Larger menus: note C** |
+| Lighthouse performance | 98–100 | **Yes** |
+| Repeat visit | < 300 ms, also offline | **Yes** with the service worker (§15.2.8). Not on the very first visit, and iOS may clear it after weeks unused |
+
+**A. "TTFB < 50 ms" over a phone network.** What the phone sees as TTFB includes the network trip: Lighthouse's own 4G profile adds 150 ms, and a phone in Addis Ababa reaching a server in Europe adds ~150–250 ms. No server can beat that. *Closest achievable:* < 50 ms **server time** (measured in CI and on the server with `curl`), and near-the-user delivery through Cloudflare's free CDN (§15.4), whose edge serves the static page from its cache.
+
+**B. "LCP < 2.5 s on slow 3G".** With Chrome's "Slow 3G" preset (2 s per round trip, 400 kbps), opening a *new* HTTPS connection alone takes about 4 round trips ≈ 8 s before the first byte — physically impossible to beat on a first visit. *Closest achievable:* (1) **first visit < 2.5 s on WebPageTest "3G Slow" (400 ms round trip, 400 kbps)**, with text as the largest element; (2) **any repeat visit < 300 ms on any network**, thanks to the service worker; (3) on Chrome's "Slow 3G", text visible in the first ~9 s with nothing blocking it, reported but not gated.
+
+**C. 30 KB for very large menus.** Text alone of ~200 items exceeds 30 KB gzipped. *Plan:* the HTML carries the first categories up to the budget; the rest arrives as a second static file right after load (also cached by the service worker), and search covers everything once it is there. So the **first download stays ≤ 30 KB for any menu**; total size grows only with the menu itself.
+
+### 15.2 Customer menu — how
+1. **Static full-page cache.** Each menu (`tenant · branch · locale`) is rendered to `public/menu-cache/…/index.html` plus pre-compressed `.gz` and `.br` copies. `.htaccess`/Nginx serve the file if it exists, otherwise Laravel renders and writes it. Pre-compressing means Brotli works even where the host has no Brotli module. Rewritten on every change (items, prices, sold out, appearance, hours, promotions) and by the daily cron for subscription state. Works on shared hosting.
+2. **No framework.** Critical CSS inlined; ≤ 5 KB plain JS with `defer`, only for sticky tabs, search/filters, item sheet, "Open now" and the menu by time (computed in the browser, so cached pages are never wrong).
+3. **Fonts.** System fonts by default. Custom fonts: self-hosted, subset WOFF2, preloaded, `font-display: swap`; Amharic/Arabic fonts load only when that language is shown.
+4. **Images.** Done at upload (Partition 3c, tuned in this PR): 320/640/1280 WebP (q72), AVIF when GD supports it (many shared hosts don't; WebP is always made), 640 JPEG fallback (q75), metadata stripped, a < 300-byte blurred inline placeholder and the dominant colour. In the page: `srcset`/`sizes`, width + height, first visible images eager with `fetchpriority="high"`, all others `loading="lazy" decoding="async"`.
+5. **Text and prices first.** Photos never block showing the menu.
+6. **Caching headers.** Hashed assets and photos: `Cache-Control: public, max-age=31536000, immutable` (in `.htaccess` and Nginx since this PR; photo URLs change on every upload). Menu HTML: short cache + `ETag`/`Last-Modified` → 304.
+7. **Compression.** gzip/Brotli via `.htaccess`/Nginx (this PR) plus the pre-compressed static menu files.
+8. **Service worker.** Stale-while-revalidate for the menu HTML, cache-first for images and assets; `sw.js` itself `no-cache`.
+9. **No third parties.** No external fonts, analytics or map embeds. The view/scan beacon is sent with `sendBeacon` after `load`, without cookies.
+10. **Prefetch.** When an item scrolls into view, its detail-size photo is prefetched so the sheet opens instantly.
+11. **QR links.** `/q/{code}` is answered by a tiny PHP file that reads a pre-generated map (no Laravel, no database) and redirects in one step; the scan is counted by the menu's beacon.
+
+### 15.3 Admin and Super Admin
+- Route-level code splitting (already on); rare screens and heavy widgets (command palette, appearance drawer, "no restaurant" screen, other UI languages) load on first use (this PR).
+- **First load budget: 225 KB gzipped** (owner chose option A of §15.6; the original 150 KB target needs a different UI stack). Now **221 KB**; CI fails above 225 KB (`scripts/bundle-size.mjs`).
+- TanStack Query caching with stale-while-revalidate; prefetch of likely next screens on hover/intent; optimistic updates for sold-out and reordering (done) and price edits (to do, with rollback).
+- Skeletons, no spinners for page loads; no layout shift. Photo upload: instant local preview, progress, the UI stays usable.
+
+### 15.4 Server and database
+- Indexes on every lookup/filter column; composite indexes start with `tenant_id` (§4).
+- No N+1: Eloquent strict mode fails tests on lazy loading, and **query-count tests** fail if a page's query count grows with the menu size (menus, editor tree, add-ons, tags, export — this PR).
+- Public menu data in 1–3 queries, cached per restaurant, cleared on change.
+- Production: `php artisan optimize`; OPcache settings for shared hosting and VPS documented in Partition 13.
+- Cloudflare free plan (documented in Partition 13): CDN, cache rules for the static menu pages with a short edge time, and an optional API token so changes purge the edge copy at once.
+
+### 15.5 Enforcement and reporting
+- **CI fails the PR** when: the demo menu's HTML + CSS + JS > 30 KB gzip; Lighthouse CI (mobile, throttled; 3 runs, median) misses LCP 1.2 s, CLS 0.02, TBT/INP proxy, or score 98; the admin first load exceeds its ceiling; a query-count test grows. CI job `guest-menu-speed` (Partition 4): seeds the demo café, builds its static page, serves it with Nginx exactly like production (static file + `.gz`, no PHP) and runs `@lhci/cli` 0.16.0 with `ci/lighthouse/lighthouserc.json`: performance ≥ 0.98, accessibility ≥ 0.95, LCP ≤ 1200 ms, CLS ≤ 0.02, TBT ≤ 100 ms (the lab stand-in for INP < 100 ms), document ≤ 30 KB, no external scripts, no third parties. A Pest test also checks the 30 KB gzip and < 5 KB inline JS budgets.
+- **Profiles:** Lighthouse mobile (4G, 4× CPU) gated in CI; "old Android" (4× CPU, slow 4G) and WebPageTest-style "3G Slow" (400 ms, 400 kbps) and Chrome "Slow 3G", first and repeat visit, reported.
+- **Measured (Partition 4, demo café, 58 items, 7 photos):** HTML+CSS+JS **8.4 KB gzip** (37 KB raw; inline JS 4.7 KB raw / 1.9 KB gzip), whole first load **15 KB**; Lighthouse mobile **100 / 100 / 100 / 100** (perf, a11y, best practices, SEO), FCP 0.7 s, **LCP 0.7 s**, **CLS 0**, TBT 10–50 ms; server time ≈ 20 ms rendered by PHP, static copy served without PHP in ≈ 1 ms locally.
+- **Every partition report** includes: page weight, LCP, CLS, server time cached/uncached, Lighthouse score for the customer menu, and the admin first-load size.
+
+### 15.6 Admin first load: 150 KB is not reachable with the approved stack — **decided: A (2026-11-10)**
+Measured on 2026-11-10: **285 KB → 241 KB** after this PR's changes. What remains is mostly the approved libraries themselves: React DOM ~60 KB, TanStack Router ~25 KB, Radix menus/popovers ~30 KB, i18next ~17 KB, Tailwind CSS ~16 KB, axios ~15 KB, TanStack Query ~10 KB. Even with everything optional removed the floor is about 220 KB. Options for the owner:
+- **A (recommended): keep the stack, ceiling 225 KB.** Replace axios with a small `fetch` wrapper and lazy-load more widgets. Low risk. After the first visit the admin loads from the browser cache (immutable assets), so staff feel it only once per release.
+- **B: swap React for Preact (compat layer).** ≈ −45 KB → ~180 KB. Real risk with Radix and TanStack internals; needs a full re-test. Big architecture change.
+- **C: reach 150 KB** by dropping Radix-based components for hand-made ones and trimming the router — weeks of rework of finished screens.
+The guest-facing 30 KB customer page is unaffected by this choice.
+
+**Load on demand (owner, 2026-11-10: keep budgets; move code rather than raise limits):** screen texts (menu editor, branches, info, settings…) are `locales/en/screens.json`, loaded in parallel with the admin area (`/admin` route `beforeLoad`), not in the first download: 223.0 → **217.8 KB**. On the guest page the item details sheet is `sheet.{hash}.js` (1.3 KB), fetched after load and cached for a year by the browser and the service worker; inline script 5.0 → 4.2 KB.
+
+**Done (A):** axios replaced by a small `fetch` client (same Idempotency-Key, XSRF and 419-retry behaviour); toasts, sign-out dialog, command palette, appearance drawer, rare screens and non-English UI texts load on first use. 285 → **221 KB**; CI ceiling 225 KB.
+

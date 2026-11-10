@@ -5,6 +5,8 @@ namespace App\Support;
 use App\Models\Category;
 use App\Models\Item;
 use App\Models\Media;
+use App\Models\Promotion;
+use App\Models\TenantAppearance;
 
 /**
  * A replaced or orphaned photo is deleted (row and files), so it no longer
@@ -18,7 +20,10 @@ class MediaJanitor
             return;
         }
 
-        $used = Item::where('media_id', $mediaId)->exists() || Category::where('media_id', $mediaId)->exists();
+        $used = Item::where('media_id', $mediaId)->exists()
+            || Category::where('media_id', $mediaId)->exists()
+            || Promotion::where('media_id', $mediaId)->exists()
+            || TenantAppearance::where(fn ($q) => $q->where('logo_media_id', $mediaId)->orWhere('cover_media_id', $mediaId))->exists();
         if ($used) {
             return;
         }

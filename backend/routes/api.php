@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AcceptInvitationController;
 use App\Http\Controllers\Api\AccountController;
 use App\Http\Controllers\Api\ActivityController;
+use App\Http\Controllers\Api\BeaconController;
 use App\Http\Controllers\Api\InvitationController;
 use App\Http\Controllers\Api\MeController;
 use App\Http\Controllers\Api\Menu\AddonGroupController;
@@ -12,6 +13,11 @@ use App\Http\Controllers\Api\Menu\ItemController;
 use App\Http\Controllers\Api\Menu\MediaController;
 use App\Http\Controllers\Api\Menu\MenuController;
 use App\Http\Controllers\Api\Menu\TagController;
+use App\Http\Controllers\Api\Restaurant\AppearanceController;
+use App\Http\Controllers\Api\Restaurant\BranchController;
+use App\Http\Controllers\Api\Restaurant\InfoController;
+use App\Http\Controllers\Api\Restaurant\PromotionController;
+use App\Http\Controllers\Api\Restaurant\QrCodeController;
 use App\Http\Controllers\Api\TeamController;
 use App\Http\Controllers\Api\TenantController;
 use Illuminate\Support\Facades\Route;
@@ -21,6 +27,10 @@ use Illuminate\Support\Facades\Route;
 | Idempotency-Key header ('idempotent'). Restaurant routes live under
 | /api/v1/t/{tenant} and only resolve for members ('tenant').
 */
+// Visit beacon from the guest page (no body worth replaying, so no
+// idempotency key). Counting arrives with Insights (Partition 10).
+Route::post('v1/beacon', BeaconController::class)->middleware('throttle:120,1')->name('beacon');
+
 Route::prefix('v1')->middleware('idempotent')->group(function () {
     Route::get('invitations/{token}', [AcceptInvitationController::class, 'show'])
         ->middleware('throttle:30,1');
@@ -86,6 +96,42 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::get('export', [ImportController::class, 'export']);
             Route::post('import/preview', [ImportController::class, 'preview'])->middleware('throttle:20,1');
             Route::post('import/commit', [ImportController::class, 'commit']);
+
+            Route::get('branches', [BranchController::class, 'index']);
+            Route::post('branches', [BranchController::class, 'store']);
+            Route::patch('branches/{branch}', [BranchController::class, 'update']);
+            Route::delete('branches/{branch}', [BranchController::class, 'destroy']);
+            Route::get('branches/{branch}/tables', [BranchController::class, 'tables']);
+            Route::post('branches/{branch}/tables', [BranchController::class, 'addTables']);
+            Route::delete('tables/{table}', [BranchController::class, 'deleteTable']);
+            Route::get('branches/{branch}/overrides', [BranchController::class, 'overrides']);
+            Route::put('branches/{branch}/overrides', [BranchController::class, 'saveOverrides']);
+            Route::put('menus/{menu}/branches', [BranchController::class, 'menuBranches']);
+            Route::get('branches/{branch}/table-cards.pdf', [QrCodeController::class, 'tableCards']);
+
+            Route::get('qr-codes', [QrCodeController::class, 'index']);
+            Route::post('qr-codes', [QrCodeController::class, 'store']);
+            Route::patch('qr-codes/{qr}', [QrCodeController::class, 'update']);
+            Route::delete('qr-codes/{qr}', [QrCodeController::class, 'destroy']);
+            Route::get('qr-codes/{qr}.{format}', [QrCodeController::class, 'download'])->whereIn('format', ['svg', 'png', 'pdf']);
+
+            Route::get('promotions', [PromotionController::class, 'index']);
+            Route::post('promotions', [PromotionController::class, 'store']);
+            Route::post('promotions/reorder', [PromotionController::class, 'reorder']);
+            Route::patch('promotions/{promotion}', [PromotionController::class, 'update']);
+            Route::delete('promotions/{promotion}', [PromotionController::class, 'destroy']);
+
+            Route::get('profile', [InfoController::class, 'profile']);
+            Route::put('profile', [InfoController::class, 'saveProfile']);
+            Route::get('hours', [InfoController::class, 'hours']);
+            Route::put('hours', [InfoController::class, 'saveHours']);
+            Route::get('closures', [InfoController::class, 'closures']);
+            Route::post('closures', [InfoController::class, 'addClosure']);
+            Route::delete('closures/{closure}', [InfoController::class, 'deleteClosure']);
+
+            Route::get('appearance', [AppearanceController::class, 'show']);
+            Route::put('appearance', [AppearanceController::class, 'update']);
+            Route::get('appearance/preview', [AppearanceController::class, 'preview'])->name('appearance.preview');
 
             Route::get('tags', [TagController::class, 'index']);
             Route::post('tags', [TagController::class, 'store']);

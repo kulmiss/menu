@@ -21,10 +21,11 @@ use Illuminate\Support\Facades\Storage;
  * @property int $bytes
  * @property array<int|string, string> $variants size (320, 640, 1280, jpg, og) → file in base_path
  * @property string|null $dominant_color "#a0522d"
+ * @property string|null $placeholder tiny blurred preview (data URI)
  * @property array<string, string> $alt
  * @property int|null $created_by
  */
-#[Fillable(['disk', 'base_path', 'mime', 'width', 'height', 'bytes', 'variants', 'dominant_color', 'alt', 'created_by'])]
+#[Fillable(['disk', 'base_path', 'mime', 'width', 'height', 'bytes', 'variants', 'dominant_color', 'placeholder', 'alt', 'created_by'])]
 class Media extends Model
 {
     use BelongsToTenant;

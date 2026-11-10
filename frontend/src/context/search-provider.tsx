@@ -1,5 +1,16 @@
-import { createContext, useContext, useEffect, useState } from 'react'
-import { CommandMenu } from '@/components/command-menu'
+import {
+  createContext,
+  lazy,
+  Suspense,
+  useContext,
+  useEffect,
+  useState,
+} from 'react'
+
+// Loaded the first time it opens: most visits never use it (PLAN.md §15).
+const CommandMenu = lazy(() =>
+  import('@/components/command-menu').then((m) => ({ default: m.CommandMenu }))
+)
 
 type SearchContextType = {
   open: boolean
@@ -14,6 +25,8 @@ type SearchProviderProps = {
 
 export function SearchProvider({ children }: SearchProviderProps) {
   const [open, setOpen] = useState(false)
+  const [used, setUsed] = useState(false)
+  if (open && !used) setUsed(true)
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -29,7 +42,11 @@ export function SearchProvider({ children }: SearchProviderProps) {
   return (
     <SearchContext value={{ open, setOpen }}>
       {children}
-      <CommandMenu />
+      {used && (
+        <Suspense fallback={null}>
+          <CommandMenu />
+        </Suspense>
+      )}
     </SearchContext>
   )
 }

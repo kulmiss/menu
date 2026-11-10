@@ -23,6 +23,7 @@ class AuthorizationServiceProvider extends ServiceProvider
         Gate::define('team.view', $managerOrOwner);
         Gate::define('activity.view', $managerOrOwner);
         Gate::define('menu.manage', $managerOrOwner);
+        Gate::define('restaurant.manage', $managerOrOwner);
 
         Gate::define('team.manage', fn (User $user, Role $target): bool => $role()?->canManage($target) ?? false);
 

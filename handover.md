@@ -1,53 +1,121 @@
 # Handover
 
-_Last updated: 2026-11-10 16:10 EAT. Clean stopping point: Partition 3 complete (#5 ready), CI green._
+_Last updated: 2026-11-10 23:00 EAT. Clean stopping point after Partition 9 (PR #13)._
+
+> **Speed is the top priority (owner, 2026-11-10): PLAN.md §15 applies to every partition and every partition report includes the §15.5 numbers.**
+> **English only for now (owner, 2026-11-10):** texts stay in `t()` / `__()` and the database keeps per-language fields; language switches and translation screens are hidden while one language is enabled.
+> **Working mode (owner):** go through all remaining partitions without stopping for OK, then write the Step 4 final report. Stop only for: changes outside this project, steps that can't be undone, licence doubts, the same CI failure 3 times, or the working limit.
 
 ## Where we are
 | Part | Branch | PR | State |
 |---|---|---|---|
-| 2 backend (auth & tenancy) | `feat/auth-tenancy` | #3 | green, contained in #4 |
-| 2b SPA auth, switcher, team | `feat/auth-spa` | #4 | **ready**, CI green |
-| 3a menu data model + API | `feat/menu-data` | #5 | CI green |
-| 3b admin menu editor | `feat/menu-data` | #5 | CI green |
-| 3c photos | `feat/menu-data` | #5 | CI green |
-| 3d import/export (openspout) | `feat/menu-data` | #5 | CI green |
+| 2 backend (auth & tenancy) | `feat/auth-tenancy` | #3 | contained in newer PRs |
+| 2b SPA auth, switcher, team | `feat/auth-spa` | #4 | contained |
+| 3 menu data, editor, photos, import/export | `feat/menu-data` | #5 | contained |
+| Performance plan + admin budget (option A) | `feat/performance` | #6 | contained |
+| Settings + 2FA; English only | `feat/settings` | #7 | CI green, contained |
+| 4 Customer menu page | `feat/public-menu` | #8 | CI green, contained |
+| 5 Appearance + live preview | `feat/appearance` | #9 | CI green, contained (still open on GitHub on 2026-11-10 18:05) |
+| 6 Branches + QR codes | `feat/branches-qr` | #10 | CI green, contained |
+| 7 Restaurant info + hours | `feat/info-hours` | #11 | CI green, contained (still open on GitHub on 2026-11-10 18:55) |
+| #78 per-size branch prices | `feat/size-prices` | #12 | contained |
+| **9 Promotions** | `feat/promotions` | **#13** | newest |
 
-**#5 is ready** and contains #3 and #4: merge only #5, with *Create a merge commit*.
+**Merge only the newest PR** with *Create a merge commit*; it contains all earlier ones. Note: on 2026-11-10 the owner reported #9 and #11 as merged, but GitHub still showed them open and `develop` still at #5 — the stack simply continues.
 
-## Claude's workspace can now run everything
-Since 2026-11-10 the cloud workspace can: `pnpm install` (npm registry), `composer install --prefer-source` (git clones of public GitHub repos; Packagist metadata is blocked, so **`composer require` of new packages still needs the owner's PC**), MariaDB 10.11 (`apt-get install mariadb-server`), Chromium for Vitest browser tests (`PLAYWRIGHT_BROWSERS_PATH` pointing at `/opt/pw-browsers` with a `chromium_headless_shell-1217` symlink to `-1243`), and a real-browser smoke test against `php artisan serve`.
-Setup recipe used: `composer config -g use-github-api false`; `phpstan/phpstan` has no git source, so its zip was put into Composer's cache (`~/.cache/composer/files/phpstan/phpstan/<sha1 of dist url>.zip`, built with `git archive` of the tag).
+## What Partition 9 contains (PR #13)
+- `promotions` (special / announcement, title, text, photo, linked dish, branch, local start/end, on/off, order); API `promotions` (+ `reorder`); admin `/admin/promotions` with dialog.
+- Guest page: announcement lines and special cards at the top; dates checked in the browser (`data-w`); a special with a dish opens its sheet.
+- **Load on demand** (owner's rule): item sheet → `public/menu-assets/sheet.{hash}.js` (written on first page build, immutable caching in `.htaccess`/Nginx, cache-first in the service worker), fetched after load; Lighthouse CI allows 1 script file. Inline script **4.2 KB**.
+- Admin screen texts → `src/locales/en/screens.json`, loaded by the `/admin` route's `beforeLoad` in parallel with the user check; tests merge it in `test-setup.ts`. Admin first load **217.8 KB**.
+- Tests: backend **208**, frontend **172**.
 
-## What 2b contains (PR #4)
-- Routes `/admin/*`, `/auth/*` (sign-in, sign-up, forgot/reset password, two-factor, invite/$token); `/admin` guard on `GET /api/v1/me`; safe `?redirect=`.
-- Fortify forms with CSRF cookie and 422 → field errors; 419 refresh-and-retry once with the same Idempotency-Key.
-- Restaurant switcher (zustand, persisted), role-filtered sidebar, verify-email and subscription banners, "no restaurant" screen.
-- Team page (members, roles, can-edit-prices, invite, pending, revoke, leave).
-- Backend: reset/invite emails link to `/auth/...`; sign-up with `invitation_token` joins the inviting restaurant (QUESTIONS #56).
+## PR #12 — per-size branch prices (owner decision #78)
+- `branch_variant_prices` (branch, size, price). Overrides API takes/returns `sizes: {variantId: price}`; sizes are checked to belong to the item. Guest page uses them (and the "from" price follows). Item lists now carry `variants` (id, name, price).
+- Admin: one small price field per size in Prices & availability.
+- Partition 8 (translations) stays deferred (English only, owner 2026-11-10): nothing to build; languages UI hidden while one language.
 
-## What Partition 3 contains so far (PR #5)
-- **3a API** under `/api/v1/t/{tenant}`: `menus` (+ `reorder`, `{id}/tree`, `{id}/duplicate`, `{id}/schedules`), `categories` (+ `reorder`, `duplicate`), `items` (+ `reorder`, `bulk`, `bulk-price`, `{id}/duplicate`, `{id}/sold-out`, `{id}/price`), `addon-groups` (+ options, `reorder`), `addon-options/{id}/sold-out`, `tags`. Composite FKs, plan limits (menus, items → 402), activity log + cache_version bump on every change.
-- **3b SPA**: `/admin/menu` (editor), `/admin/addons`, `/admin/tags`; item sheet with details / prices & sizes / add-ons / tags & allergens; drag reorder (dnd-kit); bulk actions; staff see sold-out switches only (plus a price-only form with *can edit prices*).
-- Decisions: QUESTIONS #56–61 (GD instead of Intervention, items may have no price, menu↔branch in Partition 6, feature switches in Partition 11).
+## What Partition 7 contains (PR #11)
+- Tables `tenant_profiles`, `opening_hours` (breaks, past midnight; per branch or restaurant-wide), `closures`.
+- API `GET/PUT profile`, `GET/PUT hours[?branch_id]` (overlap check), `GET/POST/DELETE closures`; owners and managers.
+- Guest page: open/closed pill (browser-side, restaurant time zone, `hours.js`), closure notices, "Info & opening hours" section (about, week table, address + map, call/WhatsApp/Telegram/e-mail, socials, Wi-Fi when switched on).
+- Inline JS minifier is now token-aware (strings kept, comments and spacing removed): page script **5.0 KB raw / 2.3 KB gzip** — at the 5 KB limit; trim before adding more guest-page JS (Partition 10 beacon: keep it tiny).
+- Fixed: the controller served a stale static copy even with static pages switched off (affected tests).
+- Admin `/admin/info`: about/contact/socials/Wi-Fi form, week editor (add break, copy Monday to Tue–Fri, next-day hint, per-branch hours), holiday list.
+- Tests: backend **202**, frontend **170** (incl. 9 unit tests of the guest hours logic). Admin first load **222.3 KB** / 225 KB: Super Admin strings must load lazily in Partition 11.
 
-- **3c photos**: `media` table, `POST/DELETE media`, GD sizes (320/640/1280 WebP, 640 JPEG, 1200×630 OG, dominant colour), HEIC refused with advice, `photos` plan limit, replaced photos deleted; SPA crop + downscale (react-easy-crop) on items and categories, thumbnails in the list.
-- **3d import/export**: `GET export`, `GET import/template` (xlsx|csv), `POST import/preview` → per-row plan, `POST import/commit` (token, re-checked, all-or-nothing); `/admin/import`. Rules in QUESTIONS #63.
-- **openspout ^5.3** was added from Claude's workspace: Packagist is blocked there, so it was resolved from the GitHub repo and only the openspout entry plus the content-hash were added to `composer.lock` (`composer validate --strict` passes, CI installs it).
+## What Partition 6 contains (PR #10)
+- Tables `branches` (every restaurant has a main branch), `dining_tables`, `qr_codes` (soft-deleted, never reused), `menu_branch`, `branch_item_overrides`.
+- Guest pages per branch: `/{slug}` (main) and `/{slug}/{branch}`, each with its own static copy (`menu-cache/{slug}/{branch}/`), overrides (price for items without sizes, sold out, hidden), menus limited to branches, branch switch.
+- `/q/{code}`: `public/qr.php` reads `storage/app/qr-map.php` (rebuilt after every code/branch/slug change) and redirects in one step (~1.5 ms, no Laravel, no DB) to `…#q=CODE`; Laravel route as fallback. `.htaccess` + Nginx rules added.
+- QR images (chillerlan/php-qrcode 6.0.1): SVG, PNG, single-card PDF; table-card sheets (FPDF 1.9.0), 4 × A6 per A4 with cut lines. ECC Q, quiet zone 4, vector modules; scanning checked with zxing-cpp (QUESTIONS #75).
+- API: `branches` (+ tables, overrides, table-cards.pdf), `tables/{id}`, `menus/{id}/branches`, `qr-codes` (+ `.svg/.png/.pdf`). Owners and managers; plan limits `branches`, `tables`.
+- Admin: `/admin/branches` (cards, branch dialog incl. menus shown, tables sheet with numbered ranges and card printing, prices & availability sheet), `/admin/qr-codes` (previews, downloads, table cards per branch, extra codes).
+- Tests: backend **196**, frontend **158**. Admin first load **221.5 KB** (budget 225 KB — margin is getting small; if a later partition needs room, move feature texts into lazily loaded i18n namespaces).
+
+## What Partition 5 contains (PR #9)
+- `themes` (5 presets) and `tenant_appearance` (colour, font, layout list/grid/large, show prices/photos/descriptions/calories, logo, cover, theme).
+- API `GET/PUT appearance`, `GET appearance/preview` (guest page with unsaved settings, `no-store`, no service worker or beacon). Owners and managers only (`restaurant.manage`).
+- `App\Support\Contrast` (WCAG maths): the guest page nudges the brand colour to ≥ 4.5:1 on white and in dark mode; the admin warns when it was too light (QUESTIONS #71–74).
+- Guest page: theme colours and system font stack via CSS variables, cover (fetchpriority high) and logo, grid / large-photo layouts with matching `sizes`, the switches.
+- Admin `/admin/appearance`: theme cards, colour picker + hex, font, layout, switches, logo/cover upload with crop, sticky Save/Undo bar, live phone preview (debounced; "Preview" toggle on phones).
+- Tests: backend **187** (contrast unit, appearance API × roles, validation, logo replacement, preview, guest page look); frontend **155** (appearance page). Admin first load 219.5 KB.
+
+## What Partition 4 contains (PR #8)
+- **Guest page `/{slug}`** (`PublicMenuController`, `resources/views/public/menu.blade.php`): one HTML file with inline CSS (`resources/public-menu/menu.css`) and inline JS (`menu.js`, 4.7 KB raw), system fonts, light/dark, sticky search + tag filters + category chips, item sheet built from embedded JSON (sizes, add-ons, allergens, kcal, prep time), photos with WebP/AVIF `srcset`, width/height, < 300-byte placeholder, first 4 eager (first with `fetchpriority=high`), rest lazy; detail photo prefetched on hover/touch.
+- **Static copy** (`App\Support\PublicMenu\MenuPageCache`): `public/menu-cache/{slug}/index.html` + `.gz`, written atomically on the first visit, deleted after the commit of any change (`Tenant::bumpCacheVersion`) and by the scheduler (`menu:refresh-pages` hourly for expired subscriptions, `--all` daily at 00:05 so "New" badges expire). `.htaccess` and `docker/nginx/default.conf` send it **without PHP**; PHP also serves it if the rewrite rules are missing. ETag + `max-age=0, must-revalidate`.
+- Data in a **fixed number of queries** (`MenuPageData`, query-count test); old slugs 301 (keeping `?table=…`); suspended/unavailable → friendly 503 + noindex; unknown → 404.
+- **Service worker** `public/sw.js`: stale-while-revalidate for guest pages, cache-first for `/media` (max 300 entries); offline note on the page.
+- **Beacon** `POST /api/v1/beacon` after load (204 stub; counting in Partition 10).
+- **DemoSeeder** "Buna & Bread" (`slug demo`, 58 items, 2 menus incl. scheduled Breakfast, sizes, add-ons, tags, allergens, 7 generated photos; login demo@example.com / password — never on a live server, QUESTIONS #69).
+- **CI job `guest-menu-speed`**: demo → static page → Nginx (no PHP) → `@lhci/cli` 0.16.0, 3 mobile throttled runs, median; fails on score < 98, LCP > 1.2 s, CLS > 0.02, TBT > 100 ms, document > 30 KB, any script file or third party (`ci/lighthouse/`).
+- Not in #8 (by plan): `/q/{code}` → Partition 6 (QR table); appearance/themes → 5; restaurant info + hours → 7.
+
+## Speed numbers (§15.5) — Partition 4
+| Measure | Result | Target |
+|---|---|---|
+| Guest page HTML+CSS+JS (demo, gzip) | **8.4 KB** (37 KB raw) | ≤ 30 KB |
+| Inline JS | 4.7 KB raw / 1.9 KB gzip | < 5 KB |
+| Whole first load (with 4 thumbnails) | 15 KB | – |
+| Lighthouse mobile (perf / a11y / BP / SEO) | **100 / 100 / 100 / 100** | ≥ 98 |
+| FCP / **LCP** | 0.7 s / **0.7 s** | LCP < 1.2 s |
+| CLS | **0** | < 0.02 |
+| TBT (INP stand-in) | 10–50 ms | < 100 ms |
+| Server time, PHP render / static copy | ≈ 20 ms / ≈ 1 ms | < 200 / < 50 ms |
+| Admin first load | 218 KB gzip | ≤ 225 KB |
+Measured locally with Nginx serving the static copy (same setup as CI). Note: without gzip (`php artisan serve`) LCP rises to ~1.4 s — compression on the server matters (on by default in `.htaccess`/Nginx).
 
 ## Checks at this point
-Backend: Pint, Larastan 6, migrate → rollback → migrate, Pest **150**. Frontend: lint, Prettier, build, Vitest **150**. Browser smoke (375 px): sign-up → menu editor (categories, items, tags, allergens, sold out, keyboard/mouse reorder, bulk +10 %) → import CSV → export Excel → photo upload (3000×2000 → cropped 2048×1536, all sizes written). No errors.
-Vitest browser tests pre-bundle a few deps in `vite.config.ts` (`optimizeDeps.include`) so Vite never reloads mid-run; add a dep there if CI ever logs "Vite unexpectedly reloaded".
+Backend: Pint, Larastan 6, Pest **208**. Frontend: lint, Prettier, build, Vitest **172**, bundle 217.8 KB. Lighthouse CI green (demo page unchanged). Browser check of the guest page at 390 px: list, search, sheet with photo/sizes/allergens, no console errors.
+
+## Packages added in this build (all pinned by the lockfiles)
+| Package | Version | Licence | Where |
+|---|---|---|---|
+| openspout/openspout | 5.3.0 | MIT | backend, XLSX import/export |
+| @dnd-kit/core | 6.3.1 | MIT | admin, drag reorder |
+| @dnd-kit/sortable | 10.0.0 | MIT | admin |
+| @dnd-kit/utilities | 3.2.2 | MIT | admin |
+| react-easy-crop | 6.2.5 | MIT | admin, photo crop |
+| chillerlan/php-qrcode | 6.0.1 | MIT / Apache-2.0 | backend, QR codes |
+| chillerlan/php-settings-container | 3.3.0 | MIT | dependency of php-qrcode |
+| setasign/fpdf | 1.9.0 | MIT | backend, table-card PDFs |
+| @lhci/cli | 0.16.0 | Apache-2.0 | CI only, `ci/lighthouse/package.json` + lockfile (puppeteer-core held at 25.16.0) |
+Removed: axios. Composer constraints are `~6.0.1` / `~1.9.0` (patch updates only; `composer validate --strict` rejects exact constraints) and the lockfile pins the exact versions. They were added to `composer.lock` from the GitHub tags (Packagist is blocked in Claude's workspace). `package.json` uses caret ranges for the dnd-kit packages; the exact versions are pinned in `pnpm-lock.yaml` (`--frozen-lockfile` in CI).
+
+## Claude's workspace notes
+Workspace can run `pnpm install`, `composer install --prefer-source` (Packagist blocked: new Composer packages need the owner's PC or the lock-entry trick used for openspout), MariaDB (`service mariadb start` after idle), Chromium (`PLAYWRIGHT_BROWSERS_PATH=/tmp/pw` with a `chromium_headless_shell-1217` → `-1243` symlink), Nginx, Lighthouse (`npx lighthouse@12.8.2 --chrome-path=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome`).
 
 ## Next steps (in order)
-1. **Partition 2 leftovers** (small PR stacked on `feat/menu-data`): personal settings pages — profile, password, **2FA setup** (Fortify endpoints exist), interface language — and translate the config drawer. Needed before Super Admin (2FA required).
-2. **Partition 4 — customer menu page**: Blade page `/{slug}`, inlined CSS + ~5 KB JS, layouts, search/filter, item sheet, HTML cache by `cache_version`, view beacon, SEO, `/q/{code}`; budget check in CI.
+10 Insights (beacon counting) → 11 Super Admin → 12 Demo data (extend DemoSeeder) → 13 Docs (deploy, OPcache, Cloudflare, cron for `schedule:run`) → 14 Final QA → Step 4 final report.
+Still open from §15.3: optimistic price edits in the admin.
 
 ## Blockers / owner actions
-- Merge #5 (contains #3 and #4).
+- Merge the newest PR (contains everything before it).
 - `main` branch protection still to add.
+- Production needs the Laravel scheduler cron (`* * * * * php artisan schedule:run`) for `menu:refresh-pages` (documented in Partition 13).
 
 ## Pinned references
 - shadcn-admin `e16c87f` (v2.2.1, MIT); Laravel skeleton v13.11.0 `06d016a`; design mockups https://claude.ai/artifact/HKJ6v8zV9y2b7oQoYb33B5
 
 ## Prompt for the next chat
-> Continue the Menu project in kulmiss/menu from handover.md (branch feat/menu-data, PR #5 ready). Same rules as PLAN.md and QUESTIONS.md: stacked PRs (I merge only the newest), CI checks every PR, tests in every partition, shared hosting is the main target. Do the Partition 2 leftovers (settings + 2FA setup), then Partition 4 (customer menu page). Stop only for new packages, big architecture choices, licence doubts, or steps that can't be undone.
+> Continue the Menu project in kulmiss/menu from handover.md (newest PR, see the table). Speed is the top priority (PLAN.md §15); English only. Work through all remaining partitions (8 → 14) without stopping for my OK, then write the Step 4 final report. Same rules: stacked PRs (I merge only the newest), CI checks every PR, tests in every partition, shared hosting is the main target.

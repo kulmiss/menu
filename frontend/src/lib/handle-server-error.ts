@@ -1,11 +1,10 @@
-import { isAxiosError } from 'axios'
 import i18n from '@/i18n'
-import { toast } from 'sonner'
-import { errorStatus, serverMessage } from '@/lib/api'
+import { errorStatus, isApiError, serverMessage } from '@/lib/api'
+import { toast } from '@/lib/toast'
 
 /** i18n key for a failed request, by HTTP status. */
 export function errorKey(error: unknown): string {
-  if (!isAxiosError(error)) return 'errors.generic'
+  if (!isApiError(error)) return 'errors.generic'
   switch (errorStatus(error)) {
     case 0:
       return 'errors.network'

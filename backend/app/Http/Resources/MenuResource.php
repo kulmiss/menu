@@ -25,6 +25,8 @@ class MenuResource extends JsonResource
                 'starts_at' => substr($s->starts_at, 0, 5),
                 'ends_at' => substr($s->ends_at, 0, 5),
             ])->values()),
+            // Branches the menu is limited to; [] = every branch.
+            'branch_ids' => $this->whenLoaded('branches', fn () => $this->branches->pluck('id')->values()),
             'categories_count' => $this->whenCounted('categories'),
             'items_count' => $this->when(
                 array_key_exists('items_count', $this->resource->getAttributes()),

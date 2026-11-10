@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Enums\SubscriptionState;
+use App\Support\PublicMenu\MenuPageCache;
+use App\Support\Qr\QrMap;
 use App\Support\SystemTags;
 use App\Tenancy\CurrentTenant;
 use Carbon\CarbonInterface;
@@ -15,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @property int $id
@@ -54,8 +57,19 @@ class Tenant extends Model
     {
         // Every new restaurant starts with the built-in tags (vegan, spicy…).
         static::created(function (Tenant $tenant): void {
-            app(CurrentTenant::class)->runAs($tenant, fn () => SystemTags::ensure());
+            app(CurrentTenant::class)->runAs($tenant, function () {
+                SystemTags::ensure();
+                // Every restaurant has a main branch and one QR code for the whole restaurant.
+                Branch::create(['slug' => 'main', 'name' => ['en' => __('qr.default_branch')], 'is_default' => true]);
+                QrCode::create(['code' => QrCode::newCode()]);
+            });
         });
+        static::updated(function (Tenant $tenant): void {
+            if ($tenant->wasChanged('slug')) {
+                QrMap::touch();
+            }
+        });
+        static::deleted(fn () => QrMap::touch());
     }
 
     protected function casts(): array
@@ -161,8 +175,17 @@ class Tenant extends Model
     }
 
     /** Any change to menu data calls this so the cached public page is rebuilt. */
+    /** @return HasMany<Branch, $this> */
+    public function branches(): HasMany
+    {
+        return $this->hasMany(Branch::class);
+    }
+
     public function bumpCacheVersion(): void
     {
         $this->increment('cache_version');
+        // Drop the static guest page once the change is saved, so a visitor
+        // racing the transaction can't store the old version again.
+        DB::afterCommit(fn () => MenuPageCache::forget($this));
     }
 }

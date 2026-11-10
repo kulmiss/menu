@@ -19,14 +19,18 @@ import { Route as AuthResetPasswordRouteImport } from './routes/auth/reset-passw
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
 import { Route as AdminTeamRouteImport } from './routes/admin/team'
 import { Route as AdminTagsRouteImport } from './routes/admin/tags'
+import { Route as AdminQrCodesRouteImport } from './routes/admin/qr-codes'
+import { Route as AdminPromotionsRouteImport } from './routes/admin/promotions'
+import { Route as AdminInfoRouteImport } from './routes/admin/info'
 import { Route as AdminImportRouteImport } from './routes/admin/import'
+import { Route as AdminBranchesRouteImport } from './routes/admin/branches'
+import { Route as AdminAppearanceRouteImport } from './routes/admin/appearance'
 import { Route as AdminAddonsRouteImport } from './routes/admin/addons'
 import { Route as AdminSettingsRouteRouteImport } from './routes/admin/settings/route'
 import { Route as AdminSettingsIndexRouteImport } from './routes/admin/settings/index'
 import { Route as AdminMenuIndexRouteImport } from './routes/admin/menu/index'
 import { Route as AuthInviteTokenRouteImport } from './routes/auth/invite/$token'
-import { Route as AdminSettingsAppearanceRouteImport } from './routes/admin/settings/appearance'
-import { Route as AdminSettingsAccountRouteImport } from './routes/admin/settings/account'
+import { Route as AdminSettingsSecurityRouteImport } from './routes/admin/settings/security'
 
 const AdminRouteRoute = AdminRouteRouteImport.update({
   id: '/admin',
@@ -78,9 +82,34 @@ const AdminTagsRoute = AdminTagsRouteImport.update({
   path: '/tags',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminQrCodesRoute = AdminQrCodesRouteImport.update({
+  id: '/qr-codes',
+  path: '/qr-codes',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminPromotionsRoute = AdminPromotionsRouteImport.update({
+  id: '/promotions',
+  path: '/promotions',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminInfoRoute = AdminInfoRouteImport.update({
+  id: '/info',
+  path: '/info',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdminImportRoute = AdminImportRouteImport.update({
   id: '/import',
   path: '/import',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminBranchesRoute = AdminBranchesRouteImport.update({
+  id: '/branches',
+  path: '/branches',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminAppearanceRoute = AdminAppearanceRouteImport.update({
+  id: '/appearance',
+  path: '/appearance',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const AdminAddonsRoute = AdminAddonsRouteImport.update({
@@ -108,14 +137,9 @@ const AuthInviteTokenRoute = AuthInviteTokenRouteImport.update({
   path: '/auth/invite/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminSettingsAppearanceRoute = AdminSettingsAppearanceRouteImport.update({
-  id: '/appearance',
-  path: '/appearance',
-  getParentRoute: () => AdminSettingsRouteRoute,
-} as any)
-const AdminSettingsAccountRoute = AdminSettingsAccountRouteImport.update({
-  id: '/account',
-  path: '/account',
+const AdminSettingsSecurityRoute = AdminSettingsSecurityRouteImport.update({
+  id: '/security',
+  path: '/security',
   getParentRoute: () => AdminSettingsRouteRoute,
 } as any)
 
@@ -124,7 +148,12 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteRouteWithChildren
   '/admin/settings': typeof AdminSettingsRouteRouteWithChildren
   '/admin/addons': typeof AdminAddonsRoute
+  '/admin/appearance': typeof AdminAppearanceRoute
+  '/admin/branches': typeof AdminBranchesRoute
   '/admin/import': typeof AdminImportRoute
+  '/admin/info': typeof AdminInfoRoute
+  '/admin/promotions': typeof AdminPromotionsRoute
+  '/admin/qr-codes': typeof AdminQrCodesRoute
   '/admin/tags': typeof AdminTagsRoute
   '/admin/team': typeof AdminTeamRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
@@ -133,8 +162,7 @@ export interface FileRoutesByFullPath {
   '/auth/sign-up': typeof AuthSignUpRoute
   '/auth/two-factor': typeof AuthTwoFactorRoute
   '/admin/': typeof AdminIndexRoute
-  '/admin/settings/account': typeof AdminSettingsAccountRoute
-  '/admin/settings/appearance': typeof AdminSettingsAppearanceRoute
+  '/admin/settings/security': typeof AdminSettingsSecurityRoute
   '/auth/invite/$token': typeof AuthInviteTokenRoute
   '/admin/menu/': typeof AdminMenuIndexRoute
   '/admin/settings/': typeof AdminSettingsIndexRoute
@@ -142,7 +170,12 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin/addons': typeof AdminAddonsRoute
+  '/admin/appearance': typeof AdminAppearanceRoute
+  '/admin/branches': typeof AdminBranchesRoute
   '/admin/import': typeof AdminImportRoute
+  '/admin/info': typeof AdminInfoRoute
+  '/admin/promotions': typeof AdminPromotionsRoute
+  '/admin/qr-codes': typeof AdminQrCodesRoute
   '/admin/tags': typeof AdminTagsRoute
   '/admin/team': typeof AdminTeamRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
@@ -151,8 +184,7 @@ export interface FileRoutesByTo {
   '/auth/sign-up': typeof AuthSignUpRoute
   '/auth/two-factor': typeof AuthTwoFactorRoute
   '/admin': typeof AdminIndexRoute
-  '/admin/settings/account': typeof AdminSettingsAccountRoute
-  '/admin/settings/appearance': typeof AdminSettingsAppearanceRoute
+  '/admin/settings/security': typeof AdminSettingsSecurityRoute
   '/auth/invite/$token': typeof AuthInviteTokenRoute
   '/admin/menu': typeof AdminMenuIndexRoute
   '/admin/settings': typeof AdminSettingsIndexRoute
@@ -163,7 +195,12 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteRouteWithChildren
   '/admin/settings': typeof AdminSettingsRouteRouteWithChildren
   '/admin/addons': typeof AdminAddonsRoute
+  '/admin/appearance': typeof AdminAppearanceRoute
+  '/admin/branches': typeof AdminBranchesRoute
   '/admin/import': typeof AdminImportRoute
+  '/admin/info': typeof AdminInfoRoute
+  '/admin/promotions': typeof AdminPromotionsRoute
+  '/admin/qr-codes': typeof AdminQrCodesRoute
   '/admin/tags': typeof AdminTagsRoute
   '/admin/team': typeof AdminTeamRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
@@ -172,8 +209,7 @@ export interface FileRoutesById {
   '/auth/sign-up': typeof AuthSignUpRoute
   '/auth/two-factor': typeof AuthTwoFactorRoute
   '/admin/': typeof AdminIndexRoute
-  '/admin/settings/account': typeof AdminSettingsAccountRoute
-  '/admin/settings/appearance': typeof AdminSettingsAppearanceRoute
+  '/admin/settings/security': typeof AdminSettingsSecurityRoute
   '/auth/invite/$token': typeof AuthInviteTokenRoute
   '/admin/menu/': typeof AdminMenuIndexRoute
   '/admin/settings/': typeof AdminSettingsIndexRoute
@@ -185,7 +221,12 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/settings'
     | '/admin/addons'
+    | '/admin/appearance'
+    | '/admin/branches'
     | '/admin/import'
+    | '/admin/info'
+    | '/admin/promotions'
+    | '/admin/qr-codes'
     | '/admin/tags'
     | '/admin/team'
     | '/auth/forgot-password'
@@ -194,8 +235,7 @@ export interface FileRouteTypes {
     | '/auth/sign-up'
     | '/auth/two-factor'
     | '/admin/'
-    | '/admin/settings/account'
-    | '/admin/settings/appearance'
+    | '/admin/settings/security'
     | '/auth/invite/$token'
     | '/admin/menu/'
     | '/admin/settings/'
@@ -203,7 +243,12 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin/addons'
+    | '/admin/appearance'
+    | '/admin/branches'
     | '/admin/import'
+    | '/admin/info'
+    | '/admin/promotions'
+    | '/admin/qr-codes'
     | '/admin/tags'
     | '/admin/team'
     | '/auth/forgot-password'
@@ -212,8 +257,7 @@ export interface FileRouteTypes {
     | '/auth/sign-up'
     | '/auth/two-factor'
     | '/admin'
-    | '/admin/settings/account'
-    | '/admin/settings/appearance'
+    | '/admin/settings/security'
     | '/auth/invite/$token'
     | '/admin/menu'
     | '/admin/settings'
@@ -223,7 +267,12 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/settings'
     | '/admin/addons'
+    | '/admin/appearance'
+    | '/admin/branches'
     | '/admin/import'
+    | '/admin/info'
+    | '/admin/promotions'
+    | '/admin/qr-codes'
     | '/admin/tags'
     | '/admin/team'
     | '/auth/forgot-password'
@@ -232,8 +281,7 @@ export interface FileRouteTypes {
     | '/auth/sign-up'
     | '/auth/two-factor'
     | '/admin/'
-    | '/admin/settings/account'
-    | '/admin/settings/appearance'
+    | '/admin/settings/security'
     | '/auth/invite/$token'
     | '/admin/menu/'
     | '/admin/settings/'
@@ -322,11 +370,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminTagsRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/qr-codes': {
+      id: '/admin/qr-codes'
+      path: '/qr-codes'
+      fullPath: '/admin/qr-codes'
+      preLoaderRoute: typeof AdminQrCodesRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/promotions': {
+      id: '/admin/promotions'
+      path: '/promotions'
+      fullPath: '/admin/promotions'
+      preLoaderRoute: typeof AdminPromotionsRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/info': {
+      id: '/admin/info'
+      path: '/info'
+      fullPath: '/admin/info'
+      preLoaderRoute: typeof AdminInfoRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/import': {
       id: '/admin/import'
       path: '/import'
       fullPath: '/admin/import'
       preLoaderRoute: typeof AdminImportRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/branches': {
+      id: '/admin/branches'
+      path: '/branches'
+      fullPath: '/admin/branches'
+      preLoaderRoute: typeof AdminBranchesRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/appearance': {
+      id: '/admin/appearance'
+      path: '/appearance'
+      fullPath: '/admin/appearance'
+      preLoaderRoute: typeof AdminAppearanceRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/addons': {
@@ -364,32 +447,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthInviteTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/settings/appearance': {
-      id: '/admin/settings/appearance'
-      path: '/appearance'
-      fullPath: '/admin/settings/appearance'
-      preLoaderRoute: typeof AdminSettingsAppearanceRouteImport
-      parentRoute: typeof AdminSettingsRouteRoute
-    }
-    '/admin/settings/account': {
-      id: '/admin/settings/account'
-      path: '/account'
-      fullPath: '/admin/settings/account'
-      preLoaderRoute: typeof AdminSettingsAccountRouteImport
+    '/admin/settings/security': {
+      id: '/admin/settings/security'
+      path: '/security'
+      fullPath: '/admin/settings/security'
+      preLoaderRoute: typeof AdminSettingsSecurityRouteImport
       parentRoute: typeof AdminSettingsRouteRoute
     }
   }
 }
 
 interface AdminSettingsRouteRouteChildren {
-  AdminSettingsAccountRoute: typeof AdminSettingsAccountRoute
-  AdminSettingsAppearanceRoute: typeof AdminSettingsAppearanceRoute
+  AdminSettingsSecurityRoute: typeof AdminSettingsSecurityRoute
   AdminSettingsIndexRoute: typeof AdminSettingsIndexRoute
 }
 
 const AdminSettingsRouteRouteChildren: AdminSettingsRouteRouteChildren = {
-  AdminSettingsAccountRoute: AdminSettingsAccountRoute,
-  AdminSettingsAppearanceRoute: AdminSettingsAppearanceRoute,
+  AdminSettingsSecurityRoute: AdminSettingsSecurityRoute,
   AdminSettingsIndexRoute: AdminSettingsIndexRoute,
 }
 
@@ -399,7 +473,12 @@ const AdminSettingsRouteRouteWithChildren =
 interface AdminRouteRouteChildren {
   AdminSettingsRouteRoute: typeof AdminSettingsRouteRouteWithChildren
   AdminAddonsRoute: typeof AdminAddonsRoute
+  AdminAppearanceRoute: typeof AdminAppearanceRoute
+  AdminBranchesRoute: typeof AdminBranchesRoute
   AdminImportRoute: typeof AdminImportRoute
+  AdminInfoRoute: typeof AdminInfoRoute
+  AdminPromotionsRoute: typeof AdminPromotionsRoute
+  AdminQrCodesRoute: typeof AdminQrCodesRoute
   AdminTagsRoute: typeof AdminTagsRoute
   AdminTeamRoute: typeof AdminTeamRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -409,7 +488,12 @@ interface AdminRouteRouteChildren {
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminSettingsRouteRoute: AdminSettingsRouteRouteWithChildren,
   AdminAddonsRoute: AdminAddonsRoute,
+  AdminAppearanceRoute: AdminAppearanceRoute,
+  AdminBranchesRoute: AdminBranchesRoute,
   AdminImportRoute: AdminImportRoute,
+  AdminInfoRoute: AdminInfoRoute,
+  AdminPromotionsRoute: AdminPromotionsRoute,
+  AdminQrCodesRoute: AdminQrCodesRoute,
   AdminTagsRoute: AdminTagsRoute,
   AdminTeamRoute: AdminTeamRoute,
   AdminIndexRoute: AdminIndexRoute,

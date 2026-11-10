@@ -1,0 +1,13 @@
+{
+  "name": "menu-lighthouse-ci",
+  "private": true,
+  "description": "CI only: Lighthouse CI for the guest menu page (PLAN.md \u00a715.5). Exact versions, locked.",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@lhci/cli": "0.16.0"
+  },
+  "overrides": {
+    "puppeteer-core": "25.16.0"
+  },
+  "//": "puppeteer-core 25.17.0 needs @puppeteer/browsers 3.2.7, whose tarball is missing from npm (404, 2026-11-10); remove the override once it is fixed."
+}

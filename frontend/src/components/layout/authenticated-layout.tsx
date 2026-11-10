@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { Outlet } from '@tanstack/react-router'
 import { getCookie } from '@/lib/cookies'
 import { cn } from '@/lib/utils'
@@ -9,7 +10,13 @@ import { SubscriptionBanner } from '@/components/layout/subscription-banner'
 import { SkipToMain } from '@/components/skip-to-main'
 import { useCurrentTenant, useMe } from '@/features/auth/use-me'
 import { VerifyEmailBanner } from '@/features/auth/verify-email'
-import { NoRestaurant } from '@/features/errors/no-restaurant'
+
+// Rare screen: downloaded only when needed.
+const NoRestaurant = lazy(() =>
+  import('@/features/errors/no-restaurant').then((m) => ({
+    default: m.NoRestaurant,
+  }))
+)
 
 type AuthenticatedLayoutProps = {
   children?: React.ReactNode
@@ -20,7 +27,13 @@ export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
   const tenant = useCurrentTenant()
   const defaultOpen = getCookie('sidebar_state') !== 'false'
 
-  if (!tenant) return <NoRestaurant />
+  if (!tenant) {
+    return (
+      <Suspense fallback={null}>
+        <NoRestaurant />
+      </Suspense>
+    )
+  }
 
   return (
     <SearchProvider>

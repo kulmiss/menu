@@ -19,7 +19,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar'
-import { SignOutDialog } from '@/components/sign-out-dialog'
+import { LazySignOutDialog } from '@/components/lazy-sign-out-dialog'
 import { useMe } from '@/features/auth/use-me'
 
 function UserLabel({ name, email }: { name: string; email: string }) {
@@ -92,7 +92,7 @@ export function NavUser() {
         </SidebarMenuItem>
       </SidebarMenu>
 
-      <SignOutDialog open={!!open} onOpenChange={setOpen} />
+      <LazySignOutDialog open={!!open} onOpenChange={setOpen} />
     </>
   )
 }

@@ -15,7 +15,12 @@ return [
 
     'idempotency_hours' => 24,
 
-    'locales' => ['en', 'so', 'am', 'ar'],
+    // Interface + default menu language. English only for now (QUESTIONS #14, #15);
+    // menu texts are stored per language, so adding one needs no data change.
+    'locales' => ['en'],
+
+    // Write a static copy of each guest menu page to public/menu-cache (PLAN.md §15.2.1).
+    'static_pages' => (bool) env('MENU_STATIC_PAGES', true),
 
     'default_currency' => env('MENU_DEFAULT_CURRENCY', 'ETB'),
 
@@ -38,7 +43,7 @@ return [
     | Plan limits (plans.limits JSON) checked when something is created.
     | A missing key or null means unlimited.
     */
-    'limit_keys' => ['menus', 'items', 'branches', 'languages', 'photos', 'members'],
+    'limit_keys' => ['menus', 'items', 'branches', 'tables', 'languages', 'photos', 'members'],
 
     // Largest price accepted, in minor units (100 000 000 = 1 000 000.00).
     'max_price_minor' => 100_000_000,
@@ -49,8 +54,8 @@ return [
     'reserved_slugs' => [
         'admin', 'api', 'app', 'assets', 'auth', 'build', 'css', 'dashboard', 'docs',
         'favicon.ico', 'help', 'img', 'images', 'js', 'login', 'logout', 'media',
-        'menu', 'platform', 'privacy', 'q', 'register', 'robots.txt', 'sanctum',
-        'settings', 'signup', 'sitemap.xml', 'static', 'status', 'storage', 'support',
+        'menu', 'menu-cache', 'platform', 'privacy', 'q', 'register', 'robots.txt', 'sanctum',
+        'settings', 'signup', 'sitemap.xml', 'static', 'sw.js', 'status', 'storage', 'support',
         'terms', 'up', 'www',
     ],
 ];

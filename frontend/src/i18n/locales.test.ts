@@ -1,10 +1,10 @@
-import am from '@/locales/am/common.json'
-import ar from '@/locales/ar/common.json'
-import en from '@/locales/en/common.json'
-import so from '@/locales/so/common.json'
+import common from '@/locales/en/common.json'
+import screens from '@/locales/en/screens.json'
 import { describe, expect, it } from 'vitest'
 
 type Tree = { [key: string]: string | Tree }
+
+const en = { ...common, ...screens } as Tree
 
 function keys(tree: Tree, prefix = ''): string[] {
   return Object.entries(tree)
@@ -18,16 +18,6 @@ function keys(tree: Tree, prefix = ''): string[] {
 }
 
 describe('locale files', () => {
-  const english = keys(en as Tree)
-
-  it.each([
-    ['so', so],
-    ['am', am],
-    ['ar', ar],
-  ])('%s has exactly the English keys', (_code, locale) => {
-    expect(keys(locale as Tree)).toEqual(english)
-  })
-
   it('English is the reviewed source language', () => {
     expect((en as Tree)._status).toBeUndefined()
   })

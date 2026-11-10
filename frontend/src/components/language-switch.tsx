@@ -3,6 +3,7 @@ import {
   LANGUAGES,
   languageDir,
   persistLanguage,
+  setLanguage,
   type LanguageCode,
 } from '@/i18n'
 import { Check, Languages } from 'lucide-react'
@@ -18,11 +19,17 @@ import {
 } from '@/components/ui/dropdown-menu'
 
 export function LanguageSwitch() {
+  // Hidden until a second language exists.
+  if (LANGUAGES.length < 2) return null
+  return <LanguageMenu />
+}
+
+function LanguageMenu() {
   const { t, i18n } = useTranslation()
   const { setDir } = useDirection()
 
   const choose = (code: LanguageCode) => {
-    void i18n.changeLanguage(code)
+    void setLanguage(code)
     persistLanguage(code)
     setDir(languageDir(code))
   }
