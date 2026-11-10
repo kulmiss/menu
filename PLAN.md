@@ -65,6 +65,7 @@ Restaurants and cafés publish a fast, clean menu that customers open from a QR 
 - **Budget (before images): ≤ 100 KB transferred.** HTML ≤ 55 KB gz (large menu), CSS ≤ 12 KB, JS ≤ 6 KB, one subset WOFF2 font ≤ 25 KB. CI fails if the demo menu page exceeds the budget.
 - Images: `<picture>` with WebP + JPEG fallback (old iOS), `srcset` 320/640/1280, `loading="lazy"`, explicit width/height, blurred 16 px placeholder colour.
 - SEO: `<title>`, meta description, canonical (strips `table`), Open Graph + Twitter card with the cover image (1200×630 crop), `hreflang` per enabled language, JSON-LD `Restaurant` + `Menu`, `robots.txt`, `sitemap.xml` of active restaurants.
+- Light/dark follows the phone setting (`prefers-color-scheme`), with both palettes in the inlined CSS and brand colours adjusted per mode to keep ≥ 4.5:1.
 - Fonts: curated self-hosted list (Inter, Manrope, Lora, Nunito, System). **Noto Sans Ethiopic** and **Noto Sans Arabic** load through `unicode-range`, so they download only when Amharic or Arabic text is on the page.
 
 ### 3.4 Deploy targets (documented in Partition 13)
