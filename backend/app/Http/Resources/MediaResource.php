@@ -17,6 +17,7 @@ class MediaResource extends JsonResource
             'width' => $this->width,
             'height' => $this->height,
             'dominant_color' => $this->dominant_color,
+            'placeholder' => $this->placeholder,
             'urls' => $this->urls(),
         ];
     }

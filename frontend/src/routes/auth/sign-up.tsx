@@ -1,11 +1,13 @@
-import { z } from 'zod'
 import { createFileRoute } from '@tanstack/react-router'
+import { optionalString } from '@/lib/search-params'
 import { SignUpPage } from '@/features/auth/sign-up'
 
 export const Route = createFileRoute('/auth/sign-up')({
-  validateSearch: z.object({
-    redirect: z.string().optional(),
-    invite: z.string().optional(),
+  validateSearch: (
+    search: Record<string, unknown>
+  ): { redirect?: string; invite?: string } => ({
+    redirect: optionalString(search.redirect),
+    invite: optionalString(search.invite),
   }),
   component: function SignUpRoute() {
     const { redirect, invite } = Route.useSearch()

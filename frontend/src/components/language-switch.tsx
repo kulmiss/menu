@@ -3,6 +3,7 @@ import {
   LANGUAGES,
   languageDir,
   persistLanguage,
+  setLanguage,
   type LanguageCode,
 } from '@/i18n'
 import { Check, Languages } from 'lucide-react'
@@ -22,7 +23,7 @@ export function LanguageSwitch() {
   const { setDir } = useDirection()
 
   const choose = (code: LanguageCode) => {
-    void i18n.changeLanguage(code)
+    void setLanguage(code)
     persistLanguage(code)
     setDir(languageDir(code))
   }

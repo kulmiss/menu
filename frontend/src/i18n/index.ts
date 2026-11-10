@@ -1,7 +1,4 @@
-import am from '@/locales/am/common.json'
-import ar from '@/locales/ar/common.json'
 import en from '@/locales/en/common.json'
-import so from '@/locales/so/common.json'
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
 
@@ -38,22 +35,37 @@ export function persistLanguage(code: LanguageCode) {
   }
 }
 
+// English ships with the app; other languages download when chosen, so
+// each visit loads only one translation file (PLAN.md §15).
+const loaders = import.meta.glob<{ default: Record<string, unknown> }>(
+  '../locales/*/common.json'
+)
 /** True while a locale file is still an unreviewed machine draft. */
 export function isDraftLanguage(code: string): boolean {
-  const bundle = i18n.getResourceBundle(code, 'common') as
-    | { _status?: string }
-    | undefined
-  return bundle?._status === 'machine_draft'
+  // Read from the files at build time (vite.config.ts), so the "(draft)"
+  // label needs no translation download.
+  return __LOCALE_STATUS__[code] === 'machine_draft'
+}
+
+/** Makes sure a language's texts are loaded. */
+export async function loadLanguage(code: string): Promise<void> {
+  if (code === 'en' || i18n.hasResourceBundle(code, 'common')) return
+  const loader = loaders[`../locales/${code}/common.json`]
+  if (!loader) return
+  const bundle = (await loader()).default
+  i18n.addResourceBundle(code, 'common', bundle, true, true)
+}
+
+/** Loads a language, then switches the interface to it. */
+export async function setLanguage(code: LanguageCode): Promise<void> {
+  await loadLanguage(code)
+  await i18n.changeLanguage(code)
 }
 
 void i18n.use(initReactI18next).init({
-  resources: {
-    en: { common: en },
-    so: { common: so },
-    am: { common: am },
-    ar: { common: ar },
-  },
-  lng: storedLanguage(),
+  resources: { en: { common: en } },
+  partialBundledLanguages: true,
+  lng: 'en',
   fallbackLng: 'en',
   defaultNS: 'common',
   ns: ['common'],
@@ -65,5 +77,13 @@ i18n.on('languageChanged', (lng) => {
   document.documentElement.setAttribute('lang', lng)
 })
 document.documentElement.setAttribute('lang', i18n.language)
+
+/** Resolves once the remembered language is loaded (render after this). */
+export const i18nReady: Promise<void> = (() => {
+  const stored = storedLanguage()
+  return stored === 'en'
+    ? Promise.resolve()
+    : setLanguage(stored).catch(() => undefined)
+})()
 
 export default i18n

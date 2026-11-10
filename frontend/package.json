@@ -17,7 +17,8 @@
     "test:browser": "vitest",
     "test:coverage": "vitest run --coverage --browser.headless",
     "test:browser:install": "playwright install chromium --with-deps",
-    "typecheck": "tsc -b"
+    "typecheck": "tsc -b",
+    "size": "node scripts/bundle-size.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

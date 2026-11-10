@@ -87,6 +87,11 @@ jobs:
         run: pnpm format:check
       - name: Build (also generates routes) + typecheck
         run: pnpm build
+      # PLAN.md §15: the admin's first download, gzipped. Fails the PR if it
+      # grows past the budget. Target 150 KB; current ceiling while the owner
+      # decides how to get there (see PLAN.md §15.6).
+      - name: Admin bundle budget
+        run: node scripts/bundle-size.mjs --budget-kb=245
       - name: Install test browser
         run: pnpm exec playwright install chromium --with-deps
       - name: Tests (Vitest)

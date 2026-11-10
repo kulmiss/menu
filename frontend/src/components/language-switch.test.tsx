@@ -21,7 +21,8 @@ describe('LanguageSwitch', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Language' }))
     await userEvent.click(screen.getByText('Arabic'))
 
-    expect(i18n.language).toBe('ar')
+    // Arabic texts download on demand, then the language switches.
+    await expect.poll(() => i18n.language).toBe('ar')
     await expect.poll(() => document.documentElement.dir).toBe('rtl')
     expect(document.documentElement.lang).toBe('ar')
   })

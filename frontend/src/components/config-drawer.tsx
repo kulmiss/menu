@@ -27,7 +27,11 @@ import {
 } from '@/components/ui/sheet'
 import { useSidebar } from './ui/sidebar'
 
-export function ConfigDrawer() {
+export function ConfigDrawer({
+  defaultOpen = false,
+}: {
+  defaultOpen?: boolean
+}) {
   const { setOpen } = useSidebar()
   const { resetDir } = useDirection()
   const { resetTheme } = useTheme()
@@ -41,7 +45,7 @@ export function ConfigDrawer() {
   }
 
   return (
-    <Sheet>
+    <Sheet defaultOpen={defaultOpen}>
       <SheetTrigger asChild>
         <Button
           size='icon'

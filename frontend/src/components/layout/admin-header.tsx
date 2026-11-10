@@ -1,6 +1,6 @@
-import { ConfigDrawer } from '@/components/config-drawer'
 import { LanguageSwitch } from '@/components/language-switch'
 import { Header } from '@/components/layout/header'
+import { LazyConfigDrawer } from '@/components/layout/lazy-config-drawer'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
@@ -12,7 +12,7 @@ export function AdminHeader({ fixed }: { fixed?: boolean }) {
       <Search className='me-auto' />
       <LanguageSwitch />
       <ThemeSwitch />
-      <ConfigDrawer />
+      <LazyConfigDrawer />
       <ProfileDropdown />
     </Header>
   )

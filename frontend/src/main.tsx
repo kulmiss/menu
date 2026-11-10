@@ -14,7 +14,7 @@ import { DirectionProvider } from './context/direction-provider'
 import { FontProvider } from './context/font-provider'
 import { ThemeProvider } from './context/theme-provider'
 // i18n (must load before the first render)
-import i18n from './i18n'
+import i18n, { i18nReady } from './i18n'
 // Generated Routes
 import { routeTree } from './routeTree.gen'
 // Styles
@@ -96,7 +96,11 @@ declare module '@tanstack/react-router' {
 
 // Render the app
 const rootElement = document.getElementById('root')!
-if (!rootElement.innerHTML) {
+// A remembered non-English language is loaded first, so no English flash.
+void i18nReady.then(render)
+
+function render() {
+  if (rootElement.innerHTML) return
   const root = ReactDOM.createRoot(rootElement)
   root.render(
     <StrictMode>

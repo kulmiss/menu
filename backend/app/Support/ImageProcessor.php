@@ -9,10 +9,12 @@ use RuntimeException;
 /**
  * Turns one upload into the sizes the public menu uses (PLAN.md §3.3, §4.8),
  * with plain GD so it runs on any shared host (QUESTIONS #57):
- * - 320 / 640 / 1280 px wide WebP for `srcset`,
+ * - 320 / 640 / 1280 px wide WebP for `srcset` (and AVIF too when the
+ *   server's GD supports it — many shared hosts don't),
  * - 640 px JPEG for old browsers,
  * - 1200×630 JPEG for link previews (Open Graph),
- * plus the average colour as a placeholder. Re-encoding drops all metadata
+ * plus the average colour and a tiny blurred preview (data URI under 300
+ * bytes) to show inline while the photo loads. Re-encoding drops all metadata
  * (EXIF, GPS); phone photos are turned upright first.
  */
 class ImageProcessor
@@ -22,8 +24,18 @@ class ImageProcessor
 
     public const WIDTHS = [320, 640, 1280];
 
+    /** Strong compression (PLAN.md §15): photos are the heaviest part of a menu. */
+    public const WEBP_QUALITY = 72;
+
+    public const AVIF_QUALITY = 55;
+
+    public const JPEG_QUALITY = 75;
+
+    /** Width of the inline preview; it is shown blurred, so tiny is enough. */
+    private const PLACEHOLDER_WIDTH = 16;
+
     /**
-     * @return array{width: int, height: int, variants: array<int|string, string>, dominant_color: string}
+     * @return array{width: int, height: int, variants: array<int|string, string>, dominant_color: string, placeholder: string}
      */
     public function process(string $path, string $mime, string $disk, string $folder): array
     {
@@ -39,6 +51,9 @@ class ImageProcessor
             // Never enlarge; a small photo still gets every name.
             $scaled = $this->scaleToWidth($image, min($target, $width));
             $variants[(string) $target] = $this->store($scaled, 'webp', $disk, "{$folder}/{$target}.webp");
+            if (self::supportsAvif()) {
+                $variants["avif{$target}"] = $this->store($scaled, 'avif', $disk, "{$folder}/{$target}.avif");
+            }
             if ($target === 640) {
                 $variants['jpg'] = $this->store($scaled, 'jpeg', $disk, "{$folder}/640.jpg");
             }
@@ -50,7 +65,23 @@ class ImageProcessor
             'height' => $height,
             'variants' => array_map(fn (string $p) => basename($p), $variants),
             'dominant_color' => $this->averageColor($image),
+            'placeholder' => $this->placeholder($image),
         ];
+    }
+
+    public static function supportsAvif(): bool
+    {
+        return function_exists('imageavif') && (bool) (gd_info()['AVIF Support'] ?? false);
+    }
+
+    /** A 16 px wide WebP as a data URI, shown blurred until the photo arrives. */
+    private function placeholder(GdImage $image): string
+    {
+        $tiny = $this->resample($image, self::PLACEHOLDER_WIDTH, max(1, (int) round(imagesy($image) * self::PLACEHOLDER_WIDTH / imagesx($image))));
+        ob_start();
+        imagewebp($tiny, null, 30);
+
+        return 'data:image/webp;base64,'.base64_encode((string) ob_get_clean());
     }
 
     private function load(string $path, string $mime): GdImage
@@ -153,7 +184,11 @@ class ImageProcessor
     private function store(GdImage $image, string $format, string $disk, string $path): string
     {
         ob_start();
-        $format === 'webp' ? imagewebp($image, null, 80) : imagejpeg($image, null, 82);
+        match ($format) {
+            'webp' => imagewebp($image, null, self::WEBP_QUALITY),
+            'avif' => imageavif($image, null, self::AVIF_QUALITY, 6),
+            default => imagejpeg($image, null, self::JPEG_QUALITY),
+        };
         Storage::disk($disk)->put($path, (string) ob_get_clean());
 
         return $path;
