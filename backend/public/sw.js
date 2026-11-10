@@ -1,7 +1,7 @@
 // Guest menu service worker (PLAN.md §15.2.6).
 // Menu pages: show the saved copy at once, fetch a fresh one in the background
 // (stale-while-revalidate), so repeat visits are instant and work offline.
-// Photos: cache-first; their URLs never change.
+// Photos and the on-demand item sheet script: cache-first; their URLs never change.
 var PAGES = 'menu-pages-v1', MEDIA = 'menu-media-v1', MAX_MEDIA = 300;
 
 self.addEventListener('install', function () { self.skipWaiting(); });
@@ -21,7 +21,7 @@ self.addEventListener('fetch', function (e) {
   var r = e.request, u = new URL(r.url);
   if (r.method !== 'GET' || u.origin !== location.origin) return;
 
-  if (u.pathname.indexOf('/media/') === 0) {
+  if (u.pathname.indexOf('/media/') === 0 || u.pathname.indexOf('/menu-assets/') === 0) {
     e.respondWith(caches.open(MEDIA).then(function (c) {
       return c.match(r).then(function (hit) {
         return hit || fetch(r).then(function (res) {

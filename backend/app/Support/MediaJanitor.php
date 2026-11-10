@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Models\Category;
 use App\Models\Item;
 use App\Models\Media;
+use App\Models\Promotion;
 use App\Models\TenantAppearance;
 
 /**
@@ -21,6 +22,7 @@ class MediaJanitor
 
         $used = Item::where('media_id', $mediaId)->exists()
             || Category::where('media_id', $mediaId)->exists()
+            || Promotion::where('media_id', $mediaId)->exists()
             || TenantAppearance::where(fn ($q) => $q->where('logo_media_id', $mediaId)->orWhere('cover_media_id', $mediaId))->exists();
         if ($used) {
             return;

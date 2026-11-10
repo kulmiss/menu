@@ -20,6 +20,27 @@ class InlineAssets
         ));
     }
 
+    /**
+     * The item sheet script (loaded on demand), written once per version to
+     * public/menu-assets/sheet.{hash}.js so it can be cached for a year.
+     */
+    public static function sheetUrl(): string
+    {
+        return self::$memo['sheet'] ??= (function () {
+            $js = self::minifyJs((string) file_get_contents(resource_path('public-menu/sheet.js')));
+            $name = 'sheet.'.substr(md5($js), 0, 10).'.js';
+            $file = public_path('menu-assets/'.$name);
+            if (! is_file($file)) {
+                @mkdir(dirname($file), 0755, true);
+                $tmp = $file.'.'.bin2hex(random_bytes(4));
+                file_put_contents($tmp, $js);
+                rename($tmp, $file);
+            }
+
+            return '/menu-assets/'.$name;
+        })();
+    }
+
     public static function js(): string
     {
         return self::$memo['js'] ??= self::minifyJs(

@@ -1,41 +1,28 @@
-// Guest menu page script, inlined (PLAN.md §15.2.2). Budget: < 5 KB.
+// Guest menu page script, inlined (PLAN.md §15.2.2). Budget: < 5 KB;
+// rarely needed parts load on demand (sheet.js).
 // Nothing heavy runs before the first paint: one delegated click handler now,
 // everything else on the next idle moment.
 (function () {
   var d = document, w = window, D, seen = {};
   var id = function (x) { return d.getElementById(x); };
   var on = function (e, n, f, o) { e.addEventListener(n, f, o); };
-  var dl = id('s'), body = id('sb');
-  var add = function (e) { body.appendChild(e); return e; };
+  var dl = id('s');
   var $ = function (s, r) { return (r || d).querySelectorAll(s); };
-  var el = function (t, c, x) { var e = d.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
   var data = function () { return D || (D = JSON.parse(id('d').textContent)); };
   var later = w.requestIdleCallback || function (f) { setTimeout(f, 1); };
 
-  // Item details sheet, built from the data embedded in the page.
+  // Item details: photo prefetch on hover/touch; the sheet itself is a small
+  // file loaded on demand (sheet.js), fetched in the background after load.
+  var wait, tag;
   function big(id) { var x = data().c[id]; if (x && x.i && !seen[id]) { seen[id] = 1; new Image().src = x.i; } }
-  function row(a, b, so) { var r = el('div', 'ro'); r.appendChild(el('span', '', a)); r.appendChild(el('span', so ? 'mu' : '', so ? D.t.so : b)); return r; }
-  function open(li) {
-    var x = data().c[li.dataset.i] || {}, T = D.t;
-    body.textContent = '';
-    if (x.i) { var im = el('img'); im.src = x.i; im.alt = ''; im.width = 1280; im.height = 853; add(im); }
-    add(el('h3', '', li.querySelector('.nm').textContent));
-    var pr = li.querySelector('.pr'); if (pr) add(el('div', 'pr', pr.textContent));
-    if (x.d) add(el('p', '', x.d));
-    if (x.v) { add(el('h4', '', T.sz)); x.v.forEach(function (v) { add(row(v[0], v[1])); }); }
-    (x.a || []).forEach(function (g) {
-      add(el('h4', '', g[0]));
-      var h = g[2] ? (g[1] === g[2] ? T.ex.replace(':count', g[2]) : g[1] ? T.ch.replace(':min', g[1]).replace(':max', g[2]) : T.up.replace(':max', g[2])) : '';
-      if (h) add(el('div', 'mu', h));
-      g[3].forEach(function (o) { add(row(o[0], o[1], o[2])); });
-    });
-    if (x.al) { add(el('h4', '', T.al)); add(el('div', '', x.al.join(', '))); }
-    var m = [];
-    if (x.k) m.push(T.kc.replace(':count', x.k));
-    if (x.p) m.push(T.pm.replace(':count', x.p));
-    if (m.length) add(el('p', 'mu', m.join(' · ')));
-    if (dl.showModal) dl.showModal(); else dl.setAttribute('open', '');
+  function load() {
+    if (tag) return;
+    tag = d.createElement('script');
+    tag.src = data().s;
+    tag.onload = function () { if (wait) w.mS(wait, D); wait = null; };
+    d.head.appendChild(tag);
   }
+  function open(li) { if (w.mS) w.mS(li, data()); else { wait = li; load(); } }
   on(d, 'click', function (e) {
     var b = e.target.closest && e.target.closest('.it');
     if (b) open(b.parentNode);
@@ -51,6 +38,8 @@
     try {
       var n = mhNow(D.z), T = D.t;
       $('.mn[data-s]').forEach(function (m) { m.classList.toggle('off', !mhIn(JSON.parse(m.dataset.s), n)); });
+      // Promotions: shown only between their start and end (local time).
+      $('[data-w]').forEach(function (e) { var p = JSON.parse(e.dataset.w), k = n.d + ' ' + n.t; e.hidden = !!(p[0] && k < p[0] || p[1] && k >= p[1]); });
       var st = mhState(D.h || [], D.x || [], n), pill = id('st');
       if (st && pill) {
         pill.textContent = st[0] === 2 ? T.ct : st[0] === 1 ? T.on.replace(':time', st[1]) : st[1] == null ? T.cl
@@ -110,6 +99,7 @@
   on(w, 'load', function () {
     if (data().p) return; // admin preview: no service worker, no visit counted
     later(function () {
+      load();
       if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(function () {});
       if (navigator.sendBeacon) navigator.sendBeacon('/api/v1/beacon', JSON.stringify({ t: data().id, q: scan || null }));
     });

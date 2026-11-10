@@ -7,8 +7,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Branch;
 use App\Models\BranchItemOverride;
 use App\Models\BranchVariantPrice;
-use App\Models\ItemVariant;
 use App\Models\DiningTable;
+use App\Models\ItemVariant;
 use App\Models\Menu;
 use App\Models\QrCode;
 use App\Models\Tenant;
@@ -206,7 +206,12 @@ class BranchController extends Controller
         ]);
 
         // Sizes must belong to the item they are listed under.
-        $sizeIds = collect($data['overrides'])->flatMap(fn ($row) => array_keys($row['sizes'] ?? []))->map(fn ($id) => (int) $id);
+        $sizeIds = [];
+        foreach ($data['overrides'] as $row) {
+            foreach (array_keys($row['sizes'] ?? []) as $variantId) {
+                $sizeIds[] = (int) $variantId;
+            }
+        }
         $owners = ItemVariant::whereIn('id', $sizeIds)->pluck('item_id', 'id');
         foreach ($data['overrides'] as $i => $row) {
             foreach (array_keys($row['sizes'] ?? []) as $variantId) {

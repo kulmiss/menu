@@ -2,6 +2,7 @@ import {
   BookOpen,
   FileSpreadsheet,
   LayoutDashboard,
+  Megaphone,
   Info,
   MapPin,
   QrCode,
@@ -39,6 +40,12 @@ export const sidebarData: SidebarData = {
           title: 'nav.tags',
           url: '/admin/tags',
           icon: Tags,
+          roles: ['owner', 'manager'],
+        },
+        {
+          title: 'nav.promotions',
+          url: '/admin/promotions',
+          icon: Megaphone,
           roles: ['owner', 'manager'],
         },
         {

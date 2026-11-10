@@ -20,6 +20,7 @@ import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-pas
 import { Route as AdminTeamRouteImport } from './routes/admin/team'
 import { Route as AdminTagsRouteImport } from './routes/admin/tags'
 import { Route as AdminQrCodesRouteImport } from './routes/admin/qr-codes'
+import { Route as AdminPromotionsRouteImport } from './routes/admin/promotions'
 import { Route as AdminInfoRouteImport } from './routes/admin/info'
 import { Route as AdminImportRouteImport } from './routes/admin/import'
 import { Route as AdminBranchesRouteImport } from './routes/admin/branches'
@@ -86,6 +87,11 @@ const AdminQrCodesRoute = AdminQrCodesRouteImport.update({
   path: '/qr-codes',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminPromotionsRoute = AdminPromotionsRouteImport.update({
+  id: '/promotions',
+  path: '/promotions',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdminInfoRoute = AdminInfoRouteImport.update({
   id: '/info',
   path: '/info',
@@ -146,6 +152,7 @@ export interface FileRoutesByFullPath {
   '/admin/branches': typeof AdminBranchesRoute
   '/admin/import': typeof AdminImportRoute
   '/admin/info': typeof AdminInfoRoute
+  '/admin/promotions': typeof AdminPromotionsRoute
   '/admin/qr-codes': typeof AdminQrCodesRoute
   '/admin/tags': typeof AdminTagsRoute
   '/admin/team': typeof AdminTeamRoute
@@ -167,6 +174,7 @@ export interface FileRoutesByTo {
   '/admin/branches': typeof AdminBranchesRoute
   '/admin/import': typeof AdminImportRoute
   '/admin/info': typeof AdminInfoRoute
+  '/admin/promotions': typeof AdminPromotionsRoute
   '/admin/qr-codes': typeof AdminQrCodesRoute
   '/admin/tags': typeof AdminTagsRoute
   '/admin/team': typeof AdminTeamRoute
@@ -191,6 +199,7 @@ export interface FileRoutesById {
   '/admin/branches': typeof AdminBranchesRoute
   '/admin/import': typeof AdminImportRoute
   '/admin/info': typeof AdminInfoRoute
+  '/admin/promotions': typeof AdminPromotionsRoute
   '/admin/qr-codes': typeof AdminQrCodesRoute
   '/admin/tags': typeof AdminTagsRoute
   '/admin/team': typeof AdminTeamRoute
@@ -216,6 +225,7 @@ export interface FileRouteTypes {
     | '/admin/branches'
     | '/admin/import'
     | '/admin/info'
+    | '/admin/promotions'
     | '/admin/qr-codes'
     | '/admin/tags'
     | '/admin/team'
@@ -237,6 +247,7 @@ export interface FileRouteTypes {
     | '/admin/branches'
     | '/admin/import'
     | '/admin/info'
+    | '/admin/promotions'
     | '/admin/qr-codes'
     | '/admin/tags'
     | '/admin/team'
@@ -260,6 +271,7 @@ export interface FileRouteTypes {
     | '/admin/branches'
     | '/admin/import'
     | '/admin/info'
+    | '/admin/promotions'
     | '/admin/qr-codes'
     | '/admin/tags'
     | '/admin/team'
@@ -365,6 +377,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminQrCodesRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/promotions': {
+      id: '/admin/promotions'
+      path: '/promotions'
+      fullPath: '/admin/promotions'
+      preLoaderRoute: typeof AdminPromotionsRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/info': {
       id: '/admin/info'
       path: '/info'
@@ -458,6 +477,7 @@ interface AdminRouteRouteChildren {
   AdminBranchesRoute: typeof AdminBranchesRoute
   AdminImportRoute: typeof AdminImportRoute
   AdminInfoRoute: typeof AdminInfoRoute
+  AdminPromotionsRoute: typeof AdminPromotionsRoute
   AdminQrCodesRoute: typeof AdminQrCodesRoute
   AdminTagsRoute: typeof AdminTagsRoute
   AdminTeamRoute: typeof AdminTeamRoute
@@ -472,6 +492,7 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminBranchesRoute: AdminBranchesRoute,
   AdminImportRoute: AdminImportRoute,
   AdminInfoRoute: AdminInfoRoute,
+  AdminPromotionsRoute: AdminPromotionsRoute,
   AdminQrCodesRoute: AdminQrCodesRoute,
   AdminTagsRoute: AdminTagsRoute,
   AdminTeamRoute: AdminTeamRoute,

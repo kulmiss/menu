@@ -1,7 +1,10 @@
-import en from '@/locales/en/common.json'
+import common from '@/locales/en/common.json'
+import screens from '@/locales/en/screens.json'
 import { describe, expect, it } from 'vitest'
 
 type Tree = { [key: string]: string | Tree }
+
+const en = { ...common, ...screens } as Tree
 
 function keys(tree: Tree, prefix = ''): string[] {
   return Object.entries(tree)

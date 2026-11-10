@@ -59,9 +59,34 @@ export async function loadLanguage(code: string): Promise<void> {
   i18n.addResourceBundle(code, 'common', bundle, true, true)
 }
 
+// Texts of the restaurant screens (menu editor, branches, settings…) are a
+// second file, loaded in parallel with the admin area rather than in the
+// first download (PLAN.md §15.6). Same "common" namespace, so t() calls
+// don't change.
+const screenLoaders = import.meta.glob<{ default: Record<string, unknown> }>(
+  '../locales/*/screens.json'
+)
+const screensLoaded = new Map<string, Promise<void>>()
+
+/** Makes sure the screen texts of a language (default: current) are loaded. */
+export function loadScreenTexts(
+  code: string = i18n.language || 'en'
+): Promise<void> {
+  const known = screensLoaded.get(code)
+  if (known) return known
+  const loader = screenLoaders[`../locales/${code}/screens.json`]
+  const promise = loader
+    ? loader().then((m) => {
+        i18n.addResourceBundle(code, 'common', m.default, true, false)
+      })
+    : Promise.resolve()
+  screensLoaded.set(code, promise)
+  return promise
+}
+
 /** Loads a language, then switches the interface to it. */
 export async function setLanguage(code: LanguageCode): Promise<void> {
-  await loadLanguage(code)
+  await Promise.all([loadLanguage(code), loadScreenTexts(code)])
   await i18n.changeLanguage(code)
 }
 

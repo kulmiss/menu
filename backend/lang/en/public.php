@@ -27,6 +27,7 @@ return [
     'unavailable_title' => 'Menu unavailable',
     'unavailable_body' => 'The menu of :name is not available right now. Please ask the staff.',
     'info' => 'Info & opening hours',
+    'special' => 'Special',
     'hours' => 'Opening hours',
     'address' => 'Address',
     'open_maps' => 'Open in Maps',

@@ -15,6 +15,7 @@ use App\Models\Media;
 use App\Models\Menu;
 use App\Models\MenuSchedule;
 use App\Models\OpeningHour;
+use App\Models\Promotion;
 use App\Models\Tag;
 use App\Models\Tenant;
 use App\Models\TenantAppearance;
@@ -158,9 +159,40 @@ class MenuPageData
                 ];
             })->filter(fn (array $m) => $m['categories'] !== [])->values()->all();
 
+            // Promotions still running (the page shows each only inside its dates).
+            $itemsOnPage = [];
+            foreach ($menuRows as $m) {
+                foreach ($m['categories'] as $c) {
+                    foreach ($c['items'] as $i) {
+                        $itemsOnPage[$i['id']] = $i;
+                    }
+                }
+            }
+            $localNow = now($tenant->timezone)->format('Y-m-d H:i');
+            $promotions = Promotion::with('media')->where('is_active', true)
+                ->where(fn ($q) => $q->whereNull('branch_id')->orWhere('branch_id', $branchId))
+                ->where(fn ($q) => $q->whereNull('ends_at')->orWhere('ends_at', '>', $localNow))
+                ->orderBy('sort')->orderBy('id')->get()
+                ->map(function (Promotion $p) use ($text, $itemsOnPage, $localNow, $photos) {
+                    $window = [$p->starts_at?->format('Y-m-d H:i'), $p->ends_at?->format('Y-m-d H:i')];
+                    $item = $p->item_id !== null ? ($itemsOnPage[$p->item_id] ?? null) : null;
+
+                    return [
+                        'type' => $p->type,
+                        'title' => $text($p->title),
+                        'body' => $text($p->body),
+                        'item' => $item ? ['id' => $item['id'], 'price' => $item['price']] : null,
+                        'image' => $photos && $p->media ? ($p->media->urls()['640'] ?? null) : null,
+                        'window' => $window[0] === null && $window[1] === null ? null : $window,
+                        // Outside its dates when the page was built (no-JS fallback; the script re-checks).
+                        'hidden' => ($window[0] !== null && $localNow < $window[0]) || ($window[1] !== null && $localNow >= $window[1]),
+                    ];
+                })->values()->all();
+
             return [
                 'tenant' => $tenant,
                 'theme' => $theme,
+                'promotions' => $promotions,
                 'branch' => $branch && $branches->count() > 1 ? $text($branch->name) : null,
                 'branches' => $branches->count() > 1 ? $branches->map(fn (Branch $b) => [
                     'name' => $text($b->name),

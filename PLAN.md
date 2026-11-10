@@ -1,6 +1,6 @@
 # PLAN — Digital menu SaaS
 
-Status: **approved; in build (Partitions 1–7 done).** Progress is in [handover.md](handover.md). **Speed is the top priority** — see §15, which wins over any older figure in this file.
+Status: **approved; in build (Partitions 1–7 and 9 done; 8 deferred).** Progress is in [handover.md](handover.md). **Speed is the top priority** — see §15, which wins over any older figure in this file.
 Decisions behind this plan are in [QUESTIONS.md](QUESTIONS.md). Progress and next steps are in [handover.md](handover.md).
 
 ---
@@ -279,8 +279,8 @@ Ready for more languages later without rewriting:
 | 5 ✅ | **Appearance + live preview** (PR #9) | appearance settings, themes, fonts, contrast guard, preview iframe | contrast unit, preview render |
 | 6 ✅ | **Branches + QR codes** (PR #10) | branches, overrides, tables, QR PNG/SVG/PDF, table cards | overrides resolution, PDF render |
 | 7 ✅ | **Restaurant info + hours** (PR #11) | profile, contacts, Wi-Fi, hours with breaks/overnight, closures | hours units (incl. midnight) |
-| 8 | **Translations** — *deferred (English only, §11)* | languages, translation grid, fallback; hidden while one language | fallback, missing filter |
-| 9 | **Promotions** | specials/announcements, badges | date windows |
+| 8 ⏸ | **Translations** — *deferred (English only, §11); nothing built* | languages, translation grid, fallback; hidden while one language | fallback, missing filter |
+| 9 ✅ | **Promotions** (PR #13) | specials/announcements, badges | date windows |
 | 10 | **Insights** | stats aggregation, charts, scans per table | counting, bot filter |
 | 11 | **Super Admin** | dashboard, restaurants, plans, features, payments, themes, announcements, log, settings, log-in-as, subscription states | platform policies, impersonation limits, state machine |
 | 12 | **Demo data** | fictional restaurants (see §13), seeders, demo images (generated, no real photos of people) | seeder runs on fresh DB |
@@ -358,6 +358,8 @@ Measured on 2026-11-10: **285 KB → 241 KB** after this PR's changes. What rema
 - **B: swap React for Preact (compat layer).** ≈ −45 KB → ~180 KB. Real risk with Radix and TanStack internals; needs a full re-test. Big architecture change.
 - **C: reach 150 KB** by dropping Radix-based components for hand-made ones and trimming the router — weeks of rework of finished screens.
 The guest-facing 30 KB customer page is unaffected by this choice.
+
+**Load on demand (owner, 2026-11-10: keep budgets; move code rather than raise limits):** screen texts (menu editor, branches, info, settings…) are `locales/en/screens.json`, loaded in parallel with the admin area (`/admin` route `beforeLoad`), not in the first download: 223.0 → **217.8 KB**. On the guest page the item details sheet is `sheet.{hash}.js` (1.3 KB), fetched after load and cached for a year by the browser and the service worker; inline script 5.0 → 4.2 KB.
 
 **Done (A):** axios replaced by a small `fetch` client (same Idempotency-Key, XSRF and 419-retry behaviour); toasts, sign-out dialog, command palette, appearance drawer, rare screens and non-English UI texts load on first use. 285 → **221 KB**; CI ceiling 225 KB.
 

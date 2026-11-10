@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\Menu\TagController;
 use App\Http\Controllers\Api\Restaurant\AppearanceController;
 use App\Http\Controllers\Api\Restaurant\BranchController;
 use App\Http\Controllers\Api\Restaurant\InfoController;
+use App\Http\Controllers\Api\Restaurant\PromotionController;
 use App\Http\Controllers\Api\Restaurant\QrCodeController;
 use App\Http\Controllers\Api\TeamController;
 use App\Http\Controllers\Api\TenantController;
@@ -113,6 +114,12 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::patch('qr-codes/{qr}', [QrCodeController::class, 'update']);
             Route::delete('qr-codes/{qr}', [QrCodeController::class, 'destroy']);
             Route::get('qr-codes/{qr}.{format}', [QrCodeController::class, 'download'])->whereIn('format', ['svg', 'png', 'pdf']);
+
+            Route::get('promotions', [PromotionController::class, 'index']);
+            Route::post('promotions', [PromotionController::class, 'store']);
+            Route::post('promotions/reorder', [PromotionController::class, 'reorder']);
+            Route::patch('promotions/{promotion}', [PromotionController::class, 'update']);
+            Route::delete('promotions/{promotion}', [PromotionController::class, 'destroy']);
 
             Route::get('profile', [InfoController::class, 'profile']);
             Route::put('profile', [InfoController::class, 'saveProfile']);

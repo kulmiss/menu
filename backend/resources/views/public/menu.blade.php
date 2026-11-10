@@ -13,6 +13,7 @@
     $data = [
         'id' => $tenant->id,
         'p' => $preview ? 1 : 0,
+        's' => InlineAssets::sheetUrl(),
         'z' => $timezone,
         'h' => $hours,
         'x' => $closures,
@@ -72,6 +73,18 @@
 <nav class="ch cn" aria-label="Categories">@foreach ($menus as $m)@foreach ($m['categories'] as $c)<a href="#c{{ $c['id'] }}">{{ $c['name'] }}</a>@endforeach @endforeach</nav>
 </div></div>
 <main class="w L-{{ $theme['layout'] }}">
+@foreach ($promotions as $p)
+@if ($p['type'] === 'announcement')
+<p class="an"@if ($p['window']) data-w="{{ json_encode($p['window']) }}"@endif @if ($p['hidden']) hidden @endif><b>{{ $p['title'] }}</b>@if ($p['body'] !== '') {{ $p['body'] }}@endif</p>
+@else
+<div class="spc"@if ($p['item']) data-i="{{ $p['item']['id'] }}"@endif @if ($p['window']) data-w="{{ json_encode($p['window']) }}"@endif @if ($p['hidden']) hidden @endif>
+<{{ $p['item'] ? 'button type=button' : 'div' }} class="{{ $p['item'] ? 'it ' : '' }}sp">
+@if ($p['image'])<img src="{{ $p['image'] }}" alt="" width="640" height="427" loading="lazy" decoding="async">@endif
+<span class="tx"><span class="bd hl">{{ __('public.special') }}</span><span class="nm">{{ $p['title'] }}</span>@if ($p['body'] !== '')<span class="sm">{{ $p['body'] }}</span>@endif @if ($p['item'] && $p['item']['price'] !== '')<span class="pr">{{ $p['item']['price'] }}</span>@endif</span>
+</{{ $p['item'] ? 'button' : 'div' }}>
+</div>
+@endif
+@endforeach
 @forelse ($menus as $m)
 <div class="mn"@if ($m['scheduled']) data-s="{{ json_encode($m['schedules']) }}"@endif>
 @if (count($menus) > 1)<h2 class="mh" data-off="{{ __('public.not_now') }}">{{ $m['name'] }}</h2>@endif

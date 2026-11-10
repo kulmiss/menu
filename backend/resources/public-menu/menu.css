@@ -68,6 +68,15 @@ li[hidden],section[hidden]{display:none}
 .inf a{color:var(--a);text-underline-offset:2px}
 .pw{user-select:all}
 .ab{white-space:pre-line}
+
+.an{margin:1rem 0 0;padding:.6rem .8rem;border-radius:.75rem;background:var(--card);border:1px solid var(--ln);font-size:.9rem}
+.an[hidden],.spc[hidden]{display:none}
+.spc{margin-top:1rem}
+.sp{display:block;width:100%;padding:0;border:1px solid var(--ln);border-radius:1rem;overflow:hidden;background:var(--card);text-align:start;cursor:pointer}
+div.sp{cursor:default}
+.sp img{display:block;width:100%;height:auto;aspect-ratio:3/2;object-fit:cover}
+.sp .tx{display:block;padding:.75rem .9rem}
+.sp .bd{margin:0 0 .35rem}
 footer{color:var(--mu);font-size:.8rem;text-align:center;padding:2.5rem 0 3rem}
 dialog{position:fixed;border:0;padding:0;margin:auto auto 0;width:100%;max-width:44rem;max-height:92vh;border-radius:1rem 1rem 0 0;background:var(--bg);color:var(--fg)}
 dialog::backdrop{background:#0008}
