@@ -1,5 +1,3 @@
-import { Check, Languages } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
 import {
   isDraftLanguage,
   LANGUAGES,
@@ -7,6 +5,8 @@ import {
   persistLanguage,
   type LanguageCode,
 } from '@/i18n'
+import { Check, Languages } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import { useDirection } from '@/context/direction-provider'
 import { Button } from '@/components/ui/button'

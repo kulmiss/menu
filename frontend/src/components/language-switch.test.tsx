@@ -1,7 +1,7 @@
+import i18n from '@/i18n'
 import { afterEach, describe, expect, it } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { userEvent } from 'vitest/browser'
-import i18n from '@/i18n'
 import { DirectionProvider } from '@/context/direction-provider'
 import { LanguageSwitch } from './language-switch'
 

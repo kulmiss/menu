@@ -1,9 +1,9 @@
-import i18n from 'i18next'
-import { initReactI18next } from 'react-i18next'
 import am from '@/locales/am/common.json'
 import ar from '@/locales/ar/common.json'
 import en from '@/locales/en/common.json'
 import so from '@/locales/so/common.json'
+import i18n from 'i18next'
+import { initReactI18next } from 'react-i18next'
 
 export const LANGUAGES = [
   { code: 'en', dir: 'ltr' },

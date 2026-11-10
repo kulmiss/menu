@@ -1,4 +1,10 @@
-import { LayoutDashboard, Palette, Settings, UserCog, Wrench } from 'lucide-react'
+import {
+  LayoutDashboard,
+  Palette,
+  Settings,
+  UserCog,
+  Wrench,
+} from 'lucide-react'
 import { Logo } from '@/assets/logo'
 import { type SidebarData } from '../types'
 

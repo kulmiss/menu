@@ -1,8 +1,8 @@
-import { describe, expect, it } from 'vitest'
 import am from '@/locales/am/common.json'
 import ar from '@/locales/ar/common.json'
 import en from '@/locales/en/common.json'
 import so from '@/locales/so/common.json'
+import { describe, expect, it } from 'vitest'
 
 type Tree = { [key: string]: string | Tree }
 
