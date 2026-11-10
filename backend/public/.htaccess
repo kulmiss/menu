@@ -18,6 +18,14 @@
     RewriteCond %{REQUEST_URI} (.+)/$
     RewriteRule ^ %1 [L,R=301]
 
+    # Guest menu pages: send the static copy without starting PHP (PLAN.md §15.2.1).
+    # Needs public/ as the document root (see docs/deploy.md).
+    RewriteCond %{REQUEST_METHOD} ^(GET|HEAD)$
+    RewriteCond %{QUERY_STRING} ^$
+    RewriteCond %{REQUEST_URI} ^/([a-z0-9-]+)$
+    RewriteCond %{DOCUMENT_ROOT}/menu-cache/%1/index.html -f
+    RewriteRule ^ menu-cache/%1/index.html [L]
+
     # Send Requests To Front Controller...
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
@@ -30,6 +38,10 @@
 <IfModule mod_headers.c>
     <If "%{REQUEST_URI} =~ m#^/(app/assets|media)/#">
         Header set Cache-Control "public, max-age=31536000, immutable"
+    </If>
+    # Guest pages may change any minute: always check (the ETag makes it cheap).
+    <If "%{REQUEST_URI} =~ m#^/menu-cache/# || %{REQUEST_URI} == '/sw.js'">
+        Header set Cache-Control "public, max-age=0, must-revalidate"
     </If>
 </IfModule>
 

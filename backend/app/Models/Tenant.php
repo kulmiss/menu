@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\SubscriptionState;
+use App\Support\PublicMenu\MenuPageCache;
 use App\Support\SystemTags;
 use App\Tenancy\CurrentTenant;
 use Carbon\CarbonInterface;
@@ -15,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @property int $id
@@ -164,5 +166,8 @@ class Tenant extends Model
     public function bumpCacheVersion(): void
     {
         $this->increment('cache_version');
+        // Drop the static guest page once the change is saved, so a visitor
+        // racing the transaction can't store the old version again.
+        DB::afterCommit(fn () => MenuPageCache::forget($this));
     }
 }

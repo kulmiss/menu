@@ -75,7 +75,7 @@ New rules added by the owner (now in PLAN.md §2): Docker is for local developme
 | 54 | Local PHP version | Owner's Laragon has **PHP 8.5**; CI runs **8.3** (the minimum we support) so we never depend on newer features. |
 | 55 | How PRs are merged | **Stacked PRs** (owner, 2026-11-10): each new branch is built on the previous one, so the newest PR always contains all earlier ones. The owner merges **only the newest PR** with *Create a merge commit* (not squash); GitHub then marks the earlier PRs as merged automatically. PRs stay small for review because each shows only its own commits once the earlier ones are in `develop`. |
 
-## Decisions taken in Partitions 2b–3 (Claude, changeable)
+## Decisions taken in Partitions 2b–4 (Claude, changeable)
 
 | # | Question | Decision |
 |---|---|---|
@@ -89,6 +89,11 @@ New rules added by the owner (now in PLAN.md §2): Docker is for local developme
 | 63 | Import rules | One row per item; matched by menu + category + item name in the main language; **blank cell = keep current value**; sizes as `Small=60; Large=80`; unknown tags become custom tags; any row error blocks the whole import (fix the file, upload again). Preview kept 30 min. |
 | 65 | Admin first-load budget (PLAN §15.6) | **A: keep the stack, 225 KB ceiling** (owner, 2026-11-10). Now 221 KB after replacing axios with `fetch` and lazy-loading rare UI. |
 | 64 | Speed targets (owner, 2026-11-10) | **PLAN.md §15 is the top priority.** Targets that physics or the approved stack rule out are stated there with the closest achievable target (server time vs. network TTFB, "Slow 3G" first visit, 30 KB for very large menus, admin 150 KB). |
+| 66 | When the static guest page is rebuilt | **Deleted on every change (after the database commit) and rebuilt by the next visitor**, not rebuilt at once in the background: no queue worker is needed on shared hosting, and the first visitor after a change still gets a ~20 ms PHP render. Hourly cron removes pages of restaurants whose subscription ran out; a daily cron at 00:05 removes all pages so "New" badges expire. Easy to change: add a rebuild job later. |
+| 67 | Menus served at set times (e.g. Breakfast) on the guest page | **Shown with a "Not served right now" label**, not hidden: the page is one static file for all hours, and hiding sections after load would cause layout shift. Easy to change. |
+| 68 | INP target in CI | Lighthouse lab runs can't measure INP (it needs real taps), so CI gates **TBT ≤ 100 ms** as the stand-in; real INP comes from the beacon later (Partition 10). |
+| 69 | Demo login | `DemoSeeder` creates **demo@example.com / password** for the demo café. It is only run by hand (`php artisan db:seed --class=DemoSeeder`) and in CI; **never run it on a live server**, or change the password right after. |
+| 70 | Lighthouse CI package | **`@lhci/cli` 0.16.0 (Apache-2.0)** run with `npx` in CI only, pinned to the exact version; it is not added to the project's dependencies. |
 
 ## Open
 

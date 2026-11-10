@@ -9,6 +9,8 @@ it('requires an Idempotency-Key on every create/change API route', function () {
 
     $missing = $routes
         ->reject(fn ($route) => in_array('idempotent', $route->gatherMiddleware(), true))
+        // The guest-page visit beacon only counts; replaying it is harmless.
+        ->reject(fn ($route) => $route->uri() === 'api/v1/beacon')
         ->map(fn ($route) => implode('|', $route->methods()).' '.$route->uri())
         ->values()->all();
 

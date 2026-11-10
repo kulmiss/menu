@@ -1,6 +1,6 @@
 # PLAN — Digital menu SaaS
 
-Status: **approved; in build.** Progress is in [handover.md](handover.md). **Speed is the top priority** — see §15, which wins over any older figure in this file.
+Status: **approved; in build (Partitions 1–4 done).** Progress is in [handover.md](handover.md). **Speed is the top priority** — see §15, which wins over any older figure in this file.
 Decisions behind this plan are in [QUESTIONS.md](QUESTIONS.md). Progress and next steps are in [handover.md](handover.md).
 
 ---
@@ -273,7 +273,7 @@ Ready for more languages later without rewriting:
 | 1 | **Project setup** | Monorepo (`backend/`, `frontend/`), Laravel 13 API skeleton, shadcn-admin imported at pinned commit with Clerk + demos removed, i18n wiring, Docker dev, CI, THIRD_PARTY_NOTICES, `.env.example` | CI green, migrate/rollback |
 | 2 | **Auth & tenancy** | Fortify + Sanctum, tenants, memberships, invitations, roles/policies, tenant middleware, `BelongsToTenant`, idempotency middleware, activity log, 2FA, auth screens, restaurant switcher | isolation suite base, idempotency, roles |
 | 3 | **Menu data model & admin editor** | menus, schedules, categories, items, variants, add-ons, tags, allergens, media upload + crop, reorder, duplicate, bulk price, sold-out, import/export | CRUD × roles × limits, import preview |
-| 4 | **Customer menu page** | Blade page rendered to **static files served without PHP**, inline CSS, ≤ 5 KB JS, layouts, search/filter, item sheet, service worker, beacon after load, SEO, `/q/{code}` without the database | HTML tests, **30 KB budget, Lighthouse CI**, JS units, query counts |
+| 4 ✅ | **Customer menu page** (PR #8) | Blade page rendered to **static files served without PHP**, inline CSS, ≤ 5 KB JS, layouts, search/filter, item sheet, service worker, beacon after load, SEO, `/q/{code}` without the database | HTML tests, **30 KB budget, Lighthouse CI**, JS units, query counts |
 | 5 | **Appearance + live preview** | appearance settings, themes, fonts, contrast guard, preview iframe | contrast unit, preview render |
 | 6 | **Branches + QR codes** | branches, overrides, tables, QR PNG/SVG/PDF, table cards | overrides resolution, PDF render |
 | 7 | **Restaurant info + hours** | profile, contacts, Wi-Fi, hours with breaks/overnight, closures | hours units (incl. midnight) |
@@ -345,8 +345,9 @@ The customer menu must open almost instantly, also on slow mobile networks and o
 - Cloudflare free plan (documented in Partition 13): CDN, cache rules for the static menu pages with a short edge time, and an optional API token so changes purge the edge copy at once.
 
 ### 15.5 Enforcement and reporting
-- **CI fails the PR** when: the demo menu's HTML + CSS + JS > 30 KB gzip; Lighthouse CI (mobile, throttled; 3 runs, median) misses LCP 1.2 s, CLS 0.02, TBT/INP proxy, or score 98; the admin first load exceeds its ceiling; a query-count test grows. (Lighthouse CI arrives with the demo menu page in Partition 4; until then the admin budget and query counts run.)
+- **CI fails the PR** when: the demo menu's HTML + CSS + JS > 30 KB gzip; Lighthouse CI (mobile, throttled; 3 runs, median) misses LCP 1.2 s, CLS 0.02, TBT/INP proxy, or score 98; the admin first load exceeds its ceiling; a query-count test grows. CI job `guest-menu-speed` (Partition 4): seeds the demo café, builds its static page, serves it with Nginx exactly like production (static file + `.gz`, no PHP) and runs `@lhci/cli` 0.16.0 with `ci/lighthouse/lighthouserc.json`: performance ≥ 0.98, accessibility ≥ 0.95, LCP ≤ 1200 ms, CLS ≤ 0.02, TBT ≤ 100 ms (the lab stand-in for INP < 100 ms), document ≤ 30 KB, no external scripts, no third parties. A Pest test also checks the 30 KB gzip and < 5 KB inline JS budgets.
 - **Profiles:** Lighthouse mobile (4G, 4× CPU) gated in CI; "old Android" (4× CPU, slow 4G) and WebPageTest-style "3G Slow" (400 ms, 400 kbps) and Chrome "Slow 3G", first and repeat visit, reported.
+- **Measured (Partition 4, demo café, 58 items, 7 photos):** HTML+CSS+JS **8.4 KB gzip** (37 KB raw; inline JS 4.7 KB raw / 1.9 KB gzip), whole first load **15 KB**; Lighthouse mobile **100 / 100 / 100 / 100** (perf, a11y, best practices, SEO), FCP 0.7 s, **LCP 0.7 s**, **CLS 0**, TBT 10–50 ms; server time ≈ 20 ms rendered by PHP, static copy served without PHP in ≈ 1 ms locally.
 - **Every partition report** includes: page weight, LCP, CLS, server time cached/uncached, Lighthouse score for the customer menu, and the admin first-load size.
 
 ### 15.6 Admin first load: 150 KB is not reachable with the approved stack — **decided: A (2026-11-10)**

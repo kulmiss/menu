@@ -19,6 +19,9 @@ return [
     // menu texts are stored per language, so adding one needs no data change.
     'locales' => ['en'],
 
+    // Write a static copy of each guest menu page to public/menu-cache (PLAN.md §15.2.1).
+    'static_pages' => (bool) env('MENU_STATIC_PAGES', true),
+
     'default_currency' => env('MENU_DEFAULT_CURRENCY', 'ETB'),
 
     /*
@@ -51,8 +54,8 @@ return [
     'reserved_slugs' => [
         'admin', 'api', 'app', 'assets', 'auth', 'build', 'css', 'dashboard', 'docs',
         'favicon.ico', 'help', 'img', 'images', 'js', 'login', 'logout', 'media',
-        'menu', 'platform', 'privacy', 'q', 'register', 'robots.txt', 'sanctum',
-        'settings', 'signup', 'sitemap.xml', 'static', 'status', 'storage', 'support',
+        'menu', 'menu-cache', 'platform', 'privacy', 'q', 'register', 'robots.txt', 'sanctum',
+        'settings', 'signup', 'sitemap.xml', 'static', 'sw.js', 'status', 'storage', 'support',
         'terms', 'up', 'www',
     ],
 ];

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AcceptInvitationController;
 use App\Http\Controllers\Api\AccountController;
 use App\Http\Controllers\Api\ActivityController;
+use App\Http\Controllers\Api\BeaconController;
 use App\Http\Controllers\Api\InvitationController;
 use App\Http\Controllers\Api\MeController;
 use App\Http\Controllers\Api\Menu\AddonGroupController;
@@ -21,6 +22,10 @@ use Illuminate\Support\Facades\Route;
 | Idempotency-Key header ('idempotent'). Restaurant routes live under
 | /api/v1/t/{tenant} and only resolve for members ('tenant').
 */
+// Visit beacon from the guest page (no body worth replaying, so no
+// idempotency key). Counting arrives with Insights (Partition 10).
+Route::post('v1/beacon', BeaconController::class)->middleware('throttle:120,1')->name('beacon');
+
 Route::prefix('v1')->middleware('idempotent')->group(function () {
     Route::get('invitations/{token}', [AcceptInvitationController::class, 'show'])
         ->middleware('throttle:30,1');
