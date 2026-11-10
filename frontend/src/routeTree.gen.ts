@@ -20,6 +20,7 @@ import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-pas
 import { Route as AdminTeamRouteImport } from './routes/admin/team'
 import { Route as AdminTagsRouteImport } from './routes/admin/tags'
 import { Route as AdminImportRouteImport } from './routes/admin/import'
+import { Route as AdminAppearanceRouteImport } from './routes/admin/appearance'
 import { Route as AdminAddonsRouteImport } from './routes/admin/addons'
 import { Route as AdminSettingsRouteRouteImport } from './routes/admin/settings/route'
 import { Route as AdminSettingsIndexRouteImport } from './routes/admin/settings/index'
@@ -82,6 +83,11 @@ const AdminImportRoute = AdminImportRouteImport.update({
   path: '/import',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminAppearanceRoute = AdminAppearanceRouteImport.update({
+  id: '/appearance',
+  path: '/appearance',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdminAddonsRoute = AdminAddonsRouteImport.update({
   id: '/addons',
   path: '/addons',
@@ -118,6 +124,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteRouteWithChildren
   '/admin/settings': typeof AdminSettingsRouteRouteWithChildren
   '/admin/addons': typeof AdminAddonsRoute
+  '/admin/appearance': typeof AdminAppearanceRoute
   '/admin/import': typeof AdminImportRoute
   '/admin/tags': typeof AdminTagsRoute
   '/admin/team': typeof AdminTeamRoute
@@ -135,6 +142,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin/addons': typeof AdminAddonsRoute
+  '/admin/appearance': typeof AdminAppearanceRoute
   '/admin/import': typeof AdminImportRoute
   '/admin/tags': typeof AdminTagsRoute
   '/admin/team': typeof AdminTeamRoute
@@ -155,6 +163,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteRouteWithChildren
   '/admin/settings': typeof AdminSettingsRouteRouteWithChildren
   '/admin/addons': typeof AdminAddonsRoute
+  '/admin/appearance': typeof AdminAppearanceRoute
   '/admin/import': typeof AdminImportRoute
   '/admin/tags': typeof AdminTagsRoute
   '/admin/team': typeof AdminTeamRoute
@@ -176,6 +185,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/settings'
     | '/admin/addons'
+    | '/admin/appearance'
     | '/admin/import'
     | '/admin/tags'
     | '/admin/team'
@@ -193,6 +203,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin/addons'
+    | '/admin/appearance'
     | '/admin/import'
     | '/admin/tags'
     | '/admin/team'
@@ -212,6 +223,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/settings'
     | '/admin/addons'
+    | '/admin/appearance'
     | '/admin/import'
     | '/admin/tags'
     | '/admin/team'
@@ -317,6 +329,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminImportRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/appearance': {
+      id: '/admin/appearance'
+      path: '/appearance'
+      fullPath: '/admin/appearance'
+      preLoaderRoute: typeof AdminAppearanceRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/addons': {
       id: '/admin/addons'
       path: '/addons'
@@ -378,6 +397,7 @@ const AdminSettingsRouteRouteWithChildren =
 interface AdminRouteRouteChildren {
   AdminSettingsRouteRoute: typeof AdminSettingsRouteRouteWithChildren
   AdminAddonsRoute: typeof AdminAddonsRoute
+  AdminAppearanceRoute: typeof AdminAppearanceRoute
   AdminImportRoute: typeof AdminImportRoute
   AdminTagsRoute: typeof AdminTagsRoute
   AdminTeamRoute: typeof AdminTeamRoute
@@ -388,6 +408,7 @@ interface AdminRouteRouteChildren {
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminSettingsRouteRoute: AdminSettingsRouteRouteWithChildren,
   AdminAddonsRoute: AdminAddonsRoute,
+  AdminAppearanceRoute: AdminAppearanceRoute,
   AdminImportRoute: AdminImportRoute,
   AdminTagsRoute: AdminTagsRoute,
   AdminTeamRoute: AdminTeamRoute,

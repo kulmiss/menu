@@ -101,6 +101,7 @@
 
   // Service worker and the visit beacon after load.
   w.addEventListener('load', function () {
+    if (data().p) return; // admin preview: no service worker, no visit counted
     later(function () {
       if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(function () {});
       if (navigator.sendBeacon) navigator.sendBeacon('/api/v1/beacon', JSON.stringify({ t: data().id }));

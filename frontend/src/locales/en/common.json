@@ -459,5 +459,43 @@
     "direction": "Direction",
     "ltr": "Left to right",
     "rtl": "Right to left"
+  },
+  "appearance": {
+    "title": "Appearance",
+    "description": "How your menu looks to guests. Changes show in the preview right away; guests see them after you save.",
+    "themes": "Themes",
+    "themes_hint": "Start from a ready-made look, then adjust it.",
+    "style": "Style",
+    "colour": "Brand colour",
+    "contrast_light": "This colour is hard to read on white. Guests will see a darker shade of it so the text stays readable.",
+    "font": "Font",
+    "fonts": {
+      "system": "Modern",
+      "serif": "Classic serif",
+      "rounded": "Rounded"
+    },
+    "layout": "Layout",
+    "layouts": {
+      "list": "List",
+      "grid": "Grid",
+      "large": "Large photos"
+    },
+    "flags": {
+      "show_prices": "Show prices",
+      "show_photos": "Show photos",
+      "show_descriptions": "Show descriptions",
+      "show_calories": "Show calories"
+    },
+    "images": "Logo and cover",
+    "images_hint": "The cover appears at the top of your menu. Use a wide photo.",
+    "logo": "Logo",
+    "cover": "Cover photo",
+    "save": "Save",
+    "reset": "Undo changes",
+    "unsaved": "Unsaved changes",
+    "saved": "Appearance saved. Guests see it now.",
+    "preview": "Preview",
+    "preview_hint": "Preview of your menu on a phone (not saved yet).",
+    "pick_colour": "Pick a colour"
   }
 }

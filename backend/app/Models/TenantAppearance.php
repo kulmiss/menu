@@ -1,0 +1,80 @@
+<?php
+
+namespace App\Models;
+
+use App\Models\Concerns\BelongsToTenant;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+/**
+ * How a restaurant's guest menu looks (PLAN.md §4.4).
+ *
+ * @property int $id
+ * @property int $tenant_id
+ * @property int|null $logo_media_id
+ * @property int|null $cover_media_id
+ * @property string $primary_color "#b4432a"
+ * @property string $font system|serif|rounded
+ * @property string $layout list|grid|large
+ * @property bool $show_prices
+ * @property bool $show_photos
+ * @property bool $show_descriptions
+ * @property bool $show_calories
+ * @property int|null $theme_id
+ * @property-read Media|null $logo
+ * @property-read Media|null $cover
+ */
+#[Fillable(['logo_media_id', 'cover_media_id', 'primary_color', 'font', 'layout', 'show_prices', 'show_photos', 'show_descriptions', 'show_calories', 'theme_id'])]
+class TenantAppearance extends Model
+{
+    use BelongsToTenant;
+
+    protected $table = 'tenant_appearance';
+
+    public const FONTS = ['system', 'serif', 'rounded'];
+
+    public const LAYOUTS = ['list', 'grid', 'large'];
+
+    /** Values for a restaurant that never opened the Appearance screen. */
+    public const DEFAULTS = [
+        'logo_media_id' => null,
+        'cover_media_id' => null,
+        'primary_color' => '#b4432a',
+        'font' => 'system',
+        'layout' => 'list',
+        'show_prices' => true,
+        'show_photos' => true,
+        'show_descriptions' => true,
+        'show_calories' => true,
+        'theme_id' => null,
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'show_prices' => 'boolean',
+            'show_photos' => 'boolean',
+            'show_descriptions' => 'boolean',
+            'show_calories' => 'boolean',
+        ];
+    }
+
+    /** @return BelongsTo<Media, $this> */
+    public function logo(): BelongsTo
+    {
+        return $this->belongsTo(Media::class, 'logo_media_id');
+    }
+
+    /** @return BelongsTo<Media, $this> */
+    public function cover(): BelongsTo
+    {
+        return $this->belongsTo(Media::class, 'cover_media_id');
+    }
+
+    /** The saved settings, or the defaults (not saved) when there are none yet. */
+    public static function current(): self
+    {
+        return self::with(['logo', 'cover'])->first() ?? new self(self::DEFAULTS);
+    }
+}

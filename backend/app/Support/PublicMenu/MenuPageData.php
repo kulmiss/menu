@@ -12,6 +12,7 @@ use App\Models\Menu;
 use App\Models\MenuSchedule;
 use App\Models\Tag;
 use App\Models\Tenant;
+use App\Models\TenantAppearance;
 use App\Tenancy\CurrentTenant;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -24,9 +25,11 @@ class MenuPageData
     public function __construct(private readonly CurrentTenant $current) {}
 
     /** @return array<string, mixed> */
-    public function build(Tenant $tenant): array
+    public function build(Tenant $tenant, ?TenantAppearance $appearance = null): array
     {
-        return $this->current->runAs($tenant, function () use ($tenant) {
+        return $this->current->runAs($tenant, function () use ($tenant, $appearance) {
+            $appearance ??= TenantAppearance::current();
+            $theme = PageTheme::from($appearance);
             $locale = $tenant->default_locale ?: 'en';
             $text = fn (?array $v): string => $v === null || $v === [] ? '' : (string) ($v[$locale] ?? reset($v));
 
@@ -44,9 +47,13 @@ class MenuPageData
             ])->get();
 
             $tagsUsed = [];
-            $money = fn (?int $minor): string => self::money($minor, $tenant->currency_code);
+            $money = fn (?int $minor): string => $theme['show_prices'] ? self::money($minor, $tenant->currency_code) : '';
+            $describe = fn (?array $v): string => $theme['show_descriptions'] ? $text($v) : '';
+            $photos = $theme['show_photos'];
+            $calories = $theme['show_calories'];
+            $prices = $theme['show_prices'];
 
-            $menuRows = $menus->map(function (Menu $menu) use ($text, $money, &$tagsUsed) {
+            $menuRows = $menus->map(function (Menu $menu) use ($text, $money, $describe, $photos, $calories, $prices, &$tagsUsed) {
                 return [
                     'id' => $menu->id,
                     'name' => $text($menu->name),
@@ -55,8 +62,8 @@ class MenuPageData
                     'categories' => $menu->categories->filter(fn (Category $c) => $c->items->isNotEmpty())->map(fn (Category $c) => [
                         'id' => $c->id,
                         'name' => $text($c->name),
-                        'description' => $text($c->description),
-                        'items' => $c->items->map(function (Item $item) use ($text, $money, &$tagsUsed) {
+                        'description' => $describe($c->description),
+                        'items' => $c->items->map(function (Item $item) use ($text, $money, $describe, $photos, $calories, $prices, &$tagsUsed) {
                             $tags = $item->tags->map(fn (Tag $t) => ['key' => $t->key ?? 'c'.$t->id, 'label' => $t->key ? __('public.tags.'.$t->key) : $text($t->name)])->values()->all();
                             foreach ($tags as $tag) {
                                 $tagsUsed[$tag['key']] = $tag['label'];
@@ -65,26 +72,26 @@ class MenuPageData
                             return [
                                 'id' => $item->id,
                                 'name' => $text($item->name),
-                                'summary' => $text($item->summary),
+                                'summary' => $describe($item->summary),
                                 'price' => $item->variants->isNotEmpty()
-                                    ? __('public.from', ['price' => $money($item->fromPriceMinor())])
-                                    : ($item->price_minor === null ? '' : $money($item->price_minor)),
+                                    ? ($prices ? __('public.from', ['price' => $money($item->fromPriceMinor())]) : '')
+                                    : $money($item->price_minor),
                                 'sold_out' => $item->is_sold_out,
                                 'new' => $item->is_new && ($item->new_until === null || $item->new_until->isFuture() || $item->new_until->isToday()),
                                 'popular' => $item->is_popular,
                                 'tags' => $tags,
-                                'media' => $item->media ? self::image($item->media) : null,
+                                'media' => $photos && $item->media ? self::image($item->media) : null,
                                 'sheet' => array_filter([
-                                    'd' => $text($item->description),
+                                    'd' => $describe($item->description),
                                     'v' => $item->variants->map(fn (ItemVariant $v) => [$text($v->name), $money($v->price_minor)])->values()->all(),
                                     'a' => $item->addonGroups->map(fn (AddonGroup $g) => [
                                         $text($g->name), $g->min_choices, $g->max_choices,
-                                        $g->options->map(fn (AddonOption $o) => [$text($o->name), $o->price_minor > 0 ? '+'.$money($o->price_minor) : '', $o->is_sold_out ? 1 : 0])->values()->all(),
+                                        $g->options->map(fn (AddonOption $o) => [$text($o->name), $prices && $o->price_minor > 0 ? '+'.$money($o->price_minor) : '', $o->is_sold_out ? 1 : 0])->values()->all(),
                                     ])->values()->all(),
                                     'al' => array_map(fn ($a) => __('public.allergens.'.$a), $item->allergens()),
-                                    'k' => $item->calories,
+                                    'k' => $calories ? $item->calories : null,
                                     'p' => $item->prep_minutes,
-                                    'i' => $item->media ? ($item->media->urls()['1280'] ?? null) : null,
+                                    'i' => $photos && $item->media ? ($item->media->urls()['1280'] ?? null) : null,
                                 ], fn ($v) => $v !== null && $v !== '' && $v !== []),
                             ];
                         })->values()->all(),
@@ -94,6 +101,7 @@ class MenuPageData
 
             return [
                 'tenant' => $tenant,
+                'theme' => $theme,
                 'locale' => $locale,
                 'menus' => $menuRows,
                 'tags' => $tagsUsed,
@@ -126,6 +134,7 @@ class MenuPageData
             'webp' => implode(', ', array_filter([
                 isset($urls['320']) ? $urls['320'].' 320w' : null,
                 isset($urls['640']) ? $urls['640'].' 640w' : null,
+                isset($urls['1280']) ? $urls['1280'].' 1280w' : null,
             ])),
             'avif' => isset($urls['avif320']) ? $urls['avif320'].' 320w, '.($urls['avif640'] ?? '').' 640w' : null,
             'jpg' => $urls['jpg'] ?? null,

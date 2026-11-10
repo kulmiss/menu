@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\Menu\ItemController;
 use App\Http\Controllers\Api\Menu\MediaController;
 use App\Http\Controllers\Api\Menu\MenuController;
 use App\Http\Controllers\Api\Menu\TagController;
+use App\Http\Controllers\Api\Restaurant\AppearanceController;
 use App\Http\Controllers\Api\TeamController;
 use App\Http\Controllers\Api\TenantController;
 use Illuminate\Support\Facades\Route;
@@ -91,6 +92,10 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::get('export', [ImportController::class, 'export']);
             Route::post('import/preview', [ImportController::class, 'preview'])->middleware('throttle:20,1');
             Route::post('import/commit', [ImportController::class, 'commit']);
+
+            Route::get('appearance', [AppearanceController::class, 'show']);
+            Route::put('appearance', [AppearanceController::class, 'update']);
+            Route::get('appearance/preview', [AppearanceController::class, 'preview'])->name('appearance.preview');
 
             Route::get('tags', [TagController::class, 'index']);
             Route::post('tags', [TagController::class, 'store']);

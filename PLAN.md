@@ -1,6 +1,6 @@
 # PLAN — Digital menu SaaS
 
-Status: **approved; in build (Partitions 1–4 done).** Progress is in [handover.md](handover.md). **Speed is the top priority** — see §15, which wins over any older figure in this file.
+Status: **approved; in build (Partitions 1–5 done).** Progress is in [handover.md](handover.md). **Speed is the top priority** — see §15, which wins over any older figure in this file.
 Decisions behind this plan are in [QUESTIONS.md](QUESTIONS.md). Progress and next steps are in [handover.md](handover.md).
 
 ---
@@ -274,7 +274,7 @@ Ready for more languages later without rewriting:
 | 2 | **Auth & tenancy** | Fortify + Sanctum, tenants, memberships, invitations, roles/policies, tenant middleware, `BelongsToTenant`, idempotency middleware, activity log, 2FA, auth screens, restaurant switcher | isolation suite base, idempotency, roles |
 | 3 | **Menu data model & admin editor** | menus, schedules, categories, items, variants, add-ons, tags, allergens, media upload + crop, reorder, duplicate, bulk price, sold-out, import/export | CRUD × roles × limits, import preview |
 | 4 ✅ | **Customer menu page** (PR #8) | Blade page rendered to **static files served without PHP**, inline CSS, ≤ 5 KB JS, layouts, search/filter, item sheet, service worker, beacon after load, SEO, `/q/{code}` without the database | HTML tests, **30 KB budget, Lighthouse CI**, JS units, query counts |
-| 5 | **Appearance + live preview** | appearance settings, themes, fonts, contrast guard, preview iframe | contrast unit, preview render |
+| 5 ✅ | **Appearance + live preview** (PR #9) | appearance settings, themes, fonts, contrast guard, preview iframe | contrast unit, preview render |
 | 6 | **Branches + QR codes** | branches, overrides, tables, QR PNG/SVG/PDF, table cards | overrides resolution, PDF render |
 | 7 | **Restaurant info + hours** | profile, contacts, Wi-Fi, hours with breaks/overnight, closures | hours units (incl. midnight) |
 | 8 | **Translations** — *deferred (English only, §11)* | languages, translation grid, fallback; hidden while one language | fallback, missing filter |

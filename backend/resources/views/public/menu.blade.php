@@ -1,6 +1,9 @@
 @php
     use App\Support\PublicMenu\InlineAssets;
-    $eagerLeft = 4; // the first photos load at once; the rest lazily (PLAN.md §15.2.4)
+    $preview ??= false;
+    $cover = $theme['cover'];
+    $eagerLeft = $cover ? 2 : 4; // the first photos load at once; the rest lazily (PLAN.md §15.2.4)
+    $sizes = ['list' => '88px', 'grid' => '(min-width:44rem) 340px, 50vw', 'large' => '(min-width:44rem) 704px, 100vw'][$theme['layout']];
     $sheets = [];
     $firstImage = null;
     foreach ($menus as $m) { foreach ($m['categories'] as $c) { foreach ($c['items'] as $i) {
@@ -9,6 +12,7 @@
     } } }
     $data = [
         'id' => $tenant->id,
+        'p' => $preview ? 1 : 0,
         'z' => $timezone,
         'c' => (object) $sheets,
         't' => [
@@ -26,18 +30,26 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>{{ $tenant->name }}</title>
 <meta name="description" content="{{ $tenant->name }} — menu">
-<meta name="theme-color" content="#ffffff">
+<meta name="theme-color" content="{{ $theme['theme_color'] }}">
 <link rel="canonical" href="{{ url('/'.$tenant->slug) }}">
 <meta property="og:title" content="{{ $tenant->name }}">
 <meta property="og:type" content="website">
 <meta property="og:url" content="{{ url('/'.$tenant->slug) }}">
 @if ($firstImage)<meta property="og:image" content="{{ $firstImage }}">@endif
 <link rel="icon" href="data:,">
-<style>{!! InlineAssets::css() !!}</style>
+<style>{!! InlineAssets::css() !!}{!! $theme['css'] !!}</style>
 </head>
 <body>
+@if ($cover)
+<div class="cv" style="background-image:url({{ $cover['placeholder'] ?? '' }});background-color:{{ $cover['color'] ?? 'transparent' }}"><picture>
+@if (isset($cover['urls']['avif640']))<source type="image/avif" srcset="{{ $cover['urls']['avif640'] }} 640w{{ isset($cover['urls']['avif1280']) ? ', '.$cover['urls']['avif1280'].' 1280w' : '' }}" sizes="(min-width:44rem) 704px, 100vw">@endif
+<source type="image/webp" srcset="{{ $cover['urls']['640'] ?? '' }} 640w{{ isset($cover['urls']['1280']) ? ', '.$cover['urls']['1280'].' 1280w' : '' }}" sizes="(min-width:44rem) 704px, 100vw">
+<img src="{{ $cover['urls']['jpg'] ?? '' }}" alt="" width="1280" height="549" fetchpriority="high" decoding="async">
+</picture></div>
+@endif
 <div class="w">
 <header>
+@if ($theme['logo'])<img class="lg" src="{{ $theme['logo']['320'] ?? '' }}" alt="" width="56" height="56">@endif
 <h1>{{ $tenant->name }}</h1>
 </header>
 </div>
@@ -48,7 +60,7 @@
 @endif
 <nav class="ch" aria-label="Categories">@foreach ($menus as $m)@foreach ($m['categories'] as $c)<a href="#c{{ $c['id'] }}">{{ $c['name'] }}</a>@endforeach @endforeach</nav>
 </div></div>
-<main class="w">
+<main class="w L-{{ $theme['layout'] }}">
 @forelse ($menus as $m)
 <div class="mn"@if ($m['scheduled']) data-s="{{ json_encode($m['schedules']) }}"@endif>
 @if (count($menus) > 1)<h2 class="mh" data-off="{{ __('public.not_now') }}">{{ $m['name'] }}</h2>@endif
@@ -70,9 +82,9 @@
 @if ($i['media'])
 @php $img = $i['media']; $eager = $eagerLeft-- > 0; @endphp
 <span class="im" style="background-image:url({{ $img['placeholder'] ?? '' }});background-color:{{ $img['color'] ?? 'transparent' }}"><picture>
-@if ($img['avif'])<source type="image/avif" srcset="{{ $img['avif'] }}" sizes="88px">@endif
-<source type="image/webp" srcset="{{ $img['webp'] }}" sizes="88px">
-<img src="{{ $img['jpg'] }}" alt="" width="{{ $img['w'] }}" height="{{ $img['h'] }}" decoding="async" @if ($eager) fetchpriority="{{ $eagerLeft === 3 ? 'high' : 'auto' }}" @else loading="lazy" @endif>
+@if ($img['avif'])<source type="image/avif" srcset="{{ $img['avif'] }}" sizes="{{ $sizes }}">@endif
+<source type="image/webp" srcset="{{ $img['webp'] }}" sizes="{{ $sizes }}">
+<img src="{{ $img['jpg'] }}" alt="" width="{{ $img['w'] }}" height="{{ $img['h'] }}" decoding="async" @if ($eager) fetchpriority="{{ ! $cover && $eagerLeft === 3 ? 'high' : 'auto' }}" @else loading="lazy" @endif>
 </picture></span>
 @endif
 </button></li>

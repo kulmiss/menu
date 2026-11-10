@@ -2,6 +2,7 @@ import {
   BookOpen,
   FileSpreadsheet,
   LayoutDashboard,
+  Palette,
   ListPlus,
   Tags,
   Settings,
@@ -48,6 +49,12 @@ export const sidebarData: SidebarData = {
     {
       title: 'nav.restaurant',
       items: [
+        {
+          title: 'nav.appearance',
+          url: '/admin/appearance',
+          icon: Palette,
+          roles: ['owner', 'manager'],
+        },
         {
           title: 'nav.team',
           url: '/admin/team',

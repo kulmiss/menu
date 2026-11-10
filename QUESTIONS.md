@@ -94,6 +94,10 @@ New rules added by the owner (now in PLAN.md §2): Docker is for local developme
 | 68 | INP target in CI | Lighthouse lab runs can't measure INP (it needs real taps), so CI gates **TBT ≤ 100 ms** as the stand-in; real INP comes from the beacon later (Partition 10). |
 | 69 | Demo login | `DemoSeeder` creates **demo@example.com / password** for the demo café. It is only run by hand (`php artisan db:seed --class=DemoSeeder`) and in CI; **never run it on a live server**, or change the password right after. |
 | 70 | Lighthouse CI package | **`@lhci/cli` 0.16.0 (Apache-2.0)**, CI only, in its own `ci/lighthouse/package.json` + lockfile (`npm ci`), not in the app. `puppeteer-core` is held at 25.16.0 because 25.17.0 points at a broken npm upload. |
+| 71 | Menu fonts | **System font stacks only** (Modern, Classic serif, Rounded): no font files to download, so the 30 KB budget and LCP hold (§15.2.3). A web font could be added later as an opt-in with a size warning. |
+| 72 | Brand colours that are hard to read | The owner may pick any colour. The guest page **automatically uses the nearest darker shade on white and a lighter shade in dark mode** so text stays ≥ 4.5:1; the admin shows a warning only for the light page. |
+| 73 | Live preview | The preview frame loads the real guest page with the unsaved settings in the address (`GET appearance/preview`), never cached or counted; saving clears the static page so guests see it at once. |
+| 74 | Theme presets | Five starting looks (Classic, Bistro, Fresh, Espresso, Berry) seeded by the migration; Super Admin manages them in Partition 11. Picking one fills colour, font and layout; the owner can still change each. |
 
 ## Open
 
