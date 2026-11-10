@@ -27,7 +27,8 @@
     "qr_codes": "QR codes",
     "info": "Restaurant info",
     "promotions": "Promotions",
-    "insights": "Insights"
+    "insights": "Insights",
+    "platform": "Platform"
   },
   "language": {
     "label": "Language",
@@ -51,7 +52,8 @@
     "available_again": "Available again",
     "view_menu": "View menu",
     "open_insights": "Insights",
-    "open_qr": "QR codes"
+    "open_qr": "QR codes",
+    "announcement_ok": "Got it"
   },
   "roles": {
     "owner": "Owner",
@@ -198,5 +200,9 @@
     "direction": "Direction",
     "ltr": "Left to right",
     "rtl": "Right to left"
+  },
+  "impersonation": {
+    "banner": "You are logged in as {{name}} (until {{time}}). Everything you do is recorded.",
+    "back": "Back to platform"
   }
 }

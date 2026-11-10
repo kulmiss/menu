@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use App\Models\Membership;
 use App\Models\Tenant;
+use App\Support\Features;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -33,6 +34,7 @@ class TenantResource extends JsonResource
                 'shows_banner' => $state->showsBanner(),
                 'stage_ends_at' => $this->subscriptionStageEndsAt()?->toIso8601String(),
             ],
+            'features' => Features::for($this->resource),
             'membership' => $this->membership ? [
                 'id' => $this->membership->id,
                 'role' => $this->membership->role->value,

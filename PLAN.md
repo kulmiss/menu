@@ -1,6 +1,6 @@
 # PLAN — Digital menu SaaS
 
-Status: **approved; in build (Partitions 1–7, 9, 10 done; 8 deferred).** Progress is in [handover.md](handover.md). **Speed is the top priority** — see §15, which wins over any older figure in this file.
+Status: **approved; in build (Partitions 1–7, 9–11 done; 8 deferred).** Progress is in [handover.md](handover.md). **Speed is the top priority** — see §15, which wins over any older figure in this file.
 Decisions behind this plan are in [QUESTIONS.md](QUESTIONS.md). Progress and next steps are in [handover.md](handover.md).
 
 ---
@@ -282,7 +282,7 @@ Ready for more languages later without rewriting:
 | 8 ⏸ | **Translations** — *deferred (English only, §11); nothing built* | languages, translation grid, fallback; hidden while one language | fallback, missing filter |
 | 9 ✅ | **Promotions** (PR #13) | specials/announcements, badges | date windows |
 | 10 ✅ | **Insights** (PR #14) | stats aggregation, charts, scans per table | counting, bot filter |
-| 11 | **Super Admin** | dashboard, restaurants, plans, features, payments, themes, announcements, log, settings, log-in-as, subscription states | platform policies, impersonation limits, state machine |
+| 11 ✅ | **Super Admin** (PR #15) | dashboard, restaurants, plans, features, payments, themes, announcements, log, settings, log-in-as, subscription states | platform policies, impersonation limits, state machine |
 | 12 | **Demo data** | fictional restaurants (see §13), seeders, demo images (generated, no real photos of people) | seeder runs on fresh DB |
 | 13 | **Docs** | README, admin user guide (en), deploy: shared hosting + VPS (with/without Docker), legal page placeholders | – |
 | 14 | **Final QA** | all sides, all roles, breakpoints, light/dark, RTL, the §15.5 network/CPU profiles, first and repeat visits, fixes | Playwright smoke, Lighthouse |

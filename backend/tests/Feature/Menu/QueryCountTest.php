@@ -37,6 +37,7 @@ it('loads the editor menu with a fixed number of queries, however big the menu (
     [$menu] = sampleMenu($tenant);
     $url = t($tenant, str_replace('{menu}', (string) $menu->id, $path));
 
+    $this->actingAs($owner)->getJson($url)->assertOk(); // warm-up: one-time caches
     $small = countQueries(fn () => $this->actingAs($owner)->getJson($url)->assertOk());
     grow($tenant, $menu->id, 4, 10);
     $big = countQueries(fn () => $this->actingAs($owner)->getJson($url)->assertOk());
@@ -48,6 +49,7 @@ it('exports any size of menu with a fixed number of queries', function () {
     [$owner, $tenant] = member(Role::Owner);
     [$menu] = sampleMenu($tenant);
 
+    $this->actingAs($owner)->get(t($tenant, 'export?format=csv'))->assertOk(); // warm-up: one-time caches
     $small = countQueries(fn () => $this->actingAs($owner)->get(t($tenant, 'export?format=csv'))->assertOk());
     grow($tenant, $menu->id, 3, 8);
     $big = countQueries(fn () => $this->actingAs($owner)->get(t($tenant, 'export?format=csv'))->assertOk());

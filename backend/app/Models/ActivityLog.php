@@ -39,4 +39,10 @@ class ActivityLog extends Model
     {
         return $this->belongsTo(User::class, 'actor_id');
     }
+
+    /** @return BelongsTo<User, $this> */
+    public function impersonator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'impersonator_id');
+    }
 }

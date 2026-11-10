@@ -1,19 +1,28 @@
 # Handover
 
-_Last updated: 2026-11-11 00:10 EAT. Partition 10 (PR #14)._
+_Last updated: 2026-11-11 02:30 EAT. Partition 11 (PR #15)._
 
 > **Speed is the top priority (owner, 2026-11-10): PLAN.md §15 applies to every partition and every partition report includes the §15.5 numbers.**
 > **English only for now (owner, 2026-11-10):** texts stay in `t()` / `__()` and the database keeps per-language fields; language switches and translation screens are hidden while one language is enabled.
 > **Working mode (owner):** go through all remaining partitions without stopping for OK, then write the Step 4 final report. Stop only for: changes outside this project, steps that can't be undone, licence doubts, the same CI failure 3 times, or the working limit.
 
 ## Where we are
-`develop` contains PRs #3–#13 (owner merged #13 on 2026-11-10; verified: every earlier PR head is in `develop`, and GitHub shows #3–#12 as merged). No old PRs open.
+`develop` contains PRs #3–#14 (owner merged #14 on 2026-11-10).
 
 | Part | Branch | PR | State |
 |---|---|---|---|
-| **10 Insights + dashboard** | `feat/insights` (from `develop`) | **#14** | newest |
+| **11 Super Admin** | `feat/platform` (from `develop`) | **#15** | newest |
 
 **Merge only the newest PR** with *Create a merge commit*.
+
+## What Partition 11 contains (PR #15)
+- Tables `payments`, `platform_settings`, `platform_announcements` (+ `announcement_reads`), `impersonations`. Plan features (`App\Support\Features`, `feature:` middleware, `features` in `/me` tenants, guest page footer/promotions).
+- API `/api/v1/platform/*` (middleware `platform`: Super Admin + 2FA, never while logged in as): dashboard, restaurants (list/filter, create with owner + set-password mail, edit, suspend/unsuspend, delete/restore, features, payments, impersonate), payments + CSV, plans (limits + features), themes, announcements, activity log, settings. Restaurant side: `t/{id}/announcements` (+ read), `POST impersonation/stop`.
+- "Log in as": `App\Support\ImpersonationManager` + `GuardImpersonation` (api + web groups): 60 minutes, blocked URIs, `impersonator_id` in every log entry; `/me.impersonation` drives the red banner.
+- SPA `/platform` (own texts `locales/en/platform.json`, loaded by the route), one `/platform/$section` route; 2FA gate; restaurant sheet (plan, trial date, payments, features, team, log in as, suspend, delete/restore); plans, payments (CSV), themes, announcements, activity, settings, security.
+- Admin: feature-aware sidebar, lazy "logged in as" banner, platform link for Super Admins without a restaurant, dashboard news (lazy).
+- Tests: backend **225**, frontend **177**. Admin first load **224.9 KB** / 225 KB (QUESTIONS #97).
+- Local Super Admin used in the browser check: admin@example.com / password, 2FA secret `JBSWY3DPEHPK3PXP` (only in Claude's local DB; Partition 12 adds it to the demo seeder).
 
 ## What Partition 10 contains (PR #14)
 - `stats_daily` counters (one upsert per event). Beacon `POST /api/v1/beacon` `{t, b, q, i}`: menu view per page load, QR scan when the page came from `/q/CODE` (`#q=` in the address), item view from the on-demand sheet script. Bots/headless/link previews ignored; no cookies, no IPs; excluded from Sanctum stateful/CSRF (test proves it). Nightly prune of counters > 400 days.
@@ -84,7 +93,7 @@ _Last updated: 2026-11-11 00:10 EAT. Partition 10 (PR #14)._
 Measured locally with Nginx serving the static copy (same setup as CI). Note: without gzip (`php artisan serve`) LCP rises to ~1.4 s — compression on the server matters (on by default in `.htaccess`/Nginx).
 
 ## Checks at this point
-Backend: Pint, Larastan 6, Pest **215**. Frontend: lint, Prettier, build, Vitest **174**, bundle 221.5 KB. Lighthouse CI green (demo page unchanged). Browser check of the guest page at 390 px: list, search, sheet with photo/sizes/allergens, no console errors.
+Backend: Pint, Larastan 6, Pest **225**. Frontend: lint, Prettier, build, Vitest **177**, bundle 224.9 KB. Lighthouse CI green (demo page unchanged). Browser check of the guest page at 390 px: list, search, sheet with photo/sizes/allergens, no console errors.
 
 ## Packages added in this build (all pinned by the lockfiles)
 | Package | Version | Licence | Where |
@@ -104,7 +113,7 @@ Removed: axios. Composer constraints are `~6.0.1` / `~1.9.0` (patch updates only
 Workspace can run `pnpm install`, `composer install --prefer-source` (Packagist blocked: new Composer packages need the owner's PC or the lock-entry trick used for openspout), MariaDB (`service mariadb start` after idle), Chromium (`PLAYWRIGHT_BROWSERS_PATH=/tmp/pw` with a `chromium_headless_shell-1217` → `-1243` symlink), Nginx, Lighthouse (`npx lighthouse@12.8.2 --chrome-path=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome`).
 
 ## Next steps (in order)
-10 Insights (beacon counting) → 11 Super Admin → 12 Demo data (extend DemoSeeder) → 13 Docs (deploy, OPcache, Cloudflare, cron for `schedule:run`) → 14 Final QA → Step 4 final report.
+10 Insights (beacon counting) → 12 Demo data (extend DemoSeeder) → 13 Docs (deploy, OPcache, Cloudflare, cron for `schedule:run`) → 14 Final QA → Step 4 final report.
 Still open from §15.3: optimistic price edits in the admin.
 
 ## Blockers / owner actions

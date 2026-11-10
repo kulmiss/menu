@@ -9,9 +9,12 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as PlatformRouteRouteImport } from './routes/platform/route'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PlatformIndexRouteImport } from './routes/platform/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as PlatformSectionRouteImport } from './routes/platform/$section'
 import { Route as AuthTwoFactorRouteImport } from './routes/auth/two-factor'
 import { Route as AuthSignUpRouteImport } from './routes/auth/sign-up'
 import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
@@ -33,6 +36,11 @@ import { Route as AdminMenuIndexRouteImport } from './routes/admin/menu/index'
 import { Route as AuthInviteTokenRouteImport } from './routes/auth/invite/$token'
 import { Route as AdminSettingsSecurityRouteImport } from './routes/admin/settings/security'
 
+const PlatformRouteRoute = PlatformRouteRouteImport.update({
+  id: '/platform',
+  path: '/platform',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRouteRoute = AdminRouteRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -43,10 +51,20 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlatformIndexRoute = PlatformIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PlatformRouteRoute,
+} as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminRouteRoute,
+} as any)
+const PlatformSectionRoute = PlatformSectionRouteImport.update({
+  id: '/$section',
+  path: '/$section',
+  getParentRoute: () => PlatformRouteRoute,
 } as any)
 const AuthTwoFactorRoute = AuthTwoFactorRouteImport.update({
   id: '/auth/two-factor',
@@ -152,6 +170,7 @@ const AdminSettingsSecurityRoute = AdminSettingsSecurityRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRouteWithChildren
+  '/platform': typeof PlatformRouteRouteWithChildren
   '/admin/settings': typeof AdminSettingsRouteRouteWithChildren
   '/admin/addons': typeof AdminAddonsRoute
   '/admin/appearance': typeof AdminAppearanceRoute
@@ -168,7 +187,9 @@ export interface FileRoutesByFullPath {
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
   '/auth/two-factor': typeof AuthTwoFactorRoute
+  '/platform/$section': typeof PlatformSectionRoute
   '/admin/': typeof AdminIndexRoute
+  '/platform/': typeof PlatformIndexRoute
   '/admin/settings/security': typeof AdminSettingsSecurityRoute
   '/auth/invite/$token': typeof AuthInviteTokenRoute
   '/admin/menu/': typeof AdminMenuIndexRoute
@@ -191,7 +212,9 @@ export interface FileRoutesByTo {
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
   '/auth/two-factor': typeof AuthTwoFactorRoute
+  '/platform/$section': typeof PlatformSectionRoute
   '/admin': typeof AdminIndexRoute
+  '/platform': typeof PlatformIndexRoute
   '/admin/settings/security': typeof AdminSettingsSecurityRoute
   '/auth/invite/$token': typeof AuthInviteTokenRoute
   '/admin/menu': typeof AdminMenuIndexRoute
@@ -201,6 +224,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRouteWithChildren
+  '/platform': typeof PlatformRouteRouteWithChildren
   '/admin/settings': typeof AdminSettingsRouteRouteWithChildren
   '/admin/addons': typeof AdminAddonsRoute
   '/admin/appearance': typeof AdminAppearanceRoute
@@ -217,7 +241,9 @@ export interface FileRoutesById {
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
   '/auth/two-factor': typeof AuthTwoFactorRoute
+  '/platform/$section': typeof PlatformSectionRoute
   '/admin/': typeof AdminIndexRoute
+  '/platform/': typeof PlatformIndexRoute
   '/admin/settings/security': typeof AdminSettingsSecurityRoute
   '/auth/invite/$token': typeof AuthInviteTokenRoute
   '/admin/menu/': typeof AdminMenuIndexRoute
@@ -228,6 +254,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/platform'
     | '/admin/settings'
     | '/admin/addons'
     | '/admin/appearance'
@@ -244,7 +271,9 @@ export interface FileRouteTypes {
     | '/auth/sign-in'
     | '/auth/sign-up'
     | '/auth/two-factor'
+    | '/platform/$section'
     | '/admin/'
+    | '/platform/'
     | '/admin/settings/security'
     | '/auth/invite/$token'
     | '/admin/menu/'
@@ -267,7 +296,9 @@ export interface FileRouteTypes {
     | '/auth/sign-in'
     | '/auth/sign-up'
     | '/auth/two-factor'
+    | '/platform/$section'
     | '/admin'
+    | '/platform'
     | '/admin/settings/security'
     | '/auth/invite/$token'
     | '/admin/menu'
@@ -276,6 +307,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/platform'
     | '/admin/settings'
     | '/admin/addons'
     | '/admin/appearance'
@@ -292,7 +324,9 @@ export interface FileRouteTypes {
     | '/auth/sign-in'
     | '/auth/sign-up'
     | '/auth/two-factor'
+    | '/platform/$section'
     | '/admin/'
+    | '/platform/'
     | '/admin/settings/security'
     | '/auth/invite/$token'
     | '/admin/menu/'
@@ -302,6 +336,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRouteRoute: typeof AdminRouteRouteWithChildren
+  PlatformRouteRoute: typeof PlatformRouteRouteWithChildren
   AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
   AuthResetPasswordRoute: typeof AuthResetPasswordRoute
   AuthSignInRoute: typeof AuthSignInRoute
@@ -312,6 +347,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/platform': {
+      id: '/platform'
+      path: '/platform'
+      fullPath: '/platform'
+      preLoaderRoute: typeof PlatformRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin': {
       id: '/admin'
       path: '/admin'
@@ -326,12 +368,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/platform/': {
+      id: '/platform/'
+      path: '/'
+      fullPath: '/platform/'
+      preLoaderRoute: typeof PlatformIndexRouteImport
+      parentRoute: typeof PlatformRouteRoute
+    }
     '/admin/': {
       id: '/admin/'
       path: '/'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRouteRoute
+    }
+    '/platform/$section': {
+      id: '/platform/$section'
+      path: '/$section'
+      fullPath: '/platform/$section'
+      preLoaderRoute: typeof PlatformSectionRouteImport
+      parentRoute: typeof PlatformRouteRoute
     }
     '/auth/two-factor': {
       id: '/auth/two-factor'
@@ -525,9 +581,24 @@ const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
   AdminRouteRouteChildren,
 )
 
+interface PlatformRouteRouteChildren {
+  PlatformSectionRoute: typeof PlatformSectionRoute
+  PlatformIndexRoute: typeof PlatformIndexRoute
+}
+
+const PlatformRouteRouteChildren: PlatformRouteRouteChildren = {
+  PlatformSectionRoute: PlatformSectionRoute,
+  PlatformIndexRoute: PlatformIndexRoute,
+}
+
+const PlatformRouteRouteWithChildren = PlatformRouteRoute._addFileChildren(
+  PlatformRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRouteRoute: AdminRouteRouteWithChildren,
+  PlatformRouteRoute: PlatformRouteRouteWithChildren,
   AuthForgotPasswordRoute: AuthForgotPasswordRoute,
   AuthResetPasswordRoute: AuthResetPasswordRoute,
   AuthSignInRoute: AuthSignInRoute,

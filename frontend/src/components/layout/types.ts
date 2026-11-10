@@ -7,6 +7,8 @@ type BaseNavItem = {
   icon?: React.ElementType
   /** Only these roles see the item (server checks again). All when unset. */
   roles?: Role[]
+  /** Hidden when the restaurant's plan has this feature switched off. */
+  feature?: string
 }
 
 type NavLink = BaseNavItem & {

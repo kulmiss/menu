@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { BarChart3, ExternalLink, QrCode } from 'lucide-react'
@@ -17,6 +18,9 @@ import { Main } from '@/components/layout/main'
 import { useCurrentTenant } from '@/features/auth/use-me'
 import { dashboardQuery } from '@/features/insights/api'
 import { tr } from '@/features/menu/text'
+
+// Platform news: secondary to today's numbers, so it downloads separately.
+const Announcements = lazy(() => import('./announcements'))
 
 /** Dashboard (PLAN.md screen 1): today at a glance and what is sold out. */
 export function Dashboard() {
@@ -79,6 +83,11 @@ export function Dashboard() {
             </Button>
           )}
         </div>
+        {tenant && (
+          <Suspense fallback={null}>
+            <Announcements tenantId={tenantId} locale={locale} />
+          </Suspense>
+        )}
         <div className='grid gap-4 sm:grid-cols-2'>
           {stat('views')}
           {stat('scans')}
