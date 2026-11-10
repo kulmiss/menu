@@ -5,7 +5,6 @@ import { Loader2, Send } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { applyFieldErrors } from '@/lib/api'
-import { handleServerError } from '@/lib/handle-server-error'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -67,9 +66,7 @@ export function InviteDialog({
     },
   })
   const invite = useInvite(tenantId, (error) => {
-    if (!applyFieldErrors(error, form.setError, ['email', 'role'])) {
-      handleServerError(error)
-    }
+    applyFieldErrors(error, form.setError, ['email', 'role'])
   })
 
   // eslint-disable-next-line react-hooks/incompatible-library

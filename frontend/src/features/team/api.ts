@@ -90,7 +90,8 @@ export type InviteInput = {
 export function useInvite(tenantId: number, onError: (error: unknown) => void) {
   const qc = useQueryClient()
   return useMutation({
-    // The dialog shows field errors itself (replaces the default toast).
+    // The dialog shows field errors itself; other failures get the usual toast.
+    meta: { inlineErrors: true },
     onError,
     mutationFn: async (input: InviteInput) =>
       (

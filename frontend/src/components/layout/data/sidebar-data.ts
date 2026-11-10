@@ -1,5 +1,8 @@
 import {
+  BookOpen,
   LayoutDashboard,
+  ListPlus,
+  Tags,
   Palette,
   Settings,
   UserCog,
@@ -16,8 +19,29 @@ export const sidebarData: SidebarData = {
   navGroups: [
     {
       title: 'nav.general',
+      items: [{ title: 'nav.dashboard', url: '/admin', icon: LayoutDashboard }],
+    },
+    {
+      title: 'nav.menu_group',
       items: [
-        { title: 'nav.dashboard', url: '/admin', icon: LayoutDashboard },
+        { title: 'nav.menu', url: '/admin/menu', icon: BookOpen },
+        {
+          title: 'nav.addons',
+          url: '/admin/addons',
+          icon: ListPlus,
+          roles: ['owner', 'manager'],
+        },
+        {
+          title: 'nav.tags',
+          url: '/admin/tags',
+          icon: Tags,
+          roles: ['owner', 'manager'],
+        },
+      ],
+    },
+    {
+      title: 'nav.restaurant',
+      items: [
         {
           title: 'nav.team',
           url: '/admin/team',

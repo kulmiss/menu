@@ -1,13 +1,14 @@
 import { StrictMode } from 'react'
 import ReactDOM from 'react-dom/client'
 import {
+  MutationCache,
   QueryCache,
   QueryClient,
   QueryClientProvider,
 } from '@tanstack/react-query'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { toast } from 'sonner'
-import { errorStatus } from '@/lib/api'
+import { errorStatus, validationErrors } from '@/lib/api'
 import { handleServerError } from '@/lib/handle-server-error'
 import { DirectionProvider } from './context/direction-provider'
 import { FontProvider } from './context/font-provider'
@@ -25,6 +26,10 @@ declare module '@tanstack/react-query' {
       /** false: a 401 is expected (signed-out page) — don't redirect. */
       authRedirect?: boolean
     }
+    mutationMeta: {
+      /** true: the form shows 422 field errors itself — no toast for those. */
+      inlineErrors?: boolean
+    }
   }
 }
 
@@ -41,13 +46,16 @@ const queryClient = new QueryClient({
       refetchOnWindowFocus: import.meta.env.PROD,
       staleTime: 10 * 1000, // 10s
     },
-    mutations: {
-      onError: (error) => {
-        if (errorStatus(error) === 401) return sessionExpired()
-        handleServerError(error)
-      },
-    },
   },
+  // One place for failed saves: sign-in again on 401, else one toast —
+  // except validation errors a form already shows under its fields.
+  mutationCache: new MutationCache({
+    onError: (error, _variables, _result, mutation) => {
+      if (errorStatus(error) === 401) return sessionExpired()
+      if (mutation.meta?.inlineErrors && validationErrors(error)) return
+      handleServerError(error)
+    },
+  }),
   queryCache: new QueryCache({
     onError: (error, query) => {
       if (errorStatus(error) === 401) {

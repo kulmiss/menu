@@ -18,8 +18,11 @@ import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth/reset-password'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
 import { Route as AdminTeamRouteImport } from './routes/admin/team'
+import { Route as AdminTagsRouteImport } from './routes/admin/tags'
+import { Route as AdminAddonsRouteImport } from './routes/admin/addons'
 import { Route as AdminSettingsRouteRouteImport } from './routes/admin/settings/route'
 import { Route as AdminSettingsIndexRouteImport } from './routes/admin/settings/index'
+import { Route as AdminMenuIndexRouteImport } from './routes/admin/menu/index'
 import { Route as AuthInviteTokenRouteImport } from './routes/auth/invite/$token'
 import { Route as AdminSettingsAppearanceRouteImport } from './routes/admin/settings/appearance'
 import { Route as AdminSettingsAccountRouteImport } from './routes/admin/settings/account'
@@ -69,6 +72,16 @@ const AdminTeamRoute = AdminTeamRouteImport.update({
   path: '/team',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminTagsRoute = AdminTagsRouteImport.update({
+  id: '/tags',
+  path: '/tags',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminAddonsRoute = AdminAddonsRouteImport.update({
+  id: '/addons',
+  path: '/addons',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdminSettingsRouteRoute = AdminSettingsRouteRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -78,6 +91,11 @@ const AdminSettingsIndexRoute = AdminSettingsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminSettingsRouteRoute,
+} as any)
+const AdminMenuIndexRoute = AdminMenuIndexRouteImport.update({
+  id: '/menu/',
+  path: '/menu/',
+  getParentRoute: () => AdminRouteRoute,
 } as any)
 const AuthInviteTokenRoute = AuthInviteTokenRouteImport.update({
   id: '/auth/invite/$token',
@@ -99,6 +117,8 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRouteWithChildren
   '/admin/settings': typeof AdminSettingsRouteRouteWithChildren
+  '/admin/addons': typeof AdminAddonsRoute
+  '/admin/tags': typeof AdminTagsRoute
   '/admin/team': typeof AdminTeamRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -109,10 +129,13 @@ export interface FileRoutesByFullPath {
   '/admin/settings/account': typeof AdminSettingsAccountRoute
   '/admin/settings/appearance': typeof AdminSettingsAppearanceRoute
   '/auth/invite/$token': typeof AuthInviteTokenRoute
+  '/admin/menu/': typeof AdminMenuIndexRoute
   '/admin/settings/': typeof AdminSettingsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin/addons': typeof AdminAddonsRoute
+  '/admin/tags': typeof AdminTagsRoute
   '/admin/team': typeof AdminTeamRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -123,6 +146,7 @@ export interface FileRoutesByTo {
   '/admin/settings/account': typeof AdminSettingsAccountRoute
   '/admin/settings/appearance': typeof AdminSettingsAppearanceRoute
   '/auth/invite/$token': typeof AuthInviteTokenRoute
+  '/admin/menu': typeof AdminMenuIndexRoute
   '/admin/settings': typeof AdminSettingsIndexRoute
 }
 export interface FileRoutesById {
@@ -130,6 +154,8 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRouteWithChildren
   '/admin/settings': typeof AdminSettingsRouteRouteWithChildren
+  '/admin/addons': typeof AdminAddonsRoute
+  '/admin/tags': typeof AdminTagsRoute
   '/admin/team': typeof AdminTeamRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
@@ -140,6 +166,7 @@ export interface FileRoutesById {
   '/admin/settings/account': typeof AdminSettingsAccountRoute
   '/admin/settings/appearance': typeof AdminSettingsAppearanceRoute
   '/auth/invite/$token': typeof AuthInviteTokenRoute
+  '/admin/menu/': typeof AdminMenuIndexRoute
   '/admin/settings/': typeof AdminSettingsIndexRoute
 }
 export interface FileRouteTypes {
@@ -148,6 +175,8 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/admin/settings'
+    | '/admin/addons'
+    | '/admin/tags'
     | '/admin/team'
     | '/auth/forgot-password'
     | '/auth/reset-password'
@@ -158,10 +187,13 @@ export interface FileRouteTypes {
     | '/admin/settings/account'
     | '/admin/settings/appearance'
     | '/auth/invite/$token'
+    | '/admin/menu/'
     | '/admin/settings/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin/addons'
+    | '/admin/tags'
     | '/admin/team'
     | '/auth/forgot-password'
     | '/auth/reset-password'
@@ -172,12 +204,15 @@ export interface FileRouteTypes {
     | '/admin/settings/account'
     | '/admin/settings/appearance'
     | '/auth/invite/$token'
+    | '/admin/menu'
     | '/admin/settings'
   id:
     | '__root__'
     | '/'
     | '/admin'
     | '/admin/settings'
+    | '/admin/addons'
+    | '/admin/tags'
     | '/admin/team'
     | '/auth/forgot-password'
     | '/auth/reset-password'
@@ -188,6 +223,7 @@ export interface FileRouteTypes {
     | '/admin/settings/account'
     | '/admin/settings/appearance'
     | '/auth/invite/$token'
+    | '/admin/menu/'
     | '/admin/settings/'
   fileRoutesById: FileRoutesById
 }
@@ -267,6 +303,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminTeamRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/tags': {
+      id: '/admin/tags'
+      path: '/tags'
+      fullPath: '/admin/tags'
+      preLoaderRoute: typeof AdminTagsRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/addons': {
+      id: '/admin/addons'
+      path: '/addons'
+      fullPath: '/admin/addons'
+      preLoaderRoute: typeof AdminAddonsRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/settings': {
       id: '/admin/settings'
       path: '/settings'
@@ -280,6 +330,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/settings/'
       preLoaderRoute: typeof AdminSettingsIndexRouteImport
       parentRoute: typeof AdminSettingsRouteRoute
+    }
+    '/admin/menu/': {
+      id: '/admin/menu/'
+      path: '/menu'
+      fullPath: '/admin/menu/'
+      preLoaderRoute: typeof AdminMenuIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
     '/auth/invite/$token': {
       id: '/auth/invite/$token'
@@ -322,14 +379,20 @@ const AdminSettingsRouteRouteWithChildren =
 
 interface AdminRouteRouteChildren {
   AdminSettingsRouteRoute: typeof AdminSettingsRouteRouteWithChildren
+  AdminAddonsRoute: typeof AdminAddonsRoute
+  AdminTagsRoute: typeof AdminTagsRoute
   AdminTeamRoute: typeof AdminTeamRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminMenuIndexRoute: typeof AdminMenuIndexRoute
 }
 
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminSettingsRouteRoute: AdminSettingsRouteRouteWithChildren,
+  AdminAddonsRoute: AdminAddonsRoute,
+  AdminTagsRoute: AdminTagsRoute,
   AdminTeamRoute: AdminTeamRoute,
   AdminIndexRoute: AdminIndexRoute,
+  AdminMenuIndexRoute: AdminMenuIndexRoute,
 }
 
 const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
