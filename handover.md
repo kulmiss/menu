@@ -38,7 +38,7 @@ _Last updated: 2026-11-10 13:45 EAT, Step 3 · Partition 2 backend done (PR #3),
 - Stacked PRs: the owner merges only the newest PR, with *Create a merge commit* (QUESTIONS #55).
 
 ## Blockers / owner actions
-- **GitHub Actions is disabled by a billing problem on the account** ("recent account payments have failed or your spending limit needs to be increased"). CI cannot run until fixed (Settings → Billing and plans). Until then, the owner's PC is the only place tests run.
+- GitHub Actions: the private repo had hit the account's free monthly minutes (used by another repo). **Owner made `kulmiss/menu` public on 2026-11-10**, so Actions is free. CI on PR #3 is green: backend (Pint, Larastan, migrate/rollback/migrate, Pest) and frontend (lint, format, build, **Vitest browser tests**).
 - `main` not protected yet. PR #1 merged; PRs #2 and #3 open (merge only #3).
 - Owner's PC: Docker Desktop works but downloads from deb.debian.org are very slow (~20–30 KB/s); the PHP image is now built and cached. Laragon's PHP could not write `backend/vendor` (Windows "Permission denied", likely antivirus) — use Docker.
 
