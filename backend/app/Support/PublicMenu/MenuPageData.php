@@ -4,6 +4,8 @@ namespace App\Support\PublicMenu;
 
 use App\Models\AddonGroup;
 use App\Models\AddonOption;
+use App\Models\Branch;
+use App\Models\BranchItemOverride;
 use App\Models\Category;
 use App\Models\Item;
 use App\Models\ItemVariant;
@@ -25,26 +27,55 @@ class MenuPageData
     public function __construct(private readonly CurrentTenant $current) {}
 
     /** @return array<string, mixed> */
-    public function build(Tenant $tenant, ?TenantAppearance $appearance = null): array
+    public function build(Tenant $tenant, ?TenantAppearance $appearance = null, ?Branch $branch = null): array
     {
-        return $this->current->runAs($tenant, function () use ($tenant, $appearance) {
+        return $this->current->runAs($tenant, function () use ($tenant, $appearance, $branch) {
+            $branches = Branch::where('is_active', true)->orderByDesc('is_default')->orderBy('sort')->orderBy('id')->get();
+            $branch ??= $branches->firstWhere('is_default', true) ?? $branches->first();
+            $branchId = $branch?->id;
             $appearance ??= TenantAppearance::current();
             $theme = PageTheme::from($appearance);
             $locale = $tenant->default_locale ?: 'en';
             $text = fn (?array $v): string => $v === null || $v === [] ? '' : (string) ($v[$locale] ?? reset($v));
 
             /** @var Collection<int, Menu> $menus */
-            $menus = Menu::where('is_visible', true)->orderBy('sort')->orderBy('id')->with([
-                'schedules',
-                'categories' => fn ($q) => $q->where('is_visible', true),
-                'categories.media',
-                'categories.items' => fn ($q) => $q->where('is_visible', true),
-                'categories.items.variants',
-                'categories.items.media',
-                'categories.items.tags',
-                'categories.items.allergenRows',
-                'categories.items.addonGroups.options',
-            ])->get();
+            $menus = Menu::where('is_visible', true)
+                // Menus limited to some branches (QUESTIONS #59).
+                ->where(fn ($q) => $q->whereDoesntHave('branches')->orWhereHas('branches', fn ($b) => $b->where('branches.id', $branchId)))
+                ->orderBy('sort')->orderBy('id')->with([
+                    'schedules',
+                    'categories' => fn ($q) => $q->where('is_visible', true),
+                    'categories.media',
+                    'categories.items' => fn ($q) => $q->where('is_visible', true),
+                    'categories.items.variants',
+                    'categories.items.media',
+                    'categories.items.tags',
+                    'categories.items.allergenRows',
+                    'categories.items.addonGroups.options',
+                ])->get();
+
+            // This branch's own prices, sold-out and hidden items (null = as the main menu).
+            $overrides = $branchId === null ? collect() : BranchItemOverride::where('branch_id', $branchId)->get()->keyBy('item_id');
+            if ($overrides->isNotEmpty()) {
+                foreach ($menus as $menu) {
+                    foreach ($menu->categories as $category) {
+                        $category->setRelation('items', $category->items->reject(function (Item $item) use ($overrides) {
+                            $o = $overrides->get($item->id);
+                            if ($o === null) {
+                                return false;
+                            }
+                            if ($o->is_sold_out !== null) {
+                                $item->is_sold_out = $o->is_sold_out;
+                            }
+                            if ($o->price_minor !== null && $item->variants->isEmpty()) {
+                                $item->price_minor = $o->price_minor;
+                            }
+
+                            return (bool) $o->is_hidden;
+                        })->values());
+                    }
+                }
+            }
 
             $tagsUsed = [];
             $money = fn (?int $minor): string => $theme['show_prices'] ? self::money($minor, $tenant->currency_code) : '';
@@ -102,6 +133,13 @@ class MenuPageData
             return [
                 'tenant' => $tenant,
                 'theme' => $theme,
+                'branch' => $branch && $branches->count() > 1 ? $text($branch->name) : null,
+                'branches' => $branches->count() > 1 ? $branches->map(fn (Branch $b) => [
+                    'name' => $text($b->name),
+                    'path' => $b->path($tenant),
+                    'current' => $b->id === $branchId,
+                ])->values()->all() : [],
+                'canonical' => $branch ? $branch->path($tenant) : '/'.$tenant->slug,
                 'locale' => $locale,
                 'menus' => $menuRows,
                 'tags' => $tagsUsed,

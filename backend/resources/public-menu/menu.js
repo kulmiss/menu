@@ -80,13 +80,13 @@
 
     // Highlight the category chip for the section on screen.
     var chips = {};
-    $('.ch a').forEach(function (a) { chips[a.hash.slice(1)] = a; });
+    $('.cn a').forEach(function (a) { chips[a.hash.slice(1)] = a; });
     if ('IntersectionObserver' in w) {
       var io = new IntersectionObserver(function (es) {
         es.forEach(function (e) {
           var a = chips[e.target.id];
           if (a && e.isIntersecting) {
-            $('.ch a.on').forEach(function (x) { x.classList.remove('on'); });
+            $('.cn a.on').forEach(function (x) { x.classList.remove('on'); });
             a.classList.add('on');
             a.parentNode.scrollLeft = a.offsetLeft - a.parentNode.offsetWidth / 2 + a.offsetWidth / 2;
           }
@@ -99,12 +99,16 @@
     w.addEventListener('online', off); w.addEventListener('offline', off); off();
   });
 
+  // A QR scan arrives as #q=CODE: remember it for the beacon, then tidy the address.
+  var scan = (location.hash.match(/^#q=([A-Z0-9]{8})$/) || [])[1];
+  if (scan && history.replaceState) history.replaceState(null, '', location.pathname + location.search);
+
   // Service worker and the visit beacon after load.
   w.addEventListener('load', function () {
     if (data().p) return; // admin preview: no service worker, no visit counted
     later(function () {
       if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(function () {});
-      if (navigator.sendBeacon) navigator.sendBeacon('/api/v1/beacon', JSON.stringify({ t: data().id }));
+      if (navigator.sendBeacon) navigator.sendBeacon('/api/v1/beacon', JSON.stringify({ t: data().id, q: scan || null }));
     });
   });
 })();

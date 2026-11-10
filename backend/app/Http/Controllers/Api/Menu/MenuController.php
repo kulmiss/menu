@@ -33,7 +33,7 @@ class MenuController extends Controller
     public function index(): AnonymousResourceCollection
     {
         $menus = Menu::query()
-            ->with('schedules')
+            ->with(['schedules', 'branches:id'])
             ->withCount('categories')
             ->addSelect(['items_count' => Item::query()
                 ->selectRaw('count(*)')

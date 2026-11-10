@@ -14,6 +14,8 @@ use App\Http\Controllers\Api\Menu\MediaController;
 use App\Http\Controllers\Api\Menu\MenuController;
 use App\Http\Controllers\Api\Menu\TagController;
 use App\Http\Controllers\Api\Restaurant\AppearanceController;
+use App\Http\Controllers\Api\Restaurant\BranchController;
+use App\Http\Controllers\Api\Restaurant\QrCodeController;
 use App\Http\Controllers\Api\TeamController;
 use App\Http\Controllers\Api\TenantController;
 use Illuminate\Support\Facades\Route;
@@ -92,6 +94,24 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::get('export', [ImportController::class, 'export']);
             Route::post('import/preview', [ImportController::class, 'preview'])->middleware('throttle:20,1');
             Route::post('import/commit', [ImportController::class, 'commit']);
+
+            Route::get('branches', [BranchController::class, 'index']);
+            Route::post('branches', [BranchController::class, 'store']);
+            Route::patch('branches/{branch}', [BranchController::class, 'update']);
+            Route::delete('branches/{branch}', [BranchController::class, 'destroy']);
+            Route::get('branches/{branch}/tables', [BranchController::class, 'tables']);
+            Route::post('branches/{branch}/tables', [BranchController::class, 'addTables']);
+            Route::delete('tables/{table}', [BranchController::class, 'deleteTable']);
+            Route::get('branches/{branch}/overrides', [BranchController::class, 'overrides']);
+            Route::put('branches/{branch}/overrides', [BranchController::class, 'saveOverrides']);
+            Route::put('menus/{menu}/branches', [BranchController::class, 'menuBranches']);
+            Route::get('branches/{branch}/table-cards.pdf', [QrCodeController::class, 'tableCards']);
+
+            Route::get('qr-codes', [QrCodeController::class, 'index']);
+            Route::post('qr-codes', [QrCodeController::class, 'store']);
+            Route::patch('qr-codes/{qr}', [QrCodeController::class, 'update']);
+            Route::delete('qr-codes/{qr}', [QrCodeController::class, 'destroy']);
+            Route::get('qr-codes/{qr}.{format}', [QrCodeController::class, 'download'])->whereIn('format', ['svg', 'png', 'pdf']);
 
             Route::get('appearance', [AppearanceController::class, 'show']);
             Route::put('appearance', [AppearanceController::class, 'update']);

@@ -28,13 +28,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>{{ $tenant->name }}</title>
+<title>{{ $tenant->name }}{{ $branch ? ' · '.$branch : '' }}</title>
 <meta name="description" content="{{ $tenant->name }} — menu">
 <meta name="theme-color" content="{{ $theme['theme_color'] }}">
-<link rel="canonical" href="{{ url('/'.$tenant->slug) }}">
+<link rel="canonical" href="{{ url($canonical) }}">
 <meta property="og:title" content="{{ $tenant->name }}">
 <meta property="og:type" content="website">
-<meta property="og:url" content="{{ url('/'.$tenant->slug) }}">
+<meta property="og:url" content="{{ url($canonical) }}">
 @if ($firstImage)<meta property="og:image" content="{{ $firstImage }}">@endif
 <link rel="icon" href="data:,">
 <style>{!! InlineAssets::css() !!}{!! $theme['css'] !!}</style>
@@ -50,15 +50,19 @@
 <div class="w">
 <header>
 @if ($theme['logo'])<img class="lg" src="{{ $theme['logo']['320'] ?? '' }}" alt="" width="56" height="56">@endif
-<h1>{{ $tenant->name }}</h1>
+<div><h1>{{ $tenant->name }}</h1>
+@if ($branch)<p class="sub">{{ $branch }}</p>@endif</div>
 </header>
+@if ($branches)
+<nav class="ch bs" aria-label="{{ __('public.branches') }}">@foreach ($branches as $b)<a href="{{ $b['path'] }}"@if ($b['current']) class="on" aria-current="page"@endif>{{ $b['name'] }}</a>@endforeach</nav>
+@endif
 </div>
 <div class="bar"><div class="w">
 <div class="sr"><input id="q" type="search" placeholder="{{ __('public.search') }}" aria-label="{{ __('public.search') }}" autocomplete="off"></div>
 @if (count($tags) > 1)
 <div class="ch" role="group" aria-label="{{ __('public.filter') }}">@foreach ($tags as $key => $label)<button type="button" data-tag="{{ $key }}" aria-pressed="false">{{ $label }}</button>@endforeach</div>
 @endif
-<nav class="ch" aria-label="Categories">@foreach ($menus as $m)@foreach ($m['categories'] as $c)<a href="#c{{ $c['id'] }}">{{ $c['name'] }}</a>@endforeach @endforeach</nav>
+<nav class="ch cn" aria-label="Categories">@foreach ($menus as $m)@foreach ($m['categories'] as $c)<a href="#c{{ $c['id'] }}">{{ $c['name'] }}</a>@endforeach @endforeach</nav>
 </div></div>
 <main class="w L-{{ $theme['layout'] }}">
 @forelse ($menus as $m)

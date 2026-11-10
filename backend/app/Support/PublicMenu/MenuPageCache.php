@@ -14,14 +14,15 @@ use Illuminate\Support\Facades\File;
  */
 class MenuPageCache
 {
-    public static function dir(string $slug): string
+    public static function dir(string $slug, ?string $branch = null): string
     {
-        return public_path('menu-cache/'.$slug);
+        return public_path('menu-cache/'.$slug.($branch === null ? '' : '/'.$branch));
     }
 
-    public static function path(string $slug): string
+    /** Main branch: menu-cache/{slug}/index.html; others: menu-cache/{slug}/{branch}/index.html. */
+    public static function path(string $slug, ?string $branch = null): string
     {
-        return self::dir($slug).'/index.html';
+        return self::dir($slug, $branch).'/index.html';
     }
 
     public static function enabled(): bool
@@ -29,12 +30,12 @@ class MenuPageCache
         return (bool) config('menu.static_pages', true);
     }
 
-    public static function write(string $slug, string $html): void
+    public static function write(string $slug, string $html, ?string $branch = null): void
     {
         if (! self::enabled()) {
             return;
         }
-        $dir = self::dir($slug);
+        $dir = self::dir($slug, $branch);
         File::ensureDirectoryExists($dir);
         // Write to temporary names, then rename: a visitor never gets half a file.
         $tmp = $dir.'/.index.html.'.bin2hex(random_bytes(4));

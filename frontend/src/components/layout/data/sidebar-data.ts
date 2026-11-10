@@ -2,6 +2,8 @@ import {
   BookOpen,
   FileSpreadsheet,
   LayoutDashboard,
+  MapPin,
+  QrCode,
   Palette,
   ListPlus,
   Tags,
@@ -49,6 +51,18 @@ export const sidebarData: SidebarData = {
     {
       title: 'nav.restaurant',
       items: [
+        {
+          title: 'nav.branches',
+          url: '/admin/branches',
+          icon: MapPin,
+          roles: ['owner', 'manager'],
+        },
+        {
+          title: 'nav.qr_codes',
+          url: '/admin/qr-codes',
+          icon: QrCode,
+          roles: ['owner', 'manager'],
+        },
         {
           title: 'nav.appearance',
           url: '/admin/appearance',

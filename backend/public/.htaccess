@@ -18,6 +18,9 @@
     RewriteCond %{REQUEST_URI} (.+)/$
     RewriteRule ^ %1 [L,R=301]
 
+    # QR links: one redirect from a pre-built map, no Laravel (PLAN.md §15.2.11).
+    RewriteRule ^[qQ]/([A-Za-z0-9]{8})$ qr.php?c=$1 [L]
+
     # Guest menu pages: send the static copy without starting PHP (PLAN.md §15.2.1).
     # Needs public/ as the document root (see docs/deploy.md).
     RewriteCond %{REQUEST_METHOD} ^(GET|HEAD)$
@@ -25,6 +28,11 @@
     RewriteCond %{REQUEST_URI} ^/([a-z0-9-]+)$
     RewriteCond %{DOCUMENT_ROOT}/menu-cache/%1/index.html -f
     RewriteRule ^ menu-cache/%1/index.html [L]
+    RewriteCond %{REQUEST_METHOD} ^(GET|HEAD)$
+    RewriteCond %{QUERY_STRING} ^$
+    RewriteCond %{REQUEST_URI} ^/([a-z0-9-]+)/([a-z0-9-]+)$
+    RewriteCond %{DOCUMENT_ROOT}/menu-cache/%1/%2/index.html -f
+    RewriteRule ^ menu-cache/%1/%2/index.html [L]
 
     # Send Requests To Front Controller...
     RewriteCond %{REQUEST_FILENAME} !-d

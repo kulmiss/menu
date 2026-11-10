@@ -43,7 +43,7 @@ return [
     | Plan limits (plans.limits JSON) checked when something is created.
     | A missing key or null means unlimited.
     */
-    'limit_keys' => ['menus', 'items', 'branches', 'languages', 'photos', 'members'],
+    'limit_keys' => ['menus', 'items', 'branches', 'tables', 'languages', 'photos', 'members'],
 
     // Largest price accepted, in minor units (100 000 000 = 1 000 000.00).
     'max_price_minor' => 100_000_000,

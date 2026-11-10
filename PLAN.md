@@ -1,6 +1,6 @@
 # PLAN — Digital menu SaaS
 
-Status: **approved; in build (Partitions 1–5 done).** Progress is in [handover.md](handover.md). **Speed is the top priority** — see §15, which wins over any older figure in this file.
+Status: **approved; in build (Partitions 1–6 done).** Progress is in [handover.md](handover.md). **Speed is the top priority** — see §15, which wins over any older figure in this file.
 Decisions behind this plan are in [QUESTIONS.md](QUESTIONS.md). Progress and next steps are in [handover.md](handover.md).
 
 ---
@@ -49,6 +49,7 @@ Restaurants and cafés publish a fast, clean menu that customers open from a QR 
 - Cron (one line on cPanel): `* * * * * php /home/USER/menu/artisan schedule:run`. The scheduler runs `queue:work --stop-when-empty --max-time=50` every minute, plus the daily jobs in §8.
 - Images: **GD** via Intervention Image v3 (Imagick used automatically if present).
 - Filesystem: `public` disk rooted at `public/media` (no `storage:link`). An S3-compatible disk is a config change.
+- QR codes: **chillerlan/php-qrcode 6.0.1** (MIT/Apache-2.0; with chillerlan/php-settings-container 3.3.0, MIT). Table-card PDFs: **setasign/fpdf 1.9.0** (the original FPDF, MIT, pure PHP, no external programs or font files) — owner's decision, 2026-11-10 (QUESTIONS #75).
 
 ### 3.2 Admin + Super Admin SPA (one app)
 - Based on **shadcn-admin @ `e16c87f213a5ba5e45964e9b67c792105ec74d26`** (MIT, notice in `THIRD_PARTY_NOTICES`).
@@ -275,7 +276,7 @@ Ready for more languages later without rewriting:
 | 3 | **Menu data model & admin editor** | menus, schedules, categories, items, variants, add-ons, tags, allergens, media upload + crop, reorder, duplicate, bulk price, sold-out, import/export | CRUD × roles × limits, import preview |
 | 4 ✅ | **Customer menu page** (PR #8) | Blade page rendered to **static files served without PHP**, inline CSS, ≤ 5 KB JS, layouts, search/filter, item sheet, service worker, beacon after load, SEO, `/q/{code}` without the database | HTML tests, **30 KB budget, Lighthouse CI**, JS units, query counts |
 | 5 ✅ | **Appearance + live preview** (PR #9) | appearance settings, themes, fonts, contrast guard, preview iframe | contrast unit, preview render |
-| 6 | **Branches + QR codes** | branches, overrides, tables, QR PNG/SVG/PDF, table cards | overrides resolution, PDF render |
+| 6 ✅ | **Branches + QR codes** (PR #10) | branches, overrides, tables, QR PNG/SVG/PDF, table cards | overrides resolution, PDF render |
 | 7 | **Restaurant info + hours** | profile, contacts, Wi-Fi, hours with breaks/overnight, closures | hours units (incl. midnight) |
 | 8 | **Translations** — *deferred (English only, §11)* | languages, translation grid, fallback; hidden while one language | fallback, missing filter |
 | 9 | **Promotions** | specials/announcements, badges | date windows |

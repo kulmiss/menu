@@ -1,6 +1,6 @@
 # Handover
 
-_Last updated: 2026-11-10 17:40 EAT. Clean stopping point after Partition 5 (PR #9)._
+_Last updated: 2026-11-10 19:10 EAT. Clean stopping point after Partition 6 (PR #10)._
 
 > **Speed is the top priority (owner, 2026-11-10): PLAN.md §15 applies to every partition and every partition report includes the §15.5 numbers.**
 > **English only for now (owner, 2026-11-10):** texts stay in `t()` / `__()` and the database keeps per-language fields; language switches and translation screens are hidden while one language is enabled.
@@ -15,9 +15,19 @@ _Last updated: 2026-11-10 17:40 EAT. Clean stopping point after Partition 5 (PR 
 | Performance plan + admin budget (option A) | `feat/performance` | #6 | contained |
 | Settings + 2FA; English only | `feat/settings` | #7 | CI green, contained |
 | 4 Customer menu page | `feat/public-menu` | #8 | CI green, contained |
-| **5 Appearance + live preview** | `feat/appearance` | **#9** | newest |
+| 5 Appearance + live preview | `feat/appearance` | #9 | CI green, contained (still open on GitHub on 2026-11-10 18:05) |
+| **6 Branches + QR codes** | `feat/branches-qr` | **#10** | newest |
 
-**Merge only the newest PR (#9)** with *Create a merge commit*; it contains all earlier ones.
+**Merge only the newest PR (#10)** with *Create a merge commit*; it contains all earlier ones.
+
+## What Partition 6 contains (PR #10)
+- Tables `branches` (every restaurant has a main branch), `dining_tables`, `qr_codes` (soft-deleted, never reused), `menu_branch`, `branch_item_overrides`.
+- Guest pages per branch: `/{slug}` (main) and `/{slug}/{branch}`, each with its own static copy (`menu-cache/{slug}/{branch}/`), overrides (price for items without sizes, sold out, hidden), menus limited to branches, branch switch.
+- `/q/{code}`: `public/qr.php` reads `storage/app/qr-map.php` (rebuilt after every code/branch/slug change) and redirects in one step (~1.5 ms, no Laravel, no DB) to `…#q=CODE`; Laravel route as fallback. `.htaccess` + Nginx rules added.
+- QR images (chillerlan/php-qrcode 6.0.1): SVG, PNG, single-card PDF; table-card sheets (FPDF 1.9.0), 4 × A6 per A4 with cut lines. ECC Q, quiet zone 4, vector modules; scanning checked with zxing-cpp (QUESTIONS #75).
+- API: `branches` (+ tables, overrides, table-cards.pdf), `tables/{id}`, `menus/{id}/branches`, `qr-codes` (+ `.svg/.png/.pdf`). Owners and managers; plan limits `branches`, `tables`.
+- Admin: `/admin/branches` (cards, branch dialog incl. menus shown, tables sheet with numbered ranges and card printing, prices & availability sheet), `/admin/qr-codes` (previews, downloads, table cards per branch, extra codes).
+- Tests: backend **196**, frontend **158**. Admin first load **221.5 KB** (budget 225 KB — margin is getting small; if a later partition needs room, move feature texts into lazily loaded i18n namespaces).
 
 ## What Partition 5 contains (PR #9)
 - `themes` (5 presets) and `tenant_appearance` (colour, font, layout list/grid/large, show prices/photos/descriptions/calories, logo, cover, theme).
@@ -52,7 +62,7 @@ _Last updated: 2026-11-10 17:40 EAT. Clean stopping point after Partition 5 (PR 
 Measured locally with Nginx serving the static copy (same setup as CI). Note: without gzip (`php artisan serve`) LCP rises to ~1.4 s — compression on the server matters (on by default in `.htaccess`/Nginx).
 
 ## Checks at this point
-Backend: Pint, Larastan 6, Pest **170**. Frontend (unchanged since #7): lint, Prettier, build, Vitest **148**, bundle 218 KB. Lighthouse CI passes locally. Browser check of the guest page at 390 px: list, search, sheet with photo/sizes/allergens, no console errors.
+Backend: Pint, Larastan 6, Pest **196**. Frontend: lint, Prettier, build, Vitest **158**, bundle 221.5 KB. Lighthouse CI green (demo page unchanged). Browser check of the guest page at 390 px: list, search, sheet with photo/sizes/allergens, no console errors.
 
 ## Packages added in this build (all pinned by the lockfiles)
 | Package | Version | Licence | Where |
@@ -62,26 +72,21 @@ Backend: Pint, Larastan 6, Pest **170**. Frontend (unchanged since #7): lint, Pr
 | @dnd-kit/sortable | 10.0.0 | MIT | admin |
 | @dnd-kit/utilities | 3.2.2 | MIT | admin |
 | react-easy-crop | 6.2.5 | MIT | admin, photo crop |
+| chillerlan/php-qrcode | 6.0.1 | MIT / Apache-2.0 | backend, QR codes |
+| chillerlan/php-settings-container | 3.3.0 | MIT | dependency of php-qrcode |
+| setasign/fpdf | 1.9.0 | MIT | backend, table-card PDFs |
 | @lhci/cli | 0.16.0 | Apache-2.0 | CI only, `ci/lighthouse/package.json` + lockfile (puppeteer-core held at 25.16.0) |
-Removed: axios. `package.json` uses caret ranges for the dnd-kit packages; the exact versions are pinned in `pnpm-lock.yaml` (`--frozen-lockfile` in CI).
+Removed: axios. Composer constraints are `~6.0.1` / `~1.9.0` (patch updates only; `composer validate --strict` rejects exact constraints) and the lockfile pins the exact versions. They were added to `composer.lock` from the GitHub tags (Packagist is blocked in Claude's workspace). `package.json` uses caret ranges for the dnd-kit packages; the exact versions are pinned in `pnpm-lock.yaml` (`--frozen-lockfile` in CI).
 
 ## Claude's workspace notes
 Workspace can run `pnpm install`, `composer install --prefer-source` (Packagist blocked: new Composer packages need the owner's PC or the lock-entry trick used for openspout), MariaDB (`service mariadb start` after idle), Chromium (`PLAYWRIGHT_BROWSERS_PATH=/tmp/pw` with a `chromium_headless_shell-1217` → `-1243` symlink), Nginx, Lighthouse (`npx lighthouse@12.8.2 --chrome-path=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome`).
 
-## Partition 6 plan (next, branch `feat/branches-qr` from `feat/appearance`)
-- Tables per PLAN §4.5/§4.6: `branches` (default branch created for every restaurant, incl. existing ones in the migration), `dining_tables`, `qr_codes` (8-char code from an unambiguous alphabet, unique, never reused), `branch_item_overrides` (price / sold out / hidden, null = inherit), `menu_branch`.
-- `/q/{code}` per §15.2.11: `public/q.php`-style tiny script reading a pre-built map file (`storage/app/qr-map.php`, rewritten on every QR/branch/slug change) → one 302 to `/{slug}?b=…&t=…`, no Laravel, no database; Laravel route as fallback. Scan counted later by the beacon (Partition 10).
-- Guest page per branch: static copy per branch (`menu-cache/{slug}/{branch}/`), overrides applied, branch switch when several (QUESTIONS #38).
-- QR output without packages (QUESTIONS #75): own encoder + PNG (GD) / SVG / PDF; table cards PDF (logo colour, restaurant name, table label, "Scan to see the menu").
-- Admin: Branches list/editor (info, tables, overrides grid), QR codes screen (download PNG/SVG/PDF, table cards).
-- Tests: override resolution, encoder vs reference matrices (generate fixtures with Python `qrcode` locally), PDF structure, map file + redirect, isolation, roles, plan limits (`branches`, `tables`).
-
 ## Next steps (in order)
-6 Branches + QR (`/q/{code}` without the database) → 7 Restaurant info + hours → 8 Translations (deferred; note only) → 9 Promotions → 10 Insights (beacon counting) → 11 Super Admin → 12 Demo data (extend DemoSeeder) → 13 Docs (deploy, OPcache, Cloudflare, cron for `schedule:run`) → 14 Final QA → Step 4 final report.
+7 Restaurant info + hours → 8 Translations (deferred; note only) → 9 Promotions → 10 Insights (beacon counting) → 11 Super Admin → 12 Demo data (extend DemoSeeder) → 13 Docs (deploy, OPcache, Cloudflare, cron for `schedule:run`) → 14 Final QA → Step 4 final report.
 Still open from §15.3: optimistic price edits in the admin.
 
 ## Blockers / owner actions
-- Merge #9 (contains #3–#8).
+- Merge #10 (contains #3–#9).
 - `main` branch protection still to add.
 - Production needs the Laravel scheduler cron (`* * * * * php artisan schedule:run`) for `menu:refresh-pages` (documented in Partition 13).
 
@@ -89,4 +94,4 @@ Still open from §15.3: optimistic price edits in the admin.
 - shadcn-admin `e16c87f` (v2.2.1, MIT); Laravel skeleton v13.11.0 `06d016a`; design mockups https://claude.ai/artifact/HKJ6v8zV9y2b7oQoYb33B5
 
 ## Prompt for the next chat
-> Continue the Menu project in kulmiss/menu from handover.md (newest PR #9, branch feat/appearance). Speed is the top priority (PLAN.md §15); English only. Work through all remaining partitions (6 → 14) without stopping for my OK, then write the Step 4 final report. Same rules: stacked PRs (I merge only the newest), CI checks every PR, tests in every partition, shared hosting is the main target.
+> Continue the Menu project in kulmiss/menu from handover.md (newest PR #10, branch feat/branches-qr). Speed is the top priority (PLAN.md §15); English only. Work through all remaining partitions (7 → 14) without stopping for my OK, then write the Step 4 final report. Same rules: stacked PRs (I merge only the newest), CI checks every PR, tests in every partition, shared hosting is the main target.

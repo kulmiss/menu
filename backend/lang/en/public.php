@@ -21,6 +21,7 @@ return [
     'empty' => 'The menu is being prepared. Please check again soon.',
     'offline' => 'You are offline. This is the last saved menu.',
     'filter' => 'Filter',
+    'branches' => 'Branches',
     'all' => 'All',
     'powered' => 'Menu by :app',
     'unavailable_title' => 'Menu unavailable',

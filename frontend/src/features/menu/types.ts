@@ -13,6 +13,8 @@ export type Menu = {
   schedules?: Schedule[]
   categories_count?: number
   items_count?: number
+  /** Branches the menu is limited to; empty = every branch. */
+  branch_ids?: number[]
 }
 
 /** An uploaded photo with its sizes (MediaResource). */

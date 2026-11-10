@@ -7,6 +7,7 @@ use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
@@ -28,6 +29,16 @@ class Menu extends Model
     public const ALWAYS = 'always';
 
     public const SCHEDULED = 'scheduled';
+
+    /**
+     * Branches this menu is limited to; none = every branch (QUESTIONS #59).
+     *
+     * @return BelongsToMany<Branch, $this>
+     */
+    public function branches(): BelongsToMany
+    {
+        return $this->belongsToMany(Branch::class, 'menu_branch')->withPivot('tenant_id');
+    }
 
     protected function casts(): array
     {

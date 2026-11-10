@@ -19,6 +19,7 @@ h1{font-size:1.6rem;line-height:1.2}
 .sr input{flex:1;min-width:0;height:2.5rem;padding:0 .9rem;border:1px solid var(--ln);border-radius:99px;background:var(--card);color:var(--fg);font:inherit}
 .ch{display:flex;gap:.4rem;overflow-x:auto;scrollbar-width:none;padding-top:.5rem}
 .ch::-webkit-scrollbar{display:none}
+.bs{padding:0 0 .75rem}
 .ch a,.ch button{flex:none;padding:.35rem .8rem;border-radius:99px;border:1px solid var(--ln);background:none;color:var(--fg);text-decoration:none;font-size:.875rem;white-space:nowrap;cursor:pointer}
 .ch .on,.ch [aria-pressed=true]{background:var(--a);color:var(--af);border-color:var(--a)}
 .mn{margin-top:1.5rem}
