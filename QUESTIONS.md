@@ -110,6 +110,10 @@ New rules added by the owner (now in PLAN.md §2): Docker is for local developme
 | 84 | Admin first-load budget | Screen texts load with the admin area instead of in the first download (see PLAN §15.6). 217.8 KB of 225 KB. |
 | 85 | Promotions | Two kinds: **special** (title, text, optional photo and linked dish — tapping it opens the dish) and **announcement** (one line). Optional start/end in the restaurant's local time; the page shows each only inside its dates (checked in the browser), optional branch, on/off, order. No automatic "Special" badge on menu items (the card itself is the highlight). |
 | 86 | Guest page database queries | A page build runs a **fixed 17 queries** whatever the menu size (test ceiling 20). Builds only happen when the static copy is missing, so visits never run them. |
+| 87 | What Insights counts | **Menu views** (one per page load), **QR scans** (a view that arrived through `/q/CODE`, per code — so per table/poster) and **dish details opened** (per dish). **Category views are not counted**: it would need scroll tracking in the 5 KB page script. Days are the restaurant's local days. Counters older than 400 days are deleted nightly. |
+| 88 | Who is not counted | Requests without a browser user agent and known bots, link previews (WhatsApp, Telegram, Facebook), headless browsers and speed tests (Lighthouse, PageSpeed). The admin's live preview is never counted. No cookies, no IP addresses stored. |
+| 89 | Beacon and the admin login | The beacon comes from the same site as the admin, so it is excluded from Sanctum's "stateful" handling (no session, no CSRF token) — otherwise every count would be refused. Covered by a test. |
+| 90 | Dashboard | Today's menu views and QR scans (with yesterday), the sold-out list with "Available again" (staff can use it too), links to Insights and QR codes. The chart in Insights is plain SVG (no chart library) to keep the admin's first load within budget. |
 
 ## Open
 

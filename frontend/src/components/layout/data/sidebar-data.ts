@@ -2,6 +2,7 @@ import {
   BookOpen,
   FileSpreadsheet,
   LayoutDashboard,
+  BarChart3,
   Megaphone,
   Info,
   MapPin,
@@ -24,7 +25,15 @@ export const sidebarData: SidebarData = {
   navGroups: [
     {
       title: 'nav.general',
-      items: [{ title: 'nav.dashboard', url: '/admin', icon: LayoutDashboard }],
+      items: [
+        { title: 'nav.dashboard', url: '/admin', icon: LayoutDashboard },
+        {
+          title: 'nav.insights',
+          url: '/admin/insights',
+          icon: BarChart3,
+          roles: ['owner', 'manager'],
+        },
+      ],
     },
     {
       title: 'nav.menu_group',

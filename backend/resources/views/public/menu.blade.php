@@ -12,6 +12,7 @@
     } } }
     $data = [
         'id' => $tenant->id,
+        'b' => $branch_id,
         'p' => $preview ? 1 : 0,
         's' => InlineAssets::sheetUrl(),
         'z' => $timezone,

@@ -1,6 +1,6 @@
 # PLAN — Digital menu SaaS
 
-Status: **approved; in build (Partitions 1–7 and 9 done; 8 deferred).** Progress is in [handover.md](handover.md). **Speed is the top priority** — see §15, which wins over any older figure in this file.
+Status: **approved; in build (Partitions 1–7, 9, 10 done; 8 deferred).** Progress is in [handover.md](handover.md). **Speed is the top priority** — see §15, which wins over any older figure in this file.
 Decisions behind this plan are in [QUESTIONS.md](QUESTIONS.md). Progress and next steps are in [handover.md](handover.md).
 
 ---
@@ -170,7 +170,7 @@ Upload flow: the browser crops (react-easy-crop) and downscales to ≤ 2048 px *
 ### 4.9 Insights and log
 | Table | Key columns |
 |---|---|
-| `stats_daily` | tenant_id, date, branch_id (null), metric (`menu_view`/`qr_scan`/`item_view`/`category_view`), subject_id (null / item / category / qr_code), count — unique key, `INSERT … ON DUPLICATE KEY UPDATE count = count + 1` |
+| `stats_daily` | tenant_id, date (restaurant's local day), branch_id (0 = none), metric (`menu_view`/`qr_scan`/`item_view`), subject_id (0 / item / qr_code), count — unique key, `INSERT … ON DUPLICATE KEY UPDATE count = count + 1` |
 | `activity_log` | tenant_id (null = platform), actor_id, impersonator_id, action (`item.updated`…), subject_type, subject_id, changes (json before/after, secrets masked), ip_hash, created_at — kept 12 months |
 
 Bots (known UA list) are not counted. One menu view per page load; item view when the detail sheet opens; QR scan on `/q/{code}`.
@@ -281,7 +281,7 @@ Ready for more languages later without rewriting:
 | 7 ✅ | **Restaurant info + hours** (PR #11) | profile, contacts, Wi-Fi, hours with breaks/overnight, closures | hours units (incl. midnight) |
 | 8 ⏸ | **Translations** — *deferred (English only, §11); nothing built* | languages, translation grid, fallback; hidden while one language | fallback, missing filter |
 | 9 ✅ | **Promotions** (PR #13) | specials/announcements, badges | date windows |
-| 10 | **Insights** | stats aggregation, charts, scans per table | counting, bot filter |
+| 10 ✅ | **Insights** (PR #14) | stats aggregation, charts, scans per table | counting, bot filter |
 | 11 | **Super Admin** | dashboard, restaurants, plans, features, payments, themes, announcements, log, settings, log-in-as, subscription states | platform policies, impersonation limits, state machine |
 | 12 | **Demo data** | fictional restaurants (see §13), seeders, demo images (generated, no real photos of people) | seeder runs on fresh DB |
 | 13 | **Docs** | README, admin user guide (en), deploy: shared hosting + VPS (with/without Docker), legal page placeholders | – |

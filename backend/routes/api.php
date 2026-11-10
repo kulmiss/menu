@@ -16,11 +16,13 @@ use App\Http\Controllers\Api\Menu\TagController;
 use App\Http\Controllers\Api\Restaurant\AppearanceController;
 use App\Http\Controllers\Api\Restaurant\BranchController;
 use App\Http\Controllers\Api\Restaurant\InfoController;
+use App\Http\Controllers\Api\Restaurant\InsightsController;
 use App\Http\Controllers\Api\Restaurant\PromotionController;
 use App\Http\Controllers\Api\Restaurant\QrCodeController;
 use App\Http\Controllers\Api\TeamController;
 use App\Http\Controllers\Api\TenantController;
 use Illuminate\Support\Facades\Route;
+use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
 /*
 | JSON API for the admin SPA. Every create/change route requires an
@@ -29,7 +31,11 @@ use Illuminate\Support\Facades\Route;
 */
 // Visit beacon from the guest page (no body worth replaying, so no
 // idempotency key). Counting arrives with Insights (Partition 10).
-Route::post('v1/beacon', BeaconController::class)->middleware('throttle:120,1')->name('beacon');
+Route::post('v1/beacon', BeaconController::class)
+    ->middleware('throttle:120,1')
+    // Same-site guest pages must not start a session or need a CSRF token.
+    ->withoutMiddleware([EnsureFrontendRequestsAreStateful::class])
+    ->name('beacon');
 
 Route::prefix('v1')->middleware('idempotent')->group(function () {
     Route::get('invitations/{token}', [AcceptInvitationController::class, 'show'])
@@ -114,6 +120,9 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::patch('qr-codes/{qr}', [QrCodeController::class, 'update']);
             Route::delete('qr-codes/{qr}', [QrCodeController::class, 'destroy']);
             Route::get('qr-codes/{qr}.{format}', [QrCodeController::class, 'download'])->whereIn('format', ['svg', 'png', 'pdf']);
+
+            Route::get('insights', [InsightsController::class, 'index']);
+            Route::get('dashboard', [InsightsController::class, 'dashboard']);
 
             Route::get('promotions', [PromotionController::class, 'index']);
             Route::post('promotions', [PromotionController::class, 'store']);

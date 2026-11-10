@@ -101,7 +101,7 @@
     later(function () {
       load();
       if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(function () {});
-      if (navigator.sendBeacon) navigator.sendBeacon('/api/v1/beacon', JSON.stringify({ t: data().id, q: scan || null }));
+      if (navigator.sendBeacon) navigator.sendBeacon('/api/v1/beacon', JSON.stringify({ t: D.id, b: D.b, q: scan || null }));
     });
   });
 })();

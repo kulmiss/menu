@@ -1,27 +1,25 @@
 # Handover
 
-_Last updated: 2026-11-10 23:00 EAT. Clean stopping point after Partition 9 (PR #13)._
+_Last updated: 2026-11-11 00:10 EAT. Partition 10 (PR #14)._
 
 > **Speed is the top priority (owner, 2026-11-10): PLAN.md §15 applies to every partition and every partition report includes the §15.5 numbers.**
 > **English only for now (owner, 2026-11-10):** texts stay in `t()` / `__()` and the database keeps per-language fields; language switches and translation screens are hidden while one language is enabled.
 > **Working mode (owner):** go through all remaining partitions without stopping for OK, then write the Step 4 final report. Stop only for: changes outside this project, steps that can't be undone, licence doubts, the same CI failure 3 times, or the working limit.
 
 ## Where we are
+`develop` contains PRs #3–#13 (owner merged #13 on 2026-11-10; verified: every earlier PR head is in `develop`, and GitHub shows #3–#12 as merged). No old PRs open.
+
 | Part | Branch | PR | State |
 |---|---|---|---|
-| 2 backend (auth & tenancy) | `feat/auth-tenancy` | #3 | contained in newer PRs |
-| 2b SPA auth, switcher, team | `feat/auth-spa` | #4 | contained |
-| 3 menu data, editor, photos, import/export | `feat/menu-data` | #5 | contained |
-| Performance plan + admin budget (option A) | `feat/performance` | #6 | contained |
-| Settings + 2FA; English only | `feat/settings` | #7 | CI green, contained |
-| 4 Customer menu page | `feat/public-menu` | #8 | CI green, contained |
-| 5 Appearance + live preview | `feat/appearance` | #9 | CI green, contained (still open on GitHub on 2026-11-10 18:05) |
-| 6 Branches + QR codes | `feat/branches-qr` | #10 | CI green, contained |
-| 7 Restaurant info + hours | `feat/info-hours` | #11 | CI green, contained (still open on GitHub on 2026-11-10 18:55) |
-| #78 per-size branch prices | `feat/size-prices` | #12 | contained |
-| **9 Promotions** | `feat/promotions` | **#13** | newest |
+| **10 Insights + dashboard** | `feat/insights` (from `develop`) | **#14** | newest |
 
-**Merge only the newest PR** with *Create a merge commit*; it contains all earlier ones. Note: on 2026-11-10 the owner reported #9 and #11 as merged, but GitHub still showed them open and `develop` still at #5 — the stack simply continues.
+**Merge only the newest PR** with *Create a merge commit*.
+
+## What Partition 10 contains (PR #14)
+- `stats_daily` counters (one upsert per event). Beacon `POST /api/v1/beacon` `{t, b, q, i}`: menu view per page load, QR scan when the page came from `/q/CODE` (`#q=` in the address), item view from the on-demand sheet script. Bots/headless/link previews ignored; no cookies, no IPs; excluded from Sanctum stateful/CSRF (test proves it). Nightly prune of counters > 400 days.
+- API `GET insights?days=7|30|90&branch_id`, `GET dashboard` (staff allowed).
+- Admin `/admin/insights` (totals, SVG bar chart, top dishes, scans per code) and a real dashboard (today vs yesterday, sold-out list with "Available again", links).
+- Tests: backend **215**, frontend **174**. Admin first load **221.5 KB** (dashboard is the first page and now has content). Guest inline script unchanged (item-view beacon lives in the on-demand sheet file).
 
 ## What Partition 9 contains (PR #13)
 - `promotions` (special / announcement, title, text, photo, linked dish, branch, local start/end, on/off, order); API `promotions` (+ `reorder`); admin `/admin/promotions` with dialog.
@@ -86,7 +84,7 @@ _Last updated: 2026-11-10 23:00 EAT. Clean stopping point after Partition 9 (PR 
 Measured locally with Nginx serving the static copy (same setup as CI). Note: without gzip (`php artisan serve`) LCP rises to ~1.4 s — compression on the server matters (on by default in `.htaccess`/Nginx).
 
 ## Checks at this point
-Backend: Pint, Larastan 6, Pest **208**. Frontend: lint, Prettier, build, Vitest **172**, bundle 217.8 KB. Lighthouse CI green (demo page unchanged). Browser check of the guest page at 390 px: list, search, sheet with photo/sizes/allergens, no console errors.
+Backend: Pint, Larastan 6, Pest **215**. Frontend: lint, Prettier, build, Vitest **174**, bundle 221.5 KB. Lighthouse CI green (demo page unchanged). Browser check of the guest page at 390 px: list, search, sheet with photo/sizes/allergens, no console errors.
 
 ## Packages added in this build (all pinned by the lockfiles)
 | Package | Version | Licence | Where |
