@@ -14,7 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { SignOutDialog } from '@/components/sign-out-dialog'
+import { LazySignOutDialog } from '@/components/lazy-sign-out-dialog'
 import { useMe } from '@/features/auth/use-me'
 
 export function ProfileDropdown() {
@@ -69,7 +69,7 @@ export function ProfileDropdown() {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <SignOutDialog open={!!open} onOpenChange={setOpen} />
+      <LazySignOutDialog open={!!open} onOpenChange={setOpen} />
     </>
   )
 }

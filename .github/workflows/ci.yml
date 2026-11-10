@@ -91,7 +91,7 @@ jobs:
       # grows past the budget. Target 150 KB; current ceiling while the owner
       # decides how to get there (see PLAN.md §15.6).
       - name: Admin bundle budget
-        run: node scripts/bundle-size.mjs --budget-kb=245
+        run: node scripts/bundle-size.mjs --budget-kb=225
       - name: Install test browser
         run: pnpm exec playwright install chromium --with-deps
       - name: Tests (Vitest)

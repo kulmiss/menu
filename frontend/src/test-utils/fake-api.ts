@@ -1,19 +1,17 @@
-import axios, {
-  AxiosError,
-  type AxiosHeaders,
-  type AxiosAdapter,
-  type InternalAxiosRequestConfig,
-} from 'axios'
-import { api } from '@/lib/api'
+import { api, type Adapter, type SentRequest } from '@/lib/api'
 
-type Reply = { status?: number; data?: unknown }
-type Handler = Reply | ((config: InternalAxiosRequestConfig) => Reply)
+type Reply = {
+  status?: number
+  data?: unknown
+  headers?: Record<string, string>
+}
+type Handler = Reply | ((request: SentRequest) => Reply)
 
 export type Call = {
   method: string
   url: string
   data: Record<string, unknown> | undefined
-  headers: AxiosHeaders
+  headers: Headers
 }
 
 /**
@@ -23,54 +21,42 @@ export type Call = {
 export function fakeApi(routes: Record<string, Handler>) {
   const calls: Call[] = []
   const original = api.defaults.adapter
-  const originalGlobal = axios.defaults.adapter
 
-  const adapter: AxiosAdapter = async (config) => {
-    const method = (config.method ?? 'get').toUpperCase()
-    const url = config.url ?? ''
+  const adapter: Adapter = async (request) => {
     const data =
-      typeof config.data === 'string' && config.data !== ''
-        ? (JSON.parse(config.data) as Record<string, unknown>)
+      typeof request.body === 'string' && request.body !== ''
+        ? (JSON.parse(request.body) as Record<string, unknown>)
         : undefined
-    calls.push({ method, url, data, headers: config.headers })
+    calls.push({
+      method: request.method,
+      url: request.url,
+      data,
+      headers: request.headers,
+    })
 
     const handler =
-      routes[`${method} ${url}`] ??
-      // ensureCsrfCookie() (plain axios): always fine unless a test says otherwise.
-      (url === '/sanctum/csrf-cookie' ? { status: 204 } : undefined)
+      routes[`${request.method} ${request.url}`] ??
+      // ensureCsrfCookie(): always fine unless a test says otherwise.
+      (request.url === '/sanctum/csrf-cookie' ? { status: 204 } : undefined)
     const reply: Reply =
       typeof handler === 'function'
-        ? handler(config)
+        ? handler(request)
         : (handler ?? { status: 404, data: { message: 'Not found' } })
-    const status = reply.status ?? 200
-    const response = {
+
+    return {
       data: reply.data ?? {},
-      status,
-      statusText: String(status),
-      headers: {},
-      config,
+      status: reply.status ?? 200,
+      headers: reply.headers ?? {},
     }
-    if (status >= 400) {
-      throw new AxiosError(
-        `Request failed with status code ${status}`,
-        AxiosError.ERR_BAD_REQUEST,
-        config,
-        null,
-        response
-      )
-    }
-    return response
   }
 
   api.defaults.adapter = adapter
-  axios.defaults.adapter = adapter
   return {
     calls,
     /** Calls to the API itself (without the CSRF cookie request). */
     apiCalls: () => calls.filter((c) => c.url !== '/sanctum/csrf-cookie'),
     restore: () => {
       api.defaults.adapter = original
-      axios.defaults.adapter = originalGlobal
     },
   }
 }

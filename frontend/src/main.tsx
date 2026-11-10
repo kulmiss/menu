@@ -7,9 +7,9 @@ import {
   QueryClientProvider,
 } from '@tanstack/react-query'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
-import { toast } from 'sonner'
 import { errorStatus, validationErrors } from '@/lib/api'
 import { handleServerError } from '@/lib/handle-server-error'
+import { toast } from '@/lib/toast'
 import { DirectionProvider } from './context/direction-provider'
 import { FontProvider } from './context/font-provider'
 import { ThemeProvider } from './context/theme-provider'

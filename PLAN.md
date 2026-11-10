@@ -330,7 +330,7 @@ The customer menu must open almost instantly, also on slow mobile networks and o
 
 ### 15.3 Admin and Super Admin
 - Route-level code splitting (already on); rare screens and heavy widgets (command palette, appearance drawer, "no restaurant" screen, other UI languages) load on first use (this PR).
-- **First load budget: target 150 KB gzipped — not reachable with the approved stack, see §15.6.** CI enforces a ceiling (`scripts/bundle-size.mjs`) so it can only shrink.
+- **First load budget: 225 KB gzipped** (owner chose option A of §15.6; the original 150 KB target needs a different UI stack). Now **221 KB**; CI fails above 225 KB (`scripts/bundle-size.mjs`).
 - TanStack Query caching with stale-while-revalidate; prefetch of likely next screens on hover/intent; optimistic updates for sold-out and reordering (done) and price edits (to do, with rollback).
 - Skeletons, no spinners for page loads; no layout shift. Photo upload: instant local preview, progress, the UI stays usable.
 
@@ -346,10 +346,12 @@ The customer menu must open almost instantly, also on slow mobile networks and o
 - **Profiles:** Lighthouse mobile (4G, 4× CPU) gated in CI; "old Android" (4× CPU, slow 4G) and WebPageTest-style "3G Slow" (400 ms, 400 kbps) and Chrome "Slow 3G", first and repeat visit, reported.
 - **Every partition report** includes: page weight, LCP, CLS, server time cached/uncached, Lighthouse score for the customer menu, and the admin first-load size.
 
-### 15.6 Admin first load: 150 KB is not reachable with the approved stack
+### 15.6 Admin first load: 150 KB is not reachable with the approved stack — **decided: A (2026-11-10)**
 Measured on 2026-11-10: **285 KB → 241 KB** after this PR's changes. What remains is mostly the approved libraries themselves: React DOM ~60 KB, TanStack Router ~25 KB, Radix menus/popovers ~30 KB, i18next ~17 KB, Tailwind CSS ~16 KB, axios ~15 KB, TanStack Query ~10 KB. Even with everything optional removed the floor is about 220 KB. Options for the owner:
 - **A (recommended): keep the stack, ceiling 225 KB.** Replace axios with a small `fetch` wrapper and lazy-load more widgets. Low risk. After the first visit the admin loads from the browser cache (immutable assets), so staff feel it only once per release.
 - **B: swap React for Preact (compat layer).** ≈ −45 KB → ~180 KB. Real risk with Radix and TanStack internals; needs a full re-test. Big architecture change.
 - **C: reach 150 KB** by dropping Radix-based components for hand-made ones and trimming the router — weeks of rework of finished screens.
 The guest-facing 30 KB customer page is unaffected by this choice.
+
+**Done (A):** axios replaced by a small `fetch` client (same Idempotency-Key, XSRF and 419-retry behaviour); toasts, sign-out dialog, command palette, appearance drawer, rare screens and non-English UI texts load on first use. 285 → **221 KB**; CI ceiling 225 KB.
 

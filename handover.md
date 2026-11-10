@@ -44,21 +44,19 @@ Vitest browser tests pre-bundle a few deps in `vite.config.ts` (`optimizeDeps.in
 
 ## Speed work done (#6)
 - PLAN.md §15 written (targets, honest limits with closest achievable targets, design, CI gates).
-- Admin first load 285 → 241 KB gzip; CI ceiling 245 KB (`frontend/scripts/bundle-size.mjs`, `pnpm size`).
+- Admin first load 285 → **221 KB** gzip (option A: axios → `fetch` client in `src/lib/api.ts`, lazy toasts/sign-out/command palette/drawer/locales); CI ceiling **225 KB** (`frontend/scripts/bundle-size.mjs`, `pnpm size`).
 - Query-count tests (no N+1); photos WebP q72 / JPEG q75 / AVIF when available / < 300-byte placeholder (`media.placeholder`); `.htaccess` + Nginx immutable caching and compression.
 
 ## Next steps (in order)
-1. **Owner decision: admin budget option (PLAN §15.6).** If A: replace axios with a small fetch wrapper (keep the interceptor features: Idempotency-Key, 419 retry; tests use `fakeApi` — adapt it), lazy-load more widgets, lower the CI ceiling to 225 KB.
-2. **Partition 2 leftovers**: personal settings + 2FA setup (+ optimistic price edits, §15.3).
-3. **Partition 4 — customer menu page per §15.2**: static files in `public/menu-cache` (+ `.gz`/`.br`) served by `.htaccess`/Nginx without PHP, rebuilt on every change and by the daily cron; inline CSS; ≤ 5 KB JS; service worker; `/q/{code}` via a tiny PHP file + pre-built map; demo menu seeder; **Lighthouse CI** (`@lhci/cli`, mobile throttled, 3 runs) and the 30 KB gate in CI; report the §15.5 numbers.
+1. **Partition 2 leftovers**: personal settings + 2FA setup (+ optimistic price edits, §15.3).
+2. **Partition 4 — customer menu page per §15.2**: static files in `public/menu-cache` (+ `.gz`/`.br`) served by `.htaccess`/Nginx without PHP, rebuilt on every change and by the daily cron; inline CSS; ≤ 5 KB JS; service worker; `/q/{code}` via a tiny PHP file + pre-built map; demo menu seeder; **Lighthouse CI** (`@lhci/cli`, mobile throttled, 3 runs) and the 30 KB gate in CI; report the §15.5 numbers.
 
 ## Blockers / owner actions
 - Merge #6 (contains #3, #4, #5).
-- Choose the admin budget option (PLAN §15.6): A (recommended) / B / C.
 - `main` branch protection still to add.
 
 ## Pinned references
 - shadcn-admin `e16c87f` (v2.2.1, MIT); Laravel skeleton v13.11.0 `06d016a`; design mockups https://claude.ai/artifact/HKJ6v8zV9y2b7oQoYb33B5
 
 ## Prompt for the next chat
-> Continue the Menu project in kulmiss/menu from handover.md (branch feat/performance, PR #6). Speed is the top priority: follow PLAN.md §15 in everything and report the §15.5 numbers. Admin budget: option <A/B/C>. Then the Partition 2 leftovers, then Partition 4 (customer menu page) with Lighthouse CI. Same rules: stacked PRs (I merge only the newest), CI checks every PR, tests in every partition, shared hosting is the main target. Stop only for new packages, big architecture choices, licence doubts, or steps that can't be undone.
+> Continue the Menu project in kulmiss/menu from handover.md (branch feat/performance, PR #6). Speed is the top priority: follow PLAN.md §15 in everything and report the §15.5 numbers. Then the Partition 2 leftovers, then Partition 4 (customer menu page) with Lighthouse CI. Same rules: stacked PRs (I merge only the newest), CI checks every PR, tests in every partition, shared hosting is the main target. Stop only for new packages, big architecture choices, licence doubts, or steps that can't be undone.

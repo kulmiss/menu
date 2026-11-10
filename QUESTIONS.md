@@ -87,10 +87,10 @@ New rules added by the owner (now in PLAN.md §2): Docker is for local developme
 | 61 | Who may bulk-change prices | Anyone allowed to edit prices: owners, managers and staff with *can edit prices*. Staff use a price-only endpoint; full item edits stay owner/manager. |
 | 62 | XLSX library for import/export | **openspout/openspout `^5.3`** (MIT, streaming, low memory) — owner's choice, 2026-11-10. 5.3 is the last line that runs on PHP 8.3; `config.platform.php = 8.3.0` keeps `composer update` from moving past it. Needs ext-zip, xmlreader, dom (present in CI and the Docker image; standard on cPanel). |
 | 63 | Import rules | One row per item; matched by menu + category + item name in the main language; **blank cell = keep current value**; sizes as `Small=60; Large=80`; unknown tags become custom tags; any row error blocks the whole import (fix the file, upload again). Preview kept 30 min. |
+| 65 | Admin first-load budget (PLAN §15.6) | **A: keep the stack, 225 KB ceiling** (owner, 2026-11-10). Now 221 KB after replacing axios with `fetch` and lazy-loading rare UI. |
 | 64 | Speed targets (owner, 2026-11-10) | **PLAN.md §15 is the top priority.** Targets that physics or the approved stack rule out are stated there with the closest achievable target (server time vs. network TTFB, "Slow 3G" first visit, 30 KB for very large menus, admin 150 KB). |
 
 ## Open
-- **Admin first-load budget (PLAN §15.6):** A) keep the stack, ceiling 225 KB (recommended); B) Preact swap ≈ 180 KB; C) rebuild UI without Radix for 150 KB. CI holds a 245 KB ceiling until decided.
 
 - Owner action: protect `main` in GitHub settings (require PR, no force push, no deletion). Claude's access can't change branch settings.
 - PR #1 is still open: merge it into `develop`.
