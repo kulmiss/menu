@@ -154,6 +154,10 @@ New rules added by the owner (now in PLAN.md §2): Docker is for local developme
 
 | 121 | Older photos and the 800 px size | `php artisan media:regenerate` (owner, 2026-11-11) makes missing sizes for photos uploaded earlier. The original upload isn't kept, so the new size is scaled down from the photo's 1280 px copy (small, invisible quality loss); banners use the banner quality. Safe to repeat; `--dry-run` counts, `--tenant=` limits it to one restaurant; changed menus are rebuilt. |
 
+| 122 | Photo-free menus (owner, 2026-11-11) | Confirmed: (a) Appearance → **Show photos** hides every dish and special photo with one switch (the banner and logo are branding and stay; remove them separately if wanted); (b) any dish can have no photo. New: a **"Show photo on menu"** switch per dish (default on, shown once the dish has a photo): off hides its photos on the menu, keeps them saved, and on brings them back. |
+| 123 | Layout without photos | A dish without a photo is a text row in every style, never an empty box. When **no dish on the page** shows a photo, the page gets a text layout: A becomes a printed-menu list with hairlines, B shows one card per row on phones (two on desktop) with name and price side by side, C stays its calm list. In B, a photo-less card next to photo cards also puts name and price on one row. The style rules now apply only to dish rows (they no longer touched the special card, which had an empty gap in B). |
+| 124 | Photos off: speed | Demo with banner, photos switched off (Lighthouse mobile, median of 3): A 100, LCP 0.82 s, 19.5 KB loaded; B 100, 0.96 s, 19.4 KB; C 100, 0.83–0.96 s, 19.3 KB; CLS 0; HTML 10.1 KB gzip. With photos: 24–34 KB loaded, HTML 11.3 KB. The banner remains the largest element, so LCP stays about the same; without a banner the name is the largest element. |
+
 ## Open
 
 - Owner action: protect `main` in GitHub settings (require PR, no force push, no deletion). Claude's access can't change branch settings.

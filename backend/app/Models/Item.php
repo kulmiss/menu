@@ -33,11 +33,12 @@ use Illuminate\Support\Carbon;
  * @property-read Category $category
  * @property-read Collection<int, ItemVariant> $variants
  * @property-read Collection<int, AddonGroup> $addonGroups
+ * @property bool $show_photo false: the dish's photos stay saved but the menu doesn't show them
  * @property-read Collection<int, Tag> $tags
  * @property-read Collection<int, ItemAllergen> $allergenRows
  */
 #[Fillable([
-    'category_id', 'name', 'summary', 'description', 'price_minor', 'media_id', 'calories',
+    'category_id', 'name', 'summary', 'description', 'price_minor', 'media_id', 'show_photo', 'calories',
     'prep_minutes', 'is_sold_out', 'is_visible', 'is_new', 'new_until', 'is_popular', 'sort',
 ])]
 class Item extends Model
@@ -58,6 +59,7 @@ class Item extends Model
             'is_new' => 'boolean',
             'new_until' => 'date',
             'is_popular' => 'boolean',
+            'show_photo' => 'boolean',
             'sort' => 'integer',
         ];
     }

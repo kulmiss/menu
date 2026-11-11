@@ -18,6 +18,7 @@
         if ($i['sheet'] !== []) { $sheets[$i['id']] = $i['sheet']; }
         $firstImage ??= $i['media']['og'] ?? null;
     } } }
+    // No dish photo anywhere (switched off, hidden per dish, or none uploaded): the styles use a text layout.
     $data = [
         'id' => $tenant->id,
         'b' => $branch_id,
@@ -60,7 +61,7 @@
 @endif
 <style>{!! InlineAssets::css($style) !!}{!! $theme['css'] !!}</style>
 </head>
-<body class="S-{{ $style }}">
+<body class="S-{{ $style }}{{ $firstImage ? '' : ' NP' }}">
 <div @class(['top', 'hc' => $cover, 'ov' => $cover && $cover['over']])>
 @if ($cover)
 {{-- The banner keeps its shape from the first paint (CSS aspect-ratio + placeholder), so nothing moves. --}}

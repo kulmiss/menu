@@ -33,7 +33,7 @@ function pageWithStyle(string $style): string
 it('inlines only the CSS of the chosen style', function (string $style) {
     $html = pageWithStyle($style);
 
-    expect($html)->toContain('class="S-'.$style.'"')->toContain(STYLE_MARKERS[$style]);
+    expect($html)->toContain('class="S-'.$style)->toContain(STYLE_MARKERS[$style]);
     foreach (array_diff_key(STYLE_MARKERS, [$style => true]) as $other) {
         expect($html)->not->toContain($other);
     }
@@ -193,3 +193,45 @@ it('saves where the logo and name go', function () {
         ->assertJsonPath('data.banner.grid', ['ratio' => [2, 1], 'text' => 'over']);
     $this->actingAs($owner)->putJson(t($tenant, 'appearance'), [...$values, 'banner_text' => 'left'], idem())->assertInvalid('banner_text');
 });
+
+/** A menu with photos on every dish; $showPhotos is the Appearance switch. */
+function menuWithPhotos(string $style, bool $showPhotos): string
+{
+    $tenant = Tenant::factory()->create();
+    [, $category] = sampleMenu($tenant);
+    asTenant($tenant, function () use ($category, $style, $showPhotos) {
+        foreach (range(1, 6) as $n) {
+            $media = Media::create([
+                'base_path' => 'p/'.$n, 'mime' => 'image/jpeg', 'width' => 1280, 'height' => 853, 'bytes' => 1,
+                'variants' => ['320' => '320.webp', '640' => '640.webp', '800' => '800.webp', '1280' => '1280.webp', 'jpg' => '640.jpg', 'og' => 'og.jpg'],
+                'placeholder' => 'data:image/webp;base64,'.str_repeat('A', 200),
+            ]);
+            Item::create(['category_id' => $category->id, 'name' => ['en' => 'Dish '.$n], 'price_minor' => 1000, 'media_id' => $media->id, 'sort' => $n]);
+        }
+        TenantAppearance::create([...TenantAppearance::DEFAULTS, 'style' => $style, 'show_photos' => $showPhotos]);
+    });
+
+    return (string) test()->get('/'.$tenant->slug)->assertOk()->getContent();
+}
+
+it('shows a clean, lighter page when photos are switched off', function (string $style) {
+    $with = menuWithPhotos($style, true);
+    $without = menuWithPhotos($style, false);
+
+    expect($with)->toContain('class="im"');
+    // No photo boxes, no image requests, no social preview image: every dish is a text row.
+    expect($without)->not->toContain('class="im"')
+        ->not->toContain('<img')
+        ->not->toContain('og:image')
+        ->not->toContain('loading="lazy"')
+        ->and(substr_count($without, 'class="it np"'))->toBe(7)
+        ->and($without)->toContain('class="S-'.$style.' NP"')
+        ->and($with)->toContain('class="S-'.$style.'"');
+    expect(strlen(gzencode($without, 9)))->toBeLessThan(strlen(gzencode($with, 9)));
+})->with(TenantAppearance::STYLES);
+
+it('lays out dishes without photos as text rows in every style', function (string $style) {
+    $css = InlineAssets::css($style);
+    // Each style has rules for dishes or pages without photos, so no empty photo box is drawn.
+    expect($css)->toMatch('/\.(np|NP)\b/');
+})->with(TenantAppearance::STYLES);

@@ -297,6 +297,7 @@ class ItemController extends Controller
             'is_new' => ['sometimes', 'boolean'],
             'new_until' => ['sometimes', 'nullable', 'date_format:Y-m-d'],
             'is_popular' => ['sometimes', 'boolean'],
+            'show_photo' => ['sometimes', 'boolean'],
             'variants' => ['sometimes', 'array', 'max:20'],
             'variants.*.id' => ['sometimes', 'nullable', 'integer', Rule::in($variantIds)],
             'variants.*.name' => ['required', Translations::required(60)],
@@ -319,7 +320,7 @@ class ItemController extends Controller
     {
         $fields = collect($data)->only([
             'category_id', 'name', 'summary', 'description', 'price_minor', 'media_id', 'calories', 'prep_minutes',
-            'is_sold_out', 'is_visible', 'is_new', 'new_until', 'is_popular',
+            'is_sold_out', 'is_visible', 'is_new', 'new_until', 'is_popular', 'show_photo',
         ])->all();
 
         // With sizes, the sizes carry the prices (QUESTIONS #37).

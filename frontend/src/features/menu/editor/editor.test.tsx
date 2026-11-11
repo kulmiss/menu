@@ -40,6 +40,7 @@ const item = (
   is_visible: true,
   is_new: false,
   is_popular: false,
+  show_photo: true,
   sort: id,
   ...extra,
 })
@@ -313,5 +314,64 @@ describe('ItemSheet', () => {
       })
     )
     expect(screen.container.textContent).not.toContain('Details')
+  })
+
+  it('hides a dish photo on the menu without deleting it', async () => {
+    const photo = {
+      id: 7,
+      width: 800,
+      height: 600,
+      dominant_color: '#aa5500',
+      urls: { '320': '/media/1/7/320.webp' },
+    }
+    fake = fakeApi({
+      'GET /t/1/addon-groups': { data: { data: [] } },
+      'GET /t/1/tags': { data: { data: [] } },
+      'GET /t/1/items/100': {
+        data: {
+          data: {
+            ...item(100, 'Macchiato'),
+            media_id: 7,
+            media: photo,
+            photos: [photo],
+            description: {},
+            calories: null,
+            prep_minutes: null,
+            new_until: null,
+            variants: [],
+            addon_group_ids: [],
+            tag_ids: [],
+            allergens: [],
+            menu_id: 1,
+          },
+        },
+      },
+      'PATCH /t/1/items/100': { data: { data: { id: 100 } } },
+    })
+    const screen = await renderWithQuery(
+      <ItemSheet
+        ctx={ctxFor('owner', true)}
+        itemId={100}
+        newInCategory={null}
+        categories={[coffee]}
+        open
+        onOpenChange={vi.fn()}
+      />,
+      { me: meFixture() }
+    )
+
+    const toggle = screen.getByRole('switch', { name: 'Show photo on menu' })
+    await expect.element(toggle).toBeChecked()
+    await userEvent.click(toggle)
+    await expect
+      .element(screen.getByText(/the photos stay saved/))
+      .toBeVisible()
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }))
+
+    await vi.waitFor(() =>
+      expect(
+        fake.apiCalls().find((c) => c.method === 'PATCH')?.data
+      ).toMatchObject({ show_photo: false, photo_ids: [7] })
+    )
   })
 })

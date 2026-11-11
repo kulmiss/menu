@@ -67,6 +67,7 @@ type Draft = Required<
     | 'is_new'
     | 'new_until'
     | 'is_popular'
+    | 'show_photo'
     | 'variants'
     | 'addon_group_ids'
     | 'tag_ids'
@@ -86,6 +87,7 @@ const emptyDraft = (categoryId: number): Draft => ({
   is_new: false,
   new_until: null,
   is_popular: false,
+  show_photo: true,
   variants: [],
   addon_group_ids: [],
   tag_ids: [],
@@ -104,6 +106,7 @@ const fromItem = (item: Item): Draft => ({
   is_new: item.is_new,
   new_until: item.new_until,
   is_popular: item.is_popular,
+  show_photo: item.show_photo ?? true,
   variants: item.variants,
   addon_group_ids: item.addon_group_ids,
   tag_ids: item.tag_ids,
@@ -303,6 +306,20 @@ function ItemForm({
               onChange={setPhotos}
               disabled={!ctx.canWrite}
             />
+            {photos.length > 0 && (
+              <div>
+                <ToggleRow
+                  label={t('menu.show_photo')}
+                  checked={draft.show_photo}
+                  onChange={(v) => set('show_photo', v)}
+                />
+                {!draft.show_photo && (
+                  <p className='text-sm text-muted-foreground'>
+                    {t('menu.show_photo_off')}
+                  </p>
+                )}
+              </div>
+            )}
             <TranslatableInput
               label={t('menu.name')}
               locale={ctx.locale}

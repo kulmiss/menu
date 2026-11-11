@@ -17,11 +17,15 @@ section{padding-top:2rem}
 section h2{font-size:1.6rem;font-weight:600}
 ul{display:flex;flex-direction:column;gap:1.9rem;margin-top:1rem}
 li{border:0}
-.it{padding:0;grid-template-columns:1fr auto;grid-template-areas:"im im" "nm pr" "sm sm" "tg tg";row-gap:.3rem}
-.it .im{grid-area:im;aspect-ratio:3/2;border-radius:1.1rem;margin-bottom:.5rem}
-.it .nm{grid-area:nm;font-size:1.35rem;line-height:1.2}
-.it .pr{grid-area:pr;margin:0;align-self:baseline;font-size:1.05rem;white-space:nowrap}
-.it .sm{grid-area:sm;margin:0}
-.it .tg{grid-area:tg}
+li>.it{padding:0;grid-template-columns:1fr auto;grid-template-areas:"im im" "nm pr" "sm sm" "tg tg";row-gap:.3rem}
+li>.it .im{grid-area:im;aspect-ratio:3/2;border-radius:1.1rem;margin-bottom:.5rem}
+li>.it .nm{grid-area:nm;font-size:1.35rem;line-height:1.2}
+li>.it .pr{grid-area:pr;margin:0;align-self:baseline;font-size:1.05rem;white-space:nowrap}
+li>.it .sm{grid-area:sm;margin:0}
+li>.it .tg{grid-area:tg}
 .bd{background:var(--card);border-color:transparent}
 .sh h3,.sh h4{font-family:var(--fh)}
+/* No photos on the whole menu: a printed-menu list with hairlines. */
+.NP section ul{gap:0}
+.NP section li{border-bottom:1px solid var(--ln)}
+.NP li>.it{padding:1.1rem 0}

@@ -12,11 +12,11 @@ h1{font-size:2.1rem;font-weight:500;line-height:1.1;letter-spacing:.01em}
 .cn a.on{background:none;color:var(--a);border-color:var(--a)}
 section{padding-top:1.75rem}
 section h2{font-size:1.45rem;font-weight:500}
-.it{padding:1rem 0;grid-template-columns:minmax(0,1fr) 6.5rem;grid-template-rows:auto auto auto 1fr;grid-template-areas:"nm im" "sm im" "pr im" "tg im"}
-.np{grid-template-columns:minmax(0,1fr);grid-template-areas:"nm" "sm" "pr" "tg"}
-.it .im{grid-area:im;width:6.5rem;height:6.5rem;border-radius:.9rem}
-.it .nm{grid-area:nm;font-size:1.1rem;font-weight:600;line-height:1.25}
-.it .sm{grid-area:sm}
-.it .pr{grid-area:pr}
-.it .tg{grid-area:tg}
+li>.it{padding:1rem 0;grid-template-columns:minmax(0,1fr) 6.5rem;grid-template-rows:auto auto auto 1fr;grid-template-areas:"nm im" "sm im" "pr im" "tg im"}
+li>.np{grid-template-columns:minmax(0,1fr);grid-template-areas:"nm" "sm" "pr" "tg"}
+li>.it .im{grid-area:im;width:6.5rem;height:6.5rem;border-radius:.9rem}
+li>.it .nm{grid-area:nm;font-size:1.1rem;font-weight:600;line-height:1.25}
+li>.it .sm{grid-area:sm}
+li>.it .pr{grid-area:pr}
+li>.it .tg{grid-area:tg}
 .sh h3,.sh h4{font-family:var(--fh)}
