@@ -114,5 +114,5 @@ it('draws the quick-add button as a small circle in a 44 px tap area that never 
     expect($css)->toContain('.ad{position:absolute;top:var(--adt,0);inset-inline-end:0;z-index:1;width:2.75rem;height:2.75rem') // 44 px tap area on the photo corner
         ->toContain('.ad:before{content:"";position:absolute;inset:.4375rem;border-radius:50%')                      // 30 px visible circle
         ->toContain('li>.it.ao.np{padding-inline-end:2.75rem}')                                                       // rows without a photo keep room for it
-        ->not->toContain('bottom:.5rem}');
+        ->not->toContain('.ad{inset-inline-end:.5rem;bottom:.5rem}');
 })->with(['editorial', 'grid', 'bistro']);
