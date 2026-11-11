@@ -19,12 +19,12 @@ class Stats
         return $userAgent === null || $userAgent === '' || (bool) preg_match(self::BOTS, $userAgent);
     }
 
-    public static function hit(int $tenantId, string $date, int $branchId, string $metric, int $subjectId = 0): void
+    public static function hit(int $tenantId, string $date, int $branchId, string $metric, int $subjectId = 0, int $by = 1): void
     {
         DB::statement(
-            'INSERT INTO stats_daily (tenant_id, date, branch_id, metric, subject_id, count) VALUES (?, ?, ?, ?, ?, 1)
-             ON DUPLICATE KEY UPDATE count = count + 1',
-            [$tenantId, $date, $branchId, $metric, $subjectId],
+            'INSERT INTO stats_daily (tenant_id, date, branch_id, metric, subject_id, count) VALUES (?, ?, ?, ?, ?, ?)
+             ON DUPLICATE KEY UPDATE count = count + VALUES(count)',
+            [$tenantId, $date, $branchId, $metric, $subjectId, $by],
         );
     }
 }

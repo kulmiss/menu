@@ -8,6 +8,8 @@ return [
         'insights' => 'Insights',
         'import_export' => 'Import and export',
         'remove_branding' => 'Menu without our name',
+        'pdf_menu' => 'Printable PDF menu',
+        'order_list' => '"My order" list for guests',
         'style_editorial' => 'Menu style A · Warm editorial',
         'style_grid' => 'Menu style B · Fresh grid',
         'style_bistro' => 'Menu style C · Quiet bistro',
@@ -23,5 +25,9 @@ return [
         'body' => "This is a test e-mail from :app.\n\nIf you can read this, the e-mail settings work.",
         'sent' => 'Test e-mail sent to :email. Check the inbox (and the spam folder).',
         'failed' => 'The test e-mail could not be sent: :reason',
+    ],
+    'remind' => [
+        'sent' => '{1} E-mail sent to the owner.|[2,*] E-mail sent to :count owners.',
+        'no_owner' => 'This restaurant has no owner to e-mail.',
     ],
 ];

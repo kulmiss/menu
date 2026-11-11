@@ -34,6 +34,26 @@ class BeaconController extends Controller
             $branch = 0;
         }
 
+        // "My order" (counts only; the list itself stays on the guest's phone):
+        // c = [dish id, quantity, list total] when a dish is added, w = list total when shown to the waiter.
+        if (is_array($data['c'] ?? null)) {
+            [$item, $qty] = [$data['c'][0] ?? null, $data['c'][1] ?? null];
+            if (is_int($item) && is_int($qty) && $qty > 0 && $qty <= 50
+                && DB::table('items')->where('id', $item)->where('tenant_id', $tenantId)->exists()) {
+                Stats::hit($tenantId, $date, $branch, 'order_add', $item, $qty);
+            }
+
+            return response()->noContent();
+        }
+        if (array_key_exists('w', $data)) {
+            if (is_int($data['w']) && $data['w'] >= 0 && $data['w'] < 100_000_000) {
+                Stats::hit($tenantId, $date, $branch, 'order_shown');
+                Stats::hit($tenantId, $date, $branch, 'order_value', 0, $data['w']); // sum of list totals (minor units)
+            }
+
+            return response()->noContent();
+        }
+
         if (is_int($data['i'] ?? null)) {
             if (DB::table('items')->where('id', $data['i'])->where('tenant_id', $tenantId)->exists()) {
                 Stats::hit($tenantId, $date, $branch, 'item_view', $data['i']);

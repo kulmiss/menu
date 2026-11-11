@@ -56,6 +56,9 @@ class PageTheme
             'show_photos' => $a->show_photos,
             'show_descriptions' => $a->show_descriptions,
             'show_calories' => $a->show_calories,
+            'show_share' => $a->show_share ?? true,
+            'show_pdf_link' => (bool) ($a->show_pdf_link ?? false),
+            'show_order_list' => (bool) ($a->show_order_list ?? true),
             'logo' => $a->logo?->urls(),
             'cover' => $a->cover ? self::cover($a, $style) : null,
         ];
@@ -76,6 +79,7 @@ class PageTheme
             'webp' => MenuPageData::srcset($urls),
             'avif' => MenuPageData::srcset($urls, 'avif'),
             'jpg' => $urls['jpg'] ?? '',
+            'og' => $urls['og'] ?? null, // 1200 × 630, the link preview when the menu is shared
             'sizes' => self::STYLES[$style]['sizes'],
             'w' => 1280,
             'h' => (int) round(1280 * $ratio[1] / $ratio[0]),

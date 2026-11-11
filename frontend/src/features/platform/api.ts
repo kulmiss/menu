@@ -12,6 +12,8 @@ export const FEATURES = [
   'insights',
   'import_export',
   'remove_branding',
+  'pdf_menu',
+  'order_list',
   'style_editorial',
   'style_grid',
   'style_bistro',

@@ -30,3 +30,4 @@ li>.it.np .pr{grid-row:1;grid-column:2;margin:0;padding:0;background:none;color:
 /* No photos on the whole menu: one card per row on phones. */
 .NP ul{grid-template-columns:1fr}
 @media (min-width:40rem){.NP ul{grid-template-columns:1fr 1fr}}
+.ad{inset-inline-end:.5rem;bottom:.5rem}

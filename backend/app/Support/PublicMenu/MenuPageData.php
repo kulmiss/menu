@@ -24,6 +24,7 @@ use App\Support\Features;
 use App\Support\ImageProcessor;
 use App\Tenancy\CurrentTenant;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Everything the guest page shows, loaded in a fixed number of queries
@@ -145,6 +146,15 @@ class MenuPageData
                                 'tags' => $tags,
                                 // Per dish "Show photo on menu" off: photos stay saved, the menu shows none.
                                 'media' => $photos && $item->show_photo && $item->media ? self::image($item->media) : null,
+                                // "My order": numbers only (prices in minor units, ids), in the same order as sheet v / a.
+                                'cart' => [
+                                    $item->variants->isEmpty() ? $item->price_minor : null,
+                                    $item->variants->map(fn (ItemVariant $v) => [$v->id, (int) $v->price_minor])->values()->all(),
+                                    $item->addonGroups->map(fn (AddonGroup $g) => [
+                                        (int) $g->min_choices, (int) $g->max_choices,
+                                        $g->options->map(fn (AddonOption $o) => [$o->id, (int) $o->price_minor, $o->is_sold_out ? 1 : 0])->values()->all(),
+                                    ])->values()->all(),
+                                ],
                                 'sheet' => array_filter([
                                     'd' => $describe($item->description),
                                     'v' => $item->variants->map(fn (ItemVariant $v) => [$text($v->name), $money($v->price_minor)])->values()->all(),
@@ -202,6 +212,10 @@ class MenuPageData
                 'theme' => $theme,
                 'promotions' => $promotions,
                 'branding' => ! $features['remove_branding'],
+                'pdfMenu' => $features['pdf_menu'],
+                'orderList' => $features['order_list'] && $theme['show_order_list'] && $prices,
+                // QR code → table, so "Show to waiter" can say which table (codes are printed on the tables anyway).
+                'tables' => $features['order_list'] ? self::tables($branchId) : [],
                 'branch' => $branch && $branches->count() > 1 ? $text($branch->name) : null,
                 'branches' => $branches->count() > 1 ? $branches->map(fn (Branch $b) => [
                     'name' => $text($b->name),
@@ -286,12 +300,17 @@ class MenuPageData
     }
 
     /** "Br 120" / "Br 120.50" — decimals only when needed (PLAN.md §11). */
+    public static function symbol(string $currency): string
+    {
+        return ['ETB' => 'Br', 'USD' => '$', 'EUR' => '€', 'SOS' => 'Sh', 'KES' => 'KSh'][$currency] ?? $currency;
+    }
+
     public static function money(?int $minor, string $currency): string
     {
         if ($minor === null) {
             return '';
         }
-        $symbol = ['ETB' => 'Br', 'USD' => '$', 'EUR' => '€', 'SOS' => 'Sh', 'KES' => 'KSh'][$currency] ?? $currency;
+        $symbol = self::symbol($currency);
         $number = $minor % 100 === 0 ? number_format(intdiv($minor, 100)) : number_format($minor / 100, 2);
 
         return $symbol.' '.$number;
@@ -330,5 +349,18 @@ class MenuPageData
         }
 
         return implode(', ', $parts);
+    }
+
+    /** @return array<string, string> QR code => table label, for this branch */
+    private static function tables(?int $branchId): array
+    {
+        return DB::table('qr_codes as q')
+            ->join('dining_tables as d', 'd.id', '=', 'q.dining_table_id')
+            ->whereNull('q.deleted_at')
+            ->where('q.tenant_id', app(CurrentTenant::class)->id())
+            ->when($branchId, fn ($query) => $query->where('d.branch_id', $branchId))
+            ->pluck('d.label', 'q.code')
+            ->map(fn ($label) => (string) $label)
+            ->all();
     }
 }

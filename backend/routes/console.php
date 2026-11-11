@@ -3,6 +3,7 @@
 use App\Models\Tenant;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schedule;
 
@@ -15,6 +16,9 @@ Artisan::command('inspire', function () {
 // Queued e-mails (invitations) on hosts without a long-running worker: the
 // one cron line for schedule:run also empties the queue every minute.
 Schedule::command('queue:work --stop-when-empty --max-time=50 --tries=3')->everyMinute()->withoutOverlapping();
+
+// Heartbeat for the Super Admin's "System health" (cron last run).
+Schedule::call(fn () => Cache::forever('cron:last_run', now()->toIso8601String()))->everyMinute()->name('cron-heartbeat');
 
 Schedule::command('menu:refresh-pages')->hourly();
 Schedule::command('menu:refresh-pages --all')->dailyAt('00:05');

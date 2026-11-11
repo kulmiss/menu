@@ -16,12 +16,15 @@ use App\Http\Controllers\Api\Menu\MenuController;
 use App\Http\Controllers\Api\Menu\TagController;
 use App\Http\Controllers\Api\Restaurant\AppearanceController;
 use App\Http\Controllers\Api\Restaurant\BranchController;
+use App\Http\Controllers\Api\Restaurant\DashboardWidgetController;
 use App\Http\Controllers\Api\Restaurant\InfoController;
 use App\Http\Controllers\Api\Restaurant\InsightsController;
+use App\Http\Controllers\Api\Restaurant\PdfMenuController;
 use App\Http\Controllers\Api\Restaurant\PromotionController;
 use App\Http\Controllers\Api\Restaurant\QrCodeController;
 use App\Http\Controllers\Api\TeamController;
 use App\Http\Controllers\Api\TenantController;
+use App\Http\Controllers\Platform\DashboardWidgetController as PlatformDashboardWidgetController;
 use App\Http\Controllers\Platform\PaymentController;
 use App\Http\Controllers\Platform\PlatformController;
 use App\Http\Controllers\Platform\RestaurantController;
@@ -52,6 +55,13 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
         // Super Admin (PLAN.md §7.3): Super Admins with two-factor sign-in only.
         Route::prefix('platform')->middleware('platform')->group(function () {
             Route::get('dashboard', [PlatformController::class, 'dashboard']);
+            Route::prefix('widgets')->controller(PlatformDashboardWidgetController::class)->group(function () {
+                foreach (['revenue', 'expiring', 'inactive', 'funnel', 'top', 'signups', 'health'] as $widget) {
+                    Route::get($widget, $widget);
+                }
+                Route::get('plan-mix', 'planMix');
+                Route::post('email/{tenant}', 'email')->whereNumber('tenant')->middleware('throttle:20,1');
+            });
             Route::get('restaurants', [RestaurantController::class, 'index']);
             Route::post('restaurants', [RestaurantController::class, 'store']);
             Route::get('restaurants/{restaurant}', [RestaurantController::class, 'show'])->whereNumber('restaurant');
@@ -166,6 +176,14 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
 
             Route::get('insights', [InsightsController::class, 'index'])->middleware('feature:insights');
             Route::get('dashboard', [InsightsController::class, 'dashboard']);
+            Route::prefix('widgets')->controller(DashboardWidgetController::class)->group(function () {
+                Route::get('setup', 'setup');
+                Route::post('setup/hide', 'hideSetup');
+                Route::get('trend', 'trend');
+                Route::get('missing-photos', 'missingPhotos');
+                Route::get('orders', 'orders');
+                Route::get('plan', 'plan');
+            });
 
             Route::get('promotions', [PromotionController::class, 'index']);
             Route::post('promotions', [PromotionController::class, 'store'])->middleware('feature:promotions');
@@ -184,6 +202,7 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::get('appearance', [AppearanceController::class, 'show']);
             Route::put('appearance', [AppearanceController::class, 'update']);
             Route::get('appearance/preview', [AppearanceController::class, 'preview'])->name('appearance.preview');
+            Route::get('menu-pdf', [PdfMenuController::class, 'download'])->middleware(['feature:pdf_menu', 'throttle:20,1']);
 
             Route::get('tags', [TagController::class, 'index']);
             Route::post('tags', [TagController::class, 'store']);

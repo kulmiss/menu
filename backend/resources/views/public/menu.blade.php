@@ -14,8 +14,10 @@
     $hasInfo = $week || $info['address'] || $info['links'] || $info['about'] || $info['wifi'] || $info['socials'];
     $sheets = [];
     $firstImage = null;
+    $cart = [];
     foreach ($menus as $m) { foreach ($m['categories'] as $c) { foreach ($c['items'] as $i) {
         if ($i['sheet'] !== []) { $sheets[$i['id']] = $i['sheet']; }
+        if ($orderList) { $cart[$i['id']] = [...$i['cart'], $i['sold_out'] ? 1 : 0]; }
         $firstImage ??= $i['media']['og'] ?? null;
     } } }
     // No dish photo anywhere (switched off, hidden per dish, or none uploaded): the styles use a text layout.
@@ -28,12 +30,18 @@
         'h' => $hours,
         'x' => $closures,
         'c' => (object) $sheets,
+        // "My order" (only when switched on): [price, sizes, add-on groups, sold out] per dish, currency, QR code → table.
+        'o' => $orderList ? (object) $cart : null,
+        'cu' => \App\Support\PublicMenu\MenuPageData::symbol($tenant->currency_code),
+        'q' => $orderList ? (object) $tables : null,
         't' => [
             'so' => __('public.sold_out'), 'sz' => __('public.sizes'), 'al' => __('public.allergens_title'),
             'kc' => __('public.calories'), 'pm' => __('public.prep'), 'ch' => __('public.choose'),
             'up' => __('public.choose_up_to'), 'ex' => __('public.choose_exactly'),
             'on' => __('public.open_until'), 'cl' => __('public.closed'), 'ct' => __('public.closed_today'),
             'oa' => __('public.opens_at'), 'ot' => __('public.opens_tomorrow'), 'od' => __('public.opens_day'),
+            'o' => $orderList ? __('public.order') : null,
+            'sh' => __('public.share'), 'sl' => __('public.share_link'), 'cp' => __('public.copy_link'), 'cd' => __('public.copied'),
             'ph' => __('public.photos'), 'nx' => __('public.next_photo'), 'pv' => __('public.previous_photo'),
             'dn' => array_map(fn ($i) => __('public.days_short.'.$i), range(0, 6)),
         ],
@@ -46,13 +54,21 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>{{ $tenant->name }}{{ $branch ? ' · '.$branch : '' }}</title>
-<meta name="description" content="{{ $tenant->name }} — menu">
+@php
+    // Link preview (WhatsApp, Telegram, social): banner first, else the first dish photo.
+    $shareImage = $cover['og'] ?? $firstImage;
+    $shareText = $info['about'] !== '' ? \Illuminate\Support\Str::limit(preg_replace('/\s+/', ' ', $info['about']), 155) : __('public.share_description', ['name' => $tenant->name]);
+@endphp
+<meta name="description" content="{{ $shareText }}">
 <meta name="theme-color" content="{{ $theme['theme_color'] }}">
 <link rel="canonical" href="{{ url($canonical) }}">
-<meta property="og:title" content="{{ $tenant->name }}">
+<meta property="og:title" content="{{ $tenant->name }}{{ $branch ? ' · '.$branch : '' }}">
+<meta property="og:description" content="{{ $shareText }}">
+<meta property="og:site_name" content="{{ $tenant->name }}">
+<meta name="twitter:card" content="{{ $shareImage ? 'summary_large_image' : 'summary' }}">
 <meta property="og:type" content="website">
 <meta property="og:url" content="{{ url($canonical) }}">
-@if ($firstImage)<meta property="og:image" content="{{ $firstImage }}">@endif
+@if ($shareImage)<meta property="og:image" content="{{ $shareImage }}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">@endif
 <link rel="icon" href="data:,">
 @if ($cover)
 {{-- The banner is the largest thing on screen: start fetching it before the CSS is parsed (LCP). --}}
@@ -86,7 +102,8 @@
 @endif
 </div>
 <div class="bar"><div class="w">
-<div class="sr"><input id="q" type="search" placeholder="{{ __('public.search') }}" aria-label="{{ __('public.search') }}" autocomplete="off">@if ($hasInfo)<a class="ib" href="#info" aria-label="{{ __('public.info') }}"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></a>@endif</div>
+<div class="sr"><input id="q" type="search" placeholder="{{ __('public.search') }}" aria-label="{{ __('public.search') }}" autocomplete="off">@if ($theme['show_share'])<button type="button" class="ib" data-x="H" aria-label="{{ __('public.share') }}"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5-5 5 5M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg></button>@endif
+@if ($hasInfo)<a class="ib" href="#info" aria-label="{{ __('public.info') }}"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></a>@endif</div>
 @if (count($tags) > 1)
 <div class="ch" role="group" aria-label="{{ __('public.filter') }}">@foreach ($tags as $key => $label)<button type="button" data-tag="{{ $key }}" aria-pressed="false">{{ $label }}</button>@endforeach</div>
 @endif
@@ -115,7 +132,8 @@
 <ul>
 @foreach ($c['items'] as $i)
 <li data-i="{{ $i['id'] }}" data-t="{{ implode(' ', array_column($i['tags'], 'key')) }}"@class(['so' => $i['sold_out']])>
-<button type="button" @class(['it', 'np' => ! $i['media']])><span class="tx"><span class="nm">{{ $i['name'] }}</span>
+@php $orderable = $orderList && ! $i['sold_out'] && $i['price'] !== ''; @endphp
+<button type="button" @class(['it', 'np' => ! $i['media'], 'ao' => $orderable])><span class="tx"><span class="nm">{{ $i['name'] }}</span>
 @if ($i['summary'] !== '')<span class="sm">{{ $i['summary'] }}</span>@endif
 @if ($i['price'] !== '')<span class="pr">{{ $i['price'] }}</span>@endif
 <span class="tg">@if ($i['sold_out'])<span class="bd x0">{{ __('public.sold_out') }}</span>@endif
@@ -123,6 +141,8 @@
 @if ($i['popular'])<span class="bd hl">{{ __('public.popular') }}</span>@endif
 @foreach ($i['tags'] as $t)@if (! in_array($t['key'], ['new', 'popular'], true))<span class="bd">{{ $t['label'] }}</span>@endif @endforeach
 </span></span>
+{{-- "My order" quick add (the dish sheet has the same as a real button, with sizes and add-ons). --}}
+@if ($orderable)<span class="ad" data-x="A" aria-hidden="true">+</span>@endif
 @if ($i['media'])
 @php $img = $i['media']; $eager = $position < $fold && $eagerLeft-- > 0; @endphp
 <span class="im" style="background-image:url({{ $img['placeholder'] ?? '' }});background-color:{{ $img['color'] ?? 'transparent' }}"><picture>
@@ -153,7 +173,8 @@
 @if ($info['socials'])<ul class="ln so2">@foreach ($info['socials'] as $l)<li><a href="{{ $l['href'] }}" rel="noopener" target="_blank">{{ $l['label'] }}</a></li>@endforeach</ul>@endif
 </details>
 @endif
-@if ($branding)<footer>{{ __('public.powered', ['app' => \App\Support\PlatformSettings::get('name')]) }}</footer>@endif
+@if ($branding)@if ($theme['show_pdf_link'] && $pdfMenu)<p class="pdl"><a href="{{ rtrim($canonical, '/') }}/menu.pdf">{{ __('public.pdf_menu') }}</a></p>@endif
+<footer>{{ __('public.powered', ['app' => \App\Support\PlatformSettings::get('name')]) }}</footer>@endif
 <dialog id="s" aria-label="{{ $tenant->name }}"><div class="sh" id="sb"></div><button type="button" class="x" id="sx" aria-label="{{ __('public.close') }}">×</button></dialog>
 <div class="of" id="of" hidden>{{ __('public.offline') }}</div>
 <script type="application/json" id="d">{!! json_encode($data, JSON_HEX_TAG | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>

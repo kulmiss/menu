@@ -118,7 +118,7 @@ it('hides a dish\'s photos on the menu without deleting them, and shows them aga
         ->assertJsonPath('data.show_photo', false)
         ->assertJsonPath('data.photos.*.id', [$a->id, $b->id]); // still saved
     [$html, $data] = $sheet();
-    expect($html)->not->toContain($a->base_path)->not->toContain('class="im"')->toContain('class="it np"')
+    expect($html)->not->toContain($a->base_path)->not->toContain('class="im"')->toContain('class="it np')
         ->and($data['i'])->toBeNull()->and($data['g'])->toBe([]);
     expect(asTenant($tenant, fn () => Media::count()))->toBe(2);
 

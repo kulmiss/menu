@@ -21,6 +21,8 @@ import { tr } from '@/features/menu/text'
 
 // Platform news: secondary to today's numbers, so it downloads separately.
 const Announcements = lazy(() => import('./announcements'))
+// Widgets (checklist, trend chart, plan, order stats, missing photos): on demand.
+const Widgets = lazy(() => import('./widgets'))
 
 /** Dashboard (PLAN.md screen 1): today at a glance and what is sold out. */
 export function Dashboard() {
@@ -41,28 +43,6 @@ export function Dashboard() {
   })
   const d = data.data
   const locale = tenant?.default_locale ?? 'en'
-
-  const stat = (key: 'views' | 'scans') => (
-    <Card className='py-4'>
-      <CardContent>
-        <p className='text-sm text-muted-foreground'>
-          {t(`dashboard.today_${key}`)}
-        </p>
-        {d ? (
-          <>
-            <p className='text-3xl font-bold tabular-nums'>
-              {d.today[key].toLocaleString()}
-            </p>
-            <p className='text-xs text-muted-foreground'>
-              {t('dashboard.yesterday', { count: d.yesterday[key] })}
-            </p>
-          </>
-        ) : (
-          <Skeleton className='mt-1 h-12 w-24' />
-        )}
-      </CardContent>
-    </Card>
-  )
 
   return (
     <>
@@ -88,10 +68,13 @@ export function Dashboard() {
             <Announcements tenantId={tenantId} locale={locale} />
           </Suspense>
         )}
-        <div className='grid gap-4 sm:grid-cols-2'>
-          {stat('views')}
-          {stat('scans')}
-        </div>
+        {tenant && (
+          <Suspense
+            fallback={<Skeleton className='h-40 w-full' aria-busy='true' />}
+          >
+            <Widgets tenantId={tenantId} locale={locale} manager={manager} />
+          </Suspense>
+        )}
         <Card className='mt-4'>
           <CardHeader>
             <CardTitle>{t('dashboard.sold_out')}</CardTitle>
