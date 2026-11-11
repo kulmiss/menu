@@ -148,6 +148,10 @@ New rules added by the owner (now in PLAN.md §2): Docker is for local developme
 
 | 117 | Demo data (Partition 12) | `DemoSeeder` now also creates: banner + logo (generated), info (about, address, map link, phone, WhatsApp, e-mail, Instagram/Facebook, Wi-Fi shown), opening hours (Mon–Sat 07–22, Sun 08–20), a second branch **Piassa**, 8 + 4 tables with QR codes, a special ("Buna Monday", opens the Buna dish) and an announcement, three dishes with 3 photos each, and a **Super Admin `admin@example.com` / `password` with two-factor secret `JBSWY3DPEHPK3PXP`** (add it to any authenticator app). The Super Admin is **not created when `APP_ENV=production`** (known password). The demo restaurant itself should still never be seeded on a live server (#69). |
 
+| 118 | Queued e-mails on shared hosting (Partition 13) | Invitations are queued (`QUEUE_CONNECTION=database`). Shared hosts can't keep a worker running, so the scheduler now runs `queue:work --stop-when-empty --max-time=50` every minute: the **single cron line** `schedule:run` covers e-mail, page rebuilds and clean-ups. A VPS may also run a permanent worker. |
+| 119 | Deployment guide | `docs/deploy.md`: requirements, building a release on the laptop (no Node on the server), cPanel steps (document root, `.env`, key, migrate, caches, writable folders, cron, PHP limits), VPS/Nginx, OPcache values, Cloudflare (Full strict, Rocket Loader off, don't cache HTML), SMTP + SPF/DKIM/DMARC, creating the first Super Admin, updating, backups, troubleshooting. README links it and lists the demo logins. |
+| 120 | Docker dev fix | `docker-compose.yml`: the `vite` service sets `COREPACK_ENABLE_DOWNLOAD_PROMPT=0` and `CI=true`, so `docker compose up` no longer stops at the Corepack and pnpm questions you saw. |
+
 ## Open
 
 - Owner action: protect `main` in GitHub settings (require PR, no force push, no deletion). Claude's access can't change branch settings.

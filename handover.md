@@ -17,8 +17,12 @@ _Last updated: 2026-11-11 15:20 EAT. PR #15 merged; owner's change list (2026-11
 | 4 SMTP settings | `feat/smtp-settings` (on top of viewing-as) | PR open |
 | 5 Banner | `feat/banner` (on top of smtp-settings) | PR open |
 | Partition 12 Demo data | `feat/demo-data` (on top of banner) | PR open |
+| Partition 13 Docs | `docs/deploy` (on top of demo-data) | PR open |
 
 Design canvas with the three directions: https://claude.ai/artifact/HBvYJAE5UWBSepoqiDkrxD
+
+## Partition 13 — docs (docs/deploy)
+- `docs/deploy.md` (referenced by `.htaccess`), README (demo logins, deploy link), scheduler runs the queue every minute (`routes/console.php`, `tests/Feature/ScheduleTest.php`), docker-compose vite prompts fixed.
 
 ## Partition 12 — demo data (feat/demo-data)
 - `DemoSeeder::restaurant()` (look, profile, hours, Piassa branch, tables + QR codes, promotions, galleries) and `superAdmin()` (admin@example.com / password / 2FA `JBSWY3DPEHPK3PXP`, skipped in production). `tests/Feature/DemoSeederTest.php`.

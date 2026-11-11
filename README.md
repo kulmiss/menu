@@ -23,6 +23,14 @@ Digital menu SaaS for restaurants and cafés: a fast public QR menu, a phone-fri
 2. Windows: `.\setup-docker.bat` (other systems: run the same `docker compose` commands it lists).
 3. Read `setup-log.txt`. App: http://localhost:8080 · Mail: http://localhost:8026 · Admin dev server: `docker compose up -d vite` → http://localhost:5173/app/
 
+### Demo logins (local only)
+`php artisan db:seed --class=DemoSeeder` creates the demo café at `/demo`:
+- Restaurant owner: `demo@example.com` / `password` → `/admin`
+- Super Admin: `admin@example.com` / `password`, two-factor secret `JBSWY3DPEHPK3PXP` (add it to an authenticator app) → `/platform`
+
+## Deploying
+Shared hosting (cPanel) or a VPS: see [docs/deploy.md](docs/deploy.md) — build, `.env`, cron, OPcache, Cloudflare, e-mail (SMTP, SPF, DKIM), the first Super Admin, updates and backups.
+
 ## Checks (same as CI)
 Backend (`backend/`): `vendor/bin/pint --test`, `vendor/bin/phpstan analyse`, `php artisan test`
 Frontend (`frontend/`): `pnpm lint`, `pnpm format:check`, `pnpm build`, `pnpm test`
