@@ -21,6 +21,8 @@ export type AppearanceValues = {
   show_photos: boolean
   show_descriptions: boolean
   show_calories: boolean
+  /** "Share menu" button on the guest page. */
+  show_share: boolean
   theme_id: number | null
   logo_media_id: number | null
   cover_media_id: number | null

@@ -34,6 +34,7 @@
             'up' => __('public.choose_up_to'), 'ex' => __('public.choose_exactly'),
             'on' => __('public.open_until'), 'cl' => __('public.closed'), 'ct' => __('public.closed_today'),
             'oa' => __('public.opens_at'), 'ot' => __('public.opens_tomorrow'), 'od' => __('public.opens_day'),
+            'sh' => __('public.share'), 'sl' => __('public.share_link'), 'cp' => __('public.copy_link'), 'cd' => __('public.copied'),
             'ph' => __('public.photos'), 'nx' => __('public.next_photo'), 'pv' => __('public.previous_photo'),
             'dn' => array_map(fn ($i) => __('public.days_short.'.$i), range(0, 6)),
         ],
@@ -46,13 +47,21 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>{{ $tenant->name }}{{ $branch ? ' · '.$branch : '' }}</title>
-<meta name="description" content="{{ $tenant->name }} — menu">
+@php
+    // Link preview (WhatsApp, Telegram, social): banner first, else the first dish photo.
+    $shareImage = $cover['og'] ?? $firstImage;
+    $shareText = $info['about'] !== '' ? \Illuminate\Support\Str::limit(preg_replace('/\s+/', ' ', $info['about']), 155) : __('public.share_description', ['name' => $tenant->name]);
+@endphp
+<meta name="description" content="{{ $shareText }}">
 <meta name="theme-color" content="{{ $theme['theme_color'] }}">
 <link rel="canonical" href="{{ url($canonical) }}">
-<meta property="og:title" content="{{ $tenant->name }}">
+<meta property="og:title" content="{{ $tenant->name }}{{ $branch ? ' · '.$branch : '' }}">
+<meta property="og:description" content="{{ $shareText }}">
+<meta property="og:site_name" content="{{ $tenant->name }}">
+<meta name="twitter:card" content="{{ $shareImage ? 'summary_large_image' : 'summary' }}">
 <meta property="og:type" content="website">
 <meta property="og:url" content="{{ url($canonical) }}">
-@if ($firstImage)<meta property="og:image" content="{{ $firstImage }}">@endif
+@if ($shareImage)<meta property="og:image" content="{{ $shareImage }}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">@endif
 <link rel="icon" href="data:,">
 @if ($cover)
 {{-- The banner is the largest thing on screen: start fetching it before the CSS is parsed (LCP). --}}
@@ -86,7 +95,8 @@
 @endif
 </div>
 <div class="bar"><div class="w">
-<div class="sr"><input id="q" type="search" placeholder="{{ __('public.search') }}" aria-label="{{ __('public.search') }}" autocomplete="off">@if ($hasInfo)<a class="ib" href="#info" aria-label="{{ __('public.info') }}"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></a>@endif</div>
+<div class="sr"><input id="q" type="search" placeholder="{{ __('public.search') }}" aria-label="{{ __('public.search') }}" autocomplete="off">@if ($theme['show_share'])<button type="button" class="ib" data-x="H" aria-label="{{ __('public.share') }}"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5-5 5 5M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg></button>@endif
+@if ($hasInfo)<a class="ib" href="#info" aria-label="{{ __('public.info') }}"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></a>@endif</div>
 @if (count($tags) > 1)
 <div class="ch" role="group" aria-label="{{ __('public.filter') }}">@foreach ($tags as $key => $label)<button type="button" data-tag="{{ $key }}" aria-pressed="false">{{ $label }}</button>@endforeach</div>
 @endif

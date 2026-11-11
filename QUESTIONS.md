@@ -158,6 +158,9 @@ New rules added by the owner (now in PLAN.md §2): Docker is for local developme
 | 123 | Layout without photos | A dish without a photo is a text row in every style, never an empty box. When **no dish on the page** shows a photo, the page gets a text layout: A becomes a printed-menu list with hairlines, B shows one card per row on phones (two on desktop) with name and price side by side, C stays its calm list. In B, a photo-less card next to photo cards also puts name and price on one row. The style rules now apply only to dish rows (they no longer touched the special card, which had an empty gap in B). |
 | 124 | Photos off: speed | Demo with banner, photos switched off (Lighthouse mobile, median of 3): A 100, LCP 0.82 s, 19.5 KB loaded; B 100, 0.96 s, 19.4 KB; C 100, 0.83–0.96 s, 19.3 KB; CLS 0; HTML 10.1 KB gzip. With photos: 24–34 KB loaded, HTML 11.3 KB. The banner remains the largest element, so LCP stays about the same; without a banner the name is the largest element. |
 
+| 125 | "Share menu" button | A round share button next to the search field (all styles; Appearance switch "Show "Share menu" button", default on). It opens the phone's own share sheet (Web Share API); where that doesn't exist (most desktops), a small sheet with the link, **Copy link**, WhatsApp and Telegram. It shares the page address with the branch and **without** `?table=` or the QR `#q=` code. The code lives in the on-demand file (with the dish sheet), not in the inline script. |
+| 126 | Link preview | Checked and improved: `og:title` (name · branch), new `og:description` (the restaurant's "about" text, shortened, else "The menu of …"), `og:image` now prefers the **banner** (1200 × 630) over the first dish photo, with width/height, and `twitter:card` large image when there is one. |
+
 ## Open
 
 - Owner action: protect `main` in GitHub settings (require PR, no force push, no deletion). Claude's access can't change branch settings.

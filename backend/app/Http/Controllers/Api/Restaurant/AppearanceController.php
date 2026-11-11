@@ -60,7 +60,7 @@ class AppearanceController extends Controller
     {
         Gate::authorize('restaurant.manage');
         $values = $request->validate($this->rules(partial: true));
-        foreach (['show_prices', 'show_photos', 'show_descriptions', 'show_calories'] as $flag) {
+        foreach (['show_prices', 'show_photos', 'show_descriptions', 'show_calories', ...TenantAppearance::EXTRA_FLAGS] as $flag) {
             if (array_key_exists($flag, $values)) {
                 $values[$flag] = $request->boolean($flag);
             }
@@ -95,6 +95,7 @@ class AppearanceController extends Controller
             'show_photos' => [$req, 'boolean'],
             'show_descriptions' => [$req, 'boolean'],
             'show_calories' => [$req, 'boolean'],
+            ...array_fill_keys(TenantAppearance::EXTRA_FLAGS, ['sometimes', 'boolean']),
             'logo_media_id' => ['sometimes', 'nullable', 'integer', $ownMedia],
             'cover_media_id' => ['sometimes', 'nullable', 'integer', $ownMedia],
             'theme_id' => ['sometimes', 'nullable', 'integer', Rule::exists('themes', 'id')->where('is_active', true)],
@@ -124,6 +125,7 @@ class AppearanceController extends Controller
             'show_photos' => $a->show_photos,
             'show_descriptions' => $a->show_descriptions,
             'show_calories' => $a->show_calories,
+            ...collect(TenantAppearance::EXTRA_FLAGS)->mapWithKeys(fn (string $f) => [$f => (bool) $a->{$f}])->all(),
             'theme_id' => $a->theme_id,
             'logo' => $a->logo ? new MediaResource($a->logo) : null,
             'cover' => $a->cover ? new MediaResource($a->cover) : null,

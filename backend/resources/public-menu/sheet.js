@@ -47,3 +47,31 @@ window.mS = function (li, D) {
   // Insights: count that this dish's details were opened (not in the admin preview).
   if (!D.p && navigator.sendBeacon) navigator.sendBeacon('/api/v1/beacon', JSON.stringify({ t: D.id, b: D.b, i: +li.dataset.i }));
 };
+
+// "Share menu": the phone's own share sheet (WhatsApp, Telegram, SMS, …);
+// elsewhere a small sheet with the link, "Copy link", WhatsApp and Telegram.
+// Shares the menu address with the branch, never the table (?table=, #q=).
+window.mH = function (b, D) {
+  var d = document, n = navigator, T = D.t, u = location.origin + location.pathname, t = d.title, e = encodeURIComponent;
+  if (n.share) { n.share({ title: t, url: u }).catch(function () {}); return; }
+  var dl = d.getElementById('s'), body = d.getElementById('sb');
+  var el = function (g, c, s) { var x = d.createElement(g); if (c) x.className = c; if (s != null) x.textContent = s; return x; };
+  body.textContent = '';
+  body.appendChild(el('h3', '', T.sh));
+  var f = body.appendChild(el('input', 'su'));
+  f.readOnly = true; f.value = u; f.setAttribute('aria-label', T.sl);
+  var l = body.appendChild(el('div', 'sl')), st = el('p', 'mu');
+  st.setAttribute('role', 'status');
+  var c = l.appendChild(el('button', '', T.cp));
+  c.type = 'button';
+  c.onclick = function () {
+    var ok = function () { st.textContent = T.cd; };
+    if (n.clipboard) n.clipboard.writeText(u).then(ok, function () { f.select(); });
+    else { f.select(); if (d.execCommand('copy')) ok(); }
+  };
+  [['WhatsApp', 'https://wa.me/?text=' + e(t + ' ' + u)], ['Telegram', 'https://t.me/share/url?url=' + e(u) + '&text=' + e(t)]].forEach(function (s) {
+    var a = l.appendChild(el('a', '', s[0])); a.href = s[1]; a.target = '_blank'; a.rel = 'noopener';
+  });
+  body.appendChild(st);
+  if (dl.showModal) dl.showModal(); else dl.setAttribute('open', '');
+};

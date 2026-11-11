@@ -22,11 +22,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property bool $show_photos
  * @property bool $show_descriptions
  * @property bool $show_calories
+ * @property bool $show_share "Share menu" button on the guest page
  * @property int|null $theme_id
  * @property-read Media|null $logo
  * @property-read Media|null $cover
  */
-#[Fillable(['logo_media_id', 'cover_media_id', 'primary_color', 'font', 'style', 'banner_text', 'show_prices', 'show_photos', 'show_descriptions', 'show_calories', 'theme_id'])]
+#[Fillable(['logo_media_id', 'cover_media_id', 'primary_color', 'font', 'style', 'banner_text', 'show_prices', 'show_photos', 'show_descriptions', 'show_calories', 'show_share', 'theme_id'])]
 class TenantAppearance extends Model
 {
     use BelongsToTenant;
@@ -40,6 +41,9 @@ class TenantAppearance extends Model
 
     public const DEFAULT_STYLE = 'grid';
 
+    /** Guest-page extras switched in Appearance (optional in API requests; added 2026-11-11). */
+    public const EXTRA_FLAGS = ['show_share'];
+
     /** Values for a restaurant that never opened the Appearance screen. */
     public const DEFAULTS = [
         'logo_media_id' => null,
@@ -52,6 +56,7 @@ class TenantAppearance extends Model
         'show_photos' => true,
         'show_descriptions' => true,
         'show_calories' => true,
+        'show_share' => true,
         'theme_id' => null,
     ];
 
@@ -62,6 +67,7 @@ class TenantAppearance extends Model
             'show_photos' => 'boolean',
             'show_descriptions' => 'boolean',
             'show_calories' => 'boolean',
+            'show_share' => 'boolean',
         ];
     }
 

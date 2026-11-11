@@ -19,13 +19,14 @@
     if (tag) return;
     tag = d.createElement('script');
     tag.src = data().s;
-    tag.onload = function () { if (wait) w.mS(wait, D); wait = null; };
+    tag.onload = function () { if (wait) run(wait[0], wait[1]); wait = null; };
     d.head.appendChild(tag);
   }
-  function open(li) { if (w.mS) w.mS(li, data()); else { wait = li; load(); } }
+  // Calls a part of the on-demand file (mS sheet, mH share, …), loading it first if needed.
+  function run(f, a) { if (w['m' + f]) w['m' + f](a, data()); else { wait = [f, a]; load(); } }
   on(d, 'click', function (e) {
-    var b = e.target.closest && e.target.closest('.it,.ib');
-    if (b) b.hash ? id('info').open = 1 : open(b.parentNode); // the info button opens "Info & opening hours"
+    var b = e.target.closest && e.target.closest('.it,.ib,[data-x]');
+    if (b) b.dataset.x ? run(b.dataset.x, b) : b.hash ? id('info').open = 1 : run('S', b.parentNode); // the info button opens "Info & opening hours"
     else if (e.target.id === 'sx' || e.target === dl) dl.close();
   });
   ['pointerover', 'touchstart'].forEach(function (n) {

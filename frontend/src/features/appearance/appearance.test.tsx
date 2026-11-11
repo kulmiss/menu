@@ -30,6 +30,7 @@ const APPEARANCE: Appearance = {
   show_photos: true,
   show_descriptions: true,
   show_calories: true,
+  show_share: true,
   theme_id: null,
   logo: null,
   cover: null,
@@ -199,6 +200,14 @@ describe('AppearancePage', () => {
       .element(screen.getByText('Recommended: 1600 × 640 px or larger.'))
       .toBeVisible()
     APPEARANCE.cover = original
+  })
+
+  it('switches the "Share menu" button', async () => {
+    const screen = await render()
+    await userEvent.click(
+      screen.getByRole('switch', { name: 'Show "Share menu" button' })
+    )
+    await expect.poll(() => frame(screen).src).toContain('show_share=0')
   })
 
   it('is read-only when the subscription does not allow changes', async () => {
