@@ -93,7 +93,9 @@ jobs:
       - name: Admin bundle budget
         run: node scripts/bundle-size.mjs --budget-kb=225
       - name: Install test browser
-        run: pnpm exec playwright install chromium --with-deps
+        # The runner image already has Chromium's system libraries; if the Ubuntu
+        # package mirror is unreachable (it was on 2026-11-11), install the browser alone.
+        run: pnpm exec playwright install chromium --with-deps || pnpm exec playwright install chromium
       - name: Tests (Vitest)
         run: pnpm test
 
