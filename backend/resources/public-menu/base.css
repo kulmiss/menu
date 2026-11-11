@@ -13,6 +13,15 @@ header{padding:1.25rem 1rem .5rem;display:flex;align-items:center;gap:.75rem}
 .lg{flex:none;width:3.5rem;height:3.5rem;border-radius:.9rem;object-fit:cover;background:var(--card)}
 .cv{aspect-ratio:21/9;background:var(--card) center/cover no-repeat;overflow:hidden}
 .cv img{display:block;width:100%;height:100%;object-fit:cover}
+/* Logo and name on the banner (setting "over"): readable white text on a dark fade. */
+/* Banner and header share one grid cell, so a tall header makes the banner taller instead of spilling out. */
+.ov{display:grid}
+.ov>*{grid-area:1/1;min-width:0}
+.ov .cv{height:100%}
+.ov header{align-self:end;padding:3.5rem 1rem 1rem;background:linear-gradient(#0000,#000c);color:#fff}
+.ov .sub{color:#fff}
+.ov .st{background:#000a;border-color:#fff6;color:#fff}
+.ov .st.op{color:#a7f3d0}
 h1{font-size:1.6rem;line-height:1.2}
 .sub{color:var(--mu);font-size:.9rem;margin-top:.25rem}
 .bar{position:sticky;top:0;z-index:2;background:var(--bg);border-bottom:1px solid var(--ln);padding:.5rem 0}

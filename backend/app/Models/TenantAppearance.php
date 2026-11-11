@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $primary_color "#b4432a"
  * @property string $font system|serif|rounded
  * @property string $style editorial|grid|bistro (A · Warm editorial, B · Fresh grid, C · Quiet bistro)
+ * @property string|null $banner_text over|under (logo and name on or below the banner); null = style default
  * @property bool $show_prices
  * @property bool $show_photos
  * @property bool $show_descriptions
@@ -25,7 +26,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read Media|null $logo
  * @property-read Media|null $cover
  */
-#[Fillable(['logo_media_id', 'cover_media_id', 'primary_color', 'font', 'style', 'show_prices', 'show_photos', 'show_descriptions', 'show_calories', 'theme_id'])]
+#[Fillable(['logo_media_id', 'cover_media_id', 'primary_color', 'font', 'style', 'banner_text', 'show_prices', 'show_photos', 'show_descriptions', 'show_calories', 'theme_id'])]
 class TenantAppearance extends Model
 {
     use BelongsToTenant;
@@ -46,6 +47,7 @@ class TenantAppearance extends Model
         'primary_color' => '#b4432a',
         'font' => 'system',
         'style' => self::DEFAULT_STYLE,
+        'banner_text' => null,
         'show_prices' => true,
         'show_photos' => true,
         'show_descriptions' => true,

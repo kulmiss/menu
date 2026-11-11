@@ -8,6 +8,7 @@ use App\Models\Tenant;
 use App\Models\TenantAppearance;
 use App\Support\Contrast;
 use App\Support\Features;
+use App\Support\PublicMenu\InlineAssets;
 use App\Support\PublicMenu\MenuPageCache;
 use App\Support\PublicMenu\PageTheme;
 use Illuminate\Support\Facades\DB;
@@ -143,3 +144,52 @@ it('loads only the photos on the first screen at once, per style', function (str
         ->and(substr_count($html, 'fetchpriority="high"'))->toBe(1)
         ->and(substr_count($html, 'loading="lazy"'))->toBe(8 - $eager);
 })->with([['editorial', 1], ['grid', 3], ['bistro', 4]]);
+
+/** The demo-like page with a banner photo. */
+function pageWithBanner(string $style, ?string $bannerText = null): string
+{
+    $tenant = Tenant::factory()->create();
+    sampleMenu($tenant);
+    asTenant($tenant, function () use ($style, $bannerText) {
+        $cover = Media::create([
+            'base_path' => 'b/1', 'mime' => 'image/jpeg', 'width' => 1600, 'height' => 800, 'bytes' => 1,
+            'variants' => ['320' => '320.webp', '640' => '640.webp', '800' => '800.webp', '1280' => '1280.webp', 'jpg' => '640.jpg', 'og' => 'og.jpg'],
+            'placeholder' => 'data:image/webp;base64,AAAA', 'dominant_color' => '#884422',
+        ]);
+        TenantAppearance::create([...TenantAppearance::DEFAULTS, 'style' => $style, 'banner_text' => $bannerText, 'cover_media_id' => $cover->id]);
+    });
+
+    return (string) test()->get('/'.$tenant->slug)->assertOk()->getContent();
+}
+
+it('preloads the banner in the right sizes and keeps its shape', function (string $style, string $height, string $sizes) {
+    $html = pageWithBanner($style);
+
+    // Fetched from the <head>, before the CSS is parsed (LCP).
+    expect($html)->toMatch('#<link rel="preload" as="image" fetchpriority="high" type="image/webp" imagesrcset="[^"]*/800.webp 800w, [^"]*/1280.webp 1280w" imagesizes="'.preg_quote($sizes, '#').'">#')
+        ->toContain('width="1280" height="'.$height.'" fetchpriority="high"')
+        // The space is reserved by the style's aspect ratio and filled by the blurred preview.
+        ->toContain('background-image:url(data:image/webp;base64,AAAA);background-color:#884422');
+    expect(InlineAssets::css($style))->toMatch('/\.cv\{aspect-ratio:[0-9\/]+[;}]/');
+})->with([
+    ['editorial', '720', '(min-width:44rem) 704px, 100vw'],
+    ['grid', '640', '(min-width:44rem) 680px, calc(100vw - 1.5rem)'],
+    ['bistro', '512', '(min-width:44rem) 704px, 100vw'],
+]);
+
+it('puts the logo and name on or below the banner', function () {
+    expect(pageWithBanner('grid'))->toContain('class="top hc ov"')            // B: on the banner by default
+        ->and(pageWithBanner('editorial'))->toContain('class="top hc"')       // A: below by default
+        ->and(pageWithBanner('editorial', 'over'))->toContain('class="top hc ov"')
+        ->and(pageWithBanner('grid', 'under'))->toContain('class="top hc"');
+});
+
+it('saves where the logo and name go', function () {
+    [$owner, $tenant] = member(Role::Owner);
+    $values = ['primary_color' => '#b4432a', 'font' => 'system', 'style' => 'grid', 'show_prices' => true, 'show_photos' => true, 'show_descriptions' => true, 'show_calories' => true];
+
+    $this->actingAs($owner)->putJson(t($tenant, 'appearance'), [...$values, 'banner_text' => 'under'], idem())->assertOk()
+        ->assertJsonPath('data.banner_text', 'under')
+        ->assertJsonPath('data.banner.grid', ['ratio' => [2, 1], 'text' => 'over']);
+    $this->actingAs($owner)->putJson(t($tenant, 'appearance'), [...$values, 'banner_text' => 'left'], idem())->assertInvalid('banner_text');
+});

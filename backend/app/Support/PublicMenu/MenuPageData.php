@@ -21,6 +21,7 @@ use App\Models\Tenant;
 use App\Models\TenantAppearance;
 use App\Models\TenantProfile;
 use App\Support\Features;
+use App\Support\ImageProcessor;
 use App\Tenancy\CurrentTenant;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -303,16 +304,30 @@ class MenuPageData
         return [
             'w' => $media->width,
             'h' => $media->height,
-            'webp' => implode(', ', array_filter([
-                isset($urls['320']) ? $urls['320'].' 320w' : null,
-                isset($urls['640']) ? $urls['640'].' 640w' : null,
-                isset($urls['1280']) ? $urls['1280'].' 1280w' : null,
-            ])),
-            'avif' => isset($urls['avif320']) ? $urls['avif320'].' 320w, '.($urls['avif640'] ?? '').' 640w' : null,
+            'webp' => self::srcset($urls),
+            'avif' => self::srcset($urls, 'avif') ?: null,
             'jpg' => $urls['jpg'] ?? null,
             'og' => $urls['og'] ?? null,
             'placeholder' => $media->placeholder,
             'color' => $media->dominant_color,
         ];
+    }
+
+    /**
+     * "url 320w, url 640w, …" for the sizes a photo has (older uploads have
+     * no 960).
+     *
+     * @param  array<int|string, string>  $urls
+     */
+    public static function srcset(array $urls, string $prefix = ''): string
+    {
+        $parts = [];
+        foreach (ImageProcessor::WIDTHS as $w) {
+            if (isset($urls[$prefix.$w])) {
+                $parts[] = $urls[$prefix.$w].' '.$w.'w';
+            }
+        }
+
+        return implode(', ', $parts);
     }
 }

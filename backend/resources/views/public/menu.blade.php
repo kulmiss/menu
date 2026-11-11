@@ -7,7 +7,8 @@
     $sizes = ['bistro' => '104px', 'grid' => '(min-width:40rem) 220px, 50vw', 'editorial' => '(min-width:44rem) 672px, 100vw'][$style];
     // Only photos likely on the first screen load at once; the rest lazily
     // (PLAN.md §15.2.4). How many dishes fit depends on the style and the banner.
-    $fold = ['editorial' => [2, 1], 'grid' => [4, 2], 'bistro' => [5, 3]][$style][$cover ? 1 : 0];
+    // With a banner, A and B show no dish photo on the first screen (the banner is the LCP).
+    $fold = ['editorial' => [2, 0], 'grid' => [4, 0], 'bistro' => [5, 2]][$style][$cover ? 1 : 0];
     $eagerLeft = $fold;
     $position = 0;
     $hasInfo = $week || $info['address'] || $info['links'] || $info['about'] || $info['wifi'] || $info['socials'];
@@ -52,15 +53,21 @@
 <meta property="og:url" content="{{ url($canonical) }}">
 @if ($firstImage)<meta property="og:image" content="{{ $firstImage }}">@endif
 <link rel="icon" href="data:,">
+@if ($cover)
+{{-- The banner is the largest thing on screen: start fetching it before the CSS is parsed (LCP). --}}
+@php $preloadAvif = $cover['avif'] !== ''; @endphp
+<link rel="preload" as="image" fetchpriority="high" type="image/{{ $preloadAvif ? 'avif' : 'webp' }}" imagesrcset="{{ $preloadAvif ? $cover['avif'] : $cover['webp'] }}" imagesizes="{{ $cover['sizes'] }}">
+@endif
 <style>{!! InlineAssets::css($style) !!}{!! $theme['css'] !!}</style>
 </head>
 <body class="S-{{ $style }}">
-<div @class(['top', 'hc' => $cover])>
+<div @class(['top', 'hc' => $cover, 'ov' => $cover && $cover['over']])>
 @if ($cover)
+{{-- The banner keeps its shape from the first paint (CSS aspect-ratio + placeholder), so nothing moves. --}}
 <div class="cv" style="background-image:url({{ $cover['placeholder'] ?? '' }});background-color:{{ $cover['color'] ?? 'transparent' }}"><picture>
-@if (isset($cover['urls']['avif640']))<source type="image/avif" srcset="{{ $cover['urls']['avif640'] }} 640w{{ isset($cover['urls']['avif1280']) ? ', '.$cover['urls']['avif1280'].' 1280w' : '' }}" sizes="(min-width:44rem) 704px, 100vw">@endif
-<source type="image/webp" srcset="{{ $cover['urls']['640'] ?? '' }} 640w{{ isset($cover['urls']['1280']) ? ', '.$cover['urls']['1280'].' 1280w' : '' }}" sizes="(min-width:44rem) 704px, 100vw">
-<img src="{{ $cover['urls']['jpg'] ?? '' }}" alt="" width="1280" height="549" fetchpriority="high" decoding="async">
+@if ($cover['avif'] !== '')<source type="image/avif" srcset="{{ $cover['avif'] }}" sizes="{{ $cover['sizes'] }}">@endif
+<source type="image/webp" srcset="{{ $cover['webp'] }}" sizes="{{ $cover['sizes'] }}">
+<img src="{{ $cover['jpg'] }}" alt="" width="{{ $cover['w'] }}" height="{{ $cover['h'] }}" fetchpriority="high" decoding="async">
 </picture></div>
 @endif
 <header>

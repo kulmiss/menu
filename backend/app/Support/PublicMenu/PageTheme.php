@@ -23,10 +23,12 @@ class PageTheme
      * the heading font used while the restaurant keeps the default font.
      */
     public const STYLES = [
-        'editorial' => ['light' => '#f3ebe0', 'dark' => '#231c18', 'heading' => 'serif'],
-        'grid' => ['light' => '#f5f7f6', 'dark' => '#18201d', 'heading' => 'system'],
-        'bistro' => ['light' => '#faf8f5', 'dark' => '#161412', 'heading' => 'serif'],
+        'editorial' => ['light' => '#f3ebe0', 'dark' => '#231c18', 'heading' => 'serif', 'banner' => [16, 9], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw'],
+        'grid' => ['light' => '#f5f7f6', 'dark' => '#18201d', 'heading' => 'system', 'banner' => [2, 1], 'text' => 'over', 'sizes' => '(min-width:44rem) 680px, calc(100vw - 1.5rem)'],
+        'bistro' => ['light' => '#faf8f5', 'dark' => '#161412', 'heading' => 'serif', 'banner' => [5, 2], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw'],
     ];
+
+    public const BANNER_TEXT = ['over', 'under'];
 
     /**
      * @param  list<string>|null  $allowed  styles the plan allows (null: all)
@@ -55,7 +57,31 @@ class PageTheme
             'show_descriptions' => $a->show_descriptions,
             'show_calories' => $a->show_calories,
             'logo' => $a->logo?->urls(),
-            'cover' => $a->cover ? ['urls' => $a->cover->urls(), 'placeholder' => $a->cover->placeholder, 'color' => $a->cover->dominant_color] : null,
+            'cover' => $a->cover ? self::cover($a, $style) : null,
+        ];
+    }
+
+    /**
+     * The banner: sizes for srcset, its shape in this style and whether the
+     * logo and name sit on it.
+     *
+     * @return array<string, mixed>
+     */
+    private static function cover(TenantAppearance $a, string $style): array
+    {
+        $urls = $a->cover?->urls() ?? [];
+        $ratio = self::STYLES[$style]['banner'];
+
+        return [
+            'webp' => MenuPageData::srcset($urls),
+            'avif' => MenuPageData::srcset($urls, 'avif'),
+            'jpg' => $urls['jpg'] ?? '',
+            'sizes' => self::STYLES[$style]['sizes'],
+            'w' => 1280,
+            'h' => (int) round(1280 * $ratio[1] / $ratio[0]),
+            'placeholder' => $a->cover?->placeholder,
+            'color' => $a->cover?->dominant_color,
+            'over' => ($a->banner_text ?? self::STYLES[$style]['text']) === 'over',
         ];
     }
 }

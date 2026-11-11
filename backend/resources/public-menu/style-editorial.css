@@ -5,7 +5,8 @@
 .cv{aspect-ratio:16/9}
 @media (min-width:44rem){.cv{border-radius:0 0 1.25rem 1.25rem}}
 header{flex-direction:column;align-items:flex-start;gap:.3rem;padding-top:1rem}
-.hc header{margin-top:-2.75rem;position:relative;padding-top:0}
+.hc:not(.ov) header{margin-top:-2.75rem;position:relative;padding-top:0}
+.ov .lg{border-color:#fff}
 .lg{width:4.75rem;height:4.75rem;border-radius:50%;border:4px solid var(--bg)}
 h1{font-size:2rem;font-weight:600;line-height:1.1;letter-spacing:-.01em}
 .bar{border-bottom-color:var(--ln)}

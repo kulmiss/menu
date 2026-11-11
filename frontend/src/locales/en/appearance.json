@@ -34,15 +34,21 @@
     "show_descriptions": "Show descriptions",
     "show_calories": "Show calories"
   },
-  "images": "Logo and cover",
-  "images_hint": "The cover appears at the top of your menu. Use a wide photo.",
+  "images": "Logo and banner",
+  "images_hint": "The banner is the wide photo at the top of your menu. It is cropped to the shape your menu style uses.",
   "logo": "Logo",
-  "cover": "Cover photo",
+  "cover": "Banner",
   "save": "Save",
   "reset": "Undo changes",
   "unsaved": "Unsaved changes",
   "saved": "Appearance saved. Guests see it now.",
   "preview": "Preview",
   "preview_hint": "Preview of your menu on a phone (not saved yet).",
-  "pick_colour": "Pick a colour"
+  "pick_colour": "Pick a colour",
+  "banner_size": "Recommended: {{width}} × {{height}} px or larger.",
+  "banner_text": "Logo and name",
+  "banner_texts": {
+    "over": "On the banner",
+    "under": "Below the banner"
+  }
 }

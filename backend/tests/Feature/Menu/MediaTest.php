@@ -24,7 +24,7 @@ it('stores a photo in every size the menu needs', function () {
         ->assertJsonPath('data.height', 1200);
 
     $media = asTenant($tenant, fn () => Media::sole());
-    foreach (['320.webp', '640.webp', '1280.webp', '640.jpg', 'og.jpg'] as $file) {
+    foreach (['320.webp', '640.webp', '800.webp', '1280.webp', '640.jpg', 'og.jpg'] as $file) {
         Storage::disk('public')->assertExists("{$media->base_path}/{$file}");
     }
     [$w, $h] = getimagesizefromstring(Storage::disk('public')->get("{$media->base_path}/og.jpg"));
@@ -99,4 +99,28 @@ it('refuses another restaurant\'s photo', function () {
     $this->actingAs($owner)->patchJson(t($mine, "items/{$item->id}"), ['media_id' => $foreign], idem())
         ->assertJsonValidationErrors('media_id');
     $this->deleteJson(t($mine, "media/{$foreign}"), [], idem())->assertNotFound();
+});
+
+it('saves banners a little lighter (they are the largest paint of the menu)', function () {
+    [$owner, $tenant] = member(Role::Owner);
+    // A detailed photo, so the quality setting makes a measurable difference.
+    $img = imagecreatetruecolor(1600, 800);
+    mt_srand(7);
+    for ($i = 0; $i < 20000; $i++) {
+        imagefilledellipse($img, mt_rand(0, 1600), mt_rand(0, 800), mt_rand(4, 40), mt_rand(4, 40), imagecolorallocate($img, mt_rand(0, 255), mt_rand(0, 255), mt_rand(0, 255)));
+    }
+    $path = tempnam(sys_get_temp_dir(), 'ban').'.jpg';
+    imagejpeg($img, $path, 92);
+
+    foreach ([null, 'banner'] as $purpose) {
+        $this->actingAs($owner)->post(t($tenant, 'media'), array_filter([
+            'file' => new UploadedFile($path, 'banner.jpg', 'image/jpeg', null, true), 'purpose' => $purpose,
+        ]), idem())->assertCreated();
+    }
+    [$dish, $banner] = asTenant($tenant, fn () => Media::orderBy('id')->get()->all());
+    $size = fn (Media $m) => strlen((string) Storage::disk('public')->get("{$m->base_path}/800.webp"));
+
+    expect($size($banner))->toBeLessThan($size($dish));
+    $this->actingAs($owner)->post(t($tenant, 'media'), ['file' => new UploadedFile($path, 'b.jpg', 'image/jpeg', null, true), 'purpose' => 'poster'], idem())
+        ->assertInvalid('purpose');
 });

@@ -14,6 +14,7 @@ use App\Support\Contrast;
 use App\Support\Features;
 use App\Support\MediaJanitor;
 use App\Support\PublicMenu\MenuPageData;
+use App\Support\PublicMenu\PageTheme;
 use App\Tenancy\CurrentTenant;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -89,6 +90,7 @@ class AppearanceController extends Controller
             'primary_color' => [$req, 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'font' => [$req, Rule::in(TenantAppearance::FONTS)],
             'style' => [$req, Rule::in($this->allowedStyles())],
+            'banner_text' => ['sometimes', 'nullable', Rule::in(PageTheme::BANNER_TEXT)],
             'show_prices' => [$req, 'boolean'],
             'show_photos' => [$req, 'boolean'],
             'show_descriptions' => [$req, 'boolean'],
@@ -115,6 +117,9 @@ class AppearanceController extends Controller
             'font' => $a->font,
             'style' => TenantAppearance::effectiveStyle($a->style, $this->allowedStyles()),
             'styles' => $this->allowedStyles(),
+            'banner_text' => $a->banner_text,
+            // Banner shape and where the name goes by default, per style (crop frame in the admin).
+            'banner' => array_map(fn (array $s) => ['ratio' => $s['banner'], 'text' => $s['text']], PageTheme::STYLES),
             'show_prices' => $a->show_prices,
             'show_photos' => $a->show_photos,
             'show_descriptions' => $a->show_descriptions,

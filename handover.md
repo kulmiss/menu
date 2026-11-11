@@ -15,9 +15,17 @@ _Last updated: 2026-11-11 15:20 EAT. PR #15 merged; owner's change list (2026-11
 | 2 Dish photos (up to 5) | `feat/dish-photos` (on top of menu-styles) | PR open |
 | 3 Quiet "Viewing as" badge | `feat/viewing-as` (on top of dish-photos) | PR open |
 | 4 SMTP settings | `feat/smtp-settings` (on top of viewing-as) | PR open |
-| 5 Banner | – | queued |
+| 5 Banner | `feat/banner` (on top of smtp-settings) | PR open |
 
 Design canvas with the three directions: https://claude.ai/artifact/HBvYJAE5UWBSepoqiDkrxD
+
+## Change 5 — banner (feat/banner)
+- `tenant_appearance.banner_text` (over|under|null). `PageTheme::STYLES` has banner ratio, default text position and `sizes` per style; `PageTheme::cover()`; `MenuPageData::srcset()`. Blade: preload link in head, `.top.hc.ov`, cover `<img>` width/height per style.
+- `ImageProcessor::WIDTHS` = 320/640/800/1280; `purpose=banner` upload → WebP q64.
+- CSS: overlay in base (`.ov` grid cell), per-style tweaks.
+- Admin: banner crop aspect per style, recommended size hint, "Logo and name" choice, wide thumbnail (inline styles).
+- Speed with a worst-case busy banner: LCP 1.11–1.26 s; normal banner 0.90–0.96 s (QUESTIONS #114, needs owner confirmation).
+- Tests: backend 276, frontend 189.
 
 ## Change 4 — SMTP settings (feat/smtp-settings)
 - `App\Support\MailSettings` (stored under `platform_settings.key = mail`, cached forever, password `Crypt::encryptString`), applied in `AppServiceProvider` via `afterResolving('mail.manager')`. API `GET/PUT/DELETE platform/settings/mail`, `POST platform/settings/mail/test` (throttle 6/min).

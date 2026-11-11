@@ -15,6 +15,9 @@ type Props = {
   aspect?: number
   label: string
   disabled?: boolean
+  /** Shown under the buttons, e.g. the recommended size. */
+  hint?: string
+  purpose?: 'banner'
 }
 
 /**
@@ -28,6 +31,8 @@ export function PhotoField({
   aspect = 4 / 3,
   label,
   disabled,
+  hint,
+  purpose,
 }: Props) {
   const { t } = useTranslation()
   const input = useRef<HTMLInputElement>(null)
@@ -55,7 +60,7 @@ export function PhotoField({
     setUploading(true)
     try {
       const blob = await cropToJpeg(source, area)
-      onChange(await uploadPhoto(tenantId, blob))
+      onChange(await uploadPhoto(tenantId, blob, purpose))
       close()
     } catch {
       // The server's reason is shown as a toast (see main.tsx).
@@ -71,12 +76,11 @@ export function PhotoField({
       <span className='text-sm font-medium'>{label}</span>
       <div className='flex items-center gap-3'>
         <div
-          className='flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-md border bg-muted'
-          style={
-            media?.dominant_color
-              ? { backgroundColor: media.dominant_color }
-              : undefined
-          }
+          className='flex h-20 shrink-0 items-center justify-center overflow-hidden rounded-md border bg-muted'
+          style={{
+            width: `${Math.round(80 * Math.min(aspect, 2.5))}px`,
+            backgroundColor: media?.dominant_color ?? undefined,
+          }}
         >
           {thumb ? (
             <img src={thumb} alt='' className='size-full object-cover' />
@@ -118,6 +122,7 @@ export function PhotoField({
           onChange={(e) => choose(e.target.files?.[0])}
         />
       </div>
+      {hint && <p className='text-sm text-muted-foreground'>{hint}</p>}
       {error && (
         <p role='alert' className='text-sm text-destructive'>
           {error}

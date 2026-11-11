@@ -25,6 +25,7 @@ const APPEARANCE: Appearance = {
   primary_color: '#b4432a',
   font: 'system',
   style: 'grid',
+  banner_text: null,
   show_prices: true,
   show_photos: true,
   show_descriptions: true,
@@ -34,6 +35,11 @@ const APPEARANCE: Appearance = {
   cover: null,
   warnings: [],
   styles: ['editorial', 'grid', 'bistro'],
+  banner: {
+    editorial: { ratio: [16, 9], text: 'under' },
+    grid: { ratio: [2, 1], text: 'over' },
+    bistro: { ratio: [5, 2], text: 'under' },
+  },
   themes: [
     {
       id: 1,
@@ -157,6 +163,42 @@ describe('AppearancePage', () => {
     await expect.poll(() => frame(screen).src).toContain('font=serif')
     expect(frame(screen).src).toContain('style=grid')
     APPEARANCE.styles = ['editorial', 'grid', 'bistro']
+  })
+
+  it('fits the banner to the style and places the name on or below it', async () => {
+    const cover = {
+      id: 4,
+      width: 1600,
+      height: 800,
+      dominant_color: '#884422',
+      urls: { '320': '/media/1/c/320.webp' },
+    }
+    const original = APPEARANCE.cover
+    APPEARANCE.cover = cover
+    const screen = await render()
+
+    await expect
+      .element(screen.getByText('Recommended: 1600 × 800 px or larger.'))
+      .toBeVisible()
+    // B · Fresh grid puts the name on the banner by default.
+    await expect
+      .element(
+        screen.getByRole('radio', { name: 'On the banner', exact: true })
+      )
+      .toBeChecked()
+
+    await userEvent.click(
+      screen.getByRole('radio', { name: 'Below the banner', exact: true })
+    )
+    await expect.poll(() => frame(screen).src).toContain('banner_text=under')
+
+    await userEvent.click(
+      screen.getByRole('radio', { name: /C · Quiet bistro/ })
+    )
+    await expect
+      .element(screen.getByText('Recommended: 1600 × 640 px or larger.'))
+      .toBeVisible()
+    APPEARANCE.cover = original
   })
 
   it('is read-only when the subscription does not allow changes', async () => {

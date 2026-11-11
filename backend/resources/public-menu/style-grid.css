@@ -4,10 +4,7 @@
 @media (prefers-color-scheme:dark){:root{--bg:#0f1412;--fg:#eef4f1;--mu:#a3b3ac;--ln:#24302b;--card:#18201d}}
 .top{padding:.75rem .75rem 0}
 .cv{aspect-ratio:2/1;border-radius:1.5rem}
-.hc header{position:absolute;inset:auto .75rem 0;padding:3.5rem 1rem 1rem;border-radius:0 0 1.5rem 1.5rem;background:linear-gradient(#0000,#000c);color:#fff}
-.hc .sub{color:#fff}
-.hc .st{background:#000a;border-color:#fff6;color:#fff}
-.hc .st.op{color:#a7f3d0}
+.ov header{border-radius:0 0 1.5rem 1.5rem}
 .lg{border-radius:1rem;background:#fff}
 h1{font-size:1.55rem;font-weight:750;line-height:1.15}
 .bar{border:0;padding:.75rem 0 .5rem}

@@ -80,6 +80,7 @@ function valuesOf(a: Appearance): AppearanceValues {
     primary_color: a.primary_color,
     font: a.font,
     style: a.style,
+    banner_text: a.banner_text,
     show_prices: a.show_prices,
     show_photos: a.show_photos,
     show_descriptions: a.show_descriptions,
@@ -153,6 +154,9 @@ function AppearanceForm({ initial }: { initial: Appearance }) {
   }
 
   const warn = tooLightOnWhite(values.primary_color)
+  // The banner's shape and default name position follow the menu style.
+  const bannerRatio = initial.banner[values.style].ratio
+  const bannerText = values.banner_text ?? initial.banner[values.style].text
 
   return (
     <div className='grid items-start gap-4 lg:grid-cols-[1fr_380px]'>
@@ -307,14 +311,39 @@ function AppearanceForm({ initial }: { initial: Appearance }) {
             <PhotoField
               tenantId={ctx.tenantId}
               media={cover}
-              aspect={21 / 9}
+              aspect={bannerRatio[0] / bannerRatio[1]}
               label={t('appearance.cover')}
+              hint={t('appearance.banner_size', {
+                width: 1600,
+                height: Math.round((1600 * bannerRatio[1]) / bannerRatio[0]),
+              })}
+              purpose='banner'
               disabled={disabled}
               onChange={(m) => {
                 setCover(m)
                 set('cover_media_id', m?.id ?? null)
               }}
             />
+            {cover && (
+              <fieldset className='grid gap-2 sm:col-span-2'>
+                <legend className='mb-2 text-sm font-medium'>
+                  {t('appearance.banner_text')}
+                </legend>
+                <div className='flex flex-wrap gap-2'>
+                  {(['over', 'under'] as const).map((place) => (
+                    <Choice
+                      key={place}
+                      name='banner_text'
+                      checked={bannerText === place}
+                      disabled={disabled}
+                      onChange={() => set('banner_text', place)}
+                    >
+                      {t(`appearance.banner_texts.${place}`)}
+                    </Choice>
+                  ))}
+                </div>
+              </fieldset>
+            )}
           </CardContent>
         </Card>
 
