@@ -174,7 +174,7 @@ jobs:
         run: |
           python3 - <<'PY' | tee -a "$GITHUB_STEP_SUMMARY"
           import glob, json, statistics
-          runs = [json.load(open(f)) for f in glob.glob('/tmp/lhci/lhr-*.json')]
+          runs = [json.load(open(f)) for f in glob.glob('../ci/lighthouse/.lighthouseci/lhr-*.json')]
           if not runs:
               raise SystemExit('No Lighthouse results.')
           med = lambda f: statistics.median(f(r) for r in runs)
