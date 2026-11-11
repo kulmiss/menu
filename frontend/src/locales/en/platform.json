@@ -89,7 +89,8 @@
     "style_editorial": "Menu style A · Warm editorial",
     "style_grid": "Menu style B · Fresh grid",
     "style_bistro": "Menu style C · Quiet bistro",
-    "pdf_menu": "Printable PDF menu"
+    "pdf_menu": "Printable PDF menu",
+    "order_list": "\"My order\" list for guests"
   },
   "methods": {
     "cash": "Cash",

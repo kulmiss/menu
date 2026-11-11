@@ -13,12 +13,17 @@ _Last updated: 2026-11-11 15:20 EAT. PR #15 merged; owner's change list (2026-11
 |---|---|---|
 | Share menu button | `feat/share-menu` | #26 |
 | Printable PDF menu | `feat/pdf-menu` (on #26) | #27 |
-| "My order" list | `feat/my-order` (on #27) | in progress |
+| "My order" list | `feat/my-order` (on #27) | #28 |
 
 **Queued next (owner, 2026-11-11 19:40), after "My order":** dashboard widgets as small stacked PRs.
 - Super Admin (/platform): revenue (this vs last month, MRR, 12-month SVG bars); expiring trials/subscriptions 7/14 days + "Remind" e-mail (editable, logged); inactive restaurants (no views and no edits 14+ days) + "Email owner"; growth funnel (sign-ups → ≥5 dishes → first QR scan → paying, 30/90 days, %); top restaurants (views/scans 30 days, biggest plans); new sign-ups with setup progress %; system health (disk, photo storage, cron last run, queued/failed mails, errors today, PHP/Laravel; warnings: cron > 10 min, disk < 10 %); plan mix donut + upgrades/downgrades this month.
 - Restaurant dashboard: setup checklist (logo, banner, ≥5 dishes, photos, hours, info, QR downloaded; links; "Hide"); views/scans today vs yesterday + 7-day mini chart; missing photos (most viewed first, "Add photo", only when photos shown); "My order" stats (most-added dishes, average list value 7/30 days — anonymous sendBeacon counts from the on-demand cart file: dish id, quantity, list total; bots filtered; only when the list is on); plan & usage bars (dishes, branches, photos, languages, team) with upgrade hint; platform news on top when new.
 - Rules: admin first load ≤ 225 KB (widgets on demand), plain SVG charts, parallel widgets with skeleton/empty/error states, staff never see plan/usage/money (server-enforced), fast queries (indexes, no N+1, cache totals a few minutes; test with 200 restaurants × 6 months), tests per widget, t(), light/dark, 375 px, contrast.
+
+## "My order" (#28)
+- `show_order_list` (appearance, default on), feature `order_list`; off when prices hidden. Page JSON: `o` (per dish `[price, [[variantId, price]], [[min, max, [[optionId, price, soldOut]]]], soldOut]`), `cu` (currency symbol), `q` (QR code → table label), `t.o` texts (`lang/en/public.php` → `order`). Rows: `.it.ao` + `<span class="ad" data-x="A">`.
+- On-demand `sheet.js`: choices + Add in `mS`; `mC` (cart: fmt/price/line/add), `mA` (quick add), `mO` (list sheet), waiter view; UI built lazily; styles injected from the file. Inline exposes `w.mQ` (scanned code) and `w.mD` (parsed page data).
+- Beacon: `c` → `order_add` (subject = dish, by quantity), `w` → `order_shown` + `order_value` (sum, minor units); `Stats::hit(..., $by)`.
 
 ## Share menu (#26) and PDF menu (#27)
 - Share: `show_share` (appearance, default on), button `.ib[data-x=H]`, `window.mH` in the on-demand `sheet.js`; inline `run(f, a)` calls `window['m'+f]` after loading the on-demand file. Better og tags (description, banner og image).

@@ -20,6 +20,7 @@ class Features
         'import_export' => true,
         'remove_branding' => false, // hide "Menu by …" on the guest page
         'pdf_menu' => true, // printable PDF menu (admin download, optional guest link)
+        'order_list' => true, // "My order" list on the guest page (on the guest's phone only)
         // Guest-menu styles the restaurant may pick (owner, 2026-11-11: all on by default).
         'style_editorial' => true,
         'style_grid' => true,

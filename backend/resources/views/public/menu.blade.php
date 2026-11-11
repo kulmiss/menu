@@ -14,8 +14,10 @@
     $hasInfo = $week || $info['address'] || $info['links'] || $info['about'] || $info['wifi'] || $info['socials'];
     $sheets = [];
     $firstImage = null;
+    $cart = [];
     foreach ($menus as $m) { foreach ($m['categories'] as $c) { foreach ($c['items'] as $i) {
         if ($i['sheet'] !== []) { $sheets[$i['id']] = $i['sheet']; }
+        if ($orderList) { $cart[$i['id']] = [...$i['cart'], $i['sold_out'] ? 1 : 0]; }
         $firstImage ??= $i['media']['og'] ?? null;
     } } }
     // No dish photo anywhere (switched off, hidden per dish, or none uploaded): the styles use a text layout.
@@ -28,12 +30,17 @@
         'h' => $hours,
         'x' => $closures,
         'c' => (object) $sheets,
+        // "My order" (only when switched on): [price, sizes, add-on groups, sold out] per dish, currency, QR code → table.
+        'o' => $orderList ? (object) $cart : null,
+        'cu' => \App\Support\PublicMenu\MenuPageData::symbol($tenant->currency_code),
+        'q' => $orderList ? (object) $tables : null,
         't' => [
             'so' => __('public.sold_out'), 'sz' => __('public.sizes'), 'al' => __('public.allergens_title'),
             'kc' => __('public.calories'), 'pm' => __('public.prep'), 'ch' => __('public.choose'),
             'up' => __('public.choose_up_to'), 'ex' => __('public.choose_exactly'),
             'on' => __('public.open_until'), 'cl' => __('public.closed'), 'ct' => __('public.closed_today'),
             'oa' => __('public.opens_at'), 'ot' => __('public.opens_tomorrow'), 'od' => __('public.opens_day'),
+            'o' => $orderList ? __('public.order') : null,
             'sh' => __('public.share'), 'sl' => __('public.share_link'), 'cp' => __('public.copy_link'), 'cd' => __('public.copied'),
             'ph' => __('public.photos'), 'nx' => __('public.next_photo'), 'pv' => __('public.previous_photo'),
             'dn' => array_map(fn ($i) => __('public.days_short.'.$i), range(0, 6)),
@@ -125,7 +132,8 @@
 <ul>
 @foreach ($c['items'] as $i)
 <li data-i="{{ $i['id'] }}" data-t="{{ implode(' ', array_column($i['tags'], 'key')) }}"@class(['so' => $i['sold_out']])>
-<button type="button" @class(['it', 'np' => ! $i['media']])><span class="tx"><span class="nm">{{ $i['name'] }}</span>
+@php $orderable = $orderList && ! $i['sold_out'] && $i['price'] !== ''; @endphp
+<button type="button" @class(['it', 'np' => ! $i['media'], 'ao' => $orderable])><span class="tx"><span class="nm">{{ $i['name'] }}</span>
 @if ($i['summary'] !== '')<span class="sm">{{ $i['summary'] }}</span>@endif
 @if ($i['price'] !== '')<span class="pr">{{ $i['price'] }}</span>@endif
 <span class="tg">@if ($i['sold_out'])<span class="bd x0">{{ __('public.sold_out') }}</span>@endif
@@ -133,6 +141,8 @@
 @if ($i['popular'])<span class="bd hl">{{ __('public.popular') }}</span>@endif
 @foreach ($i['tags'] as $t)@if (! in_array($t['key'], ['new', 'popular'], true))<span class="bd">{{ $t['label'] }}</span>@endif @endforeach
 </span></span>
+{{-- "My order" quick add (the dish sheet has the same as a real button, with sizes and add-ons). --}}
+@if ($orderable)<span class="ad" data-x="A" aria-hidden="true">+</span>@endif
 @if ($i['media'])
 @php $img = $i['media']; $eager = $position < $fold && $eagerLeft-- > 0; @endphp
 <span class="im" style="background-image:url({{ $img['placeholder'] ?? '' }});background-color:{{ $img['color'] ?? 'transparent' }}"><picture>

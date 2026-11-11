@@ -34,7 +34,8 @@
     "show_descriptions": "Show descriptions",
     "show_calories": "Show calories",
     "show_share": "Show \"Share menu\" button",
-    "show_pdf_link": "Show \"Download menu (PDF)\" link"
+    "show_pdf_link": "Show \"Download menu (PDF)\" link",
+    "show_order_list": "Show \"My order\" list (guests note dishes to show the waiter)"
   },
   "images": "Logo and banner",
   "images_hint": "The banner is the wide photo at the top of your menu. It is cropped to the shape your menu style uses.",

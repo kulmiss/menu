@@ -9,6 +9,7 @@ return [
         'import_export' => 'Import and export',
         'remove_branding' => 'Menu without our name',
         'pdf_menu' => 'Printable PDF menu',
+        'order_list' => '"My order" list for guests',
         'style_editorial' => 'Menu style A · Warm editorial',
         'style_grid' => 'Menu style B · Fresh grid',
         'style_bistro' => 'Menu style C · Quiet bistro',

@@ -8,7 +8,7 @@
   var on = function (e, n, f, o) { e.addEventListener(n, f, o); };
   var dl = id('s');
   var $ = function (s, r) { return (r || d).querySelectorAll(s); };
-  var data = function () { return D || (D = JSON.parse(id('d').textContent)); };
+  var data = function () { return D || (D = w.mD = JSON.parse(id('d').textContent)); }; // w.mD: shared with the on-demand file
   var later = w.requestIdleCallback || function (f) { setTimeout(f, 1); };
 
   // Item details: photo prefetch on hover/touch; the sheet itself is a small
@@ -93,7 +93,7 @@
   });
 
   // A QR scan arrives as #q=CODE: remember it for the beacon, then tidy the address.
-  var scan = (location.hash.match(/^#q=([A-Z0-9]{8})$/) || [])[1];
+  var scan = w.mQ = (location.hash.match(/^#q=([A-Z0-9]{8})$/) || [])[1];
   if (scan && history.replaceState) history.replaceState(null, '', location.pathname + location.search);
 
   // Service worker and the visit beacon after load.

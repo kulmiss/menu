@@ -32,6 +32,7 @@ const APPEARANCE: Appearance = {
   show_calories: true,
   show_share: true,
   show_pdf_link: false,
+  show_order_list: true,
   theme_id: null,
   logo: null,
   cover: null,
@@ -209,6 +210,10 @@ describe('AppearancePage', () => {
       screen.getByRole('switch', { name: 'Show "Share menu" button' })
     )
     await expect.poll(() => frame(screen).src).toContain('show_share=0')
+    await userEvent.click(
+      screen.getByRole('switch', { name: /Show "My order" list/ })
+    )
+    await expect.poll(() => frame(screen).src).toContain('show_order_list=0')
   })
 
   it('is read-only when the subscription does not allow changes', async () => {

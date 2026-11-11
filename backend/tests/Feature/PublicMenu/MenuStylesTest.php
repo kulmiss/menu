@@ -224,7 +224,7 @@ it('shows a clean, lighter page when photos are switched off', function (string 
         ->not->toContain('<img')
         ->not->toContain('og:image')
         ->not->toContain('loading="lazy"')
-        ->and(substr_count($without, 'class="it np"'))->toBe(7)
+        ->and(substr_count($without, 'class="it np'))->toBe(7)
         ->and($without)->toContain('class="S-'.$style.' NP"')
         ->and($with)->toContain('class="S-'.$style.'"');
     expect(strlen(gzencode($without, 9)))->toBeLessThan(strlen(gzencode($with, 9)));
