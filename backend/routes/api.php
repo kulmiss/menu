@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\Menu\MenuController;
 use App\Http\Controllers\Api\Menu\TagController;
 use App\Http\Controllers\Api\Restaurant\AppearanceController;
 use App\Http\Controllers\Api\Restaurant\BranchController;
+use App\Http\Controllers\Api\Restaurant\DashboardWidgetController;
 use App\Http\Controllers\Api\Restaurant\InfoController;
 use App\Http\Controllers\Api\Restaurant\InsightsController;
 use App\Http\Controllers\Api\Restaurant\PdfMenuController;
@@ -167,6 +168,14 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
 
             Route::get('insights', [InsightsController::class, 'index'])->middleware('feature:insights');
             Route::get('dashboard', [InsightsController::class, 'dashboard']);
+            Route::prefix('widgets')->controller(DashboardWidgetController::class)->group(function () {
+                Route::get('setup', 'setup');
+                Route::post('setup/hide', 'hideSetup');
+                Route::get('trend', 'trend');
+                Route::get('missing-photos', 'missingPhotos');
+                Route::get('orders', 'orders');
+                Route::get('plan', 'plan');
+            });
 
             Route::get('promotions', [PromotionController::class, 'index']);
             Route::post('promotions', [PromotionController::class, 'store'])->middleware('feature:promotions');

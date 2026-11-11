@@ -76,6 +76,7 @@ class QrCodeController extends Controller
 
     public function download(Tenant $tenant, int $qr, string $format): Response
     {
+        $tenant->markQrDownloaded();
         Gate::authorize('restaurant.manage');
         $code = QrCode::with(['branch', 'table.branch'])->findOrFail($qr);
         $url = QrImages::url($code);
@@ -91,6 +92,7 @@ class QrCodeController extends Controller
     /** Printable sheet: four cards per A4 page, for all (or chosen) tables of a branch. */
     public function tableCards(Request $request, Tenant $tenant, int $branch): Response
     {
+        $tenant->markQrDownloaded();
         Gate::authorize('restaurant.manage');
         $model = Branch::findOrFail($branch);
         $ids = array_filter(array_map('intval', explode(',', (string) $request->query('tables', ''))));

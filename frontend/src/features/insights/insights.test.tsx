@@ -84,6 +84,15 @@ describe('Dashboard', () => {
         },
       },
       'PATCH /t/1/items/5/sold-out': { data: { data: {} } },
+      'GET /t/1/widgets/trend': {
+        data: {
+          data: {
+            days: [],
+            today: { date: '2026-11-11', views: 31, scans: 9 },
+            yesterday: { date: '2026-11-10', views: 28, scans: 7 },
+          },
+        },
+      },
     })
     const screen = await renderWithQuery(<Dashboard />, {
       me: meFixture({ tenants: [tenantFixture()] }),

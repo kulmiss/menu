@@ -27,6 +27,8 @@ use Illuminate\Support\Facades\DB;
  * @property int|null $plan_id
  * @property Carbon|null $trial_ends_at
  * @property Carbon|null $paid_until
+ * @property Carbon|null $qr_downloaded_at first QR code / table card download (setup checklist)
+ * @property Carbon|null $setup_hidden_at dashboard setup checklist hidden
  * @property Carbon|null $suspended_at
  * @property string|null $suspended_reason
  * @property string $timezone
@@ -77,6 +79,8 @@ class Tenant extends Model
         return [
             'trial_ends_at' => 'datetime',
             'paid_until' => 'datetime',
+            'qr_downloaded_at' => 'datetime',
+            'setup_hidden_at' => 'datetime',
             'suspended_at' => 'datetime',
             'currency_format' => 'array',
             'cache_version' => 'integer',
@@ -179,6 +183,14 @@ class Tenant extends Model
     public function branches(): HasMany
     {
         return $this->hasMany(Branch::class);
+    }
+
+    /** Setup checklist: the first time a QR code or table cards are downloaded. */
+    public function markQrDownloaded(): void
+    {
+        if ($this->qr_downloaded_at === null) {
+            $this->forceFill(['qr_downloaded_at' => now()])->saveQuietly();
+        }
     }
 
     public function bumpCacheVersion(): void
