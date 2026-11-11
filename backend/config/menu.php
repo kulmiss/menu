@@ -25,6 +25,9 @@ return [
     // Menu style of the demo restaurant (CI measures each style).
     'demo_style' => env('DEMO_MENU_STYLE', 'grid'),
 
+    // Where the demo seeders find the downloaded demo photos (php artisan demo:photos).
+    'demo_photos_path' => env('DEMO_PHOTOS_PATH'),
+
     'default_currency' => env('MENU_DEFAULT_CURRENCY', 'ETB'),
 
     /*

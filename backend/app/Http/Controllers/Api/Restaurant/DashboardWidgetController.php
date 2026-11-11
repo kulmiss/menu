@@ -136,7 +136,7 @@ class DashboardWidgetController extends Controller
 
                 return [
                     'top' => $top->filter(fn ($r) => $names->has($r->subject_id))
-                        ->map(fn ($r) => ['id' => (int) $r->subject_id, 'name' => (object) $names[$r->subject_id]->name, 'added' => (int) $r->added])->values()->all(),
+                        ->map(fn ($r) => ['id' => (int) $r->subject_id, 'name' => $names[$r->subject_id]->name, 'added' => (int) $r->added])->values()->all(),
                     'lists_shown' => $shown,
                     'average_minor' => $shown > 0 ? intdiv($value, $shown) : null,
                 ];

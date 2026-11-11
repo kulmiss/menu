@@ -98,6 +98,10 @@
 
   // Service worker and the visit beacon after load.
   on(w, 'load', function () {
+    // Photos further down get their address only now, so the banner and the first screen load first.
+    var l = $('[data-ss]'), i = 0;
+    for (; i < l.length; i++) l[i].srcset = l[i].getAttribute('data-ss');
+    for (l = $('img[data-s]'), i = 0; i < l.length; i++) l[i].src = l[i].getAttribute('data-s');
     if (data().p) return; // admin preview: no service worker, no visit counted
     later(function () {
       load();

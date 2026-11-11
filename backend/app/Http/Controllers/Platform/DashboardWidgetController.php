@@ -106,7 +106,8 @@ class DashboardWidgetController extends Controller
     public function funnel(Request $request): JsonResponse
     {
         $days = $request->integer('days') === 90 ? 90 : 30;
-        $row = Cache::remember("platform:w:funnel:{$days}", 300, fn () => DB::table('tenants as t')
+        // Cached as a plain array: the cache store only unserializes arrays and scalars.
+        $row = Cache::remember("platform:w:funnel:{$days}", 300, fn () => (array) DB::table('tenants as t')
             ->whereNull('t.deleted_at')->where('t.created_at', '>=', now()->subDays($days))
             ->selectRaw('COUNT(*) as signups')
             ->selectRaw('SUM((SELECT COUNT(*) FROM items i WHERE i.tenant_id = t.id) >= 5) as menu')
@@ -116,7 +117,7 @@ class DashboardWidgetController extends Controller
         $steps = [];
         $previous = null;
         foreach (['signups', 'menu', 'scanned', 'paying'] as $key) {
-            $count = (int) ($row->{$key} ?? 0);
+            $count = (int) ($row[$key] ?? 0);
             $steps[] = ['key' => $key, 'count' => $count, 'percent' => $previous === null ? null : ($previous > 0 ? (int) round($count * 100 / $previous) : 0)];
             $previous = $count;
         }

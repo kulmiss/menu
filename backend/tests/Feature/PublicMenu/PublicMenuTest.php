@@ -8,6 +8,7 @@ use App\Models\Tenant;
 use App\Models\TenantAppearance;
 use App\Models\TenantSlugHistory;
 use App\Support\PublicMenu\MenuPageCache;
+use Database\Seeders\DemoCafeSeeder;
 use Database\Seeders\DemoSeeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -185,7 +186,7 @@ it('removes static pages of restaurants whose subscription ran out', function ()
 
 it('keeps the demo menu page within the 30 KB budget in every style (PLAN.md §15.1)', function (string $style) {
     Storage::fake('public');
-    $this->seed(DemoSeeder::class);
+    $this->seed(DemoCafeSeeder::class);
     $demo = Tenant::where('slug', DemoSeeder::SLUG)->firstOrFail();
     asTenant($demo, fn () => (TenantAppearance::first() ?? new TenantAppearance(TenantAppearance::DEFAULTS))->fill(['style' => $style])->save());
 
