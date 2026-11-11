@@ -44,7 +44,7 @@ class RegenerateMediaSizes extends Command
                 $variants = (array) $media->variants;
                 try {
                     if ($this->option('dry-run')) {
-                        $missing = array_filter(ImageProcessor::WIDTHS, fn (int $w) => ! isset($variants[(string) $w]));
+                        $missing = array_filter(ImageProcessor::WIDTHS, fn (int $w) => ! array_key_exists($w, $variants));
                         $updated += $missing === [] ? 0 : 1;
 
                         continue;
