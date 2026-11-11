@@ -10,7 +10,7 @@
     // With a banner, A and B show no dish photo on the first screen (the banner is the LCP).
     $fold = ['editorial' => [2, 0], 'grid' => [4, 0], 'bistro' => [5, 0]][$style][$cover ? 1 : 0];
     $eagerLeft = $fold;
-    $blurLeft = 6;
+    $blurLeft = 4;
     $position = 0;
     $hasInfo = $week || $info['address'] || $info['links'] || $info['about'] || $info['wifi'] || $info['socials'];
     $sheets = [];
@@ -151,7 +151,7 @@
 @if ($orderable)<span class="ad" data-x="A" aria-hidden="true">+</span>@endif
 @if ($i['media'])
 @php $img = $i['media']; $eager = $position < $fold && $eagerLeft-- > 0; @endphp
-{{-- The blurred placeholder for the first six photos; further down the dish colour is enough (less to decode, smaller page). --}}
+{{-- The blurred placeholder for the first four photos; further down the dish colour is enough (less to decode, smaller page). --}}
 <span class="im" style="@if ($blurLeft-- > 0)background-image:url({{ $img['placeholder'] ?? '' }});@endif background-color:{{ $img['color'] ?? 'transparent' }}"><picture>
 {{-- Below the first screen the address is set after load (menu.js: data-ss / data-s), so these never compete with the banner. --}}
 @php $ss = $eager ? 'srcset' : 'data-ss'; @endphp

@@ -146,7 +146,7 @@ it('loads only the photos on the first screen at once, per style', function (str
         ->and(substr_count($html, 'loading="lazy"'))->toBe(8 - $eager);
 })->with([['editorial', 1], ['grid', 3], ['bistro', 4]]);
 
-it('gives photos below the first screen their address only after load, and blurs only the first six', function () {
+it('gives photos below the first screen their address only after load, and blurs only the first four', function () {
     $tenant = Tenant::factory()->create();
     [, $category] = sampleMenu($tenant);
     asTenant($tenant, function () use ($category) {
@@ -168,7 +168,7 @@ it('gives photos below the first screen their address only after load, and blurs
     // grid without a banner: 3 dishes at once; 6 more and both specials wait for load.
     expect(substr_count($html, 'img data-s="'))->toBe(8)
         ->and(substr_count($html, 'data-ss="'))->toBe(8)
-        ->and(substr_count($html, 'background-image:url(data:image/webp;base64,BLUR)'))->toBe(6)
+        ->and(substr_count($html, 'background-image:url(data:image/webp;base64,BLUR)'))->toBe(4)
         ->and(substr_count($html, 'background-color:#123456'))->toBe(11);
     // Specials are compact cards with a small responsive photo, never the largest element.
     expect($html)->toMatch('#<source type="image/webp" data-ss="[^"]*x/11/320.webp 320w[^"]*" sizes="\(min-width:44rem\) 152px, 34vw">#');
