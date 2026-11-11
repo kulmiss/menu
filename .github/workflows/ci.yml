@@ -169,6 +169,28 @@ jobs:
         run: |
           npm ci --ignore-scripts --no-audit --no-fund
           npx --no-install lhci autorun --config=./lighthouserc.json
+      - name: Speed vs. targets (median of 5 runs)
+        if: always()
+        run: |
+          python3 - <<'PY' | tee -a "$GITHUB_STEP_SUMMARY"
+          import glob, json, statistics
+          runs = [json.load(open(f)) for f in glob.glob('../ci/lighthouse/.lighthouseci/lhr-*.json')]
+          if not runs:
+              raise SystemExit('No Lighthouse results.')
+          med = lambda f: statistics.median(f(r) for r in runs)
+          rows = [
+              ('LCP', med(lambda r: r['audits']['largest-contentful-paint']['numericValue']), 1200, 1300, 'ms'),
+              ('Blocking time (TBT)', med(lambda r: r['audits']['total-blocking-time']['numericValue']), 100, 200, 'ms'),
+              ('CLS', med(lambda r: r['audits']['cumulative-layout-shift']['numericValue']), 0.02, 0.02, ''),
+              ('Performance score', med(lambda r: r['categories']['performance']['score'] * 100), 98, None, ''),
+          ]
+          print('### Guest menu speed — ${{ matrix.style }} (median of %d runs)' % len(runs))
+          print('| Measure | Median | Target | CI fails above |')
+          print('|---|---|---|---|')
+          for name, value, target, gate, unit in rows:
+              ok = value >= target if name.startswith('Performance') else value <= target
+              print(f"| {name} | {value:.4g}{unit} {'✅' if ok else '⚠️'} | {target}{unit} | {gate if gate is not None else 'report only'}{unit if gate is not None else ''} |")
+          PY
       - name: Lighthouse reports
         if: always()
         uses: actions/upload-artifact@v4

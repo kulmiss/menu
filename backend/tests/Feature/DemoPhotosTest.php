@@ -100,3 +100,20 @@ it('keeps the committed credits in line with the photo list, and only free licen
     }
     expect(collect($photos)->pluck('key')->duplicates())->toBeEmpty();
 });
+
+it('follows relative and repeated Unsplash redirects to the image', function () {
+    File::put($this->dir.'/photos.json', json_encode(['photos' => [
+        ['key' => 'rel', 'source' => 'unsplash', 'id' => 'Rel1', 'page' => 'https://unsplash.com/photos/x-Rel1', 'photographer' => 'A', 'profile' => null, 'licence' => 'Unsplash License', 'banner' => false],
+    ]]));
+    Http::fake([
+        'unsplash.com/photos/Rel1/download?ixid=abc' => Http::response('', 302, ['Location' => '//images.unsplash.com/photo-9-xyz?ixid=abc&fm=jpg']),
+        'unsplash.com/photos/Rel1/download?force=true' => Http::response('', 302, ['Location' => '/photos/Rel1/download?ixid=abc']),
+        'images.unsplash.com/*' => Http::response(jpegBytes(1600, 1000), 200, ['Content-Type' => 'image/jpeg']),
+    ]);
+
+    $this->artisan('demo:photos')->assertSuccessful();
+
+    expect(is_file($this->dir.'/rel.webp'))->toBeTrue();
+    Http::assertSent(fn (Request $r) => str_starts_with($r->url(), 'https://images.unsplash.com/photo-9-xyz?w=1600'));
+    expect(DownloadDemoPhotos::absolute('/a/b', 'https://unsplash.com/x'))->toBe('https://unsplash.com/a/b');
+});

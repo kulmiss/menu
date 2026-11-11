@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Database\Seeders\Demo\Photos;
 use GdImage;
 use Illuminate\Console\Command;
+use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Throwable;
@@ -134,13 +135,12 @@ class DownloadDemoPhotos extends Command
         $client = Http::withHeaders(['User-Agent' => 'MenuDemoPhotos/1.0'])->timeout(60);
         $urls = [];
         if ($photo['source'] === 'unsplash') {
-            // The download link redirects to the image on images.unsplash.com; ask that one for a 1600 px JPEG.
-            $hop = $client->withOptions(['allow_redirects' => false])->get("https://unsplash.com/photos/{$photo['id']}/download", ['force' => 'true']);
-            $location = $hop->header('Location');
-            if ($location === '') {
-                throw new \RuntimeException("Unsplash answered {$hop->status()} without a redirect");
+            try {
+                $urls[] = $this->unsplashImage($client, $photo['id']);
+            } catch (Throwable) {
+                // Let the client follow the redirects itself (full-size file, resized below).
+                $urls[] = "https://unsplash.com/photos/{$photo['id']}/download?force=true";
             }
-            $urls[] = strtok($location, '?').'?w=1600&fit=max&fm=jpg&q=85';
         } else {
             $urls[] = "https://images.pexels.com/photos/{$photo['id']}/pexels-photo-{$photo['id']}.jpeg?auto=compress&cs=tinysrgb&w=1600";
             $urls[] = "https://images.pexels.com/photos/{$photo['id']}/pexels-{$photo['photographer']}-{$photo['id']}.jpg?auto=compress&cs=tinysrgb&w=1600";
@@ -156,6 +156,44 @@ class DownloadDemoPhotos extends Command
             $status = $response->status();
         }
         throw new \RuntimeException("download failed (HTTP {$status})");
+    }
+
+    /**
+     * The download link redirects (sometimes with a relative address, sometimes
+     * more than once) to the file on images.unsplash.com; follow it and ask that
+     * one for a 1600 px JPEG.
+     */
+    private function unsplashImage(PendingRequest $client, string $id): string
+    {
+        $url = "https://unsplash.com/photos/{$id}/download?force=true";
+        for ($hop = 0; $hop < 5; $hop++) {
+            $host = (string) parse_url($url, PHP_URL_HOST);
+            if (str_ends_with($host, 'images.unsplash.com')) {
+                return strtok($url, '?').'?w=1600&fit=max&fm=jpg&q=85';
+            }
+            $response = $client->withOptions(['allow_redirects' => false])->get($url);
+            $location = $response->header('Location');
+            if ($location === '') {
+                throw new \RuntimeException("Unsplash answered {$response->status()} without a redirect");
+            }
+            $url = self::absolute($location, $url);
+        }
+        throw new \RuntimeException('too many redirects from Unsplash');
+    }
+
+    /** "/photos/x" or "//host/x" relative to the page it came from. */
+    public static function absolute(string $location, string $base): string
+    {
+        if (preg_match('#^https?://#i', $location)) {
+            return $location;
+        }
+        $scheme = (string) parse_url($base, PHP_URL_SCHEME);
+        if (str_starts_with($location, '//')) {
+            return $scheme.':'.$location;
+        }
+        $root = $scheme.'://'.parse_url($base, PHP_URL_HOST);
+
+        return str_starts_with($location, '/') ? $root.$location : $root.'/'.ltrim($location, './');
     }
 
     /** @param  array{key: string, banner: bool}  $photo */
