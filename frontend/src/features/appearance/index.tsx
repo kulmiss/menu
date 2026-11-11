@@ -160,7 +160,7 @@ function AppearanceForm({ initial }: { initial: Appearance }) {
 
   return (
     <div className='grid items-start gap-4 lg:grid-cols-[1fr_380px]'>
-      <div className='grid gap-4'>
+      <div className='grid min-w-0 gap-4'>
         <Card>
           <CardHeader>
             <CardTitle>{t('appearance.themes')}</CardTitle>

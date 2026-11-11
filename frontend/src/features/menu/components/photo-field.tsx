@@ -74,7 +74,7 @@ export function PhotoField({
   return (
     <div className='grid gap-2'>
       <span className='text-sm font-medium'>{label}</span>
-      <div className='flex items-center gap-3'>
+      <div className='flex flex-wrap items-center gap-3'>
         <div
           className='flex h-20 shrink-0 items-center justify-center overflow-hidden rounded-md border bg-muted'
           style={{

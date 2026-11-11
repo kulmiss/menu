@@ -18,8 +18,15 @@ _Last updated: 2026-11-11 15:20 EAT. PR #15 merged; owner's change list (2026-11
 | 5 Banner | `feat/banner` (on top of smtp-settings) | PR open |
 | Partition 12 Demo data | `feat/demo-data` (on top of banner) | PR open |
 | Partition 13 Docs | `docs/deploy` (on top of demo-data) | PR open |
+| Partition 14 Final QA | `qa/final` (on top of docs/deploy) | PR open — **merge this one: it contains #16–#23** |
 
 Design canvas with the three directions: https://claude.ai/artifact/HBvYJAE5UWBSepoqiDkrxD
+
+## Partition 14 — final QA (qa/final)
+- All CI checks on the final branch: Pint, Larastan, Pest **279**, composer validate, ESLint, Prettier, build, Vitest **189**, admin first load **224.5 KB** / 225 KB.
+- Browser smoke test (390 px and 1280 px): every admin screen as the demo owner and every platform screen as the demo Super Admin (2FA code computed) — no console errors. Fixed: Appearance scrolled sideways on phones (photo row now wraps; left column `min-w-0`).
+- Guest menu (fresh demo with banner): A/B/C 100 ×4, LCP 0.89–0.90 s, CLS 0.
+- Local note: the workspace `.env` has `SANCTUM_STATEFUL_DOMAINS=127.0.0.1:8000`; when serving on another port, set it (or sign-in won't stick).
 
 ## Partition 13 — docs (docs/deploy)
 - `docs/deploy.md` (referenced by `.htaccess`), README (demo logins, deploy link), scheduler runs the queue every minute (`routes/console.php`, `tests/Feature/ScheduleTest.php`), docker-compose vite prompts fixed.
