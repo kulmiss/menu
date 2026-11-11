@@ -274,6 +274,7 @@ export type ItemInput = {
   is_new?: boolean
   new_until?: string | null
   is_popular?: boolean
+  show_photo?: boolean
   is_sold_out?: boolean
   variants?: Variant[]
   addon_group_ids?: number[]

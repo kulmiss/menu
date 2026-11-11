@@ -143,7 +143,8 @@ class MenuPageData
                                 'new' => $item->is_new && ($item->new_until === null || $item->new_until->isFuture() || $item->new_until->isToday()),
                                 'popular' => $item->is_popular,
                                 'tags' => $tags,
-                                'media' => $photos && $item->media ? self::image($item->media) : null,
+                                // Per dish "Show photo on menu" off: photos stay saved, the menu shows none.
+                                'media' => $photos && $item->show_photo && $item->media ? self::image($item->media) : null,
                                 'sheet' => array_filter([
                                     'd' => $describe($item->description),
                                     'v' => $item->variants->map(fn (ItemVariant $v) => [$text($v->name), $money($v->price_minor)])->values()->all(),
@@ -154,9 +155,9 @@ class MenuPageData
                                     'al' => array_map(fn ($a) => __('public.allergens.'.$a), $item->allergens()),
                                     'k' => $calories ? $item->calories : null,
                                     'p' => $item->prep_minutes,
-                                    'i' => $photos && $item->media ? ($item->media->urls()['1280'] ?? null) : null,
+                                    'i' => $photos && $item->show_photo && $item->media ? ($item->media->urls()['1280'] ?? null) : null,
                                     // More photos to swipe through in the details sheet (photo 2–5).
-                                    'g' => $photos ? $item->photos->reject(fn (Media $m) => $m->id === $item->media_id)
+                                    'g' => $photos && $item->show_photo ? $item->photos->reject(fn (Media $m) => $m->id === $item->media_id)
                                         ->map(fn (Media $m) => $m->urls()['1280'] ?? null)->filter()->values()->all() : [],
                                 ], fn ($v) => $v !== null && $v !== '' && $v !== []),
                             ];

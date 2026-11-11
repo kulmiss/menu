@@ -101,7 +101,9 @@
     "tags": "Tags",
     "manage_tags": "Manage tags",
     "allergens": "Allergens",
-    "other_languages": "other languages: {{count}}"
+    "other_languages": "other languages: {{count}}",
+    "show_photo": "Show photo on menu",
+    "show_photo_off": "Hidden: the photos stay saved, guests don't see them. Switch on to show them again."
   },
   "branches": {
     "title": "Branches",

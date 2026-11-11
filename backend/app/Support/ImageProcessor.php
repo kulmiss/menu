@@ -79,6 +79,45 @@ class ImageProcessor
         ];
     }
 
+    /**
+     * Makes the sizes an older photo is missing (e.g. 800 px, added on
+     * 2026-11-11) from the largest copy it already has; the original upload
+     * isn't kept. Returns the new variant names (empty when nothing was missing).
+     *
+     * @param  array<int|string, string>  $variants  size => file name ('320' keys are ints in PHP)
+     * @return array<int|string, string>
+     */
+    public function addMissing(string $disk, string $folder, array $variants, bool $banner = false): array
+    {
+        $avif = self::supportsAvif();
+        $missing = array_filter(self::WIDTHS, fn (int $w) => ! array_key_exists($w, $variants) || ($avif && ! array_key_exists('avif'.$w, $variants)));
+        $source = null;
+        foreach (self::WIDTHS as $w) {
+            $source = array_key_exists($w, $variants) ? $variants[$w] : $source; // the largest one wins
+        }
+        if ($missing === [] || $source === null) {
+            return [];
+        }
+        $bytes = Storage::disk($disk)->get("{$folder}/{$source}");
+        $image = $bytes === null ? false : @imagecreatefromstring($bytes);
+        if (! $image instanceof GdImage) {
+            throw new RuntimeException("Unreadable image in {$folder}.");
+        }
+        $this->webpQuality = $banner ? self::BANNER_WEBP_QUALITY : self::WEBP_QUALITY;
+        $added = [];
+        foreach ($missing as $target) {
+            $scaled = $this->scaleToWidth($image, min($target, imagesx($image)));
+            if (! array_key_exists($target, $variants)) {
+                $added[$target] = basename($this->store($scaled, 'webp', $disk, "{$folder}/{$target}.webp"));
+            }
+            if ($avif && ! array_key_exists('avif'.$target, $variants)) {
+                $added['avif'.$target] = basename($this->store($scaled, 'avif', $disk, "{$folder}/{$target}.avif"));
+            }
+        }
+
+        return $added;
+    }
+
     public static function supportsAvif(): bool
     {
         return function_exists('imageavif') && (bool) (gd_info()['AVIF Support'] ?? false);

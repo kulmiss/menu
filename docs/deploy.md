@@ -148,6 +148,13 @@ php artisan menu:refresh-pages --all     # rebuild the static menu pages with th
 php artisan up
 ```
 
+When a release adds a photo size (the 800 px size was added on 2026-11-11), make it for photos uploaded earlier — once, safe to repeat:
+
+```bash
+php artisan media:regenerate --dry-run   # how many photos miss a size
+php artisan media:regenerate             # make them and rebuild those menus (--tenant=slug for one restaurant)
+```
+
 If OPcache has `validate_timestamps=0`, reload PHP (cPanel: change the PHP version and back, or ask the host).
 
 ## 10. Backups

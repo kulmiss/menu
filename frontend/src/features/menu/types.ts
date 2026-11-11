@@ -42,6 +42,8 @@ export type ItemSummary = {
   is_visible: boolean
   is_new: boolean
   is_popular: boolean
+  /** false: photos stay saved but the menu doesn't show them. */
+  show_photo: boolean
   sort: number
 }
 

@@ -32,6 +32,7 @@ class ItemSummaryResource extends JsonResource
             'is_visible' => $this->is_visible,
             'is_new' => $this->is_new,
             'is_popular' => $this->is_popular,
+            'show_photo' => $this->show_photo,
             'sort' => $this->sort,
         ];
     }

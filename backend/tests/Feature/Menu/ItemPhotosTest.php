@@ -98,3 +98,31 @@ it('puts the extra photos in the guest page for the swipe gallery', function () 
         ->and($sheet['g'][0])->toEndWith($b->base_path.'/1280.webp');
     expect(asTenant($tenant, fn () => Item::find($item->id)->photos()->count()))->toBe(3);
 });
+
+it('hides a dish\'s photos on the menu without deleting them, and shows them again', function () {
+    [$owner, $tenant] = member(Role::Owner);
+    [, , $item] = sampleMenu($tenant);
+    [$a, $b] = [dishPhoto($tenant), dishPhoto($tenant)];
+    $this->actingAs($owner)->patchJson(t($tenant, "items/{$item->id}"), ['photo_ids' => [$a->id, $b->id]], idem())->assertOk()
+        ->assertJsonPath('data.show_photo', true);
+
+    $sheet = function () use ($tenant, $item) {
+        $html = (string) $this->get('/'.$tenant->slug)->assertOk()->getContent();
+        preg_match('#<script type="application/json" id="d">(.*?)</script>#s', $html, $m);
+
+        // Dishes with nothing more to show have no sheet data at all.
+        return [$html, json_decode($m[1], true)['c'][$item->id] ?? ['i' => null, 'g' => []]];
+    };
+
+    $this->actingAs($owner)->patchJson(t($tenant, "items/{$item->id}"), ['show_photo' => false], idem())->assertOk()
+        ->assertJsonPath('data.show_photo', false)
+        ->assertJsonPath('data.photos.*.id', [$a->id, $b->id]); // still saved
+    [$html, $data] = $sheet();
+    expect($html)->not->toContain($a->base_path)->not->toContain('class="im"')->toContain('class="it np"')
+        ->and($data['i'])->toBeNull()->and($data['g'])->toBe([]);
+    expect(asTenant($tenant, fn () => Media::count()))->toBe(2);
+
+    $this->actingAs($owner)->patchJson(t($tenant, "items/{$item->id}"), ['show_photo' => true], idem())->assertOk();
+    [$html, $data] = $sheet();
+    expect($html)->toContain($a->base_path.'/320.webp')->and($data['g'])->toHaveCount(1);
+});

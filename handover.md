@@ -7,20 +7,24 @@ _Last updated: 2026-11-11 15:20 EAT. PR #15 merged; owner's change list (2026-11
 > **Working mode (owner):** go through all remaining partitions without stopping for OK, then write the Step 4 final report. Stop only for: changes outside this project, steps that can't be undone, licence doubts, the same CI failure 3 times, or the working limit.
 
 ## Where we are
-`develop` contains PRs #3–#15 (Partition 11 merged 2026-11-11). Owner's change list in progress as stacked PRs (merge only the newest):
+`develop` contains #3–#23 (owner merged #23 on 2026-11-11). Open, stacked (merge only the newest):
 
-| Change | Branch | State |
+| Change | Branch | PR |
 |---|---|---|
-| 1 Menu styles A/B/C (owner picked **all three**, admin chooses) | `feat/menu-styles` | PR open |
-| 2 Dish photos (up to 5) | `feat/dish-photos` (on top of menu-styles) | PR open |
-| 3 Quiet "Viewing as" badge | `feat/viewing-as` (on top of dish-photos) | PR open |
-| 4 SMTP settings | `feat/smtp-settings` (on top of viewing-as) | PR open |
-| 5 Banner | `feat/banner` (on top of smtp-settings) | PR open |
-| Partition 12 Demo data | `feat/demo-data` (on top of banner) | PR open |
-| Partition 13 Docs | `docs/deploy` (on top of demo-data) | PR open |
-| Partition 14 Final QA | `qa/final` (on top of docs/deploy) | PR open — **merge this one: it contains #16–#23** |
+| `media:regenerate` for older photos | `feat/media-regenerate` | #24 |
+| Photo-free menus + "Show photo on menu" per dish | `feat/photo-free` (on top of #24) | #25 — merge this one |
 
-Design canvas with the three directions: https://claude.ai/artifact/HBvYJAE5UWBSepoqiDkrxD
+Owner decisions 2026-11-11: #114 keep photo quality; regenerate command yes; #106, #99, #98, #111, #117, #91–#97 OK.
+
+## Photo-free menus (feat/photo-free)
+- `items.show_photo` (default true): `MenuPageData` shows no media/sheet photos when off; API + dish editor switch ("Show photo on menu", hint when off).
+- Guest page: `body.NP` when no dish photo is shown; style CSS scoped to `li>.it` (specials untouched); A hairline list, B one-column cards with name/price row, `li>.it.np` card layout in B.
+- Checked A/B/C at 375 px light/dark and 1280 px, photos off and mixed: no empty boxes, no overflow.
+- Photos off (demo with banner): A/B/C 100, LCP 0.82–0.96 s, CLS 0, 19.3–19.5 KB loaded, HTML 10.1 KB gzip.
+- Tests: backend 289, frontend 190. Admin first load 224.5 KB.
+
+## media:regenerate (feat/media-regenerate)
+- `ImageProcessor::addMissing()` + `app/Console/Commands/RegenerateMediaSizes.php` (`--dry-run`, `--tenant=`); rebuilds affected menus. Run once on the server after deploying (docs/deploy.md → Updating).
 
 ## Partition 14 — final QA (qa/final)
 - All CI checks on the final branch: Pint, Larastan, Pest **279**, composer validate, ESLint, Prettier, build, Vitest **189**, admin first load **224.5 KB** / 225 KB.
