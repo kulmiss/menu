@@ -23,6 +23,8 @@ export type AppearanceValues = {
   show_calories: boolean
   /** "Share menu" button on the guest page. */
   show_share: boolean
+  /** "Download menu (PDF)" link on the guest page (plan feature pdf_menu). */
+  show_pdf_link: boolean
   theme_id: number | null
   logo_media_id: number | null
   cover_media_id: number | null

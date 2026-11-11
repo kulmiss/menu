@@ -40,6 +40,7 @@ const FLAGS = [
   'show_descriptions',
   'show_calories',
   'show_share',
+  'show_pdf_link',
 ] as const
 const FONT_STACK: Record<Font, string> = {
   system: 'system-ui, sans-serif',
@@ -87,6 +88,7 @@ function valuesOf(a: Appearance): AppearanceValues {
     show_descriptions: a.show_descriptions,
     show_calories: a.show_calories,
     show_share: a.show_share,
+    show_pdf_link: a.show_pdf_link,
     theme_id: a.theme_id,
     logo_media_id: a.logo?.id ?? null,
     cover_media_id: a.cover?.id ?? null,

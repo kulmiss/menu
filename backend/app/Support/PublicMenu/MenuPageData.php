@@ -202,6 +202,7 @@ class MenuPageData
                 'theme' => $theme,
                 'promotions' => $promotions,
                 'branding' => ! $features['remove_branding'],
+                'pdfMenu' => $features['pdf_menu'],
                 'branch' => $branch && $branches->count() > 1 ? $text($branch->name) : null,
                 'branches' => $branches->count() > 1 ? $branches->map(fn (Branch $b) => [
                     'name' => $text($b->name),

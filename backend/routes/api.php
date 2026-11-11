@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\Restaurant\AppearanceController;
 use App\Http\Controllers\Api\Restaurant\BranchController;
 use App\Http\Controllers\Api\Restaurant\InfoController;
 use App\Http\Controllers\Api\Restaurant\InsightsController;
+use App\Http\Controllers\Api\Restaurant\PdfMenuController;
 use App\Http\Controllers\Api\Restaurant\PromotionController;
 use App\Http\Controllers\Api\Restaurant\QrCodeController;
 use App\Http\Controllers\Api\TeamController;
@@ -184,6 +185,7 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::get('appearance', [AppearanceController::class, 'show']);
             Route::put('appearance', [AppearanceController::class, 'update']);
             Route::get('appearance/preview', [AppearanceController::class, 'preview'])->name('appearance.preview');
+            Route::get('menu-pdf', [PdfMenuController::class, 'download'])->middleware(['feature:pdf_menu', 'throttle:20,1']);
 
             Route::get('tags', [TagController::class, 'index']);
             Route::post('tags', [TagController::class, 'store']);

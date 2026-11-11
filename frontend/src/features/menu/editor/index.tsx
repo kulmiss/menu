@@ -6,6 +6,7 @@ import {
   Copy,
   Eye,
   EyeOff,
+  FileDown,
   MoreHorizontal,
   Pencil,
   Plus,
@@ -30,6 +31,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { ConfirmDialog } from '@/components/confirm-dialog'
 import { AdminHeader } from '@/components/layout/admin-header'
 import { Main } from '@/components/layout/main'
+import { useCurrentTenant } from '@/features/auth/use-me'
 import {
   type BulkAction,
   menusQuery,
@@ -56,6 +58,7 @@ import { BulkPriceDialog } from './bulk-price-dialog'
 import { CategoryCard } from './category-card'
 import { ItemSheet } from './item-sheet'
 import { NameDialog, type NameValues } from './name-dialog'
+import { PdfMenuDialog } from './pdf-menu-dialog'
 import { ScheduleDialog } from './schedule-dialog'
 import { SortableItem, SortableList } from './sortable'
 
@@ -78,6 +81,9 @@ export function MenuEditorPage({
   const menus = useQuery(menusQuery(ctx.tenantId))
   const createMenu = useCreateMenu(ctx.tenantId)
   const [newMenuOpen, setNewMenuOpen] = useState(false)
+  const [pdfOpen, setPdfOpen] = useState(false)
+  // Plan feature (Super Admin can switch it per plan); missing = on.
+  const pdfAllowed = useCurrentTenant()?.features?.pdf_menu !== false
 
   const current = menus.data?.find((m) => m.id === menuId) ?? menus.data?.[0]
 
@@ -89,7 +95,24 @@ export function MenuEditorPage({
           <h1 className='text-2xl font-bold tracking-tight'>
             {t('menu.title')}
           </h1>
+          {ctx.canManage && pdfAllowed && (menus.data?.length ?? 0) > 0 && (
+            <Button
+              variant='outline'
+              className='min-h-11 sm:min-h-9'
+              onClick={() => setPdfOpen(true)}
+            >
+              <FileDown /> {t('menu.pdf.button')}
+            </Button>
+          )}
         </div>
+        {pdfOpen && menus.data && (
+          <PdfMenuDialog
+            ctx={ctx}
+            menus={menus.data}
+            open={pdfOpen}
+            onOpenChange={setPdfOpen}
+          />
+        )}
 
         {menus.isPending ? (
           <div className='grid gap-3' aria-busy='true'>

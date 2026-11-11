@@ -57,6 +57,7 @@ class PageTheme
             'show_descriptions' => $a->show_descriptions,
             'show_calories' => $a->show_calories,
             'show_share' => $a->show_share ?? true,
+            'show_pdf_link' => (bool) ($a->show_pdf_link ?? false),
             'logo' => $a->logo?->urls(),
             'cover' => $a->cover ? self::cover($a, $style) : null,
         ];

@@ -163,7 +163,8 @@
 @if ($info['socials'])<ul class="ln so2">@foreach ($info['socials'] as $l)<li><a href="{{ $l['href'] }}" rel="noopener" target="_blank">{{ $l['label'] }}</a></li>@endforeach</ul>@endif
 </details>
 @endif
-@if ($branding)<footer>{{ __('public.powered', ['app' => \App\Support\PlatformSettings::get('name')]) }}</footer>@endif
+@if ($branding)@if ($theme['show_pdf_link'] && $pdfMenu)<p class="pdl"><a href="{{ rtrim($canonical, '/') }}/menu.pdf">{{ __('public.pdf_menu') }}</a></p>@endif
+<footer>{{ __('public.powered', ['app' => \App\Support\PlatformSettings::get('name')]) }}</footer>@endif
 <dialog id="s" aria-label="{{ $tenant->name }}"><div class="sh" id="sb"></div><button type="button" class="x" id="sx" aria-label="{{ __('public.close') }}">×</button></dialog>
 <div class="of" id="of" hidden>{{ __('public.offline') }}</div>
 <script type="application/json" id="d">{!! json_encode($data, JSON_HEX_TAG | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>

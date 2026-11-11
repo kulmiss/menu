@@ -17,6 +17,10 @@ Route::get('/{area}/{path?}', SpaController::class)
 Route::get('/q/{code}', [PublicMenuController::class, 'qr'])->where('code', '[A-Za-z0-9]{8}')->name('qr');
 Route::get('/Q/{code}', [PublicMenuController::class, 'qr'])->where('code', '[A-Za-z0-9]{8}');
 
+// The printable menu for guests (Appearance → "Download menu (PDF)" link), cached until the menu changes.
+Route::get('/{slug}/{branch}/menu.pdf', [PublicMenuController::class, 'pdf'])->where(['slug' => '[a-z0-9-]+', 'branch' => '[a-z0-9-]+']);
+Route::get('/{slug}/menu.pdf', [PublicMenuController::class, 'pdf'])->where('slug', '[a-z0-9-]+');
+
 Route::get('/{slug}/{branch?}', [PublicMenuController::class, 'show'])
     ->where(['slug' => '[a-z0-9-]+', 'branch' => '[a-z0-9-]+'])
     ->name('public.menu');

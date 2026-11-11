@@ -28,6 +28,7 @@ return [
     'unavailable_body' => 'The menu of :name is not available right now. Please ask the staff.',
     'info' => 'Info & opening hours',
     'share' => 'Share menu',
+    'pdf_menu' => 'Download menu (PDF)',
     'share_link' => 'Menu link',
     'share_description' => 'The menu of :name: dishes, prices and opening hours.',
     'copy_link' => 'Copy link',

@@ -33,7 +33,8 @@
     "show_photos": "Show photos",
     "show_descriptions": "Show descriptions",
     "show_calories": "Show calories",
-    "show_share": "Show \"Share menu\" button"
+    "show_share": "Show \"Share menu\" button",
+    "show_pdf_link": "Show \"Download menu (PDF)\" link"
   },
   "images": "Logo and banner",
   "images_hint": "The banner is the wide photo at the top of your menu. It is cropped to the shape your menu style uses.",
