@@ -26,4 +26,8 @@ return [
         'sent' => 'Test e-mail sent to :email. Check the inbox (and the spam folder).',
         'failed' => 'The test e-mail could not be sent: :reason',
     ],
+    'remind' => [
+        'sent' => '{1} E-mail sent to the owner.|[2,*] E-mail sent to :count owners.',
+        'no_owner' => 'This restaurant has no owner to e-mail.',
+    ],
 ];

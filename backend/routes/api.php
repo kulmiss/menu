@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\Restaurant\PromotionController;
 use App\Http\Controllers\Api\Restaurant\QrCodeController;
 use App\Http\Controllers\Api\TeamController;
 use App\Http\Controllers\Api\TenantController;
+use App\Http\Controllers\Platform\DashboardWidgetController as PlatformDashboardWidgetController;
 use App\Http\Controllers\Platform\PaymentController;
 use App\Http\Controllers\Platform\PlatformController;
 use App\Http\Controllers\Platform\RestaurantController;
@@ -54,6 +55,13 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
         // Super Admin (PLAN.md §7.3): Super Admins with two-factor sign-in only.
         Route::prefix('platform')->middleware('platform')->group(function () {
             Route::get('dashboard', [PlatformController::class, 'dashboard']);
+            Route::prefix('widgets')->controller(PlatformDashboardWidgetController::class)->group(function () {
+                foreach (['revenue', 'expiring', 'inactive', 'funnel', 'top', 'signups', 'health'] as $widget) {
+                    Route::get($widget, $widget);
+                }
+                Route::get('plan-mix', 'planMix');
+                Route::post('email/{tenant}', 'email')->whereNumber('tenant')->middleware('throttle:20,1');
+            });
             Route::get('restaurants', [RestaurantController::class, 'index']);
             Route::post('restaurants', [RestaurantController::class, 'store']);
             Route::get('restaurants/{restaurant}', [RestaurantController::class, 'show'])->whereNumber('restaurant');

@@ -1,10 +1,14 @@
+import { lazy, Suspense } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { dashboardQ, money, STATES } from './api'
+import { dashboardQ, STATES } from './api'
 import { PageTitle } from './layout'
+
+// The eight Super Admin widgets are downloaded after the page (owner, 2026-11-11).
+const Widgets = lazy(() => import('./widgets'))
 
 export function PlatformDashboard() {
   const { t } = useTranslation()
@@ -51,50 +55,10 @@ export function PlatformDashboard() {
             ))}
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('platform.dash.per_plan')}</CardTitle>
-          </CardHeader>
-          <CardContent className='grid gap-1 text-sm'>
-            {Object.entries(d?.per_plan ?? {}).map(([plan, n]) => (
-              <div key={plan} className='flex justify-between'>
-                <span>{plan}</span>
-                <span className='tabular-nums'>{n}</span>
-              </div>
-            ))}
-            <p className='mt-2 text-muted-foreground'>
-              {t('platform.dash.revenue')}:{' '}
-              {Object.entries(d?.revenue_30d ?? {})
-                .map(([c, v]) => money(v, c))
-                .join(' · ') || '—'}
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('platform.dash.expiring')}</CardTitle>
-          </CardHeader>
-          <CardContent className='grid gap-1 text-sm'>
-            {d?.expiring.length === 0 && (
-              <p className='text-muted-foreground'>
-                {t('platform.dash.none_expiring')}
-              </p>
-            )}
-            {d?.expiring.map((r) => (
-              <Link
-                key={r.id}
-                to='/platform/$section'
-                params={{ section: 'restaurants' }}
-                search={{ open: r.id }}
-                className='flex justify-between rounded px-1 hover:bg-accent'
-              >
-                <span className='truncate'>{r.name}</span>
-                <span className='text-muted-foreground'>{r.ends_at}</span>
-              </Link>
-            ))}
-          </CardContent>
-        </Card>
       </div>
+      <Suspense fallback={<Skeleton className='mt-4 h-64 w-full' />}>
+        <Widgets />
+      </Suspense>
     </>
   )
 }

@@ -1,6 +1,6 @@
 # Handover
 
-_Last updated: 2026-11-11 15:20 EAT. PR #15 merged; owner's change list (2026-11-11) queued below._
+_Last updated: 2026-11-11 20:45 EAT. #26–#30 open and stacked; all requested work is done — waiting for the owner to merge #30 and run the laptop steps below._
 
 > **Speed is the top priority (owner, 2026-11-10): PLAN.md §15 applies to every partition and every partition report includes the §15.5 numbers.**
 > **English only for now (owner, 2026-11-10):** texts stay in `t()` / `__()` and the database keeps per-language fields; language switches and translation screens are hidden while one language is enabled.
@@ -15,12 +15,24 @@ _Last updated: 2026-11-11 15:20 EAT. PR #15 merged; owner's change list (2026-11
 | Printable PDF menu | `feat/pdf-menu` (on #26) | #27 |
 | "My order" list | `feat/my-order` (on #27) | #28 |
 | Restaurant dashboard widgets | `feat/restaurant-dashboard` (on #28) | #29 |
-| Super Admin dashboard widgets | `feat/platform-dashboard` (on #29) | in progress |
+| Super Admin dashboard widgets | `feat/platform-dashboard` (on #29) | #30 |
 
 **Queued next (owner, 2026-11-11 19:40), after "My order":** dashboard widgets as small stacked PRs.
 - Super Admin (/platform): revenue (this vs last month, MRR, 12-month SVG bars); expiring trials/subscriptions 7/14 days + "Remind" e-mail (editable, logged); inactive restaurants (no views and no edits 14+ days) + "Email owner"; growth funnel (sign-ups → ≥5 dishes → first QR scan → paying, 30/90 days, %); top restaurants (views/scans 30 days, biggest plans); new sign-ups with setup progress %; system health (disk, photo storage, cron last run, queued/failed mails, errors today, PHP/Laravel; warnings: cron > 10 min, disk < 10 %); plan mix donut + upgrades/downgrades this month.
 - Restaurant dashboard: setup checklist (logo, banner, ≥5 dishes, photos, hours, info, QR downloaded; links; "Hide"); views/scans today vs yesterday + 7-day mini chart; missing photos (most viewed first, "Add photo", only when photos shown); "My order" stats (most-added dishes, average list value 7/30 days — anonymous sendBeacon counts from the on-demand cart file: dish id, quantity, list total; bots filtered; only when the list is on); plan & usage bars (dishes, branches, photos, languages, team) with upgrade hint; platform news on top when new.
 - Rules: admin first load ≤ 225 KB (widgets on demand), plain SVG charts, parallel widgets with skeleton/empty/error states, staff never see plan/usage/money (server-enforced), fast queries (indexes, no N+1, cache totals a few minutes; test with 200 restaurants × 6 months), tests per widget, t(), light/dark, 375 px, contrast.
+
+## Super Admin dashboard (#30)
+- `Platform\DashboardWidgetController` (revenue, expiring, inactive, funnel?days=30|90, top, signups, health, plan-mix, POST email/{tenant}); routes under `platform/widgets/*`; cron heartbeat `Cache::forever('cron:last_run')` and `queue:work --stop-when-empty` every minute in `routes/console.php`; indexes migration `2026_11_11_210001`.
+- Frontend `features/platform/widgets.tsx` (lazy from `features/platform/dashboard.tsx`), shared `features/dashboard/widget-card.tsx` (`Widget`, `Bar`). Decisions #135–#139.
+
+## Owner's laptop steps (after merging #30)
+1. `git pull` develop; `composer install`; `php artisan migrate`; `pnpm install && pnpm build` (frontend).
+2. `php artisan menu:refresh-pages --all` (new share button, PDF link, order list, styles in every static page).
+3. `php artisan media:regenerate --dry-run`, then without `--dry-run` (800 px sizes for older photos).
+4. cPanel cron: `* * * * * php /path/artisan schedule:run >> /dev/null 2>&1` — needed for page refresh, the mail queue and the health heartbeat (the health widget warns until it runs).
+5. Try: Share menu on a phone, PDF download (editor + guest link), My order (add, show to waiter, next visit), both dashboards (as owner, staff, Super Admin).
+6. Protect `main` in GitHub settings; then the go-live steps in `docs/deploy.md`.
 
 ## Restaurant dashboard (#29)
 - `Api\Restaurant\DashboardWidgetController` (setup, hideSetup, trend, missingPhotos, orders, plan); routes `t/{id}/widgets/*`; tenants `qr_downloaded_at`, `setup_hidden_at` (`Tenant::markQrDownloaded()` in QR downloads).
