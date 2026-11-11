@@ -1,19 +1,23 @@
 # Handover
 
-_Last updated: 2026-11-11 02:30 EAT. Partition 11 (PR #15)._
+_Last updated: 2026-11-11 15:20 EAT. PR #15 merged; owner's change list (2026-11-11) queued below._
 
 > **Speed is the top priority (owner, 2026-11-10): PLAN.md §15 applies to every partition and every partition report includes the §15.5 numbers.**
 > **English only for now (owner, 2026-11-10):** texts stay in `t()` / `__()` and the database keeps per-language fields; language switches and translation screens are hidden while one language is enabled.
 > **Working mode (owner):** go through all remaining partitions without stopping for OK, then write the Step 4 final report. Stop only for: changes outside this project, steps that can't be undone, licence doubts, the same CI failure 3 times, or the working limit.
 
 ## Where we are
-`develop` contains PRs #3–#14 (owner merged #14 on 2026-11-10).
+`develop` contains PRs #3–#15 (Partition 11 merged 2026-11-11).
 
-| Part | Branch | PR | State |
-|---|---|---|---|
-| **11 Super Admin** | `feat/platform` (from `develop`) | **#15** | newest |
+## Owner's change list (2026-11-11) — do these as separate small PRs into develop, then Partitions 12–14
+1. **New customer menu UI** — modern, premium, photo-first; smooth category tabs, elegant item sheet, reduced-motion-safe animations, good empty/sold-out states. **First 2–3 directions as mockups on the design canvas (phone, light + dark, demo café) → owner picks (the ONLY stop).** Keep all budgets (Lighthouse 100, < 30 KB before images, inline script ≤ 5 KB, LCP < 1.2 s).
+2. **Food photos** — easy add/change/crop/remove per dish, also from a phone (camera/gallery), upload progress + preview; **up to 5 photos per dish** (first = main; swipe in the item sheet); plan photo limits; auto resize/compress (WebP sizes + blur placeholder).
+3. **"Log in as" indicator** — remove the red banner; small quiet badge "Viewing as <restaurant>" + "Back to platform" in the admin header, only the Super Admin sees it; owner never sees anything; keep activity log + safety blocks.
+4. **SMTP settings in Super Admin → Settings → Email** — host, port, encryption (none/SSL/TLS), username, password (encrypted, shown only as ••••), from address/name; "Send test email" with clear success/error; fall back to .env when empty; every platform e-mail uses them.
+5. **Restaurant banner at the top of the menu** — check the existing cover photo; upload/crop to the recommended size with live preview and remove; logo + name over/under it; fast (sizes, priority) and no layout shift.
 
-**Merge only the newest PR** with *Create a merge commit*.
+Rules unchanged: tests, CI green, budgets kept (load on demand, don't raise limits), t() everywhere, 44 px targets, contrast ≥ 4.5:1, light + dark. Decisions → QUESTIONS.md.
+Also queued: `docker-compose.yml` vite service needs `COREPACK_ENABLE_DOWNLOAD_PROMPT=0` (the pnpm prompt stops the container); optional "Resend set-password e-mail" button + friendlier welcome mail for owners created by the Super Admin.
 
 ## What Partition 11 contains (PR #15)
 - Tables `payments`, `platform_settings`, `platform_announcements` (+ `announcement_reads`), `impersonations`. Plan features (`App\Support\Features`, `feature:` middleware, `features` in `/me` tenants, guest page footer/promotions).
