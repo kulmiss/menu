@@ -7,14 +7,22 @@ _Last updated: 2026-11-11 15:20 EAT. PR #15 merged; owner's change list (2026-11
 > **Working mode (owner):** go through all remaining partitions without stopping for OK, then write the Step 4 final report. Stop only for: changes outside this project, steps that can't be undone, licence doubts, the same CI failure 3 times, or the working limit.
 
 ## Where we are
-`develop` contains #3–#23 (owner merged #23 on 2026-11-11). Open, stacked (merge only the newest):
+`develop` contains #3–#25. Open, stacked (merge only the newest):
 
 | Change | Branch | PR |
 |---|---|---|
-| `media:regenerate` for older photos | `feat/media-regenerate` | #24 |
-| Photo-free menus + "Show photo on menu" per dish | `feat/photo-free` (on top of #24) | #25 — merge this one |
+| Share menu button | `feat/share-menu` | #26 |
+| Printable PDF menu | `feat/pdf-menu` (on #26) | #27 |
+| "My order" list | `feat/my-order` (on #27) | in progress |
 
-Owner decisions 2026-11-11: #114 keep photo quality; regenerate command yes; #106, #99, #98, #111, #117, #91–#97 OK.
+**Queued next (owner, 2026-11-11 19:40), after "My order":** dashboard widgets as small stacked PRs.
+- Super Admin (/platform): revenue (this vs last month, MRR, 12-month SVG bars); expiring trials/subscriptions 7/14 days + "Remind" e-mail (editable, logged); inactive restaurants (no views and no edits 14+ days) + "Email owner"; growth funnel (sign-ups → ≥5 dishes → first QR scan → paying, 30/90 days, %); top restaurants (views/scans 30 days, biggest plans); new sign-ups with setup progress %; system health (disk, photo storage, cron last run, queued/failed mails, errors today, PHP/Laravel; warnings: cron > 10 min, disk < 10 %); plan mix donut + upgrades/downgrades this month.
+- Restaurant dashboard: setup checklist (logo, banner, ≥5 dishes, photos, hours, info, QR downloaded; links; "Hide"); views/scans today vs yesterday + 7-day mini chart; missing photos (most viewed first, "Add photo", only when photos shown); "My order" stats (most-added dishes, average list value 7/30 days — anonymous sendBeacon counts from the on-demand cart file: dish id, quantity, list total; bots filtered; only when the list is on); plan & usage bars (dishes, branches, photos, languages, team) with upgrade hint; platform news on top when new.
+- Rules: admin first load ≤ 225 KB (widgets on demand), plain SVG charts, parallel widgets with skeleton/empty/error states, staff never see plan/usage/money (server-enforced), fast queries (indexes, no N+1, cache totals a few minutes; test with 200 restaurants × 6 months), tests per widget, t(), light/dark, 375 px, contrast.
+
+## Share menu (#26) and PDF menu (#27)
+- Share: `show_share` (appearance, default on), button `.ib[data-x=H]`, `window.mH` in the on-demand `sheet.js`; inline `run(f, a)` calls `window['m'+f]` after loading the on-demand file. Better og tags (description, banner og image).
+- PDF: `App\Support\PublicMenu\PdfMenu` (FPDF, columns, keep-together blocks), `Api\Restaurant\PdfMenuController` (`GET t/{id}/menu-pdf`, feature `pdf_menu`), guest `/{slug}[/{branch}]/menu.pdf` (`PublicMenuController::pdf`, cached in `menu-cache/{slug}[/{branch}]/menu.pdf`), `show_pdf_link` (default off). Admin dialog `features/menu/editor/pdf-menu-dialog.tsx` (inside the editor chunk: a lazy split moved shared chunks into the first load).
 
 ## Photo-free menus (feat/photo-free)
 - `items.show_photo` (default true): `MenuPageData` shows no media/sheet photos when off; API + dish editor switch ("Show photo on menu", hint when off).
