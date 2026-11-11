@@ -2,8 +2,15 @@
     use App\Support\PublicMenu\InlineAssets;
     $preview ??= false;
     $cover = $theme['cover'];
-    $eagerLeft = $cover ? 2 : 4; // the first photos load at once; the rest lazily (PLAN.md §15.2.4)
-    $sizes = ['list' => '88px', 'grid' => '(min-width:44rem) 340px, 50vw', 'large' => '(min-width:44rem) 704px, 100vw'][$theme['layout']];
+    $style = $theme['style'];
+    // Photo widths per menu style, so the browser picks the right file (§15.2.4).
+    $sizes = ['bistro' => '104px', 'grid' => '(min-width:40rem) 220px, 50vw', 'editorial' => '(min-width:44rem) 672px, 100vw'][$style];
+    // Only photos likely on the first screen load at once; the rest lazily
+    // (PLAN.md §15.2.4). How many dishes fit depends on the style and the banner.
+    $fold = ['editorial' => [2, 1], 'grid' => [4, 2], 'bistro' => [5, 3]][$style][$cover ? 1 : 0];
+    $eagerLeft = $fold;
+    $position = 0;
+    $hasInfo = $week || $info['address'] || $info['links'] || $info['about'] || $info['wifi'] || $info['socials'];
     $sheets = [];
     $firstImage = null;
     foreach ($menus as $m) { foreach ($m['categories'] as $c) { foreach ($c['items'] as $i) {
@@ -44,9 +51,10 @@
 <meta property="og:url" content="{{ url($canonical) }}">
 @if ($firstImage)<meta property="og:image" content="{{ $firstImage }}">@endif
 <link rel="icon" href="data:,">
-<style>{!! InlineAssets::css() !!}{!! $theme['css'] !!}</style>
+<style>{!! InlineAssets::css($style) !!}{!! $theme['css'] !!}</style>
 </head>
-<body>
+<body class="S-{{ $style }}">
+<div @class(['top', 'hc' => $cover])>
 @if ($cover)
 <div class="cv" style="background-image:url({{ $cover['placeholder'] ?? '' }});background-color:{{ $cover['color'] ?? 'transparent' }}"><picture>
 @if (isset($cover['urls']['avif640']))<source type="image/avif" srcset="{{ $cover['urls']['avif640'] }} 640w{{ isset($cover['urls']['avif1280']) ? ', '.$cover['urls']['avif1280'].' 1280w' : '' }}" sizes="(min-width:44rem) 704px, 100vw">@endif
@@ -54,26 +62,28 @@
 <img src="{{ $cover['urls']['jpg'] ?? '' }}" alt="" width="1280" height="549" fetchpriority="high" decoding="async">
 </picture></div>
 @endif
-<div class="w">
 <header>
-@if ($theme['logo'])<img class="lg" src="{{ $theme['logo']['320'] ?? '' }}" alt="" width="56" height="56">@endif
+@if ($theme['logo'])<img class="lg" src="{{ $theme['logo']['320'] ?? '' }}" alt="" width="76" height="76">@endif
 <div><h1>{{ $tenant->name }}</h1>
 @if ($branch)<p class="sub">{{ $branch }}</p>@endif
-<p class="st" id="st" hidden></p></div>
+{{-- The open/closed pill is filled in by the script; its space is kept so nothing moves (CLS). --}}
+<p class="st ld" id="st"@if (! $hours) hidden @endif>&nbsp;</p></div>
 </header>
+</div>
+<div class="w">
 @foreach ($notices as $n)<p class="nt">{{ __('public.closed_on', ['dates' => $n['dates']]) }}@if ($n['note'] !== '') · {{ $n['note'] }}@endif</p>@endforeach
 @if ($branches)
 <nav class="ch bs" aria-label="{{ __('public.branches') }}">@foreach ($branches as $b)<a href="{{ $b['path'] }}"@if ($b['current']) class="on" aria-current="page"@endif>{{ $b['name'] }}</a>@endforeach</nav>
 @endif
 </div>
 <div class="bar"><div class="w">
-<div class="sr"><input id="q" type="search" placeholder="{{ __('public.search') }}" aria-label="{{ __('public.search') }}" autocomplete="off"></div>
+<div class="sr"><input id="q" type="search" placeholder="{{ __('public.search') }}" aria-label="{{ __('public.search') }}" autocomplete="off">@if ($hasInfo)<a class="ib" href="#info" aria-label="{{ __('public.info') }}"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></a>@endif</div>
 @if (count($tags) > 1)
 <div class="ch" role="group" aria-label="{{ __('public.filter') }}">@foreach ($tags as $key => $label)<button type="button" data-tag="{{ $key }}" aria-pressed="false">{{ $label }}</button>@endforeach</div>
 @endif
 <nav class="ch cn" aria-label="Categories">@foreach ($menus as $m)@foreach ($m['categories'] as $c)<a href="#c{{ $c['id'] }}">{{ $c['name'] }}</a>@endforeach @endforeach</nav>
 </div></div>
-<main class="w L-{{ $theme['layout'] }}">
+<main class="w">
 @foreach ($promotions as $p)
 @if ($p['type'] === 'announcement')
 <p class="an"@if ($p['window']) data-w="{{ json_encode($p['window']) }}"@endif @if ($p['hidden']) hidden @endif><b>{{ $p['title'] }}</b>@if ($p['body'] !== '') {{ $p['body'] }}@endif</p>
@@ -96,34 +106,35 @@
 <ul>
 @foreach ($c['items'] as $i)
 <li data-i="{{ $i['id'] }}" data-t="{{ implode(' ', array_column($i['tags'], 'key')) }}"@class(['so' => $i['sold_out']])>
-<button type="button" class="it"><span class="tx"><span class="nm">{{ $i['name'] }}</span>
+<button type="button" @class(['it', 'np' => ! $i['media']])><span class="tx"><span class="nm">{{ $i['name'] }}</span>
 @if ($i['summary'] !== '')<span class="sm">{{ $i['summary'] }}</span>@endif
 @if ($i['price'] !== '')<span class="pr">{{ $i['price'] }}</span>@endif
-@if ($i['sold_out'])<span class="bd">{{ __('public.sold_out') }}</span>@endif
+<span class="tg">@if ($i['sold_out'])<span class="bd x0">{{ __('public.sold_out') }}</span>@endif
 @if ($i['new'])<span class="bd hl">{{ __('public.new') }}</span>@endif
 @if ($i['popular'])<span class="bd hl">{{ __('public.popular') }}</span>@endif
 @foreach ($i['tags'] as $t)@if (! in_array($t['key'], ['new', 'popular'], true))<span class="bd">{{ $t['label'] }}</span>@endif @endforeach
-</span>
+</span></span>
 @if ($i['media'])
-@php $img = $i['media']; $eager = $eagerLeft-- > 0; @endphp
+@php $img = $i['media']; $eager = $position < $fold && $eagerLeft-- > 0; @endphp
 <span class="im" style="background-image:url({{ $img['placeholder'] ?? '' }});background-color:{{ $img['color'] ?? 'transparent' }}"><picture>
 @if ($img['avif'])<source type="image/avif" srcset="{{ $img['avif'] }}" sizes="{{ $sizes }}">@endif
 <source type="image/webp" srcset="{{ $img['webp'] }}" sizes="{{ $sizes }}">
-<img src="{{ $img['jpg'] }}" alt="" width="{{ $img['w'] }}" height="{{ $img['h'] }}" decoding="async" @if ($eager) fetchpriority="{{ ! $cover && $eagerLeft === 3 ? 'high' : 'auto' }}" @else loading="lazy" @endif>
+<img src="{{ $img['jpg'] }}" alt="" width="{{ $img['w'] }}" height="{{ $img['h'] }}" decoding="async" @if ($eager) fetchpriority="{{ ! $cover && $eagerLeft === $fold - 1 ? 'high' : 'auto' }}" @else loading="lazy" @endif>
 </picture></span>
 @endif
 </button></li>
+@php $position++; @endphp
 @endforeach
 </ul>
 </section>
 @endforeach
 </div>
 @empty
-<p class="nr">{{ __('public.empty') }}</p>
+<div class="nr"><svg aria-hidden="true" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 11h16a8 8 0 0 1-16 0zM8 3v4M12 2v5M16 3v4"/></svg><p>{{ __('public.empty') }}</p></div>
 @endforelse
 <p class="nr" id="nr" hidden>{{ __('public.no_results') }}</p>
 </main>
-@if ($week || $info['address'] || $info['links'] || $info['about'] || $info['wifi'] || $info['socials'])
+@if ($hasInfo)
 <details class="inf w" id="info"><summary>{{ __('public.info') }}</summary>
 @if ($info['about'] !== '')<p class="ab">{{ $info['about'] }}</p>@endif
 @if ($week)<h3>{{ __('public.hours') }}</h3><table>@foreach ($week as $row)<tr><th scope="row">{{ $row['day'] }}</th><td>{{ $row['times'] }}</td></tr>@endforeach</table>@endif

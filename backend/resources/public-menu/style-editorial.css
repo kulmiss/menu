@@ -1,0 +1,26 @@
+/* Style A · Warm editorial: big photos first, serif headings, underlined tabs.
+   Surfaces must match PageTheme::STYLES['editorial'] (contrast of the brand colour). */
+:root{--bg:#fbf7f1;--fg:#2a211b;--mu:#6b5e52;--ln:#e9e0d4;--card:#f3ebe0}
+@media (prefers-color-scheme:dark){:root{--bg:#1a1512;--fg:#f4ede4;--mu:#b9ac9f;--ln:#3a3029;--card:#231c18}}
+.cv{aspect-ratio:16/9}
+@media (min-width:44rem){.cv{border-radius:0 0 1.25rem 1.25rem}}
+header{flex-direction:column;align-items:flex-start;gap:.3rem;padding-top:1rem}
+.hc header{margin-top:-2.75rem;position:relative;padding-top:0}
+.lg{width:4.75rem;height:4.75rem;border-radius:50%;border:4px solid var(--bg)}
+h1{font-size:2rem;font-weight:600;line-height:1.1;letter-spacing:-.01em}
+.bar{border-bottom-color:var(--ln)}
+.cn{gap:1.25rem}
+.cn a{padding:0 .1rem;border:0;border-bottom:2px solid transparent;border-radius:0;color:var(--mu)}
+.cn a.on{background:none;color:var(--fg);border-color:var(--fg)}
+section{padding-top:2rem}
+section h2{font-size:1.6rem;font-weight:600}
+ul{display:flex;flex-direction:column;gap:1.9rem;margin-top:1rem}
+li{border:0}
+.it{padding:0;grid-template-columns:1fr auto;grid-template-areas:"im im" "nm pr" "sm sm" "tg tg";row-gap:.3rem}
+.it .im{grid-area:im;aspect-ratio:3/2;border-radius:1.1rem;margin-bottom:.5rem}
+.it .nm{grid-area:nm;font-size:1.35rem;line-height:1.2}
+.it .pr{grid-area:pr;margin:0;align-self:baseline;font-size:1.05rem;white-space:nowrap}
+.it .sm{grid-area:sm;margin:0}
+.it .tg{grid-area:tg}
+.bd{background:var(--card);border-color:transparent}
+.sh h3,.sh h4{font-family:var(--fh)}

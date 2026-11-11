@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @property int $id
  * @property array<string, string> $name
- * @property array{primary: string, font: string, layout: string} $preset
+ * @property array{primary: string, font: string, style: string} $preset
  * @property bool $is_active
  * @property int $sort
  */

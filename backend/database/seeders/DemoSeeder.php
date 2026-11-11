@@ -15,6 +15,7 @@ use App\Models\Menu;
 use App\Models\MenuSchedule;
 use App\Models\Tag;
 use App\Models\Tenant;
+use App\Models\TenantAppearance;
 use App\Models\User;
 use App\Support\ImageProcessor;
 use App\Tenancy\CurrentTenant;
@@ -55,7 +56,11 @@ class DemoSeeder extends Seeder
         ]);
         Membership::create(['tenant_id' => $tenant->id, 'user_id' => $user->id, 'role' => Role::Owner]);
 
-        $current->runAs($tenant, fn () => $this->menu($tenant, $images));
+        $current->runAs($tenant, function () use ($tenant, $images) {
+            $this->menu($tenant, $images);
+            // CI measures every menu style on the demo (DEMO_MENU_STYLE=editorial|grid|bistro).
+            TenantAppearance::create([...TenantAppearance::DEFAULTS, 'style' => TenantAppearance::effectiveStyle(config('menu.demo_style'), TenantAppearance::STYLES)]);
+        });
     }
 
     private function menu(Tenant $tenant, ImageProcessor $images): void

@@ -145,7 +145,7 @@ it('keeps settings, themes and the activity log', function () {
     $this->actingAs($admin)->putJson(p('settings'), ['name' => 'MenuHub', 'support_email' => 'help@example.com'], idem())->assertOk()->assertJsonPath('data.name', 'MenuHub');
     $this->get('/'.$tenant->slug)->assertSee('Menu by MenuHub');
 
-    $this->actingAs($admin)->postJson(p('themes'), ['name' => ['en' => 'Coffee'], 'primary' => '#6b3e26', 'font' => 'serif', 'layout' => 'list'], idem())->assertCreated();
+    $this->actingAs($admin)->postJson(p('themes'), ['name' => ['en' => 'Coffee'], 'primary' => '#6b3e26', 'font' => 'serif', 'style' => 'bistro'], idem())->assertCreated();
     $this->actingAs($admin)->getJson(p('themes'))->assertJsonPath('data.5.primary', '#6b3e26');
 
     $this->actingAs($admin)->getJson(p('activity?platform_only=1'))->assertOk()->assertJsonPath('data.0.action', 'platform.theme_created');

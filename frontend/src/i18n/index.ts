@@ -84,30 +84,33 @@ export function loadScreenTexts(
   return promise
 }
 
-// Super Admin texts: only downloaded in the /platform area.
-const platformLoaders = import.meta.glob<{ default: Record<string, unknown> }>(
-  '../locales/*/platform.json'
+// Texts only some screens need, downloaded when such a screen opens: the
+// Super Admin area and single rarely visited screens (owner, 2026-11-11:
+// load on demand instead of raising the size limit).
+const pageLoaders = import.meta.glob<{ default: Record<string, unknown> }>(
+  '../locales/en/{appearance,platform}.json'
 )
-let platformLoaded: Promise<void> | null = null
+const pagesLoaded = new Map<string, Promise<void>>()
 
-export function loadPlatformTexts(): Promise<void> {
-  const code = i18n.language || 'en'
-  const loader =
-    platformLoaders[`../locales/${code}/platform.json`] ??
-    platformLoaders['../locales/en/platform.json']
-  platformLoaded ??= loader
-    ? loader().then((m) => {
-        i18n.addResourceBundle(
-          code,
-          'common',
-          { platform: m.default },
-          true,
-          false
-        )
-      })
-    : Promise.resolve()
-  return platformLoaded
+/** Loads the texts of one area into "common" under its own key. */
+export function loadPageTexts(page: 'appearance' | 'platform'): Promise<void> {
+  let promise = pagesLoaded.get(page)
+  if (!promise) {
+    promise = pageLoaders[`../locales/en/${page}.json`]().then((m) => {
+      i18n.addResourceBundle(
+        i18n.language || 'en',
+        'common',
+        { [page]: m.default },
+        true,
+        false
+      )
+    })
+    pagesLoaded.set(page, promise)
+  }
+  return promise
 }
+
+export const loadPlatformTexts = () => loadPageTexts('platform')
 
 /** Loads a language, then switches the interface to it. */
 export async function setLanguage(code: LanguageCode): Promise<void> {

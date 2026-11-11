@@ -26,15 +26,14 @@ import {
   type Appearance,
   type AppearanceValues,
   type Font,
-  type Layout,
   appearanceQuery,
   previewUrl,
   useSaveAppearance,
 } from './api'
 import { isHex, tooLightOnWhite } from './contrast'
+import { StylePicker } from './style-picker'
 
 const FONTS: Font[] = ['system', 'serif', 'rounded']
-const LAYOUTS: Layout[] = ['list', 'grid', 'large']
 const FLAGS = [
   'show_prices',
   'show_photos',
@@ -80,7 +79,7 @@ function valuesOf(a: Appearance): AppearanceValues {
   return {
     primary_color: a.primary_color,
     font: a.font,
-    layout: a.layout,
+    style: a.style,
     show_prices: a.show_prices,
     show_photos: a.show_photos,
     show_descriptions: a.show_descriptions,
@@ -110,12 +109,17 @@ function AppearanceForm({ initial }: { initial: Appearance }) {
   // The preview follows the settings, a moment after the last change.
   useEffect(() => {
     const next = previewUrl(ctx.tenantId, values)
-    const timer = setTimeout(() => {
-      if (next !== src) {
-        setLoading(true)
-        setSrc(next)
-      }
-    }, 350)
+    // A new menu style shows at once; typing a colour waits for a pause.
+    const styleChanged = !src.includes(`style=${values.style}`)
+    const timer = setTimeout(
+      () => {
+        if (next !== src) {
+          setLoading(true)
+          setSrc(next)
+        }
+      },
+      styleChanged ? 0 : 350
+    )
     return () => clearTimeout(timer)
   }, [ctx.tenantId, values, src])
 
@@ -171,7 +175,9 @@ function AppearanceForm({ initial }: { initial: Appearance }) {
                     ...v,
                     primary_color: theme.primary,
                     font: theme.font,
-                    layout: theme.layout,
+                    style: initial.styles.includes(theme.style)
+                      ? theme.style
+                      : v.style,
                     theme_id: theme.id,
                   }))
                 }}
@@ -255,24 +261,12 @@ function AppearanceForm({ initial }: { initial: Appearance }) {
               </div>
             </fieldset>
 
-            <fieldset className='grid gap-2'>
-              <legend className='mb-2 text-sm font-medium'>
-                {t('appearance.layout')}
-              </legend>
-              <div className='flex flex-wrap gap-2'>
-                {LAYOUTS.map((layout) => (
-                  <Choice
-                    key={layout}
-                    name='layout'
-                    checked={values.layout === layout}
-                    disabled={disabled}
-                    onChange={() => set('layout', layout)}
-                  >
-                    {t(`appearance.layouts.${layout}`)}
-                  </Choice>
-                ))}
-              </div>
-            </fieldset>
+            <StylePicker
+              value={values.style}
+              allowed={initial.styles}
+              disabled={disabled}
+              onChange={(style) => set('style', style)}
+            />
 
             <div className='grid gap-3'>
               {FLAGS.map((flag) => (

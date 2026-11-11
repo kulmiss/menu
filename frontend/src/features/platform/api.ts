@@ -12,6 +12,9 @@ export const FEATURES = [
   'insights',
   'import_export',
   'remove_branding',
+  'style_editorial',
+  'style_grid',
+  'style_bistro',
 ] as const
 export const LIMITS = [
   'menus',
@@ -126,7 +129,7 @@ export const themesQ = () =>
       name: Record<string, string>
       primary: string
       font: string
-      layout: string
+      style: string
       is_active: boolean
     }[]
   >('themes')

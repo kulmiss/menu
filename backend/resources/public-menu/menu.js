@@ -24,8 +24,8 @@
   }
   function open(li) { if (w.mS) w.mS(li, data()); else { wait = li; load(); } }
   on(d, 'click', function (e) {
-    var b = e.target.closest && e.target.closest('.it');
-    if (b) open(b.parentNode);
+    var b = e.target.closest && e.target.closest('.it,.ib');
+    if (b) b.hash ? id('info').open = 1 : open(b.parentNode); // the info button opens "Info & opening hours"
     else if (e.target.id === 'sx' || e.target === dl) dl.close();
   });
   ['pointerover', 'touchstart'].forEach(function (n) {

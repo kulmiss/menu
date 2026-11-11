@@ -1,0 +1,22 @@
+/* Style C · Quiet bistro: centred name, thin banner, hairline list with
+   square photos on the right. Surfaces must match PageTheme::STYLES['bistro']. */
+:root{--bg:#fff;--fg:#191714;--mu:#625c55;--ln:#ece9e4;--card:#faf8f5}
+@media (prefers-color-scheme:dark){:root{--bg:#0e0d0c;--fg:#f2eee8;--mu:#aba49b;--ln:#2a2724;--card:#161412}}
+.cv{aspect-ratio:5/2}
+header{flex-direction:column;text-align:center;gap:.3rem;padding-top:1.4rem}
+.lg{border-radius:50%}
+h1{font-size:2.1rem;font-weight:500;line-height:1.1;letter-spacing:.01em}
+.bar{border-top:1px solid var(--ln)}
+.cn{gap:.25rem}
+.cn a{padding:0 .7rem;border:0;border-bottom:2px solid transparent;border-radius:0;color:var(--mu)}
+.cn a.on{background:none;color:var(--a);border-color:var(--a)}
+section{padding-top:1.75rem}
+section h2{font-size:1.45rem;font-weight:500}
+.it{padding:1rem 0;grid-template-columns:minmax(0,1fr) 6.5rem;grid-template-rows:auto auto auto 1fr;grid-template-areas:"nm im" "sm im" "pr im" "tg im"}
+.np{grid-template-columns:minmax(0,1fr);grid-template-areas:"nm" "sm" "pr" "tg"}
+.it .im{grid-area:im;width:6.5rem;height:6.5rem;border-radius:.9rem}
+.it .nm{grid-area:nm;font-size:1.1rem;font-weight:600;line-height:1.25}
+.it .sm{grid-area:sm}
+.it .pr{grid-area:pr}
+.it .tg{grid-area:tg}
+.sh h3,.sh h4{font-family:var(--fh)}

@@ -101,7 +101,13 @@ jobs:
   # median of 3 runs on the demo menu, served as production serves it.
   # A PR that breaks a budget fails here.
   guest-menu-speed:
+    name: guest-menu-speed (${{ matrix.style }})
     runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        # Every menu style must meet every speed budget (owner, 2026-11-11).
+        style: [editorial, grid, bistro]
     defaults:
       run:
         working-directory: backend
@@ -123,6 +129,7 @@ jobs:
       DB_USERNAME: root
       DB_PASSWORD: root
       APP_URL: http://localhost:8124
+      DEMO_MENU_STYLE: ${{ matrix.style }}
     steps:
       - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
@@ -147,6 +154,7 @@ jobs:
           for i in $(seq 1 30); do curl -sf http://localhost:8123/up > /dev/null && break; sleep 1; done
           curl -sf -o /dev/null http://localhost:8123/demo
           test -f public/menu-cache/demo/index.html.gz
+          grep -q 'class="S-${{ matrix.style }}"' public/menu-cache/demo/index.html
           echo "Guest page: $(stat -c %s public/menu-cache/demo/index.html) bytes, $(stat -c %s public/menu-cache/demo/index.html.gz) gzip"
       - name: Serve it like production (Nginx, no PHP)
         run: |
@@ -163,6 +171,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: lighthouse
+          name: lighthouse-${{ matrix.style }}
           path: /tmp/lhci
           if-no-files-found: ignore

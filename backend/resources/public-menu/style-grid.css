@@ -1,0 +1,29 @@
+/* Style B · Fresh grid: name on the banner, pill tabs, two photo cards per row.
+   Surfaces must match PageTheme::STYLES['grid'] (contrast of the brand colour). */
+:root{--bg:#f5f7f6;--fg:#14211c;--mu:#56655f;--ln:#e1e7e4;--card:#fff}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1412;--fg:#eef4f1;--mu:#a3b3ac;--ln:#24302b;--card:#18201d}}
+.top{padding:.75rem .75rem 0}
+.cv{aspect-ratio:2/1;border-radius:1.5rem}
+.hc header{position:absolute;inset:auto .75rem 0;padding:3.5rem 1rem 1rem;border-radius:0 0 1.5rem 1.5rem;background:linear-gradient(#0000,#000c);color:#fff}
+.hc .sub{color:#fff}
+.hc .st{background:#000a;border-color:#fff6;color:#fff}
+.hc .st.op{color:#a7f3d0}
+.lg{border-radius:1rem;background:#fff}
+h1{font-size:1.55rem;font-weight:750;line-height:1.15}
+.bar{border:0;padding:.75rem 0 .5rem}
+.sr input,.ib{border-color:var(--card);background:var(--card);box-shadow:0 1px 2px #0000000f}
+.ch a,.ch button{background:var(--card);border-color:var(--card);font-weight:500}
+section h2{font-size:1.3rem;font-weight:750}
+ul{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:.75rem}
+@media (min-width:40rem){ul{grid-template-columns:1fr 1fr 1fr}}
+li{border:0;background:var(--card);border-radius:1.25rem;overflow:hidden;box-shadow:0 1px 3px #00000012}
+.it{height:100%;padding:0 0 .9rem;grid-template-columns:minmax(0,1fr);align-content:start}
+.it .im{grid-row:1;grid-column:1;aspect-ratio:4/3}
+.it .pr{grid-row:1;grid-column:1;align-self:end;justify-self:start;z-index:1;margin:.5rem;padding:.2rem .6rem;border-radius:99px;background:var(--card);color:var(--fg);font-size:.875rem;font-weight:700}
+.it.np .pr{grid-row:4;margin:.4rem .75rem 0;padding:0;background:none;color:var(--a)}
+.it.np .tg{grid-row:5}
+.it .nm{grid-row:2;padding:.65rem .75rem 0;font-size:.95rem;line-height:1.25}
+.it .sm{grid-row:3;padding:0 .75rem;font-size:.8rem}
+.it .tg{grid-row:4;padding:0 .75rem}
+.spc .sp{border:0;border-radius:1.25rem}
+.an{border:0;background:var(--card)}

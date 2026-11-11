@@ -470,7 +470,7 @@ export function ThemesPage() {
     name: '',
     primary: '#b4432a',
     font: 'system',
-    layout: 'list',
+    style: 'grid',
   })
 
   return (
@@ -491,7 +491,7 @@ export function ThemesPage() {
                 <p className='font-medium'>{th.name.en}</p>
                 <p className='text-muted-foreground'>
                   {t(`platform.themes.fonts.${th.font}`)} ·{' '}
-                  {t(`platform.themes.layouts.${th.layout}`)}
+                  {t(`platform.themes.styles.${th.style}`)}
                 </p>
               </div>
               <Switch
@@ -540,7 +540,7 @@ export function ThemesPage() {
                 onChange={(x) => setV({ ...v, primary: x.target.value })}
               />
             </div>
-            {(['font', 'layout'] as const).map((k) => (
+            {(['font', 'style'] as const).map((k) => (
               <div key={k} className='grid gap-1'>
                 <Label>{t(`platform.themes.${k}`)}</Label>
                 <Select
@@ -556,11 +556,11 @@ export function ThemesPage() {
                   <SelectContent>
                     {(k === 'font'
                       ? ['system', 'serif', 'rounded']
-                      : ['list', 'grid', 'large']
+                      : ['editorial', 'grid', 'bistro']
                     ).map((o) => (
                       <SelectItem key={o} value={o}>
                         {t(
-                          `platform.themes.${k === 'font' ? 'fonts' : 'layouts'}.${o}`
+                          `platform.themes.${k === 'font' ? 'fonts' : 'styles'}.${o}`
                         )}
                       </SelectItem>
                     ))}

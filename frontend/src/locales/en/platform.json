@@ -85,7 +85,10 @@
     "promotions": "Promotions",
     "insights": "Insights",
     "import_export": "Import and export",
-    "remove_branding": "Menu without our name"
+    "remove_branding": "Menu without our name",
+    "style_editorial": "Menu style A · Warm editorial",
+    "style_grid": "Menu style B · Fresh grid",
+    "style_bistro": "Menu style C · Quiet bistro"
   },
   "methods": {
     "cash": "Cash",
@@ -153,16 +156,16 @@
     "name": "Name",
     "colour": "Colour",
     "font": "Font",
-    "layout": "Layout",
+    "style": "Menu style",
     "fonts": {
       "system": "Modern",
       "serif": "Classic serif",
       "rounded": "Rounded"
     },
-    "layouts": {
-      "list": "List",
-      "grid": "Grid",
-      "large": "Large photos"
+    "styles": {
+      "editorial": "A · Warm editorial",
+      "grid": "B · Fresh grid",
+      "bistro": "C · Quiet bistro"
     }
   },
   "announcements": {

@@ -11,12 +11,25 @@ class InlineAssets
     /** @var array<string, string> */
     private static array $memo = [];
 
-    public static function css(): string
+    /**
+     * The shared CSS plus the CSS of one menu style only (owner, 2026-11-11:
+     * a page never carries the other styles).
+     */
+    public static function css(string $style = 'grid'): string
     {
-        return self::$memo['css'] ??= trim((string) preg_replace(
-            ['#/\*.*?\*/#s', '/\s*\n\s*/', '/\s*([{};:,>])\s*/', '/;}/'],
-            ['', '', '$1', '}'],
-            (string) file_get_contents(resource_path('public-menu/menu.css')),
+        $style = in_array($style, ['editorial', 'grid', 'bistro'], true) ? $style : 'grid';
+
+        return self::$memo['css.'.$style] ??= self::minifyCss(
+            file_get_contents(resource_path('public-menu/base.css'))."\n".file_get_contents(resource_path('public-menu/style-'.$style.'.css'))
+        );
+    }
+
+    public static function minifyCss(string $src): string
+    {
+        return trim((string) preg_replace(
+            ['#/\*.*?\*/#s', '/\s*\n\s*/', '/\s*([{};,>])\s*/', '/([{;]\s*[-a-z]+)\s*:\s*/', '/;}/'],
+            ['', '', '$1', '$1:', '}'],
+            $src,
         ));
     }
 

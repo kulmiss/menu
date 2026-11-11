@@ -24,7 +24,7 @@ vi.mock('./api', async (orig) => {
 const APPEARANCE: Appearance = {
   primary_color: '#b4432a',
   font: 'system',
-  layout: 'list',
+  style: 'grid',
   show_prices: true,
   show_photos: true,
   show_descriptions: true,
@@ -33,20 +33,21 @@ const APPEARANCE: Appearance = {
   logo: null,
   cover: null,
   warnings: [],
+  styles: ['editorial', 'grid', 'bistro'],
   themes: [
     {
       id: 1,
       name: 'Classic',
       primary: '#b4432a',
       font: 'system',
-      layout: 'list',
+      style: 'bistro',
     },
     {
       id: 2,
       name: 'Bistro',
       primary: '#2f5d50',
       font: 'serif',
-      layout: 'large',
+      style: 'editorial',
     },
   ],
 }
@@ -95,10 +96,10 @@ describe('AppearancePage', () => {
     await expect
       .element(screen.getByRole('button', { name: 'Bistro' }))
       .toBeVisible()
-    expect(frame(screen).src).toContain('layout=list')
+    expect(frame(screen).src).toContain('style=grid')
 
     await userEvent.click(screen.getByRole('button', { name: 'Bistro' }))
-    await expect.poll(() => frame(screen).src).toContain('layout=large')
+    await expect.poll(() => frame(screen).src).toContain('style=editorial')
     expect(frame(screen).src).toContain('font=serif')
     expect(frame(screen).src).toContain('primary_color=%232f5d50')
     await expect.element(screen.getByText('Unsaved changes')).toBeVisible()
@@ -109,7 +110,7 @@ describe('AppearancePage', () => {
       .toMatchObject({
         primary_color: '#2f5d50',
         font: 'serif',
-        layout: 'large',
+        style: 'editorial',
         theme_id: 2,
       })
     await expect
@@ -128,13 +129,34 @@ describe('AppearancePage', () => {
       .toBeVisible()
   })
 
-  it('switches and layout choices change the preview', async () => {
+  it('switches and the menu style change the preview', async () => {
     const screen = await render()
     await userEvent.click(screen.getByRole('switch', { name: 'Show prices' }))
-    await userEvent.click(screen.getByText('Grid'))
+    await userEvent.click(
+      screen.getByRole('radio', { name: /C · Quiet bistro/ })
+    )
 
     await expect.poll(() => frame(screen).src).toContain('show_prices=0')
-    expect(frame(screen).src).toContain('layout=grid')
+    expect(frame(screen).src).toContain('style=bistro')
+    await expect
+      .element(screen.getByRole('radio', { name: /C · Quiet bistro/ }))
+      .toBeChecked()
+  })
+
+  it('offers only the styles in the plan', async () => {
+    APPEARANCE.styles = ['grid', 'bistro']
+    const screen = await render()
+    await expect
+      .element(screen.getByRole('radio', { name: /A · Warm editorial/ }))
+      .toBeDisabled()
+    await expect
+      .element(screen.getByText('Not included in your plan.'))
+      .toBeVisible()
+    // A theme with a style outside the plan keeps the current style.
+    await userEvent.click(screen.getByRole('button', { name: 'Bistro' }))
+    await expect.poll(() => frame(screen).src).toContain('font=serif')
+    expect(frame(screen).src).toContain('style=grid')
+    APPEARANCE.styles = ['editorial', 'grid', 'bistro']
   })
 
   it('is read-only when the subscription does not allow changes', async () => {

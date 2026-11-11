@@ -40,7 +40,7 @@ class MenuPageData
             $branch ??= $branches->firstWhere('is_default', true) ?? $branches->first();
             $branchId = $branch?->id;
             $appearance ??= TenantAppearance::current();
-            $theme = PageTheme::from($appearance);
+            $theme = PageTheme::from($appearance, Features::styles($tenant));
             $locale = $tenant->default_locale ?: 'en';
             $text = fn (?array $v): string => $v === null || $v === [] ? '' : (string) ($v[$locale] ?? reset($v));
 

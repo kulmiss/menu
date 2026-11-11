@@ -7,7 +7,26 @@ _Last updated: 2026-11-11 15:20 EAT. PR #15 merged; owner's change list (2026-11
 > **Working mode (owner):** go through all remaining partitions without stopping for OK, then write the Step 4 final report. Stop only for: changes outside this project, steps that can't be undone, licence doubts, the same CI failure 3 times, or the working limit.
 
 ## Where we are
-`develop` contains PRs #3–#15 (Partition 11 merged 2026-11-11).
+`develop` contains PRs #3–#15 (Partition 11 merged 2026-11-11). Owner's change list in progress as stacked PRs (merge only the newest):
+
+| Change | Branch | State |
+|---|---|---|
+| 1 Menu styles A/B/C (owner picked **all three**, admin chooses) | `feat/menu-styles` | PR open |
+| 2 Dish photos (up to 5) | – | next |
+| 3 Quiet "Viewing as" badge | – | queued |
+| 4 SMTP settings | – | queued |
+| 5 Banner | – | queued |
+
+Design canvas with the three directions: https://claude.ai/artifact/HBvYJAE5UWBSepoqiDkrxD
+
+## Change 1 — menu styles (feat/menu-styles)
+- `tenant_appearance.style` (editorial|grid|bistro, default grid) replaces `layout` (list→bistro, grid→grid, large→editorial); theme presets moved too. Plan features `style_editorial/grid/bistro` (on by default) + per-restaurant overrides; `Features::styles()`; `TenantAppearance::effectiveStyle()` falls back when a style is off.
+- Guest page: `resources/public-menu/base.css` + one `style-{style}.css` inlined (`InlineAssets::css($style)`); `body.S-{style}`; one shared markup (dish rows are a CSS grid, `.tx{display:contents}`), info button in the search bar, open/closed pill space reserved (no CLS), eager photos only on the first screen per style, nicer empty state, reduced-motion-safe sheet animation.
+- `PageTheme::STYLES`: per-style contrast surfaces + heading font ("Style default" font keeps the style's heading font).
+- Admin: Appearance → "Menu style" cards with drawings (`features/appearance/style-picker.tsx`), instant preview on style change; Appearance texts load with the screen (`locales/en/appearance.json`, `loadPageTexts`). Platform: themes use styles; plans/restaurant features list the three styles.
+- CI `guest-menu-speed` is a matrix over the three styles (`DEMO_MENU_STYLE`).
+- Speed (local, Nginx static copy, Lighthouse 12.8.2 mobile simulated, median of 3): A 100/100/100/100, LCP 0.73 s, CLS 0, 10.4 KB gzip HTML; B 100 ×4, LCP 0.69 s, CLS 0, 10.5 KB; C 100 ×4, LCP 0.73 s, CLS 0, 10.3 KB. Inline JS 4.2 KB. Admin first load 230,364 B of 230,400.
+- Tests: backend **253**, frontend **178**.
 
 ## Owner's change list (2026-11-11) — do these as separate small PRs into develop, then Partitions 12–14
 1. **New customer menu UI** — modern, premium, photo-first; smooth category tabs, elegant item sheet, reduced-motion-safe animations, good empty/sold-out states. **First 2–3 directions as mockups on the design canvas (phone, light + dark, demo café) → owner picks (the ONLY stop).** Keep all budgets (Lighthouse 100, < 30 KB before images, inline script ≤ 5 KB, LCP < 1.2 s).

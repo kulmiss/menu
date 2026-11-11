@@ -11,6 +11,7 @@ use App\Models\TenantAppearance;
 use App\Models\Theme;
 use App\Support\ActivityLogger;
 use App\Support\Contrast;
+use App\Support\Features;
 use App\Support\MediaJanitor;
 use App\Support\PublicMenu\MenuPageData;
 use App\Tenancy\CurrentTenant;
@@ -87,7 +88,7 @@ class AppearanceController extends Controller
         return [
             'primary_color' => [$req, 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'font' => [$req, Rule::in(TenantAppearance::FONTS)],
-            'layout' => [$req, Rule::in(TenantAppearance::LAYOUTS)],
+            'style' => [$req, Rule::in($this->allowedStyles())],
             'show_prices' => [$req, 'boolean'],
             'show_photos' => [$req, 'boolean'],
             'show_descriptions' => [$req, 'boolean'],
@@ -98,13 +99,22 @@ class AppearanceController extends Controller
         ];
     }
 
+    /** @return list<string> */
+    private function allowedStyles(): array
+    {
+        $tenant = app(CurrentTenant::class)->get();
+
+        return $tenant ? Features::styles($tenant) : TenantAppearance::STYLES;
+    }
+
     /** @return array<string, mixed> */
     private function payload(TenantAppearance $a): array
     {
         return [
             'primary_color' => $a->primary_color,
             'font' => $a->font,
-            'layout' => $a->layout,
+            'style' => TenantAppearance::effectiveStyle($a->style, $this->allowedStyles()),
+            'styles' => $this->allowedStyles(),
             'show_prices' => $a->show_prices,
             'show_photos' => $a->show_photos,
             'show_descriptions' => $a->show_descriptions,

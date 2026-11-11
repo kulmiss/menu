@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\Tenant;
+use App\Models\TenantAppearance;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -18,6 +19,10 @@ class Features
         'insights' => true,
         'import_export' => true,
         'remove_branding' => false, // hide "Menu by …" on the guest page
+        // Guest-menu styles the restaurant may pick (owner, 2026-11-11: all on by default).
+        'style_editorial' => true,
+        'style_grid' => true,
+        'style_bistro' => true,
     ];
 
     /** @var array<int, array<string, bool>> */
@@ -41,6 +46,18 @@ class Features
     public static function enabled(Tenant $tenant, string $key): bool
     {
         return self::for($tenant)[$key] ?? false;
+    }
+
+    /**
+     * The menu styles this restaurant may use, in picker order.
+     *
+     * @return list<string>
+     */
+    public static function styles(Tenant $tenant): array
+    {
+        $on = self::for($tenant);
+
+        return array_values(array_filter(TenantAppearance::STYLES, fn (string $s) => $on['style_'.$s] ?? false));
     }
 
     public static function forget(?int $tenantId = null): void

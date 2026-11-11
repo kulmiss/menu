@@ -8,6 +8,7 @@ use App\Models\ActivityLog;
 use App\Models\Plan;
 use App\Models\PlatformAnnouncement;
 use App\Models\Tenant;
+use App\Models\TenantAppearance;
 use App\Models\Theme;
 use App\Rules\Translations;
 use App\Support\ActivityLogger;
@@ -128,10 +129,10 @@ class PlatformController extends Controller
             'name' => [$theme ? 'sometimes' : 'required', Translations::required(40)],
             'primary' => [$theme ? 'sometimes' : 'required', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'font' => [$theme ? 'sometimes' : 'required', Rule::in(['system', 'serif', 'rounded'])],
-            'layout' => [$theme ? 'sometimes' : 'required', Rule::in(['list', 'grid', 'large'])],
+            'style' => [$theme ? 'sometimes' : 'required', Rule::in(TenantAppearance::STYLES)],
             'is_active' => ['sometimes', 'boolean'],
         ]);
-        $preset = array_merge($model->preset ?? [], array_intersect_key($data, array_flip(['primary', 'font', 'layout'])));
+        $preset = array_merge($model->preset ?? [], array_intersect_key($data, array_flip(['primary', 'font', 'style'])));
         $model->fill([...array_intersect_key($data, ['name' => true, 'is_active' => true]), 'preset' => $preset])->save();
         $this->activity->log($theme ? 'platform.theme_updated' : 'platform.theme_created', $model, null, null);
 
