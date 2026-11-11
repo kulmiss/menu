@@ -79,6 +79,42 @@ class ImageProcessor
         ];
     }
 
+    /**
+     * Makes the sizes an older photo is missing (e.g. 800 px, added on
+     * 2026-11-11) from the largest copy it already has; the original upload
+     * isn't kept. Returns the new variant names (empty when nothing was missing).
+     *
+     * @param  array<string, string>  $variants
+     * @return array<string, string>
+     */
+    public function addMissing(string $disk, string $folder, array $variants, bool $banner = false): array
+    {
+        $missing = array_values(array_filter(self::WIDTHS, fn (int $w) => ! isset($variants[(string) $w])
+            || (self::supportsAvif() && ! isset($variants['avif'.$w]))));
+        $source = collect(self::WIDTHS)->reverse()->first(fn (int $w) => isset($variants[(string) $w]));
+        if ($missing === [] || $source === null) {
+            return [];
+        }
+        $bytes = Storage::disk($disk)->get("{$folder}/{$variants[(string) $source]}");
+        $image = $bytes === null ? false : @imagecreatefromstring($bytes);
+        if (! $image instanceof GdImage) {
+            throw new RuntimeException("Unreadable image in {$folder}.");
+        }
+        $this->webpQuality = $banner ? self::BANNER_WEBP_QUALITY : self::WEBP_QUALITY;
+        $added = [];
+        foreach ($missing as $target) {
+            $scaled = $this->scaleToWidth($image, min($target, imagesx($image)));
+            if (! isset($variants[(string) $target])) {
+                $added[(string) $target] = basename($this->store($scaled, 'webp', $disk, "{$folder}/{$target}.webp"));
+            }
+            if (self::supportsAvif() && ! isset($variants['avif'.$target])) {
+                $added['avif'.$target] = basename($this->store($scaled, 'avif', $disk, "{$folder}/{$target}.avif"));
+            }
+        }
+
+        return $added;
+    }
+
     public static function supportsAvif(): bool
     {
         return function_exists('imageavif') && (bool) (gd_info()['AVIF Support'] ?? false);
