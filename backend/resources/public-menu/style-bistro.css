@@ -20,3 +20,4 @@ li>.it .sm{grid-area:sm}
 li>.it .pr{grid-area:pr}
 li>.it .tg{grid-area:tg}
 .sh h3,.sh h4{font-family:var(--fh)}
+li>.it{--adt:1rem}
