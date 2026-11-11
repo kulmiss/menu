@@ -13,11 +13,16 @@ _Last updated: 2026-11-11 15:20 EAT. PR #15 merged; owner's change list (2026-11
 |---|---|---|
 | 1 Menu styles A/B/C (owner picked **all three**, admin chooses) | `feat/menu-styles` | PR open |
 | 2 Dish photos (up to 5) | `feat/dish-photos` (on top of menu-styles) | PR open |
-| 3 Quiet "Viewing as" badge | – | queued |
+| 3 Quiet "Viewing as" badge | `feat/viewing-as` (on top of dish-photos) | PR open |
 | 4 SMTP settings | – | queued |
 | 5 Banner | – | queued |
 
 Design canvas with the three directions: https://claude.ai/artifact/HBvYJAE5UWBSepoqiDkrxD
+
+## Change 3 — "Viewing as" badge (feat/viewing-as)
+- `components/layout/viewing-as.tsx` (lazy, in `AdminHeader` when `/me.impersonation` is set); `impersonation-banner.tsx` removed. `/me.impersonation.tenant_name` added. Server-side logging/limits/blocks untouched.
+- Admin-only texts moved from `common.json` to `screens.json` (QUESTIONS #110): first load 229,760 B.
+- Tests: backend 260, frontend 185.
 
 ## Change 2 — dish photos (feat/dish-photos)
 - `item_photos` (tenant_id, item_id, media_id, sort; composite FKs; backfilled from `items.media_id`). `Item::photos()`; `photo_ids` in item create/update (max 5, distinct, own media), legacy `media_id` keeps extras; janitor checks `item_photos`; copier copies photos; `ItemResource.photos`.

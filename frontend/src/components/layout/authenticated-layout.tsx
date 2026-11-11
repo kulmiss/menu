@@ -11,13 +11,6 @@ import { SkipToMain } from '@/components/skip-to-main'
 import { useCurrentTenant, useMe } from '@/features/auth/use-me'
 import { VerifyEmailBanner } from '@/features/auth/verify-email'
 
-// Rare: only while a Super Admin is "logged in as" someone.
-const ImpersonationBanner = lazy(() =>
-  import('@/components/layout/impersonation-banner').then((m) => ({
-    default: m.ImpersonationBanner,
-  }))
-)
-
 // Rare screen: downloaded only when needed.
 const NoRestaurant = lazy(() =>
   import('@/features/errors/no-restaurant').then((m) => ({
@@ -62,14 +55,6 @@ export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
               'peer-data-[variant=inset]:has-data-[layout=fixed]:h-[calc(100svh-(var(--spacing)*4))]'
             )}
           >
-            {me.impersonation && (
-              <Suspense fallback={null}>
-                <ImpersonationBanner
-                  userName={me.impersonation.user_name}
-                  endsAt={me.impersonation.ends_at}
-                />
-              </Suspense>
-            )}
             {!me.email_verified && <VerifyEmailBanner email={me.email} />}
             <SubscriptionBanner tenant={tenant} />
             {children ?? <Outlet />}

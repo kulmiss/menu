@@ -491,5 +491,64 @@
     "max": "highest {{count}}",
     "max_one": "highest {{count}}",
     "max_other": "highest {{count}}"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "intro": "Today at your restaurant.",
+    "today_views": "Menu views today",
+    "today_scans": "QR scans today",
+    "yesterday_one": "Yesterday: {{count}}",
+    "yesterday_other": "Yesterday: {{count}}",
+    "yesterday": "Yesterday: {{count}}",
+    "sold_out": "Sold out now",
+    "sold_out_hint": "Guests see these as sold out. Tap when they are back.",
+    "nothing_sold_out": "Nothing is sold out.",
+    "available_again": "Available again",
+    "view_menu": "View menu",
+    "open_insights": "Insights",
+    "open_qr": "QR codes",
+    "announcement_ok": "Got it"
+  },
+  "drawer": {
+    "open": "Display settings",
+    "title": "Display",
+    "intro": "Adjust how the admin looks on this device.",
+    "reset": "Reset",
+    "reset_all": "Reset all display settings",
+    "reset_named": "Reset {{name}}",
+    "sidebar": "Sidebar",
+    "inset": "Inset",
+    "floating": "Floating",
+    "layout": "Layout",
+    "default": "Default",
+    "compact": "Compact",
+    "full": "Full width",
+    "direction": "Direction",
+    "ltr": "Left to right",
+    "rtl": "Right to left"
+  },
+  "subscription": {
+    "grace": "Your subscription has expired. Renew by {{date}} to keep editing.",
+    "read_only": "Your subscription has expired. The admin is read-only until you renew; the menu goes offline on {{date}}.",
+    "unavailable": "Your subscription has expired and your menu is offline. Renew to bring it back."
+  },
+  "no_restaurant": {
+    "title": "No restaurant yet",
+    "text": "Your account is not part of any restaurant. Ask an owner or manager to invite you, then open the link in the email."
+  },
+  "impersonation": {
+    "viewing_as": "Viewing as {{name}}",
+    "until": "Until {{time}}. Everything you do is recorded.",
+    "back": "Back to platform"
+  },
+  "search": {
+    "button": "Search",
+    "placeholder": "Type a command or search…",
+    "empty": "No results found."
+  },
+  "switcher": {
+    "label": "Switch restaurant",
+    "title": "Your restaurants",
+    "current": "Current restaurant"
   }
 }

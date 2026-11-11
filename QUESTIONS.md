@@ -135,6 +135,9 @@ New rules added by the owner (now in PLAN.md §2): Docker is for local developme
 | 107 | Adding photos from a phone | Two buttons: **Take photo** (opens the camera on phones) and **Choose photo** (photo library / files). Every photo goes through the 4:3 crop with zoom, is downscaled in the browser (longest side 2048 px), then uploads with a progress bar and preview. The server makes the WebP sizes and the blurred placeholder as before. Upload progress uses XMLHttpRequest in the dish editor's own code, not in the shared API client, so the admin's first download doesn't grow. |
 | 108 | Swipe gallery on the guest page | In the dish sheet (the on-demand `sheet.js`, not the inline script): scroll-snap swipe, "1 / 3" counter, arrow buttons only on devices with a mouse, keyboard scrolling when focused; photos 2–5 load lazily. |
 
+| 109 | "Log in as" indicator (change 3) | The red banner is gone. While logged in as a restaurant, the admin header shows a small outlined badge with an eye icon, **"Viewing as <restaurant>"** (the name is hidden on narrow phones but still read by screen readers) and **"Back to platform"**; hovering shows until when and that everything is recorded. It exists only in the Super Admin's own session, so the restaurant never sees it. Activity log entries (`impersonator_id`), the 60-minute limit and the blocked actions are unchanged. |
+| 110 | More admin-only texts load with the admin area | Dashboard, settings drawer, subscription notice, "no restaurant", search, restaurant switcher and "viewing as" texts moved from the first download (`common.json`) to `screens.json` (loaded in parallel with the user check before any admin screen shows). Admin first load: **229,760 B of 230,400** (640 B free again). |
+
 ## Open
 
 - Owner action: protect `main` in GitHub settings (require PR, no force push, no deletion). Claude's access can't change branch settings.

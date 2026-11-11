@@ -78,6 +78,7 @@ class ImpersonationManager
         return $record === null ? null : [
             'tenant_id' => $record->tenant_id,
             'user_name' => (string) $request->user()?->name,
+            'tenant_name' => (string) Tenant::whereKey($record->tenant_id)->value('name'),
             'ends_at' => date(DATE_ATOM, (int) $request->session()->get('impersonation_ends_at')),
         ];
     }

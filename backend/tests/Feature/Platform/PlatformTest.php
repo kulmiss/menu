@@ -165,7 +165,7 @@ function impersonate(User $admin, Tenant $tenant): array
     ];
 }
 
-it('logs in as the owner with a red banner, blocks risky actions and logs who did what', function () {
+it('logs in as the owner with a quiet badge, blocks risky actions and logs who did what', function () {
     $admin = superAdmin();
     [$owner, $tenant] = member(Role::Owner);
     [, , $item] = sampleMenu($tenant);
@@ -174,7 +174,9 @@ it('logs in as the owner with a red banner, blocks risky actions and logs who di
     expect(Impersonation::where('super_admin_id', $admin->id)->where('user_id', $owner->id)->whereNull('ended_at')->exists())->toBeTrue();
 
     $this->actingAs($owner)->withSession($session);
-    $this->getJson('/api/v1/me')->assertJsonPath('data.id', $owner->id)->assertJsonPath('data.impersonation.tenant_id', $tenant->id);
+    $this->getJson('/api/v1/me')->assertJsonPath('data.id', $owner->id)
+        ->assertJsonPath('data.impersonation.tenant_id', $tenant->id)
+        ->assertJsonPath('data.impersonation.tenant_name', $tenant->name);
     $this->getJson(p('dashboard'))->assertNotFound();
 
     $this->patchJson(t($tenant, "items/{$item->id}"), ['name' => ['en' => 'Cortado']], idem())->assertOk();
@@ -187,6 +189,16 @@ it('logs in as the owner with a red banner, blocks risky actions and logs who di
 
     $this->postJson('/api/v1/impersonation/stop', [], idem())->assertOk()->assertJsonPath('data.redirect', '/platform')->assertSessionMissing('impersonation_id');
     expect(Impersonation::whereNull('ended_at')->exists())->toBeFalse();
+});
+
+it('never shows "viewing as" to the restaurant owner in their own session', function () {
+    $admin = superAdmin();
+    [$owner, $tenant] = member(Role::Owner);
+    impersonate($admin, $tenant);
+
+    // The owner's own browser has its own session without the impersonation keys.
+    $this->flushSession();
+    $this->actingAs($owner)->getJson('/api/v1/me')->assertOk()->assertJsonPath('data.impersonation', null);
 });
 
 it('ends "log in as" after 60 minutes', function () {
