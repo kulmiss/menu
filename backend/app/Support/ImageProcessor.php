@@ -9,7 +9,8 @@ use RuntimeException;
 /**
  * Turns one upload into the sizes the public menu uses (PLAN.md §3.3, §4.8),
  * with plain GD so it runs on any shared host (QUESTIONS #57):
- * - 320 / 640 / 1280 px wide WebP for `srcset` (and AVIF too when the
+ * - 320 / 640 / 800 / 1280 px wide WebP for `srcset` (800 fits most phones
+ *   at full width, so the banner and big photos don't need 1280) (and AVIF too when the
  *   server's GD supports it — many shared hosts don't),
  * - 640 px JPEG for old browsers,
  * - 1200×630 JPEG for link previews (Open Graph),
@@ -22,7 +23,7 @@ class ImageProcessor
     /** Longest side kept from the original. The browser already downscales to this. */
     public const MAX_SIDE = 2048;
 
-    public const WIDTHS = [320, 640, 1280];
+    public const WIDTHS = [320, 640, 800, 1280];
 
     /** Strong compression (PLAN.md §15): photos are the heaviest part of a menu. */
     public const WEBP_QUALITY = 72;
@@ -31,14 +32,23 @@ class ImageProcessor
 
     public const JPEG_QUALITY = 75;
 
+    /**
+     * The menu banner is the page's largest paint (LCP), so it is saved a
+     * little lighter (owner's LCP budget < 1.2 s; QUESTIONS #114).
+     */
+    public const BANNER_WEBP_QUALITY = 64;
+
+    private int $webpQuality = self::WEBP_QUALITY;
+
     /** Width of the inline preview; it is shown blurred, so tiny is enough. */
     private const PLACEHOLDER_WIDTH = 16;
 
     /**
      * @return array{width: int, height: int, variants: array<int|string, string>, dominant_color: string, placeholder: string}
      */
-    public function process(string $path, string $mime, string $disk, string $folder): array
+    public function process(string $path, string $mime, string $disk, string $folder, bool $banner = false): array
     {
+        $this->webpQuality = $banner ? self::BANNER_WEBP_QUALITY : self::WEBP_QUALITY;
         $image = $this->load($path, $mime);
         $image = $this->orient($image, $path, $mime);
         $image = $this->fit($image, self::MAX_SIDE);
@@ -185,7 +195,7 @@ class ImageProcessor
     {
         ob_start();
         match ($format) {
-            'webp' => imagewebp($image, null, self::WEBP_QUALITY),
+            'webp' => imagewebp($image, null, $this->webpQuality),
             'avif' => imageavif($image, null, self::AVIF_QUALITY, 6),
             default => imagejpeg($image, null, self::JPEG_QUALITY),
         };

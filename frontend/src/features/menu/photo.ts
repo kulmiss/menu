@@ -66,10 +66,13 @@ export async function cropToJpeg(
 
 export async function uploadPhoto(
   tenantId: number,
-  blob: Blob
+  blob: Blob,
+  /** "banner": saved a little lighter, it is the menu's largest paint. */
+  purpose?: 'banner'
 ): Promise<Media> {
   const form = new FormData()
   form.append('file', blob, 'photo.jpg')
+  if (purpose) form.append('purpose', purpose)
   const { data } = await api.post<{ data: Media }>(
     tenantUrl(tenantId, 'media'),
     form

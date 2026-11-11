@@ -46,6 +46,7 @@ export type Me = {
   /** Set while a Super Admin is "logged in as" this user. */
   impersonation?: {
     tenant_id: number
+    tenant_name: string
     user_name: string
     ends_at: string
   } | null

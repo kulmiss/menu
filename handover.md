@@ -1,19 +1,84 @@
 # Handover
 
-_Last updated: 2026-11-11 02:30 EAT. Partition 11 (PR #15)._
+_Last updated: 2026-11-11 15:20 EAT. PR #15 merged; owner's change list (2026-11-11) queued below._
 
 > **Speed is the top priority (owner, 2026-11-10): PLAN.md §15 applies to every partition and every partition report includes the §15.5 numbers.**
 > **English only for now (owner, 2026-11-10):** texts stay in `t()` / `__()` and the database keeps per-language fields; language switches and translation screens are hidden while one language is enabled.
 > **Working mode (owner):** go through all remaining partitions without stopping for OK, then write the Step 4 final report. Stop only for: changes outside this project, steps that can't be undone, licence doubts, the same CI failure 3 times, or the working limit.
 
 ## Where we are
-`develop` contains PRs #3–#14 (owner merged #14 on 2026-11-10).
+`develop` contains PRs #3–#15 (Partition 11 merged 2026-11-11). Owner's change list in progress as stacked PRs (merge only the newest):
 
-| Part | Branch | PR | State |
-|---|---|---|---|
-| **11 Super Admin** | `feat/platform` (from `develop`) | **#15** | newest |
+| Change | Branch | State |
+|---|---|---|
+| 1 Menu styles A/B/C (owner picked **all three**, admin chooses) | `feat/menu-styles` | PR open |
+| 2 Dish photos (up to 5) | `feat/dish-photos` (on top of menu-styles) | PR open |
+| 3 Quiet "Viewing as" badge | `feat/viewing-as` (on top of dish-photos) | PR open |
+| 4 SMTP settings | `feat/smtp-settings` (on top of viewing-as) | PR open |
+| 5 Banner | `feat/banner` (on top of smtp-settings) | PR open |
+| Partition 12 Demo data | `feat/demo-data` (on top of banner) | PR open |
+| Partition 13 Docs | `docs/deploy` (on top of demo-data) | PR open |
+| Partition 14 Final QA | `qa/final` (on top of docs/deploy) | PR open — **merge this one: it contains #16–#23** |
 
-**Merge only the newest PR** with *Create a merge commit*.
+Design canvas with the three directions: https://claude.ai/artifact/HBvYJAE5UWBSepoqiDkrxD
+
+## Partition 14 — final QA (qa/final)
+- All CI checks on the final branch: Pint, Larastan, Pest **279**, composer validate, ESLint, Prettier, build, Vitest **189**, admin first load **224.5 KB** / 225 KB.
+- Browser smoke test (390 px and 1280 px): every admin screen as the demo owner and every platform screen as the demo Super Admin (2FA code computed) — no console errors. Fixed: Appearance scrolled sideways on phones (photo row now wraps; left column `min-w-0`).
+- Guest menu (fresh demo with banner): A/B/C 100 ×4, LCP 0.89–0.90 s, CLS 0.
+- Local note: the workspace `.env` has `SANCTUM_STATEFUL_DOMAINS=127.0.0.1:8000`; when serving on another port, set it (or sign-in won't stick).
+
+## Partition 13 — docs (docs/deploy)
+- `docs/deploy.md` (referenced by `.htaccess`), README (demo logins, deploy link), scheduler runs the queue every minute (`routes/console.php`, `tests/Feature/ScheduleTest.php`), docker-compose vite prompts fixed.
+
+## Partition 12 — demo data (feat/demo-data)
+- `DemoSeeder::restaurant()` (look, profile, hours, Piassa branch, tables + QR codes, promotions, galleries) and `superAdmin()` (admin@example.com / password / 2FA `JBSWY3DPEHPK3PXP`, skipped in production). `tests/Feature/DemoSeederTest.php`.
+- Fresh demo (Lighthouse mobile, median of 3): A/B/C all 100 ×4, LCP 0.89–0.90 s, CLS 0, HTML 11.2 KB gzip.
+- Tests: backend 278.
+
+## Change 5 — banner (feat/banner)
+- `tenant_appearance.banner_text` (over|under|null). `PageTheme::STYLES` has banner ratio, default text position and `sizes` per style; `PageTheme::cover()`; `MenuPageData::srcset()`. Blade: preload link in head, `.top.hc.ov`, cover `<img>` width/height per style.
+- `ImageProcessor::WIDTHS` = 320/640/800/1280; `purpose=banner` upload → WebP q64.
+- CSS: overlay in base (`.ov` grid cell), per-style tweaks.
+- Admin: banner crop aspect per style, recommended size hint, "Logo and name" choice, wide thumbnail (inline styles).
+- Speed with a worst-case busy banner: LCP 1.11–1.26 s; normal banner 0.90–0.96 s (QUESTIONS #114, needs owner confirmation).
+- Tests: backend 276, frontend 189.
+
+## Change 4 — SMTP settings (feat/smtp-settings)
+- `App\Support\MailSettings` (stored under `platform_settings.key = mail`, cached forever, password `Crypt::encryptString`), applied in `AppServiceProvider` via `afterResolving('mail.manager')`. API `GET/PUT/DELETE platform/settings/mail`, `POST platform/settings/mail/test` (throttle 6/min).
+- Frontend `features/platform/email-settings.tsx` under the Settings form.
+- Platform test helpers (`superAdmin`, `browser`, `p`) moved to `tests/Pest.php`.
+- Tests: backend 270, frontend 188. First load 229,854 B.
+
+## Change 3 — "Viewing as" badge (feat/viewing-as)
+- `components/layout/viewing-as.tsx` (lazy, in `AdminHeader` when `/me.impersonation` is set); `impersonation-banner.tsx` removed. `/me.impersonation.tenant_name` added. Server-side logging/limits/blocks untouched.
+- Admin-only texts moved from `common.json` to `screens.json` (QUESTIONS #110): first load 229,760 B.
+- Tests: backend 260, frontend 185.
+
+## Change 2 — dish photos (feat/dish-photos)
+- `item_photos` (tenant_id, item_id, media_id, sort; composite FKs; backfilled from `items.media_id`). `Item::photos()`; `photo_ids` in item create/update (max 5, distinct, own media), legacy `media_id` keeps extras; janitor checks `item_photos`; copier copies photos; `ItemResource.photos`.
+- Guest page: sheet data `g` = photos 2–5 (1280 px); swipe gallery in `sheet.js` + CSS (`.gw/.gl/.gc/.ga`).
+- Admin: `components/photo-gallery.tsx` (take/choose, crop, progress, make main, move earlier, replace, remove), `components/crop-dialog.tsx` (shared with PhotoField), `upload.ts` (XHR with progress). Gallery uses inline styles for new layout values (shared CSS unchanged).
+- Tests: backend **259**, frontend **183**. Admin first load ≤ 230,400 B.
+
+## Change 1 — menu styles (feat/menu-styles)
+- `tenant_appearance.style` (editorial|grid|bistro, default grid) replaces `layout` (list→bistro, grid→grid, large→editorial); theme presets moved too. Plan features `style_editorial/grid/bistro` (on by default) + per-restaurant overrides; `Features::styles()`; `TenantAppearance::effectiveStyle()` falls back when a style is off.
+- Guest page: `resources/public-menu/base.css` + one `style-{style}.css` inlined (`InlineAssets::css($style)`); `body.S-{style}`; one shared markup (dish rows are a CSS grid, `.tx{display:contents}`), info button in the search bar, open/closed pill space reserved (no CLS), eager photos only on the first screen per style, nicer empty state, reduced-motion-safe sheet animation.
+- `PageTheme::STYLES`: per-style contrast surfaces + heading font ("Style default" font keeps the style's heading font).
+- Admin: Appearance → "Menu style" cards with drawings (`features/appearance/style-picker.tsx`), instant preview on style change; Appearance texts load with the screen (`locales/en/appearance.json`, `loadPageTexts`). Platform: themes use styles; plans/restaurant features list the three styles.
+- CI `guest-menu-speed` is a matrix over the three styles (`DEMO_MENU_STYLE`).
+- Speed (local, Nginx static copy, Lighthouse 12.8.2 mobile simulated, median of 3): A 100/100/100/100, LCP 0.73 s, CLS 0, 10.4 KB gzip HTML; B 100 ×4, LCP 0.69 s, CLS 0, 10.5 KB; C 100 ×4, LCP 0.73 s, CLS 0, 10.3 KB. Inline JS 4.2 KB. Admin first load 230,364 B of 230,400.
+- Tests: backend **253**, frontend **178**.
+
+## Owner's change list (2026-11-11) — do these as separate small PRs into develop, then Partitions 12–14
+1. **New customer menu UI** — modern, premium, photo-first; smooth category tabs, elegant item sheet, reduced-motion-safe animations, good empty/sold-out states. **First 2–3 directions as mockups on the design canvas (phone, light + dark, demo café) → owner picks (the ONLY stop).** Keep all budgets (Lighthouse 100, < 30 KB before images, inline script ≤ 5 KB, LCP < 1.2 s).
+2. **Food photos** — easy add/change/crop/remove per dish, also from a phone (camera/gallery), upload progress + preview; **up to 5 photos per dish** (first = main; swipe in the item sheet); plan photo limits; auto resize/compress (WebP sizes + blur placeholder).
+3. **"Log in as" indicator** — remove the red banner; small quiet badge "Viewing as <restaurant>" + "Back to platform" in the admin header, only the Super Admin sees it; owner never sees anything; keep activity log + safety blocks.
+4. **SMTP settings in Super Admin → Settings → Email** — host, port, encryption (none/SSL/TLS), username, password (encrypted, shown only as ••••), from address/name; "Send test email" with clear success/error; fall back to .env when empty; every platform e-mail uses them.
+5. **Restaurant banner at the top of the menu** — check the existing cover photo; upload/crop to the recommended size with live preview and remove; logo + name over/under it; fast (sizes, priority) and no layout shift.
+
+Rules unchanged: tests, CI green, budgets kept (load on demand, don't raise limits), t() everywhere, 44 px targets, contrast ≥ 4.5:1, light + dark. Decisions → QUESTIONS.md.
+Also queued: `docker-compose.yml` vite service needs `COREPACK_ENABLE_DOWNLOAD_PROMPT=0` (the pnpm prompt stops the container); optional "Resend set-password e-mail" button + friendlier welcome mail for owners created by the Super Admin.
 
 ## What Partition 11 contains (PR #15)
 - Tables `payments`, `platform_settings`, `platform_announcements` (+ `announcement_reads`), `impersonations`. Plan features (`App\Support\Features`, `feature:` middleware, `features` in `/me` tenants, guest page footer/promotions).

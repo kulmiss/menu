@@ -31,7 +31,7 @@ class MediaController extends Controller
     public function store(Request $request, CurrentTenant $current, PlanLimits $limits, ImageProcessor $images): JsonResponse
     {
         Gate::authorize('menu.manage');
-        $request->validate(['file' => ['required', 'file', 'max:8192']]);
+        $request->validate(['file' => ['required', 'file', 'max:8192'], 'purpose' => ['sometimes', 'in:banner']]);
 
         $file = $request->file('file');
         $mime = (string) $file->getMimeType();
@@ -44,7 +44,7 @@ class MediaController extends Controller
 
         $folder = $current->id().'/'.Str::lower((string) Str::ulid());
         try {
-            $result = $images->process((string) $file->getRealPath(), $mime, 'public', $folder);
+            $result = $images->process((string) $file->getRealPath(), $mime, 'public', $folder, $request->input('purpose') === 'banner');
         } catch (Throwable) {
             throw ValidationException::withMessages(['file' => __('menu.media.unreadable')]);
         }

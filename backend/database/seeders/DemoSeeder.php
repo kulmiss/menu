@@ -5,7 +5,9 @@ namespace Database\Seeders;
 use App\Enums\Role;
 use App\Models\AddonGroup;
 use App\Models\AddonOption;
+use App\Models\Branch;
 use App\Models\Category;
+use App\Models\DiningTable;
 use App\Models\Item;
 use App\Models\ItemAllergen;
 use App\Models\ItemVariant;
@@ -13,8 +15,13 @@ use App\Models\Media;
 use App\Models\Membership;
 use App\Models\Menu;
 use App\Models\MenuSchedule;
+use App\Models\OpeningHour;
+use App\Models\Promotion;
+use App\Models\QrCode;
 use App\Models\Tag;
 use App\Models\Tenant;
+use App\Models\TenantAppearance;
+use App\Models\TenantProfile;
 use App\Models\User;
 use App\Support\ImageProcessor;
 use App\Tenancy\CurrentTenant;
@@ -23,14 +30,22 @@ use Illuminate\Support\Str;
 
 /**
  * "Buna & Bread", the demo café (English): about 60 items, two menus, sizes,
- * add-ons, tags, allergens and a few generated photos. CI measures the guest
- * page's speed on it (PLAN.md §15.5). Sign in: demo@example.com / password.
+ * add-ons, tags, allergens, generated photos (some dishes with a gallery), a
+ * banner and logo, info + opening hours, a second branch, promotions, tables
+ * with QR codes, and a Super Admin. CI measures the guest page's speed on it
+ * (PLAN.md §15.5).
+ *
+ * Sign in: demo@example.com / password (restaurant owner);
+ *          admin@example.com / password + two-factor secret JBSWY3DPEHPK3PXP
+ *          (Super Admin; not created when APP_ENV=production).
  *
  *   php artisan db:seed --class=DemoSeeder
  */
 class DemoSeeder extends Seeder
 {
     public const SLUG = 'demo';
+
+    public const ADMIN_2FA_SECRET = 'JBSWY3DPEHPK3PXP';
 
     public function run(CurrentTenant $current, ImageProcessor $images): void
     {
@@ -55,7 +70,139 @@ class DemoSeeder extends Seeder
         ]);
         Membership::create(['tenant_id' => $tenant->id, 'user_id' => $user->id, 'role' => Role::Owner]);
 
-        $current->runAs($tenant, fn () => $this->menu($tenant, $images));
+        $current->runAs($tenant, function () use ($tenant, $images) {
+            $this->menu($tenant, $images);
+            $this->restaurant($tenant, $images);
+        });
+        $this->superAdmin();
+    }
+
+    /** The demo Super Admin (two-factor on, as the platform requires). Never on a live server. */
+    private function superAdmin(): void
+    {
+        if (app()->isProduction()) {
+            $this->command?->warn('Production: the demo Super Admin (known password) is not created.');
+
+            return;
+        }
+        User::firstOrCreate(['email' => 'admin@example.com'], ['name' => 'Platform Admin', 'password' => 'password'])
+            ->forceFill([
+                'is_super_admin' => true,
+                'email_verified_at' => now(),
+                'two_factor_secret' => encrypt(self::ADMIN_2FA_SECRET),
+                'two_factor_recovery_codes' => encrypt(json_encode(['demo-recovery-1', 'demo-recovery-2'])),
+                'two_factor_confirmed_at' => now(),
+            ])->save();
+    }
+
+    /** Look, info, hours, a second branch, promotions, tables with QR codes and dish galleries. */
+    private function restaurant(Tenant $tenant, ImageProcessor $images): void
+    {
+        // CI measures every menu style on the demo (DEMO_MENU_STYLE=editorial|grid|bistro).
+        TenantAppearance::create([
+            ...TenantAppearance::DEFAULTS,
+            'style' => TenantAppearance::effectiveStyle(config('menu.demo_style'), TenantAppearance::STYLES),
+            'primary_color' => '#9a3b1f',
+            'cover_media_id' => $this->banner($tenant, $images)?->id,
+            'logo_media_id' => $this->logo($tenant, $images)?->id,
+        ]);
+
+        TenantProfile::create([
+            'description' => "Ethiopian coffee roasted every Monday, fresh bread every morning.\nTraditional buna ceremony on Sundays.",
+            'address' => 'Bole Road, Addis Ababa',
+            'maps_url' => 'https://maps.google.com/?q=Bole+Road+Addis+Ababa',
+            'phone' => '+251 11 123 4567',
+            'whatsapp' => '+251 91 123 4567',
+            'email' => 'hello@example.com',
+            'socials' => ['instagram' => 'https://instagram.com/example', 'facebook' => 'https://facebook.com/example'],
+            'wifi_name' => 'BunaGuest',
+            'wifi_password' => 'coffee2026',
+            'show_wifi' => true,
+        ]);
+        foreach (range(0, 6) as $day) { // 0 = Sunday
+            OpeningHour::create(['branch_id' => null, 'weekday' => $day, 'opens_at' => $day === 0 ? '08:00' : '07:00', 'closes_at' => $day === 0 ? '20:00' : '22:00']);
+        }
+
+        $main = Branch::where('is_default', true)->firstOrFail();
+        $piassa = Branch::create(['slug' => 'piassa', 'name' => ['en' => 'Piassa'], 'address' => 'Piassa, Addis Ababa', 'sort' => 1]);
+        foreach ([$main, $piassa] as $branch) {
+            foreach (range(1, $branch->is($main) ? 8 : 4) as $n) {
+                $table = DiningTable::create(['branch_id' => $branch->id, 'label' => (string) $n, 'sort' => $n]);
+                QrCode::create(['code' => QrCode::newCode(), 'branch_id' => $branch->id, 'dining_table_id' => $table->id, 'label' => 'Table '.$n]);
+            }
+        }
+
+        $buna = Item::whereJsonContains('name->en', 'Buna (Ethiopian coffee)')->first() ?? Item::query()->first();
+        Promotion::create(['type' => 'special', 'title' => ['en' => 'Buna Monday'], 'body' => ['en' => 'Second cup free before 10:00'], 'item_id' => $buna?->id, 'sort' => 0]);
+        Promotion::create(['type' => 'announcement', 'title' => ['en' => 'New:'], 'body' => ['en' => 'Fresh quinoa bowls every day.'], 'sort' => 1]);
+
+        // Every dish photo is photo 1; three dishes get two more to swipe through.
+        $withPhotos = Item::whereNotNull('media_id')->orderBy('id')->get();
+        $extra = 100;
+        foreach ($withPhotos as $i => $item) {
+            $ids = [(int) $item->media_id];
+            if ($i < 3) {
+                foreach ([0, 1] as $_) {
+                    $photo = $this->photo($tenant, $images, $extra++);
+                    if ($photo) {
+                        $ids[] = $photo->id;
+                    }
+                }
+            }
+            $item->photos()->sync(collect($ids)->mapWithKeys(fn ($id, $sort) => [$id => ['tenant_id' => $tenant->id, 'sort' => $sort]])->all());
+        }
+    }
+
+    /** A soft, warm café banner (2:1), saved like an uploaded banner. */
+    private function banner(Tenant $tenant, ImageProcessor $images): ?Media
+    {
+        if (! function_exists('imagecreatetruecolor')) {
+            return null;
+        }
+        $img = imagecreatetruecolor(1600, 800);
+        for ($y = 0; $y < 800; $y += 2) {
+            $k = $y / 800;
+            imagefilledrectangle($img, 0, $y, 1599, $y + 1, (int) imagecolorallocate($img, (int) (92 + 70 * $k), (int) (58 + 40 * $k), (int) (38 + 20 * $k)));
+        }
+        mt_srand(11);
+        foreach (range(1, 40) as $_) { // warm lights
+            $r = mt_rand(20, 90);
+            imagefilledellipse($img, mt_rand(0, 1600), mt_rand(0, 420), $r, $r, (int) imagecolorallocatealpha($img, 255, mt_rand(190, 230), mt_rand(120, 170), mt_rand(70, 110)));
+        }
+        imagefilledrectangle($img, 0, 560, 1599, 800, (int) imagecolorallocate($img, 120, 78, 48)); // counter
+        foreach ([[420, 560], [800, 540], [1180, 560]] as [$x, $y]) { // cups and a plate
+            imagefilledellipse($img, $x, $y, 260, 90, (int) imagecolorallocate($img, 246, 240, 232));
+            imagefilledellipse($img, $x, $y - 10, 150, 50, (int) imagecolorallocate($img, 70, 40, 24));
+        }
+        imagefilter($img, IMG_FILTER_GAUSSIAN_BLUR);
+
+        return $this->store($img, $tenant, $images, 'banner', true);
+    }
+
+    /** A round coffee-bean logo. */
+    private function logo(Tenant $tenant, ImageProcessor $images): ?Media
+    {
+        if (! function_exists('imagecreatetruecolor')) {
+            return null;
+        }
+        $img = imagecreatetruecolor(512, 512);
+        imagefill($img, 0, 0, (int) imagecolorallocate($img, 154, 59, 31));
+        imagefilledellipse($img, 256, 256, 260, 340, (int) imagecolorallocate($img, 250, 240, 228));
+        imagesetthickness($img, 18);
+        imagearc($img, 256, 256, 90, 300, 290, 70, (int) imagecolorallocate($img, 154, 59, 31));
+
+        return $this->store($img, $tenant, $images, 'logo');
+    }
+
+    private function store(\GdImage $img, Tenant $tenant, ImageProcessor $images, string $name, bool $banner = false): Media
+    {
+        $path = tempnam(sys_get_temp_dir(), 'demo').'.jpg';
+        imagejpeg($img, $path, 90);
+        $folder = $tenant->id.'/demo-'.$name;
+        $result = $images->process($path, 'image/jpeg', 'public', $folder, $banner);
+        @unlink($path);
+
+        return Media::create([...$result, 'disk' => 'public', 'base_path' => $folder, 'mime' => 'image/jpeg', 'bytes' => 0]);
     }
 
     private function menu(Tenant $tenant, ImageProcessor $images): void

@@ -85,7 +85,10 @@
     "promotions": "Promotions",
     "insights": "Insights",
     "import_export": "Import and export",
-    "remove_branding": "Menu without our name"
+    "remove_branding": "Menu without our name",
+    "style_editorial": "Menu style A · Warm editorial",
+    "style_grid": "Menu style B · Fresh grid",
+    "style_bistro": "Menu style C · Quiet bistro"
   },
   "methods": {
     "cash": "Cash",
@@ -153,16 +156,16 @@
     "name": "Name",
     "colour": "Colour",
     "font": "Font",
-    "layout": "Layout",
+    "style": "Menu style",
     "fonts": {
       "system": "Modern",
       "serif": "Classic serif",
       "rounded": "Rounded"
     },
-    "layouts": {
-      "list": "List",
-      "grid": "Grid",
-      "large": "Large photos"
+    "styles": {
+      "editorial": "A · Warm editorial",
+      "grid": "B · Fresh grid",
+      "bistro": "C · Quiet bistro"
     }
   },
   "announcements": {
@@ -192,5 +195,28 @@
     "default_currency": "Default currency",
     "terms": "Terms of use",
     "privacy": "Privacy policy"
+  },
+  "mail": {
+    "title": "Email (SMTP)",
+    "using_platform": "All platform e-mails (invitations, password resets, e-mail checks) are sent through this server.",
+    "using_env": "Nothing saved here yet: e-mails use the server's .env settings ({{host}}). Save a server below to use it instead.",
+    "host": "SMTP server",
+    "port": "Port",
+    "encryption": "Encryption",
+    "encryptions": {
+      "tls": "TLS (STARTTLS, usually port 587)",
+      "ssl": "SSL (usually port 465)",
+      "none": "None (not recommended)"
+    },
+    "username": "Username",
+    "password": "Password",
+    "password_saved": "A password is saved and is never shown. Leave the field empty to keep it, or type a new one.",
+    "password_hint": "Stored encrypted. It is never shown again after saving.",
+    "from_address": "From address",
+    "from_name": "From name",
+    "send_test": "Send test email",
+    "test_failed": "The test e-mail could not be sent.",
+    "reset": "Use the server's .env settings",
+    "reset_done": "E-mails now use the server's .env settings."
   }
 }

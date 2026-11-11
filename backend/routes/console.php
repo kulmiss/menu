@@ -12,6 +12,10 @@ Artisan::command('inspire', function () {
 
 // Static guest pages (PLAN.md §15.2.1): drop pages of restaurants whose
 // subscription ran out, and rebuild everything daily so "New" badges expire.
+// Queued e-mails (invitations) on hosts without a long-running worker: the
+// one cron line for schedule:run also empties the queue every minute.
+Schedule::command('queue:work --stop-when-empty --max-time=50 --tries=3')->everyMinute()->withoutOverlapping();
+
 Schedule::command('menu:refresh-pages')->hourly();
 Schedule::command('menu:refresh-pages --all')->dailyAt('00:05');
 

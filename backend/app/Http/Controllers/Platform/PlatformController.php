@@ -8,16 +8,21 @@ use App\Models\ActivityLog;
 use App\Models\Plan;
 use App\Models\PlatformAnnouncement;
 use App\Models\Tenant;
+use App\Models\TenantAppearance;
 use App\Models\Theme;
 use App\Rules\Translations;
 use App\Support\ActivityLogger;
 use App\Support\Features;
+use App\Support\MailSettings;
 use App\Support\PlatformSettings;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Throwable;
 
 /**
  * Super Admin screens that are mostly lists (PLAN.md §7.3): dashboard,
@@ -128,10 +133,10 @@ class PlatformController extends Controller
             'name' => [$theme ? 'sometimes' : 'required', Translations::required(40)],
             'primary' => [$theme ? 'sometimes' : 'required', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'font' => [$theme ? 'sometimes' : 'required', Rule::in(['system', 'serif', 'rounded'])],
-            'layout' => [$theme ? 'sometimes' : 'required', Rule::in(['list', 'grid', 'large'])],
+            'style' => [$theme ? 'sometimes' : 'required', Rule::in(TenantAppearance::STYLES)],
             'is_active' => ['sometimes', 'boolean'],
         ]);
-        $preset = array_merge($model->preset ?? [], array_intersect_key($data, array_flip(['primary', 'font', 'layout'])));
+        $preset = array_merge($model->preset ?? [], array_intersect_key($data, array_flip(['primary', 'font', 'style'])));
         $model->fill([...array_intersect_key($data, ['name' => true, 'is_active' => true]), 'preset' => $preset])->save();
         $this->activity->log($theme ? 'platform.theme_updated' : 'platform.theme_created', $model, null, null);
 
@@ -233,5 +238,56 @@ class PlatformController extends Controller
         $this->activity->log('platform.settings_saved', null, ['keys' => ['to' => array_keys($data)]], null);
 
         return $this->settings();
+    }
+
+    public function mailSettings(): JsonResponse
+    {
+        return response()->json(['data' => MailSettings::forScreen()]);
+    }
+
+    public function saveMailSettings(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'host' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9.-]+$/i'],
+            'port' => ['required', 'integer', 'between:1,65535'],
+            'encryption' => ['required', Rule::in(MailSettings::ENCRYPTIONS)],
+            'username' => ['nullable', 'string', 'max:255'],
+            'password' => ['nullable', 'string', 'max:255'],
+            'clear_password' => ['sometimes', 'boolean'],
+            'from_address' => ['nullable', 'email', 'max:255'],
+            'from_name' => ['nullable', 'string', 'max:100'],
+        ]);
+        MailSettings::save($data, $data['password'] ?? null, (bool) ($data['clear_password'] ?? false));
+        // Never log the password; only which fields were sent.
+        $this->activity->log('platform.mail_settings_saved', null, ['host' => ['to' => $data['host']], 'password_changed' => ['to' => ($data['password'] ?? '') !== '']], null);
+
+        return $this->mailSettings();
+    }
+
+    public function clearMailSettings(): JsonResponse
+    {
+        MailSettings::clear();
+        $this->activity->log('platform.mail_settings_cleared', null, [], null);
+
+        return $this->mailSettings();
+    }
+
+    /** Sends a short e-mail with the saved settings and reports what happened. */
+    public function testMail(Request $request): JsonResponse
+    {
+        $data = $request->validate(['to' => ['nullable', 'email']]);
+        $to = $data['to'] ?? (string) $request->user()?->email;
+        try {
+            Mail::raw(__('platform.mail_test.body', ['app' => PlatformSettings::get('name')]), function ($m) use ($to) {
+                $m->to($to)->subject(__('platform.mail_test.subject', ['app' => PlatformSettings::get('name')]));
+            });
+        } catch (Throwable $e) {
+            return response()->json([
+                'message' => __('platform.mail_test.failed', ['reason' => Str::limit($e->getMessage(), 300)]),
+                'code' => 'mail.failed',
+            ], 422);
+        }
+
+        return response()->json(['data' => ['sent_to' => $to], 'message' => __('platform.mail_test.sent', ['email' => $to])]);
     }
 }

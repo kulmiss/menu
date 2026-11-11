@@ -5,6 +5,7 @@ use App\Models\Item;
 use App\Models\Menu;
 use App\Models\MenuSchedule;
 use App\Models\Tenant;
+use App\Models\TenantAppearance;
 use App\Models\TenantSlugHistory;
 use App\Support\PublicMenu\MenuPageCache;
 use Database\Seeders\DemoSeeder;
@@ -182,9 +183,11 @@ it('removes static pages of restaurants whose subscription ran out', function ()
     File::deleteDirectory($public);
 });
 
-it('keeps the demo menu page within the 30 KB budget (PLAN.md §15.1)', function () {
+it('keeps the demo menu page within the 30 KB budget in every style (PLAN.md §15.1)', function (string $style) {
     Storage::fake('public');
     $this->seed(DemoSeeder::class);
+    $demo = Tenant::where('slug', DemoSeeder::SLUG)->firstOrFail();
+    asTenant($demo, fn () => (TenantAppearance::first() ?? new TenantAppearance(TenantAppearance::DEFAULTS))->fill(['style' => $style])->save());
 
     $html = $this->get('/'.DemoSeeder::SLUG)->assertOk()->getContent();
     $gzip = strlen((string) gzencode((string) $html, 9));
@@ -192,7 +195,8 @@ it('keeps the demo menu page within the 30 KB budget (PLAN.md §15.1)', function
     expect($gzip)->toBeLessThanOrEqual(30 * 1024);
     expect(preg_match('#<script>(.*?)</script>#s', (string) $html, $js))->toBe(1);
     expect(strlen($js[1]))->toBeLessThan(5 * 1024);  // inline JS under 5 KB (§15.2.2)
-});
+    expect($html)->toContain('class="S-'.$style.'"');
+})->with(['editorial', 'grid', 'bistro']);
 
 it('accepts the visit beacon without an idempotency key', function () {
     $this->postJson('/api/v1/beacon', ['t' => 1])->assertNoContent();

@@ -1,18 +1,11 @@
 import { useRef, useState } from 'react'
-import { ImagePlus, Loader2, Trash2 } from 'lucide-react'
-import Cropper, { type Area } from 'react-easy-crop'
+import { ImagePlus, Trash2 } from 'lucide-react'
+import { type Area } from 'react-easy-crop'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
 import { ACCEPTED_TYPES, cropToJpeg, isHeic, uploadPhoto } from '../photo'
 import { type Media } from '../types'
+import { CropDialog } from './crop-dialog'
 
 type Props = {
   tenantId: number
@@ -22,6 +15,9 @@ type Props = {
   aspect?: number
   label: string
   disabled?: boolean
+  /** Shown under the buttons, e.g. the recommended size. */
+  hint?: string
+  purpose?: 'banner'
 }
 
 /**
@@ -35,13 +31,12 @@ export function PhotoField({
   aspect = 4 / 3,
   label,
   disabled,
+  hint,
+  purpose,
 }: Props) {
   const { t } = useTranslation()
   const input = useRef<HTMLInputElement>(null)
   const [source, setSource] = useState<string | null>(null)
-  const [crop, setCrop] = useState({ x: 0, y: 0 })
-  const [zoom, setZoom] = useState(1)
-  const [area, setArea] = useState<Area | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
 
@@ -51,8 +46,6 @@ export function PhotoField({
     if (isHeic(file)) return setError(t('photo.heic'))
     if (!ACCEPTED_TYPES.includes(file.type)) return setError(t('photo.type'))
     if (file.size > 30 * 1024 * 1024) return setError(t('photo.too_big'))
-    setCrop({ x: 0, y: 0 })
-    setZoom(1)
     setSource(URL.createObjectURL(file))
   }
 
@@ -62,12 +55,12 @@ export function PhotoField({
     if (input.current) input.current.value = ''
   }
 
-  async function save() {
-    if (!source || !area) return
+  async function save(area: Area) {
+    if (!source) return
     setUploading(true)
     try {
       const blob = await cropToJpeg(source, area)
-      onChange(await uploadPhoto(tenantId, blob))
+      onChange(await uploadPhoto(tenantId, blob, purpose))
       close()
     } catch {
       // The server's reason is shown as a toast (see main.tsx).
@@ -81,14 +74,13 @@ export function PhotoField({
   return (
     <div className='grid gap-2'>
       <span className='text-sm font-medium'>{label}</span>
-      <div className='flex items-center gap-3'>
+      <div className='flex flex-wrap items-center gap-3'>
         <div
-          className='flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-md border bg-muted'
-          style={
-            media?.dominant_color
-              ? { backgroundColor: media.dominant_color }
-              : undefined
-          }
+          className='flex h-20 shrink-0 items-center justify-center overflow-hidden rounded-md border bg-muted'
+          style={{
+            width: `${Math.round(80 * Math.min(aspect, 2.5))}px`,
+            backgroundColor: media?.dominant_color ?? undefined,
+          }}
         >
           {thumb ? (
             <img src={thumb} alt='' className='size-full object-cover' />
@@ -130,56 +122,20 @@ export function PhotoField({
           onChange={(e) => choose(e.target.files?.[0])}
         />
       </div>
+      {hint && <p className='text-sm text-muted-foreground'>{hint}</p>}
       {error && (
         <p role='alert' className='text-sm text-destructive'>
           {error}
         </p>
       )}
 
-      <Dialog open={source !== null} onOpenChange={(o) => !o && close()}>
-        <DialogContent className='sm:max-w-lg'>
-          <DialogHeader className='text-start'>
-            <DialogTitle>{t('photo.crop_title')}</DialogTitle>
-            <DialogDescription>{t('photo.crop_intro')}</DialogDescription>
-          </DialogHeader>
-          <div className='relative h-72 overflow-hidden rounded-md bg-black'>
-            {source && (
-              <Cropper
-                image={source}
-                crop={crop}
-                zoom={zoom}
-                aspect={aspect}
-                onCropChange={setCrop}
-                onZoomChange={setZoom}
-                onCropComplete={(_, pixels) => setArea(pixels)}
-              />
-            )}
-          </div>
-          <label className='grid gap-1 text-sm'>
-            {t('photo.zoom')}
-            <input
-              type='range'
-              min={1}
-              max={3}
-              step={0.05}
-              value={zoom}
-              onChange={(e) => setZoom(Number(e.target.value))}
-              className='h-11 accent-primary'
-            />
-          </label>
-          <DialogFooter>
-            <Button
-              type='button'
-              className='min-h-11 sm:min-h-9'
-              disabled={!area || uploading}
-              onClick={save}
-            >
-              {uploading && <Loader2 className='animate-spin' />}
-              {t('photo.use')}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <CropDialog
+        source={source}
+        aspect={aspect}
+        busy={uploading}
+        onCancel={close}
+        onConfirm={save}
+      />
     </div>
   )
 }

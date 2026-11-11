@@ -6,13 +6,17 @@ import {
 import { api, tenantUrl } from '@/lib/api'
 import { type Media } from '@/features/menu/types'
 
-export type Layout = 'list' | 'grid' | 'large'
+/** Guest-menu styles: A · Warm editorial, B · Fresh grid, C · Quiet bistro. */
+export type MenuStyle = 'editorial' | 'grid' | 'bistro'
 export type Font = 'system' | 'serif' | 'rounded'
+export type BannerText = 'over' | 'under'
 
 export type AppearanceValues = {
   primary_color: string
   font: Font
-  layout: Layout
+  style: MenuStyle
+  /** Logo and name on or below the banner; null = the style's default. */
+  banner_text: BannerText | null
   show_prices: boolean
   show_photos: boolean
   show_descriptions: boolean
@@ -27,7 +31,7 @@ export type ThemePreset = {
   name: string
   primary: string
   font: Font
-  layout: Layout
+  style: MenuStyle
 }
 
 export type Appearance = Omit<
@@ -38,6 +42,10 @@ export type Appearance = Omit<
   cover: Media | null
   warnings: { key: string; message: string }[]
   themes: ThemePreset[]
+  /** Styles this restaurant's plan allows, in picker order. */
+  styles: MenuStyle[]
+  /** Banner shape [width, height] and default name position per style. */
+  banner: Record<MenuStyle, { ratio: [number, number]; text: BannerText }>
 }
 
 export const appearanceKey = (t: number) => ['appearance', t] as const

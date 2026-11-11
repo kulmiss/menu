@@ -63,6 +63,8 @@ export type Item = ItemSummary & {
   tag_ids: number[]
   allergens: string[]
   menu_id: number
+  /** All photos in order (max 5); the first is the main one. */
+  photos?: Media[]
 }
 
 export type Category = {

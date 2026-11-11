@@ -21,6 +21,7 @@ class MediaJanitor
         }
 
         $used = Item::where('media_id', $mediaId)->exists()
+            || Item::whereHas('photos', fn ($q) => $q->where('media.id', $mediaId))->exists()
             || Category::where('media_id', $mediaId)->exists()
             || Promotion::where('media_id', $mediaId)->exists()
             || TenantAppearance::where(fn ($q) => $q->where('logo_media_id', $mediaId)->orWhere('cover_media_id', $mediaId))->exists();

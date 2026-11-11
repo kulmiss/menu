@@ -31,6 +31,8 @@ class ItemResource extends JsonResource
             'tag_ids' => $this->tags->pluck('id')->values(),
             'allergens' => $this->allergens(),
             'menu_id' => $this->category->menu_id,
+            // All photos in order; the first is the main one (= media).
+            'photos' => MediaResource::collection($this->photos)->resolve($request),
         ];
     }
 }

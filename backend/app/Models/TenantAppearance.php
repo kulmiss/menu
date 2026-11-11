@@ -16,7 +16,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int|null $cover_media_id
  * @property string $primary_color "#b4432a"
  * @property string $font system|serif|rounded
- * @property string $layout list|grid|large
+ * @property string $style editorial|grid|bistro (A · Warm editorial, B · Fresh grid, C · Quiet bistro)
+ * @property string|null $banner_text over|under (logo and name on or below the banner); null = style default
  * @property bool $show_prices
  * @property bool $show_photos
  * @property bool $show_descriptions
@@ -25,7 +26,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read Media|null $logo
  * @property-read Media|null $cover
  */
-#[Fillable(['logo_media_id', 'cover_media_id', 'primary_color', 'font', 'layout', 'show_prices', 'show_photos', 'show_descriptions', 'show_calories', 'theme_id'])]
+#[Fillable(['logo_media_id', 'cover_media_id', 'primary_color', 'font', 'style', 'banner_text', 'show_prices', 'show_photos', 'show_descriptions', 'show_calories', 'theme_id'])]
 class TenantAppearance extends Model
 {
     use BelongsToTenant;
@@ -34,7 +35,10 @@ class TenantAppearance extends Model
 
     public const FONTS = ['system', 'serif', 'rounded'];
 
-    public const LAYOUTS = ['list', 'grid', 'large'];
+    /** Guest-menu styles; the order is the order of the admin picker. */
+    public const STYLES = ['editorial', 'grid', 'bistro'];
+
+    public const DEFAULT_STYLE = 'grid';
 
     /** Values for a restaurant that never opened the Appearance screen. */
     public const DEFAULTS = [
@@ -42,7 +46,8 @@ class TenantAppearance extends Model
         'cover_media_id' => null,
         'primary_color' => '#b4432a',
         'font' => 'system',
-        'layout' => 'list',
+        'style' => self::DEFAULT_STYLE,
+        'banner_text' => null,
         'show_prices' => true,
         'show_photos' => true,
         'show_descriptions' => true,
@@ -70,6 +75,21 @@ class TenantAppearance extends Model
     public function cover(): BelongsTo
     {
         return $this->belongsTo(Media::class, 'cover_media_id');
+    }
+
+    /**
+     * The style to show: the saved one when the plan allows it, otherwise the
+     * default (or the first allowed) style.
+     *
+     * @param  list<string>  $allowed
+     */
+    public static function effectiveStyle(?string $style, array $allowed): string
+    {
+        if (in_array($style, $allowed, true)) {
+            return (string) $style;
+        }
+
+        return in_array(self::DEFAULT_STYLE, $allowed, true) || $allowed === [] ? self::DEFAULT_STYLE : $allowed[0];
     }
 
     /** The saved settings, or the defaults (not saved) when there are none yet. */

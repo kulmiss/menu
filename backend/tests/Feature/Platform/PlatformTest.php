@@ -10,26 +10,6 @@ use App\Models\User;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\Notification;
 
-function superAdmin(bool $twoFactor = true): User
-{
-    return User::factory()->create([
-        'is_super_admin' => true,
-        'two_factor_secret' => $twoFactor ? encrypt('secret') : null,
-        'two_factor_confirmed_at' => $twoFactor ? now() : null,
-    ])->fresh();
-}
-
-/** Requests as the browser app sends them (cookie session, like the SPA). */
-function browser(): void
-{
-    test()->withHeaders(['Origin' => config('app.url'), 'Referer' => config('app.url').'/platform']);
-}
-
-function p(string $path = ''): string
-{
-    return '/api/v1/platform/'.ltrim($path, '/');
-}
-
 it('is only for Super Admins with two-factor sign-in', function () {
     [$owner] = member(Role::Owner);
 
@@ -145,7 +125,7 @@ it('keeps settings, themes and the activity log', function () {
     $this->actingAs($admin)->putJson(p('settings'), ['name' => 'MenuHub', 'support_email' => 'help@example.com'], idem())->assertOk()->assertJsonPath('data.name', 'MenuHub');
     $this->get('/'.$tenant->slug)->assertSee('Menu by MenuHub');
 
-    $this->actingAs($admin)->postJson(p('themes'), ['name' => ['en' => 'Coffee'], 'primary' => '#6b3e26', 'font' => 'serif', 'layout' => 'list'], idem())->assertCreated();
+    $this->actingAs($admin)->postJson(p('themes'), ['name' => ['en' => 'Coffee'], 'primary' => '#6b3e26', 'font' => 'serif', 'style' => 'bistro'], idem())->assertCreated();
     $this->actingAs($admin)->getJson(p('themes'))->assertJsonPath('data.5.primary', '#6b3e26');
 
     $this->actingAs($admin)->getJson(p('activity?platform_only=1'))->assertOk()->assertJsonPath('data.0.action', 'platform.theme_created');
@@ -165,7 +145,7 @@ function impersonate(User $admin, Tenant $tenant): array
     ];
 }
 
-it('logs in as the owner with a red banner, blocks risky actions and logs who did what', function () {
+it('logs in as the owner with a quiet badge, blocks risky actions and logs who did what', function () {
     $admin = superAdmin();
     [$owner, $tenant] = member(Role::Owner);
     [, , $item] = sampleMenu($tenant);
@@ -174,7 +154,9 @@ it('logs in as the owner with a red banner, blocks risky actions and logs who di
     expect(Impersonation::where('super_admin_id', $admin->id)->where('user_id', $owner->id)->whereNull('ended_at')->exists())->toBeTrue();
 
     $this->actingAs($owner)->withSession($session);
-    $this->getJson('/api/v1/me')->assertJsonPath('data.id', $owner->id)->assertJsonPath('data.impersonation.tenant_id', $tenant->id);
+    $this->getJson('/api/v1/me')->assertJsonPath('data.id', $owner->id)
+        ->assertJsonPath('data.impersonation.tenant_id', $tenant->id)
+        ->assertJsonPath('data.impersonation.tenant_name', $tenant->name);
     $this->getJson(p('dashboard'))->assertNotFound();
 
     $this->patchJson(t($tenant, "items/{$item->id}"), ['name' => ['en' => 'Cortado']], idem())->assertOk();
@@ -187,6 +169,16 @@ it('logs in as the owner with a red banner, blocks risky actions and logs who di
 
     $this->postJson('/api/v1/impersonation/stop', [], idem())->assertOk()->assertJsonPath('data.redirect', '/platform')->assertSessionMissing('impersonation_id');
     expect(Impersonation::whereNull('ended_at')->exists())->toBeFalse();
+});
+
+it('never shows "viewing as" to the restaurant owner in their own session', function () {
+    $admin = superAdmin();
+    [$owner, $tenant] = member(Role::Owner);
+    impersonate($admin, $tenant);
+
+    // The owner's own browser has its own session without the impersonation keys.
+    $this->flushSession();
+    $this->actingAs($owner)->getJson('/api/v1/me')->assertOk()->assertJsonPath('data.impersonation', null);
 });
 
 it('ends "log in as" after 60 minutes', function () {

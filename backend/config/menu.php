@@ -22,6 +22,9 @@ return [
     // Write a static copy of each guest menu page to public/menu-cache (PLAN.md §15.2.1).
     'static_pages' => (bool) env('MENU_STATIC_PAGES', true),
 
+    // Menu style of the demo restaurant (CI measures each style).
+    'demo_style' => env('DEMO_MENU_STYLE', 'grid'),
+
     'default_currency' => env('MENU_DEFAULT_CURRENCY', 'ETB'),
 
     /*

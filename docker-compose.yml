@@ -50,6 +50,10 @@ services:
   vite:
     image: node:22-bookworm
     working_dir: /var/www/frontend
+    environment:
+      # Corepack would otherwise stop and ask before downloading pnpm.
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
+      CI: "true" # pnpm: no "remove modules directory?" prompt
     command: sh -c "corepack enable && pnpm install && pnpm dev --host 0.0.0.0"
     ports:
       - "5173:5173"
