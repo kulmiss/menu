@@ -8,7 +8,7 @@
     // Only photos likely on the first screen load at once; the rest lazily
     // (PLAN.md §15.2.4). How many dishes fit depends on the style and the banner.
     // With a banner, A and B show no dish photo on the first screen (the banner is the LCP).
-    $fold = ['editorial' => [2, 0], 'grid' => [4, 0], 'bistro' => [5, 2]][$style][$cover ? 1 : 0];
+    $fold = ['editorial' => [2, 0], 'grid' => [4, 0], 'bistro' => [5, 0]][$style][$cover ? 1 : 0];
     $eagerLeft = $fold;
     $blurLeft = 6;
     $position = 0;
@@ -112,18 +112,17 @@
 <nav class="ch cn" aria-label="Categories">@foreach ($menus as $m)@foreach ($m['categories'] as $c)<a href="#c{{ $c['id'] }}">{{ $c['name'] }}</a>@endforeach @endforeach</nav>
 </div></div>
 <main class="w">
-@php $spFirst = true; @endphp
 @foreach ($promotions as $p)
 @if ($p['type'] === 'announcement')
 <p class="an"@if ($p['window']) data-w="{{ json_encode($p['window']) }}"@endif @if ($p['hidden']) hidden @endif><b>{{ $p['title'] }}</b>@if ($p['body'] !== '') {{ $p['body'] }}@endif</p>
 @else
 <div class="spc"@if ($p['item']) data-i="{{ $p['item']['id'] }}"@endif @if ($p['window']) data-w="{{ json_encode($p['window']) }}"@endif @if ($p['hidden']) hidden @endif>
 <{{ $p['item'] ? 'button type=button' : 'div' }} class="{{ $p['item'] ? 'it ' : '' }}sp">
-@if ($p['image'])@php $sp = $p['image']; $spEager = $spFirst; $spFirst = false; @endphp
-{{-- Specials sit near the top, so the first one loads at once (it is often the largest thing on screen). --}}
-@php $ss = $spEager ? 'srcset' : 'data-ss'; @endphp
-<picture>@if ($sp['avif'])<source type="image/avif" {{ $ss }}="{{ $sp['avif'] }}" sizes="(min-width:44rem) 672px, calc(100vw - 2rem)">@endif<source type="image/webp" {{ $ss }}="{{ $sp['webp'] }}" sizes="(min-width:44rem) 672px, calc(100vw - 2rem)">
-<img {{ $spEager ? 'src' : 'data-s' }}="{{ $sp['jpg'] }}" alt="" width="{{ $sp['w'] }}" height="{{ $sp['h'] }}" @unless ($spEager) decoding="async" @endunless style="background-color:{{ $sp['color'] ?? 'transparent' }}" @if ($spEager) fetchpriority="high" @else loading="lazy" @endif></picture>@endif
+@if ($p['image'])@php $sp = $p['image']; @endphp
+{{-- A special is a compact card (photo on the side), never the largest element: its photo waits for load like the ones below, so the banner loads alone. --}}
+@php $ss = 'data-ss'; @endphp
+<picture>@if ($sp['avif'])<source type="image/avif" {{ $ss }}="{{ $sp['avif'] }}" sizes="(min-width:44rem) 152px, 34vw">@endif<source type="image/webp" {{ $ss }}="{{ $sp['webp'] }}" sizes="(min-width:44rem) 152px, 34vw">
+<img data-s="{{ $sp['jpg'] }}" alt="" width="{{ $sp['w'] }}" height="{{ $sp['h'] }}" decoding="async" style="background-color:{{ $sp['color'] ?? 'transparent' }}" loading="lazy"></picture>@endif
 <span class="tx"><span class="bd hl">{{ __('public.special') }}</span><span class="nm">{{ $p['title'] }}</span>@if ($p['body'] !== '')<span class="sm">{{ $p['body'] }}</span>@endif @if ($p['item'] && $p['item']['price'] !== '')<span class="pr">{{ $p['item']['price'] }}</span>@endif</span>
 </{{ $p['item'] ? 'button' : 'div' }}>
 </div>

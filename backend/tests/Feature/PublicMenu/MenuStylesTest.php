@@ -4,6 +4,7 @@ use App\Enums\Role;
 use App\Models\Item;
 use App\Models\Media;
 use App\Models\Plan;
+use App\Models\Promotion;
 use App\Models\Tenant;
 use App\Models\TenantAppearance;
 use App\Support\Contrast;
@@ -144,6 +145,36 @@ it('loads only the photos on the first screen at once, per style', function (str
         ->and(substr_count($html, 'fetchpriority="high"'))->toBe(1)
         ->and(substr_count($html, 'loading="lazy"'))->toBe(8 - $eager);
 })->with([['editorial', 1], ['grid', 3], ['bistro', 4]]);
+
+it('gives photos below the first screen their address only after load, and blurs only the first six', function () {
+    $tenant = Tenant::factory()->create();
+    [, $category] = sampleMenu($tenant);
+    asTenant($tenant, function () use ($category) {
+        $media = fn (int $n) => Media::create([
+            'base_path' => 'x/'.$n, 'mime' => 'image/jpeg', 'width' => 1280, 'height' => 853, 'bytes' => 1, 'placeholder' => 'data:image/webp;base64,BLUR', 'dominant_color' => '#123456',
+            'variants' => ['320' => '320.webp', '640' => '640.webp', '1280' => '1280.webp', 'jpg' => '640.jpg', 'og' => 'og.jpg'],
+        ]);
+        foreach (range(1, 9) as $n) {
+            Item::create(['category_id' => $category->id, 'name' => ['en' => 'Dish '.$n], 'price_minor' => 1000, 'media_id' => $media($n)->id, 'sort' => $n]);
+        }
+        foreach ([1, 2] as $n) {
+            Promotion::create(['type' => 'special', 'title' => ['en' => 'Deal '.$n], 'media_id' => $media(10 + $n)->id, 'sort' => $n]);
+        }
+        TenantAppearance::create([...TenantAppearance::DEFAULTS, 'style' => 'grid']);
+    });
+
+    $html = (string) $this->get('/'.$tenant->slug)->assertOk()->getContent();
+
+    // grid without a banner: 3 dishes at once; 6 more and both specials wait for load.
+    expect(substr_count($html, 'img data-s="'))->toBe(8)
+        ->and(substr_count($html, 'data-ss="'))->toBe(8)
+        ->and(substr_count($html, 'background-image:url(data:image/webp;base64,BLUR)'))->toBe(6)
+        ->and(substr_count($html, 'background-color:#123456'))->toBe(11);
+    // Specials are compact cards with a small responsive photo, never the largest element.
+    expect($html)->toMatch('#<source type="image/webp" data-ss="[^"]*x/11/320.webp 320w[^"]*" sizes="\(min-width:44rem\) 152px, 34vw">#');
+    // …and the page script swaps the addresses in on load.
+    expect(InlineAssets::js())->toContain('data-ss')->toContain('img[data-s]');
+});
 
 /** The demo-like page with a banner photo. */
 function pageWithBanner(string $style, ?string $bannerText = null): string

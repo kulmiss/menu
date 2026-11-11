@@ -67,7 +67,7 @@ Upload the whole `backend/` folder (it now contains `vendor/` and `public/app/`)
    php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan event:cache
    ```
 
-   Never run `db:seed --class=DemoSeeder` on a live server (it creates a demo restaurant with a known password).
+   Never run the demo seeders on a live server: they create restaurants with known passwords (`DemoSeeder` refuses when `APP_ENV=production`).
 6. **Writable folders** (755 for folders, owned by your cPanel user): `storage/`, `bootstrap/cache/`, `public/media/`, `public/menu-cache/`, `public/menu-assets/`.
 7. **Cron** (cPanel → Cron Jobs, every minute) — the only cron line needed:
 
