@@ -132,11 +132,10 @@ class DownloadDemoPhotos extends Command
         if (is_file($file) && ! $this->option('force')) {
             return;
         }
-        $client = Http::withHeaders(['User-Agent' => 'MenuDemoPhotos/1.0'])->timeout(60);
         $urls = [];
         if ($photo['source'] === 'unsplash') {
             try {
-                $urls[] = $this->unsplashImage($client, $photo['id']);
+                $urls[] = $this->unsplashImage($photo['id']);
             } catch (Throwable) {
                 // Let the client follow the redirects itself (full-size file, resized below).
                 $urls[] = "https://unsplash.com/photos/{$photo['id']}/download?force=true";
@@ -147,7 +146,7 @@ class DownloadDemoPhotos extends Command
         }
         $status = 0;
         foreach ($urls as $url) {
-            $response = $client->get($url);
+            $response = self::client()->get($url);
             if ($response->successful() && str_starts_with((string) $response->header('Content-Type'), 'image/') && strlen($response->body()) > 5000) {
                 File::put($file, $response->body());
 
@@ -163,7 +162,7 @@ class DownloadDemoPhotos extends Command
      * more than once) to the file on images.unsplash.com; follow it and ask that
      * one for a 1600 px JPEG.
      */
-    private function unsplashImage(PendingRequest $client, string $id): string
+    private function unsplashImage(string $id): string
     {
         $url = "https://unsplash.com/photos/{$id}/download?force=true";
         for ($hop = 0; $hop < 5; $hop++) {
@@ -171,7 +170,7 @@ class DownloadDemoPhotos extends Command
             if (str_ends_with($host, 'images.unsplash.com')) {
                 return strtok($url, '?').'?w=1600&fit=max&fm=jpg&q=85';
             }
-            $response = $client->withOptions(['allow_redirects' => false])->get($url);
+            $response = self::client(follow: false)->get($url);
             $location = $response->header('Location');
             if ($location === '') {
                 throw new \RuntimeException("Unsplash answered {$response->status()} without a redirect");
@@ -179,6 +178,18 @@ class DownloadDemoPhotos extends Command
             $url = self::absolute($location, $url);
         }
         throw new \RuntimeException('too many redirects from Unsplash');
+    }
+
+    /**
+     * A fresh client for every request: withOptions() changes the client it is
+     * called on, so one shared client that once turned redirects off never
+     * followed a 301/302/307/308 again ("download failed (HTTP 307)").
+     */
+    public static function client(bool $follow = true): PendingRequest
+    {
+        return Http::withHeaders(['User-Agent' => 'MenuDemoPhotos/1.0'])->timeout(60)->withOptions([
+            'allow_redirects' => $follow ? ['max' => 5, 'strict' => true, 'protocols' => ['https', 'http']] : false,
+        ]);
     }
 
     /** "/photos/x" or "//host/x" relative to the page it came from. */

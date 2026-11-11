@@ -117,3 +117,23 @@ it('follows relative and repeated Unsplash redirects to the image', function () 
     Http::assertSent(fn (Request $r) => str_starts_with($r->url(), 'https://images.unsplash.com/photo-9-xyz?w=1600'));
     expect(DownloadDemoPhotos::absolute('/a/b', 'https://unsplash.com/x'))->toBe('https://unsplash.com/a/b');
 });
+
+it('follows 301, 302, 307 and 308 redirects to the image', function (int $status) {
+    File::put($this->dir.'/photos.json', json_encode(['photos' => [
+        ['key' => 'moved', 'source' => 'pexels', 'id' => '777', 'page' => 'https://www.pexels.com/photo/x-777/', 'photographer' => 'cook-1', 'profile' => null, 'licence' => 'Pexels License', 'banner' => false],
+    ]]));
+    Http::fake([
+        'images.pexels.com/photos/777/*' => Http::response('', $status, ['Location' => 'https://cdn.example.test/777.jpg']),
+        'cdn.example.test/*' => Http::response(jpegBytes(1200, 800), 200, ['Content-Type' => 'image/jpeg']),
+    ]);
+
+    $this->artisan('demo:photos')->assertSuccessful();
+
+    expect(is_file($this->dir.'/moved.webp'))->toBeTrue();
+    Http::assertSent(fn (Request $r) => $r->url() === 'https://cdn.example.test/777.jpg');
+})->with([301, 302, 307, 308]);
+
+it('keeps following redirects after a hop where they were turned off', function () {
+    expect(DownloadDemoPhotos::client(follow: false)->getOptions()['allow_redirects'])->toBeFalse()
+        ->and(DownloadDemoPhotos::client()->getOptions()['allow_redirects'])->toBeArray();
+});

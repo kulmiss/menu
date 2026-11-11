@@ -23,14 +23,14 @@ credit is not required but given here. Download them with `php artisan demo:phot
 | `burger-boards.webp` | [pexels 15010285](https://www.pexels.com/photo/delicious-burgers-on-wooden-boards-on-table-15010285/) | [natan-machado-fotografia-gastronomica-162809799](https://www.pexels.com/@natan-machado-fotografia-gastronomica-162809799) | Pexels License |
 | `burger-half.webp` | [pexels 5374420](https://www.pexels.com/photo/burger-sliced-in-half-5374420/) | [enginakyurt](https://www.pexels.com/@enginakyurt) | Pexels License |
 | `burger-tray.webp` | [pexels 36007382](https://www.pexels.com/photo/cheeseburger-and-fries-on-fast-food-tray-36007382/) | [hacihuseyinerol](https://www.pexels.com/@hacihuseyinerol) | Pexels License |
-| `cafe-bali.webp` | [unsplash nmpW_WwwVSc](https://unsplash.com/photos/interior-of-rustic-cafe-with-wooden-tables-nmpW_WwwVSc) | [Shawn](https://unsplash.com/@shawnanggg) | Unsplash License |
-| `cafe-rustic.webp` | [unsplash xhKG01FN2uk](https://unsplash.com/photos/rustic-cafe-interior-with-wooden-furniture-xhKG01FN2uk) | [Ruben Ramirez](https://unsplash.com/@pinchebesu) | Unsplash License |
-| `cafe-tables.webp` | [unsplash N5zICWXBDuU](https://unsplash.com/photos/brown-wooden-chairs-and-tables-N5zICWXBDuU) | [Compagnons](https://unsplash.com/@sigmund) | Unsplash License |
-| `cappuccino.webp` | [unsplash 3q9FzbvWf9w](https://unsplash.com/photos/cup-of-cappuccino-3q9FzbvWf9w) | [Shannon Douglas](https://unsplash.com/@shannondouglas) | Unsplash License |
-| `cappuccino-2.webp` | [unsplash 4MCJpRp_xbw](https://unsplash.com/photos/a-cappuccino-with-a-latte-art-on-it-4MCJpRp_xbw) | [Daniel Lincoln](https://unsplash.com/@danny_lincoln) | Unsplash License |
+| `cafe-bali.webp` | [pexels 18721982](https://www.pexels.com/photo/plants-near-chairs-in-restaurant-18721982/) | [arda-kaykisiz-672105204](https://www.pexels.com/@arda-kaykisiz-672105204) | Pexels License |
+| `cafe-rustic.webp` | [pexels 29833130](https://www.pexels.com/photo/cozy-cafe-interior-with-espresso-machine-29833130/) | [rumpy](https://www.pexels.com/@rumpy) | Pexels License |
+| `cafe-tables.webp` | [pexels 17130636](https://www.pexels.com/photo/interior-of-a-restaurant-17130636/) | [senguliv](https://www.pexels.com/@senguliv) | Pexels License |
+| `cappuccino.webp` | [pexels 4913342](https://www.pexels.com/photo/cup-of-aromatic-cappuccino-served-on-marble-table-4913342/) | [orlovamaria](https://www.pexels.com/@orlovamaria) | Pexels License |
+| `cappuccino-2.webp` | [pexels 6747870](https://www.pexels.com/photo/white-ceramic-cup-with-coffee-6747870/) | [rania](https://www.pexels.com/@rania) | Pexels License |
 | `carbonara.webp` | [pexels 546945](https://www.pexels.com/photo/shallow-focus-photo-of-pasta-546945/) | [maurijn-pach-166875](https://www.pexels.com/@maurijn-pach-166875) | Pexels License |
-| `ceremony.webp` | [unsplash XgxnIhfcS_M](https://unsplash.com/photos/person-in-white-long-sleeve-shirt-holding-white-ceramic-bowl-XgxnIhfcS_M) | Zeynep S. | Unsplash License |
-| `ceremony-2.webp` | [unsplash sJGiivhaYd0](https://unsplash.com/photos/person-pouring-white-powder-on-white-ceramic-bowl-sJGiivhaYd0) | Zeynep S. | Unsplash License |
+| `ceremony.webp` | [pexels 6742970](https://www.pexels.com/photo/woman-grinding-coffee-beans-6742970/) | [lan-yao-324969](https://www.pexels.com/@lan-yao-324969) | Pexels License |
+| `ceremony-2.webp` | [pexels 38519871](https://www.pexels.com/photo/traditional-ethiopian-coffee-ceremony-scene-38519871/) | [lekepov-2044219506](https://www.pexels.com/@lekepov-2044219506) | Pexels License |
 | `chai-latte.webp` | [pexels 11833310](https://www.pexels.com/photo/white-cup-with-brown-liquid-11833310/) | [eat-kubba](https://www.pexels.com/@eat-kubba) | Pexels License |
 | `cheeseburger.webp` | [pexels 4628466](https://www.pexels.com/photo/close-up-photography-of-a-burger-4628466/) | [taha-balta-3031128](https://www.pexels.com/@taha-balta-3031128) | Pexels License |
 | `cheesecake.webp` | [pexels 18416956](https://www.pexels.com/photo/small-cheesecake-topped-with-whipped-cream-fruits-and-sprinkled-with-edible-flowers-18416956/) | [nadin-sh-78971847](https://www.pexels.com/@nadin-sh-78971847) | Pexels License |
@@ -39,14 +39,14 @@ credit is not required but given here. Download them with `php artisan demo:phot
 | `chicken-plate.webp` | [pexels 15390177](https://www.pexels.com/photo/crispy-chicken-with-fries-sauce-and-salad-15390177/) | [fauzanfitria](https://www.pexels.com/@fauzanfitria) | Pexels License |
 | `chocolate-cake.webp` | [pexels 10249461](https://www.pexels.com/photo/close-up-of-chocolate-cakes-10249461/) | [nishant-sharma-77755298](https://www.pexels.com/@nishant-sharma-77755298) | Pexels License |
 | `club-sandwich.webp` | [pexels 15362507](https://www.pexels.com/photo/sandwiches-on-a-plate-15362507/) | [tochtliyeung1996](https://www.pexels.com/@tochtliyeung1996) | Pexels License |
-| `cold-brew.webp` | [unsplash hJJAyrscf_A](https://unsplash.com/photos/clear-drinking-glass-with-brown-liquid-hJJAyrscf_A) | K8 | Unsplash License |
+| `cold-brew.webp` | [pexels 34046778](https://www.pexels.com/photo/refreshing-iced-coffee-on-wooden-table-34046778/) | [nguy-n-ti-n-th-nh-2150376175](https://www.pexels.com/@nguy-n-ti-n-th-nh-2150376175) | Pexels License |
 | `croissants.webp` | [pexels 8957093](https://www.pexels.com/photo/bread-on-a-wooden-tray-8957093/) | [alina-kurson-80193566](https://www.pexels.com/@alina-kurson-80193566) | Pexels License |
 | `cupcake.webp` | [pexels 3081657](https://www.pexels.com/photo/cupcake-on-tray-3081657/) | [oksana-d-649220](https://www.pexels.com/@oksana-d-649220) | Pexels License |
 | `dessert-plate.webp` | [pexels 16544183](https://www.pexels.com/photo/sweet-cakes-on-plate-16544183/) | [bernhard-hagen-45078018](https://www.pexels.com/@bernhard-hagen-45078018) | Pexels License |
 | `donuts.webp` | [pexels 18580208](https://www.pexels.com/photo/plate-with-donuts-18580208/) | [valeriya](https://www.pexels.com/@valeriya) | Pexels License |
 | `eclairs.webp` | [pexels 37124654](https://www.pexels.com/photo/assorted-gourmet-eclairs-on-white-plate-37124654/) | [kemalcanfilm](https://www.pexels.com/@kemalcanfilm) | Pexels License |
 | `eggs-tea.webp` | [pexels 32334105](https://www.pexels.com/photo/delicious-breakfast-spread-in-baghdad-cafe-32334105/) | [khezez](https://www.pexels.com/@khezez) | Pexels License |
-| `espresso.webp` | [unsplash 69YqZOU6-Jo](https://unsplash.com/photos/cup-of-coffee-69YqZOU6-Jo) | [Binit Sharma](https://unsplash.com/@binifty) | Unsplash License |
+| `espresso.webp` | [pexels 11160148](https://www.pexels.com/photo/close-up-shot-of-a-coffee-in-a-white-cup-11160148/) | [shameel-mukkath-3421394](https://www.pexels.com/@shameel-mukkath-3421394) | Pexels License |
 | `fine-crispy.webp` | [pexels 32793299](https://www.pexels.com/photo/gourmet-crispy-fried-dish-with-microgreens-32793299/) | [nano-erdozain-120534369](https://www.pexels.com/@nano-erdozain-120534369) | Pexels License |
 | `fine-interior.webp` | [pexels 29962487](https://www.pexels.com/photo/elegant-restaurant-interior-with-dinner-setup-29962487/) | [valeriya](https://www.pexels.com/@valeriya) | Pexels License |
 | `fine-plated.webp` | [pexels 33033817](https://www.pexels.com/photo/elegant-culinary-presentation-in-tokyo-restaurant-33033817/) | [szymon-shields-1503561](https://www.pexels.com/@szymon-shields-1503561) | Pexels License |
@@ -64,21 +64,21 @@ credit is not required but given here. Download them with `php artisan demo:phot
 | `grilled-cheese.webp` | [pexels 9240536](https://www.pexels.com/photo/toasted-sandwiches-on-black-ceramic-plate-9240536/) | [akilvigneshjr](https://www.pexels.com/@akilvigneshjr) | Pexels License |
 | `hot-chocolate.webp` | [pexels 11043663](https://www.pexels.com/photo/a-cotton-flower-beside-a-delicious-cup-of-drink-11043663/) | [ioanamtc](https://www.pexels.com/@ioanamtc) | Pexels License |
 | `ice-cream.webp` | [pexels 6412948](https://www.pexels.com/photo/close-up-shot-of-three-different-ice-cream-flavors-in-bowls-6412948/) | [rdne](https://www.pexels.com/@rdne) | Pexels License |
-| `iced-coffee.webp` | [unsplash y2Dfk2Kt89o](https://unsplash.com/photos/a-glass-of-iced-coffee-sitting-on-a-counter-y2Dfk2Kt89o) | [pariwat pannium](https://unsplash.com/@pariwatt) | Unsplash License |
+| `iced-coffee.webp` | [pexels 4869290](https://www.pexels.com/photo/cold-coffee-drink-in-clear-drinking-glass-4869290/) | [roman-odintsov](https://www.pexels.com/@roman-odintsov) | Pexels License |
 | `iced-lemon-tea.webp` | [pexels 11009224](https://www.pexels.com/photo/iced-tea-with-fresh-lemon-drink-11009224/) | [shameel-mukkath-3421394](https://www.pexels.com/@shameel-mukkath-3421394) | Pexels License |
 | `iced-mint-tea.webp` | [pexels 37515893](https://www.pexels.com/photo/refreshing-iced-tea-with-mint-garnish-37515893/) | [kunal-lakhotia-781256899](https://www.pexels.com/@kunal-lakhotia-781256899) | Pexels License |
 | `injera-dishes.webp` | [pexels 17486827](https://www.pexels.com/photo/breakfast-meals-on-plates-17486827/) | [dbaler](https://www.pexels.com/@dbaler) | Pexels License |
 | `injera-platter.webp` | [pexels 17486836](https://www.pexels.com/photo/meal-on-plate-17486836/) | [dbaler](https://www.pexels.com/@dbaler) | Pexels License |
-| `jebena.webp` | [unsplash 6LLEcQ4C3aY](https://unsplash.com/photos/black-kettle-on-stove-with-stainless-steel-pot-6LLEcQ4C3aY) | [Yosef Futsum](https://unsplash.com/@yosef_fxum) | Unsplash License |
+| `jebena.webp` | [pexels 24375991](https://www.pexels.com/photo/traditional-jar-with-decorations-24375991/) | [christian-alemu-127251395](https://www.pexels.com/@christian-alemu-127251395) | Pexels License |
 | `juice-jars.webp` | [pexels 8181545](https://www.pexels.com/photo/different-flavors-of-fruit-juice-on-mason-jars-8181545/) | [kindelmedia](https://www.pexels.com/@kindelmedia) | Pexels License |
 | `juices-table.webp` | [pexels 8215113](https://www.pexels.com/photo/healthy-fruit-juices-in-glasses-8215113/) | [kindelmedia](https://www.pexels.com/@kindelmedia) | Pexels License |
 | `kiwi-juice.webp` | [pexels 28053287](https://www.pexels.com/photo/kiwi-fresh-juice-28053287/) | [umarali07](https://www.pexels.com/@umarali07) | Pexels License |
-| `latte.webp` | [unsplash kSlL887znkE](https://unsplash.com/photos/white-ceramic-teacup-with-coffee-latte-art-kSlL887znkE) | [Jason W](https://unsplash.com/@jason_w) | Unsplash License |
-| `latte-biscotti.webp` | [unsplash Tz6004NuNL8](https://unsplash.com/photos/a-cup-of-coffee-with-latte-art-and-biscotti-Tz6004NuNL8) | [Sadia Alam](https://unsplash.com/@sadiaalam) | Unsplash License |
-| `macchiato.webp` | [unsplash BnrKDRn5sjg](https://unsplash.com/photos/white-ceramic-cup-with-espresso-coffee-BnrKDRn5sjg) | Brigitte Tohm | Unsplash License |
+| `latte.webp` | [pexels 459489](https://www.pexels.com/photo/cup-of-coffee-on-saucer-459489/) | [pixabay](https://www.pexels.com/@pixabay) | Pexels License |
+| `latte-biscotti.webp` | [pexels 38068561](https://www.pexels.com/photo/elegant-coffee-and-dessert-on-wooden-table-38068561/) | [liudmyla-kharytoniuk-2152529089](https://www.pexels.com/@liudmyla-kharytoniuk-2152529089) | Pexels License |
+| `macchiato.webp` | [pexels 11160127](https://www.pexels.com/photo/cup-of-coffee-on-white-saucer-in-close-up-photography-11160127/) | [shameel-mukkath-3421394](https://www.pexels.com/@shameel-mukkath-3421394) | Pexels License |
 | `mango-juice.webp` | [pexels 17612822](https://www.pexels.com/photo/a-glass-of-mango-juice-with-a-spoon-and-a-piece-of-fruit-17612822/) | [shameel-mukkath-3421394](https://www.pexels.com/@shameel-mukkath-3421394) | Pexels License |
 | `matcha.webp` | [pexels 911810](https://www.pexels.com/photo/white-ceramic-cup-near-plant-911810/) | [minan1398](https://www.pexels.com/@minan1398) | Pexels License |
-| `mocha.webp` | [unsplash TvXpVcgi9nw](https://unsplash.com/photos/clear-glass-beverage-container-on-table-TvXpVcgi9nw) | [Daria Rudyk](https://unsplash.com/@rudyirudyk) | Unsplash License |
+| `mocha.webp` | [pexels 20066366](https://www.pexels.com/photo/close-up-of-a-glass-of-coffee-with-four-layers-20066366/) | [felipe-vieira-651921657](https://www.pexels.com/@felipe-vieira-651921657) | Pexels License |
 | `orange-juice.webp` | [pexels 17612821](https://www.pexels.com/photo/a-glass-of-orange-juice-with-a-slice-of-orange-on-top-17612821/) | [shameel-mukkath-3421394](https://www.pexels.com/@shameel-mukkath-3421394) | Pexels License |
 | `pain-choc.webp` | [pexels 6215305](https://www.pexels.com/photo/delicious-breakfast-with-croissant-and-coffee-6215305/) | [furkanfdemir](https://www.pexels.com/@furkanfdemir) | Pexels License |
 | `pancakes.webp` | [pexels 6758386](https://www.pexels.com/photo/a-stack-of-pancakes-on-a-plate-6758386/) | [alleksana](https://www.pexels.com/@alleksana) | Pexels License |
@@ -114,6 +114,6 @@ credit is not required but given here. Download them with `php artisan demo:phot
 | `sweet-rolls.webp` | [pexels 40321543](https://www.pexels.com/photo/freshly-baked-sweet-pastries-with-powdered-sugar-40321543/) | [ian-panelo](https://www.pexels.com/@ian-panelo) | Pexels License |
 | `tibs.webp` | [pexels 36984977](https://www.pexels.com/photo/delicious-traditional-ethiopian-meal-served-hot-36984977/) | [mohamed9380](https://www.pexels.com/@mohamed9380) | Pexels License |
 | `toastie-fries.webp` | [pexels 11256670](https://www.pexels.com/photo/toasted-sandwiches-beside-fried-french-fries-11256670/) | [tolgaaslanturk](https://www.pexels.com/@tolgaaslanturk) | Pexels License |
-| `waffle.webp` | [unsplash iSlVsXL-yvU](https://unsplash.com/photos/waffle-with-strawberry-on-white-ceramic-plate-iSlVsXL-yvU) | mulugeta wolde | Unsplash License |
+| `waffle.webp` | [pexels 19664626](https://www.pexels.com/photo/pile-of-waffles-19664626/) | [ann-h-45017](https://www.pexels.com/@ann-h-45017) | Pexels License |
 | `wings.webp` | [pexels 33254639](https://www.pexels.com/photo/close-up-of-crispy-fried-chicken-on-plate-33254639/) | [alankrit-saini-14865083](https://www.pexels.com/@alankrit-saini-14865083) | Pexels License |
 | `yogurt-bowls.webp` | [pexels 6823370](https://www.pexels.com/photo/fruits-in-cream-in-bowl-6823370/) | [shkrabaanthony](https://www.pexels.com/@shkrabaanthony) | Pexels License |
