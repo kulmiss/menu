@@ -146,6 +146,8 @@ New rules added by the owner (now in PLAN.md §2): Docker is for local developme
 | 115 | Logo and name with a banner | New setting **"Logo and name: On the banner / Below the banner"** (shown once a banner is set). Default follows the style: B on the banner, A and C below (A's round logo overlaps the banner edge). On the banner, white text sits on a dark fade (contrast ≥ 4.5:1) and the banner grows if the name is long, so nothing spills out. |
 | 116 | New photo size | All new uploads also get an 800 px WebP (and AVIF where supported), used by `srcset` for the banner and the large dish photos of style A. ~+25 % disk per photo. |
 
+| 117 | Demo data (Partition 12) | `DemoSeeder` now also creates: banner + logo (generated), info (about, address, map link, phone, WhatsApp, e-mail, Instagram/Facebook, Wi-Fi shown), opening hours (Mon–Sat 07–22, Sun 08–20), a second branch **Piassa**, 8 + 4 tables with QR codes, a special ("Buna Monday", opens the Buna dish) and an announcement, three dishes with 3 photos each, and a **Super Admin `admin@example.com` / `password` with two-factor secret `JBSWY3DPEHPK3PXP`** (add it to any authenticator app). The Super Admin is **not created when `APP_ENV=production`** (known password). The demo restaurant itself should still never be seeded on a live server (#69). |
+
 ## Open
 
 - Owner action: protect `main` in GitHub settings (require PR, no force push, no deletion). Claude's access can't change branch settings.

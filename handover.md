@@ -16,8 +16,14 @@ _Last updated: 2026-11-11 15:20 EAT. PR #15 merged; owner's change list (2026-11
 | 3 Quiet "Viewing as" badge | `feat/viewing-as` (on top of dish-photos) | PR open |
 | 4 SMTP settings | `feat/smtp-settings` (on top of viewing-as) | PR open |
 | 5 Banner | `feat/banner` (on top of smtp-settings) | PR open |
+| Partition 12 Demo data | `feat/demo-data` (on top of banner) | PR open |
 
 Design canvas with the three directions: https://claude.ai/artifact/HBvYJAE5UWBSepoqiDkrxD
+
+## Partition 12 — demo data (feat/demo-data)
+- `DemoSeeder::restaurant()` (look, profile, hours, Piassa branch, tables + QR codes, promotions, galleries) and `superAdmin()` (admin@example.com / password / 2FA `JBSWY3DPEHPK3PXP`, skipped in production). `tests/Feature/DemoSeederTest.php`.
+- Fresh demo (Lighthouse mobile, median of 3): A/B/C all 100 ×4, LCP 0.89–0.90 s, CLS 0, HTML 11.2 KB gzip.
+- Tests: backend 278.
 
 ## Change 5 — banner (feat/banner)
 - `tenant_appearance.banner_text` (over|under|null). `PageTheme::STYLES` has banner ratio, default text position and `sizes` per style; `PageTheme::cover()`; `MenuPageData::srcset()`. Blade: preload link in head, `.top.hc.ov`, cover `<img>` width/height per style.
