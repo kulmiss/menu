@@ -8,8 +8,9 @@
     // Only photos likely on the first screen load at once; the rest lazily
     // (PLAN.md §15.2.4). How many dishes fit depends on the style and the banner.
     // With a banner, A and B show no dish photo on the first screen (the banner is the LCP).
-    $fold = ['editorial' => [2, 0], 'grid' => [4, 0], 'bistro' => [5, 2]][$style][$cover ? 1 : 0];
+    $fold = ['editorial' => [2, 0], 'grid' => [4, 0], 'bistro' => [5, 0]][$style][$cover ? 1 : 0];
     $eagerLeft = $fold;
+    $blurLeft = 4;
     $position = 0;
     $hasInfo = $week || $info['address'] || $info['links'] || $info['about'] || $info['wifi'] || $info['socials'];
     $sheets = [];
@@ -84,7 +85,8 @@
 <div class="cv" style="background-image:url({{ $cover['placeholder'] ?? '' }});background-color:{{ $cover['color'] ?? 'transparent' }}"><picture>
 @if ($cover['avif'] !== '')<source type="image/avif" srcset="{{ $cover['avif'] }}" sizes="{{ $cover['sizes'] }}">@endif
 <source type="image/webp" srcset="{{ $cover['webp'] }}" sizes="{{ $cover['sizes'] }}">
-<img src="{{ $cover['jpg'] }}" alt="" width="{{ $cover['w'] }}" height="{{ $cover['h'] }}" fetchpriority="high" decoding="async">
+{{-- No decoding="async" on the largest image: it then appears in the first frame, not one or two later. --}}
+<img src="{{ $cover['jpg'] }}" alt="" width="{{ $cover['w'] }}" height="{{ $cover['h'] }}" fetchpriority="high">
 </picture></div>
 @endif
 <header>
@@ -116,7 +118,11 @@
 @else
 <div class="spc"@if ($p['item']) data-i="{{ $p['item']['id'] }}"@endif @if ($p['window']) data-w="{{ json_encode($p['window']) }}"@endif @if ($p['hidden']) hidden @endif>
 <{{ $p['item'] ? 'button type=button' : 'div' }} class="{{ $p['item'] ? 'it ' : '' }}sp">
-@if ($p['image'])<img src="{{ $p['image'] }}" alt="" width="640" height="427" loading="lazy" decoding="async">@endif
+@if ($p['image'])@php $sp = $p['image']; @endphp
+{{-- A special is a compact card (photo on the side), never the largest element: its photo waits for load like the ones below, so the banner loads alone. --}}
+@php $ss = 'data-ss'; @endphp
+<picture>@if ($sp['avif'])<source type="image/avif" {{ $ss }}="{{ $sp['avif'] }}" sizes="(min-width:44rem) 152px, 34vw">@endif<source type="image/webp" {{ $ss }}="{{ $sp['webp'] }}" sizes="(min-width:44rem) 152px, 34vw">
+<img data-s="{{ $sp['jpg'] }}" alt="" width="{{ $sp['w'] }}" height="{{ $sp['h'] }}" decoding="async" style="background-color:{{ $sp['color'] ?? 'transparent' }}" loading="lazy"></picture>@endif
 <span class="tx"><span class="bd hl">{{ __('public.special') }}</span><span class="nm">{{ $p['title'] }}</span>@if ($p['body'] !== '')<span class="sm">{{ $p['body'] }}</span>@endif @if ($p['item'] && $p['item']['price'] !== '')<span class="pr">{{ $p['item']['price'] }}</span>@endif</span>
 </{{ $p['item'] ? 'button' : 'div' }}>
 </div>
@@ -145,10 +151,13 @@
 @if ($orderable)<span class="ad" data-x="A" aria-hidden="true">+</span>@endif
 @if ($i['media'])
 @php $img = $i['media']; $eager = $position < $fold && $eagerLeft-- > 0; @endphp
-<span class="im" style="background-image:url({{ $img['placeholder'] ?? '' }});background-color:{{ $img['color'] ?? 'transparent' }}"><picture>
-@if ($img['avif'])<source type="image/avif" srcset="{{ $img['avif'] }}" sizes="{{ $sizes }}">@endif
-<source type="image/webp" srcset="{{ $img['webp'] }}" sizes="{{ $sizes }}">
-<img src="{{ $img['jpg'] }}" alt="" width="{{ $img['w'] }}" height="{{ $img['h'] }}" decoding="async" @if ($eager) fetchpriority="{{ ! $cover && $eagerLeft === $fold - 1 ? 'high' : 'auto' }}" @else loading="lazy" @endif>
+{{-- The blurred placeholder for the first four photos; further down the dish colour is enough (less to decode, smaller page). --}}
+<span class="im" style="@if ($blurLeft-- > 0)background-image:url({{ $img['placeholder'] ?? '' }});@endif background-color:{{ $img['color'] ?? 'transparent' }}"><picture>
+{{-- Below the first screen the address is set after load (menu.js: data-ss / data-s), so these never compete with the banner. --}}
+@php $ss = $eager ? 'srcset' : 'data-ss'; @endphp
+@if ($img['avif'])<source type="image/avif" {{ $ss }}="{{ $img['avif'] }}" sizes="{{ $sizes }}">@endif
+<source type="image/webp" {{ $ss }}="{{ $img['webp'] }}" sizes="{{ $sizes }}">
+<img {{ $eager ? 'src' : 'data-s' }}="{{ $img['jpg'] }}" alt="" width="{{ $img['w'] }}" height="{{ $img['h'] }}" decoding="async" @if ($eager) fetchpriority="{{ ! $cover && $eagerLeft === $fold - 1 ? 'high' : 'auto' }}" @else loading="lazy" @endif>
 </picture></span>
 @endif
 </button></li>

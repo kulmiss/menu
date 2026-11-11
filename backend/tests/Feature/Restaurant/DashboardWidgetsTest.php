@@ -126,3 +126,18 @@ it('answers each widget in a few queries', function () {
         DB::disableQueryLog();
     }
 });
+
+it('reads the cached order counts back from a real (serializing) cache store', function () {
+    config(['cache.default' => 'file']);
+    Cache::flush();
+    [$owner, $tenant] = member(Role::Owner);
+    [, , $item] = sampleMenu($tenant);
+    Stats::hit($tenant->id, now($tenant->timezone)->toDateString(), 0, 'order_add', $item->id, 2);
+
+    foreach (['orders', 'trend'] as $widget) {
+        $first = $this->actingAs($owner)->getJson(t($tenant, 'widgets/'.$widget))->assertOk()->json();
+        $this->actingAs($owner)->getJson(t($tenant, 'widgets/'.$widget))->assertOk()->assertExactJson($first);
+    }
+    $this->actingAs($owner)->getJson(t($tenant, 'widgets/orders'))->assertJsonPath('data.periods.7.top.0.name', ['en' => 'Macchiato']);
+    Cache::flush();
+});

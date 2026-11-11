@@ -23,10 +23,22 @@ Digital menu SaaS for restaurants and cafés: a fast public QR menu, a phone-fri
 2. Windows: `.\setup-docker.bat` (other systems: run the same `docker compose` commands it lists).
 3. Read `setup-log.txt`. App: http://localhost:8080 · Mail: http://localhost:8026 · Admin dev server: `docker compose up -d vite` → http://localhost:5173/app/
 
-### Demo logins (local only)
-`php artisan db:seed --class=DemoSeeder` creates the demo café at `/demo`:
-- Restaurant owner: `demo@example.com` / `password` → `/admin`
-- Super Admin: `admin@example.com` / `password`, two-factor secret `JBSWY3DPEHPK3PXP` (add it to an authenticator app) → `/platform`
+### Sales demo (local only)
+1. Real photos (once): `powershell -ExecutionPolicy Bypass -File scripts\download-demo-photos.ps1`
+   (or `php artisan demo:photos` in `backend/`). It downloads the 110 photos listed in
+   `backend/database/seeders/demo-photos/photos.json` (Unsplash / Pexels licence only, credits in `CREDITS.md`)
+   as WebP, under 8 MB in all. Commit the `.webp` files. Without them the demo uses simple generated pictures.
+2. `php artisan migrate:fresh --seed --seeder=DemoSeeder` (only the café: `--seeder=DemoCafeSeeder`). Refused when `APP_ENV=production`.
+
+What you get: **Buna & Bread** at `/demo` (and `/demo/piassa`) with 67 dishes, 90 days of insights and every field filled;
+**Lumière Table** `/demo-fine` (style A), **Stack & Slice** `/demo-pizza` (B), **Crumb & Juice** `/demo-bakery` (C);
+about 30 small restaurants in every state with 12 months of payments for the Super Admin dashboard.
+All people, e-mails and phone numbers are fictional.
+
+Logins (password `password`):
+- Café: `demo@example.com` (owner), `manager@example.com`, `staff@example.com` → `/admin`
+- Showcases: `fine@example.com`, `pizza@example.com`, `bakery@example.com`
+- Super Admin: `admin@example.com`, two-factor secret `JBSWY3DPEHPK3PXP` (add it to an authenticator app) → `/platform`
 
 ## Deploying
 Shared hosting (cPanel) or a VPS: see [docs/deploy.md](docs/deploy.md) — build, `.env`, cron, OPcache, Cloudflare, e-mail (SMTP, SPF, DKIM), the first Super Admin, updates and backups.

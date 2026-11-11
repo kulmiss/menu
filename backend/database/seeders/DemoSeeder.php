@@ -2,375 +2,97 @@
 
 namespace Database\Seeders;
 
-use App\Enums\Role;
-use App\Models\AddonGroup;
-use App\Models\AddonOption;
-use App\Models\Branch;
-use App\Models\Category;
-use App\Models\DiningTable;
-use App\Models\Item;
-use App\Models\ItemAllergen;
-use App\Models\ItemVariant;
-use App\Models\Media;
-use App\Models\Membership;
-use App\Models\Menu;
-use App\Models\MenuSchedule;
-use App\Models\OpeningHour;
-use App\Models\Promotion;
-use App\Models\QrCode;
-use App\Models\Tag;
+use App\Console\Commands\DownloadDemoPhotos;
 use App\Models\Tenant;
-use App\Models\TenantAppearance;
-use App\Models\TenantProfile;
 use App\Models\User;
 use App\Support\ImageProcessor;
-use App\Tenancy\CurrentTenant;
+use Database\Seeders\Demo\Cafe;
+use Database\Seeders\Demo\Insights;
+use Database\Seeders\Demo\Photos;
+use Database\Seeders\Demo\Platform;
+use Database\Seeders\Demo\Showcase;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 
 /**
- * "Buna & Bread", the demo café (English): about 60 items, two menus, sizes,
- * add-ons, tags, allergens, generated photos (some dishes with a gallery), a
- * banner and logo, info + opening hours, a second branch, promotions, tables
- * with QR codes, and a Super Admin. CI measures the guest page's speed on it
- * (PLAN.md §15.5).
+ * The sales demo (never on a live server: refused when APP_ENV=production).
  *
- * Sign in: demo@example.com / password (restaurant owner);
- *          admin@example.com / password + two-factor secret JBSWY3DPEHPK3PXP
- *          (Super Admin; not created when APP_ENV=production).
+ * - "Buna & Bread" at /demo: 67 dishes with real photos, 2 branches, team,
+ *   tables, promotions, 90 days of insights.
+ * - Three showcase restaurants, one per menu style: /demo-fine (A),
+ *   /demo-pizza (B), /demo-bakery (C).
+ * - About 30 small restaurants in every state with 12 months of payments,
+ *   so every Super Admin widget has data.
  *
- *   php artisan db:seed --class=DemoSeeder
+ * Real photos: run `php artisan demo:photos` once (or the PowerShell script
+ * scripts/download-demo-photos.ps1); without them, simple generated pictures
+ * are used. Credits: database/seeders/demo-photos/CREDITS.md.
+ *
+ * Sign in (password "password" for all): demo@example.com (owner),
+ * manager@example.com, staff@example.com; fine@ / pizza@ / bakery@example.com;
+ * admin@example.com + two-factor secret JBSWY3DPEHPK3PXP (Super Admin).
+ *
+ *   php artisan migrate:fresh --seed --seeder=DemoSeeder
  */
 class DemoSeeder extends Seeder
 {
-    public const SLUG = 'demo';
+    public const SLUG = Cafe::SLUG;
 
     public const ADMIN_2FA_SECRET = 'JBSWY3DPEHPK3PXP';
 
-    public function run(CurrentTenant $current, ImageProcessor $images): void
-    {
-        if (Tenant::where('slug', self::SLUG)->exists()) {
-            $this->command?->info('The demo restaurant already exists.');
+    /** Only the café (and the Super Admin): what CI's speed check and most tests need. */
+    protected bool $cafeOnly = false;
 
-            return;
-        }
-
-        $tenant = Tenant::create([
-            'slug' => self::SLUG,
-            'name' => 'Buna & Bread',
-            'paid_until' => now()->addYears(10),
-            'timezone' => 'Africa/Addis_Ababa',
-            'default_locale' => 'en',
-            'currency_code' => 'ETB',
-        ]);
-        $user = User::firstOrCreate(['email' => 'demo@example.com'], [
-            'name' => 'Demo Owner',
-            'password' => 'password',
-            'email_verified_at' => now(),
-        ]);
-        Membership::create(['tenant_id' => $tenant->id, 'user_id' => $user->id, 'role' => Role::Owner]);
-
-        $current->runAs($tenant, function () use ($tenant, $images) {
-            $this->menu($tenant, $images);
-            $this->restaurant($tenant, $images);
-        });
-        $this->superAdmin();
-    }
-
-    /** The demo Super Admin (two-factor on, as the platform requires). Never on a live server. */
-    private function superAdmin(): void
+    public function run(): void
     {
         if (app()->isProduction()) {
-            $this->command?->warn('Production: the demo Super Admin (known password) is not created.');
+            $this->command?->error('The demo data is never seeded on a live server (APP_ENV=production).');
 
             return;
         }
-        User::firstOrCreate(['email' => 'admin@example.com'], ['name' => 'Platform Admin', 'password' => 'password'])
-            ->forceFill([
-                'is_super_admin' => true,
-                'email_verified_at' => now(),
-                'two_factor_secret' => encrypt(self::ADMIN_2FA_SECRET),
-                'two_factor_recovery_codes' => encrypt(json_encode(['demo-recovery-1', 'demo-recovery-2'])),
-                'two_factor_confirmed_at' => now(),
-            ])->save();
-    }
+        if (Tenant::where('slug', self::SLUG)->exists()) {
+            $this->command?->info('The demo restaurant already exists. Use migrate:fresh --seed --seeder=DemoSeeder to start over.');
 
-    /** Look, info, hours, a second branch, promotions, tables with QR codes and dish galleries. */
-    private function restaurant(Tenant $tenant, ImageProcessor $images): void
-    {
-        // CI measures every menu style on the demo (DEMO_MENU_STYLE=editorial|grid|bistro).
-        TenantAppearance::create([
-            ...TenantAppearance::DEFAULTS,
-            'style' => TenantAppearance::effectiveStyle(config('menu.demo_style'), TenantAppearance::STYLES),
-            'primary_color' => '#9a3b1f',
-            'cover_media_id' => $this->banner($tenant, $images)?->id,
-            'logo_media_id' => $this->logo($tenant, $images)?->id,
-        ]);
-
-        TenantProfile::create([
-            'description' => "Ethiopian coffee roasted every Monday, fresh bread every morning.\nTraditional buna ceremony on Sundays.",
-            'address' => 'Bole Road, Addis Ababa',
-            'maps_url' => 'https://maps.google.com/?q=Bole+Road+Addis+Ababa',
-            'phone' => '+251 11 123 4567',
-            'whatsapp' => '+251 91 123 4567',
-            'email' => 'hello@example.com',
-            'socials' => ['instagram' => 'https://instagram.com/example', 'facebook' => 'https://facebook.com/example'],
-            'wifi_name' => 'BunaGuest',
-            'wifi_password' => 'coffee2026',
-            'show_wifi' => true,
-        ]);
-        foreach (range(0, 6) as $day) { // 0 = Sunday
-            OpeningHour::create(['branch_id' => null, 'weekday' => $day, 'opens_at' => $day === 0 ? '08:00' : '07:00', 'closes_at' => $day === 0 ? '20:00' : '22:00']);
+            return;
+        }
+        // One Photos instance, so each photo is processed once and copied for the next restaurant.
+        app()->instance(Photos::class, new Photos(app(ImageProcessor::class)));
+        $missing = count(array_filter(DownloadDemoPhotos::manifest(), fn (array $p) => ! Photos::has($p['key'])));
+        if ($missing > 0) {
+            $this->command?->warn("{$missing} demo photos are not downloaded yet; generated pictures are used. Run: php artisan demo:photos");
         }
 
-        $main = Branch::where('is_default', true)->firstOrFail();
-        $piassa = Branch::create(['slug' => 'piassa', 'name' => ['en' => 'Piassa'], 'address' => 'Piassa, Addis Ababa', 'sort' => 1]);
-        foreach ([$main, $piassa] as $branch) {
-            foreach (range(1, $branch->is($main) ? 8 : 4) as $n) {
-                $table = DiningTable::create(['branch_id' => $branch->id, 'label' => (string) $n, 'sort' => $n]);
-                QrCode::create(['code' => QrCode::newCode(), 'branch_id' => $branch->id, 'dining_table_id' => $table->id, 'label' => 'Table '.$n]);
+        $platform = app(Platform::class);
+        $insights = app(Insights::class);
+        $plans = $platform->plans();
+        $admin = $this->superAdmin();
+
+        $cafe = app(Cafe::class)->seed($plans['business']);
+        $insights->seed($cafe, 90, 140);
+        $paying = [$cafe];
+
+        if (! $this->cafeOnly) {
+            foreach (app(Showcase::class)->seed($plans) as $i => $tenant) {
+                $insights->seed($tenant, 90, [60, 85, 45][$i]);
+                $paying[] = $tenant;
             }
+            $platform->smallRestaurants($plans, $admin);
+            $platform->announcement($admin);
         }
-
-        $buna = Item::whereJsonContains('name->en', 'Buna (Ethiopian coffee)')->first() ?? Item::query()->first();
-        Promotion::create(['type' => 'special', 'title' => ['en' => 'Buna Monday'], 'body' => ['en' => 'Second cup free before 10:00'], 'item_id' => $buna?->id, 'sort' => 0]);
-        Promotion::create(['type' => 'announcement', 'title' => ['en' => 'New:'], 'body' => ['en' => 'Fresh quinoa bowls every day.'], 'sort' => 1]);
-
-        // Every dish photo is photo 1; three dishes get two more to swipe through.
-        $withPhotos = Item::whereNotNull('media_id')->orderBy('id')->get();
-        $extra = 100;
-        foreach ($withPhotos as $i => $item) {
-            $ids = [(int) $item->media_id];
-            if ($i < 3) {
-                foreach ([0, 1] as $_) {
-                    $photo = $this->photo($tenant, $images, $extra++);
-                    if ($photo) {
-                        $ids[] = $photo->id;
-                    }
-                }
-            }
-            $item->photos()->sync(collect($ids)->mapWithKeys(fn ($id, $sort) => [$id => ['tenant_id' => $tenant->id, 'sort' => $sort]])->all());
-        }
+        $platform->payFor($paying, $admin);
     }
 
-    /** A soft, warm café banner (2:1), saved like an uploaded banner. */
-    private function banner(Tenant $tenant, ImageProcessor $images): ?Media
+    /** The demo Super Admin (two-factor on, as the platform requires). */
+    private function superAdmin(): User
     {
-        if (! function_exists('imagecreatetruecolor')) {
-            return null;
-        }
-        $img = imagecreatetruecolor(1600, 800);
-        for ($y = 0; $y < 800; $y += 2) {
-            $k = $y / 800;
-            imagefilledrectangle($img, 0, $y, 1599, $y + 1, (int) imagecolorallocate($img, (int) (92 + 70 * $k), (int) (58 + 40 * $k), (int) (38 + 20 * $k)));
-        }
-        mt_srand(11);
-        foreach (range(1, 40) as $_) { // warm lights
-            $r = mt_rand(20, 90);
-            imagefilledellipse($img, mt_rand(0, 1600), mt_rand(0, 420), $r, $r, (int) imagecolorallocatealpha($img, 255, mt_rand(190, 230), mt_rand(120, 170), mt_rand(70, 110)));
-        }
-        imagefilledrectangle($img, 0, 560, 1599, 800, (int) imagecolorallocate($img, 120, 78, 48)); // counter
-        foreach ([[420, 560], [800, 540], [1180, 560]] as [$x, $y]) { // cups and a plate
-            imagefilledellipse($img, $x, $y, 260, 90, (int) imagecolorallocate($img, 246, 240, 232));
-            imagefilledellipse($img, $x, $y - 10, 150, 50, (int) imagecolorallocate($img, 70, 40, 24));
-        }
-        imagefilter($img, IMG_FILTER_GAUSSIAN_BLUR);
+        $admin = User::firstOrCreate(['email' => 'admin@example.com'], ['name' => 'Platform Admin', 'password' => 'password']);
+        $admin->forceFill([
+            'is_super_admin' => true,
+            'email_verified_at' => now(),
+            'two_factor_secret' => encrypt(self::ADMIN_2FA_SECRET),
+            'two_factor_recovery_codes' => encrypt(json_encode(['demo-recovery-1', 'demo-recovery-2'])),
+            'two_factor_confirmed_at' => now(),
+        ])->save();
 
-        return $this->store($img, $tenant, $images, 'banner', true);
-    }
-
-    /** A round coffee-bean logo. */
-    private function logo(Tenant $tenant, ImageProcessor $images): ?Media
-    {
-        if (! function_exists('imagecreatetruecolor')) {
-            return null;
-        }
-        $img = imagecreatetruecolor(512, 512);
-        imagefill($img, 0, 0, (int) imagecolorallocate($img, 154, 59, 31));
-        imagefilledellipse($img, 256, 256, 260, 340, (int) imagecolorallocate($img, 250, 240, 228));
-        imagesetthickness($img, 18);
-        imagearc($img, 256, 256, 90, 300, 290, 70, (int) imagecolorallocate($img, 154, 59, 31));
-
-        return $this->store($img, $tenant, $images, 'logo');
-    }
-
-    private function store(\GdImage $img, Tenant $tenant, ImageProcessor $images, string $name, bool $banner = false): Media
-    {
-        $path = tempnam(sys_get_temp_dir(), 'demo').'.jpg';
-        imagejpeg($img, $path, 90);
-        $folder = $tenant->id.'/demo-'.$name;
-        $result = $images->process($path, 'image/jpeg', 'public', $folder, $banner);
-        @unlink($path);
-
-        return Media::create([...$result, 'disk' => 'public', 'base_path' => $folder, 'mime' => 'image/jpeg', 'bytes' => 0]);
-    }
-
-    private function menu(Tenant $tenant, ImageProcessor $images): void
-    {
-        $tag = Tag::all()->keyBy('key');
-        $milk = AddonGroup::create(['name' => ['en' => 'Milk'], 'min_choices' => 0, 'max_choices' => 1]);
-        foreach ([['Oat milk', 1500], ['Almond milk', 1500], ['Lactose-free', 1000]] as $i => [$name, $price]) {
-            AddonOption::create(['addon_group_id' => $milk->id, 'name' => ['en' => $name], 'price_minor' => $price, 'sort' => $i]);
-        }
-        $extras = AddonGroup::create(['name' => ['en' => 'Extras'], 'min_choices' => 0, 'max_choices' => 3]);
-        foreach ([['Avocado', 4000], ['Fried egg', 2500], ['Cheese', 3000], ['Chili sauce', 0]] as $i => [$name, $price]) {
-            AddonOption::create(['addon_group_id' => $extras->id, 'name' => ['en' => $name], 'price_minor' => $price, 'sort' => $i]);
-        }
-
-        $allDay = Menu::create(['name' => ['en' => 'All day'], 'slug' => 'all-day', 'sort' => 0]);
-        $breakfast = Menu::create(['name' => ['en' => 'Breakfast'], 'slug' => 'breakfast', 'schedule_mode' => Menu::SCHEDULED, 'sort' => 1]);
-        foreach (range(0, 6) as $day) {
-            MenuSchedule::create(['menu_id' => $breakfast->id, 'weekday' => $day, 'starts_at' => '06:30', 'ends_at' => '11:30']);
-        }
-
-        $photos = 0;
-        $data = $this->catalogue($allDay, $breakfast);
-
-        foreach ($data as $ci => [$menu, $categoryName, $categoryText, $items]) {
-            $category = Category::create([
-                'menu_id' => $menu->id, 'name' => ['en' => $categoryName],
-                'description' => $categoryText ? ['en' => $categoryText] : null, 'sort' => $ci,
-            ]);
-            foreach ($items as $ii => [$name, $summary, $price, $tags, $opt]) {
-                $media = ($opt['photo'] ?? false) ? $this->photo($tenant, $images, $photos++) : null;
-                $sizes = $opt['sizes'] ?? null;
-                $item = Item::create([
-                    'category_id' => $category->id,
-                    'name' => ['en' => $name],
-                    'summary' => $summary ? ['en' => $summary] : null,
-                    'description' => $summary ? ['en' => $summary.'. Made to order in our kitchen.'] : null,
-                    'price_minor' => $sizes ? null : $price,
-                    'media_id' => $media?->id,
-                    'calories' => $opt['k'] ?? null,
-                    'prep_minutes' => $opt['p'] ?? null,
-                    'is_sold_out' => $opt['sold_out'] ?? false,
-                    'is_new' => in_array('new', $tags, true),
-                    'is_popular' => in_array('popular', $tags, true),
-                    'sort' => $ii,
-                ]);
-                foreach ($sizes ?? [] as $si => [$size, $sizePrice]) {
-                    ItemVariant::create(['item_id' => $item->id, 'name' => ['en' => $size], 'price_minor' => $sizePrice, 'is_default' => $si === 0, 'sort' => $si]);
-                }
-                $tagIds = collect($tags)->map(fn ($k) => $tag[$k]->id ?? null)->filter();
-                $item->tags()->attach($tagIds->mapWithKeys(fn ($id) => [$id => ['tenant_id' => $tenant->id]])->all());
-                foreach ($opt['al'] ?? [] as $allergen) {
-                    ItemAllergen::create(['item_id' => $item->id, 'allergen' => $allergen]);
-                }
-                $groups = array_filter([($opt['milk'] ?? false) ? $milk->id : null, ($opt['extras'] ?? false) ? $extras->id : null]);
-                $item->addonGroups()->attach(collect($groups)->mapWithKeys(fn ($id) => [$id => ['tenant_id' => $tenant->id, 'sort' => 0]])->all());
-            }
-        }
-    }
-
-    /**
-     * The demo menu: [menu, category, category text, items]; each item is
-     * [name, summary, price, tags, options].
-     *
-     * @return list<array{0: Menu, 1: string, 2: string|null, 3: list<array{0: string, 1: string|null, 2: int, 3: list<string>, 4: array{sizes?: list<array{0: string, 1: int}>, al?: list<string>, photo?: bool, extras?: bool, milk?: bool, k?: int, p?: int, sold_out?: bool}}>}>
-     */
-    private function catalogue(Menu $allDay, Menu $breakfast): array
-    {
-        return [
-            [$allDay, 'Coffee', 'Roasted here every Monday.', [
-                ['Buna (Ethiopian coffee)', 'Traditional jebena coffee with frankincense', 6000, ['popular'], ['sizes' => [['Cup', 6000], ['Pot for 4', 20000]]]],
-                ['Macchiato', 'Espresso with a spoon of foam', 7000, [], ['milk' => true, 'al' => ['milk']]],
-                ['Cappuccino', 'Double shot, silky milk', 9000, [], ['milk' => true, 'al' => ['milk'], 'sizes' => [['Regular', 9000], ['Large', 11000]]]],
-                ['Latte', 'Smooth and milky', 9500, [], ['milk' => true, 'al' => ['milk']]],
-                ['Flat white', 'Two ristretto shots, thin milk', 10000, [], ['milk' => true, 'al' => ['milk']]],
-                ['Americano', 'Espresso and hot water', 7500, ['vegan'], []],
-                ['Espresso', 'Single origin, Yirgacheffe', 5500, ['vegan'], ['sizes' => [['Single', 5500], ['Double', 7500]]]],
-                ['Mocha', 'Espresso, chocolate and milk', 11000, [], ['milk' => true, 'al' => ['milk']]],
-                ['Iced coffee', 'Cold brew over ice', 10000, ['vegan', 'new'], []],
-                ['Spris', 'Layered coffee and tea', 6500, ['vegan'], []],
-            ]],
-            [$allDay, 'Tea & more', null, [
-                ['Shai (spiced tea)', 'Black tea with cinnamon and cloves', 4500, ['vegan'], []],
-                ['Green tea', null, 4500, ['vegan'], []],
-                ['Ginger lemon honey', 'Fresh ginger, lemon, local honey', 6000, ['vegetarian'], []],
-                ['Hot chocolate', 'Rich cocoa, whipped cream', 9000, ['vegetarian'], ['al' => ['milk']]],
-                ['Fresh juice', 'Mango, avocado or papaya', 9000, ['vegan'], ['sizes' => [['Glass', 9000], ['Jug', 26000]]]],
-                ['Spris juice', 'Layered avocado, mango and papaya', 11000, ['vegan', 'popular'], []],
-                ['Sparkling water', null, 3500, ['vegan'], []],
-                ['Still water', null, 2500, ['vegan'], []],
-            ]],
-            [$allDay, 'Bakery', 'Baked fresh every morning.', [
-                ['Butter croissant', 'Flaky, golden, French butter', 6500, ['vegetarian', 'popular'], ['al' => ['gluten', 'milk', 'eggs'], 'photo' => true]],
-                ['Pain au chocolat', null, 7500, ['vegetarian'], ['al' => ['gluten', 'milk', 'eggs']]],
-                ['Almond croissant', 'Filled with almond cream', 8500, ['vegetarian'], ['al' => ['gluten', 'milk', 'eggs', 'nuts']]],
-                ['Cinnamon roll', 'Cream cheese glaze', 8000, ['vegetarian'], ['al' => ['gluten', 'milk', 'eggs'], 'photo' => true]],
-                ['Banana bread', 'With walnuts', 6000, ['vegetarian'], ['al' => ['gluten', 'eggs', 'nuts']]],
-                ['Dabo (honey bread)', 'Traditional spiced loaf', 5000, ['vegetarian'], ['al' => ['gluten']]],
-                ['Sourdough loaf', 'To take home', 18000, ['vegan'], ['al' => ['gluten']]],
-                ['Blueberry muffin', null, 6500, ['vegetarian'], ['al' => ['gluten', 'milk', 'eggs']]],
-                ['Chocolate cookie', null, 4500, ['vegetarian'], ['al' => ['gluten', 'milk', 'eggs']]],
-            ]],
-            [$allDay, 'Sandwiches', 'Served on our sourdough.', [
-                ['Chicken avocado', 'Grilled chicken, avocado, tomato, aioli', 22000, ['popular'], ['al' => ['gluten', 'eggs'], 'extras' => true, 'photo' => true, 'k' => 640, 'p' => 10]],
-                ['Tuna melt', 'Tuna, cheddar, red onion', 21000, [], ['al' => ['gluten', 'fish', 'milk'], 'extras' => true]],
-                ['Halloumi & veggies', 'Grilled halloumi, peppers, pesto', 20000, ['vegetarian'], ['al' => ['gluten', 'milk', 'nuts'], 'extras' => true]],
-                ['Beef pastrami', 'Pickles, mustard, Swiss cheese', 25000, [], ['al' => ['gluten', 'milk', 'mustard']]],
-                ['Falafel wrap', 'Hummus, salad, tahini', 18000, ['vegan'], ['al' => ['gluten', 'sesame'], 'extras' => true]],
-                ['Club sandwich', 'Chicken, egg, bacon, lettuce', 24000, [], ['al' => ['gluten', 'eggs']]],
-                ['Grilled cheese', 'Three cheeses', 16000, ['vegetarian'], ['al' => ['gluten', 'milk']]],
-            ]],
-            [$allDay, 'Ethiopian classics', null, [
-                ['Shiro', 'Chickpea stew with injera', 18000, ['vegan', 'popular'], ['photo' => true, 'p' => 15]],
-                ['Beyaynetu', 'Fasting platter: lentils, greens, shiro', 24000, ['vegan'], ['p' => 15]],
-                ['Doro wat', 'Spicy chicken stew with egg', 32000, ['spicy'], ['al' => ['eggs'], 'p' => 20]],
-                ['Tibs', 'Sautéed beef with rosemary', 30000, ['spicy'], ['sizes' => [['Half', 30000], ['Full', 52000]], 'p' => 15]],
-                ['Kitfo', 'Minced beef, mitmita, ayib', 34000, ['spicy'], ['al' => ['milk']]],
-                ['Misir wat', 'Red lentil stew', 16000, ['vegan', 'spicy'], []],
-                ['Gomen', 'Collard greens', 14000, ['vegan'], []],
-                ['Extra injera', null, 2500, ['vegan'], []],
-            ]],
-            [$allDay, 'Salads & bowls', null, [
-                ['Garden salad', 'Seasonal greens, vinaigrette', 15000, ['vegan', 'gluten_free'], ['al' => ['mustard']]],
-                ['Chicken Caesar', 'Romaine, parmesan, croutons', 22000, [], ['al' => ['gluten', 'milk', 'eggs', 'fish']]],
-                ['Quinoa bowl', 'Roasted vegetables, tahini', 20000, ['vegan', 'gluten_free', 'new'], ['al' => ['sesame'], 'photo' => true]],
-                ['Greek salad', 'Feta, olives, cucumber', 18000, ['vegetarian', 'gluten_free'], ['al' => ['milk']]],
-            ]],
-            [$allDay, 'Desserts', null, [
-                ['Chocolate cake', 'Dark chocolate ganache', 11000, ['vegetarian'], ['al' => ['gluten', 'milk', 'eggs'], 'photo' => true]],
-                ['Cheesecake', 'Passion fruit topping', 12000, ['vegetarian'], ['al' => ['gluten', 'milk', 'eggs']]],
-                ['Fruit salad', 'Seasonal fruit', 8000, ['vegan', 'gluten_free'], []],
-                ['Ice cream', 'Vanilla, chocolate or mango', 7000, ['vegetarian', 'gluten_free'], ['al' => ['milk'], 'sold_out' => true]],
-            ]],
-            [$breakfast, 'Breakfast', 'Until 11:30.', [
-                ['Firfir', 'Shredded injera in spiced sauce', 15000, ['vegan', 'spicy'], []],
-                ['Chechebsa', 'Flatbread with niter kibbeh and honey', 16000, ['vegetarian', 'popular'], ['al' => ['gluten', 'milk'], 'photo' => true]],
-                ['Ful', 'Fava beans, egg, bread', 17000, ['vegetarian'], ['al' => ['gluten', 'eggs'], 'extras' => true]],
-                ['Scrambled eggs', 'On toast with tomato', 16000, ['vegetarian'], ['al' => ['gluten', 'eggs', 'milk'], 'extras' => true]],
-                ['Avocado toast', 'Chili flakes, lime', 18000, ['vegan', 'new'], ['al' => ['gluten'], 'extras' => true]],
-                ['Pancakes', 'Honey and fresh fruit', 17000, ['vegetarian'], ['al' => ['gluten', 'milk', 'eggs']]],
-                ['Granola bowl', 'Yogurt, honey, fruit', 15000, ['vegetarian'], ['al' => ['milk', 'nuts']]],
-                ['Full breakfast', 'Eggs, sausage, beans, toast', 26000, [], ['al' => ['gluten', 'eggs']]],
-            ]],
-        ];
-    }
-
-    /** A simple generated "food" picture, run through the normal photo pipeline. */
-    private function photo(Tenant $tenant, ImageProcessor $images, int $n): ?Media
-    {
-        if (! function_exists('imagecreatetruecolor')) {
-            return null;
-        }
-        $palette = [[196, 120, 60], [120, 70, 40], [90, 140, 70], [210, 170, 90], [160, 60, 50], [230, 190, 140], [70, 50, 40], [200, 100, 80]];
-        [$r, $g, $b] = $palette[$n % count($palette)];
-        $img = imagecreatetruecolor(1200, 800);
-        for ($y = 0; $y < 800; $y += 4) {
-            $k = $y / 800;
-            imagefilledrectangle($img, 0, $y, 1199, $y + 3, (int) imagecolorallocate($img, (int) (245 - 30 * $k), (int) (238 - 30 * $k), (int) (228 - 30 * $k)));
-        }
-        imagefilledellipse($img, 600, 420, 760, 560, (int) imagecolorallocate($img, 250, 250, 248));
-        imagefilledellipse($img, 600, 420, 600, 430, (int) imagecolorallocate($img, $r, $g, $b));
-        imagefilledellipse($img, 540, 380, 200, 140, (int) imagecolorallocate($img, min(255, $r + 40), min(255, $g + 40), min(255, $b + 30)));
-        $path = tempnam(sys_get_temp_dir(), 'demo').'.jpg';
-        imagejpeg($img, $path, 90);
-
-        $folder = $tenant->id.'/'.Str::lower((string) Str::ulid());
-        $result = $images->process($path, 'image/jpeg', 'public', $folder);
-        @unlink($path);
-
-        return Media::create([...$result, 'disk' => 'public', 'base_path' => $folder, 'mime' => 'image/jpeg', 'bytes' => 0]);
+        return $admin;
     }
 }

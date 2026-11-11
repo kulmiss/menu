@@ -15,12 +15,17 @@ _Last updated: 2026-11-11 20:45 EAT. #26–#30 open and stacked; all requested w
 | Printable PDF menu | `feat/pdf-menu` (on #26) | #27 |
 | "My order" list | `feat/my-order` (on #27) | #28 |
 | Restaurant dashboard widgets | `feat/restaurant-dashboard` (on #28) | #29 |
-| Super Admin dashboard widgets | `feat/platform-dashboard` (on #29) | #30 |
+| Super Admin dashboard widgets | `feat/platform-dashboard` (on #29) | #30 (merged) |
+| Sales demo with real photos | `feat/sales-demo` | #32 — **CI speed job not green yet** (see below) |
 
 **Queued next (owner, 2026-11-11 19:40), after "My order":** dashboard widgets as small stacked PRs.
 - Super Admin (/platform): revenue (this vs last month, MRR, 12-month SVG bars); expiring trials/subscriptions 7/14 days + "Remind" e-mail (editable, logged); inactive restaurants (no views and no edits 14+ days) + "Email owner"; growth funnel (sign-ups → ≥5 dishes → first QR scan → paying, 30/90 days, %); top restaurants (views/scans 30 days, biggest plans); new sign-ups with setup progress %; system health (disk, photo storage, cron last run, queued/failed mails, errors today, PHP/Laravel; warnings: cron > 10 min, disk < 10 %); plan mix donut + upgrades/downgrades this month.
 - Restaurant dashboard: setup checklist (logo, banner, ≥5 dishes, photos, hours, info, QR downloaded; links; "Hide"); views/scans today vs yesterday + 7-day mini chart; missing photos (most viewed first, "Add photo", only when photos shown); "My order" stats (most-added dishes, average list value 7/30 days — anonymous sendBeacon counts from the on-demand cart file: dish id, quantity, list total; bots filtered; only when the list is on); plan & usage bars (dishes, branches, photos, languages, team) with upgrade hint; platform news on top when new.
 - Rules: admin first load ≤ 225 KB (widgets on demand), plain SVG charts, parallel widgets with skeleton/empty/error states, staff never see plan/usage/money (server-enforced), fast queries (indexes, no N+1, cache totals a few minutes; test with 200 restaurants × 6 months), tests per widget, t(), light/dark, 375 px, contrast.
+
+## Sales demo (#32) — open issue
+- `DemoSeeder` (full) / `DemoCafeSeeder`; `database/seeders/Demo/{Cafe,Showcase,Platform,Insights,MenuBuilder,Photos}.php`; `php artisan demo:photos` + `scripts/download-demo-photos.ps1`; 110 photos listed in `demo-photos/photos.json`, `CREDITS.md`. Decisions #140–#146.
+- Guest-page speed with real-weight photos: LCP went 1.50 s → 1.2007 s in CI (limit 1200 ms); TBT on CI runners varies 21–586 ms between runs. The speed job fails by fractions of a millisecond or on noisy TBT. Temp PR #31 (sample photos, closed) shows it. Options for the owner: accept a slightly higher LCP limit for menus with real photos, lighter banner (lower quality / smaller size), or fewer demo dishes.
 
 ## Super Admin dashboard (#30)
 - `Platform\DashboardWidgetController` (revenue, expiring, inactive, funnel?days=30|90, top, signups, health, plan-mix, POST email/{tenant}); routes under `platform/widgets/*`; cron heartbeat `Cache::forever('cron:last_run')` and `queue:work --stop-when-empty` every minute in `routes/console.php`; indexes migration `2026_11_11_210001`.

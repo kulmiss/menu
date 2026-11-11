@@ -200,7 +200,7 @@ class MenuPageData
                         'title' => $text($p->title),
                         'body' => $text($p->body),
                         'item' => $item ? ['id' => $item['id'], 'price' => $item['price']] : null,
-                        'image' => $photos && $p->media ? ($p->media->urls()['640'] ?? null) : null,
+                        'image' => $photos && $p->media ? self::image($p->media) : null,
                         'window' => $window[0] === null && $window[1] === null ? null : $window,
                         // Outside its dates when the page was built (no-JS fallback; the script re-checks).
                         'hidden' => ($window[0] !== null && $localNow < $window[0]) || ($window[1] !== null && $localNow >= $window[1]),

@@ -149,3 +149,18 @@ it('stays fast with 200 restaurants and 6 months of statistics', function () {
         DB::disableQueryLog();
     }
 });
+
+it('reads every cached widget back from a real (serializing) cache store', function () {
+    config(['cache.default' => 'file']);
+    Cache::flush();
+    $t = Tenant::factory()->create(['created_at' => now()->subDays(3)]);
+    Stats::hit($t->id, now()->toDateString(), 0, 'qr_scan', 1);
+    $admin = superAdmin();
+
+    foreach (['revenue', 'expiring', 'inactive', 'funnel?days=30', 'top', 'signups', 'health', 'plan-mix'] as $widget) {
+        $first = $this->actingAs($admin)->getJson(p('widgets/'.$widget))->assertOk()->json();
+        $this->actingAs($admin)->getJson(p('widgets/'.$widget))->assertOk()->assertExactJson($first);
+    }
+    $this->actingAs($admin)->getJson(p('widgets/funnel?days=30'))->assertJsonPath('data.steps.2.count', 1);
+    Cache::flush();
+});
