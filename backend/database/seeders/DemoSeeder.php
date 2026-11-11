@@ -63,22 +63,43 @@ class DemoSeeder extends Seeder
 
         $platform = app(Platform::class);
         $insights = app(Insights::class);
-        $plans = $platform->plans();
+        $plans = $this->step('Plans and Super Admin', fn () => $platform->plans());
         $admin = $this->superAdmin();
 
-        $cafe = app(Cafe::class)->seed($plans['business']);
-        $insights->seed($cafe, 90, 140);
+        $cafe = $this->step('Buna & Bread: menus, photos, branches, team', fn () => app(Cafe::class)->seed($plans['business']));
+        $this->step('Buna & Bread: 90 days of insights', fn () => $insights->seed($cafe, 90, 140));
         $paying = [$cafe];
 
         if (! $this->cafeOnly) {
-            foreach (app(Showcase::class)->seed($plans) as $i => $tenant) {
-                $insights->seed($tenant, 90, [60, 85, 45][$i]);
-                $paying[] = $tenant;
-            }
-            $platform->smallRestaurants($plans, $admin);
+            $showcases = $this->step('Showcase restaurants (A, B, C)', fn () => app(Showcase::class)->seed($plans));
+            $this->step('Showcase restaurants: insights', function () use ($showcases, $insights) {
+                foreach ($showcases as $i => $tenant) {
+                    $insights->seed($tenant, 90, [60, 85, 45][$i]);
+                }
+            });
+            $paying = [...$paying, ...$showcases];
+            $this->step('30 small restaurants, payments, plan changes', fn () => $platform->smallRestaurants($plans, $admin));
             $platform->announcement($admin);
         }
-        $platform->payFor($paying, $admin);
+        $this->step('Payments for the café and showcases', fn () => $platform->payFor($paying, $admin));
+    }
+
+    /**
+     * Runs one part of the demo and prints a progress line with its time.
+     *
+     * @template T
+     *
+     * @param  callable(): T  $work
+     * @return T
+     */
+    private function step(string $label, callable $work): mixed
+    {
+        $this->command?->getOutput()->write("  {$label} … ");
+        $started = microtime(true);
+        $result = $work();
+        $this->command?->getOutput()->writeln(sprintf('<info>done</info> (%.1f s)', microtime(true) - $started));
+
+        return $result;
     }
 
     /** The demo Super Admin (two-factor on, as the platform requires). */

@@ -60,7 +60,7 @@ credit is not required but given here. Download them with `php artisan demo:phot
 | `garden-salad.webp` | [pexels 17303318](https://www.pexels.com/photo/dish-served-in-a-restaurant-17303318/) | [nadin-sh-78971847](https://www.pexels.com/@nadin-sh-78971847) | Pexels License |
 | `ginger-tea.webp` | [pexels 34928366](https://www.pexels.com/photo/invigorating-ginger-tea-with-honey-34928366/) | [masuma-rahaman-437541976](https://www.pexels.com/@masuma-rahaman-437541976) | Pexels License |
 | `granola.webp` | [pexels 30529077](https://www.pexels.com/photo/delicious-granola-breakfast-with-berries-30529077/) | [not-my-real-name-2148486441](https://www.pexels.com/@not-my-real-name-2148486441) | Pexels License |
-| `green-tea.webp` | [pexels 31251487](https://www.pexels.com/photo/traditional-japanese-green-tea-setup-with-teapot-31251487/) | [anh-nguyen-517648218](https://www.pexels.com/@anh-nguyen-517648218) | Pexels License |
+| `green-tea.webp` | [pexels 36028821](https://www.pexels.com/photo/steaming-green-tea-in-glass-cup-with-bokeh-36028821/) | [filmy-kashif-2157365380](https://www.pexels.com/@filmy-kashif-2157365380) | Pexels License |
 | `grilled-cheese.webp` | [pexels 9240536](https://www.pexels.com/photo/toasted-sandwiches-on-black-ceramic-plate-9240536/) | [akilvigneshjr](https://www.pexels.com/@akilvigneshjr) | Pexels License |
 | `hot-chocolate.webp` | [pexels 11043663](https://www.pexels.com/photo/a-cotton-flower-beside-a-delicious-cup-of-drink-11043663/) | [ioanamtc](https://www.pexels.com/@ioanamtc) | Pexels License |
 | `ice-cream.webp` | [pexels 6412948](https://www.pexels.com/photo/close-up-shot-of-three-different-ice-cream-flavors-in-bowls-6412948/) | [rdne](https://www.pexels.com/@rdne) | Pexels License |
@@ -81,7 +81,7 @@ credit is not required but given here. Download them with `php artisan demo:phot
 | `mocha.webp` | [unsplash TvXpVcgi9nw](https://unsplash.com/photos/clear-glass-beverage-container-on-table-TvXpVcgi9nw) | [Daria Rudyk](https://unsplash.com/@rudyirudyk) | Unsplash License |
 | `orange-juice.webp` | [pexels 17612821](https://www.pexels.com/photo/a-glass-of-orange-juice-with-a-slice-of-orange-on-top-17612821/) | [shameel-mukkath-3421394](https://www.pexels.com/@shameel-mukkath-3421394) | Pexels License |
 | `pain-choc.webp` | [pexels 6215305](https://www.pexels.com/photo/delicious-breakfast-with-croissant-and-coffee-6215305/) | [furkanfdemir](https://www.pexels.com/@furkanfdemir) | Pexels License |
-| `pancakes.webp` | [pexels 730922](https://www.pexels.com/photo/selective-focus-of-pile-of-pan-cakes-730922/) | [clickerhappy](https://www.pexels.com/@clickerhappy) | Pexels License |
+| `pancakes.webp` | [pexels 6758386](https://www.pexels.com/photo/a-stack-of-pancakes-on-a-plate-6758386/) | [alleksana](https://www.pexels.com/@alleksana) | Pexels License |
 | `pancakes-berries.webp` | [pexels 6529790](https://www.pexels.com/photo/pancakes-and-fruits-on-a-white-ceramic-plate-6529790/) | [rdne](https://www.pexels.com/@rdne) | Pexels License |
 | `pancakes-strawberry.webp` | [pexels 37648012](https://www.pexels.com/photo/stack-of-pancakes-with-strawberries-and-syrup-37648012/) | [tochukwu-ekeh-2149052634](https://www.pexels.com/@tochukwu-ekeh-2149052634) | Pexels License |
 | `panna-cotta.webp` | [pexels 14996603](https://www.pexels.com/photo/panacotta-14996603/) | [sylwester-ficek-154797634](https://www.pexels.com/@sylwester-ficek-154797634) | Pexels License |
