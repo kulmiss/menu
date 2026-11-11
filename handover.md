@@ -12,12 +12,18 @@ _Last updated: 2026-11-11 15:20 EAT. PR #15 merged; owner's change list (2026-11
 | Change | Branch | State |
 |---|---|---|
 | 1 Menu styles A/B/C (owner picked **all three**, admin chooses) | `feat/menu-styles` | PR open |
-| 2 Dish photos (up to 5) | – | next |
+| 2 Dish photos (up to 5) | `feat/dish-photos` (on top of menu-styles) | PR open |
 | 3 Quiet "Viewing as" badge | – | queued |
 | 4 SMTP settings | – | queued |
 | 5 Banner | – | queued |
 
 Design canvas with the three directions: https://claude.ai/artifact/HBvYJAE5UWBSepoqiDkrxD
+
+## Change 2 — dish photos (feat/dish-photos)
+- `item_photos` (tenant_id, item_id, media_id, sort; composite FKs; backfilled from `items.media_id`). `Item::photos()`; `photo_ids` in item create/update (max 5, distinct, own media), legacy `media_id` keeps extras; janitor checks `item_photos`; copier copies photos; `ItemResource.photos`.
+- Guest page: sheet data `g` = photos 2–5 (1280 px); swipe gallery in `sheet.js` + CSS (`.gw/.gl/.gc/.ga`).
+- Admin: `components/photo-gallery.tsx` (take/choose, crop, progress, make main, move earlier, replace, remove), `components/crop-dialog.tsx` (shared with PhotoField), `upload.ts` (XHR with progress). Gallery uses inline styles for new layout values (shared CSS unchanged).
+- Tests: backend **259**, frontend **183**. Admin first load ≤ 230,400 B.
 
 ## Change 1 — menu styles (feat/menu-styles)
 - `tenant_appearance.style` (editorial|grid|bistro, default grid) replaces `layout` (list→bistro, grid→grid, large→editorial); theme presets moved too. Plan features `style_editorial/grid/bistro` (on by default) + per-restaurant overrides; `Features::styles()`; `TenantAppearance::effectiveStyle()` falls back when a style is off.

@@ -88,6 +88,19 @@ class Item extends Model
             ->orderByPivot('sort');
     }
 
+    /**
+     * All photos of the dish in order (at most 5); the first is the main one
+     * (also kept in media_id).
+     *
+     * @return BelongsToMany<Media, $this>
+     */
+    public function photos(): BelongsToMany
+    {
+        return $this->belongsToMany(Media::class, 'item_photos')
+            ->withPivot(['tenant_id', 'sort'])
+            ->orderByPivot('sort');
+    }
+
     /** @return BelongsToMany<Tag, $this> */
     public function tags(): BelongsToMany
     {

@@ -55,6 +55,7 @@ class MenuPageData
                     'categories.items' => fn ($q) => $q->where('is_visible', true),
                     'categories.items.variants',
                     'categories.items.media',
+                    'categories.items.photos',
                     'categories.items.tags',
                     'categories.items.allergenRows',
                     'categories.items.addonGroups.options',
@@ -153,6 +154,9 @@ class MenuPageData
                                     'k' => $calories ? $item->calories : null,
                                     'p' => $item->prep_minutes,
                                     'i' => $photos && $item->media ? ($item->media->urls()['1280'] ?? null) : null,
+                                    // More photos to swipe through in the details sheet (photo 2–5).
+                                    'g' => $photos ? $item->photos->reject(fn (Media $m) => $m->id === $item->media_id)
+                                        ->map(fn (Media $m) => $m->urls()['1280'] ?? null)->filter()->values()->all() : [],
                                 ], fn ($v) => $v !== null && $v !== '' && $v !== []),
                             ];
                         })->values()->all(),

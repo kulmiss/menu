@@ -82,7 +82,14 @@ dialog{position:fixed;border:0;padding:0;margin:auto auto 0;width:100%;max-width
 dialog::backdrop{background:#0008}
 @media (min-width:48rem){dialog{margin:auto;border-radius:1rem}}
 .sh{padding:1rem 1rem 1.5rem}
-.sh img{display:block;width:calc(100% + 2rem);max-width:none;height:auto;margin:-1rem -1rem 1rem;aspect-ratio:3/2;object-fit:cover;background:var(--card)}
+.gw{position:relative;margin:-1rem -1rem 1rem}
+.gl{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
+.gl::-webkit-scrollbar{display:none}
+.gl img{flex:0 0 100%;display:block;width:100%;height:auto;aspect-ratio:3/2;object-fit:cover;background:var(--card);scroll-snap-align:center}
+.gc{position:absolute;bottom:.6rem;inset-inline-end:.75rem;font-size:.75rem;font-weight:600;padding:.15rem .5rem;border-radius:99px;background:#000a;color:#fff}
+.ga{display:none;position:absolute;top:50%;inset-inline-start:.5rem;width:2.75rem;height:2.75rem;margin-top:-1.375rem;border:0;border-radius:99px;background:#000a;color:#fff;font-size:1.5rem;line-height:1;cursor:pointer}
+.ga.gn{inset-inline-start:auto;inset-inline-end:.5rem}
+@media (hover:hover){.ga{display:block}}
 .sh h3{font-size:1.5rem;line-height:1.2;padding-inline-end:2.5rem}
 .sh>.pr{font-size:1.15rem}
 .sh h4{margin:1rem 0 .25rem;font-size:.95rem}
@@ -92,7 +99,7 @@ dialog::backdrop{background:#0008}
 .mu{color:var(--mu);font-size:.875rem}
 .of{position:fixed;inset:auto 0 0;background:var(--fg);color:var(--bg);text-align:center;font-size:.85rem;padding:.5rem}
 @media (prefers-reduced-motion:no-preference){
-html{scroll-behavior:smooth}
+html,.gl{scroll-behavior:smooth}
 dialog[open]{animation:up .28s cubic-bezier(.2,.8,.2,1)}
 dialog[open]::backdrop{animation:fd .28s ease}
 .it .im img{transition:transform .4s ease}

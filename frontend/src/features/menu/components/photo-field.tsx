@@ -1,18 +1,11 @@
 import { useRef, useState } from 'react'
-import { ImagePlus, Loader2, Trash2 } from 'lucide-react'
-import Cropper, { type Area } from 'react-easy-crop'
+import { ImagePlus, Trash2 } from 'lucide-react'
+import { type Area } from 'react-easy-crop'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
 import { ACCEPTED_TYPES, cropToJpeg, isHeic, uploadPhoto } from '../photo'
 import { type Media } from '../types'
+import { CropDialog } from './crop-dialog'
 
 type Props = {
   tenantId: number
@@ -39,9 +32,6 @@ export function PhotoField({
   const { t } = useTranslation()
   const input = useRef<HTMLInputElement>(null)
   const [source, setSource] = useState<string | null>(null)
-  const [crop, setCrop] = useState({ x: 0, y: 0 })
-  const [zoom, setZoom] = useState(1)
-  const [area, setArea] = useState<Area | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
 
@@ -51,8 +41,6 @@ export function PhotoField({
     if (isHeic(file)) return setError(t('photo.heic'))
     if (!ACCEPTED_TYPES.includes(file.type)) return setError(t('photo.type'))
     if (file.size > 30 * 1024 * 1024) return setError(t('photo.too_big'))
-    setCrop({ x: 0, y: 0 })
-    setZoom(1)
     setSource(URL.createObjectURL(file))
   }
 
@@ -62,8 +50,8 @@ export function PhotoField({
     if (input.current) input.current.value = ''
   }
 
-  async function save() {
-    if (!source || !area) return
+  async function save(area: Area) {
+    if (!source) return
     setUploading(true)
     try {
       const blob = await cropToJpeg(source, area)
@@ -136,50 +124,13 @@ export function PhotoField({
         </p>
       )}
 
-      <Dialog open={source !== null} onOpenChange={(o) => !o && close()}>
-        <DialogContent className='sm:max-w-lg'>
-          <DialogHeader className='text-start'>
-            <DialogTitle>{t('photo.crop_title')}</DialogTitle>
-            <DialogDescription>{t('photo.crop_intro')}</DialogDescription>
-          </DialogHeader>
-          <div className='relative h-72 overflow-hidden rounded-md bg-black'>
-            {source && (
-              <Cropper
-                image={source}
-                crop={crop}
-                zoom={zoom}
-                aspect={aspect}
-                onCropChange={setCrop}
-                onZoomChange={setZoom}
-                onCropComplete={(_, pixels) => setArea(pixels)}
-              />
-            )}
-          </div>
-          <label className='grid gap-1 text-sm'>
-            {t('photo.zoom')}
-            <input
-              type='range'
-              min={1}
-              max={3}
-              step={0.05}
-              value={zoom}
-              onChange={(e) => setZoom(Number(e.target.value))}
-              className='h-11 accent-primary'
-            />
-          </label>
-          <DialogFooter>
-            <Button
-              type='button'
-              className='min-h-11 sm:min-h-9'
-              disabled={!area || uploading}
-              onClick={save}
-            >
-              {uploading && <Loader2 className='animate-spin' />}
-              {t('photo.use')}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <CropDialog
+        source={source}
+        aspect={aspect}
+        busy={uploading}
+        onCancel={close}
+        onConfirm={save}
+      />
     </div>
   )
 }

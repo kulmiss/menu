@@ -41,7 +41,7 @@ import {
   useUpdatePrice,
 } from '../api'
 import { MoneyInput } from '../components/money-input'
-import { PhotoField } from '../components/photo-field'
+import { PhotoGallery } from '../components/photo-gallery'
 import { TranslatableInput } from '../components/translatable-input'
 import { tagLabel, tr } from '../text'
 import {
@@ -197,7 +197,9 @@ function ItemForm({
   const [draft, setDraft] = useState<Draft>(() =>
     item ? fromItem(item) : emptyDraft(newInCategory ?? categories[0]?.id ?? 0)
   )
-  const [photo, setPhoto] = useState<Media | null>(item?.media ?? null)
+  const [photos, setPhotos] = useState<Media[]>(
+    () => item?.photos ?? (item?.media ? [item.media] : [])
+  )
   const [tab, setTab] = useState<Tab>(priceOnly ? 'prices' : 'details')
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [confirmDelete, setConfirmDelete] = useState(false)
@@ -243,12 +245,12 @@ function ItemForm({
         await update.mutateAsync({
           id: itemId,
           ...draft,
-          media_id: photo?.id ?? null,
+          photo_ids: photos.map((p) => p.id),
         })
       } else {
         const created = await create.mutateAsync({
           ...draft,
-          media_id: photo?.id ?? null,
+          photo_ids: photos.map((p) => p.id),
         })
         onCreated?.(created.id)
       }
@@ -295,11 +297,10 @@ function ItemForm({
 
         <div className='min-h-0 flex-1 overflow-y-auto p-4'>
           <TabsContent value='details' className='grid gap-4'>
-            <PhotoField
+            <PhotoGallery
               tenantId={ctx.tenantId}
-              label={t('photo.label')}
-              media={photo}
-              onChange={setPhoto}
+              photos={photos}
+              onChange={setPhotos}
               disabled={!ctx.canWrite}
             />
             <TranslatableInput

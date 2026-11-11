@@ -171,6 +171,8 @@ export type CategoryInput = {
   description?: Translations
   is_visible?: boolean
   media_id?: number | null
+  /** All photos in order (max 5); the first is the main one. */
+  photo_ids?: number[]
 }
 
 export const useCreateCategory = (t: number) =>
@@ -264,6 +266,8 @@ export type ItemInput = {
   description?: Translations
   price_minor?: number | null
   media_id?: number | null
+  /** All photos in order (max 5); the first is the main one. */
+  photo_ids?: number[]
   calories?: number | null
   prep_minutes?: number | null
   is_visible?: boolean

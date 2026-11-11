@@ -35,7 +35,10 @@ class ItemController extends Controller
 {
     use RecordsChanges;
 
-    private const RELATIONS = ['variants', 'addonGroups', 'tags', 'allergenRows', 'category', 'media'];
+    private const RELATIONS = ['variants', 'addonGroups', 'tags', 'allergenRows', 'category', 'media', 'photos'];
+
+    /** Photos per dish (owner, 2026-11-11). */
+    public const MAX_PHOTOS = 5;
 
     public function __construct(private readonly CurrentTenant $current, private readonly PlanLimits $limits) {}
 
@@ -51,11 +54,14 @@ class ItemController extends Controller
         $this->limits->ensureRoom('items', Item::count());
 
         $item = DB::transaction(function () use ($data) {
+            $photos = $this->photoIds($data, null);
             $item = Item::create([
                 ...$this->fields($data),
+                ...($photos === null ? [] : ['media_id' => $photos[0] ?? null]),
                 'sort' => $this->nextSort(Item::where('category_id', $data['category_id'])),
             ]);
             $this->syncRelations($item, $data);
+            $this->syncPhotos($item, $photos);
 
             return $item;
         });
@@ -75,12 +81,20 @@ class ItemController extends Controller
             if (isset($fields['category_id']) && (int) $fields['category_id'] !== $model->category_id) {
                 $fields['sort'] = $this->nextSort(Item::where('category_id', $fields['category_id']));
             }
-            $oldMedia = $model->media_id;
+            $photos = $this->photoIds($data, $model);
+            $oldMedia = array_unique([$model->media_id, ...$model->photos->pluck('id')->all()]);
+            if ($photos !== null) {
+                $fields['media_id'] = $photos[0] ?? null;
+            }
             $model->fill($fields)->save();
             $changes = ActivityLogger::diff($model);
             $this->syncRelations($model, $data);
-            if ($oldMedia !== $model->media_id) {
-                MediaJanitor::releaseIfUnused($oldMedia);
+            $this->syncPhotos($model, $photos);
+            if ($photos !== null) {
+                $changes['photos'] = ['from' => count(array_filter($oldMedia)), 'to' => count($photos)];
+                foreach (array_diff(array_filter($oldMedia), $photos) as $gone) {
+                    MediaJanitor::releaseIfUnused((int) $gone);
+                }
             }
 
             return $changes;
@@ -93,9 +107,11 @@ class ItemController extends Controller
     public function destroy(Tenant $tenant, int $item): Response
     {
         Gate::authorize('menu.manage');
-        $model = Item::findOrFail($item);
+        $model = Item::with('photos')->findOrFail($item);
         $model->delete();
-        MediaJanitor::releaseIfUnused($model->media_id);
+        foreach (array_unique([$model->media_id, ...$model->photos->pluck('id')->all()]) as $mediaId) {
+            MediaJanitor::releaseIfUnused($mediaId);
+        }
         $this->recordChange('item.deleted', $model, ['name' => $model->name]);
 
         return response()->noContent();
@@ -272,6 +288,8 @@ class ItemController extends Controller
             'description' => ['sometimes', Translations::optional(2000)],
             'price_minor' => ['sometimes', 'nullable', ...$this->priceRule()],
             'media_id' => ['sometimes', 'nullable', 'integer', $this->existsHere('media')],
+            'photo_ids' => ['sometimes', 'array', 'max:'.self::MAX_PHOTOS],
+            'photo_ids.*' => ['integer', 'distinct', $this->existsHere('media')],
             'calories' => ['sometimes', 'nullable', 'integer', 'between:0,20000'],
             'prep_minutes' => ['sometimes', 'nullable', 'integer', 'between:0,600'],
             'is_sold_out' => ['sometimes', 'boolean'],
@@ -338,6 +356,40 @@ class ItemController extends Controller
                 ItemAllergen::create(['item_id' => $item->id, 'allergen' => $allergen]);
             }
         }
+    }
+
+    /**
+     * The dish's photos after this request, in order, or null when the
+     * request doesn't touch them. Older clients send only media_id: that
+     * replaces the main photo and keeps the others.
+     *
+     * @param  array<string, mixed>  $data
+     * @return list<int>|null
+     */
+    private function photoIds(array $data, ?Item $item): ?array
+    {
+        if (array_key_exists('photo_ids', $data)) {
+            return array_values(array_map('intval', (array) $data['photo_ids']));
+        }
+        if (! array_key_exists('media_id', $data)) {
+            return null;
+        }
+        $others = $item ? $item->photos->pluck('id')->reject(fn ($id) => $id === $item->media_id)->all() : [];
+
+        return array_slice(array_values(array_unique(array_filter([$data['media_id'] === null ? null : (int) $data['media_id'], ...$others]))), 0, self::MAX_PHOTOS);
+    }
+
+    /** @param list<int>|null $ids */
+    private function syncPhotos(Item $item, ?array $ids): void
+    {
+        if ($ids === null) {
+            return;
+        }
+        $rows = [];
+        foreach ($ids as $sort => $id) {
+            $rows[$id] = ['tenant_id' => $item->tenant_id, 'sort' => $sort];
+        }
+        $item->photos()->sync($rows);
     }
 
     /** @param array<int|string, array<string, mixed>> $rows */

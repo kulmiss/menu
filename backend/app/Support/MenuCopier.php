@@ -44,7 +44,7 @@ class MenuCopier
         $copy = $source->replicate()->fill($overrides);
         $copy->save();
 
-        foreach ($source->items()->with(['variants', 'addonGroups', 'tags', 'allergenRows'])->get() as $item) {
+        foreach ($source->items()->with(['variants', 'addonGroups', 'tags', 'allergenRows', 'photos'])->get() as $item) {
             $this->copyItem($item, ['category_id' => $copy->id]);
         }
 
@@ -54,7 +54,7 @@ class MenuCopier
     /** @param array<string, mixed> $overrides */
     public function copyItem(Item $source, array $overrides): Item
     {
-        $source->loadMissing(['variants', 'addonGroups', 'tags', 'allergenRows']);
+        $source->loadMissing(['variants', 'addonGroups', 'tags', 'allergenRows', 'photos']);
         $copy = $source->replicate()->fill($overrides);
         $copy->save();
 
@@ -74,6 +74,10 @@ class MenuCopier
         foreach ($source->allergens() as $allergen) {
             ItemAllergen::create(['item_id' => $copy->id, 'allergen' => $allergen]);
         }
+        // The copy shows the same photos (files are shared, not duplicated).
+        $copy->photos()->attach($source->photos->mapWithKeys(fn ($m) => [
+            $m->id => ['tenant_id' => $copy->tenant_id, 'sort' => (int) $m->getRelationValue('pivot')->sort],
+        ])->all());
 
         return $copy;
     }

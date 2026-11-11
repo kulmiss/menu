@@ -7,7 +7,26 @@ window.mS = function (li, D) {
   var add = function (e) { body.appendChild(e); return e; };
   var row = function (a, b, so) { var r = el('div', 'ro'); r.appendChild(el('span', '', a)); r.appendChild(el('span', so ? 'mu' : '', so ? T.so : b)); return r; };
   body.textContent = '';
-  if (x.i) { var im = el('img'); im.src = x.i; im.alt = ''; im.width = 1280; im.height = 853; add(im); }
+  // Photos: the main one, then up to 4 more to swipe through (scroll snap).
+  var pics = x.i ? [x.i].concat(x.g || []) : [], n = pics.length;
+  if (n) {
+    var gw = add(el('div', 'gw')), gl = gw.appendChild(el('div', 'gl'));
+    pics.forEach(function (src, k) { var im = el('img'); im.src = src; im.alt = ''; im.width = 1280; im.height = 853; if (k) im.loading = 'lazy'; gl.appendChild(im); });
+    if (n > 1) {
+      var gc = gw.appendChild(el('span', 'gc', '1 / ' + n)), at = function () { return Math.round(Math.abs(gl.scrollLeft) / gl.offsetWidth); };
+      gl.tabIndex = 0;
+      gl.setAttribute('role', 'group');
+      gl.setAttribute('aria-label', T.ph.replace(':count', n));
+      gl.onscroll = function () { gc.textContent = at() + 1 + ' / ' + n; };
+      // Arrows for mouse users (hidden on touch screens by the CSS).
+      [-1, 1].forEach(function (s) {
+        var b = gw.appendChild(el('button', 'ga' + (s > 0 ? ' gn' : ''), s > 0 ? '\u203A' : '\u2039'));
+        b.type = 'button';
+        b.setAttribute('aria-label', s > 0 ? T.nx : T.pv);
+        b.onclick = function () { gl.scrollTo({ left: (at() + s) * gl.offsetWidth * (getComputedStyle(gl).direction == 'rtl' ? -1 : 1) }); };
+      });
+    }
+  }
   add(el('h3', '', li.querySelector('.nm').textContent));
   var pr = li.querySelector('.pr');
   if (pr) add(el('div', 'pr', pr.textContent));

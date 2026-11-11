@@ -431,7 +431,20 @@
     "crop_title": "Crop the photo",
     "crop_intro": "Drag to move, use the slider to zoom.",
     "zoom": "Zoom",
-    "use": "Use photo"
+    "use": "Use photo",
+    "photos_label": "Photos",
+    "photos_hint": "Up to {{max}} photos. The first one is the main photo; guests swipe through the rest.",
+    "take": "Take photo",
+    "choose": "Choose photo",
+    "main": "Main",
+    "make_main": "Make photo {{n}} the main photo",
+    "move_left": "Move photo {{n}} earlier",
+    "replace": "Replace photo {{n}}",
+    "remove_n": "Remove photo {{n}}",
+    "photo_n": "Photo {{n}}",
+    "uploading": "Uploading… {{percent}}%",
+    "upload_failed": "The photo could not be uploaded. Check the connection and try again.",
+    "full": "This dish has {{max}} photos. Remove one to add another."
   },
   "allergens": {
     "gluten": "Gluten",

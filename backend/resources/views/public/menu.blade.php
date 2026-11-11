@@ -32,6 +32,7 @@
             'up' => __('public.choose_up_to'), 'ex' => __('public.choose_exactly'),
             'on' => __('public.open_until'), 'cl' => __('public.closed'), 'ct' => __('public.closed_today'),
             'oa' => __('public.opens_at'), 'ot' => __('public.opens_tomorrow'), 'od' => __('public.opens_day'),
+            'ph' => __('public.photos'), 'nx' => __('public.next_photo'), 'pv' => __('public.previous_photo'),
             'dn' => array_map(fn ($i) => __('public.days_short.'.$i), range(0, 6)),
         ],
     ];

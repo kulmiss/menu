@@ -130,6 +130,11 @@ New rules added by the owner (now in PLAN.md §2): Docker is for local developme
 | 103 | CI speed check per style | The `guest-menu-speed` job now runs once per style (matrix), so the checks are named `guest-menu-speed (editorial|grid|bistro)`. If you add branch protection, require all three. |
 | 104 | Appearance texts | The Appearance screen's texts load when the screen opens (`locales/en/appearance.json`), not with the admin area. Admin first load: 230,364 bytes of 230,400 (225 KB); the style picker's drawings use plain SVG colours so they add no shared CSS. |
 
+| 105 | Dish photos (change 2) | Up to **5 photos per dish** in `item_photos` (order kept); the first is the main photo and is also kept in `items.media_id`, so lists, import/export and the guest list read one column as before. The API takes `photo_ids` (ordered); older clients sending only `media_id` replace the main photo and keep the others. Removed photos that nothing else uses are deleted (files too). A duplicated dish shares the same photo files. Easy to change: `ItemController::MAX_PHOTOS`. |
+| 106 | Plan photo limit with galleries | The plan's `photos` limit keeps counting **all photos of the restaurant** (each upload), so 5 photos on one dish use 5 of the limit. The refusal reason from the server is shown under the gallery. |
+| 107 | Adding photos from a phone | Two buttons: **Take photo** (opens the camera on phones) and **Choose photo** (photo library / files). Every photo goes through the 4:3 crop with zoom, is downscaled in the browser (longest side 2048 px), then uploads with a progress bar and preview. The server makes the WebP sizes and the blurred placeholder as before. Upload progress uses XMLHttpRequest in the dish editor's own code, not in the shared API client, so the admin's first download doesn't grow. |
+| 108 | Swipe gallery on the guest page | In the dish sheet (the on-demand `sheet.js`, not the inline script): scroll-snap swipe, "1 / 3" counter, arrow buttons only on devices with a mouse, keyboard scrolling when focused; photos 2–5 load lazily. |
+
 ## Open
 
 - Owner action: protect `main` in GitHub settings (require PR, no force push, no deletion). Claude's access can't change branch settings.
