@@ -14,10 +14,16 @@ _Last updated: 2026-11-11 15:20 EAT. PR #15 merged; owner's change list (2026-11
 | 1 Menu styles A/B/C (owner picked **all three**, admin chooses) | `feat/menu-styles` | PR open |
 | 2 Dish photos (up to 5) | `feat/dish-photos` (on top of menu-styles) | PR open |
 | 3 Quiet "Viewing as" badge | `feat/viewing-as` (on top of dish-photos) | PR open |
-| 4 SMTP settings | – | queued |
+| 4 SMTP settings | `feat/smtp-settings` (on top of viewing-as) | PR open |
 | 5 Banner | – | queued |
 
 Design canvas with the three directions: https://claude.ai/artifact/HBvYJAE5UWBSepoqiDkrxD
+
+## Change 4 — SMTP settings (feat/smtp-settings)
+- `App\Support\MailSettings` (stored under `platform_settings.key = mail`, cached forever, password `Crypt::encryptString`), applied in `AppServiceProvider` via `afterResolving('mail.manager')`. API `GET/PUT/DELETE platform/settings/mail`, `POST platform/settings/mail/test` (throttle 6/min).
+- Frontend `features/platform/email-settings.tsx` under the Settings form.
+- Platform test helpers (`superAdmin`, `browser`, `p`) moved to `tests/Pest.php`.
+- Tests: backend 270, frontend 188. First load 229,854 B.
 
 ## Change 3 — "Viewing as" badge (feat/viewing-as)
 - `components/layout/viewing-as.tsx` (lazy, in `AdminHeader` when `/me.impersonation` is set); `impersonation-banner.tsx` removed. `/me.impersonation.tenant_name` added. Server-side logging/limits/blocks untouched.

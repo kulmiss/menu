@@ -10,26 +10,6 @@ use App\Models\User;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\Notification;
 
-function superAdmin(bool $twoFactor = true): User
-{
-    return User::factory()->create([
-        'is_super_admin' => true,
-        'two_factor_secret' => $twoFactor ? encrypt('secret') : null,
-        'two_factor_confirmed_at' => $twoFactor ? now() : null,
-    ])->fresh();
-}
-
-/** Requests as the browser app sends them (cookie session, like the SPA). */
-function browser(): void
-{
-    test()->withHeaders(['Origin' => config('app.url'), 'Referer' => config('app.url').'/platform']);
-}
-
-function p(string $path = ''): string
-{
-    return '/api/v1/platform/'.ltrim($path, '/');
-}
-
 it('is only for Super Admins with two-factor sign-in', function () {
     [$owner] = member(Role::Owner);
 

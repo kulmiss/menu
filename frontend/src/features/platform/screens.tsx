@@ -41,6 +41,7 @@ import {
   themesQ,
   usePlatformMutation,
 } from './api'
+import { EmailSettings } from './email-settings'
 import { PageTitle } from './layout'
 
 function useErrors() {
@@ -916,6 +917,7 @@ function SettingsForm({
           {t('common.save')}
         </Button>
       </form>
+      <EmailSettings />
     </>
   )
 }

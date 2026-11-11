@@ -160,6 +160,21 @@ export const activityQ = (params: string) =>
   >(`activity${params ? `?${params}` : ''}`)
 export const settingsQ = () => q<Record<string, string | null>>('settings')
 
+/** SMTP settings (Settings → Email); the password itself never comes back. */
+export type MailSettings = {
+  source: 'platform' | 'env'
+  host: string
+  port: number
+  encryption: 'none' | 'ssl' | 'tls'
+  username: string
+  has_password: boolean
+  from_address: string
+  from_name: string
+  env_host: string
+  env_mailer: string
+}
+export const mailQ = () => q<MailSettings>('settings/mail')
+
 /** Any platform change: refetch every platform list afterwards. */
 export function usePlatformMutation<V>(
   fn: (v: V) => Promise<unknown>,

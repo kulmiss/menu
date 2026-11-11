@@ -18,4 +18,10 @@ return [
     'no_owner' => 'This restaurant has no owner to log in as.',
     'suspended_reason' => 'Your restaurant is suspended: :reason',
     'slug_taken' => 'This web address is already taken.',
+    'mail_test' => [
+        'subject' => 'Test e-mail from :app',
+        'body' => "This is a test e-mail from :app.\n\nIf you can read this, the e-mail settings work.",
+        'sent' => 'Test e-mail sent to :email. Check the inbox (and the spam folder).',
+        'failed' => 'The test e-mail could not be sent: :reason',
+    ],
 ];
