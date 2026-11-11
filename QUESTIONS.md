@@ -188,6 +188,8 @@ New rules added by the owner (now in PLAN.md §2): Docker is for local developme
 
 | 147 | CI speed check vs. targets (owner, 2026-11-11) | Targets unchanged: **LCP < 1.2 s, TBT < 100 ms, score ≥ 98**, reported in every PR (median, with ✅/⚠️, in the check summary of each `guest-menu-speed` job). The CI check now takes the **median of 5 Lighthouse runs** and **fails only if LCP > 1.3 s or TBT > 200 ms** (score: report only), so runner noise doesn't block PRs. Photo quality unchanged. Compact special card approved. |
 
+| 148 | Demo photos: all Pexels | The 16 Unsplash photos kept failing on the owner's laptop ("HTTP 307"): `withOptions()` changes the client it's called on, so after the Unsplash step turned redirects off, no later request followed a redirect. Fixed (a fresh client per request, redirects 301/302/307/308 followed, tested) and, as the owner asked, the 16 replaced by Pexels photos of the same subjects (café interiors, Ethiopian coffee preparation and ceremony, clay pot, espresso drinks, waffles). All 110 demo photos are now Pexels License. The waffle dish now reads "Golden waffles, honey and cream" to match its photo. |
+
 ## Open
 
 - Owner action: protect `main` in GitHub settings (require PR, no force push, no deletion). Claude's access can't change branch settings.
