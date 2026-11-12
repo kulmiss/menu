@@ -1,6 +1,6 @@
 /* Style C · Quiet bistro: centred name, thin banner, hairline list with
    square photos on the right. Surfaces must match PageTheme::STYLES['bistro']. */
-:root{--bg:#fff;--fg:#191714;--mu:#625c55;--ln:#ece9e4;--card:#faf8f5}
+:root{--br:.5rem;--bg:#fff;--fg:#191714;--mu:#625c55;--ln:#ece9e4;--card:#faf8f5}
 @media (prefers-color-scheme:dark){:root{--bg:#0e0d0c;--fg:#f2eee8;--mu:#aba49b;--ln:#2a2724;--card:#161412}}
 .cv{aspect-ratio:5/2}
 header{flex-direction:column;text-align:center;gap:.3rem;padding-top:1.4rem}
