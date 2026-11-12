@@ -212,6 +212,8 @@ New rules added by the owner (now in PLAN.md §2): Docker is for local developme
 
 | 159 | LCP without a banner | Without a banner, the largest paint was the first special's photo, which only loaded after the page (it waited like the photos below): LCP 1.9–2.5 s in A/B/C. Now the first photo on screen (the first special's, else the first dish's) is preloaded from the <head> with high priority and loads at once; every other photo waits for load. Special cards are all the same height (title on one line, text on two), so a later special is never larger and never becomes the LCP. When the first dish photo is the LCP, it is picked one size smaller (A 80vw → the 640 px file, B 40vw → 320 px, about 3 % under its box on a 1.75× phone). Locally (median of 3): demo without banner A 1.11 s, B 1.04 s, C 1.06 s, D 0.81 s. Without banner and without specials: B 1.11 s, C 1.11 s, A about 1.4 s, because its first dish photo is full width (50 KB). CI now runs every style with and without the banner (8 speed jobs; DEMO_MENU_BANNER). |
 
+| 160 | Style A, no banner, no specials | The first dish photo, only in this case, now takes the 320 px file on a phone (one size below the 640 px used since #159; same quality setting; every other photo unchanged): LCP 1.4 s → 1.11 s locally. It is a little softer on a phone when you look closely (side-by-side in the PR). On desktop it still takes the 800 px file. CI now also measures "editorial, no-banner-no-specials" (DEMO_MENU_SPECIALS=0). |
+
 ## Open
 
 - Owner action: protect `main` in GitHub settings (require PR, no force push, no deletion). Claude's access can't change branch settings.

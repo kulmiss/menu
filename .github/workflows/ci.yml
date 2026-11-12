@@ -112,6 +112,10 @@ jobs:
         style: [editorial, grid, bistro, minimal]
         # …with the banner and without it: then the first photo is the largest paint (owner, 2026-11-12).
         banner: [banner, no-banner]
+        # …and A without banner and specials: its full-width first dish photo is then the largest paint.
+        include:
+          - style: editorial
+            banner: no-banner-no-specials
     defaults:
       run:
         working-directory: backend
@@ -135,6 +139,7 @@ jobs:
       APP_URL: http://localhost:8124
       DEMO_MENU_STYLE: ${{ matrix.style }}
       DEMO_MENU_BANNER: ${{ matrix.banner == 'banner' && '1' || '0' }}
+      DEMO_MENU_SPECIALS: ${{ matrix.banner == 'no-banner-no-specials' && '0' || '1' }}
     steps:
       - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
@@ -161,6 +166,7 @@ jobs:
           test -f public/menu-cache/demo/index.html.gz
           grep -q 'class="S-${{ matrix.style }}[ "]' public/menu-cache/demo/index.html
           if [ "${{ matrix.banner }}" = banner ]; then grep -q '<div class="cv' public/menu-cache/demo/index.html; else ! grep -q '<div class="cv' public/menu-cache/demo/index.html; fi
+          if [ "${{ matrix.banner }}" = no-banner-no-specials ]; then ! grep -q '<div class="spc' public/menu-cache/demo/index.html; else grep -q '<div class="spc' public/menu-cache/demo/index.html; fi
           echo "Guest page: $(stat -c %s public/menu-cache/demo/index.html) bytes, $(stat -c %s public/menu-cache/demo/index.html.gz) gzip"
       - name: Serve it like production (Nginx, no PHP)
         run: |

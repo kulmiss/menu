@@ -28,6 +28,9 @@ return [
     // Banner on the demo restaurant (CI also measures every style without one).
     'demo_banner' => (bool) env('DEMO_MENU_BANNER', true),
 
+    // Specials on the demo restaurant (CI measures style A without banner and specials).
+    'demo_specials' => (bool) env('DEMO_MENU_SPECIALS', true),
+
     // Where the demo seeders find the downloaded demo photos (php artisan demo:photos).
     'demo_photos_path' => env('DEMO_PHOTOS_PATH'),
 

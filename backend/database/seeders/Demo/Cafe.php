@@ -141,11 +141,13 @@ class Cafe
     private function promotions(Tenant $tenant, array $items): void
     {
         Promotion::create([
+            'is_active' => (bool) config('menu.demo_specials'),
             'type' => 'special', 'title' => ['en' => 'Sunday buna ceremony'],
             'body' => ['en' => 'A full jebena for the table, roasted in front of you, with popcorn. Sundays from 15:00.'],
             'item_id' => $items['Buna (Ethiopian coffee)']->id, 'media_id' => $this->photos->media($tenant, 'ceremony')?->id, 'sort' => 0,
         ]);
         Promotion::create([
+            'is_active' => (bool) config('menu.demo_specials'),
             'type' => 'special', 'title' => ['en' => 'Weekend brunch for two'],
             'body' => ['en' => 'Two breakfast plates, two coffees and a fresh juice to share — Br 780 on Saturdays and Sundays.'],
             'media_id' => $this->photos->media($tenant, 'brunch')?->id, 'sort' => 1,
