@@ -196,6 +196,8 @@ New rules added by the owner (now in PLAN.md §2): Docker is for local developme
 
 | 151 | One URL / QR per branch | The branch picker is gone: a branch URL (or its QR code, or a table's QR code) shows only that branch; `/restaurant` shows the main branch. With more than one branch the branch name sits under the restaurant name (main branch included); with one branch nothing changes. "Other branches" (name, address, link; never the branch you're on) is in the info/footer area, on by default, switch in Appearance ("Show \"Other branches\" …"); no effect for one branch. Admin → QR codes: every code shows "Opens {branch}" (restaurant-wide codes open the main branch); printed restaurant cards now carry the main branch's name too when there are several. Table codes always belong to their table's branch (already enforced; now tested). |
 
+| 152 | Opening-hours pill | Redesigned as a pill with a dot: green dot + green text "Open now · until 22:00", red dot "Closed · opens Thu 08:00" (text in the normal text colour, so it stays ≥ 4.5:1). Space above (0.5 rem) and below; the closure notice became a calm rounded card with a brand-colour dot and a 0.75 rem gap before the search bar. On the "name over banner" header the pill is dark glass with white text. CSS only: no change to the inline script (4.80 KB). Contrast and spacing are checked by a browser test in all three styles, light and dark. |
+
 ## Open
 
 - Owner action: protect `main` in GitHub settings (require PR, no force push, no deletion). Claude's access can't change branch settings.

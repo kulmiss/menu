@@ -20,8 +20,7 @@ header{padding:1.25rem 1rem .5rem;display:flex;align-items:center;gap:.75rem}
 .ov .cv{height:100%}
 .ov header{align-self:end;padding:3.5rem 1rem 1rem;background:linear-gradient(#0000,#000c);color:#fff}
 .ov .sub{color:#fff}
-.ov .st{background:#000a;border-color:#fff6;color:#fff}
-.ov .st.op{color:#a7f3d0}
+.ov .st,.ov .st.op{background:#0009;border-color:#fff5;color:#fff}
 h1{font-size:1.6rem;line-height:1.2}
 .sub{color:var(--mu);font-size:.9rem;margin-top:.25rem}
 .bar{position:sticky;top:0;z-index:2;background:var(--bg);border-bottom:1px solid var(--ln);padding:.5rem 0}
@@ -67,11 +66,7 @@ li>.it.ao.np{padding-inline-end:2.75rem}
 .nr{color:var(--mu);padding:3rem 1rem;text-align:center;display:flex;flex-direction:column;align-items:center;gap:.75rem}
 .nr svg{color:var(--ln)}
 
-.st{display:inline-block;margin-top:.35rem;font-size:.8rem;font-weight:600;padding:.1rem .55rem;border-radius:99px;background:var(--card);border:1px solid var(--ln);color:var(--mu)}
 .st.ld{visibility:hidden}
-.st.op{color:#0f6b3a;border-color:#0f6b3a33;background:#0f6b3a14}
-@media (prefers-color-scheme:dark){.st.op{color:#6fd39b}}
-.nt{max-width:44rem;margin:.25rem auto 0;padding:.5rem 1rem;font-size:.875rem;background:var(--card);border-inline-start:3px solid var(--a)}
 .inf{margin-top:2rem;border-top:1px solid var(--ln);padding-top:1rem}
 .inf summary{cursor:pointer;font-weight:600;min-height:2.75rem;display:flex;align-items:center;list-style:none}
 .inf summary::after{content:"+";margin-inline-start:auto;font-size:1.25rem;color:var(--mu)}
@@ -134,3 +129,14 @@ dialog[open]::backdrop{animation:fd .28s ease}
 @keyframes up{from{transform:translateY(2rem);opacity:0}}
 @keyframes fd{from{opacity:0}}
 .ob{list-style:none;padding:0;margin:0}.ob li{padding:.25rem 0}.ob a{display:inline-flex;align-items:center;min-height:44px;font-weight:600}.ob span{display:block;font-size:.875rem;opacity:.8}
+/* Opening-hours pill: dot + text, green when open, red when closed (owner, 2026-11-12). */
+.st{display:inline-flex;align-items:center;gap:.45rem;margin:.5rem 0 .25rem;padding:.3rem .75rem;border-radius:99px;font-size:.8125rem;font-weight:600;line-height:1.25;background:var(--card);border:1px solid var(--ln);color:var(--fg)}
+.st[hidden]{display:none}
+.st:before{content:"";flex:none;width:.5rem;height:.5rem;border-radius:50%;background:#d92d20;box-shadow:0 0 0 3px #d92d2026}
+.st.op{color:#0b5e33;border-color:#0f6b3a40;background:#0f6b3a12}
+.st.op:before{background:#12a15c;box-shadow:0 0 0 3px #12a15c33}
+@media (prefers-color-scheme:dark){.st.op{color:#7ee2a8}.st:before{background:#f97066}}
+/* Closure notices: a calm card, spaced from the header and the search bar. */
+.nt{display:flex;gap:.6rem;max-width:44rem;margin:.5rem auto;padding:.65rem .9rem;font-size:.875rem;line-height:1.4;border-radius:.75rem;background:var(--card);border:1px solid var(--ln)}
+.nt:before{content:"";flex:none;width:.5rem;height:.5rem;margin-top:.45rem;border-radius:50%;background:var(--a)}
+.nt:last-child{margin-bottom:.75rem}
