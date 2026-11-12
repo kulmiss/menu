@@ -255,7 +255,8 @@ it('shows a clean, lighter page when photos are switched off', function (string 
     // No photo boxes, no image requests, no social preview image: every dish is a text row.
     expect($without)->not->toContain('class="im"')
         ->not->toContain('<img')
-        ->not->toContain('og:image')
+        // The link preview is the platform default, never a dish photo (and the page doesn't load it).
+        ->not->toContain('og.jpg')
         ->not->toContain('loading="lazy"')
         ->and(substr_count($without, 'class="it np'))->toBe(7)
         ->and($without)->toContain('class="S-'.$style.' NP"')

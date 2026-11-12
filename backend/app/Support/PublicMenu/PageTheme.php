@@ -83,7 +83,8 @@ class PageTheme
             'webp' => MenuPageData::srcset($urls),
             'avif' => MenuPageData::srcset($urls, 'avif'),
             'jpg' => $urls['jpg'] ?? '',
-            'og' => $urls['og'] ?? null, // 1200 × 630, the link preview when the menu is shared
+            // 1200 × 630, the link preview when the menu is shared; ?v= so apps refetch after a change.
+            'og' => isset($urls['og']) ? $urls['og'].'?v='.($a->cover->updated_at->timestamp ?? 0) : null,
             'sizes' => self::STYLES[$style]['sizes'],
             'w' => 1280,
             'h' => (int) round(1280 * $ratio[1] / $ratio[0]),

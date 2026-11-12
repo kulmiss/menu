@@ -14,12 +14,12 @@
     $position = 0;
     $hasInfo = $week || $info['address'] || $info['links'] || $info['about'] || $info['wifi'] || $info['socials'] || $otherBranches;
     $sheets = [];
-    $firstImage = null;
     $cart = [];
+    $anyPhoto = false;
     foreach ($menus as $m) { foreach ($m['categories'] as $c) { foreach ($c['items'] as $i) {
         if ($i['sheet'] !== []) { $sheets[$i['id']] = $i['sheet']; }
         if ($orderList) { $cart[$i['id']] = [...$i['cart'], $i['sold_out'] ? 1 : 0]; }
-        $firstImage ??= $i['media']['og'] ?? null;
+        $anyPhoto = $anyPhoto || $i['media'] !== null;
     } } }
     // No dish photo anywhere (switched off, hidden per dish, or none uploaded): the styles use a text layout.
     $data = [
@@ -56,20 +56,31 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>{{ $tenant->name }}{{ $branch ? ' · '.$branch : '' }}</title>
 @php
-    // Link preview (WhatsApp, Telegram, social): banner first, else the first dish photo.
-    $shareImage = $cover['og'] ?? $firstImage;
+    // Link preview (WhatsApp, Telegram, Facebook, X, iMessage; owner, 2026-11-12): the banner's
+    // 1200 × 630 JPEG, else the platform default. Meta tags only: the page never loads it.
+    $share = \App\Support\PublicMenu\ShareImage::for($cover);
+    $pageUrl = \App\Support\PublicMenu\ShareImage::absolute($canonical);
+    $shareTitle = $tenant->name.($branch ? ' · '.$branch : '');
     $shareText = $info['about'] !== '' ? \Illuminate\Support\Str::limit(preg_replace('/\s+/', ' ', $info['about']), 155) : __('public.share_description', ['name' => $tenant->name]);
 @endphp
 <meta name="description" content="{{ $shareText }}">
 <meta name="theme-color" content="{{ $theme['theme_color'] }}">
-<link rel="canonical" href="{{ url($canonical) }}">
-<meta property="og:title" content="{{ $tenant->name }}{{ $branch ? ' · '.$branch : '' }}">
+<link rel="canonical" href="{{ $pageUrl }}">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ $pageUrl }}">
+<meta property="og:title" content="{{ $shareTitle }}">
 <meta property="og:description" content="{{ $shareText }}">
 <meta property="og:site_name" content="{{ $tenant->name }}">
-<meta name="twitter:card" content="{{ $shareImage ? 'summary_large_image' : 'summary' }}">
-<meta property="og:type" content="website">
-<meta property="og:url" content="{{ url($canonical) }}">
-@if ($shareImage)<meta property="og:image" content="{{ $shareImage }}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">@endif
+<meta property="og:image" content="{{ $share['url'] }}">
+@if (str_starts_with($share['url'], 'https://'))<meta property="og:image:secure_url" content="{{ $share['url'] }}">@endif
+<meta property="og:image:type" content="{{ $share['type'] }}">
+<meta property="og:image:width" content="{{ $share['width'] }}">
+<meta property="og:image:height" content="{{ $share['height'] }}">
+<meta property="og:image:alt" content="{{ __('public.share_alt', ['name' => $shareTitle]) }}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ $shareTitle }}">
+<meta name="twitter:description" content="{{ $shareText }}">
+<meta name="twitter:image" content="{{ $share['url'] }}">
 <link rel="icon" href="data:,">
 @if ($cover)
 {{-- The banner is the largest thing on screen: start fetching it before the CSS is parsed (LCP). --}}
@@ -78,7 +89,7 @@
 @endif
 <style>{!! InlineAssets::css($style) !!}{!! $theme['css'] !!}</style>
 </head>
-<body class="S-{{ $style }}{{ $firstImage ? '' : ' NP' }}">
+<body class="S-{{ $style }}{{ $anyPhoto ? '' : ' NP' }}">
 <div @class(['top', 'hc' => $cover, 'ov' => $cover && $cover['over']])>
 @if ($cover)
 {{-- The banner keeps its shape from the first paint (CSS aspect-ratio + placeholder), so nothing moves. --}}

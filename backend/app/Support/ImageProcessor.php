@@ -68,7 +68,7 @@ class ImageProcessor
                 $variants['jpg'] = $this->store($scaled, 'jpeg', $disk, "{$folder}/640.jpg");
             }
         }
-        $variants['og'] = $this->store($this->cover($image, 1200, 630), 'jpeg', $disk, "{$folder}/og.jpg");
+        $variants['og'] = $this->shareImage($image, $disk, "{$folder}/og.jpg");
 
         return [
             'width' => $width,
@@ -95,7 +95,8 @@ class ImageProcessor
         foreach (self::WIDTHS as $w) {
             $source = array_key_exists($w, $variants) ? $variants[$w] : $source; // the largest one wins
         }
-        if ($missing === [] || $source === null) {
+        $needsOg = ! array_key_exists('og', $variants);
+        if (($missing === [] && ! $needsOg) || $source === null) {
             return [];
         }
         $bytes = Storage::disk($disk)->get("{$folder}/{$source}");
@@ -105,6 +106,10 @@ class ImageProcessor
         }
         $this->webpQuality = $banner ? self::BANNER_WEBP_QUALITY : self::WEBP_QUALITY;
         $added = [];
+        // The link preview (1200 × 630 JPEG) for photos uploaded before it existed.
+        if ($needsOg) {
+            $added['og'] = basename($this->shareImage($image, $disk, "{$folder}/og.jpg"));
+        }
         foreach ($missing as $target) {
             $scaled = $this->scaleToWidth($image, min($target, imagesx($image)));
             if (! array_key_exists($target, $variants)) {
@@ -199,6 +204,37 @@ class ImageProcessor
     }
 
     /** Fills exactly width×height, cropping the overflow around the centre. */
+    /** Largest file a link preview may be; WhatsApp skips bigger images (owner, 2026-11-12: ~300 KB). */
+    public const SHARE_MAX_BYTES = 300 * 1024;
+
+    /**
+     * The link preview: 1200 × 630, centre crop, JPEG (every app reads it),
+     * quality lowered step by step until it is under SHARE_MAX_BYTES.
+     */
+    public function shareImage(GdImage $image, string $disk, string $path): string
+    {
+        $card = $this->cover($image, 1200, 630);
+        $bytes = '';
+        foreach ([self::JPEG_QUALITY, 68, 60, 52, 45] as $quality) {
+            ob_start();
+            imageinterlace($card, true);
+            imagejpeg($card, null, $quality);
+            $bytes = (string) ob_get_clean();
+            if (strlen($bytes) <= self::SHARE_MAX_BYTES) {
+                break;
+            }
+        }
+        Storage::disk($disk)->put($path, $bytes);
+
+        return $path;
+    }
+
+    /** Public wrapper for an uploaded file (Super Admin's default preview). */
+    public function shareImageFrom(string $path, string $mime, string $disk, string $target): string
+    {
+        return $this->shareImage($this->orient($this->load($path, $mime), $path, $mime), $disk, $target);
+    }
+
     private function cover(GdImage $image, int $width, int $height): GdImage
     {
         $w = imagesx($image);

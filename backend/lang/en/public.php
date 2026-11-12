@@ -11,6 +11,7 @@ return [
     'popular' => 'Popular',
     'close' => 'Close',
     'back_to_top' => 'Back to top',
+    'share_alt' => ':name — menu',
     'sizes' => 'Sizes',
     'allergens_title' => 'Allergens',
     'calories' => ':count kcal',

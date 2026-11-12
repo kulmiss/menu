@@ -43,6 +43,7 @@ import {
 } from './api'
 import { EmailSettings } from './email-settings'
 import { PageTitle } from './layout'
+import { ShareImageCard } from './share-image'
 
 function useErrors() {
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -917,6 +918,10 @@ function SettingsForm({
           {t('common.save')}
         </Button>
       </form>
+      <ShareImageCard
+        url={initial.share_image_url ?? ''}
+        custom={!!initial.share_image}
+      />
       <EmailSettings />
     </>
   )

@@ -88,6 +88,8 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::get('activity', [PlatformController::class, 'activity']);
             Route::get('settings', [PlatformController::class, 'settings']);
             Route::put('settings', [PlatformController::class, 'saveSettings']);
+            Route::post('settings/share-image', [PlatformController::class, 'saveShareImage']);
+            Route::delete('settings/share-image', [PlatformController::class, 'deleteShareImage']);
             Route::get('settings/mail', [PlatformController::class, 'mailSettings']);
             Route::put('settings/mail', [PlatformController::class, 'saveMailSettings']);
             Route::delete('settings/mail', [PlatformController::class, 'clearMailSettings']);

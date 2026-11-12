@@ -200,6 +200,19 @@
     "terms": "Terms of use",
     "privacy": "Privacy policy"
   },
+  "share": {
+    "title": "Link preview",
+    "hint": "The picture WhatsApp, Telegram, Facebook and X show when someone shares a menu that has no banner. Menus with a banner show their banner. JPG, PNG or WebP, at least 600 × 315; it is cropped to 1200 × 630.",
+    "alt": "Current link preview picture",
+    "built_in": "Using the built-in picture.",
+    "custom": "Using your picture.",
+    "choose": "Choose a picture",
+    "upload": "Upload picture",
+    "reset": "Use the built-in picture",
+    "saved": "Link preview saved. Menus will show it from now on.",
+    "reset_done": "Back to the built-in picture.",
+    "failed": "That picture couldn't be used. Try a JPG or PNG of at least 600 × 315."
+  },
   "mail": {
     "title": "Email (SMTP)",
     "using_platform": "All platform e-mails (invitations, password resets, e-mail checks) are sent through this server.",
