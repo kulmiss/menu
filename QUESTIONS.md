@@ -198,6 +198,8 @@ New rules added by the owner (now in PLAN.md §2): Docker is for local developme
 
 | 152 | Opening-hours pill | Redesigned as a pill with a dot: green dot + green text "Open now · until 22:00", red dot "Closed · opens Thu 08:00" (text in the normal text colour, so it stays ≥ 4.5:1). Space above (0.5 rem) and below; the closure notice became a calm rounded card with a brand-colour dot and a 0.75 rem gap before the search bar. On the "name over banner" header the pill is dark glass with white text. CSS only: no change to the inline script (4.80 KB). Contrast and spacing are checked by a browser test in all three styles, light and dark. |
 
+| 153 | Sheet scroll lock | While the dish sheet, Share, My order or the waiter view is open, the page behind is pinned (body `position:fixed` at `top:-scrollY`; overflow:hidden alone doesn't work on iOS Safari) and put back at the exact spot on close (instant, not smooth). `overscroll-behavior:contain` on the sheet and the waiter view. There was no swipe-to-close before; added: a swipe down of 90 px or more that starts with the sheet at its top closes it (the sheet follows the finger); a swipe that starts lower just scrolls. All in the on-demand file; inline script unchanged (4.80 KB). Measured with a real mouse wheel in all 3 styles, photos on/off, light/dark: before, the page behind jumped from 1200 to 5600–6000 px; after, it stays at 1200. |
+
 ## Open
 
 - Owner action: protect `main` in GitHub settings (require PR, no force push, no deletion). Claude's access can't change branch settings.

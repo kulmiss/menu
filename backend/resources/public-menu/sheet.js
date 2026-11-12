@@ -281,7 +281,7 @@ window.mH = function (b, D) {
     t.appendChild(el('span', '', T.total));
     t.appendChild(el('span', '', fmt(total()[1])));
     v.appendChild(el('p', '', T.not_order));
-    var close = function () { v.remove(); d.removeEventListener('keydown', esc); };
+    var close = function () { v.remove(); d.removeEventListener('keydown', esc); if (w.mL) w.mL(); };
     var esc = function (e) { if (e.key === 'Escape') close(); };
     x.type = 'button';
     x.onclick = close;
@@ -290,4 +290,34 @@ window.mH = function (b, D) {
     x.focus();
     if (navigator.sendBeacon) navigator.sendBeacon('/api/v1/beacon', JSON.stringify({ t: D.id, b: D.b, w: total()[1] }));
   }
+})();
+
+// While a sheet (dish, share, My order) or the waiter view is open, the page
+// behind it must not scroll: the body is pinned where it was and put back to
+// the exact spot on close (iOS Safari ignores overflow:hidden on the body).
+// Swipe down on the sheet when it's scrolled to the top closes it.
+(function () {
+  var d = document, w = window, dl = d.getElementById('s'), bs = d.body.style, y = 0, y0 = -1, dy = 0, css = d.createElement('style');
+  css.textContent = 'dialog,.wv{overscroll-behavior:contain}.lk{position:fixed;left:0;right:0;overflow:hidden}';
+  d.head.appendChild(css);
+  var sync = w.mL = function () {
+    var on = dl.open || !!d.querySelector('.wv'), lk = d.body.classList.contains('lk');
+    if (on && !lk) { y = w.scrollY; bs.top = -y + 'px'; d.body.classList.add('lk'); }
+    if (!on && lk) { d.body.classList.remove('lk'); bs.top = ''; w.scrollTo({ top: y, behavior: 'instant' }); }
+  };
+  var show = dl.showModal;
+  if (show) dl.showModal = function () { show.call(dl); sync(); };
+  dl.addEventListener('close', sync);
+  dl.addEventListener('touchstart', function (e) { y0 = dl.scrollTop > 0 ? -1 : e.touches[0].clientY; dy = 0; }, { passive: true });
+  dl.addEventListener('touchmove', function (e) {
+    if (y0 < 0) return;
+    dy = e.touches[0].clientY - y0;
+    dl.style.transform = dy > 0 ? 'translateY(' + dy + 'px)' : '';
+  }, { passive: true });
+  dl.addEventListener('touchend', function () {
+    if (y0 < 0) return;
+    y0 = -1;
+    dl.style.transform = '';
+    if (dy > 90) dl.close();
+  });
 })();
