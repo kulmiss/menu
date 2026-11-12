@@ -16,7 +16,7 @@ beforeEach(() => {
   document.body.append(host)
   dl = document.getElementById('s') as HTMLDialogElement
   // The page data the on-demand file reads; no "My order" here.
-  w.mD = { t: { mu: '' } }
+  w.mD = { t: { mu: '', tp: 'Back to top' } }
   new Function(source)()
 })
 afterEach(() => {

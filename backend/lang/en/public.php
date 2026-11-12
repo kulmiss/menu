@@ -10,6 +10,7 @@ return [
     'new' => 'New',
     'popular' => 'Popular',
     'close' => 'Close',
+    'back_to_top' => 'Back to top',
     'sizes' => 'Sizes',
     'allergens_title' => 'Allergens',
     'calories' => ':count kcal',

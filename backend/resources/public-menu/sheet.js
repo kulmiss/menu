@@ -321,3 +321,23 @@ window.mH = function (b, D) {
     if (dy > 90) dl.close();
   });
 })();
+
+// "Back to top": a small round button that shows after about 1.5 screens of
+// scrolling; it sits above the My order bar and hides while a sheet is open.
+(function () {
+  var d = document, w = window, D = w.mD || JSON.parse(d.getElementById('d').textContent), css = d.createElement('style'), b = d.createElement('button'), on = 0;
+  css.textContent = '.tt{position:fixed;inset-inline-start:.75rem;bottom:calc(.75rem + env(safe-area-inset-bottom));z-index:3;width:2.75rem;height:2.75rem;display:flex;align-items:center;justify-content:center;padding:0;border:0;border-radius:99px;background:var(--a);color:var(--af);box-shadow:0 2px 10px #0004;cursor:pointer;visibility:hidden;opacity:0;transform:translateY(.5rem);transition:opacity .2s,transform .2s,visibility .2s,bottom .2s}.tt.on{visibility:visible;opacity:1;transform:none}.hob .tt{bottom:calc(4.75rem + env(safe-area-inset-bottom))}.lk .tt{display:none}@media (prefers-reduced-motion:reduce){.tt{transition:none}}';
+  d.head.appendChild(css);
+  b.type = 'button';
+  b.className = 'tt';
+  b.setAttribute('aria-label', D.t.tp);
+  b.innerHTML = '<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+  b.onclick = function () { w.scrollTo({ top: 0, behavior: w.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' }); };
+  d.body.appendChild(b);
+  var check = function () {
+    var v = w.scrollY > w.innerHeight * 1.5;
+    if (v != on) b.classList.toggle('on', on = v);
+  };
+  w.addEventListener('scroll', check, { passive: true });
+  check();
+})();

@@ -200,6 +200,8 @@ New rules added by the owner (now in PLAN.md §2): Docker is for local developme
 
 | 153 | Sheet scroll lock | While the dish sheet, Share, My order or the waiter view is open, the page behind is pinned (body `position:fixed` at `top:-scrollY`; overflow:hidden alone doesn't work on iOS Safari) and put back at the exact spot on close (instant, not smooth). `overscroll-behavior:contain` on the sheet and the waiter view. There was no swipe-to-close before; added: a swipe down of 90 px or more that starts with the sheet at its top closes it (the sheet follows the finger); a swipe that starts lower just scrolls. All in the on-demand file; inline script unchanged (4.80 KB). Measured with a real mouse wheel in all 3 styles, photos on/off, light/dark: before, the page behind jumped from 1200 to 5600–6000 px; after, it stays at 1200. |
 
+| 154 | "Back to top" button | A 44 px round brand-colour button with an up arrow, bottom-left corner (bottom-right would sit on the dishes' "+" buttons, which are on the right in every style; the left edge only has text under it). Shows after 1.5 screens of scrolling, fades in/out (no animation with reduced motion; the scroll is then instant too), moves up above the My order bar when it's shown, hidden while a sheet or the waiter view is open, safe-area aware. Label "Back to top" via __(). In the on-demand file; the inline script is unchanged (4.80 KB) and the page grows only by the label (~30 B). |
+
 ## Open
 
 - Owner action: protect `main` in GitHub settings (require PR, no force push, no deletion). Claude's access can't change branch settings.
