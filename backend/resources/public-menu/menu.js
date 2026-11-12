@@ -96,6 +96,17 @@
   var scan = w.mQ = (location.hash.match(/^#q=([A-Z0-9]{8})$/) || [])[1];
   if (scan && history.replaceState) history.replaceState(null, '', location.pathname + location.search);
 
+  // The menu changed since this copy was saved: reload from the fresh one (scroll kept),
+  // but not while a dish, the list, the waiter view or a search is in use.
+  var sw = navigator.serviceWorker;
+  if (sw) on(sw, 'message', function (e) {
+    if (e.data === 'mu') (function go() {
+      if (d.querySelector('dialog[open],.wv') || id('q').value) return setTimeout(go, 2e3);
+      try { if (sessionStorage.mu > Date.now() - 1e4) return; sessionStorage.mu = Date.now(); } catch (x) {} // at most once per 10 s (no loop)
+      location.reload();
+    })();
+  });
+
   // Service worker and the visit beacon after load.
   on(w, 'load', function () {
     // Photos further down get their address only now, after the first frame, so the banner and first screen go first.
@@ -109,7 +120,7 @@
     if (data().p) return; // admin preview: no service worker, no visit counted
     later(function () {
       load();
-      if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(function () {});
+      if (sw) { sw.register('/sw.js').catch(function () {}); if (sw.controller) sw.controller.postMessage(performance.timeOrigin); } // "changed since I opened?"
       if (navigator.sendBeacon) navigator.sendBeacon('/api/v1/beacon', JSON.stringify({ t: D.id, b: D.b, q: scan || null }));
     });
   });

@@ -43,7 +43,7 @@
             'oa' => __('public.opens_at'), 'ot' => __('public.opens_tomorrow'), 'od' => __('public.opens_day'),
             'o' => $orderList ? __('public.order') : null,
             'sh' => __('public.share'), 'sl' => __('public.share_link'), 'cp' => __('public.copy_link'), 'cd' => __('public.copied'),
-            'ph' => __('public.photos'), 'nx' => __('public.next_photo'), 'pv' => __('public.previous_photo'),
+            'ph' => __('public.photos'), 'nx' => __('public.next_photo'), 'pv' => __('public.previous_photo'), 'mu' => __('public.menu_updated'),
             'dn' => array_map(fn ($i) => __('public.days_short.'.$i), range(0, 6)),
         ],
     ];

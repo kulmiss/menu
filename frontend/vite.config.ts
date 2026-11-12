@@ -58,6 +58,7 @@ export default defineConfig({
         __dirname,
         '../backend/resources/public-menu'
       ),
+      '@guest-public': path.resolve(__dirname, '../backend/public'),
     },
   },
   server: {
@@ -65,6 +66,7 @@ export default defineConfig({
       allow: [
         path.resolve(__dirname, '.'),
         path.resolve(__dirname, '../backend/resources/public-menu'),
+        path.resolve(__dirname, '../backend/public/sw.js'),
       ],
     },
   },

@@ -116,3 +116,15 @@ it('draws the quick-add button as a small circle in a 44 px tap area that never 
         ->toContain('li>.it.ao.np{padding-inline-end:2.75rem}')                                                       // rows without a photo keep room for it
         ->not->toContain('.ad{inset-inline-end:.5rem;bottom:.5rem}');
 })->with(['editorial', 'grid', 'bistro']);
+
+it('says "Menu updated" from the on-demand file after the page reloaded itself, not from the inline script', function () {
+    $tenant = Tenant::factory()->create();
+    sampleMenu($tenant);
+    $html = (string) $this->get('/'.$tenant->slug)->assertOk()->getContent();
+    preg_match('#<script type="application/json" id="d">(.*?)</script>#s', $html, $m);
+
+    expect(json_decode($m[1], true)['t']['mu'])->toBe('Menu updated');
+    expect(File::get(resource_path('public-menu/sheet.js')))->toContain('sessionStorage.mn = mu')->toContain("setAttribute('role', 'status')");
+    expect(InlineAssets::js())->not->toContain('Menu updated')
+        ->and(strlen(InlineAssets::js()))->toBeLessThanOrEqual(5 * 1024);
+});
