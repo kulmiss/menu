@@ -169,19 +169,46 @@
 @endforelse
 <p class="nr" id="nr" hidden>{{ __('public.no_results') }}</p>
 </main>
-@if ($hasInfo)
-<details class="inf w" id="info"><summary>{{ __('public.info') }}</summary>
+@php
+    // Footer icons: 24 × 24 line drawings, drawn for this page (no icon package).
+    $icons = [
+        'phone' => '<path d="M5 4h3l2 5-2.5 1.5a11 11 0 0 0 6 6L15 14l5 2v3a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/>',
+        'whatsapp' => '<path d="M3.5 20.5l1.3-4.2A8.5 8.5 0 1 1 8 19.3z"/><path d="M9 9.5c.3 2.4 2.1 4.2 4.5 4.5l1-1.2 1.6.8"/>',
+        'telegram' => '<path d="M21 4L3 11l6 2 2 6 3-4 5 4zM9 13l12-9"/>',
+        'email' => '<rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="M3.5 7l8.5 6 8.5-6"/>',
+        'pin' => '<path d="M12 21s-7-6.1-7-12a7 7 0 0 1 14 0c0 5.9-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/>',
+        'wifi' => '<path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.8 16a5 5 0 0 1 6.4 0M12 19.5h.01"/>',
+        'clock' => '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+        'store' => '<path d="M4 10v10h16V10M3 10l2-6h14l2 6zM9 20v-5h6v5"/>',
+        'file' => '<path d="M14 3H6v18h12V7zM14 3v4h4M9 13h6M9 17h6"/>',
+        'facebook' => '<path d="M14.5 3H13a4 4 0 0 0-4 4v3H7v3.5h2V21h3.5v-7.5H15l.5-3.5h-3V7.5a1 1 0 0 1 1-1h1.5z"/>',
+        'instagram' => '<rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17 7h.01"/>',
+        'tiktok' => '<path d="M14 3v11.5a3.5 3.5 0 1 1-3.5-3.5M14 3c.5 2.6 2.4 4.5 5 4.8"/>',
+        'x' => '<path d="M4.5 4.5l15 15M19.5 4.5l-15 15"/>',
+        'youtube' => '<rect x="2.5" y="5.5" width="19" height="13" rx="3.5"/><path d="M10 9l5 3-5 3z"/>',
+        'website' => '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
+    ];
+    $icon = fn (string $k): string => '<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'.$icons[$k].'</svg>';
+    $pdfLink = $theme['show_pdf_link'] && $pdfMenu;
+@endphp
+@if ($hasInfo || $pdfLink || $branding)
+{{-- Footer (owner, 2026-11-12): who, when, where, how to reach them. id="info" is the (i) button's target. --}}
+<footer class="ft" id="info"><div class="w">
+<div class="fh">@if ($theme['logo'])<img class="fl" src="{{ $theme['logo']['320'] ?? '' }}" alt="" width="48" height="48" loading="lazy">@endif
+<div><p class="fn">{{ $tenant->name }}</p>@if ($branch)<p class="sub">{{ $branch }}</p>@endif</div></div>
 @if ($info['about'] !== '')<p class="ab">{{ $info['about'] }}</p>@endif
-@if ($week)<h3>{{ __('public.hours') }}</h3><table>@foreach ($week as $row)<tr><th scope="row">{{ $row['day'] }}</th><td>{{ $row['times'] }}</td></tr>@endforeach</table>@endif
-@if ($info['address'] !== '' || $info['maps'])<h3>{{ __('public.address') }}</h3>@if ($info['address'] !== '')<p>{{ $info['address'] }}</p>@endif @if ($info['maps'])<p><a href="{{ $info['maps'] }}" rel="noopener" target="_blank">{{ __('public.open_maps') }}</a></p>@endif @endif
-@if ($info['links'])<h3>{{ __('public.contact') }}</h3><ul class="ln">@foreach ($info['links'] as $l)<li><a href="{{ $l['href'] }}" rel="noopener">{{ $l['label'] }}: {{ $l['text'] }}</a></li>@endforeach</ul>@endif
-@if ($info['wifi'])<h3>Wi-Fi</h3><p>{{ __('public.wifi_name') }}: <b>{{ $info['wifi']['name'] }}</b>@if ($info['wifi']['password'])<br>{{ __('public.wifi_password') }}: <b class="pw">{{ $info['wifi']['password'] }}</b>@endif</p>@endif
-@if ($otherBranches)<h3>{{ __('public.other_branches') }}</h3><ul class="ob">@foreach ($otherBranches as $b)<li><a href="{{ $b['path'] }}">{{ $b['name'] }}</a>@if ($b['address'] !== '')<span>{{ $b['address'] }}</span>@endif</li>@endforeach</ul>@endif
-@if ($info['socials'])<ul class="ln so2">@foreach ($info['socials'] as $l)<li><a href="{{ $l['href'] }}" rel="noopener" target="_blank">{{ $l['label'] }}</a></li>@endforeach</ul>@endif
-</details>
+@if ($hoursSummary || $info['address'] !== '' || $info['maps'] || $info['links'] || $info['wifi'] || $otherBranches)<div class="fg">
+@if ($hoursSummary)<div><h2>{!! $icon('clock') !!}{{ __('public.hours') }}</h2><dl class="hs">@foreach ($hoursSummary as $h)<div><dt>{{ $h['days'] }}</dt><dd>{{ $h['times'] }}</dd></div>@endforeach</dl></div>@endif
+@if ($info['address'] !== '' || $info['maps'])<div><h2>{!! $icon('pin') !!}{{ __('public.address') }}</h2>@if ($info['address'] !== '')<p>{{ $info['address'] }}</p>@endif @if ($info['maps'])<a class="fbt" href="{{ $info['maps'] }}" rel="noopener" target="_blank">{{ __('public.open_maps') }}</a>@endif</div>@endif
+@if ($info['links'])<div><h2>{{ __('public.contact') }}</h2><ul class="fc">@foreach ($info['links'] as $l)<li><a href="{{ $l['href'] }}" rel="noopener">{!! $icon($l['icon']) !!}<span><small>{{ $l['label'] }}</small>{{ $l['text'] }}</span></a></li>@endforeach</ul></div>@endif
+@if ($info['wifi'])<div><h2>{!! $icon('wifi') !!}Wi-Fi</h2><p>{{ __('public.wifi_name') }}: <b>{{ $info['wifi']['name'] }}</b>@if ($info['wifi']['password'])<br>{{ __('public.wifi_password') }}: <b class="pw">{{ $info['wifi']['password'] }}</b>@endif</p></div>@endif
+@if ($otherBranches)<div><h2>{!! $icon('store') !!}{{ __('public.other_branches') }}</h2><ul class="ob">@foreach ($otherBranches as $b)<li><a href="{{ $b['path'] }}">{{ $b['name'] }}</a>@if ($b['address'] !== '')<span>{{ $b['address'] }}</span>@endif</li>@endforeach</ul></div>@endif
+</div>@endif
+@if ($info['socials'])<ul class="fso">@foreach ($info['socials'] as $l)<li><a href="{{ $l['href'] }}" rel="noopener" target="_blank" aria-label="{{ $l['label'] }}" title="{{ $l['label'] }}">{!! $icon($l['icon']) !!}</a></li>@endforeach</ul>@endif
+@if ($pdfLink)<p class="pdl"><a href="{{ rtrim($canonical, '/') }}/menu.pdf">{!! $icon('file') !!}{{ __('public.pdf_menu') }}</a></p>@endif
+@if ($branding)<p class="pb">{{ __('public.powered', ['app' => \App\Support\PlatformSettings::get('name')]) }}</p>@endif
+</div></footer>
 @endif
-@if ($branding)@if ($theme['show_pdf_link'] && $pdfMenu)<p class="pdl"><a href="{{ rtrim($canonical, '/') }}/menu.pdf">{{ __('public.pdf_menu') }}</a></p>@endif
-<footer>{{ __('public.powered', ['app' => \App\Support\PlatformSettings::get('name')]) }}</footer>@endif
 <dialog id="s" aria-label="{{ $tenant->name }}"><div class="sh" id="sb"></div><button type="button" class="x" id="sx" aria-label="{{ __('public.close') }}">×</button></dialog>
 <div class="of" id="of" hidden>{{ __('public.offline') }}</div>
 <script type="application/json" id="d">{!! json_encode($data, JSON_HEX_TAG | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>

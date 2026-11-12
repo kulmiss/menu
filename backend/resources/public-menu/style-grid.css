@@ -30,3 +30,5 @@ li>.it.np .pr{grid-row:1;grid-column:2;margin:0;padding:0;background:none;color:
 /* No photos on the whole menu: one card per row on phones. */
 .NP ul{grid-template-columns:1fr}
 @media (min-width:40rem){.NP ul{grid-template-columns:1fr 1fr}}
+/* Footer: each group on its own rounded card. */
+.fg>div{background:var(--bg);border-radius:1rem;padding:1rem}.fc svg,.fso a,.fbt,.pdl a{background:var(--card)}

@@ -21,3 +21,5 @@ li>.it .pr{grid-area:pr}
 li>.it .tg{grid-area:tg}
 .sh h3,.sh h4{font-family:var(--fh)}
 li>.it{--adt:1rem}
+/* Footer: centred name and socials, hairline rule above the groups. */
+.ft{background:var(--bg)}.fh{flex-direction:column;text-align:center}.fn{font-family:var(--fh);font-weight:500;font-size:1.5rem}.ft .ab{margin-inline:auto;text-align:center}.fg{border-top:1px solid var(--ln);padding-top:1.5rem}.fso{justify-content:center}.pdl{text-align:center}

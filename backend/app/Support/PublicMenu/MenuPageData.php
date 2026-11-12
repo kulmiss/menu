@@ -229,6 +229,7 @@ class MenuPageData
                 'hours' => $hours,
                 'closures' => $closures->map(fn (Closure $c) => [$c->starts_on->toDateString(), $c->ends_on->toDateString()])->values()->all(),
                 'week' => self::week($hours),
+                'hoursSummary' => self::summary(self::week($hours)),
                 'notices' => $closures->take(3)->map(fn (Closure $c) => [
                     'dates' => $c->starts_on->equalTo($c->ends_on) ? $c->starts_on->format('D j M') : $c->starts_on->format('D j M').' – '.$c->ends_on->format('D j M'),
                     'note' => $text($c->note),
@@ -264,6 +265,30 @@ class MenuPageData
     }
 
     /**
+     * The week in a few lines for the footer: days in a row with the same
+     * times share a line ("Mon–Fri · 07:00–22:00").
+     *
+     * @param  list<array{day: string, times: string}>  $week
+     * @return list<array{days: string, times: string}>
+     */
+    private static function summary(array $week): array
+    {
+        $short = fn (int $i): string => __('public.days_short.'.[1, 2, 3, 4, 5, 6, 0][$i]);
+        $out = [];
+        $start = 0;
+        foreach ($week as $i => $row) {
+            $next = $week[$i + 1] ?? null;
+            if ($next !== null && $next['times'] === $row['times']) {
+                continue;
+            }
+            $out[] = ['days' => $start === $i ? $short($i) : $short($start).'–'.$short($i), 'times' => $row['times']];
+            $start = $i + 1;
+        }
+
+        return $out;
+    }
+
+    /**
      * Contact and Wi-Fi for the info section; a branch's address and phone
      * win over the restaurant's.
      *
@@ -279,15 +304,15 @@ class MenuPageData
         $digits = fn (?string $v): string => (string) preg_replace('/\D+/', '', (string) $v);
 
         $links = array_values(array_filter([
-            $phone ? ['label' => __('public.call'), 'href' => 'tel:'.preg_replace('/[^0-9+]/', '', $phone), 'text' => $phone] : null,
-            $p->whatsapp ? ['label' => 'WhatsApp', 'href' => 'https://wa.me/'.$digits($p->whatsapp), 'text' => $p->whatsapp] : null,
-            $p->telegram ? ['label' => 'Telegram', 'href' => 'https://t.me/'.$p->telegram, 'text' => '@'.$p->telegram] : null,
-            $p->email ? ['label' => __('public.email'), 'href' => 'mailto:'.$p->email, 'text' => $p->email] : null,
+            $phone ? ['icon' => 'phone', 'label' => __('public.call'), 'href' => 'tel:'.preg_replace('/[^0-9+]/', '', $phone), 'text' => $phone] : null,
+            $p->whatsapp ? ['icon' => 'whatsapp', 'label' => 'WhatsApp', 'href' => 'https://wa.me/'.$digits($p->whatsapp), 'text' => $p->whatsapp] : null,
+            $p->telegram ? ['icon' => 'telegram', 'label' => 'Telegram', 'href' => 'https://t.me/'.$p->telegram, 'text' => '@'.$p->telegram] : null,
+            $p->email ? ['icon' => 'email', 'label' => __('public.email'), 'href' => 'mailto:'.$p->email, 'text' => $p->email] : null,
         ]));
         $socials = [];
         foreach (TenantProfile::SOCIALS as $key) {
             if (! empty($p->socials[$key])) {
-                $socials[] = ['label' => __('public.socials.'.$key), 'href' => $p->socials[$key]];
+                $socials[] = ['icon' => $key, 'label' => __('public.socials.'.$key), 'href' => $p->socials[$key]];
             }
         }
 
