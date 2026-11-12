@@ -6,8 +6,8 @@ import {
 import { api, tenantUrl } from '@/lib/api'
 import { type Media } from '@/features/menu/types'
 
-/** Guest-menu styles: A · Warm editorial, B · Fresh grid, C · Quiet bistro. */
-export type MenuStyle = 'editorial' | 'grid' | 'bistro'
+/** Guest-menu styles: A · Warm editorial, B · Fresh grid, C · Quiet bistro, D · Minimal. */
+export type MenuStyle = 'editorial' | 'grid' | 'bistro' | 'minimal'
 export type Font = 'system' | 'serif' | 'rounded'
 export type BannerText = 'over' | 'under'
 
@@ -28,6 +28,8 @@ export type AppearanceValues = {
   /** "My order" list for guests (kept on their phone; plan feature order_list). */
   show_order_list: boolean
   show_other_branches: boolean
+  show_logo: boolean
+  show_banner: boolean
   theme_id: number | null
   logo_media_id: number | null
   cover_media_id: number | null

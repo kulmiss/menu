@@ -116,8 +116,9 @@ class MenuPageData
             $photos = $theme['show_photos'];
             $calories = $theme['show_calories'];
             $prices = $theme['show_prices'];
+            $sizesLine = $theme['style'] === 'minimal';
 
-            $menuRows = $menus->map(function (Menu $menu) use ($text, $money, $describe, $photos, $calories, $prices, &$tagsUsed) {
+            $menuRows = $menus->map(function (Menu $menu) use ($text, $money, $describe, $photos, $calories, $prices, $sizesLine, &$tagsUsed) {
                 return [
                     'id' => $menu->id,
                     'name' => $text($menu->name),
@@ -127,7 +128,7 @@ class MenuPageData
                         'id' => $c->id,
                         'name' => $text($c->name),
                         'description' => $describe($c->description),
-                        'items' => $c->items->map(function (Item $item) use ($text, $money, $describe, $photos, $calories, $prices, &$tagsUsed) {
+                        'items' => $c->items->map(function (Item $item) use ($text, $money, $describe, $photos, $calories, $prices, $sizesLine, &$tagsUsed) {
                             $tags = $item->tags->map(fn (Tag $t) => ['key' => $t->key ?? 'c'.$t->id, 'label' => $t->key ? __('public.tags.'.$t->key) : $text($t->name)])->values()->all();
                             foreach ($tags as $tag) {
                                 $tagsUsed[$tag['key']] = $tag['label'];
@@ -140,6 +141,10 @@ class MenuPageData
                                 'price' => $item->variants->isNotEmpty()
                                     ? ($prices ? __('public.from', ['price' => $money($item->fromPriceMinor())]) : '')
                                     : $money($item->price_minor),
+                                // Style D lists the sizes on the menu itself: "Small 60 · Large 80".
+                                'sizes' => $sizesLine && $prices && $item->variants->count() > 1
+                                    ? $item->variants->map(fn (ItemVariant $v) => $text($v->name).' '.self::number((int) $v->price_minor))->implode(' · ')
+                                    : '',
                                 'sold_out' => $item->is_sold_out,
                                 'new' => $item->is_new && ($item->new_until === null || $item->new_until->isFuture() || $item->new_until->isToday()),
                                 'popular' => $item->is_popular,
@@ -337,10 +342,14 @@ class MenuPageData
         if ($minor === null) {
             return '';
         }
-        $symbol = self::symbol($currency);
-        $number = $minor % 100 === 0 ? number_format(intdiv($minor, 100)) : number_format($minor / 100, 2);
 
-        return $symbol.' '.$number;
+        return self::symbol($currency).' '.self::number($minor);
+    }
+
+    /** "120" / "120.50": the amount without the currency (sizes line in style D). */
+    public static function number(int $minor): string
+    {
+        return $minor % 100 === 0 ? number_format(intdiv($minor, 100)) : number_format($minor / 100, 2);
     }
 
     /** @return array<string, mixed> */

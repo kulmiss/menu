@@ -2,10 +2,10 @@ import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import { type MenuStyle } from './api'
 
-const MENU_STYLES: MenuStyle[] = ['editorial', 'grid', 'bistro']
+const MENU_STYLES: MenuStyle[] = ['editorial', 'grid', 'bistro', 'minimal']
 
 /**
- * "Menu style" picker: three cards with a small drawing of each style.
+ * "Menu style" picker: four cards with a small drawing of each style.
  * Styles the plan doesn't include stay visible but can't be picked.
  */
 export function StylePicker({
@@ -26,7 +26,7 @@ export function StylePicker({
       <legend className='mb-2 text-sm font-medium'>
         {t('appearance.menu_style')}
       </legend>
-      <div className='grid gap-2 sm:grid-cols-3'>
+      <div className='grid grid-cols-2 gap-2 lg:grid-cols-4'>
         {MENU_STYLES.map((style) => {
           const locked = !allowed.includes(style)
           const checked = value === style
@@ -124,6 +124,23 @@ function StyleThumb({ style }: { style: MenuStyle }) {
               <rect x='8' y={y + 16} width='104' height='0.6' {...line} />
             </g>
           ))}
+        </>
+      )}
+      {style === 'minimal' && (
+        <>
+          <rect width='120' height='18' {...photo} />
+          <rect x='38' y='23' width='44' height='5' rx='2' {...ink} />
+          <rect x='8' y='35' width='30' height='3' rx='1.5' {...ink} />
+          <rect x='8' y='40' width='104' height='0.8' {...ink} />
+          {[45, 60, 75].map((y) => (
+            <g key={y}>
+              <rect x='8' y={y + 2} width='40' height='4' rx='2' {...ink} />
+              <rect x='92' y={y + 2} width='20' height='4' rx='2' {...ink} />
+              <rect x='8' y={y + 8} width='60' height='3' rx='1.5' {...line} />
+              <rect x='8' y={y + 13.5} width='104' height='0.6' {...line} />
+            </g>
+          ))}
+          <rect x='8' y='83' width='12' height='2.5' rx='1' {...accent} />
         </>
       )}
     </svg>

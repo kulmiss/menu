@@ -5,6 +5,7 @@ import base from '@public-menu/base.css?raw'
 import bistro from '@public-menu/style-bistro.css?raw'
 import editorial from '@public-menu/style-editorial.css?raw'
 import grid from '@public-menu/style-grid.css?raw'
+import minimal from '@public-menu/style-minimal.css?raw'
 import { afterEach, describe, expect, it } from 'vitest'
 
 type Rgba = [number, number, number, number]
@@ -55,7 +56,7 @@ afterEach(() => {
   root?.remove()
 })
 
-const STYLES = { editorial, grid, bistro }
+const STYLES = { editorial, grid, bistro, minimal }
 
 describe('opening-hours pill', () => {
   for (const [name, css] of Object.entries(STYLES))

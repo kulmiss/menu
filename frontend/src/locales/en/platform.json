@@ -89,6 +89,7 @@
     "style_editorial": "Menu style A · Warm editorial",
     "style_grid": "Menu style B · Fresh grid",
     "style_bistro": "Menu style C · Quiet bistro",
+    "style_minimal": "Menu style D · Minimal",
     "pdf_menu": "Printable PDF menu",
     "order_list": "\"My order\" list for guests"
   },
@@ -167,7 +168,8 @@
     "styles": {
       "editorial": "A · Warm editorial",
       "grid": "B · Fresh grid",
-      "bistro": "C · Quiet bistro"
+      "bistro": "C · Quiet bistro",
+      "minimal": "D · Minimal"
     }
   },
   "announcements": {

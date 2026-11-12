@@ -78,6 +78,10 @@ it('seeds the complete sales demo: café, three showcases, small restaurants and
         asTenant($tenant, fn () => expect(TenantAppearance::sole()->style)->toBe($style)->and(Item::count())->toBeGreaterThan(12)->and(Item::whereNotNull('media_id')->count())->toBeGreaterThan(7));
         $this->get('/'.$slug)->assertOk();
     }
+    // Style D · Minimal on one demo restaurant, with banner and logo.
+    $nine = Tenant::where('slug', 'demo-nine-wells-coffee')->sole();
+    asTenant($nine, fn () => expect(TenantAppearance::sole())->style->toBe('minimal')->logo_media_id->not->toBeNull()->cover_media_id->not->toBeNull());
+    $this->get('/demo-nine-wells-coffee')->assertOk()->assertSee('S-minimal', false);
 
     // Small restaurants in every state, payments over 12 months, plan changes this month.
     $states = Tenant::all()->countBy(fn (Tenant $t) => $t->subscriptionState()->value);

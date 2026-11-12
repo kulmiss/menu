@@ -78,6 +78,9 @@ class Platform
         'juice' => [['Avocado spris', 12000, 'avocado-smoothie'], ['Mango juice', 10000, 'mango-juice'], ['Orange juice', 9500, null], ['Strawberry smoothie', 12000, null], ['Papaya juice', 9500, null], ['Fruit salad', 11000, null], ['Granola bowl', 16000, null]],
     ];
 
+    /** The demo restaurant on style D (/demo-nine-wells-coffee). */
+    public const MINIMAL = 'Nine Wells Coffee';
+
     public function __construct(
         private readonly CurrentTenant $current,
         private readonly Photos $photos,
@@ -203,7 +206,8 @@ class Platform
         $banner = ['cafe' => 'cafe-bali', 'ethiopian' => 'injera-dishes', 'pizza' => 'pizzas-plates', 'grill' => 'cafe-tables', 'juice' => 'juices-table'][$kind];
         TenantAppearance::create([
             ...TenantAppearance::DEFAULTS,
-            'style' => ['cafe' => 'bistro', 'ethiopian' => 'grid', 'pizza' => 'grid', 'grill' => 'editorial', 'juice' => 'bistro'][$kind],
+            // Nine Wells Coffee shows style D · Minimal, with banner and logo (owner, 2026-11-12).
+            'style' => $tenant->name === self::MINIMAL ? 'minimal' : ['cafe' => 'bistro', 'ethiopian' => 'grid', 'pizza' => 'grid', 'grill' => 'editorial', 'juice' => 'bistro'][$kind],
             'primary_color' => $colors[$kind],
             'logo_media_id' => $setup >= 1 ? $this->photos->logo($tenant, $colors[$kind], ['cafe' => 'bean', 'pizza' => 'slice', 'juice' => 'wheat'][$kind] ?? 'ring')?->id : null,
             'cover_media_id' => $setup >= 2 ? $this->photos->media($tenant, $banner, true)?->id : null,

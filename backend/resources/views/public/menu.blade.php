@@ -4,11 +4,11 @@
     $cover = $theme['cover'];
     $style = $theme['style'];
     // Photo widths per menu style, so the browser picks the right file (§15.2.4).
-    $sizes = ['bistro' => '104px', 'grid' => '(min-width:40rem) 220px, 50vw', 'editorial' => '(min-width:44rem) 672px, 100vw'][$style];
+    $sizes = ['minimal' => '1px', 'bistro' => '104px', 'grid' => '(min-width:40rem) 220px, 50vw', 'editorial' => '(min-width:44rem) 672px, 100vw'][$style];
     // Only photos likely on the first screen load at once; the rest lazily
     // (PLAN.md §15.2.4). How many dishes fit depends on the style and the banner.
     // With a banner, A and B show no dish photo on the first screen (the banner is the LCP).
-    $fold = ['editorial' => [2, 0], 'grid' => [4, 0], 'bistro' => [5, 0]][$style][$cover ? 1 : 0];
+    $fold = ['editorial' => [2, 0], 'grid' => [4, 0], 'bistro' => [5, 0], 'minimal' => [0, 0]][$style][$cover ? 1 : 0];
     $eagerLeft = $fold;
     $blurLeft = 4;
     $position = 0;
@@ -138,7 +138,7 @@
 @php $orderable = $orderList && ! $i['sold_out'] && $i['price'] !== ''; @endphp
 <button type="button" @class(['it', 'np' => ! $i['media'], 'ao' => $orderable])><span class="tx"><span class="nm">{{ $i['name'] }}</span>
 @if ($i['summary'] !== '')<span class="sm">{{ $i['summary'] }}</span>@endif
-@if ($i['price'] !== '')<span class="pr">{{ $i['price'] }}</span>@endif
+@if ($i['sizes'] !== '')<span class="pr sz">{{ $i['sizes'] }}</span>@elseif ($i['price'] !== '')<span class="pr">{{ $i['price'] }}</span>@endif
 <span class="tg">@if ($i['sold_out'])<span class="bd x0">{{ __('public.sold_out') }}</span>@endif
 @if ($i['new'])<span class="bd hl">{{ __('public.new') }}</span>@endif
 @if ($i['popular'])<span class="bd hl">{{ __('public.popular') }}</span>@endif

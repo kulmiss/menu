@@ -19,7 +19,8 @@ use Illuminate\Support\Facades\File;
 const STYLE_MARKERS = [
     'editorial' => '.lg{width:4.75rem',
     'grid' => 'grid-template-columns:1fr 1fr',
-    'bistro' => '.cv{aspect-ratio:5/2}',
+    'bistro' => 'section h2{font-size:1.45rem',
+    'minimal' => '.lg{width:3rem',
 ];
 
 function pageWithStyle(string $style): string
@@ -98,7 +99,7 @@ it('offers only the styles the plan allows, and a restaurant override wins', fun
     $tenant->forceFill(['plan_id' => $plan->id])->save();
     Features::forget();
 
-    $this->actingAs($owner)->getJson(t($tenant, 'appearance'))->assertJsonPath('data.styles', ['grid', 'bistro']);
+    $this->actingAs($owner)->getJson(t($tenant, 'appearance'))->assertJsonPath('data.styles', ['grid', 'bistro', 'minimal']);
     $this->actingAs($owner)->putJson(t($tenant, 'appearance'), [
         'primary_color' => '#b4432a', 'font' => 'system', 'style' => 'editorial',
         'show_prices' => true, 'show_photos' => true, 'show_descriptions' => true, 'show_calories' => true,
@@ -106,7 +107,7 @@ it('offers only the styles the plan allows, and a restaurant override wins', fun
 
     DB::table('tenant_feature_overrides')->insert(['tenant_id' => $tenant->id, 'feature_key' => 'style_editorial', 'enabled' => true]);
     Features::forget();
-    $this->actingAs($owner)->getJson(t($tenant, 'appearance'))->assertJsonPath('data.styles', ['editorial', 'grid', 'bistro']);
+    $this->actingAs($owner)->getJson(t($tenant, 'appearance'))->assertJsonPath('data.styles', ['editorial', 'grid', 'bistro', 'minimal']);
 });
 
 it('falls back to an allowed style when the saved one is switched off', function () {
@@ -206,6 +207,7 @@ it('preloads the banner in the right sizes and keeps its shape', function (strin
     ['editorial', '720', '(min-width:44rem) 704px, 100vw'],
     ['grid', '640', '(min-width:44rem) 680px, calc(100vw - 1.5rem)'],
     ['bistro', '512', '(min-width:44rem) 704px, 100vw'],
+    ['minimal', '512', '(min-width:44rem) 704px, 100vw'],
 ]);
 
 it('puts the logo and name on or below the banner', function () {
@@ -259,7 +261,7 @@ it('shows a clean, lighter page when photos are switched off', function (string 
         ->and($without)->toContain('class="S-'.$style.' NP"')
         ->and($with)->toContain('class="S-'.$style.'"');
     expect(strlen(gzencode($without, 9)))->toBeLessThan(strlen(gzencode($with, 9)));
-})->with(TenantAppearance::STYLES);
+})->with(['editorial', 'grid', 'bistro']); // D never shows dish photos (StyleMinimalTest)
 
 it('lays out dishes without photos as text rows in every style', function (string $style) {
     $css = InlineAssets::css($style);

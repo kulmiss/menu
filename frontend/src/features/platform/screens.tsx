@@ -557,7 +557,7 @@ export function ThemesPage() {
                   <SelectContent>
                     {(k === 'font'
                       ? ['system', 'serif', 'rounded']
-                      : ['editorial', 'grid', 'bistro']
+                      : ['editorial', 'grid', 'bistro', 'minimal']
                     ).map((o) => (
                       <SelectItem key={o} value={o}>
                         {t(

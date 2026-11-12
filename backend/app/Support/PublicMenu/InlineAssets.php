@@ -2,6 +2,8 @@
 
 namespace App\Support\PublicMenu;
 
+use App\Models\TenantAppearance;
+
 /**
  * The guest page's CSS and JS, inlined into the HTML (no extra requests).
  * A light minifier: comments and indentation go, the code stays readable in git.
@@ -17,7 +19,7 @@ class InlineAssets
      */
     public static function css(string $style = 'grid'): string
     {
-        $style = in_array($style, ['editorial', 'grid', 'bistro'], true) ? $style : 'grid';
+        $style = in_array($style, TenantAppearance::STYLES, true) ? $style : 'grid';
 
         return self::$memo['css.'.$style] ??= self::minifyCss(
             file_get_contents(resource_path('public-menu/base.css'))."\n".file_get_contents(resource_path('public-menu/style-'.$style.'.css'))
