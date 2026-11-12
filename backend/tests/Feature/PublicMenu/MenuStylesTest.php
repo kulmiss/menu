@@ -126,7 +126,7 @@ it('defaults new restaurants to the fresh grid style', function () {
     expect(TenantAppearance::DEFAULTS['style'])->toBe('grid');
 });
 
-it('loads only the photos on the first screen at once, per style', function (string $style, int $eager) {
+it('without a banner, preloads the first dish photo and loads only it at once', function (string $style, string $sizes) {
     $tenant = Tenant::factory()->create();
     [, $category] = sampleMenu($tenant);
     asTenant($tenant, function () use ($category, $style) {
@@ -142,10 +142,63 @@ it('loads only the photos on the first screen at once, per style', function (str
 
     $html = (string) $this->get('/'.$tenant->slug)->assertOk()->getContent();
 
-    expect(substr_count($html, 'fetchpriority="'))->toBe($eager)
-        ->and(substr_count($html, 'fetchpriority="high"'))->toBe(1)
-        ->and(substr_count($html, 'loading="lazy"'))->toBe(8 - $eager);
-})->with([['editorial', 1], ['grid', 3], ['bistro', 4]]);
+    // The first dish photo is the largest paint (LCP, owner 2026-11-12): fetched from the <head>, high priority,
+    // in the size picked for it; the other seven wait for load (same size or smaller, so never a later LCP).
+    expect($html)->toMatch('#<link rel="preload" as="image" fetchpriority="high" type="image/webp" imagesrcset="[^"]*x/1/320.webp 320w[^"]*" imagesizes="'.preg_quote($sizes, '#').'">#')
+        ->toMatch('#<source type="image/webp" srcset="[^"]*x/1/320.webp[^"]*" sizes="'.preg_quote($sizes, '#').'">\s*<img src="[^"]*x/1/640.jpg"[^>]*fetchpriority="high"#')
+        ->and(substr_count($html, 'fetchpriority="high"'))->toBe(2)
+        ->and(substr_count($html, 'loading="lazy"'))->toBe(7);
+})->with([
+    ['editorial', '(min-width:44rem) 672px, 80vw'],
+    ['grid', '(min-width:40rem) 220px, 40vw'],
+    ['bistro', '104px'],
+]);
+
+it('with a banner, loads the banner first and every dish photo after load', function (string $style, int $eager) {
+    $tenant = Tenant::factory()->create();
+    [, $category] = sampleMenu($tenant);
+    asTenant($tenant, function () use ($category, $style) {
+        $photo = fn (string $p) => Media::create([
+            'base_path' => $p, 'mime' => 'image/jpeg', 'width' => 1280, 'height' => 853, 'bytes' => 1,
+            'variants' => ['320' => '320.webp', '640' => '640.webp', '800' => '800.webp', '1280' => '1280.webp', 'jpg' => '640.jpg', 'og' => 'og.jpg'],
+        ]);
+        foreach (range(1, 8) as $n) {
+            Item::create(['category_id' => $category->id, 'name' => ['en' => 'Dish '.$n], 'price_minor' => 1000, 'media_id' => $photo('x/'.$n)->id, 'sort' => $n]);
+        }
+        TenantAppearance::create([...TenantAppearance::DEFAULTS, 'style' => $style, 'cover_media_id' => $photo('b/1')->id]);
+    });
+
+    $html = (string) $this->get('/'.$tenant->slug)->assertOk()->getContent();
+
+    expect(substr_count($html, 'fetchpriority="auto"'))->toBe($eager)
+        ->and(substr_count($html, 'loading="lazy"'))->toBe(8 - $eager)
+        ->and($html)->toMatch('#<link rel="preload" as="image" fetchpriority="high"[^>]*b/1/800.webp#');
+})->with([['editorial', 0], ['grid', 0], ['bistro', 0]]);
+
+it('without a banner, the first special is the largest paint: preloaded, at once, every card the same height', function () {
+    $tenant = Tenant::factory()->create();
+    [, $category] = sampleMenu($tenant);
+    asTenant($tenant, function () use ($category) {
+        $photo = fn (string $p) => Media::create([
+            'base_path' => $p, 'mime' => 'image/jpeg', 'width' => 1280, 'height' => 853, 'bytes' => 1,
+            'variants' => ['320' => '320.webp', '640' => '640.webp', '1280' => '1280.webp', 'jpg' => '640.jpg', 'og' => 'og.jpg'],
+        ]);
+        Item::create(['category_id' => $category->id, 'name' => ['en' => 'Dish'], 'price_minor' => 1000, 'media_id' => $photo('x/1')->id]);
+        Promotion::create(['type' => 'special', 'title' => ['en' => 'Deal 1'], 'media_id' => $photo('s/1')->id, 'sort' => 1]);
+        Promotion::create(['type' => 'special', 'title' => ['en' => 'Deal 2'], 'media_id' => $photo('s/2')->id, 'sort' => 2]);
+        TenantAppearance::create([...TenantAppearance::DEFAULTS, 'style' => 'bistro']);
+    });
+
+    $html = (string) $this->get('/'.$tenant->slug)->assertOk()->getContent();
+
+    expect($html)->toMatch('#<link rel="preload" as="image" fetchpriority="high" type="image/webp" imagesrcset="[^"]*s/1/320.webp[^"]*" imagesizes="\(min-width:44rem\) 152px, 34vw">#')
+        ->toMatch('#<img src="[^"]*s/1/640.jpg"[^>]*fetchpriority="high"#')
+        ->toMatch('#<img data-s="[^"]*s/2/640.jpg"[^>]*loading="lazy"#')
+        ->toMatch('#<img data-s="[^"]*x/1/640.jpg"#')
+        ->and(substr_count($html, 'fetchpriority="high"'))->toBe(2);
+    // Equal cards: a later special photo is never larger than the first, so it can't become the LCP.
+    expect(InlineAssets::css('bistro'))->toContain('.sp{min-height:9.5rem;align-items:stretch;column-gap:0}');
+});
 
 it('gives photos below the first screen their address only after load, and blurs only the first four', function () {
     $tenant = Tenant::factory()->create();
@@ -166,13 +219,15 @@ it('gives photos below the first screen their address only after load, and blurs
 
     $html = (string) $this->get('/'.$tenant->slug)->assertOk()->getContent();
 
-    // grid without a banner: 3 dishes at once; 6 more and both specials wait for load.
-    expect(substr_count($html, 'img data-s="'))->toBe(8)
-        ->and(substr_count($html, 'data-ss="'))->toBe(8)
+    // grid without a banner: the first special is the largest paint and loads at once; all nine dishes
+    // and the second special wait for load.
+    expect(substr_count($html, 'img data-s="'))->toBe(10)
+        ->and(substr_count($html, 'data-ss="'))->toBe(10)
         ->and(substr_count($html, 'background-image:url(data:image/webp;base64,BLUR)'))->toBe(4)
         ->and(substr_count($html, 'background-color:#123456'))->toBe(11);
-    // Specials are compact cards with a small responsive photo, never the largest element.
-    expect($html)->toMatch('#<source type="image/webp" data-ss="[^"]*x/11/320.webp 320w[^"]*" sizes="\(min-width:44rem\) 152px, 34vw">#');
+    // Specials are compact cards with a small responsive photo.
+    expect($html)->toMatch('#<source type="image/webp" srcset="[^"]*x/11/320.webp 320w[^"]*" sizes="\(min-width:44rem\) 152px, 34vw">#')
+        ->toMatch('#<source type="image/webp" data-ss="[^"]*x/12/320.webp 320w[^"]*" sizes="\(min-width:44rem\) 152px, 34vw">#');
     // …and the page script swaps the addresses in on load.
     expect(InlineAssets::js())->toContain('data-ss')->toContain('img[data-s]');
 });
