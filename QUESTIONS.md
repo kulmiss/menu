@@ -192,6 +192,8 @@ New rules added by the owner (now in PLAN.md §2): Docker is for local developme
 
 | 149 | Menu updates on guests' phones | Before: a guest who had opened the menu before saw the saved copy first and the restaurant's changes only on the next visit. Now the service worker compares the fresh copy it fetches in the background with the saved one (ETag, else the page text) and, when it differs, the open page reloads from the fresh copy (scroll kept; the "My order" list is in localStorage). The page also asks once it has loaded, because the answer can arrive before it listens. Not while a dish, the order list, the waiter view or a search is in use (it waits until they're closed), and at most once per 10 s (no reload loops). A real in-place update without reload would need the page script reworked and doesn't fit the 5 KB inline budget; the reload comes from the phone's copy, so it takes a fraction of a second. Inline script 4.80 KB. |
 
+| 150 | "Menu updated" notice | After the page reloads itself (#149), a small quiet line "Menu updated" shows at the top for ~3 s and fades (role=status, no sound, no popup, taps go through). The code is in the on-demand file (sheet.js): it reads the time menu.js stores just before reloading and shows the line once per reload. Inline script unchanged (4.80 KB). Checked: after the reload the "My order" list already marks re-priced (was …), sold-out and removed dishes and the total/bar use the new prices — no change needed. |
+
 ## Open
 
 - Owner action: protect `main` in GitHub settings (require PR, no force push, no deletion). Claude's access can't change branch settings.

@@ -75,6 +75,7 @@ return [
     'open_until' => 'Open now · until :time',
     'closed' => 'Closed',
     'closed_today' => 'Closed today',
+    'menu_updated' => 'Menu updated',
     'closed_on' => 'Closed :dates',
     'opens_at' => 'opens :time',
     'opens_tomorrow' => 'opens tomorrow :time',

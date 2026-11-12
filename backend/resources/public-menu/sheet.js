@@ -115,6 +115,19 @@ window.mH = function (b, D) {
 
 // "My order": a list kept only on this phone (localStorage, per restaurant
 // and branch). Nothing is sent to the restaurant; it is shown to the waiter.
+// "Menu updated": the page reloaded itself because the restaurant changed something
+// (menu.js sets sessionStorage.mu just before). A quiet line for ~3 s, read out politely.
+(function () {
+  var d = document, w = window, mu;
+  try { mu = +sessionStorage.mu; if (!mu || Date.now() - mu > 15e3 || sessionStorage.mn == mu) return; sessionStorage.mn = mu; } catch (e) { return; }
+  var D = w.mD || JSON.parse(d.getElementById('d').textContent), n = d.createElement('p');
+  n.setAttribute('role', 'status');
+  n.textContent = D.t.mu;
+  n.style.cssText = 'position:fixed;top:.75rem;left:50%;transform:translateX(-50%);z-index:4;margin:0;padding:.45rem .9rem;border-radius:99px;background:var(--fg);color:var(--bg);font-size:.875rem;box-shadow:0 2px 10px #0003;pointer-events:none;transition:opacity .4s';
+  d.body.appendChild(n);
+  setTimeout(function () { n.style.opacity = 0; setTimeout(function () { n.remove(); }, 450); }, 3e3);
+})();
+
 (function () {
   var d = document, w = window, D = w.mD || JSON.parse(d.getElementById('d').textContent);
   if (!D.o || D.p) return;
