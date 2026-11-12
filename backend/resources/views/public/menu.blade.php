@@ -12,7 +12,9 @@
     // Without a banner the first photo on screen is the largest paint (LCP, owner 2026-11-12): the first
     // special's photo, else the first dish photo. It is preloaded with high priority.
     $lcp = null;
-    $lcpSizes = ['minimal' => '1px', 'bistro' => '104px', 'grid' => '(min-width:40rem) 220px, 40vw', 'editorial' => '(min-width:44rem) 672px, 80vw'][$style];
+    // A's first dish photo is full width: on a phone it takes the 320 px file, one size below B/C's pick
+    // logic would give (owner, 2026-11-12: same quality, only this photo, only without banner and specials).
+    $lcpSizes = ['minimal' => '1px', 'bistro' => '104px', 'grid' => '(min-width:40rem) 220px, 40vw', 'editorial' => '(min-width:44rem) 672px, 44vw'][$style];
     if (! $cover) {
         foreach ($promotions as $p) {
             if ($p['type'] !== 'announcement' && ! $p['hidden'] && $p['image']) {

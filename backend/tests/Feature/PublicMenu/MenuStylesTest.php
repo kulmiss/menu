@@ -149,7 +149,7 @@ it('without a banner, preloads the first dish photo and loads only it at once', 
         ->and(substr_count($html, 'fetchpriority="high"'))->toBe(2)
         ->and(substr_count($html, 'loading="lazy"'))->toBe(7);
 })->with([
-    ['editorial', '(min-width:44rem) 672px, 80vw'],
+    ['editorial', '(min-width:44rem) 672px, 44vw'], // the 320 px file on a phone (owner, 2026-11-12)
     ['grid', '(min-width:40rem) 220px, 40vw'],
     ['bistro', '104px'],
 ]);
