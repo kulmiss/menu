@@ -74,6 +74,7 @@ class Cafe
             'style' => TenantAppearance::effectiveStyle(config('menu.demo_style'), TenantAppearance::STYLES),
             'primary_color' => '#9a3b1f',
             'banner_text' => 'under',
+            'show_banner' => (bool) config('menu.demo_banner'),
             'cover_media_id' => $this->photos->media($tenant, 'cafe-rustic', true)?->id,
             'logo_media_id' => $this->photos->logo($tenant, '#9a3b1f', 'bean')?->id,
         ]);

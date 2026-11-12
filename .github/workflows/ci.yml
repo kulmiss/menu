@@ -103,13 +103,15 @@ jobs:
   # median of 3 runs on the demo menu, served as production serves it.
   # A PR that breaks a budget fails here.
   guest-menu-speed:
-    name: guest-menu-speed (${{ matrix.style }})
+    name: guest-menu-speed (${{ matrix.style }}, ${{ matrix.banner }})
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
         # Every menu style must meet every speed budget (owner, 2026-11-11).
         style: [editorial, grid, bistro, minimal]
+        # …with the banner and without it: then the first photo is the largest paint (owner, 2026-11-12).
+        banner: [banner, no-banner]
     defaults:
       run:
         working-directory: backend
@@ -132,6 +134,7 @@ jobs:
       DB_PASSWORD: root
       APP_URL: http://localhost:8124
       DEMO_MENU_STYLE: ${{ matrix.style }}
+      DEMO_MENU_BANNER: ${{ matrix.banner == 'banner' && '1' || '0' }}
     steps:
       - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
@@ -157,6 +160,7 @@ jobs:
           curl -sf -o /dev/null http://localhost:8123/demo
           test -f public/menu-cache/demo/index.html.gz
           grep -q 'class="S-${{ matrix.style }}[ "]' public/menu-cache/demo/index.html
+          if [ "${{ matrix.banner }}" = banner ]; then grep -q '<div class="cv' public/menu-cache/demo/index.html; else ! grep -q '<div class="cv' public/menu-cache/demo/index.html; fi
           echo "Guest page: $(stat -c %s public/menu-cache/demo/index.html) bytes, $(stat -c %s public/menu-cache/demo/index.html.gz) gzip"
       - name: Serve it like production (Nginx, no PHP)
         run: |
@@ -184,7 +188,7 @@ jobs:
               ('CLS', med(lambda r: r['audits']['cumulative-layout-shift']['numericValue']), 0.02, 0.02, ''),
               ('Performance score', med(lambda r: r['categories']['performance']['score'] * 100), 98, None, ''),
           ]
-          print('### Guest menu speed — ${{ matrix.style }} (median of %d runs)' % len(runs))
+          print('### Guest menu speed — ${{ matrix.style }}, ${{ matrix.banner }} (median of %d runs)' % len(runs))
           print('| Measure | Median | Target | CI fails above |')
           print('|---|---|---|---|')
           for name, value, target, gate, unit in rows:
@@ -195,6 +199,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: lighthouse-${{ matrix.style }}
+          name: lighthouse-${{ matrix.style }}-${{ matrix.banner }}
           path: /tmp/lhci
           if-no-files-found: ignore

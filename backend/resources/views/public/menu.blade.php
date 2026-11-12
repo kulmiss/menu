@@ -9,7 +9,28 @@
     // (PLAN.md §15.2.4). How many dishes fit depends on the style and the banner.
     // With a banner, A and B show no dish photo on the first screen (the banner is the LCP).
     $fold = ['editorial' => [2, 0], 'grid' => [4, 0], 'bistro' => [5, 0], 'minimal' => [0, 0]][$style][$cover ? 1 : 0];
-    $eagerLeft = $fold;
+    // Without a banner the first photo on screen is the largest paint (LCP, owner 2026-11-12): the first
+    // special's photo, else the first dish photo. It is preloaded with high priority.
+    $lcp = null;
+    $lcpSizes = ['minimal' => '1px', 'bistro' => '104px', 'grid' => '(min-width:40rem) 220px, 40vw', 'editorial' => '(min-width:44rem) 672px, 80vw'][$style];
+    if (! $cover) {
+        foreach ($promotions as $p) {
+            if ($p['type'] !== 'announcement' && ! $p['hidden'] && $p['image']) {
+                $lcp = ['img' => $p['image'], 'sizes' => '(min-width:44rem) 152px, 34vw', 'special' => $p];
+                break;
+            }
+        }
+        if ($lcp === null && $fold > 0) {
+            foreach ($menus as $m) { foreach ($m['categories'] as $c) { foreach ($c['items'] as $i) {
+                // A slightly smaller pick for this one photo (≈3 % under the box on a 1.75× phone, not visible),
+                // so it is the 320 / 640 px file instead of the next size up.
+                if ($i['media']) { $lcp = ['img' => $i['media'], 'sizes' => $lcpSizes, 'item' => $i['id']]; break 3; }
+            } } }
+        }
+    }
+    // Without a banner only that first photo loads at once; the rest wait for load (they are the same
+    // size or smaller, so none of them becomes a later, larger paint).
+    $eagerLeft = $cover ? $fold : (isset($lcp['item']) ? 1 : 0);
     $blurLeft = 4;
     $position = 0;
     $hasInfo = $week || $info['address'] || $info['links'] || $info['about'] || $info['wifi'] || $info['socials'] || $otherBranches;
@@ -86,6 +107,10 @@
 {{-- The banner is the largest thing on screen: start fetching it before the CSS is parsed (LCP). --}}
 @php $preloadAvif = $cover['avif'] !== ''; @endphp
 <link rel="preload" as="image" fetchpriority="high" type="image/{{ $preloadAvif ? 'avif' : 'webp' }}" imagesrcset="{{ $preloadAvif ? $cover['avif'] : $cover['webp'] }}" imagesizes="{{ $cover['sizes'] }}">
+@elseif ($lcp)
+{{-- No banner: the first special or dish photo is the largest paint; fetch it just as early. --}}
+@php $preloadAvif = ! empty($lcp['img']['avif']); @endphp
+<link rel="preload" as="image" fetchpriority="high" type="image/{{ $preloadAvif ? 'avif' : 'webp' }}" imagesrcset="{{ $preloadAvif ? $lcp['img']['avif'] : $lcp['img']['webp'] }}" imagesizes="{{ $lcp['sizes'] }}">
 @endif
 <style>{!! InlineAssets::css($style) !!}{!! $theme['css'] !!}</style>
 </head>
@@ -127,10 +152,12 @@
 <div class="spc"@if ($p['item']) data-i="{{ $p['item']['id'] }}"@endif @if ($p['window']) data-w="{{ json_encode($p['window']) }}"@endif @if ($p['hidden']) hidden @endif>
 <{{ $p['item'] ? 'button type=button' : 'div' }} class="{{ $p['item'] ? 'it ' : '' }}sp">
 @if ($p['image'])@php $sp = $p['image']; @endphp
-{{-- A special is a compact card (photo on the side), never the largest element: its photo waits for load like the ones below, so the banner loads alone. --}}
-@php $ss = 'data-ss'; @endphp
+{{-- A special is a compact card (photo on the side). With a banner its photo waits for load, so the banner loads alone.
+     Without one, the first special's photo is the largest paint: it loads at once (preloaded above). The others wait:
+     every card is the same height, so a later photo is never larger and never becomes the LCP. --}}
+@php $spEager = ($lcp['special'] ?? null) === $p; $ss = $spEager ? 'srcset' : 'data-ss'; @endphp
 <picture>@if ($sp['avif'])<source type="image/avif" {{ $ss }}="{{ $sp['avif'] }}" sizes="(min-width:44rem) 152px, 34vw">@endif<source type="image/webp" {{ $ss }}="{{ $sp['webp'] }}" sizes="(min-width:44rem) 152px, 34vw">
-<img data-s="{{ $sp['jpg'] }}" alt="" width="{{ $sp['w'] }}" height="{{ $sp['h'] }}" decoding="async" style="background-color:{{ $sp['color'] ?? 'transparent' }}" loading="lazy"></picture>@endif
+<img {{ $spEager ? 'src' : 'data-s' }}="{{ $sp['jpg'] }}" alt="" width="{{ $sp['w'] }}" height="{{ $sp['h'] }}" decoding="{{ $spEager ? 'sync' : 'async' }}" style="background-color:{{ $sp['color'] ?? 'transparent' }}" @if ($spEager) fetchpriority="high" @else loading="lazy" @endif></picture>@endif
 <span class="tx"><span class="bd hl">{{ __('public.special') }}</span><span class="nm">{{ $p['title'] }}</span>@if ($p['body'] !== '')<span class="sm">{{ $p['body'] }}</span>@endif @if ($p['item'] && $p['item']['price'] !== '')<span class="pr">{{ $p['item']['price'] }}</span>@endif</span>
 </{{ $p['item'] ? 'button' : 'div' }}>
 </div>
@@ -163,9 +190,10 @@
 <span class="im" style="@if ($blurLeft-- > 0)background-image:url({{ $img['placeholder'] ?? '' }});@endif background-color:{{ $img['color'] ?? 'transparent' }}"><picture>
 {{-- Below the first screen the address is set after load (menu.js: data-ss / data-s), so these never compete with the banner. --}}
 @php $ss = $eager ? 'srcset' : 'data-ss'; @endphp
-@if ($img['avif'])<source type="image/avif" {{ $ss }}="{{ $img['avif'] }}" sizes="{{ $sizes }}">@endif
-<source type="image/webp" {{ $ss }}="{{ $img['webp'] }}" sizes="{{ $sizes }}">
-<img {{ $eager ? 'src' : 'data-s' }}="{{ $img['jpg'] }}" alt="" width="{{ $img['w'] }}" height="{{ $img['h'] }}" decoding="async" @if ($eager) fetchpriority="{{ ! $cover && $eagerLeft === $fold - 1 ? 'high' : 'auto' }}" @else loading="lazy" @endif>
+@php $isz = ($lcp['item'] ?? null) === $i['id'] ? $lcpSizes : $sizes; @endphp
+@if ($img['avif'])<source type="image/avif" {{ $ss }}="{{ $img['avif'] }}" sizes="{{ $isz }}">@endif
+<source type="image/webp" {{ $ss }}="{{ $img['webp'] }}" sizes="{{ $isz }}">
+<img {{ $eager ? 'src' : 'data-s' }}="{{ $img['jpg'] }}" alt="" width="{{ $img['w'] }}" height="{{ $img['h'] }}" decoding="async" @if ($eager) fetchpriority="{{ ($lcp['item'] ?? null) === $i['id'] ? 'high' : 'auto' }}" @else loading="lazy" @endif>
 </picture></span>
 @endif
 </button></li>
