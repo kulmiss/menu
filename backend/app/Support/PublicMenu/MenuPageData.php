@@ -116,8 +116,9 @@ class MenuPageData
             $photos = $theme['show_photos'];
             $calories = $theme['show_calories'];
             $prices = $theme['show_prices'];
+            $sizesLine = $theme['style'] === 'minimal';
 
-            $menuRows = $menus->map(function (Menu $menu) use ($text, $money, $describe, $photos, $calories, $prices, &$tagsUsed) {
+            $menuRows = $menus->map(function (Menu $menu) use ($text, $money, $describe, $photos, $calories, $prices, $sizesLine, &$tagsUsed) {
                 return [
                     'id' => $menu->id,
                     'name' => $text($menu->name),
@@ -127,7 +128,7 @@ class MenuPageData
                         'id' => $c->id,
                         'name' => $text($c->name),
                         'description' => $describe($c->description),
-                        'items' => $c->items->map(function (Item $item) use ($text, $money, $describe, $photos, $calories, $prices, &$tagsUsed) {
+                        'items' => $c->items->map(function (Item $item) use ($text, $money, $describe, $photos, $calories, $prices, $sizesLine, &$tagsUsed) {
                             $tags = $item->tags->map(fn (Tag $t) => ['key' => $t->key ?? 'c'.$t->id, 'label' => $t->key ? __('public.tags.'.$t->key) : $text($t->name)])->values()->all();
                             foreach ($tags as $tag) {
                                 $tagsUsed[$tag['key']] = $tag['label'];
@@ -140,6 +141,10 @@ class MenuPageData
                                 'price' => $item->variants->isNotEmpty()
                                     ? ($prices ? __('public.from', ['price' => $money($item->fromPriceMinor())]) : '')
                                     : $money($item->price_minor),
+                                // Style D lists the sizes on the menu itself: "Small 60 · Large 80".
+                                'sizes' => $sizesLine && $prices && $item->variants->count() > 1
+                                    ? $item->variants->map(fn (ItemVariant $v) => $text($v->name).' '.self::number((int) $v->price_minor))->implode(' · ')
+                                    : '',
                                 'sold_out' => $item->is_sold_out,
                                 'new' => $item->is_new && ($item->new_until === null || $item->new_until->isFuture() || $item->new_until->isToday()),
                                 'popular' => $item->is_popular,
@@ -217,16 +222,19 @@ class MenuPageData
                 // QR code → table, so "Show to waiter" can say which table (codes are printed on the tables anyway).
                 'tables' => $features['order_list'] ? self::tables($branchId) : [],
                 'branch' => $branch && $branches->count() > 1 ? $text($branch->name) : null,
-                'branches' => $branches->count() > 1 ? $branches->map(fn (Branch $b) => [
-                    'name' => $text($b->name),
-                    'path' => $b->path($tenant),
-                    'current' => $b->id === $branchId,
-                ])->values()->all() : [],
+                // One URL per branch, no picker (owner, 2026-11-12): only a footer list of the other branches.
+                'otherBranches' => $branches->count() > 1 && $theme['show_other_branches']
+                    ? $branches->reject(fn (Branch $b) => $b->id === $branchId)->map(fn (Branch $b) => [
+                        'name' => $text($b->name),
+                        'address' => $text($b->is_default ? $profile->address : $b->address),
+                        'path' => $b->path($tenant),
+                    ])->values()->all() : [],
                 'canonical' => $branch ? $branch->path($tenant) : '/'.$tenant->slug,
                 'branch_id' => $branchId,
                 'hours' => $hours,
                 'closures' => $closures->map(fn (Closure $c) => [$c->starts_on->toDateString(), $c->ends_on->toDateString()])->values()->all(),
                 'week' => self::week($hours),
+                'hoursSummary' => self::summary(self::week($hours)),
                 'notices' => $closures->take(3)->map(fn (Closure $c) => [
                     'dates' => $c->starts_on->equalTo($c->ends_on) ? $c->starts_on->format('D j M') : $c->starts_on->format('D j M').' – '.$c->ends_on->format('D j M'),
                     'note' => $text($c->note),
@@ -262,6 +270,30 @@ class MenuPageData
     }
 
     /**
+     * The week in a few lines for the footer: days in a row with the same
+     * times share a line ("Mon–Fri · 07:00–22:00").
+     *
+     * @param  list<array{day: string, times: string}>  $week
+     * @return list<array{days: string, times: string}>
+     */
+    private static function summary(array $week): array
+    {
+        $short = fn (int $i): string => __('public.days_short.'.[1, 2, 3, 4, 5, 6, 0][$i]);
+        $out = [];
+        $start = 0;
+        foreach ($week as $i => $row) {
+            $next = $week[$i + 1] ?? null;
+            if ($next !== null && $next['times'] === $row['times']) {
+                continue;
+            }
+            $out[] = ['days' => $start === $i ? $short($i) : $short($start).'–'.$short($i), 'times' => $row['times']];
+            $start = $i + 1;
+        }
+
+        return $out;
+    }
+
+    /**
      * Contact and Wi-Fi for the info section; a branch's address and phone
      * win over the restaurant's.
      *
@@ -277,15 +309,15 @@ class MenuPageData
         $digits = fn (?string $v): string => (string) preg_replace('/\D+/', '', (string) $v);
 
         $links = array_values(array_filter([
-            $phone ? ['label' => __('public.call'), 'href' => 'tel:'.preg_replace('/[^0-9+]/', '', $phone), 'text' => $phone] : null,
-            $p->whatsapp ? ['label' => 'WhatsApp', 'href' => 'https://wa.me/'.$digits($p->whatsapp), 'text' => $p->whatsapp] : null,
-            $p->telegram ? ['label' => 'Telegram', 'href' => 'https://t.me/'.$p->telegram, 'text' => '@'.$p->telegram] : null,
-            $p->email ? ['label' => __('public.email'), 'href' => 'mailto:'.$p->email, 'text' => $p->email] : null,
+            $phone ? ['icon' => 'phone', 'label' => __('public.call'), 'href' => 'tel:'.preg_replace('/[^0-9+]/', '', $phone), 'text' => $phone] : null,
+            $p->whatsapp ? ['icon' => 'whatsapp', 'label' => 'WhatsApp', 'href' => 'https://wa.me/'.$digits($p->whatsapp), 'text' => $p->whatsapp] : null,
+            $p->telegram ? ['icon' => 'telegram', 'label' => 'Telegram', 'href' => 'https://t.me/'.$p->telegram, 'text' => '@'.$p->telegram] : null,
+            $p->email ? ['icon' => 'email', 'label' => __('public.email'), 'href' => 'mailto:'.$p->email, 'text' => $p->email] : null,
         ]));
         $socials = [];
         foreach (TenantProfile::SOCIALS as $key) {
             if (! empty($p->socials[$key])) {
-                $socials[] = ['label' => __('public.socials.'.$key), 'href' => $p->socials[$key]];
+                $socials[] = ['icon' => $key, 'label' => __('public.socials.'.$key), 'href' => $p->socials[$key]];
             }
         }
 
@@ -310,10 +342,14 @@ class MenuPageData
         if ($minor === null) {
             return '';
         }
-        $symbol = self::symbol($currency);
-        $number = $minor % 100 === 0 ? number_format(intdiv($minor, 100)) : number_format($minor / 100, 2);
 
-        return $symbol.' '.$number;
+        return self::symbol($currency).' '.self::number($minor);
+    }
+
+    /** "120" / "120.50": the amount without the currency (sizes line in style D). */
+    public static function number(int $minor): string
+    {
+        return $minor % 100 === 0 ? number_format(intdiv($minor, 100)) : number_format($minor / 100, 2);
     }
 
     /** @return array<string, mixed> */

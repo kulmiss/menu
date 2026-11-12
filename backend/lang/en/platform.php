@@ -13,6 +13,7 @@ return [
         'style_editorial' => 'Menu style A · Warm editorial',
         'style_grid' => 'Menu style B · Fresh grid',
         'style_bistro' => 'Menu style C · Quiet bistro',
+        'style_minimal' => 'Menu style D · Minimal',
     ],
     'two_factor_required' => 'Set up two-factor sign-in in your security settings to use the platform area.',
     'impersonation_expired' => 'The “log in as” session ended after 60 minutes. You are back in the platform area.',

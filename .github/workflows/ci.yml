@@ -109,7 +109,7 @@ jobs:
       fail-fast: false
       matrix:
         # Every menu style must meet every speed budget (owner, 2026-11-11).
-        style: [editorial, grid, bistro]
+        style: [editorial, grid, bistro, minimal]
     defaults:
       run:
         working-directory: backend
@@ -156,7 +156,7 @@ jobs:
           for i in $(seq 1 30); do curl -sf http://localhost:8123/up > /dev/null && break; sleep 1; done
           curl -sf -o /dev/null http://localhost:8123/demo
           test -f public/menu-cache/demo/index.html.gz
-          grep -q 'class="S-${{ matrix.style }}"' public/menu-cache/demo/index.html
+          grep -q 'class="S-${{ matrix.style }}[ "]' public/menu-cache/demo/index.html
           echo "Guest page: $(stat -c %s public/menu-cache/demo/index.html) bytes, $(stat -c %s public/menu-cache/demo/index.html.gz) gzip"
       - name: Serve it like production (Nginx, no PHP)
         run: |

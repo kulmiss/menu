@@ -45,7 +45,7 @@ it('gives the shared link a good preview: name, branch, description and the bann
     $this->get('/'.$tenant->slug)->assertOk()
         ->assertSee('<meta property="og:title" content="Buna &amp; Bread">', false)
         ->assertSee('<meta property="og:description" content="Ethiopian coffee roasted every Monday. Fresh bread every morning.">', false)
-        ->assertSee('/c/1/og.jpg"><meta property="og:image:width" content="1200">', false)
+        ->assertSee('/c/1/og.jpg?v=', false)->assertSee('<meta property="og:image:width" content="1200">', false)
         ->assertSee('<meta name="twitter:card" content="summary_large_image">', false);
 });
 
@@ -55,5 +55,7 @@ it('falls back to a plain description without info', function () {
 
     $this->get('/'.$tenant->slug)->assertOk()
         ->assertSee('content="The menu of Tiny Café: dishes, prices and opening hours."', false)
-        ->assertSee('<meta name="twitter:card" content="summary">', false);
+        // No banner: the platform's default picture, still a large card.
+        ->assertSee('/images/share-default.jpg?v=', false)
+        ->assertSee('<meta name="twitter:card" content="summary_large_image">', false);
 });

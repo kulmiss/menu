@@ -25,6 +25,8 @@ class PageTheme
     public const STYLES = [
         'editorial' => ['light' => '#f3ebe0', 'dark' => '#231c18', 'heading' => 'serif', 'banner' => [16, 9], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw'],
         'grid' => ['light' => '#f5f7f6', 'dark' => '#18201d', 'heading' => 'system', 'banner' => [2, 1], 'text' => 'over', 'sizes' => '(min-width:44rem) 680px, calc(100vw - 1.5rem)'],
+        // D · Minimal: no dish photos at all, text list (owner, 2026-11-12).
+        'minimal' => ['light' => '#f5f5f4', 'dark' => '#1a1a19', 'heading' => 'system', 'banner' => [5, 2], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw'],
         'bistro' => ['light' => '#faf8f5', 'dark' => '#161412', 'heading' => 'serif', 'banner' => [5, 2], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw'],
     ];
 
@@ -53,14 +55,16 @@ class PageTheme
             'theme_color' => $light,
             'style' => $style,
             'show_prices' => $a->show_prices,
-            'show_photos' => $a->show_photos,
+            // Style D shows no dish or special photos, whatever the switch says.
+            'show_photos' => $a->show_photos && $style !== 'minimal',
             'show_descriptions' => $a->show_descriptions,
             'show_calories' => $a->show_calories,
             'show_share' => $a->show_share ?? true,
             'show_pdf_link' => (bool) ($a->show_pdf_link ?? false),
+            'show_other_branches' => (bool) ($a->show_other_branches ?? true),
             'show_order_list' => (bool) ($a->show_order_list ?? true),
-            'logo' => $a->logo?->urls(),
-            'cover' => $a->cover ? self::cover($a, $style) : null,
+            'logo' => ($a->show_logo ?? true) ? $a->logo?->urls() : null,
+            'cover' => ($a->show_banner ?? true) && $a->cover ? self::cover($a, $style) : null,
         ];
     }
 
@@ -79,7 +83,8 @@ class PageTheme
             'webp' => MenuPageData::srcset($urls),
             'avif' => MenuPageData::srcset($urls, 'avif'),
             'jpg' => $urls['jpg'] ?? '',
-            'og' => $urls['og'] ?? null, // 1200 × 630, the link preview when the menu is shared
+            // 1200 × 630, the link preview when the menu is shared; ?v= so apps refetch after a change.
+            'og' => isset($urls['og']) ? $urls['og'].'?v='.($a->cover->updated_at->timestamp ?? 0) : null,
             'sizes' => self::STYLES[$style]['sizes'],
             'w' => 1280,
             'h' => (int) round(1280 * $ratio[1] / $ratio[0]),

@@ -32,16 +32,20 @@ const APPEARANCE: Appearance = {
   show_calories: true,
   show_share: true,
   show_pdf_link: false,
+  show_other_branches: true,
+  show_logo: true,
+  show_banner: true,
   show_order_list: true,
   theme_id: null,
   logo: null,
   cover: null,
   warnings: [],
-  styles: ['editorial', 'grid', 'bistro'],
+  styles: ['editorial', 'grid', 'bistro', 'minimal'],
   banner: {
     editorial: { ratio: [16, 9], text: 'under' },
     grid: { ratio: [2, 1], text: 'over' },
     bistro: { ratio: [5, 2], text: 'under' },
+    minimal: { ratio: [5, 2], text: 'under' },
   },
   themes: [
     {
@@ -152,6 +156,22 @@ describe('AppearancePage', () => {
       .toBeChecked()
   })
 
+  it('offers D · Minimal next to A, B and C, with logo and banner switches', async () => {
+    const screen = await render()
+    await userEvent.click(screen.getByRole('radio', { name: /D · Minimal/ }))
+    await expect.poll(() => frame(screen).src).toContain('style=minimal')
+    await expect
+      .element(screen.getByText(/Text only: names, short descriptions/))
+      .toBeVisible()
+    await userEvent.click(
+      screen.getByRole('switch', { name: 'Show the banner' })
+    )
+    await expect.poll(() => frame(screen).src).toContain('show_banner=0')
+    await expect
+      .element(screen.getByRole('switch', { name: 'Show the logo' }))
+      .toBeChecked()
+  })
+
   it('offers only the styles in the plan', async () => {
     APPEARANCE.styles = ['grid', 'bistro']
     const screen = await render()
@@ -159,13 +179,13 @@ describe('AppearancePage', () => {
       .element(screen.getByRole('radio', { name: /A · Warm editorial/ }))
       .toBeDisabled()
     await expect
-      .element(screen.getByText('Not included in your plan.'))
+      .element(screen.getByText('Not included in your plan.').first())
       .toBeVisible()
     // A theme with a style outside the plan keeps the current style.
     await userEvent.click(screen.getByRole('button', { name: 'Bistro' }))
     await expect.poll(() => frame(screen).src).toContain('font=serif')
     expect(frame(screen).src).toContain('style=grid')
-    APPEARANCE.styles = ['editorial', 'grid', 'bistro']
+    APPEARANCE.styles = ['editorial', 'grid', 'bistro', 'minimal']
   })
 
   it('fits the banner to the style and places the name on or below it', async () => {

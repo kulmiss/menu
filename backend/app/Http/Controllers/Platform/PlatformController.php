@@ -13,11 +13,14 @@ use App\Models\Theme;
 use App\Rules\Translations;
 use App\Support\ActivityLogger;
 use App\Support\Features;
+use App\Support\ImageProcessor;
 use App\Support\MailSettings;
 use App\Support\PlatformSettings;
+use App\Support\PublicMenu\ShareImage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -221,7 +224,28 @@ class PlatformController extends Controller
 
     public function settings(): JsonResponse
     {
-        return response()->json(['data' => PlatformSettings::all()]);
+        return response()->json(['data' => [...PlatformSettings::all(), 'share_image_url' => ShareImage::for(null)['url']]]);
+    }
+
+    /** The default link preview for menus without a banner (owner, 2026-11-12). */
+    public function saveShareImage(Request $request, ImageProcessor $images): JsonResponse
+    {
+        $request->validate(['image' => ['required', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240', 'dimensions:min_width=600,min_height=315']]);
+        ShareImage::store($request->file('image'), $images);
+        $this->activity->log('platform.share_image_saved', null, [], null);
+        // Every menu without a banner now points at the new picture.
+        Artisan::call('menu:refresh-pages', ['--all' => true]);
+
+        return $this->settings();
+    }
+
+    public function deleteShareImage(): JsonResponse
+    {
+        ShareImage::forget();
+        $this->activity->log('platform.share_image_removed', null, [], null);
+        Artisan::call('menu:refresh-pages', ['--all' => true]);
+
+        return $this->settings();
     }
 
     public function saveSettings(Request $request): JsonResponse

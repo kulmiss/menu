@@ -17,6 +17,7 @@ export const FEATURES = [
   'style_editorial',
   'style_grid',
   'style_bistro',
+  'style_minimal',
 ] as const
 export const LIMITS = [
   'menus',

@@ -25,6 +25,7 @@ class Features
         'style_editorial' => true,
         'style_grid' => true,
         'style_bistro' => true,
+        'style_minimal' => true, // D · Minimal, text only (owner, 2026-11-12)
     ];
 
     /** @var array<int, array<string, bool>> */

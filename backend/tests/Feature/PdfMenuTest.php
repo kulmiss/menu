@@ -96,7 +96,7 @@ it('offers guests a cached PDF only when the restaurant switches the link on, re
     asTenant($tenant, fn () => TenantAppearance::current()->fill(['show_pdf_link' => true])->save());
     $tenant->bumpCacheVersion();
 
-    $this->get('/'.$tenant->slug)->assertOk()->assertSee('href="/'.$tenant->slug.'/menu.pdf">Download menu (PDF)</a>', false);
+    $this->get('/'.$tenant->slug)->assertOk()->assertSee('href="/'.$tenant->slug.'/menu.pdf">', false)->assertSee('Download menu (PDF)</a>', false);
     $this->get('/'.$tenant->slug.'/menu.pdf')->assertOk()->assertHeader('Content-Type', 'application/pdf');
     $file = MenuPageCache::dir($tenant->slug).'/menu.pdf';
     expect($file)->toBeFile();

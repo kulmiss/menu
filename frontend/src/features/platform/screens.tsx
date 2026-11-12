@@ -43,6 +43,7 @@ import {
 } from './api'
 import { EmailSettings } from './email-settings'
 import { PageTitle } from './layout'
+import { ShareImageCard } from './share-image'
 
 function useErrors() {
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -557,7 +558,7 @@ export function ThemesPage() {
                   <SelectContent>
                     {(k === 'font'
                       ? ['system', 'serif', 'rounded']
-                      : ['editorial', 'grid', 'bistro']
+                      : ['editorial', 'grid', 'bistro', 'minimal']
                     ).map((o) => (
                       <SelectItem key={o} value={o}>
                         {t(
@@ -917,6 +918,10 @@ function SettingsForm({
           {t('common.save')}
         </Button>
       </form>
+      <ShareImageCard
+        url={initial.share_image_url ?? ''}
+        custom={!!initial.share_image}
+      />
       <EmailSettings />
     </>
   )

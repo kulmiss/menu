@@ -18,6 +18,8 @@ class PlatformSettings
         'default_currency' => 'ETB',
         'terms' => '',
         'privacy' => '',
+        // Default link preview when a restaurant has no banner (path on the public disk; null = built-in).
+        'share_image' => null,
     ];
 
     /** @return array<string, mixed> */

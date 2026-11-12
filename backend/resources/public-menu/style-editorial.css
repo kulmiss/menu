@@ -1,6 +1,6 @@
 /* Style A · Warm editorial: big photos first, serif headings, underlined tabs.
    Surfaces must match PageTheme::STYLES['editorial'] (contrast of the brand colour). */
-:root{--bg:#fbf7f1;--fg:#2a211b;--mu:#6b5e52;--ln:#e9e0d4;--card:#f3ebe0}
+:root{--br:.875rem;--bg:#fbf7f1;--fg:#2a211b;--mu:#6b5e52;--ln:#e9e0d4;--card:#f3ebe0}
 @media (prefers-color-scheme:dark){:root{--bg:#1a1512;--fg:#f4ede4;--mu:#b9ac9f;--ln:#3a3029;--card:#231c18}}
 .cv{aspect-ratio:16/9}
 @media (min-width:44rem){.cv{border-radius:0 0 1.25rem 1.25rem}}
@@ -29,3 +29,5 @@ li>.it .tg{grid-area:tg}
 .NP section ul{gap:0}
 .NP section li{border-bottom:1px solid var(--ln)}
 .NP li>.it{padding:1.1rem 0}
+/* Footer: quiet paper, serif name, hairline between the groups. */
+.ft{background:var(--bg)}.fn{font-family:var(--fh);font-size:1.5rem;font-weight:600}.fg>div{border-top:1px solid var(--ln);padding-top:1rem}

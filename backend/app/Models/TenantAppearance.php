@@ -16,7 +16,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int|null $cover_media_id
  * @property string $primary_color "#b4432a"
  * @property string $font system|serif|rounded
- * @property string $style editorial|grid|bistro (A · Warm editorial, B · Fresh grid, C · Quiet bistro)
+ * @property string $style editorial|grid|bistro|minimal (A · Warm editorial, B · Fresh grid, C · Quiet bistro, D · Minimal)
+ * @property bool $show_logo logo on the guest page (kept when off)
+ * @property bool $show_banner banner on the guest page (kept when off)
  * @property string|null $banner_text over|under (logo and name on or below the banner); null = style default
  * @property bool $show_prices
  * @property bool $show_photos
@@ -24,12 +26,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property bool $show_calories
  * @property bool $show_share "Share menu" button on the guest page
  * @property bool $show_pdf_link "Download menu (PDF)" link on the guest page
+ * @property bool $show_other_branches "Other branches" list at the bottom of a branch's menu
  * @property bool $show_order_list "My order" list on the guest page (kept on the guest's phone)
  * @property int|null $theme_id
  * @property-read Media|null $logo
  * @property-read Media|null $cover
  */
-#[Fillable(['logo_media_id', 'cover_media_id', 'primary_color', 'font', 'style', 'banner_text', 'show_prices', 'show_photos', 'show_descriptions', 'show_calories', 'show_share', 'show_pdf_link', 'show_order_list', 'theme_id'])]
+#[Fillable(['logo_media_id', 'cover_media_id', 'primary_color', 'font', 'style', 'banner_text', 'show_prices', 'show_photos', 'show_descriptions', 'show_calories', 'show_share', 'show_pdf_link', 'show_order_list', 'show_other_branches', 'show_logo', 'show_banner', 'theme_id'])]
 class TenantAppearance extends Model
 {
     use BelongsToTenant;
@@ -39,12 +42,12 @@ class TenantAppearance extends Model
     public const FONTS = ['system', 'serif', 'rounded'];
 
     /** Guest-menu styles; the order is the order of the admin picker. */
-    public const STYLES = ['editorial', 'grid', 'bistro'];
+    public const STYLES = ['editorial', 'grid', 'bistro', 'minimal'];
 
     public const DEFAULT_STYLE = 'grid';
 
     /** Guest-page extras switched in Appearance (optional in API requests; added 2026-11-11). */
-    public const EXTRA_FLAGS = ['show_share', 'show_pdf_link', 'show_order_list'];
+    public const EXTRA_FLAGS = ['show_share', 'show_pdf_link', 'show_order_list', 'show_other_branches', 'show_logo', 'show_banner'];
 
     /** Values for a restaurant that never opened the Appearance screen. */
     public const DEFAULTS = [
@@ -60,6 +63,9 @@ class TenantAppearance extends Model
         'show_calories' => true,
         'show_share' => true,
         'show_pdf_link' => false,
+        'show_other_branches' => true,
+        'show_logo' => true,
+        'show_banner' => true,
         'show_order_list' => true,
         'theme_id' => null,
     ];
@@ -73,6 +79,9 @@ class TenantAppearance extends Model
             'show_calories' => 'boolean',
             'show_share' => 'boolean',
             'show_pdf_link' => 'boolean',
+            'show_other_branches' => 'boolean',
+            'show_logo' => 'boolean',
+            'show_banner' => 'boolean',
             'show_order_list' => 'boolean',
         ];
     }

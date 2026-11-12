@@ -7,6 +7,12 @@ window.mS = function (li, D) {
   var add = function (e) { body.appendChild(e); return e; };
   var row = function (a, b, so) { var r = el('div', 'ro'); r.appendChild(el('span', '', a)); r.appendChild(el('span', so ? 'mu' : '', so ? T.so : b)); return r; };
   body.textContent = '';
+  // Choices and the sticky "Add to my order" bar; made once, so they look right before anything is in the list.
+  if (!d.getElementById('sst')) {
+    var st = d.head.appendChild(el('style'));
+    st.id = 'sst';
+    st.textContent = '.oc{cursor:pointer;align-items:center;min-height:2.75rem}.oc input{flex:none;width:1.25rem;height:1.25rem;margin:0;accent-color:var(--a)}.oc span:nth-child(2){flex:1}.sf{position:sticky;bottom:0;z-index:1;margin:1.25rem -1rem -1.5rem;padding:.75rem 1rem calc(.75rem + env(safe-area-inset-bottom));background:var(--bg);border-top:1px solid var(--ln)}.sf .mu{margin:0 0 .5rem;text-align:center}.sf .mu:empty{display:none}.oa{display:flex;align-items:center;justify-content:center;width:100%;min-height:3.25rem;padding:.5rem 1.25rem;border:0;border-radius:var(--br,99px);background:var(--a);color:var(--af);font:inherit;font-size:1rem;font-weight:700;box-shadow:0 2px 8px #0002;cursor:pointer}.oa:active{transform:scale(.98)}';
+  }
   // Photos: the main one, then up to 4 more to swipe through (scroll snap).
   var pics = x.i ? [x.i].concat(x.g || []) : [], n = pics.length;
   if (n) {
@@ -78,7 +84,8 @@ window.mS = function (li, D) {
       w.mC.add(+li.dataset.i, pick, li.querySelector('.nm').textContent, x);
       dl.close();
     };
-    add(msg); add(btn); upd();
+    var sf = add(el('div', 'sf'));
+    sf.appendChild(msg); sf.appendChild(btn); upd();
   }
   if (dl.showModal) dl.showModal(); else dl.setAttribute('open', '');
   // Insights: count that this dish's details were opened (not in the admin preview).
@@ -153,7 +160,7 @@ window.mH = function (b, D) {
     // Styles and the bar are only made once the list has something in it.
     if (b) return;
     var css = el('style');
-    css.textContent = '.ob{position:fixed;inset:auto .75rem .75rem;z-index:3;max-width:42rem;margin:0 auto;min-height:3.25rem;border:0;border-radius:99px;background:var(--a);color:var(--af);font:inherit;font-weight:700;box-shadow:0 4px 16px #0004;cursor:pointer}.hob{padding-bottom:5rem}.oc{cursor:pointer;align-items:center;min-height:2.75rem}.oc input{width:1.25rem;height:1.25rem;margin:0 .6rem 0 0;accent-color:var(--a)}.oc span:nth-child(2){flex:1}.oa,.ow{display:block;width:100%;min-height:3rem;margin-top:1rem;border:0;border-radius:99px;background:var(--a);color:var(--af);font:inherit;font-weight:700;cursor:pointer}.ok{background:none;border:1px solid var(--ln);color:var(--fg);min-height:2.75rem}.ol,.wv ul{display:block;list-style:none;margin:.75rem 0 0;padding:0}.ol li,.wv li{background:none;border-radius:0;box-shadow:none;overflow:visible}.ol li{padding:.75rem 0;border-bottom:1px solid var(--ln)}.ol .r1{display:flex;justify-content:space-between;gap:.75rem;font-weight:600}.ol .r2{display:flex;align-items:center;gap:.5rem;margin-top:.5rem}.ol .r2 button{min-width:2.75rem;height:2.75rem;border-radius:99px;border:1px solid var(--ln);background:var(--card);color:var(--fg);font:inherit;font-size:1.1rem;cursor:pointer}.ol .r2 .rm{margin-inline-start:auto;padding:0 .9rem;font-size:.9rem}.ol .r2 b{min-width:1.5rem;text-align:center}.ol input{width:100%;height:2.75rem;margin-top:.5rem;padding:0 .75rem;border:1px solid var(--ln);border-radius:.6rem;background:var(--card);color:var(--fg);font:inherit}.ol .bad{color:var(--fg);font-weight:600;font-size:.85rem}.ol .x0 .r1{text-decoration:line-through;color:var(--mu)}.otl{display:flex;justify-content:space-between;font-size:1.15rem;font-weight:700;margin-top:1rem}.wv{position:fixed;inset:0;z-index:9;overflow:auto;background:#fff;color:#000;padding:1.25rem 1.25rem 2rem;font-size:1.3rem;line-height:1.35}.wv h2{font-size:2.2rem;margin:0 0 .25rem}.wv ul{margin:1rem 0}.wv li{padding:.8rem 0;border-bottom:2px solid #000}.wv b{font-size:1.5rem}.wv .wn{display:block;font-style:italic}.wv .wt{display:flex;justify-content:space-between;font-size:1.8rem;font-weight:800;margin-top:1rem}.wv button{position:sticky;top:0;float:right;min-width:3rem;min-height:3rem;border:2px solid #000;border-radius:99px;background:#fff;color:#000;font:inherit;font-weight:700;padding:0 1rem;cursor:pointer}';
+    css.textContent = '.ob{position:fixed;inset:auto .75rem .75rem;z-index:3;max-width:42rem;margin:0 auto;min-height:3.25rem;border:0;border-radius:99px;background:var(--a);color:var(--af);font:inherit;font-weight:700;box-shadow:0 4px 16px #0004;cursor:pointer}.hob{padding-bottom:5rem}.ow{display:block;width:100%;min-height:3rem;margin-top:1rem;border:0;border-radius:99px;background:var(--a);color:var(--af);font:inherit;font-weight:700;cursor:pointer}.ok{background:none;border:1px solid var(--ln);color:var(--fg);min-height:2.75rem}.ol,.wv ul{display:block;list-style:none;margin:.75rem 0 0;padding:0}.ol li,.wv li{background:none;border-radius:0;box-shadow:none;overflow:visible}.ol li{padding:.75rem 0;border-bottom:1px solid var(--ln)}.ol .r1{display:flex;justify-content:space-between;gap:.75rem;font-weight:600}.ol .r2{display:flex;align-items:center;gap:.5rem;margin-top:.5rem}.ol .r2 button{min-width:2.75rem;height:2.75rem;border-radius:99px;border:1px solid var(--ln);background:var(--card);color:var(--fg);font:inherit;font-size:1.1rem;cursor:pointer}.ol .r2 .rm{margin-inline-start:auto;padding:0 .9rem;font-size:.9rem}.ol .r2 b{min-width:1.5rem;text-align:center}.ol input{width:100%;height:2.75rem;margin-top:.5rem;padding:0 .75rem;border:1px solid var(--ln);border-radius:.6rem;background:var(--card);color:var(--fg);font:inherit}.ol .bad{color:var(--fg);font-weight:600;font-size:.85rem}.ol .x0 .r1{text-decoration:line-through;color:var(--mu)}.otl{display:flex;justify-content:space-between;font-size:1.15rem;font-weight:700;margin-top:1rem}.wv{position:fixed;inset:0;z-index:9;overflow:auto;background:#fff;color:#000;padding:1.25rem 1.25rem 2rem;font-size:1.3rem;line-height:1.35}.wv h2{font-size:2.2rem;margin:0 0 .25rem}.wv ul{margin:1rem 0}.wv li{padding:.8rem 0;border-bottom:2px solid #000}.wv b{font-size:1.5rem}.wv .wn{display:block;font-style:italic}.wv .wt{display:flex;justify-content:space-between;font-size:1.8rem;font-weight:800;margin-top:1rem}.wv button{position:sticky;top:0;float:right;min-width:3rem;min-height:3rem;border:2px solid #000;border-radius:99px;background:#fff;color:#000;font:inherit;font-weight:700;padding:0 1rem;cursor:pointer}';
     d.head.appendChild(css);
     b = d.body.appendChild(el('button', 'ob'));
     b.type = 'button';
@@ -281,7 +288,7 @@ window.mH = function (b, D) {
     t.appendChild(el('span', '', T.total));
     t.appendChild(el('span', '', fmt(total()[1])));
     v.appendChild(el('p', '', T.not_order));
-    var close = function () { v.remove(); d.removeEventListener('keydown', esc); };
+    var close = function () { v.remove(); d.removeEventListener('keydown', esc); if (w.mL) w.mL(); };
     var esc = function (e) { if (e.key === 'Escape') close(); };
     x.type = 'button';
     x.onclick = close;
@@ -290,4 +297,54 @@ window.mH = function (b, D) {
     x.focus();
     if (navigator.sendBeacon) navigator.sendBeacon('/api/v1/beacon', JSON.stringify({ t: D.id, b: D.b, w: total()[1] }));
   }
+})();
+
+// While a sheet (dish, share, My order) or the waiter view is open, the page
+// behind it must not scroll: the body is pinned where it was and put back to
+// the exact spot on close (iOS Safari ignores overflow:hidden on the body).
+// Swipe down on the sheet when it's scrolled to the top closes it.
+(function () {
+  var d = document, w = window, dl = d.getElementById('s'), bs = d.body.style, y = 0, y0 = -1, dy = 0, css = d.createElement('style');
+  css.textContent = 'dialog,.wv{overscroll-behavior:contain}.lk{position:fixed;left:0;right:0;overflow:hidden}';
+  d.head.appendChild(css);
+  var sync = w.mL = function () {
+    var on = dl.open || !!d.querySelector('.wv'), lk = d.body.classList.contains('lk');
+    if (on && !lk) { y = w.scrollY; bs.top = -y + 'px'; d.body.classList.add('lk'); }
+    if (!on && lk) { d.body.classList.remove('lk'); bs.top = ''; w.scrollTo({ top: y, behavior: 'instant' }); }
+  };
+  var show = dl.showModal;
+  if (show) dl.showModal = function () { show.call(dl); sync(); };
+  dl.addEventListener('close', sync);
+  dl.addEventListener('touchstart', function (e) { y0 = dl.scrollTop > 0 ? -1 : e.touches[0].clientY; dy = 0; }, { passive: true });
+  dl.addEventListener('touchmove', function (e) {
+    if (y0 < 0) return;
+    dy = e.touches[0].clientY - y0;
+    dl.style.transform = dy > 0 ? 'translateY(' + dy + 'px)' : '';
+  }, { passive: true });
+  dl.addEventListener('touchend', function () {
+    if (y0 < 0) return;
+    y0 = -1;
+    dl.style.transform = '';
+    if (dy > 90) dl.close();
+  });
+})();
+
+// "Back to top": a small round button that shows after about 1.5 screens of
+// scrolling; it sits above the My order bar and hides while a sheet is open.
+(function () {
+  var d = document, w = window, D = w.mD || JSON.parse(d.getElementById('d').textContent), css = d.createElement('style'), b = d.createElement('button'), on = 0;
+  css.textContent = '.tt{position:fixed;inset-inline-start:.75rem;bottom:calc(.75rem + env(safe-area-inset-bottom));z-index:3;width:2.75rem;height:2.75rem;display:flex;align-items:center;justify-content:center;padding:0;border:0;border-radius:99px;background:var(--a);color:var(--af);box-shadow:0 2px 10px #0004;cursor:pointer;visibility:hidden;opacity:0;transform:translateY(.5rem);transition:opacity .2s,transform .2s,visibility .2s,bottom .2s}.tt.on{visibility:visible;opacity:1;transform:none}.hob .tt{bottom:calc(4.75rem + env(safe-area-inset-bottom))}.lk .tt{display:none}@media (prefers-reduced-motion:reduce){.tt{transition:none}}';
+  d.head.appendChild(css);
+  b.type = 'button';
+  b.className = 'tt';
+  b.setAttribute('aria-label', D.t.tp);
+  b.innerHTML = '<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+  b.onclick = function () { w.scrollTo({ top: 0, behavior: w.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' }); };
+  d.body.appendChild(b);
+  var check = function () {
+    var v = w.scrollY > w.innerHeight * 1.5;
+    if (v != on) b.classList.toggle('on', on = v);
+  };
+  w.addEventListener('scroll', check, { passive: true });
+  check();
 })();
