@@ -190,6 +190,8 @@ New rules added by the owner (now in PLAN.md §2): Docker is for local developme
 
 | 148 | Demo photos: all Pexels | The 16 Unsplash photos kept failing on the owner's laptop ("HTTP 307"): `withOptions()` changes the client it's called on, so after the Unsplash step turned redirects off, no later request followed a redirect. Fixed (a fresh client per request, redirects 301/302/307/308 followed, tested) and, as the owner asked, the 16 replaced by Pexels photos of the same subjects (café interiors, Ethiopian coffee preparation and ceremony, clay pot, espresso drinks, waffles). All 110 demo photos are now Pexels License. The waffle dish now reads "Golden waffles, honey and cream" to match its photo. |
 
+| 149 | Menu updates on guests' phones | Before: a guest who had opened the menu before saw the saved copy first and the restaurant's changes only on the next visit. Now the service worker compares the fresh copy it fetches in the background with the saved one (ETag, else the page text) and, when it differs, the open page reloads from the fresh copy (scroll kept; the "My order" list is in localStorage). The page also asks once it has loaded, because the answer can arrive before it listens. Not while a dish, the order list, the waiter view or a search is in use (it waits until they're closed), and at most once per 10 s (no reload loops). A real in-place update without reload would need the page script reworked and doesn't fit the 5 KB inline budget; the reload comes from the phone's copy, so it takes a fraction of a second. Inline script 4.80 KB. |
+
 ## Open
 
 - Owner action: protect `main` in GitHub settings (require PR, no force push, no deletion). Claude's access can't change branch settings.
