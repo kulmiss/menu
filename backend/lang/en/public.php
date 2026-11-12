@@ -22,6 +22,7 @@ return [
     'offline' => 'You are offline. This is the last saved menu.',
     'filter' => 'Filter',
     'branches' => 'Branches',
+    'other_branches' => 'Other branches',
     'all' => 'All',
     'powered' => 'Menu by :app',
     'unavailable_title' => 'Menu unavailable',

@@ -194,6 +194,8 @@ New rules added by the owner (now in PLAN.md §2): Docker is for local developme
 
 | 150 | "Menu updated" notice | After the page reloads itself (#149), a small quiet line "Menu updated" shows at the top for ~3 s and fades (role=status, no sound, no popup, taps go through). The code is in the on-demand file (sheet.js): it reads the time menu.js stores just before reloading and shows the line once per reload. Inline script unchanged (4.80 KB). Checked: after the reload the "My order" list already marks re-priced (was …), sold-out and removed dishes and the total/bar use the new prices — no change needed. |
 
+| 151 | One URL / QR per branch | The branch picker is gone: a branch URL (or its QR code, or a table's QR code) shows only that branch; `/restaurant` shows the main branch. With more than one branch the branch name sits under the restaurant name (main branch included); with one branch nothing changes. "Other branches" (name, address, link; never the branch you're on) is in the info/footer area, on by default, switch in Appearance ("Show \"Other branches\" …"); no effect for one branch. Admin → QR codes: every code shows "Opens {branch}" (restaurant-wide codes open the main branch); printed restaurant cards now carry the main branch's name too when there are several. Table codes always belong to their table's branch (already enforced; now tested). |
+
 ## Open
 
 - Owner action: protect `main` in GitHub settings (require PR, no force push, no deletion). Claude's access can't change branch settings.

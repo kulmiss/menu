@@ -33,7 +33,7 @@ class QrCodeController extends Controller
     public function index(): JsonResponse
     {
         Gate::authorize('restaurant.manage');
-        $codes = QrCode::with(['branch', 'table'])->orderBy('id')->get();
+        $codes = QrCode::with(['branch', 'table.branch'])->orderBy('id')->get();
 
         return response()->json(['data' => $codes->map(fn (QrCode $q) => $this->row($q))]);
     }
@@ -49,7 +49,7 @@ class QrCodeController extends Controller
         $code = QrCode::create([...$data, 'code' => QrCode::newCode()]);
         $this->recordChange('qr.created', $code);
 
-        return response()->json(['data' => $this->row($code->load(['branch', 'table']))], 201);
+        return response()->json(['data' => $this->row($code->load(['branch', 'table.branch']))], 201);
     }
 
     public function update(Request $request, Tenant $tenant, int $qr): JsonResponse
@@ -59,7 +59,7 @@ class QrCodeController extends Controller
         $code->fill($request->validate(['label' => ['present', 'nullable', 'string', 'max:60']]))->save();
         $this->recordChange('qr.updated', $code);
 
-        return response()->json(['data' => $this->row($code->load(['branch', 'table']))]);
+        return response()->json(['data' => $this->row($code->load(['branch', 'table.branch']))]);
     }
 
     /** Only extra codes; table and branch codes go with their table or branch. */
@@ -115,7 +115,7 @@ class QrCodeController extends Controller
     /** @return array{title: string, subtitle: string|null, label: string|null, url: string} */
     private function card(Tenant $tenant, QrCode $code): array
     {
-        $branch = $code->table !== null ? $code->table->branch : $code->branch;
+        $branch = ($code->table !== null ? $code->table->branch : $code->branch) ?? $this->mainBranch();
         $several = Branch::where('is_active', true)->count() > 1;
 
         return [
@@ -150,6 +150,13 @@ class QrCodeController extends Controller
         };
     }
 
+    private ?Branch $main = null;
+
+    private function mainBranch(): ?Branch
+    {
+        return $this->main ??= Branch::orderByDesc('is_default')->orderBy('sort')->orderBy('id')->first();
+    }
+
     /** @return array<string, mixed> */
     private function row(QrCode $q): array
     {
@@ -159,7 +166,9 @@ class QrCodeController extends Controller
             'url' => QrImages::url($q),
             'label' => $q->label,
             'kind' => $q->dining_table_id ? 'table' : ($q->label !== null ? 'extra' : ($q->branch_id ? 'branch' : 'restaurant')),
-            'branch_id' => $q->branch_id,
+            'branch_id' => $q->branch_id ?? $q->table?->branch_id,
+            // Which branch a guest lands on: the code's own, the table's, else the main branch (owner, 2026-11-12).
+            'branch' => $this->text(($q->branch ?? $q->table->branch ?? $this->mainBranch())?->name),
             'dining_table_id' => $q->dining_table_id,
             'description' => $this->describe($q),
         ];

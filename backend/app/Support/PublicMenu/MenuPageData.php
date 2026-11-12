@@ -217,11 +217,13 @@ class MenuPageData
                 // QR code → table, so "Show to waiter" can say which table (codes are printed on the tables anyway).
                 'tables' => $features['order_list'] ? self::tables($branchId) : [],
                 'branch' => $branch && $branches->count() > 1 ? $text($branch->name) : null,
-                'branches' => $branches->count() > 1 ? $branches->map(fn (Branch $b) => [
-                    'name' => $text($b->name),
-                    'path' => $b->path($tenant),
-                    'current' => $b->id === $branchId,
-                ])->values()->all() : [],
+                // One URL per branch, no picker (owner, 2026-11-12): only a footer list of the other branches.
+                'otherBranches' => $branches->count() > 1 && $theme['show_other_branches']
+                    ? $branches->reject(fn (Branch $b) => $b->id === $branchId)->map(fn (Branch $b) => [
+                        'name' => $text($b->name),
+                        'address' => $text($b->is_default ? $profile->address : $b->address),
+                        'path' => $b->path($tenant),
+                    ])->values()->all() : [],
                 'canonical' => $branch ? $branch->path($tenant) : '/'.$tenant->slug,
                 'branch_id' => $branchId,
                 'hours' => $hours,

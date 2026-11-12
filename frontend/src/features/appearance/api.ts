@@ -27,6 +27,7 @@ export type AppearanceValues = {
   show_pdf_link: boolean
   /** "My order" list for guests (kept on their phone; plan feature order_list). */
   show_order_list: boolean
+  show_other_branches: boolean
   theme_id: number | null
   logo_media_id: number | null
   cover_media_id: number | null

@@ -32,6 +32,7 @@ const APPEARANCE: Appearance = {
   show_calories: true,
   show_share: true,
   show_pdf_link: false,
+  show_other_branches: true,
   show_order_list: true,
   theme_id: null,
   logo: null,

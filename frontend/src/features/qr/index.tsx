@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Copy, Loader2, Plus, Printer, Trash2 } from 'lucide-react'
+import { Copy, Loader2, MapPin, Plus, Printer, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { validationErrors } from '@/lib/api'
 import { toast } from '@/lib/toast'
@@ -101,6 +101,12 @@ export function QrCodesPage() {
                         <Badge variant='outline'>
                           {t(`qr.kinds.${code.kind}`)}
                         </Badge>
+                        {(branches.data?.length ?? 0) > 1 && code.branch && (
+                          <Badge variant='secondary'>
+                            <MapPin aria-hidden='true' />
+                            {t('qr.opens_branch', { name: code.branch })}
+                          </Badge>
+                        )}
                       </div>
                       <button
                         type='button'

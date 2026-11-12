@@ -12,7 +12,7 @@
     $eagerLeft = $fold;
     $blurLeft = 4;
     $position = 0;
-    $hasInfo = $week || $info['address'] || $info['links'] || $info['about'] || $info['wifi'] || $info['socials'];
+    $hasInfo = $week || $info['address'] || $info['links'] || $info['about'] || $info['wifi'] || $info['socials'] || $otherBranches;
     $sheets = [];
     $firstImage = null;
     $cart = [];
@@ -99,9 +99,6 @@
 </div>
 <div class="w">
 @foreach ($notices as $n)<p class="nt">{{ __('public.closed_on', ['dates' => $n['dates']]) }}@if ($n['note'] !== '') · {{ $n['note'] }}@endif</p>@endforeach
-@if ($branches)
-<nav class="ch bs" aria-label="{{ __('public.branches') }}">@foreach ($branches as $b)<a href="{{ $b['path'] }}"@if ($b['current']) class="on" aria-current="page"@endif>{{ $b['name'] }}</a>@endforeach</nav>
-@endif
 </div>
 <div class="bar"><div class="w">
 <div class="sr"><input id="q" type="search" placeholder="{{ __('public.search') }}" aria-label="{{ __('public.search') }}" autocomplete="off">@if ($theme['show_share'])<button type="button" class="ib" data-x="H" aria-label="{{ __('public.share') }}"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5-5 5 5M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg></button>@endif
@@ -179,6 +176,7 @@
 @if ($info['address'] !== '' || $info['maps'])<h3>{{ __('public.address') }}</h3>@if ($info['address'] !== '')<p>{{ $info['address'] }}</p>@endif @if ($info['maps'])<p><a href="{{ $info['maps'] }}" rel="noopener" target="_blank">{{ __('public.open_maps') }}</a></p>@endif @endif
 @if ($info['links'])<h3>{{ __('public.contact') }}</h3><ul class="ln">@foreach ($info['links'] as $l)<li><a href="{{ $l['href'] }}" rel="noopener">{{ $l['label'] }}: {{ $l['text'] }}</a></li>@endforeach</ul>@endif
 @if ($info['wifi'])<h3>Wi-Fi</h3><p>{{ __('public.wifi_name') }}: <b>{{ $info['wifi']['name'] }}</b>@if ($info['wifi']['password'])<br>{{ __('public.wifi_password') }}: <b class="pw">{{ $info['wifi']['password'] }}</b>@endif</p>@endif
+@if ($otherBranches)<h3>{{ __('public.other_branches') }}</h3><ul class="ob">@foreach ($otherBranches as $b)<li><a href="{{ $b['path'] }}">{{ $b['name'] }}</a>@if ($b['address'] !== '')<span>{{ $b['address'] }}</span>@endif</li>@endforeach</ul>@endif
 @if ($info['socials'])<ul class="ln so2">@foreach ($info['socials'] as $l)<li><a href="{{ $l['href'] }}" rel="noopener" target="_blank">{{ $l['label'] }}</a></li>@endforeach</ul>@endif
 </details>
 @endif

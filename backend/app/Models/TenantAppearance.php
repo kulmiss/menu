@@ -24,12 +24,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property bool $show_calories
  * @property bool $show_share "Share menu" button on the guest page
  * @property bool $show_pdf_link "Download menu (PDF)" link on the guest page
+ * @property bool $show_other_branches "Other branches" list at the bottom of a branch's menu
  * @property bool $show_order_list "My order" list on the guest page (kept on the guest's phone)
  * @property int|null $theme_id
  * @property-read Media|null $logo
  * @property-read Media|null $cover
  */
-#[Fillable(['logo_media_id', 'cover_media_id', 'primary_color', 'font', 'style', 'banner_text', 'show_prices', 'show_photos', 'show_descriptions', 'show_calories', 'show_share', 'show_pdf_link', 'show_order_list', 'theme_id'])]
+#[Fillable(['logo_media_id', 'cover_media_id', 'primary_color', 'font', 'style', 'banner_text', 'show_prices', 'show_photos', 'show_descriptions', 'show_calories', 'show_share', 'show_pdf_link', 'show_order_list', 'show_other_branches', 'theme_id'])]
 class TenantAppearance extends Model
 {
     use BelongsToTenant;
@@ -44,7 +45,7 @@ class TenantAppearance extends Model
     public const DEFAULT_STYLE = 'grid';
 
     /** Guest-page extras switched in Appearance (optional in API requests; added 2026-11-11). */
-    public const EXTRA_FLAGS = ['show_share', 'show_pdf_link', 'show_order_list'];
+    public const EXTRA_FLAGS = ['show_share', 'show_pdf_link', 'show_order_list', 'show_other_branches'];
 
     /** Values for a restaurant that never opened the Appearance screen. */
     public const DEFAULTS = [
@@ -60,6 +61,7 @@ class TenantAppearance extends Model
         'show_calories' => true,
         'show_share' => true,
         'show_pdf_link' => false,
+        'show_other_branches' => true,
         'show_order_list' => true,
         'theme_id' => null,
     ];
@@ -73,6 +75,7 @@ class TenantAppearance extends Model
             'show_calories' => 'boolean',
             'show_share' => 'boolean',
             'show_pdf_link' => 'boolean',
+            'show_other_branches' => 'boolean',
             'show_order_list' => 'boolean',
         ];
     }

@@ -47,6 +47,8 @@ export type QrCodeRow = {
   label: string | null
   kind: 'restaurant' | 'branch' | 'table' | 'extra'
   branch_id: number | null
+  /** The branch a guest lands on (the main branch for restaurant codes). */
+  branch: string
   dining_table_id: number | null
   description: string
 }

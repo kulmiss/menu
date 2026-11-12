@@ -344,6 +344,7 @@
       "table": "Table",
       "extra": "Extra"
     },
+    "opens_branch": "Opens {{name}}",
     "tables": "Table cards",
     "tables_hint": "Four cards per A4 page, with cut lines. Add tables on the Branches page.",
     "extra": "Extra code",
