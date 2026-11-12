@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { ExternalLink, Loader2, Plus } from 'lucide-react'
+import { ExternalLink, Loader2, Mail, Plus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { validationErrors } from '@/lib/api'
 import { slugify } from '@/lib/slug'
@@ -621,6 +621,28 @@ function RestaurantSheet({ id, onClose }: { id: number; onClose: () => void }) {
                   {m.name} · {m.email} · {m.role}
                 </p>
               ))}
+              {!r.deleted_at && r.members.some((m) => m.role === 'owner') && (
+                <div className='grid justify-items-start gap-1'>
+                  <Button
+                    variant='outline'
+                    size='sm'
+                    disabled={act.isPending}
+                    onClick={() =>
+                      run(
+                        'post',
+                        `restaurants/${id}/resend-welcome`,
+                        undefined,
+                        t('platform.restaurants.welcome_sent')
+                      )
+                    }
+                  >
+                    <Mail /> {t('platform.restaurants.resend_welcome')}
+                  </Button>
+                  <p className='text-xs text-muted-foreground'>
+                    {t('platform.restaurants.resend_welcome_hint')}
+                  </p>
+                </div>
+              )}
             </section>
 
             <section className='flex flex-wrap gap-2 border-t pt-4'>

@@ -117,9 +117,9 @@ const resetSchema = z
     path: ['password_confirmation'],
   })
 
-type ResetProps = { token: string; email: string }
+type ResetProps = { token: string; email: string; welcome?: boolean }
 
-export function ResetPasswordForm({ token, email }: ResetProps) {
+export function ResetPasswordForm({ token, email, welcome }: ResetProps) {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [pending, setPending] = useState(false)
@@ -134,8 +134,15 @@ export function ResetPasswordForm({ token, email }: ResetProps) {
     setPending(true)
     setLinkError(null)
     try {
-      await resetPassword({ token, email, ...values })
-      toast.success(t('auth.password_changed'))
+      await resetPassword({
+        token,
+        email,
+        ...values,
+        ...(welcome ? { welcome } : {}),
+      })
+      toast.success(
+        t(welcome ? 'auth.welcome_password_set' : 'auth.password_changed')
+      )
       await navigate({ to: '/auth/sign-in', replace: true })
     } catch (error) {
       if (
@@ -208,12 +215,21 @@ export function ResetPasswordForm({ token, email }: ResetProps) {
   )
 }
 
-export function ResetPasswordPage({ token, email }: Partial<ResetProps>) {
+export function ResetPasswordPage({
+  token,
+  email,
+  welcome,
+}: Partial<ResetProps>) {
   const { t } = useTranslation()
   return (
-    <AuthCard title={t('auth.reset_title')}>
+    <AuthCard title={t(welcome ? 'auth.welcome_title' : 'auth.reset_title')}>
+      {welcome && (
+        <p className='text-sm text-muted-foreground'>
+          {t('auth.welcome_hint')}
+        </p>
+      )}
       {token && email ? (
-        <ResetPasswordForm token={token} email={email} />
+        <ResetPasswordForm token={token} email={email} welcome={welcome} />
       ) : (
         <Alert variant='destructive' role='alert'>
           <AlertDescription>

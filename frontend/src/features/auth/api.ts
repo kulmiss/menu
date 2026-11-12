@@ -103,6 +103,8 @@ export type ResetPasswordInput = {
   email: string
   password: string
   password_confirmation: string
+  /** The link came from the new-owner welcome e-mail. */
+  welcome?: boolean
 }
 
 export async function resetPassword(input: ResetPasswordInput) {
