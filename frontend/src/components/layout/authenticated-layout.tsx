@@ -9,9 +9,9 @@ import { AppSidebar } from '@/components/layout/app-sidebar'
 import { SubscriptionBanner } from '@/components/layout/subscription-banner'
 import { SkipToMain } from '@/components/skip-to-main'
 import { useCurrentTenant, useMe } from '@/features/auth/use-me'
-import { VerifyEmailBanner } from '@/features/auth/verify-email'
 
-// Rare screen: downloaded only when needed.
+// Rare screens: downloaded only when needed.
+const CheckInbox = lazy(() => import('@/features/signup/check-inbox'))
 const NoRestaurant = lazy(() =>
   import('@/features/errors/no-restaurant').then((m) => ({
     default: m.NoRestaurant,
@@ -26,6 +26,15 @@ export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
   const me = useMe()
   const tenant = useCurrentTenant()
   const defaultOpen = getCookie('sidebar_state') !== 'false'
+
+  // Until the address is confirmed, only "Check your inbox" (owner, 2026-11-13).
+  if (!me.email_verified && !me.impersonation) {
+    return (
+      <Suspense fallback={null}>
+        <CheckInbox />
+      </Suspense>
+    )
+  }
 
   if (!tenant) {
     return (
@@ -55,7 +64,6 @@ export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
               'peer-data-[variant=inset]:has-data-[layout=fixed]:h-[calc(100svh-(var(--spacing)*4))]'
             )}
           >
-            {!me.email_verified && <VerifyEmailBanner email={me.email} />}
             <SubscriptionBanner tenant={tenant} />
             {children ?? <Outlet />}
           </SidebarInset>

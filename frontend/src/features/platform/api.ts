@@ -35,6 +35,7 @@ export const STATES: SubscriptionState[] = [
   'read_only',
   'unavailable',
   'suspended',
+  'pending',
 ]
 
 export type Restaurant = {
@@ -43,6 +44,8 @@ export type Restaurant = {
   slug: string
   state: SubscriptionState
   status: string
+  /** Self sign-up not finished: 'unverified' or 'pending_approval'. */
+  signup_state?: 'unverified' | 'pending_approval' | null
   suspended_reason: string | null
   plan: { id: number; name: string } | null
   trial_ends_at: string | null

@@ -189,7 +189,7 @@ export function StateBadge({ state }: { state: string }) {
   const tone =
     state === 'active' || state === 'trial'
       ? 'secondary'
-      : state === 'grace'
+      : state === 'grace' || state === 'pending'
         ? 'outline'
         : 'destructive'
   return <Badge variant={tone}>{t(`platform.states.${state}`)}</Badge>
@@ -330,7 +330,7 @@ function RestaurantSheet({ id, onClose }: { id: number; onClose: () => void }) {
     }) => send(m, path, body)
   )
   const [reason, setReason] = useState<{
-    kind: 'suspend'
+    kind: 'suspend' | 'reject'
     text: string
   } | null>(null)
   const [pay, setPay] = useState({
@@ -388,7 +388,46 @@ function RestaurantSheet({ id, onClose }: { id: number; onClose: () => void }) {
               {r.suspended_reason && (
                 <span className='text-destructive'>{r.suspended_reason}</span>
               )}
+              {r.signup_state && (
+                <span className='text-muted-foreground'>
+                  {t(`platform.restaurants.signup_${r.signup_state}`)}
+                </span>
+              )}
             </div>
+            {r.signup_state === 'pending_approval' && !r.deleted_at && (
+              <section className='grid gap-2 rounded-md border border-amber-500/50 p-3'>
+                <h3 className='font-semibold'>
+                  {t('platform.restaurants.approval')}
+                </h3>
+                <p className='text-muted-foreground'>
+                  {t('platform.restaurants.approval_hint')}
+                </p>
+                <div className='flex flex-wrap gap-2'>
+                  <Button
+                    className='min-h-11 sm:min-h-9'
+                    disabled={act.isPending}
+                    onClick={() =>
+                      run(
+                        'post',
+                        `restaurants/${id}/approve`,
+                        {},
+                        t('platform.restaurants.approved')
+                      )
+                    }
+                  >
+                    {t('platform.restaurants.approve')}
+                  </Button>
+                  <Button
+                    variant='outline'
+                    className='min-h-11 sm:min-h-9'
+                    disabled={act.isPending}
+                    onClick={() => setReason({ kind: 'reject', text: '' })}
+                  >
+                    {t('platform.restaurants.reject')}
+                  </Button>
+                </div>
+              </section>
+            )}
             <p className='text-muted-foreground'>
               {t('platform.restaurants.counts', r.counts)}
             </p>
@@ -714,10 +753,12 @@ function RestaurantSheet({ id, onClose }: { id: number; onClose: () => void }) {
           <Dialog open onOpenChange={(o) => !o && setReason(null)}>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>{t('platform.restaurants.suspend')}</DialogTitle>
+                <DialogTitle>
+                  {t(`platform.restaurants.${reason.kind}`)}
+                </DialogTitle>
               </DialogHeader>
               <p className='text-sm text-muted-foreground'>
-                {t('platform.restaurants.suspend_hint')}
+                {t(`platform.restaurants.${reason.kind}_hint`)}
               </p>
               <Label htmlFor='reason'>{t('platform.restaurants.reason')}</Label>
               <Textarea
@@ -736,15 +777,23 @@ function RestaurantSheet({ id, onClose }: { id: number; onClose: () => void }) {
                 <Button
                   disabled={reason.text.trim().length < 5 || act.isPending}
                   onClick={async () => {
+                    const reject = reason.kind === 'reject'
                     if (
                       await run(
                         'post',
-                        `restaurants/${id}/suspend`,
+                        `restaurants/${id}/${reason.kind}`,
                         { reason: reason.text.trim() },
-                        t('platform.saved')
+                        t(
+                          reject
+                            ? 'platform.restaurants.rejected'
+                            : 'platform.saved'
+                        )
                       )
-                    )
+                    ) {
                       setReason(null)
+                      // A rejected sign-up is removed (account and restaurant).
+                      if (reject) onClose()
+                    }
                   }}
                 >
                   {t('common.continue')}

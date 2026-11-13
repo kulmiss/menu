@@ -28,6 +28,6 @@ enum SubscriptionState: string
     /** The admin shows a "subscription expired" banner. */
     public function showsBanner(): bool
     {
-        return in_array($this, [self::Grace, self::ReadOnly, self::Unavailable], true);
+        return in_array($this, [self::Grace, self::ReadOnly, self::Unavailable, self::Pending], true);
     }
 }

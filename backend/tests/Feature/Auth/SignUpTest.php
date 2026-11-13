@@ -165,6 +165,8 @@ it('waits for approval when the Super Admin wants to approve sign-ups, then appr
     Notification::assertSentTo($admin, SignupNotification::class, fn ($n) => $n->kind === 'admin' && $n->extra['approval'] === true);
     // The owner can set up the menu meanwhile, but it isn't live.
     $this->getJson(t($tenant, 'menus'))->assertOk();
+    $this->getJson('/api/v1/me')->assertJsonPath('data.tenants.0.subscription.state', 'pending')
+        ->assertJsonPath('data.tenants.0.subscription.shows_banner', true);
     $this->get('/buna-and-bread')->assertStatus(503);
     asAdmin($admin);
     $this->getJson(p('restaurants?state=pending'))->assertJsonPath('data.0.id', $tenant->id)->assertJsonPath('data.0.signup_state', 'pending_approval');
