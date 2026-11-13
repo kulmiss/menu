@@ -30,6 +30,11 @@ return Application::configure(basePath: dirname(__DIR__))
         // One-click unsubscribe (List-Unsubscribe-Post) comes from mail clients without a CSRF token; the link is signed.
         $middleware->preventRequestForgery(except: ['news/*/unsubscribe']);
 
+        // Signed-out requests: the API answers 401 (also without "Accept: application/json"),
+        // anything else goes to the sign-in page. Laravel's default looked for a "login"
+        // route that doesn't exist and answered 500 (pre-launch check).
+        $middleware->redirectGuestsTo(fn (Request $request) => $request->is('api/*') ? null : '/auth/sign-in');
+
         $middleware->alias([
             'idempotent' => EnsureIdempotency::class,
             'feature' => RequireFeature::class,

@@ -16,3 +16,9 @@ it('requires an Idempotency-Key on every create/change API route', function () {
 
     expect($missing)->toBe([]);
 });
+
+it('answers 401, not 500, to a signed-out API request without the JSON header (pre-launch check)', function () {
+    $this->get('/api/v1/me')->assertUnauthorized();
+    $this->get('/api/v1/platform/restaurants')->assertUnauthorized();
+    $this->get('/api/v1/t/1/items')->assertUnauthorized();
+});
