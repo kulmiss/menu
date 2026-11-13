@@ -160,7 +160,33 @@ If OPcache has `validate_timestamps=0`, reload PHP (cPanel: change the PHP versi
 
 ## 10. Backups
 
-Back up daily: the **database** (cPanel → Backup, or `mysqldump`), **`public/media/`** (photos) and **`.env`** (the `APP_KEY` is needed to read saved SMTP passwords and two-factor secrets). `public/menu-cache/` and `public/menu-assets/` are rebuilt automatically and need no backup.
+**Automatic (Super Admin → Backups).** Every night at 02:30 the scheduler (the same cron line) writes one zip to `storage/app/backups/` — outside the public folder, never downloadable without signing in:
+
+- `database.sql` — the whole database as SQL (made in PHP, no `mysqldump` needed; caches and sessions are left empty),
+- `media/…` — every uploaded photo and logo,
+- `manifest.json` — date, row and file counts.
+
+Old zips are thinned out to the newest one of each of the last **7 days, 4 weeks and 3 months** (change it on the Backups screen). Optional off-site copy: switch on "Copy to S3-compatible storage" and fill in the endpoint, region, bucket, access key and secret key (stored encrypted). Examples: Backblaze B2 `https://s3.<region>.backblazeb2.com` (region e.g. `eu-central-003`), Cloudflare R2 `https://<account-id>.r2.cloudflarestorage.com` (region `auto`), AWS `https://s3.<region>.amazonaws.com`.
+
+If a backup fails, or none succeeded for 26 hours, the dashboard's System health shows a warning and every Super Admin gets one e-mail a day. **Also keep a copy of `.env`** somewhere safe (password manager): the `APP_KEY` in it is needed to read saved SMTP passwords, two-factor secrets and the off-site secret key.
+
+Run one by hand: `php artisan backup:run`.
+
+### Restoring a backup
+
+There is no restore button on purpose: restoring replaces everything. Tested on the demo data on 2026-11-13 (34 restaurants, 30,451 statistics rows, 257 photos: every table count and every photo identical after restore).
+
+1. **Download** the zip (Backups → Download, then your password or a two-factor code) or take it from `storage/app/backups/` / the off-site bucket.
+2. **Put the site in maintenance mode:** `cd /home/USER/menu/backend && php artisan down`
+3. **Unzip** it somewhere outside `public`: `unzip backup-YYYYMMDD-HHMMSS-N.zip -d ~/restore`
+4. **Database** — either
+   - cPanel → phpMyAdmin → your database → *Import* → choose `database.sql` (the file drops and recreates every table), or
+   - Terminal: `mysql -u DB_USER -p DB_NAME < ~/restore/database.sql`
+   (To try it first, import into a new empty database and point a copy of the site at it.)
+5. **Photos:** `rm -rf public/media && cp -a ~/restore/media public/media` (keep permissions 755 / owner = your cPanel user).
+6. **`.env`:** keep the current one; if the server is new, restore your saved `.env` (same `APP_KEY`).
+7. **Rebuild what isn't backed up:** `php artisan optimize:clear && php artisan migrate --force && php artisan menu:refresh-pages --all`
+8. **Back online:** `php artisan up`, then open a menu, sign in to the admin and check Backups shows the restored list.
 
 ## 11. Troubleshooting
 

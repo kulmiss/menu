@@ -193,6 +193,37 @@ export const campaignQ = (id: number) =>
       }[]
     }
   >(`campaigns/${id}`)
+export type BackupRow = {
+  id: number
+  filename: string | null
+  size: number
+  kind: 'scheduled' | 'manual'
+  status: 'queued' | 'running' | 'ok' | 'failed'
+  offsite: 'uploaded' | 'failed' | null
+  error: string | null
+  created_at: string
+  finished_at: string | null
+}
+export const backupsQ = () =>
+  q<{
+    backups: BackupRow[]
+    disk_free: number | null
+    disk_total: number | null
+    problem: string | null
+    settings: {
+      backup_enabled: boolean
+      backup_keep_daily: number
+      backup_keep_weekly: number
+      backup_keep_monthly: number
+      backup_s3_enabled: boolean
+      backup_s3_endpoint: string
+      backup_s3_region: string
+      backup_s3_bucket: string
+      backup_s3_prefix: string
+      backup_s3_key: string
+      backup_s3_secret_set: boolean
+    }
+  }>('backups')
 export const tagsQ = () => q<TagRef[]>('tags')
 export const notesQ = (id: number) => q<NoteRow[]>(`restaurants/${id}/notes`)
 export const followUpsQ = () =>

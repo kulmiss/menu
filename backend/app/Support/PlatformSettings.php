@@ -56,6 +56,18 @@ class PlatformSettings
         'invoice_email' => true, // e-mail each new invoice to the owner
         // Messages (bulk e-mail): e-mails sent per minute by the cron queue worker.
         'campaign_rate' => 30,
+        // Backups (owner, 2026-11-13): daily at 02:30, thinned to the newest per day / week / month.
+        'backup_enabled' => true,
+        'backup_keep_daily' => 7,
+        'backup_keep_weekly' => 4,
+        'backup_keep_monthly' => 3,
+        'backup_s3_enabled' => false,
+        'backup_s3_endpoint' => '',
+        'backup_s3_region' => 'auto',
+        'backup_s3_bucket' => '',
+        'backup_s3_prefix' => 'menu-backups',
+        'backup_s3_key' => '',
+        'backup_s3_secret' => '', // encrypted (Crypt), never sent to the browser
         'socials' => ['telegram' => '', 'facebook' => '', 'instagram' => '', 'tiktok' => '', 'x' => '', 'youtube' => '', 'linkedin' => ''],
     ];
 
@@ -89,7 +101,8 @@ class PlatformSettings
     {
         $all = self::all();
         $all['turnstile_secret_set'] = ($all['turnstile_secret'] ?? '') !== '';
-        unset($all['turnstile_secret']);
+        $all['backup_s3_secret_set'] = ($all['backup_s3_secret'] ?? '') !== '';
+        unset($all['turnstile_secret'], $all['backup_s3_secret']);
 
         return $all;
     }

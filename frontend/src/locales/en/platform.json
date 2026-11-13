@@ -19,7 +19,8 @@
     "activity": "Activity log",
     "settings": "Settings",
     "invoices": "Invoices",
-    "messages": "Messages"
+    "messages": "Messages",
+    "backups": "Backups"
   },
   "dash": {
     "restaurants": "Restaurants",
@@ -316,7 +317,8 @@
       "disk": "Less than 10% disk space is free.",
       "failed": "Some emails failed to send. Check the mail settings.",
       "queue": "Many emails are waiting in the queue.",
-      "errors": "There were errors today. Check storage/logs."
+      "errors": "There were errors today. Check storage/logs.",
+      "backup": "Backups need attention: the last one failed or none succeeded in 26 hours. Open Backups."
     },
     "plan_mix": "Plan mix",
     "no_plan": "No plan",
@@ -566,5 +568,57 @@
     "confirm_title": "Send this e-mail to {{count}} owners?",
     "confirm_text": "It can't be stopped once it starts. Sending takes a few minutes; you can follow it here.",
     "queued": "The e-mail is being sent."
+  },
+  "backups": {
+    "hint": "The database and every uploaded photo, zipped every night at 02:30 and kept outside the public folder.",
+    "now": "Back up now",
+    "started": "Backup started. It appears here when it's done (usually within a few minutes).",
+    "disk": "Free disk space: {{free}} of {{total}}.",
+    "col": {
+      "date": "Date",
+      "size": "Size",
+      "location": "Where",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "kind": {
+      "scheduled": "Daily",
+      "manual": "By hand"
+    },
+    "server": "Server",
+    "offsite": "off-site",
+    "offsite_failed": "off-site copy failed",
+    "status": {
+      "queued": "Waiting",
+      "running": "Running",
+      "ok": "OK",
+      "failed": "Failed"
+    },
+    "download": "Download",
+    "delete": "Delete backup",
+    "delete_confirm": "Delete this backup? The off-site copy is deleted too.",
+    "none": "No backups yet. Press “Back up now” to make the first one.",
+    "restore_note": "Restoring replaces all data, so there is no button for it: follow “Restoring a backup” in docs/deploy.md.",
+    "confirm_title": "Confirm it's you",
+    "confirm_hint": "A backup contains every restaurant's data. Enter your password or a code from your authenticator app; the download link works for 5 minutes.",
+    "password": "Password",
+    "code": "Two-factor code",
+    "use_code": "Use a two-factor code instead",
+    "use_password": "Use your password instead",
+    "settings": "Backup settings",
+    "settings_hint": "Older backups are thinned out to the newest one of each day, week and month.",
+    "enabled": "Daily backup at 02:30",
+    "backup_keep_daily": "Days to keep",
+    "backup_keep_weekly": "Weeks to keep",
+    "backup_keep_monthly": "Months to keep",
+    "offsite_title": "Off-site copy (optional)",
+    "backup_s3_enabled": "Copy each backup to S3-compatible storage",
+    "backup_s3_endpoint": "Endpoint",
+    "backup_s3_region": "Region",
+    "backup_s3_bucket": "Bucket",
+    "backup_s3_prefix": "Folder in the bucket",
+    "backup_s3_key": "Access key ID",
+    "backup_s3_secret": "Secret access key",
+    "offsite_hint": "Works with Backblaze B2, Cloudflare R2, AWS S3 and others. The secret key is stored encrypted and never shown again."
   }
 }

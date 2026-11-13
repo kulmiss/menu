@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Platform;
 use App\Http\Controllers\Controller;
 use App\Models\Tenant;
 use App\Support\ActivityLogger;
+use App\Support\Backups\Backups;
 use App\Support\PlatformSettings;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -205,6 +206,7 @@ class DashboardWidgetController extends Controller
                     $failed > 0 ? 'failed' : null,
                     $queued > 50 ? 'queue' : null,
                     $errors > 0 ? 'errors' : null,
+                    PlatformSettings::get('backup_enabled') && Backups::problem() !== null ? 'backup' : null,
                 ])),
             ];
         });

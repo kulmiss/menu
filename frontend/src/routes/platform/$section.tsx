@@ -8,6 +8,7 @@ const SECTIONS = [
   'payments',
   'invoices',
   'messages',
+  'backups',
   'themes',
   'announcements',
   'activity',

@@ -27,6 +27,7 @@ use App\Http\Controllers\Api\TeamController;
 use App\Http\Controllers\Api\TenantController;
 use App\Http\Controllers\Auth\SignUpController;
 use App\Http\Controllers\NewsSubscriptionController;
+use App\Http\Controllers\Platform\BackupController;
 use App\Http\Controllers\Platform\CampaignController;
 use App\Http\Controllers\Platform\CrmController;
 use App\Http\Controllers\Platform\DashboardWidgetController as PlatformDashboardWidgetController;
@@ -114,6 +115,13 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::post('campaigns', [CampaignController::class, 'store']);
             Route::post('campaigns/{campaign}/retry', [CampaignController::class, 'retry'])->whereNumber('campaign');
             Route::put('campaigns/rate', [CampaignController::class, 'rate']);
+            // Backups (owner, 2026-11-13)
+            Route::get('backups', [BackupController::class, 'index']);
+            Route::post('backups', [BackupController::class, 'store'])->middleware('throttle:6,1');
+            Route::put('backups/settings', [BackupController::class, 'settings']);
+            Route::post('backups/{backup}/link', [BackupController::class, 'link'])->whereNumber('backup')->middleware('throttle:6,1');
+            Route::get('backups/{backup}/file', [BackupController::class, 'file'])->whereNumber('backup')->middleware('signed')->name('platform.backups.file');
+            Route::delete('backups/{backup}', [BackupController::class, 'destroy'])->whereNumber('backup');
             // Invoices (owner, 2026-11-13)
             Route::get('invoices', [InvoiceController::class, 'index']);
             Route::get('invoices.csv', [InvoiceController::class, 'export']);

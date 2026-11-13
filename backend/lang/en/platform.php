@@ -22,6 +22,8 @@ return [
     'invoice_no_owner' => 'This restaurant has no owner to send the invoice to.',
     'invoice_already_void' => 'This invoice is already void.',
     'note_not_yours' => 'You can only change your own notes.',
+    'backup_running' => 'A backup is already running.',
+    'backup_s3_incomplete' => 'Fill in the endpoint, bucket, access key and secret key first.',
     'suspended_reason' => 'Your restaurant is suspended: :reason',
     'slug_taken' => 'This web address is already taken.',
     'mail_test' => [
