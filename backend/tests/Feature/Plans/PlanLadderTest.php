@@ -114,25 +114,25 @@ it('never takes anything away from a paying restaurant, and moves it once its pa
         ->and($old->slug)->toBe('pro-legacy')
         ->and($old->name['en'])->toBe('Pro (old)')
         ->and($old->is_public)->toBeFalse()
-        ->and($old->limits)->toBe(['branches' => 5, 'items' => 300])
+        ->and($old->limits)->toEqual(['branches' => 5, 'items' => 300])
         ->and($old->price_minor)->toBe(120_000)
         ->and(Features::for($paying))->toBe($before);
     $newPro = Plan::where('slug', 'pro')->first();
     expect($old->replaced_by_plan_id)->toBe($newPro->id)
-        ->and($newPro->limits)->toBe(['photos' => 2000, 'branches' => 3])
+        ->and($newPro->limits)->toEqual(['photos' => 2000, 'branches' => 3])
         ->and(Plan::where('slug', 'like', 'pro%')->count())->toBe(2);
 
     // Plus nobody pays for: updated in place, price kept, yearly price added.
     $plus->refresh();
-    expect($plus->limits)->toBe(['photos' => 500, 'branches' => 1])->and($plus->price_minor)->toBe(40_000)->and($plus->price_year_minor)->toBe(400_000);
+    expect($plus->limits)->toEqual(['photos' => 500, 'branches' => 1])->and($plus->price_minor)->toBe(40_000)->and($plus->price_year_minor)->toBe(400_000);
     // Business only gains (remove branding): updated in place, paying restaurant keeps its plan.
     expect($onBusiness->fresh()->plan_id)->toBe($business->id)->and(Features::for($onBusiness->fresh())['remove_branding'])->toBeTrue();
     // Free: only better (customised 500 photos kept, dishes unlimited; it had no branch count, extra branches stay switched off).
-    expect($free->fresh()->limits)->toBe(['photos' => 500])
+    expect($free->fresh()->limits)->toEqual(['photos' => 500])
         ->and(Features::for($onFree->fresh())['branches'])->toBeFalse()
         ->and(limitOf($onFree, 'items'))->toBeNull();
     // Other plans: hidden from the website, untouched for their restaurants.
-    expect($starter->fresh())->is_public->toBeFalse()->limits->toBe(['items' => 80])
+    expect($starter->fresh())->is_public->toBeFalse()->limits->toEqual(['items' => 80])
         ->and($onStarter->fresh()->plan_id)->toBe($starter->id);
 
     // While paid: no move. After the paid time: moved to the new Pro, logged.
@@ -148,7 +148,7 @@ it('lets the Super Admin edit the yearly price and sees what replaced a plan', f
     $admin = superAdmin();
     $plus = Plan::where('slug', 'plus')->first();
     $this->actingAs($admin)->patchJson(p("plans/{$plus->id}"), ['price_year_minor' => 450_000, 'limits' => ['photos' => 800, 'branches' => 1]], idem())->assertOk();
-    expect($plus->fresh())->price_year_minor->toBe(450_000)->limits->toBe(['photos' => 800, 'branches' => 1]);
+    expect($plus->fresh())->price_year_minor->toBe(450_000)->limits->toEqual(['photos' => 800, 'branches' => 1]);
     $row = collect($this->actingAs($admin)->getJson(p('plans'))->assertOk()->json('data'))->firstWhere('slug', 'plus');
     expect($row['price_year_minor'])->toBe(450_000)->and($row)->toHaveKey('replaced_by_plan_id');
 });
