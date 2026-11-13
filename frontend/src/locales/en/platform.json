@@ -108,7 +108,8 @@
     "style_bistro": "Menu style C · Quiet bistro",
     "style_minimal": "Menu style D · Minimal",
     "pdf_menu": "Printable PDF menu",
-    "order_list": "\"My order\" list for guests"
+    "order_list": "\"My order\" list for guests",
+    "price_periods": "Time-based prices (happy hour)"
   },
   "methods": {
     "cash": "Cash",

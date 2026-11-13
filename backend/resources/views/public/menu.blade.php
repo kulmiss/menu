@@ -178,8 +178,9 @@
 @php $orderable = $orderList && ! $i['sold_out'] && $i['price'] !== ''; @endphp
 <button type="button" @class(['it', 'np' => ! $i['media'], 'ao' => $orderable])><span class="tx"><span class="nm">{{ $i['name'] }}</span>
 @if ($i['summary'] !== '')<span class="sm">{{ $i['summary'] }}</span>@endif
-@if ($i['sizes'] !== '')<span class="pr sz">{{ $i['sizes'] }}</span>@elseif ($i['price'] !== '')<span class="pr">{{ $i['price'] }}</span>@endif
+@if ($i['sizes'] !== '')<span class="pr sz">{{ $i['sizes'] }}</span>@elseif ($i['price'] !== '')<span class="pr">@if ($i['was'] !== '')<s>{{ $i['was'] }}</s> @endif{{ $i['price'] }}</span>@endif
 <span class="tg">@if ($i['sold_out'])<span class="bd x0">{{ __('public.sold_out') }}</span>@endif
+@if ($i['deal'] !== '')<span class="bd hl">{{ $i['deal'] }}</span>@endif
 @if ($i['new'])<span class="bd hl">{{ __('public.new') }}</span>@endif
 @if ($i['popular'])<span class="bd hl">{{ __('public.popular') }}</span>@endif
 @foreach ($i['tags'] as $t)@if (! in_array($t['key'], ['new', 'popular'], true))<span class="bd">{{ $t['label'] }}</span>@endif @endforeach

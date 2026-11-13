@@ -116,6 +116,9 @@ jobs:
         include:
           - style: editorial
             banner: no-banner-no-specials
+          # …and during a time-based price period (crossed-out prices and labels on the page).
+          - style: grid
+            banner: price-period
     defaults:
       run:
         working-directory: backend
@@ -138,7 +141,8 @@ jobs:
       DB_PASSWORD: root
       APP_URL: http://localhost:8124
       DEMO_MENU_STYLE: ${{ matrix.style }}
-      DEMO_MENU_BANNER: ${{ matrix.banner == 'banner' && '1' || '0' }}
+      DEMO_MENU_BANNER: ${{ (matrix.banner == 'banner' || matrix.banner == 'price-period') && '1' || '0' }}
+      DEMO_MENU_PRICE_PERIOD: ${{ matrix.banner == 'price-period' && '1' || '0' }}
       DEMO_MENU_SPECIALS: ${{ matrix.banner == 'no-banner-no-specials' && '0' || '1' }}
     steps:
       - uses: actions/checkout@v4
@@ -165,7 +169,8 @@ jobs:
           curl -sf -o /dev/null http://localhost:8123/demo
           test -f public/menu-cache/demo/index.html.gz
           grep -q 'class="S-${{ matrix.style }}[ "]' public/menu-cache/demo/index.html
-          if [ "${{ matrix.banner }}" = banner ]; then grep -q '<div class="cv' public/menu-cache/demo/index.html; else ! grep -q '<div class="cv' public/menu-cache/demo/index.html; fi
+          if [ "${{ matrix.banner }}" = banner ] || [ "${{ matrix.banner }}" = price-period ]; then grep -q '<div class="cv' public/menu-cache/demo/index.html; else ! grep -q '<div class="cv' public/menu-cache/demo/index.html; fi
+          if [ "${{ matrix.banner }}" = price-period ]; then grep -q 'Happy hour until' public/menu-cache/demo/index.html && grep -q '<s>' public/menu-cache/demo/index.html; fi
           if [ "${{ matrix.banner }}" = no-banner-no-specials ]; then ! grep -q '<div class="spc' public/menu-cache/demo/index.html; else grep -q '<div class="spc' public/menu-cache/demo/index.html; fi
           echo "Guest page: $(stat -c %s public/menu-cache/demo/index.html) bytes, $(stat -c %s public/menu-cache/demo/index.html.gz) gzip"
       - name: Serve it like production (Nginx, no PHP)

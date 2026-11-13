@@ -27,6 +27,7 @@ import {
   useDeletePromotion,
   useReorderPromotions,
 } from './api'
+import { PricePeriodsSection } from './price-periods'
 import { PromotionDialog } from './promotion-dialog'
 
 /** Promotions (PLAN.md screen 11): specials and announcements with dates. */
@@ -167,6 +168,13 @@ export function PromotionsPage() {
             ))}
           </div>
         )}
+        <PricePeriodsSection
+          tenantId={ctx.tenantId}
+          locale={ctx.locale}
+          currency={tenant?.currency_code ?? ''}
+          canEdit={canEdit && ctx.canEditPrices}
+          included={tenant?.features?.price_periods !== false}
+        />
       </Main>
       {editing !== null && (
         <PromotionDialog

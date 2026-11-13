@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\Restaurant\DashboardWidgetController;
 use App\Http\Controllers\Api\Restaurant\InfoController;
 use App\Http\Controllers\Api\Restaurant\InsightsController;
 use App\Http\Controllers\Api\Restaurant\PdfMenuController;
+use App\Http\Controllers\Api\Restaurant\PricePeriodController;
 use App\Http\Controllers\Api\Restaurant\PromotionController;
 use App\Http\Controllers\Api\Restaurant\QrCodeController;
 use App\Http\Controllers\Api\TeamController;
@@ -245,6 +246,14 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
                 Route::get('plan', 'plan');
             });
 
+            // Time-based prices (owner, 2026-11-14)
+            Route::middleware('feature:price_periods')->group(function () {
+                Route::get('price-periods', [PricePeriodController::class, 'index']);
+                Route::get('price-periods/preview', [PricePeriodController::class, 'preview']);
+                Route::post('price-periods', [PricePeriodController::class, 'store']);
+                Route::put('price-periods/{period}', [PricePeriodController::class, 'update'])->whereNumber('period');
+                Route::delete('price-periods/{period}', [PricePeriodController::class, 'destroy'])->whereNumber('period');
+            });
             Route::get('promotions', [PromotionController::class, 'index']);
             Route::post('promotions', [PromotionController::class, 'store'])->middleware('feature:promotions');
             Route::post('promotions/reorder', [PromotionController::class, 'reorder'])->middleware('feature:promotions');

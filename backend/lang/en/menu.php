@@ -2,6 +2,10 @@
 
 // English source strings for the API. Other languages: lang/{so,am,ar}/menu.php (Partition 8).
 return [
+    'price_period' => [
+        'percent' => 'A discount can be at most 90%.',
+        'size' => 'This size belongs to another dish.',
+    ],
     'idempotency' => [
         'missing' => 'This request needs an Idempotency-Key header.',
         'invalid' => 'The Idempotency-Key header is not valid.',

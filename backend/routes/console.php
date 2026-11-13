@@ -32,6 +32,9 @@ Schedule::command('backup:run --scheduled')->dailyAt('02:30')->withoutOverlappin
 Schedule::call(fn () => app(Backups::class)->check())->hourlyAt(17)->name('backup:check')
     ->when(fn () => (bool) PlatformSettings::get('backup_enabled'));
 
+// Time-based prices: rebuild pages when a period starts or ends (owner, 2026-11-14).
+Schedule::command('menu:price-periods')->everyMinute()->withoutOverlapping();
+
 Schedule::command('menu:refresh-pages')->hourly();
 Schedule::command('menu:refresh-pages --all')->dailyAt('00:05');
 // Self sign-ups that never confirmed their e-mail (owner, 2026-11-13).
