@@ -30,4 +30,8 @@ Tokens: one per device (`device_name`), stored hashed by Sanctum, `expires_at` =
 
 Answers with secrets carry `Cache-Control: no-store`; the idempotency table then keeps only the key and status (a replay gets `409 idempotency.not_replayable`), never the codes.
 
+## "Log in as" (QUESTIONS #188)
+
+`POST /api/v1/platform/restaurants/{id}/impersonate-token` (Super Admin with two-factor, app token) → `{token, tenant_id, ends_at}`: a token for the restaurant owner that works for 2 hours, with the same blocked actions as the web (`403 impersonation.blocked`) and no platform access. `/me` shows `impersonation`. `POST /api/v1/impersonation/stop` with that token deletes it; the app then goes back to the Super Admin's own token.
+
 Everything else (restaurant `t/{id}/…`, Super Admin `platform/…`) works unchanged with the token.

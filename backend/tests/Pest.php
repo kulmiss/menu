@@ -98,3 +98,15 @@ function p(string $path = ''): string
 {
     return '/api/v1/platform/'.ltrim($path, '/');
 }
+
+/** Mobile app sign-in fields (QUESTIONS #187). */
+function device(array $extra = []): array
+{
+    return ['device_name' => 'Pixel 8', 'platform' => 'android', 'app_version' => '1.0.0+1', ...$extra];
+}
+
+/** Headers of an app request with this token. */
+function bearer(string $token): array
+{
+    return ['Authorization' => 'Bearer '.$token, 'Accept' => 'application/json'];
+}

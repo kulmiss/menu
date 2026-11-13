@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\Tenant;
+use App\Support\ImpersonationManager;
 use App\Tenancy\CurrentTenant;
 use Closure;
 use Illuminate\Http\Request;
@@ -35,7 +36,7 @@ class ResolveTenant
 
         // Until the e-mail is confirmed, the admin shows only "Check your inbox" (owner, 2026-11-13).
         // A Super Admin "logged in as" the owner can still look around.
-        if (! $user->hasVerifiedEmail() && ! ($request->hasSession() && $request->session()->has('impersonation_id'))) {
+        if (! $user->hasVerifiedEmail() && ! app(ImpersonationManager::class)->active($request)) {
             abort(response()->json(['message' => __('signup.unverified'), 'code' => 'email.unverified'], 403));
         }
 
