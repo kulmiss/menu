@@ -91,7 +91,7 @@ jobs:
       # grows past the budget. Target 150 KB; current ceiling while the owner
       # decides how to get there (see PLAN.md §15.6).
       - name: Admin bundle budget
-        run: node scripts/bundle-size.mjs --budget-kb=225
+        run: node scripts/bundle-size.mjs --budget-kb=240
       - name: Install test browser
         # The runner image already has Chromium's system libraries; if the Ubuntu
         # package mirror is unreachable (it was on 2026-11-11), install the browser alone.

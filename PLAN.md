@@ -335,7 +335,7 @@ The customer menu must open almost instantly, also on slow mobile networks and o
 
 ### 15.3 Admin and Super Admin
 - Route-level code splitting (already on); rare screens and heavy widgets (command palette, appearance drawer, "no restaurant" screen, other UI languages) load on first use (this PR).
-- **First load budget: 225 KB gzipped** (owner chose option A of §15.6; the original 150 KB target needs a different UI stack). Now **221 KB**; CI fails above 225 KB (`scripts/bundle-size.mjs`).
+- **First load budget: 240 KB gzipped** (245,760 B; owner, 2026-11-13, QUESTIONS #171 — was 225 KB, owner's option A of §15.6; the original 150 KB target needs a different UI stack). Now **225.0 KB** (230,393 B); CI fails above 240 KB (`scripts/bundle-size.mjs`). The customer menu budgets (§15.1–15.2, 15.5) are unchanged.
 - TanStack Query caching with stale-while-revalidate; prefetch of likely next screens on hover/intent; optimistic updates for sold-out and reordering (done) and price edits (to do, with rollback).
 - Skeletons, no spinners for page loads; no layout shift. Photo upload: instant local preview, progress, the UI stays usable.
 
@@ -362,5 +362,5 @@ The guest-facing 30 KB customer page is unaffected by this choice.
 
 **Load on demand (owner, 2026-11-10: keep budgets; move code rather than raise limits):** screen texts (menu editor, branches, info, settings…) are `locales/en/screens.json`, loaded in parallel with the admin area (`/admin` route `beforeLoad`), not in the first download: 223.0 → **217.8 KB**. On the guest page the item details sheet is `sheet.{hash}.js` (1.3 KB), fetched after load and cached for a year by the browser and the service worker; inline script 5.0 → 4.2 KB.
 
-**Done (A):** axios replaced by a small `fetch` client (same Idempotency-Key, XSRF and 419-retry behaviour); toasts, sign-out dialog, command palette, appearance drawer, rare screens and non-English UI texts load on first use. 285 → **221 KB**; CI ceiling 225 KB.
+**Done (A):** axios replaced by a small `fetch` client (same Idempotency-Key, XSRF and 419-retry behaviour); toasts, sign-out dialog, command palette, appearance drawer, rare screens and non-English UI texts load on first use. 285 → **221 KB**; CI ceiling 225 KB, raised to **240 KB** on 2026-11-13 (QUESTIONS #171).
 

@@ -36,14 +36,15 @@ _Last updated: 2026-11-12 13:00 EAT. Everything requested is merged into `develo
 
 ## History (newest first)
 
-## Self sign-up (#52–#57, 2026-11-13) — QUESTIONS #162–#170
+## Self sign-up (#52–#58, 2026-11-13) — QUESTIONS #162–#171
 - #52 "Log in as owner" in one click: no reason, no time limit, not recorded.
 - #53 Backend: `POST /api/v1/signup`, e-mail confirmation (24 h signed link), Free plan (migration), `signup_state` on tenants (unverified / pending approval → public menu off), approval, rejection, `signup:prune` (7 days), anti-spam (rate limits, honeypot, optional Turnstile, blocked domains), branded e-mails with the platform logo, upgrade contact on 402.
 - #54 Screens: sign-up page, "Check your inbox" gate, sign-in messages, welcome card, Super Admin sign-up settings, e-mail logo, pending approvals, upgrade toast button.
 - #55 Public home, `/terms`, `/privacy`; browser check (`docs/screenshots/self-signup/`); docs.
 - #56 "Log in as": 2-hour limit and safety blocks back (QUESTIONS #169).
+- #58 CI: admin first-load budget 225 → 240 KB (QUESTIONS #171); customer menu budgets unchanged.
 - #57 "Log in as" not recorded at all; on the 2-hour end the admin goes to /platform (QUESTIONS #170).
-- Merge in order: #52 → #53 → #54 → #55 → #56 → #57 (each branch contains the one before).
+- Merge in order: #52 → #53 → #54 → #55 → #56 → #57 → #58 (each branch contains the one before).
 
 ## Customer-menu round (#36–#47, 2026-11-12) — QUESTIONS #149–#160
 - **Live updates (#36–#37):** `public/sw.js` compares the fresh page with the saved one (ETag or text) and tells the page (`'mu'`); the page reloads when nothing is open (guard `sessionStorage.mu`, 10 s) and `sheet.js` shows "Menu updated".
