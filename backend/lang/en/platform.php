@@ -16,7 +16,7 @@ return [
         'style_minimal' => 'Menu style D · Minimal',
     ],
     'two_factor_required' => 'Set up two-factor sign-in in your security settings to use the platform area.',
-    'impersonation_expired' => 'The “log in as” session ended after 60 minutes. You are back in the platform area.',
+    'impersonation_expired' => 'The “log in as” session ended after 2 hours. You are back in the platform area.',
     'impersonation_blocked' => 'This isn’t allowed while logged in as someone else.',
     'no_owner' => 'This restaurant has no owner to log in as.',
     'suspended_reason' => 'Your restaurant is suspended: :reason',

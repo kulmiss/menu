@@ -139,40 +139,61 @@ function impersonate(User $admin, Tenant $tenant): array
     $response = test()->actingAs($admin)->postJson(p("restaurants/{$tenant->id}/impersonate"), [], idem())->assertOk();
     $response->assertSessionHas('impersonator_id', $admin->id)->assertSessionHas('impersonation_id');
 
-    return ['impersonation_id' => session('impersonation_id'), 'impersonator_id' => $admin->id];
+    return [
+        'impersonation_id' => session('impersonation_id'),
+        'impersonator_id' => $admin->id,
+        'impersonation_ends_at' => session('impersonation_ends_at'),
+    ];
 }
 
-it('logs in as the owner in one click, with no limits and nothing recorded', function () {
+it('logs in as the owner in one click, records it silently and keeps the safety blocks', function () {
     $admin = superAdmin();
     [$owner, $tenant] = member(Role::Owner);
     [, , $item] = sampleMenu($tenant);
 
     $session = impersonate($admin, $tenant);
-    expect(Impersonation::count())->toBe(0)->and(ActivityLog::where('action', 'like', 'platform.impersonation%')->count())->toBe(0);
+    // Who, which restaurant, when.
+    $record = Impersonation::sole();
+    expect([$record->super_admin_id, $record->tenant_id, $record->user_id, $record->ended_at])->toBe([$admin->id, $tenant->id, $owner->id, null])
+        ->and($record->started_at)->not->toBeNull();
+    $start = ActivityLog::where('action', 'platform.impersonation_started')->sole();
+    expect([$start->actor_id, $start->tenant_id])->toBe([$admin->id, $tenant->id]);
 
     $this->actingAs($owner)->withSession($session);
     $this->getJson('/api/v1/me')->assertJsonPath('data.id', $owner->id)
         ->assertJsonPath('data.impersonation.tenant_id', $tenant->id)
         ->assertJsonPath('data.impersonation.tenant_name', $tenant->name);
-    // The platform stays closed until "Back to platform".
     $this->getJson(p('dashboard'))->assertNotFound();
 
-    // Changes count as the owner's; no Super Admin is attached to them.
+    // Every change carries the Super Admin's id.
     $this->patchJson(t($tenant, "items/{$item->id}"), ['name' => ['en' => 'Cortado']], idem())->assertOk();
     $log = ActivityLog::where('action', 'item.updated')->latest('id')->first();
-    expect([$log->actor_id, $log->impersonator_id])->toBe([$owner->id, null]);
+    expect([$log->actor_id, $log->impersonator_id])->toBe([$owner->id, $admin->id]);
 
-    // No blocked actions, and past the old 60-minute limit.
-    $this->travel(90)->minutes();
-    $this->patchJson(t($tenant, 'account/slug'), ['slug' => 'other-name'], idem())->assertOk();
+    // Password, e-mail, two-factor and team stay blocked.
+    $this->putJson('/api/v1/auth/user/password', ['current_password' => 'password', 'password' => 'new-password-123', 'password_confirmation' => 'new-password-123'], idem())
+        ->assertForbidden()->assertJsonPath('code', 'impersonation.blocked');
+    $this->putJson('/api/v1/auth/user/profile-information', ['name' => 'X', 'email' => 'x@example.com'], idem())->assertForbidden();
+    $this->postJson('/api/v1/auth/user/two-factor-authentication', [], idem())->assertForbidden();
+    $this->patchJson(t($tenant, 'account/slug'), ['slug' => 'other-name'], idem())->assertForbidden();
+    expect(Hash::check('password', $owner->fresh()->password))->toBeTrue();
 
     $this->postJson('/api/v1/impersonation/stop', [], idem())->assertOk()->assertJsonPath('data.redirect', '/platform')->assertSessionMissing('impersonation_id');
+    expect(Impersonation::whereNull('ended_at')->exists())->toBeFalse();
+});
 
-    // The owner's password can be changed too (this signs the browser out, as any password change does).
-    $this->actingAs($owner)->withSession(impersonate($admin, $tenant));
-    $this->putJson('/api/v1/auth/user/password', ['current_password' => 'password', 'password' => 'new-password-123', 'password_confirmation' => 'new-password-123'], idem())
-        ->assertSuccessful();
-    expect(Hash::check('new-password-123', $owner->fresh()->password))->toBeTrue();
+it('ends "log in as" automatically after 2 hours', function () {
+    config(['session.lifetime' => 600]);
+    $admin = superAdmin();
+    [$owner, $tenant] = member(Role::Owner);
+    $session = impersonate($admin, $tenant);
+
+    $this->travel(119)->minutes();
+    $this->actingAs($owner)->withSession($session)->getJson(t($tenant))->assertOk();
+    $this->travel(2)->minutes();
+    $this->getJson(t($tenant))->assertStatus(409)
+        ->assertJsonPath('code', 'impersonation.expired')->assertSessionMissing('impersonation_id');
+    expect(Impersonation::whereNull('ended_at')->exists())->toBeFalse();
 });
 
 it('never shows "viewing as" to the restaurant owner in their own session', function () {

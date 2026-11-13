@@ -27,8 +27,7 @@ class ActivityLogger
         return ActivityLog::create([
             'tenant_id' => $tenantId ?? $this->tenant->id(),
             'actor_id' => $request->user()?->getAuthIdentifier(),
-            // "Log in as" isn't recorded (owner, 2026-11-13): changes count as the owner's.
-            'impersonator_id' => null,
+            'impersonator_id' => $request->hasSession() ? $request->session()->get('impersonator_id') : null,
             'action' => $action,
             'subject_type' => $subject ? class_basename($subject) : null,
             'subject_id' => $subject?->getKey(),
