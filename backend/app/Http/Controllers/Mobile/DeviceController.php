@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Mobile;
 
 use App\Http\Controllers\Controller;
 use App\Models\PersonalAccessToken;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -16,7 +17,9 @@ class DeviceController extends Controller
         $user = $request->user();
         $current = $user->currentAccessToken();
 
-        $devices = $user->tokens()->latest('last_used_at')->latest('id')->get()
+        /** @var Collection<int, PersonalAccessToken> $tokens */
+        $tokens = PersonalAccessToken::query()->whereMorphedTo('tokenable', $user)->latest('last_used_at')->latest('id')->get();
+        $devices = $tokens
             ->filter(fn (PersonalAccessToken $t) => $t->isFresh($user))
             ->values()
             ->map(fn (PersonalAccessToken $t) => [
