@@ -6,6 +6,7 @@ use App\Http\Middleware\EnsureTenantWritable;
 use App\Http\Middleware\GuardImpersonation;
 use App\Http\Middleware\RequireFeature;
 use App\Http\Middleware\ResolveTenant;
+use App\Http\Middleware\UseWelcomeBroker;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -24,7 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // "Log in as": time limit and blocked actions, for the API and Fortify (web).
         $middleware->api(append: [GuardImpersonation::class]);
-        $middleware->web(append: [GuardImpersonation::class]);
+        $middleware->web(append: [GuardImpersonation::class, UseWelcomeBroker::class]);
 
         $middleware->alias([
             'idempotent' => EnsureIdempotency::class,

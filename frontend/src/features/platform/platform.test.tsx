@@ -122,6 +122,46 @@ describe('Super Admin screens', () => {
       })
   })
 
+  it('resends the set-password e-mail to the owner', async () => {
+    fake = fakeApi({
+      'GET /platform/restaurants': { data: { data: [restaurant] } },
+      'GET /platform/plans': { data: { data: [] } },
+      'GET /platform/restaurants/7': {
+        data: {
+          data: {
+            ...restaurant,
+            members: [
+              {
+                id: 3,
+                name: 'Ayaan',
+                email: 'ayaan@example.com',
+                role: 'owner',
+              },
+            ],
+            features: {},
+            overrides: {},
+            payments: [],
+            counts: { menus: 1, items: 20, branches: 1, views_30d: 80 },
+          },
+        },
+      },
+      'POST /platform/restaurants/7/resend-welcome': {
+        data: { data: { sent_to: 'ayaan@example.com' } },
+      },
+    })
+    const screen = await renderWithQuery(
+      <RestaurantsPage onState={() => {}} />,
+      { me: admin }
+    )
+    await userEvent.click(screen.getByRole('button', { name: 'Sahan Grill' }))
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Resend set-password e-mail' })
+    )
+    await expect
+      .poll(() => fake.calls.find((c) => c.method === 'POST')?.url)
+      .toBe('/platform/restaurants/7/resend-welcome')
+  })
+
   it('creates a plan with limits and features', async () => {
     fake = fakeApi({
       'GET /platform/plans': { data: { data: [] } },

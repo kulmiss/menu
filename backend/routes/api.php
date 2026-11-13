@@ -70,6 +70,7 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::post('restaurants/{restaurant}/restore', [RestaurantController::class, 'restore'])->whereNumber('restaurant');
             Route::post('restaurants/{restaurant}/suspend', [RestaurantController::class, 'suspend'])->whereNumber('restaurant');
             Route::post('restaurants/{restaurant}/unsuspend', [RestaurantController::class, 'unsuspend'])->whereNumber('restaurant');
+            Route::post('restaurants/{restaurant}/resend-welcome', [RestaurantController::class, 'resendWelcome'])->whereNumber('restaurant')->middleware('throttle:6,1');
             Route::put('restaurants/{restaurant}/features', [RestaurantController::class, 'features'])->whereNumber('restaurant');
             Route::post('restaurants/{restaurant}/payments', [PaymentController::class, 'store'])->whereNumber('restaurant');
             Route::post('restaurants/{restaurant}/impersonate', [RestaurantController::class, 'impersonate'])->whereNumber('restaurant');

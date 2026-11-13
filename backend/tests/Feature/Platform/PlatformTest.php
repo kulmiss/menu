@@ -7,7 +7,7 @@ use App\Models\Plan;
 use App\Models\Promotion;
 use App\Models\Tenant;
 use App\Models\User;
-use Illuminate\Auth\Notifications\ResetPassword;
+use App\Notifications\OwnerWelcomeNotification;
 use Illuminate\Support\Facades\Notification;
 
 it('is only for Super Admins with two-factor sign-in', function () {
@@ -28,7 +28,7 @@ it('creates a restaurant with a new owner who gets a set-password e-mail', funct
 
     $owner = User::where('email', 'ayaan@example.com')->firstOrFail();
     expect($owner->membershipFor(Tenant::find($id))?->role)->toBe(Role::Owner);
-    Notification::assertSentTo($owner, ResetPassword::class);
+    Notification::assertSentTo($owner, OwnerWelcomeNotification::class); // details: OwnerWelcomeTest
 
     $this->actingAs($admin)->postJson(p('restaurants'), ['name' => 'X', 'slug' => 'sahan-grill', 'owner_name' => 'X', 'owner_email' => 'x@example.com'], idem())->assertInvalid('slug');
     $this->actingAs($admin)->getJson(p('restaurants?search=sahan'))->assertJsonCount(1, 'data')->assertJsonPath('data.0.owner.email', 'ayaan@example.com');

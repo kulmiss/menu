@@ -67,6 +67,33 @@ describe('password reset', () => {
     })
   })
 
+  it('welcomes a new owner and sends the welcome flag with the password', async () => {
+    fake = fakeApi({ 'POST /auth/reset-password': { data: { message: 'ok' } } })
+    const screen = await renderWithQuery(
+      <ResetPasswordPage token='tok' email='ayaan@example.com' welcome />
+    )
+    await expect
+      .element(screen.getByText('Welcome! Choose your password'))
+      .toBeVisible()
+    await userEvent.fill(
+      screen.getByLabelText('New password'),
+      'another-long-secret'
+    )
+    await userEvent.fill(
+      screen.getByLabelText('Confirm password'),
+      'another-long-secret'
+    )
+    await userEvent.click(screen.getByRole('button', { name: 'Save password' }))
+
+    await expect
+      .poll(() => fake.apiCalls()[0]?.data)
+      .toMatchObject({
+        token: 'tok',
+        email: 'ayaan@example.com',
+        welcome: true,
+      })
+  })
+
   it('explains an expired link and offers a new one', async () => {
     fake = fakeApi({
       'POST /auth/reset-password': invalid({

@@ -99,6 +99,13 @@ return [
             'expire' => 60,
             'throttle' => 60,
         ],
+        // Set-password link in the welcome e-mail for new owners: 7 days, own table (UseWelcomeBroker).
+        'welcome' => [
+            'provider' => 'users',
+            'table' => 'owner_welcome_tokens',
+            'expire' => 7 * 24 * 60,
+            'throttle' => 0,
+        ],
     ],
 
     /*

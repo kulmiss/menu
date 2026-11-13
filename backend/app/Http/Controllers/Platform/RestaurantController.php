@@ -10,6 +10,7 @@ use App\Models\Payment;
 use App\Models\Plan;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Notifications\OwnerWelcomeNotification;
 use App\Rules\ValidSlug;
 use App\Support\ActivityLogger;
 use App\Support\Features;
@@ -112,11 +113,32 @@ class RestaurantController extends Controller
             return [$tenant, $new ? $user : null];
         });
         if ($newUser !== null) {
-            Password::broker()->sendResetLink(['email' => $newUser->email]);
+            $this->welcome($newUser, $tenant);
         }
         $this->activity->log('platform.restaurant_created', $tenant, ['slug' => ['to' => $tenant->slug]], null);
 
         return response()->json(['data' => $this->row($tenant->load('plan'))], 201);
+    }
+
+    /**
+     * "Resend set-password e-mail" (owner, 2026-11-12): a new welcome e-mail
+     * with a fresh 7-day link for the restaurant's owner. Earlier links stop working.
+     */
+    public function resendWelcome(int $restaurant): JsonResponse
+    {
+        $tenant = Tenant::findOrFail($restaurant);
+        $owner = $tenant->memberships()->where('role', Role::Owner)->with('user')->first()?->user;
+        abort_if($owner === null, 422, __('platform.remind.no_owner'));
+        $this->welcome($owner, $tenant, reminder: true);
+        $this->activity->log('platform.welcome_resent', $tenant, ['email' => ['to' => $owner->email]], null);
+
+        return response()->json(['data' => ['sent_to' => $owner->email]]);
+    }
+
+    private function welcome(User $user, Tenant $tenant, bool $reminder = false): void
+    {
+        $token = Password::broker('welcome')->createToken($user);
+        $user->notify(new OwnerWelcomeNotification($tenant, $token, $reminder));
     }
 
     public function update(Request $request, int $restaurant): JsonResponse

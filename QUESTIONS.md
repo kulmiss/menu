@@ -214,6 +214,8 @@ New rules added by the owner (now in PLAN.md §2): Docker is for local developme
 
 | 160 | Style A, no banner, no specials | The first dish photo, only in this case, now takes the 320 px file on a phone (one size below the 640 px used since #159; same quality setting; every other photo unchanged): LCP 1.4 s → 1.11 s locally. It is a little softer on a phone when you look closely (side-by-side in the PR). On desktop it still takes the 800 px file. CI now also measures "editorial, no-banner-no-specials" (DEMO_MENU_SPECIALS=0). |
 
+| 161 | Welcome e-mail and "Resend set-password e-mail" | A restaurant created by the Super Admin with a new owner now sends a friendly welcome e-mail instead of the plain "reset password" mail. It contains a greeting, what was created, a "Set my password" button, the menu address, three first steps (dishes, logo/banner/style, QR codes), the support address (if set) and the platform name. The button works for **7 days**: own token table and password broker `welcome`. Ordinary "forgot password" links keep their 60 minutes, and a normal reset token isn't valid as a welcome token or the other way round. The page opened by the link says "Welcome! Choose your password". Super Admin → restaurant → Team: **Resend set-password e-mail** sends it again with a new link; earlier links stop working; logged as `platform.welcome_resent`; 6 per minute. Owners who already had an account (added to a new restaurant) get no e-mail, as before. The e-mail header shows `APP_NAME` from `.env` (Laravel's mail layout): set it to the platform name. |
+
 ## Open
 
 - Owner action: protect `main` in GitHub settings (require PR, no force push, no deletion). Claude's access can't change branch settings.
