@@ -249,9 +249,12 @@
     "from_address": "From address",
     "from_name": "From name",
     "send_test": "Send test email",
-    "test_failed": "The test e-mail could not be sent.",
+    "test_failed": "The test e-mail to {{email}} could not be sent.",
     "reset": "Use the server's .env settings",
-    "reset_done": "E-mails now use the server's .env settings."
+    "reset_done": "E-mails now use the server's .env settings.",
+    "test_to": "Send test email to",
+    "test_invalid": "Type a valid e-mail address, like name@example.com.",
+    "test_limit": "Too many test e-mails. Wait a minute, then try again (5 per minute)."
   },
   "w": {
     "no_data": "No data yet",

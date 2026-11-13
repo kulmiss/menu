@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { meQueryOptions } from '@/features/auth/api'
 import { type MailSettings, mailQ, send, usePlatformMutation } from './api'
 
 const PORTS = { none: 25, ssl: 465, tls: 587 } as const
@@ -45,7 +46,13 @@ function EmailForm({ initial }: { initial: MailSettings }) {
     send('put', 'settings/mail', body)
   )
   const reset = usePlatformMutation(() => send('delete', 'settings/mail'))
-  const test = usePlatformMutation(() => send('post', 'settings/mail/test', {}))
+  const test = usePlatformMutation((to: string) =>
+    send('post', 'settings/mail/test', { to })
+  )
+  // Only for the test; never saved. Starts with the signed-in admin's address.
+  const me = useQuery(meQueryOptions)
+  const [testTo, setTestTo] = useState<string | null>(null)
+  const to = testTo ?? me.data?.email ?? ''
 
   const field = (
     k: Exclude<keyof typeof v, 'encryption'>,
@@ -83,16 +90,31 @@ function EmailForm({ initial }: { initial: MailSettings }) {
 
   async function sendTest() {
     setResult(null)
+    const address = to.trim()
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address)) {
+      setResult({ ok: false, text: t('platform.mail.test_invalid') })
+      return
+    }
     try {
-      const res = (await test.mutateAsync(undefined)) as {
+      const res = (await test.mutateAsync(address)) as {
         data: { message: string }
       }
       setResult({ ok: true, text: res.data.message })
     } catch (err) {
+      const status = isApiError(err) ? err.response?.status : undefined
+      const fields = validationErrors(err)
       const message = isApiError(err)
         ? (err.response?.data as { message?: string } | undefined)?.message
         : undefined
-      setResult({ ok: false, text: message ?? t('platform.mail.test_failed') })
+      setResult({
+        ok: false,
+        text:
+          status === 429
+            ? t('platform.mail.test_limit')
+            : (fields?.to ??
+              message ??
+              t('platform.mail.test_failed', { email: address })),
+      })
     }
   }
 
@@ -163,6 +185,38 @@ function EmailForm({ initial }: { initial: MailSettings }) {
               ? t('platform.mail.password_saved')
               : t('platform.mail.password_hint')}
           </p>
+          <div className='flex flex-wrap items-end gap-2'>
+            <div className='grid min-w-56 flex-1 gap-1'>
+              <Label htmlFor='mail-test-to'>{t('platform.mail.test_to')}</Label>
+              <Input
+                id='mail-test-to'
+                type='email'
+                inputMode='email'
+                autoComplete='off'
+                maxLength={254}
+                value={to}
+                className='min-h-11 sm:min-h-9'
+                onChange={(x) => setTestTo(x.target.value)}
+                onKeyDown={(x) => {
+                  // Enter here sends the test, it doesn't save the settings.
+                  if (x.key === 'Enter') {
+                    x.preventDefault()
+                    void sendTest()
+                  }
+                }}
+              />
+            </div>
+            <Button
+              type='button'
+              variant='outline'
+              className='min-h-11 sm:min-h-9'
+              disabled={test.isPending || to.trim() === ''}
+              onClick={sendTest}
+            >
+              {test.isPending && <Loader2 className='animate-spin' />}
+              {t('platform.mail.send_test')}
+            </Button>
+          </div>
           <div className='flex flex-wrap gap-2'>
             <Button
               type='submit'
@@ -170,16 +224,6 @@ function EmailForm({ initial }: { initial: MailSettings }) {
               disabled={save.isPending}
             >
               {t('common.save')}
-            </Button>
-            <Button
-              type='button'
-              variant='outline'
-              className='min-h-11 sm:min-h-9'
-              disabled={test.isPending}
-              onClick={sendTest}
-            >
-              {test.isPending && <Loader2 className='animate-spin' />}
-              {t('platform.mail.send_test')}
             </Button>
             {initial.source === 'platform' && (
               <Button
