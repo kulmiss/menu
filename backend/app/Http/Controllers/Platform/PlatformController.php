@@ -15,6 +15,7 @@ use App\Support\ActivityLogger;
 use App\Support\EmailLogo;
 use App\Support\Features;
 use App\Support\ImageProcessor;
+use App\Support\Legal\LegalText;
 use App\Support\MailSettings;
 use App\Support\PlatformSettings;
 use App\Support\PublicMenu\ShareImage;
@@ -276,8 +277,8 @@ class PlatformController extends Controller
             'support_email' => ['sometimes', 'nullable', 'email'],
             'domain' => ['sometimes', 'nullable', 'string', 'max:120', 'regex:/^[a-z0-9.-]+$/i'],
             'default_currency' => ['sometimes', 'string', 'size:3', 'alpha'],
-            'terms' => ['sometimes', 'nullable', 'string', 'max:20000'],
-            'privacy' => ['sometimes', 'nullable', 'string', 'max:20000'],
+            'terms' => ['sometimes', 'nullable', 'string', 'max:50000'],
+            'privacy' => ['sometimes', 'nullable', 'string', 'max:50000'],
             // Sign-up (owner, 2026-11-13)
             'signup_open' => ['sometimes', 'boolean'],
             'signup_plan_id' => ['sometimes', 'nullable', 'integer', Rule::exists('plans', 'id')],
@@ -391,6 +392,16 @@ class PlatformController extends Controller
     }
 
     /** Sends a short e-mail with the saved settings and reports what happened. */
+    /** "Reset to default text" for the Terms or the Privacy Policy (QUESTIONS #181): saves and returns it. */
+    public function resetLegal(string $page): JsonResponse
+    {
+        $text = LegalText::default($page);
+        PlatformSettings::save([$page => $text]);
+        $this->activity->log('platform.legal_reset', null, ['page' => ['to' => $page]], null);
+
+        return response()->json(['data' => [$page => $text]]);
+    }
+
     /**
      * Test e-mail to the address typed next to the button (owner, 2026-11-13);
      * the address is not saved. 5 tests a minute per Super Admin (route throttle).

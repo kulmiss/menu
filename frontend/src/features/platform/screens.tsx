@@ -1,9 +1,17 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Download, Loader2, Plus } from 'lucide-react'
+import {
+  AlertTriangle,
+  Download,
+  ExternalLink,
+  Loader2,
+  Plus,
+  RotateCcw,
+} from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { api, validationErrors } from '@/lib/api'
 import { toast } from '@/lib/toast'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -34,6 +42,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
+import { ConfirmDialog } from '@/components/confirm-dialog'
 import {
   FEATURES,
   LIMITS,
@@ -917,16 +926,21 @@ function SettingsForm({
             {input('domain', { placeholder: 'menu.example.com' })}
             {input('default_currency', { maxLength: 3 })}
           </div>
+          <Alert>
+            <AlertTriangle aria-hidden />
+            <AlertTitle className='line-clamp-none'>
+              {t('platform.legal.draft')}
+            </AlertTitle>
+            <AlertDescription>{t('platform.legal.format')}</AlertDescription>
+          </Alert>
           {(['terms', 'privacy'] as const).map((k) => (
-            <div key={k} className='grid gap-1'>
-              <Label htmlFor={`st-${k}`}>{t(`platform.settings.${k}`)}</Label>
-              <Textarea
-                id={`st-${k}`}
-                rows={5}
-                value={v[k]}
-                onChange={(x) => setV({ ...v, [k]: x.target.value })}
-              />
-            </div>
+            <LegalField
+              key={k}
+              page={k}
+              value={v[k]}
+              onChange={(text) => setV((x) => ({ ...x, [k]: text }))}
+              t={t}
+            />
           ))}
           <Button
             type='submit'
@@ -974,6 +988,76 @@ function SettingsForm({
         }}
       />
     </>
+  )
+}
+
+/** Terms / Privacy text with "View page" and "Reset to default text" (QUESTIONS #181). */
+function LegalField({
+  page,
+  value,
+  onChange,
+  t,
+}: {
+  page: 'terms' | 'privacy'
+  value: string
+  onChange: (text: string) => void
+  t: (k: string) => string
+}) {
+  const [confirm, setConfirm] = useState(false)
+  const reset = usePlatformMutation(() =>
+    send('post', `settings/legal/${page}/reset`, {})
+  )
+  return (
+    <div className='grid gap-1'>
+      <div className='flex flex-wrap items-end justify-between gap-2'>
+        <Label htmlFor={`st-${page}`}>{t(`platform.settings.${page}`)}</Label>
+        <div className='flex flex-wrap gap-1'>
+          <Button
+            asChild
+            variant='ghost'
+            size='sm'
+            className='min-h-11 sm:min-h-8'
+          >
+            <a href={`/${page}`} target='_blank' rel='noopener'>
+              <ExternalLink aria-hidden /> {t('platform.legal.view')}
+            </a>
+          </Button>
+          <Button
+            type='button'
+            variant='outline'
+            size='sm'
+            className='min-h-11 sm:min-h-8'
+            onClick={() => setConfirm(true)}
+          >
+            <RotateCcw aria-hidden /> {t('platform.legal.reset')}
+          </Button>
+        </div>
+      </div>
+      <Textarea
+        id={`st-${page}`}
+        rows={14}
+        className='font-mono text-sm'
+        value={value}
+        onChange={(x) => onChange(x.target.value)}
+      />
+      <ConfirmDialog
+        open={confirm}
+        onOpenChange={setConfirm}
+        title={t(`platform.legal.reset_title_${page}`)}
+        desc={t('platform.legal.reset_desc')}
+        confirmText={t('platform.legal.reset')}
+        destructive
+        isLoading={reset.isPending}
+        handleConfirm={async () => {
+          const res = (await reset.mutateAsync(undefined)) as {
+            data: { data: Record<string, string> }
+          }
+          onChange(res.data.data[page])
+          setConfirm(false)
+          toast.success(t('platform.legal.reset_done'))
+        }}
+      />
+    </div>
   )
 }
 

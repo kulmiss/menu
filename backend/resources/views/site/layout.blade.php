@@ -24,6 +24,7 @@
         footer { border-top: 1px solid var(--line); font-size: .875rem; }
         footer a { color: inherit; display: inline-flex; align-items: center; min-height: 44px; margin-inline-end: 1rem; }
     </style>
+    @stack('styles')
 </head>
 <body>
     <header>

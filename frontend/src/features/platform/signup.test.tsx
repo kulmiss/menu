@@ -290,4 +290,77 @@ describe('Super Admin landing page settings', () => {
       .toHaveValue('Menu Hub ET')
     window.history.replaceState(null, '', '#')
   })
+
+  it('shows the draft note and resets the Terms to the default text after confirming', async () => {
+    window.history.replaceState(null, '', '#general')
+    fake = fakeApi({
+      'GET /platform/settings': {
+        data: {
+          data: {
+            name: 'Menu',
+            terms: 'My own terms',
+            privacy: 'My own privacy text',
+            share_image_url: '/img/share.jpg',
+            logo_url: null,
+            signup_open: true,
+            signup_plan_id: null,
+            signup_approval: false,
+            signup_notify: true,
+            turnstile_enabled: false,
+            turnstile_site_key: '',
+            turnstile_secret_set: false,
+            disposable_domains: [],
+            upgrade_whatsapp: '',
+            plans: [{ id: 1, name: 'Free', slug: 'free' }],
+          },
+        },
+      },
+      'GET /platform/settings/mail': { status: 404 },
+      'POST /platform/settings/legal/terms/reset': {
+        data: {
+          data: { terms: 'Last updated: 13 November 2026\n\nDefault terms' },
+        },
+      },
+    })
+    const screen = await renderWithQuery(<SettingsPage />, { me: admin })
+
+    await expect
+      .element(
+        screen.getByText('Draft — have a lawyer review before relying on it.')
+      )
+      .toBeVisible()
+    const terms = screen.getByLabelText('Terms of use')
+    await expect.element(terms).toHaveValue('My own terms')
+    await expect
+      .element(screen.getByRole('link', { name: 'View page' }).first())
+      .toHaveAttribute('href', '/terms')
+
+    // Cancel keeps the text and sends nothing.
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Reset to default text' }).first()
+    )
+    await expect
+      .element(screen.getByRole('alertdialog'))
+      .toHaveTextContent('Reset the Terms of Service?')
+    await userEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+    expect(fake.calls.some((c) => c.method === 'POST')).toBe(false)
+
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Reset to default text' }).first()
+    )
+    await userEvent.click(
+      screen
+        .getByRole('alertdialog')
+        .getByRole('button', { name: 'Reset to default text' })
+    )
+    await expect
+      .element(terms)
+      .toHaveValue('Last updated: 13 November 2026\n\nDefault terms')
+    expect(
+      fake.calls.filter((c) => c.method === 'POST').map((c) => c.url)
+    ).toEqual(['/platform/settings/legal/terms/reset'])
+    await expect
+      .element(screen.getByLabelText('Privacy policy'))
+      .toHaveValue('My own privacy text')
+  })
 })

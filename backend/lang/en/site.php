@@ -4,5 +4,8 @@
 return [
     'terms' => 'Terms of Service',
     'privacy' => 'Privacy Policy',
+    'updated' => 'Last updated: :date',
+    'contents' => 'On this page',
+    'back_to_top' => 'Back to top',
     'not_written' => 'This page has not been published yet. Please contact us if you have questions.',
 ];
