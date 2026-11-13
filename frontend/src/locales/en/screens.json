@@ -617,7 +617,24 @@
     "privacy": "Search engines, link previews and speed tests are not counted. Numbers update within a minute.",
     "max": "highest {{count}}",
     "max_one": "highest {{count}}",
-    "max_other": "highest {{count}}"
+    "max_other": "highest {{count}}",
+    "export": {
+      "button": "Export",
+      "for": "Last {{count}} days",
+      "for_one": "Last {{count}} day",
+      "for_other": "Last {{count}} days",
+      "pdf": "Report (PDF)",
+      "csv_daily": "Views and scans per day (CSV)",
+      "csv_qr": "Scans per QR code and table (CSV)",
+      "csv_dishes": "Dish views and “My order” adds (CSV)"
+    },
+    "monthly": {
+      "title": "Monthly report by e-mail",
+      "hint": "On the 1st of every month, the owners get last month's report as a PDF: menu views, QR scans, top dishes and top codes, compared with the month before.",
+      "label": "E-mail me the monthly report",
+      "on": "Monthly report switched on. The first one comes on the 1st.",
+      "off": "Monthly report switched off."
+    }
   },
   "dashboard": {
     "title": "Dashboard",

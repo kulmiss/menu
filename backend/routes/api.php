@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\Restaurant\BranchController;
 use App\Http\Controllers\Api\Restaurant\DashboardWidgetController;
 use App\Http\Controllers\Api\Restaurant\InfoController;
 use App\Http\Controllers\Api\Restaurant\InsightsController;
+use App\Http\Controllers\Api\Restaurant\InsightsExportController;
 use App\Http\Controllers\Api\Restaurant\PdfMenuController;
 use App\Http\Controllers\Api\Restaurant\PricePeriodController;
 use App\Http\Controllers\Api\Restaurant\PromotionController;
@@ -238,6 +239,12 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::post('announcements/{announcement}/read', [AnnouncementController::class, 'read'])->whereNumber('announcement');
 
             Route::get('insights', [InsightsController::class, 'index'])->middleware('feature:insights');
+            Route::middleware('feature:insights')->group(function () {
+                Route::get('insights/export.csv', [InsightsExportController::class, 'csv']);
+                Route::get('insights/report.pdf', [InsightsExportController::class, 'pdf']);
+                Route::get('insights/settings', [InsightsExportController::class, 'settings']);
+                Route::put('insights/settings', [InsightsExportController::class, 'updateSettings']);
+            });
             Route::get('dashboard', [InsightsController::class, 'dashboard']);
             Route::prefix('widgets')->controller(DashboardWidgetController::class)->group(function () {
                 Route::get('setup', 'setup');

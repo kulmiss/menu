@@ -36,12 +36,15 @@ _Last updated: 2026-11-12 13:00 EAT. Everything requested is merged into `develo
 
 ## History (newest first)
 
-## Nine features (2026-11-13/14) — 1–5 merged (#64), 6 postponed, 7–9 in PRs
+## Nine features (2026-11-13/14) — 1–5 merged (#64), 6 postponed, 7–9 done in #65–#67
 
 **6. Somali + Amharic — POSTPONED (owner, 2026-11-14).** The app stays English only. The translation structure stays exactly as it is (every text through `t()` / `__()`, `locales/en/*.json`, `lang/en/*.php`, per-language JSON fields in the database, `users.locale`, `LANGUAGES` list), so languages can be added later. Plan for when it comes back: `locales/{so,am}/{common,screens,platform,signup,appearance}.json` + `lang/{so,am}/*.php` + guest-page strings marked `"_status": "machine_draft"`; review CSV (key, English, Somali, Amharic); re-enable per-field menu translations; guest page `?lang=` → one static page per language, switch code in the on-demand file (inline script is at 4.80 KB of 5 KB); Noto Sans Ethiopic subset only for `am`; plan limit `languages`; CI speed jobs for a Somali and an Amharic page.
 
 - #65 Time-based prices (QUESTIONS #178), branch `feat/price-periods`. Live: `php artisan migrate --force`; the existing cron line runs `menu:price-periods` every minute.
 - #66 Print materials (QUESTIONS #179), branch `feat/print-materials` (on top of #65). `App\Support\Print\{Canvas,PrintMaterials}`, `GET t/{tenant}/print-materials(.pdf)`, admin `/admin/print-materials`. Live: nothing to run.
+- #67 Insights export (QUESTIONS #180), branch `feat/insights-export` (on top of #66). `App\Support\Insights\{InsightsReport,ReportPdf}`, `InsightsExportController`, `insights:monthly` + `MonthlyInsightsNotification`. Live: `php artisan migrate --force` (two columns on `tenants`); the existing cron line runs `insights:monthly` hourly.
+
+**Merge order:** #65 → #66 → #67 (each is stacked on the previous one; after #65 is merged the next PR shows only its own commit).
 
 - #60 Invoices and receipts (QUESTIONS #173).
 - #61 Restaurant notes, tags and follow-ups for the Super Admin (QUESTIONS #174). Live: `php artisan migrate --force`.
