@@ -31,6 +31,7 @@ use App\Http\Controllers\Auth\SignUpController;
 use App\Http\Controllers\Mobile\AccountController as MobileAccountController;
 use App\Http\Controllers\Mobile\AuthController as MobileAuthController;
 use App\Http\Controllers\Mobile\DeviceController;
+use App\Http\Controllers\Mobile\PushController;
 use App\Http\Controllers\NewsSubscriptionController;
 use App\Http\Controllers\Platform\BackupController;
 use App\Http\Controllers\Platform\CampaignController;
@@ -93,6 +94,13 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::post('account/two-factor/confirm', [MobileAccountController::class, 'confirmTwoFactor'])->middleware('throttle:6,1');
             Route::delete('account/two-factor', [MobileAccountController::class, 'disableTwoFactor'])->middleware('throttle:6,1');
             Route::post('account/two-factor/recovery-codes', [MobileAccountController::class, 'recoveryCodes'])->middleware('throttle:6,1');
+            // Push notifications (QUESTIONS #189)
+            Route::post('push-tokens', [PushController::class, 'register'])->middleware('throttle:20,1');
+            Route::delete('push-tokens', [PushController::class, 'unregister']);
+            Route::get('notification-settings', [PushController::class, 'settings']);
+            Route::put('notification-settings', [PushController::class, 'saveSettings']);
+            Route::get('notifications', [PushController::class, 'inbox']);
+            Route::post('notifications/read', [PushController::class, 'read']);
         });
         Route::put('me/news', [NewsSubscriptionController::class, 'update']);
         Route::post('impersonation/stop', [AnnouncementController::class, 'stopImpersonating']);

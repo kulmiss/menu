@@ -1,6 +1,7 @@
 <?php
 
 use App\Jobs\SendCampaignBatch;
+use App\Models\AppNotification;
 use App\Models\Tenant;
 use App\Support\Backups\Backups;
 use App\Support\PlatformSettings;
@@ -49,6 +50,12 @@ Schedule::command('menu:refresh-pages --all')->dailyAt('00:05');
 Schedule::command('signup:prune')->dailyAt('03:20');
 // Mobile app sign-ins that expired or were unused too long (QUESTIONS #187).
 Schedule::command('mobile:prune-tokens')->dailyAt('03:25');
+// Push notifications for the app (QUESTIONS #189); sending itself runs on the queue.
+Schedule::command('push:plan-reminders')->dailyAt('09:00');
+Schedule::command('push:followups')->dailyAt('08:00');
+Schedule::command('push:health')->everyFifteenMinutes()->withoutOverlapping(10);
+Schedule::call(fn () => AppNotification::where('created_at', '<', now()->subDays(AppNotification::KEEP_DAYS))->delete())
+    ->dailyAt('03:35')->name('notifications:prune');
 
 // Insights keep 13 months of daily counters (enough for "same month last year").
 Schedule::call(fn () => DB::table('stats_daily')->where('date', '<', now()->subDays(400)->toDateString())->delete())

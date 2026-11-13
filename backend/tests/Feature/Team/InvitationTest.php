@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\Role;
+use App\Models\AppNotification;
 use App\Models\Invitation;
 use App\Models\Membership;
 use App\Models\User;
@@ -76,7 +77,9 @@ it('accepts an invitation for the invited email address', function () {
         ->assertJsonPath('data.membership.role', 'staff')
         ->assertJsonPath('data.membership.can_edit_prices', true);
 
-    expect(Membership::where('tenant_id', $tenant->id)->where('user_id', $hana->id)->exists())->toBeTrue();
+    expect(Membership::where('tenant_id', $tenant->id)->where('user_id', $hana->id)->exists())->toBeTrue()
+        // The owner's app inbox (QUESTIONS #189).
+        ->and(AppNotification::where('user_id', $owner->id)->where('type', 'invitation_accepted')->value('link'))->toBe("/r/{$tenant->id}/team");
 
     // Used once only.
     $this->getJson("/api/v1/invitations/{$token}")->assertNotFound();

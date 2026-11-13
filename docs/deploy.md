@@ -188,6 +188,17 @@ There is no restore button on purpose: restoring replaces everything. Tested on 
 7. **Rebuild what isn't backed up:** `php artisan optimize:clear && php artisan migrate --force && php artisan menu:refresh-pages --all`
 8. **Back online:** `php artisan up`, then open a menu, sign in to the admin and check Backups shows the restored list.
 
+## 10a. Mobile app push notifications (optional)
+
+The Menu Admin app works without this; pushes then only show in the app's inbox.
+
+1. Firebase console → your project → Project settings → **Service accounts** → **Generate new private key**. A JSON file downloads. Keep it secret.
+2. Upload it to the server **outside `public_html`**, e.g. `storage/app/private/firebase.json`, permissions `600`.
+3. In `.env`: `FCM_CREDENTIALS=storage/app/private/firebase.json`, then `php artisan config:cache`.
+4. Nothing else: the existing cron line sends the queued pushes every minute. Test: sign in on the app, then record a payment as another Super Admin, or wait for the 08:00/09:00 reminders.
+
+Never commit this file. It is not inside the backup zip; keep a copy in your password manager.
+
 ## 11. Troubleshooting
 
 | Problem | Check |

@@ -6,6 +6,7 @@ use App\Models\Backup;
 use App\Models\User;
 use App\Notifications\BackupProblemNotification;
 use App\Support\PlatformSettings;
+use App\Support\Push\Push;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
@@ -212,6 +213,7 @@ class Backups
         if (! Cache::add('backups:alert', true, now()->addDay())) {
             return; // at most one e-mail a day
         }
+        Push::send(Push::superAdmins(), 'backup_failed', __('push.types.backup_failed'), (string) $problem, '/p/backups');
         Notification::send(User::where('is_super_admin', true)->get(), new BackupProblemNotification((string) $problem));
     }
 }

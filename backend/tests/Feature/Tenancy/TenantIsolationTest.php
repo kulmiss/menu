@@ -2,6 +2,7 @@
 
 use App\Enums\Role;
 use App\Models\ActivityLog;
+use App\Models\AppNotification;
 use App\Models\CampaignRecipient;
 use App\Models\Concerns\BelongsToTenant;
 use App\Models\Impersonation;
@@ -96,7 +97,8 @@ it('shows each restaurant only its own rows', function () {
 it('makes every model with a tenant_id column use BelongsToTenant (except the documented bridges)', function () {
     // Bridges, plus platform records only the Super Admin area reads (payments, "log in as"),
     // and invoices (Settings → Billing filters them by the current restaurant itself; tested in InvoiceTest).
-    $bridges = [Membership::class, ActivityLog::class, TenantSlugHistory::class, Payment::class, Impersonation::class, Invoice::class, RestaurantNote::class, CampaignRecipient::class];
+    // App inbox lines are per user; tenant_id only says which restaurant a line is about (QUESTIONS #189).
+    $bridges = [Membership::class, ActivityLog::class, TenantSlugHistory::class, Payment::class, Impersonation::class, Invoice::class, RestaurantNote::class, CampaignRecipient::class, AppNotification::class];
 
     $offenders = collect(File::files(app_path('Models')))
         ->map(fn ($file) => 'App\\Models\\'.$file->getFilenameWithoutExtension())
