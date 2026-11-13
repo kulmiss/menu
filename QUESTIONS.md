@@ -254,6 +254,8 @@ New rules added by the owner (now in PLAN.md §2): Docker is for local developme
 
 | 182 | Admin fonts self-hosted | Owner, 2026-11-13. Inter and Manrope come from the app itself (`frontend/src/assets/fonts`, Fontsource 5.3.0 WOFF2, SIL OFL 1.1): weights 400/500/600/700 only, Latin + Latin Extended with `unicode-range`, `font-display: swap`; served from `/app/assets` with the year-long cache. No request to Google any more. The Privacy Policy default lost its Google Fonts line; migration `2026_11_14_400001_update_privacy_default` replaces the stored Privacy text only when it is still exactly the old default (edited texts are kept). |
 
+| 183 | Collapsible sections on /terms and /privacy | Owner, 2026-11-13. Every "## " section is a native `<details>`/`<summary>` (the heading is inside the summary; works without JavaScript, by keyboard and with screen readers), closed by default; the intro and the "In short" list before the first section are always shown. Chevron turns when open; open/close animates the height only when the visitor doesn't ask for reduced motion (`::details-content` + `interpolate-size`; other browsers simply open at once). "Expand all" / "Collapse all" are shown by a small inline script (hidden without JavaScript). Contents links and `#section` in the address open that section and scroll to it; printing opens every section (beforeprint, and print CSS) and restores them afterwards. 44 px summaries, buttons and links; light/dark from the system. |
+
 ## Open
 
 - Owner action: protect `main` in GitHub settings (require PR, no force push, no deletion). Claude's access can't change branch settings.

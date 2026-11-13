@@ -117,7 +117,8 @@ it('shows Terms and Privacy as headings, lists and paragraphs, with contents and
         ->assertSee('Last updated: 2 March 2027')
         ->assertSee('On this page')
         ->assertSee('<a href="#using-menu">1. Using Menu</a>', false)
-        ->assertSee('<h2 id="using-menu">1. Using Menu</h2>', false)
+        ->assertSee('<details class="sec" id="using-menu">', false)
+        ->assertSee('<summary><h2>1. Using Menu</h2>', false)
         ->assertSee('<p>Intro line one.<br>Intro line two.</p>', false)
         ->assertSee('<li><strong>Fair use:</strong> no spam.', false)
         ->assertSee('<li>not even a little</li>', false)
@@ -141,4 +142,26 @@ it('serves public pages and guest menus without any cookie', function () {
     }
     // The admin still gets its session cookie.
     expect($this->get('/admin')->headers->getCookies())->not->toBe([]);
+});
+
+it('shows each section as a closed, collapsible block, with the intro always visible', function () {
+    PlatformSettings::save(['privacy' => "Last updated: 1 May 2027\n\nIn short:\n\n- No cookies.\n\n## 1. First\n\nOne.\n\n## 2. Second\n\n- Two.\n\n## 3. Second\n\nSame title."]);
+    $html = $this->get('/privacy')->assertOk()->getContent();
+
+    // Intro and "In short" sit before the first section, outside any <details>.
+    $first = strpos($html, '<details');
+    expect(strpos($html, 'In short:'))->toBeLessThan($first)
+        ->and(strpos($html, '<li>No cookies.</li>'))->toBeLessThan($first);
+    // Three sections, all closed, each with its own id, the contents pointing at them.
+    expect(substr_count($html, '<details class="sec" id="'))->toBe(3)
+        ->and($html)->not->toContain('<details class="sec" id="first" open')
+        ->and($html)->toContain('<details class="sec" id="second">')
+        ->and($html)->toContain('<details class="sec" id="second-2">')
+        ->and($html)->toContain('<a href="#second-2">3. Second</a>')
+        ->and($html)->toContain('<summary><h2>2. Second</h2>');
+    // Expand / collapse all (hidden until the script runs), printing opens everything.
+    expect($html)->toContain('data-all="open" hidden>Expand all</button>')
+        ->and($html)->toContain('data-all="close" hidden>Collapse all</button>')
+        ->and($html)->toContain("addEventListener('beforeprint'")
+        ->and($html)->toContain('prefers-reduced-motion: no-preference');
 });

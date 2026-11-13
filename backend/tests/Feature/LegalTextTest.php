@@ -39,10 +39,11 @@ it('fills empty texts when migrating, and the pages show them', function () {
 
     $this->get('/terms')->assertOk()
         ->assertSee('Last updated: 13 November 2026')
-        ->assertSee('<h2 id="plans-and-payments">4. Plans and payments</h2>', false)
+        ->assertSee('<details class="sec" id="plans-and-payments">', false)
+        ->assertSee('<summary><h2>4. Plans and payments</h2>', false)
         ->assertSee('<a href="mailto:info@kulmiss.com">info@kulmiss.com</a>', false);
     $this->get('/privacy')->assertOk()
-        ->assertSee('<h2 id="what-we-collect-from-guests">3. What we collect from guests</h2>', false)
+        ->assertSee('<details class="sec" id="what-we-collect-from-guests">', false)
         ->assertSee('Personal Data Protection Proclamation No. 1321/2024');
 });
 
