@@ -40,6 +40,11 @@ const all = {
           { key: 'items', used: 9, limit: 10 },
           { key: 'branches', used: 1, limit: null },
         ],
+        next: {
+          name: { en: 'Plus' },
+          adds: ['All 4 menu styles', 'Insights and monthly report'],
+        },
+        upgrade: { whatsapp: 'https://wa.me/251911000000', email: null },
       },
     },
   },
@@ -97,6 +102,16 @@ describe('Dashboard widgets', () => {
     await expect.element(screen.getByText('Basic')).toBeVisible()
     await expect.element(screen.getByText('12 days left')).toBeVisible()
     await expect.element(screen.getByText('9 / 10')).toBeVisible()
+    await expect
+      .element(screen.getByText(/Almost at your plan's limit/))
+      .toBeVisible()
+    await expect.element(screen.getByText('Upgrade to Plus')).toBeVisible()
+    await expect
+      .element(screen.getByText('Insights and monthly report'))
+      .toBeVisible()
+    await expect
+      .element(screen.getByRole('link', { name: 'Upgrade on WhatsApp' }))
+      .toHaveAttribute('href', 'https://wa.me/251911000000')
     await expect
       .element(screen.getByText(/Almost at your plan's limit/))
       .toBeVisible()

@@ -4,6 +4,7 @@ import {
   useQueryClient,
 } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { type Page } from '@/components/data-table'
 import { type SubscriptionState } from '@/features/auth/api'
 
 export const FEATURES = [
@@ -62,6 +63,10 @@ export type Restaurant = {
   tags?: TagRef[]
   follow_up_on?: string | null
   follow_up_reason?: string | null
+  /** From the dashboard summary (QUESTIONS #186); null before the first build. */
+  health?: { band: 'healthy' | 'at_risk' | 'inactive'; score: number } | null
+  views_30d?: number | null
+  scans_30d?: number | null
 }
 
 export type TagRef = {
@@ -124,9 +129,11 @@ export type PlanRow = {
   name: Record<string, string>
   slug: string
   price_minor: number
+  price_year_minor: number | null
   currency: string
   interval: 'month' | 'year'
   trial_days: number
+  replaced_by_plan_id: number | null
   limits: Partial<Record<string, number | null>>
   features: Record<string, boolean>
   is_public: boolean
@@ -135,6 +142,14 @@ export type PlanRow = {
 }
 
 export const pkeys = { all: ['platform'] as const }
+
+/** One page of a platform DataTable (QUESTIONS #185). */
+export const fetchPage = async <T>(path: string, params: URLSearchParams) =>
+  (
+    await api.get<{ data: T[]; meta: Page<T>['meta'] }>(
+      `/platform/${path}?${params}`
+    )
+  ).data
 const get = async <T>(path: string) =>
   (await api.get<{ data: T }>(`/platform/${path}`)).data.data
 const q = <T>(path: string) =>

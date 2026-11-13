@@ -29,34 +29,6 @@ class DashboardWidgetController extends Controller
 
     public function __construct(private readonly ActivityLogger $activity) {}
 
-    /** Income this month vs last month, MRR, and the last 12 months. */
-    public function revenue(): JsonResponse
-    {
-        return response()->json(['data' => Cache::remember('platform:w:revenue', 300, function () {
-            $start = now()->startOfMonth()->subMonths(11);
-            $rows = DB::table('payments')->where('paid_at', '>=', $start)
-                ->selectRaw("DATE_FORMAT(paid_at, '%Y-%m') as month, SUM(amount_minor) as total")
-                ->groupBy('month')->pluck('total', 'month');
-            $months = [];
-            for ($i = 0; $i < 12; $i++) {
-                $key = $start->copy()->addMonths($i)->format('Y-m');
-                $months[] = ['month' => $key, 'total' => (int) ($rows[$key] ?? 0)];
-            }
-            // MRR: what restaurants paid up to now pay per month (yearly plans count 1/12).
-            $mrr = (int) DB::table('tenants')->join('plans', 'plans.id', '=', 'tenants.plan_id')
-                ->whereNull('tenants.deleted_at')->where('tenants.paid_until', '>=', now())
-                ->sum(DB::raw("CASE WHEN plans.interval = 'year' THEN plans.price_minor / 12 ELSE plans.price_minor END"));
-
-            return [
-                'currency' => PlatformSettings::get('default_currency'),
-                'this_month' => $months[11]['total'],
-                'last_month' => $months[10]['total'],
-                'mrr' => $mrr,
-                'months' => $months,
-            ];
-        })]);
-    }
-
     /** Trials and subscriptions ending in the next 14 days. */
     public function expiring(): JsonResponse
     {
@@ -100,51 +72,6 @@ class DashboardWidgetController extends Controller
 
                 return ['id' => (int) $r->id, 'name' => $r->name, 'slug' => $r->slug, 'last_activity' => $last?->toDateString()];
             })->values()->all();
-        })]);
-    }
-
-    /** Sign-ups → menu set up (≥ 5 dishes) → first QR scan → paying, for the last 30 or 90 days. */
-    public function funnel(Request $request): JsonResponse
-    {
-        $days = $request->integer('days') === 90 ? 90 : 30;
-        // Cached as a plain array: the cache store only unserializes arrays and scalars.
-        $row = Cache::remember("platform:w:funnel:{$days}", 300, fn () => (array) DB::table('tenants as t')
-            ->whereNull('t.deleted_at')->where('t.created_at', '>=', now()->subDays($days))
-            ->selectRaw('COUNT(*) as signups')
-            // Self sign-ups count once the e-mail is confirmed; restaurants the Super Admin creates count right away.
-            ->selectRaw("SUM(t.signup_state IS NULL OR t.signup_state <> 'unverified') as verified")
-            ->selectRaw('SUM((SELECT COUNT(*) FROM items i WHERE i.tenant_id = t.id) >= 5) as menu')
-            ->selectRaw("SUM(EXISTS (SELECT 1 FROM stats_daily s WHERE s.tenant_id = t.id AND s.metric = 'qr_scan')) as scanned")
-            ->selectRaw('SUM(EXISTS (SELECT 1 FROM payments p WHERE p.tenant_id = t.id)) as paying')
-            ->first());
-        $steps = [];
-        $previous = null;
-        foreach (['signups', 'verified', 'menu', 'scanned', 'paying'] as $key) {
-            $count = (int) ($row[$key] ?? 0);
-            $steps[] = ['key' => $key, 'count' => $count, 'percent' => $previous === null ? null : ($previous > 0 ? (int) round($count * 100 / $previous) : 0)];
-            $previous = $count;
-        }
-
-        return response()->json(['data' => ['days' => $days, 'steps' => $steps]]);
-    }
-
-    /** Most views and scans (30 days) and the restaurants on the biggest plans. */
-    public function top(): JsonResponse
-    {
-        return response()->json(['data' => Cache::remember('platform:w:top', 300, function () {
-            $since = now()->subDays(29)->toDateString();
-            $best = fn (string $metric) => DB::table('stats_daily as s')->join('tenants as t', 't.id', '=', 's.tenant_id')
-                ->whereNull('t.deleted_at')->where('s.metric', $metric)->where('s.date', '>=', $since)
-                ->groupBy('s.tenant_id', 't.name')->orderByDesc('total')->limit(5)
-                ->get(['s.tenant_id as id', 't.name', DB::raw('SUM(s.count) as total')])
-                ->map(fn ($r) => ['id' => (int) $r->id, 'name' => $r->name, 'total' => (int) $r->total])->all();
-            $plans = DB::table('tenants as t')->join('plans as p', 'p.id', '=', 't.plan_id')
-                ->whereNull('t.deleted_at')->where('t.paid_until', '>=', now())
-                ->orderByDesc('p.price_minor')->orderBy('t.name')->limit(5)
-                ->get(['t.id', 't.name', 'p.name as plan', 'p.price_minor'])
-                ->map(fn ($r) => ['id' => (int) $r->id, 'name' => $r->name, 'plan' => json_decode((string) $r->plan, true), 'price_minor' => (int) $r->price_minor])->all();
-
-            return ['views' => $best('menu_view'), 'scans' => $best('qr_scan'), 'plans' => $plans];
         })]);
     }
 

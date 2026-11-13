@@ -33,6 +33,8 @@ export type Tenant = {
   } | null
   /** Plan features (with the Super Admin's overrides); missing = on. */
   features?: Partial<Record<string, boolean>>
+  /** Where "Upgrade" buttons point (WhatsApp link / support e-mail). */
+  upgrade?: { whatsapp: string | null; email: string | null }
 }
 
 /** GET /api/v1/me */

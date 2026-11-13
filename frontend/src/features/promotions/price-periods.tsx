@@ -38,6 +38,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
+import { DataTable } from '@/components/data-table'
 import { branchesQuery } from '@/features/branches/api'
 import { menusQuery, treeQuery } from '@/features/menu/api'
 import { tr, withText } from '@/features/menu/text'
@@ -125,73 +126,122 @@ export function PricePeriodsSection(props: Props) {
         </p>
       ) : (
         <>
-          {(list.data ?? []).length === 0 ? (
-            <p className='rounded-md border p-6 text-center text-muted-foreground'>
-              {t('promotions.periods.empty')}
-            </p>
-          ) : (
-            <div className='grid gap-3'>
-              {list.data?.map((p) => (
-                <Card key={p.id} className='py-3'>
-                  <CardContent className='flex flex-wrap items-center gap-3'>
-                    <Clock className='size-5 text-primary' aria-hidden />
-                    <div className='min-w-0 flex-1'>
-                      <div className='flex flex-wrap items-center gap-2'>
-                        <p className='font-medium'>{tr(p.name, locale)}</p>
-                        {!p.is_active && (
-                          <Badge variant='secondary'>
-                            {t('promotions.off')}
-                          </Badge>
-                        )}
-                      </div>
-                      <p className='text-sm text-muted-foreground'>
-                        {DAYS.filter((d) => p.weekdays.includes(d))
-                          .map(dayName)
-                          .join(', ')}{' '}
-                        · {p.starts_at}–{p.ends_at} ·{' '}
-                        {t('promotions.periods.dishes', {
-                          count: new Set(p.items.map((i) => i.item_id)).size,
-                        })}
-                      </p>
-                    </div>
-                    {canEdit && (
-                      <div className='flex gap-1'>
-                        <Button
-                          variant='ghost'
-                          size='icon'
-                          className='size-11 sm:size-9'
-                          aria-label={t('promotions.edit_one', {
-                            name: tr(p.name, locale),
-                          })}
-                          onClick={() => setEditing(p)}
-                        >
-                          <Pencil />
-                        </Button>
-                        <Button
-                          variant='ghost'
-                          size='icon'
-                          className='size-11 text-destructive sm:size-9'
-                          aria-label={t('promotions.delete', {
-                            name: tr(p.name, locale),
-                          })}
-                          onClick={() => {
-                            if (
-                              window.confirm(
-                                t('promotions.periods.delete_confirm')
-                              )
-                            )
-                              remove.mutate(p.id)
-                          }}
-                        >
-                          <Trash2 />
-                        </Button>
-                      </div>
+          <DataTable<PricePeriod>
+            id='price-periods'
+            rows={list.data}
+            loading={list.isPending}
+            error={list.isError}
+            onRetry={() => list.refetch()}
+            rowId={(p) => p.id}
+            csvName='price-periods'
+            searchPlaceholder={t('promotions.periods.search')}
+            empty={t('promotions.periods.empty')}
+            onRowClick={canEdit ? (p) => setEditing(p) : undefined}
+            filters={[
+              {
+                id: 'active',
+                label: t('promotions.periods.status'),
+                options: [
+                  { value: 'on', label: t('promotions.periods.on') },
+                  { value: 'off', label: t('promotions.off') },
+                ],
+                match: (p, v) => v.includes(p.is_active ? 'on' : 'off'),
+              },
+            ]}
+            columns={[
+              {
+                id: 'name',
+                label: t('promotions.periods.name'),
+                primary: true,
+                text: (p) => tr(p.name, locale),
+                sortValue: (p) => tr(p.name, locale).toLowerCase(),
+                cell: (p) => (
+                  <span className='flex flex-wrap items-center gap-2'>
+                    <Clock className='size-4 text-primary' aria-hidden />
+                    <span className='font-medium'>{tr(p.name, locale)}</span>
+                    {!p.is_active && (
+                      <Badge variant='secondary'>{t('promotions.off')}</Badge>
                     )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
+                  </span>
+                ),
+              },
+              {
+                id: 'days',
+                label: t('promotions.periods.days'),
+                text: (p) =>
+                  DAYS.filter((d) => p.weekdays.includes(d))
+                    .map(dayName)
+                    .join(', '),
+                cell: (p) =>
+                  DAYS.filter((d) => p.weekdays.includes(d))
+                    .map(dayName)
+                    .join(', '),
+              },
+              {
+                id: 'time',
+                label: t('promotions.periods.time'),
+                text: (p) => `${p.starts_at}–${p.ends_at}`,
+                sortValue: (p) => p.starts_at,
+                cell: (p) => (
+                  <span className='tabular-nums'>
+                    {p.starts_at}–{p.ends_at}
+                  </span>
+                ),
+              },
+              {
+                id: 'dishes',
+                label: t('promotions.periods.dishes_col'),
+                align: 'end',
+                text: (p) => new Set(p.items.map((i) => i.item_id)).size,
+                sortValue: (p) => new Set(p.items.map((i) => i.item_id)).size,
+                cell: (p) => new Set(p.items.map((i) => i.item_id)).size,
+              },
+              ...(canEdit
+                ? [
+                    {
+                      id: 'actions',
+                      label: t('promotions.periods.actions'),
+                      cell: (p: PricePeriod) => (
+                        <span
+                          className='flex gap-1'
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Button
+                            variant='ghost'
+                            size='icon'
+                            className='size-11 sm:size-9'
+                            aria-label={t('promotions.edit_one', {
+                              name: tr(p.name, locale),
+                            })}
+                            onClick={() => setEditing(p)}
+                          >
+                            <Pencil />
+                          </Button>
+                          <Button
+                            variant='ghost'
+                            size='icon'
+                            className='size-11 text-destructive sm:size-9'
+                            aria-label={t('promotions.delete', {
+                              name: tr(p.name, locale),
+                            })}
+                            onClick={() => {
+                              if (
+                                window.confirm(
+                                  t('promotions.periods.delete_confirm')
+                                )
+                              )
+                                remove.mutate(p.id)
+                            }}
+                          >
+                            <Trash2 />
+                          </Button>
+                        </span>
+                      ),
+                    },
+                  ]
+                : []),
+            ]}
+          />
           <NowPreview tenantId={tenantId} locale={locale} />
         </>
       )}

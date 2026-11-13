@@ -95,7 +95,8 @@
     "reject_hint": "The owner gets this reason by e-mail. The account and restaurant are removed and the menu address is free again.",
     "rejected": "Sign-up rejected and removed.",
     "signup_short_unverified": "E-mail not confirmed",
-    "signup_short_pending_approval": "Needs approval"
+    "signup_short_pending_approval": "Needs approval",
+    "created_on": "Created"
   },
   "features": {
     "branches": "More branches",
@@ -135,7 +136,8 @@
       "method": "Method",
       "reference": "Reference",
       "period": "Period"
-    }
+    },
+    "search": "Search restaurant or reference"
   },
   "plans": {
     "hint": "What restaurants pay for and what they can use.",
@@ -157,9 +159,12 @@
     "price": "Price",
     "currency": "Currency",
     "trial_days": "Trial days",
-    "limits": "Limits (empty = unlimited)",
+    "limits": "Limits (empty = unlimited). Only photos and branches are counted on the standard plans.",
     "public": "Shown at sign-up",
-    "active": "Can be chosen"
+    "active": "Can be chosen",
+    "price_year": "Price for a year (optional)",
+    "price_year_none": "Not offered",
+    "replaced": "Old plan: its restaurants move to {{name}} when their paid time ends."
   },
   "limits": {
     "menus": "Menus",
@@ -204,11 +209,28 @@
     "send": "Publish"
   },
   "activity": {
-    "hint": "Changes on the platform and in restaurants (12 months).",
+    "hint": "Changes on the platform and in restaurants.",
     "action": "Filter by action",
     "platform_only": "Platform only",
     "platform": "Platform",
-    "as": "as {{name}}"
+    "as": "as {{name}}",
+    "when": "When",
+    "what": "Action",
+    "who": "Who",
+    "subject": "Subject",
+    "search": "Search action or person",
+    "scope": "Where",
+    "restaurants": "Restaurants",
+    "area": "Area",
+    "areas": {
+      "platform": "Platform",
+      "signup": "Sign-ups",
+      "team": "Team",
+      "menu": "Menu",
+      "restaurant": "Restaurant settings",
+      "promotions": "Promotions",
+      "insights": "Insights"
+    }
   },
   "settings": {
     "name": "Platform name",
@@ -268,12 +290,6 @@
   },
   "w": {
     "no_data": "No data yet",
-    "revenue": "Revenue",
-    "this_month": "This month",
-    "last_month": "Last month",
-    "mrr": "MRR",
-    "vs_last": "{{change}} vs last month",
-    "revenue_chart": "Revenue, last 12 months",
     "expiring": "Trials and subscriptions ending",
     "next_days_one": "Next {{count}} day",
     "next_days_other": "Next {{count}} days",
@@ -288,21 +304,6 @@
     "none_inactive": "Every restaurant was active in the last 14 days.",
     "last_activity": "last active {{date}}",
     "email_owner": "Email owner",
-    "funnel": "Growth funnel",
-    "last_days_one": "Last {{count}} day",
-    "last_days_other": "Last {{count}} days",
-    "funnel_steps": {
-      "signups": "Signed up",
-      "verified": "E-mail confirmed",
-      "menu": "5 or more dishes",
-      "scanned": "First QR scan",
-      "paying": "Paying"
-    },
-    "top": "Top restaurants",
-    "top_hint": "Last 30 days",
-    "most_views": "Most views",
-    "most_scans": "Most QR scans",
-    "biggest_plans": "Biggest plans",
     "signups": "New sign-ups",
     "setup_of": "Setup of {{name}}",
     "done": "done",
@@ -509,7 +510,16 @@
     "no_notes": "No notes yet.",
     "widget": "Follow-ups due",
     "today": "today",
-    "overdue": "overdue since {{date}}"
+    "overdue": "overdue since {{date}}",
+    "bulk_tag": "Add tag",
+    "bulk_untag": "Remove tag",
+    "bulk_email": "E-mail owners",
+    "bulk_tagged_one": "Tag added to {{count}} restaurant.",
+    "bulk_tagged_other": "Tag added to {{count}} restaurants.",
+    "bulk_tagged": "Tag added to {{count}} restaurants.",
+    "bulk_untagged_one": "Tag removed from {{count}} restaurant.",
+    "bulk_untagged_other": "Tag removed from {{count}} restaurants.",
+    "bulk_untagged": "Tag removed from {{count}} restaurants."
   },
   "messages": {
     "hint": "E-mails to restaurant owners: news, offers and reminders. They go out a few per minute through the e-mail queue.",
@@ -531,9 +541,12 @@
     "retry": "Resend to {{count}} failed",
     "requeued": "Failed addresses are queued again.",
     "col": {
-      "email": "E-mail",
-      "restaurant": "Restaurant",
-      "status": "Status"
+      "subject": "Subject",
+      "status": "Status",
+      "created": "Created",
+      "recipients": "Recipients",
+      "sent": "Sent",
+      "failed": "Failed"
     },
     "recipient": {
       "pending": "Waiting",
@@ -580,7 +593,13 @@
     "confirm_title_other": "Send this e-mail to {{count}} owners?",
     "confirm_title": "Send this e-mail to {{count}} owners?",
     "confirm_text": "It can't be stopped once it starts. Sending takes a few minutes; you can follow it here.",
-    "queued": "The e-mail is being sent."
+    "queued": "The e-mail is being sent.",
+    "picked": "Only the {{count}} restaurants picked in the restaurants list (other filters still apply).",
+    "picked_one": "Only the {{count}} restaurant picked in the restaurants list (other filters still apply).",
+    "picked_other": "Only the {{count}} restaurants picked in the restaurants list (other filters still apply).",
+    "picked_clear": "Send to all matching restaurants instead",
+    "search": "Search subject",
+    "with_failures": "With failed e-mails"
   },
   "backups": {
     "hint": "The database and every uploaded photo, zipped every night at 02:30 and kept outside the public folder.",
@@ -632,7 +651,9 @@
     "backup_s3_prefix": "Folder in the bucket",
     "backup_s3_key": "Access key ID",
     "backup_s3_secret": "Secret access key",
-    "offsite_hint": "Works with Backblaze B2, Cloudflare R2, AWS S3 and others. The secret key is stored encrypted and never shown again."
+    "offsite_hint": "Works with Backblaze B2, Cloudflare R2, AWS S3 and others. The secret key is stored encrypted and never shown again.",
+    "search": "Search backups",
+    "kind_label": "Kind"
   },
   "search": {
     "button": "Search…",
@@ -657,5 +678,146 @@
     "reset_title_privacy": "Reset the Privacy Policy?",
     "reset_desc": "Your text is replaced by the default text and saved at once. This can't be undone.",
     "reset_done": "Default text restored and saved."
+  },
+  "ins": {
+    "hint": "Numbers are rebuilt every hour from data the app already keeps. Click any number to see the restaurants behind it.",
+    "filters": "Dashboard filters",
+    "range": "Date range",
+    "last_days_one": "Last {{count}} day",
+    "last_days_other": "Last {{count}} days",
+    "custom": "Custom",
+    "from": "From",
+    "to": "To",
+    "apply": "Apply",
+    "plan": "Plan",
+    "all_plans": "All plans",
+    "updated": "Updated {{date}}",
+    "not_built": "Numbers not built yet — run php artisan platform:aggregate",
+    "to_do": "Needs attention",
+    "overview": "Overview",
+    "overview_hint": "Compared with the previous period of the same length.",
+    "vs_previous": "{{change}} vs previous",
+    "new_vs_none": "none before",
+    "total": "Total {{value}}",
+    "kpi": {
+      "restaurants": "Restaurants",
+      "active": "Active per day",
+      "new_restaurants": "New restaurants",
+      "paying": "Paying",
+      "free": "Free or not paying",
+      "mrr_minor": "MRR",
+      "revenue_minor": "Revenue",
+      "menu_views": "Menu views",
+      "qr_scans": "QR scans"
+    },
+    "chart": {
+      "views": "Menu views",
+      "revenue": "Revenue"
+    },
+    "growth": "Growth",
+    "signups_week": "Sign-ups per week",
+    "funnel": "Activation (restaurants that signed up in this period)",
+    "step": {
+      "signed_up": "Signed up",
+      "confirmed": "E-mail confirmed",
+      "dishes": "5 or more dishes",
+      "qr": "QR downloaded",
+      "views": "Menu viewed",
+      "paid": "Paid"
+    },
+    "conversion": "Free → paid",
+    "conversion_hint": "{{paid}} of {{total}} new restaurants paid",
+    "churn": "Churn",
+    "churn_hint": "{{churned}} of {{total}} paying did not renew",
+    "cohorts": "Cohorts",
+    "cohorts_hint": "Restaurants by sign-up month: how many are still active and paying today.",
+    "month": "Month",
+    "still_active": "Still active",
+    "paying_now": "Paying now",
+    "health": "Health",
+    "health_hint": "Score 0–100: setup 30, edits 20, menu views 30, plan 20. Inactive = no views and no edits in 30 days.",
+    "band": {
+      "healthy": "Healthy",
+      "at_risk": "At risk",
+      "inactive": "Inactive"
+    },
+    "band_row": "score {{score}} · setup {{setup}}% · {{views}} views · {{edits}} edits",
+    "none_in_band": "No restaurants here.",
+    "see_all": "See all in the table",
+    "engagement": "Engagement",
+    "engagement_hint": "From changes made by restaurant teams. Sign-ins are not recorded.",
+    "e": {
+      "edited_7d": "Teams that made changes, 7 days",
+      "edited_30d": "Teams that made changes, 30 days",
+      "active_7d": "Active (views or changes), 7 days",
+      "active_30d": "Active (views or changes), 30 days",
+      "edits_per_week": "Changes per week",
+      "setup_done": "Setup complete",
+      "setup_avg": "Average setup",
+      "last_edit": "Last change: {{date}}"
+    },
+    "open_activity": "Open the activity log",
+    "usage": "Feature use",
+    "usage_hint": "Restaurants using each feature now. Plan limits reached are upgrade chances.",
+    "feature": {
+      "price_periods": "Happy hour (price periods)",
+      "promotions": "Promotions",
+      "order_list": "My order (last 30 days)",
+      "print": "Printed or downloaded QR"
+    },
+    "styles": "Menu styles",
+    "style": {
+      "editorial": "Warm editorial",
+      "grid": "Fresh grid",
+      "bistro": "Quiet bistro",
+      "minimal": "Minimal"
+    },
+    "limits": "Plan limits",
+    "limit": {
+      "limit_photos": "Photo limit reached",
+      "near_photos": "Photos at 80% of limit",
+      "limit_branches": "Branch limit reached"
+    },
+    "top": "Top restaurants",
+    "top_tab": {
+      "views": "Views",
+      "scans": "QR scans",
+      "growth": "Growth",
+      "revenue": "Revenue"
+    },
+    "window": {
+      "7d": "Last 7 days",
+      "30d": "Last 30 days",
+      "90d": "Last 90 days",
+      "365d": "Last 12 months"
+    },
+    "team": "Restaurant teams",
+    "team_hint": "Team members of all restaurants. 'Active' means made a change; sign-ins are not recorded.",
+    "t": {
+      "members": "Team members",
+      "roles": "Owners · managers · staff",
+      "active_7d": "Made changes, 7 days",
+      "active_30d": "Made changes, 30 days",
+      "percent_2fa": "Two-factor on",
+      "owners_percent_2fa": "Owners with two-factor"
+    },
+    "views_30d": "Views (30 days)",
+    "scans_30d": "QR scans (30 days)",
+    "u": {
+      "paying": "Paying",
+      "not_paying": "Not paying",
+      "price_periods": "Uses happy hour",
+      "promotions": "Uses promotions",
+      "order_list": "Uses My order",
+      "print": "QR printed",
+      "limit_photos": "Photo limit reached",
+      "near_photos": "Near photo limit",
+      "limit_branches": "Branch limit reached",
+      "style_editorial": "Style: Warm editorial",
+      "style_grid": "Style: Fresh grid",
+      "style_bistro": "Style: Quiet bistro",
+      "style_minimal": "Style: Minimal"
+    },
+    "last_days": "Last {{count}} days"
   }
 }

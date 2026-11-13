@@ -40,6 +40,8 @@ type PlanInfo = {
   trial: boolean
   days_left: number | null
   usage: Usage[]
+  next?: { name: Names; adds: string[] } | null
+  upgrade?: { whatsapp: string | null; email: string | null }
 }
 
 const widget = <T,>(t: number, name: string) => ({
@@ -454,6 +456,40 @@ function PlanWidget({
               </div>
             )
           })}
+          {p.next && p.next.adds.length > 0 && (
+            <div className='grid gap-2 rounded-md border p-3'>
+              <p className='text-sm font-semibold'>
+                {t('dashboard.w.next', { name: tr(p.next.name, locale) })}
+              </p>
+              <p className='text-xs text-muted-foreground'>
+                {t('dashboard.w.next_hint')}
+              </p>
+              <ul className='grid gap-1 text-sm'>
+                {p.next.adds.map((line) => (
+                  <li key={line} className='flex gap-2'>
+                    <Check
+                      className='mt-0.5 size-4 shrink-0 text-primary'
+                      aria-hidden
+                    />
+                    {line}
+                  </li>
+                ))}
+              </ul>
+              {(p.upgrade?.whatsapp || p.upgrade?.email) && (
+                <Button asChild size='sm' className='min-h-11 w-fit sm:min-h-8'>
+                  <a
+                    href={p.upgrade.whatsapp ?? `mailto:${p.upgrade.email}`}
+                    target={p.upgrade.whatsapp ? '_blank' : undefined}
+                    rel='noopener'
+                  >
+                    {t(
+                      p.upgrade.whatsapp ? 'upgrade.whatsapp' : 'upgrade.email'
+                    )}
+                  </a>
+                </Button>
+              )}
+            </div>
+          )}
         </div>
       )}
     </Widget>

@@ -38,30 +38,30 @@ class Platform
             ['Copper Kettle Roasters', 'cafe', 'trial', 12, 'trial', 5, 11],
             ['Saffron Spoon', 'grill', 'trial', 2, 'trial', 1, 0],
             ['Green Leaf Juice Stop', 'juice', 'trial', 11, 'trial', 3, 7],
-            ['Hilltop Pizza Shack', 'pizza', 'expiring', 75, 'starter', 6, 24],
+            ['Hilltop Pizza Shack', 'pizza', 'expiring', 75, 'plus', 6, 24],
             ['Morning Dew Bakery', 'cafe', 'expiring', 160, 'pro', 6, 38],
-            ['Riverbend Grill House', 'grill', 'expiring', 220, 'starter', 6, 21],
-            ['Sunny Side Diner', 'cafe', 'expiring', 50, 'starter', 6, 17],
+            ['Riverbend Grill House', 'grill', 'expiring', 220, 'plus', 6, 21],
+            ['Sunny Side Diner', 'cafe', 'expiring', 50, 'plus', 6, 17],
             ['Blue Door Bistro', 'grill', 'expiring', 300, 'pro', 6, 45],
             ['Golden Crust Pizzeria', 'pizza', 'active', 330, 'pro', 6, 62],
             ['Olive & Thyme', 'grill', 'active', 290, 'business', 6, 80],
-            ['Nine Wells Coffee', 'cafe', 'active', 250, 'starter', 6, 28],
+            ['Nine Wells Coffee', 'cafe', 'active', 250, 'plus', 6, 28],
             ['Habesha Table', 'ethiopian', 'active', 210, 'pro', 6, 55],
-            ['Kiwi & Lime Juice Bar', 'juice', 'active', 180, 'starter', 6, 19],
+            ['Kiwi & Lime Juice Bar', 'juice', 'active', 180, 'plus', 6, 19],
             ['Firewood Kitchen', 'grill', 'active', 140, 'business', 6, 70],
             ['Lemon Grove Café', 'cafe', 'active', 110, 'pro', 6, 33],
-            ['Spice Route Ethiopian', 'ethiopian', 'active', 80, 'starter', 6, 26],
-            ['Stone Oven Slices', 'pizza', 'active', 0, 'starter', 6, 22],
-            ['Garden Terrace', 'grill', 'active', 0, 'pro-year', 6, 30],
-            ['Mango Tree Juices', 'juice', 'expired', 200, 'starter', 6, 12],
-            ['Corner Shiro House', 'ethiopian', 'expired', 130, 'starter', 6, 9],
-            ['Quick Bite Express', 'pizza', 'expired', 95, 'starter', 5, 8],
+            ['Spice Route Ethiopian', 'ethiopian', 'active', 80, 'plus', 6, 26],
+            ['Stone Oven Slices', 'pizza', 'active', 0, 'plus', 6, 22],
+            ['Garden Terrace', 'grill', 'active', 0, 'pro', 6, 30],
+            ['Mango Tree Juices', 'juice', 'expired', 200, 'plus', 6, 12],
+            ['Corner Shiro House', 'ethiopian', 'expired', 130, 'plus', 6, 9],
+            ['Quick Bite Express', 'pizza', 'expired', 95, 'plus', 5, 8],
             ['Night Owl Lounge', 'grill', 'suspended', 260, 'pro', 6, 15],
-            ['Velvet Cup', 'cafe', 'suspended', 120, 'starter', 6, 10],
-            ['Old Town Teahouse', 'cafe', 'inactive', 240, 'starter', 6, 14],
-            ['Meadow Kitchen', 'grill', 'inactive', 190, 'starter', 4, 8],
+            ['Velvet Cup', 'cafe', 'suspended', 120, 'plus', 6, 10],
+            ['Old Town Teahouse', 'cafe', 'inactive', 240, 'plus', 6, 14],
+            ['Meadow Kitchen', 'grill', 'inactive', 190, 'plus', 4, 8],
             ['Berbere & Bread', 'ethiopian', 'inactive', 150, 'pro', 6, 18],
-            ['Pocket Pizza', 'pizza', 'inactive', 100, 'starter', 6, 11],
+            ['Pocket Pizza', 'pizza', 'inactive', 100, 'plus', 6, 11],
         ];
     }
 
@@ -91,20 +91,13 @@ class Platform
     /** @return array<string, Plan> by slug */
     public function plans(): array
     {
-        $rows = [
-            ['trial', 'Trial', 0, 'month', ['items' => 30, 'branches' => 1, 'photos' => 30, 'team' => 2, 'languages' => 1], 0],
-            ['starter', 'Starter', 50000, 'month', ['items' => 80, 'branches' => 1, 'photos' => 120, 'team' => 3, 'languages' => 2], 1],
-            ['pro', 'Pro', 120000, 'month', ['items' => 300, 'branches' => 3, 'photos' => 600, 'team' => 10, 'languages' => 3], 2],
-            ['pro-year', 'Pro (yearly)', 1200000, 'year', ['items' => 300, 'branches' => 3, 'photos' => 600, 'team' => 10, 'languages' => 3], 3],
-            ['business', 'Business', 250000, 'month', [], 4],
-        ];
-        $plans = [];
-        foreach ($rows as [$slug, $name, $price, $interval, $limits, $sort]) {
-            $plans[$slug] = Plan::firstOrCreate(['slug' => $slug], [
-                'name' => ['en' => $name], 'price_minor' => $price, 'currency' => 'ETB', 'interval' => $interval,
-                'trial_days' => 14, 'limits' => $limits, 'sort' => $sort,
-            ]);
-        }
+        // Free, Plus, Pro and Business come from the plan-ladder migration (QUESTIONS #184).
+        $plans = Plan::whereIn('slug', ['free', 'plus', 'pro', 'business'])->get()->keyBy('slug')->all();
+        // Trials get everything (like Business) so new restaurants can try it all; not on the website.
+        $plans['trial'] = Plan::firstOrCreate(['slug' => 'trial'], [
+            'name' => ['en' => 'Trial'], 'price_minor' => 0, 'currency' => 'ETB', 'interval' => 'month',
+            'trial_days' => 14, 'limits' => [], 'sort' => 9, 'is_public' => false,
+        ]);
 
         return $plans;
     }
@@ -271,8 +264,8 @@ class Platform
         $now = CarbonImmutable::now();
         $changes = [
             // [restaurant index, from, to, days ago]
-            [11, 'starter', 'pro', 2], [12, 'pro', 'business', 4], [14, 'starter', 'pro', 1], [16, 'pro', 'business', 6],
-            [18, 'pro', 'starter', 3], [17, 'starter', 'pro', 48], [13, 'pro', 'starter', 75], [7, 'starter', 'pro', 110],
+            [11, 'plus', 'pro', 2], [12, 'pro', 'business', 4], [14, 'plus', 'pro', 1], [16, 'pro', 'business', 6],
+            [18, 'pro', 'plus', 3], [17, 'plus', 'pro', 48], [13, 'pro', 'plus', 75], [7, 'plus', 'pro', 110],
         ];
         foreach ($changes as $c => [$i, $from, $to, $ago]) {
             $tenant = $tenants[$i];

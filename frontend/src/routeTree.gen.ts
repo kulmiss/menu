@@ -28,6 +28,7 @@ import { Route as AdminPrintMaterialsRouteImport } from './routes/admin/print-ma
 import { Route as AdminInsightsRouteImport } from './routes/admin/insights'
 import { Route as AdminInfoRouteImport } from './routes/admin/info'
 import { Route as AdminImportRouteImport } from './routes/admin/import'
+import { Route as AdminDishesRouteImport } from './routes/admin/dishes'
 import { Route as AdminBranchesRouteImport } from './routes/admin/branches'
 import { Route as AdminAppearanceRouteImport } from './routes/admin/appearance'
 import { Route as AdminAddonsRouteImport } from './routes/admin/addons'
@@ -133,6 +134,11 @@ const AdminImportRoute = AdminImportRouteImport.update({
   path: '/import',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminDishesRoute = AdminDishesRouteImport.update({
+  id: '/dishes',
+  path: '/dishes',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdminBranchesRoute = AdminBranchesRouteImport.update({
   id: '/branches',
   path: '/branches',
@@ -187,6 +193,7 @@ export interface FileRoutesByFullPath {
   '/admin/addons': typeof AdminAddonsRoute
   '/admin/appearance': typeof AdminAppearanceRoute
   '/admin/branches': typeof AdminBranchesRoute
+  '/admin/dishes': typeof AdminDishesRoute
   '/admin/import': typeof AdminImportRoute
   '/admin/info': typeof AdminInfoRoute
   '/admin/insights': typeof AdminInsightsRoute
@@ -214,6 +221,7 @@ export interface FileRoutesByTo {
   '/admin/addons': typeof AdminAddonsRoute
   '/admin/appearance': typeof AdminAppearanceRoute
   '/admin/branches': typeof AdminBranchesRoute
+  '/admin/dishes': typeof AdminDishesRoute
   '/admin/import': typeof AdminImportRoute
   '/admin/info': typeof AdminInfoRoute
   '/admin/insights': typeof AdminInsightsRoute
@@ -245,6 +253,7 @@ export interface FileRoutesById {
   '/admin/addons': typeof AdminAddonsRoute
   '/admin/appearance': typeof AdminAppearanceRoute
   '/admin/branches': typeof AdminBranchesRoute
+  '/admin/dishes': typeof AdminDishesRoute
   '/admin/import': typeof AdminImportRoute
   '/admin/info': typeof AdminInfoRoute
   '/admin/insights': typeof AdminInsightsRoute
@@ -277,6 +286,7 @@ export interface FileRouteTypes {
     | '/admin/addons'
     | '/admin/appearance'
     | '/admin/branches'
+    | '/admin/dishes'
     | '/admin/import'
     | '/admin/info'
     | '/admin/insights'
@@ -304,6 +314,7 @@ export interface FileRouteTypes {
     | '/admin/addons'
     | '/admin/appearance'
     | '/admin/branches'
+    | '/admin/dishes'
     | '/admin/import'
     | '/admin/info'
     | '/admin/insights'
@@ -334,6 +345,7 @@ export interface FileRouteTypes {
     | '/admin/addons'
     | '/admin/appearance'
     | '/admin/branches'
+    | '/admin/dishes'
     | '/admin/import'
     | '/admin/info'
     | '/admin/insights'
@@ -504,6 +516,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminImportRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/dishes': {
+      id: '/admin/dishes'
+      path: '/dishes'
+      fullPath: '/admin/dishes'
+      preLoaderRoute: typeof AdminDishesRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/branches': {
       id: '/admin/branches'
       path: '/branches'
@@ -590,6 +609,7 @@ interface AdminRouteRouteChildren {
   AdminAddonsRoute: typeof AdminAddonsRoute
   AdminAppearanceRoute: typeof AdminAppearanceRoute
   AdminBranchesRoute: typeof AdminBranchesRoute
+  AdminDishesRoute: typeof AdminDishesRoute
   AdminImportRoute: typeof AdminImportRoute
   AdminInfoRoute: typeof AdminInfoRoute
   AdminInsightsRoute: typeof AdminInsightsRoute
@@ -607,6 +627,7 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminAddonsRoute: AdminAddonsRoute,
   AdminAppearanceRoute: AdminAppearanceRoute,
   AdminBranchesRoute: AdminBranchesRoute,
+  AdminDishesRoute: AdminDishesRoute,
   AdminImportRoute: AdminImportRoute,
   AdminInfoRoute: AdminInfoRoute,
   AdminInsightsRoute: AdminInsightsRoute,

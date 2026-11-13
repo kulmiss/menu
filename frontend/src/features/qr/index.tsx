@@ -23,8 +23,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Skeleton } from '@/components/ui/skeleton'
 import { ConfirmDialog } from '@/components/confirm-dialog'
+import { DataTable } from '@/components/data-table'
 import { AdminHeader } from '@/components/layout/admin-header'
 import { Main } from '@/components/layout/main'
 import {
@@ -52,7 +52,6 @@ export function QrCodesPage() {
   const [deleting, setDeleting] = useState<QrCodeRow | null>(null)
   const canEdit = ctx.canManage && ctx.canWrite
 
-  const main = codes.data?.filter((c) => c.kind !== 'table') ?? []
   const tableCount = (id: number) =>
     codes.data?.filter((c) => c.kind === 'table' && c.branch_id === id)
       .length ?? 0
@@ -93,83 +92,151 @@ export function QrCodesPage() {
           </Button>
         </div>
         <div className='grid gap-4'>
-          {codes.isPending ? (
-            <Skeleton className='h-40' />
-          ) : (
-            <div className='grid gap-3 md:grid-cols-2'>
-              {main.map((code) => (
-                <Card key={code.id} className='py-4'>
-                  <CardContent className='flex gap-4'>
+          <DataTable<QrCodeRow>
+            id='qr-codes'
+            rows={codes.data}
+            loading={codes.isPending}
+            error={codes.isError}
+            onRetry={() => codes.refetch()}
+            rowId={(c) => c.id}
+            csvName='qr-codes'
+            searchPlaceholder={t('qr.search')}
+            filters={[
+              {
+                id: 'kind',
+                label: t('qr.kind'),
+                options: (['restaurant', 'branch', 'table', 'extra'] as const)
+                  .filter((k) => codes.data?.some((c) => c.kind === k))
+                  .map((k) => ({ value: k, label: t(`qr.kinds.${k}`) })),
+                match: (c, v) => v.includes(c.kind),
+              },
+              ...((branches.data?.length ?? 0) > 1
+                ? [
+                    {
+                      id: 'branch',
+                      label: t('qr.branch'),
+                      options: (branches.data ?? []).map((b) => ({
+                        value: tr(b.name, ctx.locale),
+                        label: tr(b.name, ctx.locale),
+                      })),
+                      match: (c: QrCodeRow, v: string[]) =>
+                        v.includes(c.branch),
+                    },
+                  ]
+                : []),
+            ]}
+            bulk={(rows) => (
+              <Button asChild size='sm' className='min-h-11 sm:min-h-8'>
+                <Link
+                  to='/admin/print-materials'
+                  search={{ codes: rows.map((r) => r.id).join(',') }}
+                >
+                  <Printer aria-hidden /> {t('qr.print_selected')}
+                </Link>
+              </Button>
+            )}
+            columns={[
+              {
+                id: 'code',
+                label: t('qr.code'),
+                primary: true,
+                text: (c) => c.description,
+                sortValue: (c) => c.description.toLowerCase(),
+                cell: (c) => (
+                  <span className='flex min-w-0 items-center gap-3'>
                     <img
-                      src={downloadUrl(ctx.tenantId, `qr-codes/${code.id}.svg`)}
-                      alt={t('qr.image_alt', { name: code.description })}
-                      width={112}
-                      height={112}
+                      src={downloadUrl(ctx.tenantId, `qr-codes/${c.id}.svg`)}
+                      alt=''
+                      width={48}
+                      height={48}
                       loading='lazy'
-                      className='size-28 flex-none rounded border bg-white'
+                      className='size-12 flex-none rounded border bg-white'
                     />
-                    <div className='grid min-w-0 flex-1 content-start gap-1'>
-                      <div className='flex flex-wrap items-center gap-2'>
-                        <p className='font-semibold'>{code.description}</p>
-                        <Badge variant='outline'>
-                          {t(`qr.kinds.${code.kind}`)}
-                        </Badge>
-                        {(branches.data?.length ?? 0) > 1 && code.branch && (
-                          <Badge variant='secondary'>
-                            <MapPin aria-hidden='true' />
-                            {t('qr.opens_branch', { name: code.branch })}
-                          </Badge>
-                        )}
-                      </div>
-                      <button
-                        type='button'
-                        className='inline-flex min-h-8 items-center gap-1 truncate text-start font-mono text-xs text-muted-foreground hover:text-foreground'
-                        onClick={async () => {
-                          await navigator.clipboard?.writeText(code.url)
-                          toast.success(t('qr.copied'))
-                        }}
+                    <span className='font-medium'>{c.description}</span>
+                  </span>
+                ),
+              },
+              {
+                id: 'kind',
+                label: t('qr.kind'),
+                text: (c) => t(`qr.kinds.${c.kind}`),
+                sortValue: (c) => c.kind,
+                cell: (c) => (
+                  <Badge variant='outline'>{t(`qr.kinds.${c.kind}`)}</Badge>
+                ),
+              },
+              {
+                id: 'branch',
+                label: t('qr.branch'),
+                hidden: (branches.data?.length ?? 0) <= 1,
+                text: (c) => c.branch,
+                sortValue: (c) => c.branch,
+                cell: (c) => (
+                  <span className='inline-flex items-center gap-1'>
+                    <MapPin className='size-3.5' aria-hidden /> {c.branch}
+                  </span>
+                ),
+              },
+              {
+                id: 'url',
+                label: t('qr.address'),
+                text: (c) => c.url,
+                cell: (c) => (
+                  <button
+                    type='button'
+                    className='inline-flex min-h-11 items-center gap-1 text-start font-mono text-xs text-muted-foreground hover:text-foreground sm:min-h-8'
+                    onClick={async (e) => {
+                      e.stopPropagation()
+                      await navigator.clipboard?.writeText(c.url)
+                      toast.success(t('qr.copied'))
+                    }}
+                  >
+                    {c.url.replace(/^https?:\/\//, '')}{' '}
+                    <Copy className='size-3 flex-none' aria-hidden />
+                  </button>
+                ),
+              },
+              {
+                id: 'files',
+                label: t('qr.files'),
+                cell: (code) => (
+                  <span className='flex flex-wrap gap-1'>
+                    {(['pdf', 'png', 'svg'] as const).map((f) => (
+                      <Button
+                        key={f}
+                        asChild
+                        size='sm'
+                        variant={f === 'pdf' ? 'default' : 'outline'}
+                        className='min-h-11 sm:min-h-8'
                       >
-                        {code.url.replace(/^https?:\/\//, '')}{' '}
-                        <Copy className='size-3 flex-none' />
-                      </button>
-                      <div className='flex flex-wrap gap-1'>
-                        {(['pdf', 'png', 'svg'] as const).map((f) => (
-                          <Button
-                            key={f}
-                            asChild
-                            size='sm'
-                            variant={f === 'pdf' ? 'default' : 'outline'}
-                          >
-                            <a
-                              href={downloadUrl(
-                                ctx.tenantId,
-                                `qr-codes/${code.id}.${f}`
-                              )}
-                              download
-                            >
-                              {f.toUpperCase()}
-                            </a>
-                          </Button>
-                        ))}
-                        {code.kind === 'extra' && canEdit && (
-                          <Button
-                            size='sm'
-                            variant='ghost'
-                            aria-label={t('qr.delete', {
-                              name: code.description,
-                            })}
-                            onClick={() => setDeleting(code)}
-                          >
-                            <Trash2 />
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
+                        <a
+                          href={downloadUrl(
+                            ctx.tenantId,
+                            `qr-codes/${code.id}.${f}`
+                          )}
+                          download
+                          aria-label={`${f.toUpperCase()} · ${code.description}`}
+                        >
+                          {f.toUpperCase()}
+                        </a>
+                      </Button>
+                    ))}
+                    {code.kind === 'extra' && canEdit && (
+                      <Button
+                        size='sm'
+                        variant='ghost'
+                        className='min-h-11 sm:min-h-8'
+                        aria-label={t('qr.delete', { name: code.description })}
+                        onClick={() => setDeleting(code)}
+                      >
+                        <Trash2 />
+                      </Button>
+                    )}
+                  </span>
+                ),
+              },
+            ]}
+          />
 
           <Card>
             <CardHeader>

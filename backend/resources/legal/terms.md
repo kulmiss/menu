@@ -25,8 +25,8 @@ These Terms explain the rules for using Menu. By creating an account or using Me
 
 ## 4. Plans and payments
 
-- **Free plan:** no cost and no end date. It has limits (for example on dishes, photos and tables), and some features are not included.
-- **Paid plans** are for a fixed period, for example a month or a year. Current prices are shown on our website or given to you by us.
+- **Free plan:** no cost and no end date, with unlimited dishes, menus and QR codes. Only photos and branches are counted, and some features are only in paid plans.
+- **Paid plans** are for a fixed period: a month, or a year at a lower price. Current plans and prices are shown on our website or given to you by us.
 - **How you pay:** we don't take card payments online. You pay us by bank transfer, mobile money, cash or another way we agree. When we receive your payment, we record it, add the paid time to your account and issue an invoice, which we send to the owners.
 - **No automatic renewal:** paid plans don't renew on their own. Pay again before the end date to keep your plan.
 - **Trials:** if we give you a trial, it ends on the date shown in your account.

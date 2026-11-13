@@ -58,10 +58,7 @@ describe('Super Admin sign-up controls', () => {
       'GET /platform/restaurants/9': detail,
       'POST /platform/restaurants/9/approve': { data: { data: pending } },
     })
-    const screen = await renderWithQuery(
-      <RestaurantsPage onState={() => {}} />,
-      { me: admin }
-    )
+    const screen = await renderWithQuery(<RestaurantsPage />, { me: admin })
     await expect
       .element(screen.getByText('Pending sign-up').first())
       .toBeVisible()
@@ -84,10 +81,7 @@ describe('Super Admin sign-up controls', () => {
         data: { data: { removed: true } },
       },
     })
-    const screen = await renderWithQuery(
-      <RestaurantsPage onState={() => {}} />,
-      { me: admin }
-    )
+    const screen = await renderWithQuery(<RestaurantsPage />, { me: admin })
     await userEvent.click(screen.getByRole('button', { name: 'Buna & Bread' }))
     await userEvent.click(screen.getByRole('button', { name: 'Reject' }))
     await userEvent.fill(

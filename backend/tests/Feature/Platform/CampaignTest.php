@@ -22,7 +22,7 @@ beforeEach(fn () => Mail::fake());
 
 it('counts and picks recipients by plan, status, tag, inactivity and sign-up date', function () {
     $this->actingAs(superAdmin());
-    $pro = Plan::create(['name' => ['en' => 'Pro'], 'slug' => 'pro', 'price_minor' => 100, 'currency' => 'ETB', 'interval' => 'month', 'limits' => [], 'is_public' => true, 'is_active' => true]);
+    $pro = Plan::create(['name' => ['en' => 'Pro'], 'slug' => 'pro-test', 'price_minor' => 100, 'currency' => 'ETB', 'interval' => 'month', 'limits' => [], 'is_public' => true, 'is_active' => true]);
     [, $active] = member(Role::Owner);
     $active->forceFill(['plan_id' => $pro->id, 'paid_until' => now()->addMonths(2), 'trial_ends_at' => null])->save();
     [, $expiring] = member(Role::Owner);

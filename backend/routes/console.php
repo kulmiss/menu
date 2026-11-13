@@ -38,6 +38,12 @@ Schedule::command('menu:price-periods')->everyMinute()->withoutOverlapping();
 Schedule::command('insights:monthly')->hourly()->withoutOverlapping();
 
 Schedule::command('menu:refresh-pages')->hourly();
+// Restaurants on a replaced plan move to the new one once their paid time has ended (QUESTIONS #184).
+Schedule::command('plans:move-replaced')->hourlyAt(7)->withoutOverlapping();
+// Super Admin dashboard numbers (QUESTIONS #186): hourly for today and
+// yesterday, nightly for the last 35 days (late payments, restored restaurants).
+Schedule::command('platform:aggregate --days=2')->hourlyAt(12)->withoutOverlapping(30);
+Schedule::command('platform:aggregate --days=35')->dailyAt('01:10')->withoutOverlapping(60);
 Schedule::command('menu:refresh-pages --all')->dailyAt('00:05');
 // Self sign-ups that never confirmed their e-mail (owner, 2026-11-13).
 Schedule::command('signup:prune')->dailyAt('03:20');

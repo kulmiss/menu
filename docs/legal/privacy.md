@@ -58,7 +58,6 @@ We use a few service providers. They handle data for us only to run Menu:
 
 - **Hosting:** the servers and database where Menu and all its data are stored.
 - **E-mail delivery:** the e-mail service that sends our e-mails.
-- **Google Fonts:** the restaurant admin app loads its fonts from Google, so Google receives the IP address and browser type of restaurant users. Menu pages and our website don't use it.
 - **Only if we switch them on:** Cloudflare, for network protection and speed and for the "are you human?" check on the sign-up form; and an off-site storage provider for copies of our backups.
 
 Some of these providers may handle data outside Ethiopia. We share data with others only when the law requires it, or to protect someone's safety or our rights.

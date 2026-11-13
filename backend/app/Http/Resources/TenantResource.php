@@ -5,6 +5,7 @@ namespace App\Http\Resources;
 use App\Models\Membership;
 use App\Models\Tenant;
 use App\Support\Features;
+use App\Support\UpgradeContact;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -35,6 +36,8 @@ class TenantResource extends JsonResource
                 'stage_ends_at' => $this->subscriptionStageEndsAt()?->toIso8601String(),
             ],
             'features' => Features::for($this->resource),
+            // Where the "Upgrade" buttons point (QUESTIONS #184).
+            'upgrade' => UpgradeContact::payload(),
             'membership' => $this->membership ? [
                 'id' => $this->membership->id,
                 'role' => $this->membership->role->value,

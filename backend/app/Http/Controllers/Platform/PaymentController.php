@@ -9,6 +9,7 @@ use App\Models\Tenant;
 use App\Support\ActivityLogger;
 use App\Support\Billing\Invoices;
 use App\Support\PlatformSettings;
+use App\Support\Tables\TableQuery;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -16,6 +17,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Super Admin › Payments (PLAN.md §7.3 screen 4). Payments are recorded by
@@ -25,8 +27,41 @@ class PaymentController extends Controller
 {
     public function __construct(private readonly ActivityLogger $activity, private readonly Invoices $invoices) {}
 
-    public function index(Request $request): JsonResponse
+    public function index(Request $request): JsonResponse|StreamedResponse
     {
+        if ($request->has('page') || $request->query('format') === 'csv') {
+            return TableQuery::respond(Payment::with(['tenant', 'plan', 'invoices']), $request, [
+                'search' => fn ($q, string $s) => $q->where(fn ($w) => $w->where('reference', 'like', "%{$s}%")
+                    ->orWhereHas('tenant', fn ($t) => $t->withTrashed()->where('name', 'like', "%{$s}%"))),
+                'filters' => [
+                    'method' => fn ($q, array $v) => $q->whereIn('method', array_intersect($v, Payment::METHODS)),
+                    'plan' => fn ($q, array $v) => $q->whereIn('plan_id', array_map('intval', $v)),
+                    'restaurant' => fn ($q, array $v) => $q->whereIn('tenant_id', array_map('intval', $v)),
+                ],
+                'date' => 'paid_at',
+                'sorts' => [
+                    'paid_at' => 'paid_at',
+                    'amount' => 'amount_minor',
+                    'period_end' => 'period_end',
+                    'restaurant' => fn ($q, string $dir) => $q->orderBy(Tenant::withTrashed()->select('name')->whereColumn('tenants.id', 'payments.tenant_id'), $dir),
+                ],
+                'default_sort' => '-paid_at',
+                'totals' => ['amount_minor', 'currency'],
+                'csv' => ['name' => 'payments', 'columns' => [
+                    'Paid on' => fn (Payment $p) => $p->paid_at->toDateString(),
+                    'Restaurant' => fn (Payment $p) => $p->tenant->name,
+                    'Plan' => fn (Payment $p) => $p->plan?->name['en'] ?? '',
+                    'Amount' => fn (Payment $p) => number_format($p->amount_minor / 100, 2, '.', ''),
+                    'Currency' => fn (Payment $p) => $p->currency,
+                    'Method' => fn (Payment $p) => $p->method,
+                    'Reference' => fn (Payment $p) => $p->reference,
+                    'Period start' => fn (Payment $p) => $p->period_start->toDateString(),
+                    'Period end' => fn (Payment $p) => $p->period_end->toDateString(),
+                    'Invoice' => fn (Payment $p) => $p->invoices->sortByDesc('id')->first()?->number,
+                ]],
+            ], fn (Payment $p) => self::row($p));
+        }
+
         return response()->json(['data' => $this->filtered($request)->limit(1000)->get()->map(fn (Payment $p) => self::row($p))]);
     }
 

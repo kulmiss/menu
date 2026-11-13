@@ -7,15 +7,14 @@ import { sidebarData } from './sidebar-data'
 
 type Features = Partial<Record<string, boolean>> | undefined
 
-const allowed = (
-  item: { roles?: Role[]; feature?: string },
-  role: Role | null,
-  features?: Features
-) =>
-  (!item.roles || (role !== null && item.roles.includes(role))) &&
-  (!item.feature || features?.[item.feature] !== false)
+const allowed = (item: { roles?: Role[] }, role: Role | null) =>
+  !item.roles || (role !== null && item.roles.includes(role))
 
-/** Navigation translated into the UI language and filtered by role. */
+/** A feature the plan doesn't include stays in the menu, marked "Upgrade" (QUESTIONS #184). */
+const locked = (item: { feature?: string }, features?: Features) =>
+  !!item.feature && features?.[item.feature] === false
+
+/** Navigation translated into the UI language, filtered by role; features not in the plan are marked. */
 export function filterNav(
   groups: NavGroup[],
   role: Role | null,
@@ -28,18 +27,24 @@ export function filterNav(
           ...item,
           title: t(item.title),
           items: item.items
-            .filter((sub) => allowed(sub, role, features))
-            .map((sub) => ({ ...sub, title: t(sub.title) })),
+            .filter((sub) => allowed(sub, role))
+            .map((sub) => ({
+              ...sub,
+              title: t(sub.title),
+              badge: locked(sub, features) ? t('nav.upgrade') : sub.badge,
+            })),
         }
-      : { ...item, title: t(item.title) }
+      : {
+          ...item,
+          title: t(item.title),
+          badge: locked(item, features) ? t('nav.upgrade') : item.badge,
+        }
 
   return groups
     .map((group) => ({
       ...group,
       title: t(group.title),
-      items: group.items
-        .filter((i) => allowed(i, role, features))
-        .map(translateItem),
+      items: group.items.filter((i) => allowed(i, role)).map(translateItem),
     }))
     .filter((group) => group.items.length > 0)
 }

@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Download, FileText, Loader2, Mail, Search } from 'lucide-react'
+import { FileText, Loader2, Mail } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { api, validationErrors } from '@/lib/api'
+import { validationErrors } from '@/lib/api'
 import { toast } from '@/lib/toast'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -24,19 +24,15 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
+import { type Col, DataTable } from '@/components/data-table'
 import {
   type InvoiceRef,
+  type InvoiceRow,
+  fetchPage,
   invoicePdfUrl,
-  invoicesQ,
+  pkeys,
   money,
   plansQ,
   send,
@@ -191,177 +187,105 @@ function VoidDialog({
 /** Super Admin → Invoices: search, filters, CSV. */
 export function InvoicesPage() {
   const { t, i18n } = useTranslation()
-  const [q, setQ] = useState('')
-  const [from, setFrom] = useState('')
-  const [to, setTo] = useState('')
-  const [plan, setPlan] = useState('all')
-  const [status, setStatus] = useState('all')
   const plans = useQuery(plansQ())
-  const params = new URLSearchParams()
-  if (q.trim()) params.set('q', q.trim())
-  if (from) params.set('from', from)
-  if (to) params.set('to', to)
-  if (plan !== 'all') params.set('plan_id', plan)
-  if (status !== 'all') params.set('status', status)
-  const list = useQuery(invoicesQ(params.toString()))
   const date = (iso: string) =>
     new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium' }).format(
       new Date(iso)
     )
+  const columns: Col<InvoiceRow>[] = [
+    {
+      id: 'number',
+      label: t('platform.invoices.col.number'),
+      primary: true,
+      sort: 'number',
+      text: (i) => i.number,
+      cell: (i) => (
+        <div onClick={(e) => e.stopPropagation()}>
+          <InvoiceActions invoice={i} />
+          {i.void_reason && (
+            <p className='px-2 text-xs text-muted-foreground'>
+              {i.void_reason}
+            </p>
+          )}
+        </div>
+      ),
+    },
+    {
+      id: 'issued',
+      label: t('platform.invoices.col.issued'),
+      sort: 'issued_at',
+      text: (i) => i.issued_at.slice(0, 10),
+      cell: (i) => (
+        <span className='whitespace-nowrap'>{date(i.issued_at)}</span>
+      ),
+    },
+    {
+      id: 'restaurant',
+      label: t('platform.invoices.col.restaurant'),
+      text: (i) => i.tenant.name,
+      cell: (i) => i.tenant.name,
+    },
+    {
+      id: 'plan',
+      label: t('platform.invoices.col.plan'),
+      text: (i) => i.plan ?? '',
+      cell: (i) => i.plan ?? '—',
+    },
+    {
+      id: 'period',
+      label: t('platform.invoices.col.period'),
+      text: (i) => `${i.period_start} – ${i.period_end}`,
+      cell: (i) => (
+        <span className='whitespace-nowrap tabular-nums'>
+          {i.period_start} → {i.period_end}
+        </span>
+      ),
+    },
+    {
+      id: 'total',
+      label: t('platform.invoices.col.total'),
+      sort: 'total',
+      align: 'end',
+      text: (i) => i.total_minor / 100,
+      cell: (i) => money(i.total_minor, i.currency),
+    },
+  ]
 
   return (
     <>
       <PageTitle
         title={t('platform.nav.invoices')}
         hint={t('platform.invoices.hint')}
-      >
-        <Button asChild variant='outline'>
-          <a
-            href={`${api.defaults.baseURL}/platform/invoices.csv?${params}`}
-            download
-          >
-            <Download /> CSV
-          </a>
-        </Button>
-      </PageTitle>
-      <div className='mb-3 grid gap-2 sm:flex sm:flex-wrap sm:items-end'>
-        <div className='grid gap-1 sm:w-64'>
-          <Label htmlFor='inv-q' className='text-xs'>
-            {t('platform.invoices.search')}
-          </Label>
-          <div className='relative'>
-            <Search
-              className='absolute start-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground'
-              aria-hidden
-            />
-            <Input
-              id='inv-q'
-              className='ps-8'
-              placeholder={t('platform.invoices.search_hint')}
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-            />
-          </div>
-        </div>
-        <div className='grid gap-1'>
-          <Label htmlFor='inv-from' className='text-xs'>
-            {t('platform.payments.from')}
-          </Label>
-          <Input
-            id='inv-from'
-            type='date'
-            value={from}
-            onChange={(e) => setFrom(e.target.value)}
-          />
-        </div>
-        <div className='grid gap-1'>
-          <Label htmlFor='inv-to' className='text-xs'>
-            {t('platform.payments.to')}
-          </Label>
-          <Input
-            id='inv-to'
-            type='date'
-            value={to}
-            onChange={(e) => setTo(e.target.value)}
-          />
-        </div>
-        <div className='grid gap-1'>
-          <span className='text-xs font-medium'>
-            {t('platform.restaurants.plan')}
-          </span>
-          <Select value={plan} onValueChange={setPlan}>
-            <SelectTrigger
-              className='min-h-11 w-full sm:min-h-9 sm:w-40'
-              aria-label={t('platform.restaurants.plan')}
-            >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value='all'>{t('platform.invoices.all')}</SelectItem>
-              {plans.data?.map((p) => (
-                <SelectItem key={p.id} value={String(p.id)}>
-                  {p.name.en ?? p.slug}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className='grid gap-1'>
-          <span className='text-xs font-medium'>
-            {t('platform.invoices.status_label')}
-          </span>
-          <Select value={status} onValueChange={setStatus}>
-            <SelectTrigger
-              className='min-h-11 w-full sm:min-h-9 sm:w-32'
-              aria-label={t('platform.invoices.status_label')}
-            >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value='all'>{t('platform.invoices.all')}</SelectItem>
-              <SelectItem value='paid'>
-                {t('platform.invoices.status.paid')}
-              </SelectItem>
-              <SelectItem value='void'>
-                {t('platform.invoices.status.void')}
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-      <div className='overflow-x-auto rounded-md border'>
-        <table className='w-full text-sm'>
-          <thead className='bg-muted/50 text-xs text-muted-foreground'>
-            <tr>
-              {[
-                'number',
-                'issued',
-                'restaurant',
-                'plan',
-                'period',
-                'total',
-              ].map((h) => (
-                <th key={h} className='p-2 text-start'>
-                  {t(`platform.invoices.col.${h}`)}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {list.data?.map((i) => (
-              <tr key={i.id} className='border-t align-top'>
-                <td className='p-1'>
-                  <InvoiceActions invoice={i} />
-                  {i.void_reason && (
-                    <p className='px-2 text-xs text-muted-foreground'>
-                      {i.void_reason}
-                    </p>
-                  )}
-                </td>
-                <td className='p-2 whitespace-nowrap'>{date(i.issued_at)}</td>
-                <td className='p-2'>{i.tenant.name}</td>
-                <td className='p-2'>{i.plan ?? '—'}</td>
-                <td className='p-2 whitespace-nowrap tabular-nums'>
-                  {i.period_start} → {i.period_end}
-                </td>
-                <td className='p-2 whitespace-nowrap tabular-nums'>
-                  {money(i.total_minor, i.currency)}
-                </td>
-              </tr>
-            ))}
-            {list.data?.length === 0 && (
-              <tr>
-                <td
-                  colSpan={6}
-                  className='p-6 text-center text-muted-foreground'
-                >
-                  {t('platform.invoices.none')}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      />
+      <DataTable<InvoiceRow>
+        id='platform-invoices'
+        queryKey={[...pkeys.all, 'invoices', 'table']}
+        fetch={(params) => fetchPage<InvoiceRow>('invoices', params)}
+        csvUrl={(params) => `/api/v1/platform/invoices?format=csv&${params}`}
+        columns={columns}
+        rowId={(i) => i.id}
+        searchPlaceholder={t('platform.invoices.search_hint')}
+        dateLabel={t('platform.invoices.col.issued')}
+        filters={[
+          {
+            id: 'status',
+            label: t('platform.invoices.status_label'),
+            options: ['paid', 'void'].map((s) => ({
+              value: s,
+              label: t(`platform.invoices.status.${s}`),
+            })),
+          },
+          {
+            id: 'plan',
+            label: t('platform.restaurants.plan'),
+            options: (plans.data ?? []).map((p) => ({
+              value: String(p.id),
+              label: p.name.en ?? p.slug,
+            })),
+          },
+        ]}
+        empty={t('platform.invoices.none')}
+      />
     </>
   )
 }

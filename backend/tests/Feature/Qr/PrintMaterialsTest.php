@@ -95,7 +95,7 @@ it('prints one face per table, the headline, the table name and "Menu by" only o
     expect(substr_count($one['text'], '(Table 1)'))->toBe(12);
 
     // The default headline, and no "Menu by" when the plan removes branding.
-    $plan = Plan::create(['name' => ['en' => 'Pro'], 'slug' => 'pro', 'limits' => []]);
+    $plan = Plan::create(['name' => ['en' => 'Pro'], 'slug' => 'pro-test', 'limits' => []]);
     DB::table('plan_features')->insert(['plan_id' => $plan->id, 'feature_key' => 'remove_branding', 'enabled' => true]);
     $tenant->forceFill(['plan_id' => $plan->id])->save();
     Features::forget();

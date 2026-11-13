@@ -106,7 +106,7 @@ it('turns plan features on and off, per plan and per restaurant', function () {
 it('shows platform announcements to the restaurants they are meant for', function () {
     $admin = superAdmin();
     [$owner, $tenant] = member(Role::Owner);
-    $plan = Plan::create(['name' => ['en' => 'Pro'], 'slug' => 'pro', 'limits' => []]);
+    $plan = Plan::create(['name' => ['en' => 'Pro'], 'slug' => 'pro-test', 'limits' => []]);
 
     $all = $this->actingAs($admin)->postJson(p('announcements'), ['title' => ['en' => 'New feature: QR table cards']], idem())->assertCreated()->json('data.id');
     $this->actingAs($admin)->postJson(p('announcements'), ['title' => ['en' => 'Pro only'], 'plan_ids' => [$plan->id]], idem())->assertCreated();

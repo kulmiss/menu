@@ -71,9 +71,15 @@ describe('Super Admin screens', () => {
       },
     })
     const screen = await renderWithQuery(<PlatformDashboard />, { me: admin })
-    await expect.element(screen.getByText('1,200')).toBeVisible()
-    // The eight widgets load after the page; with no answers they show their error state.
+    await expect
+      .element(screen.getByRole('link', { name: /Trial\s*3/ }))
+      .toHaveAttribute('href', '/platform/$section?state=trial')
+    // Insights and the to-do widgets load after the page; with no answers they show their error state.
+    await expect.element(screen.getByText('Overview')).toBeVisible()
     await expect.element(screen.getByText('System health')).toBeVisible()
+    await expect
+      .element(screen.getByRole('button', { name: 'Last 30 days' }))
+      .toHaveAttribute('aria-pressed', 'true')
   })
 
   it('records a payment for a restaurant', async () => {
@@ -103,10 +109,7 @@ describe('Super Admin screens', () => {
         data: { data: {} },
       },
     })
-    const screen = await renderWithQuery(
-      <RestaurantsPage onState={() => {}} />,
-      { me: admin }
-    )
+    const screen = await renderWithQuery(<RestaurantsPage />, { me: admin })
     await userEvent.click(screen.getByRole('button', { name: 'Sahan Grill' }))
     await userEvent.type(screen.getByLabelText('Amount (SOS)'), '1500')
     await userEvent.clear(screen.getByLabelText('Months'))
@@ -149,10 +152,7 @@ describe('Super Admin screens', () => {
         data: { data: { sent_to: 'ayaan@example.com' } },
       },
     })
-    const screen = await renderWithQuery(
-      <RestaurantsPage onState={() => {}} />,
-      { me: admin }
-    )
+    const screen = await renderWithQuery(<RestaurantsPage />, { me: admin })
     await userEvent.click(screen.getByRole('button', { name: 'Sahan Grill' }))
     await userEvent.click(
       screen.getByRole('button', { name: 'Resend set-password e-mail' })
@@ -191,10 +191,7 @@ describe('Super Admin screens', () => {
         data: { message: 'No owner' },
       },
     })
-    const screen = await renderWithQuery(
-      <RestaurantsPage onState={() => {}} />,
-      { me: admin }
-    )
+    const screen = await renderWithQuery(<RestaurantsPage />, { me: admin })
     await userEvent.click(screen.getByRole('button', { name: 'Sahan Grill' }))
     await userEvent.click(
       screen.getByRole('button', { name: 'Log in as owner' })

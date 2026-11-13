@@ -168,7 +168,7 @@
         .track .mark::after{content:"";position:absolute;left:50%;bottom:-5px;margin-left:-5px;border:5px solid transparent;border-bottom:0;border-top-color:var(--fg)}
         .scale{display:flex;justify-content:space-between;margin-top:10px;color:var(--muted);font-size:.85rem}
         .plans{display:flex;flex-wrap:wrap;justify-content:center;gap:28px 20px}
-        .plan{display:flex;flex-direction:column;gap:16px;position:relative;flex:1 1 200px;max-width:320px;min-width:0}
+        .plan{display:flex;flex-direction:column;gap:16px;position:relative;flex:1 1 220px;max-width:300px;min-width:0}
         .plan.hl{border:2px solid var(--brand);box-shadow:var(--shadow)}
         .badge{position:absolute;top:-13px;left:24px;background:var(--brand);color:var(--on-brand);font-size:.8rem;font-weight:700;padding:3px 10px;border-radius:999px}
         .price{color:var(--fg)!important;font-size:1.9rem;font-weight:800;letter-spacing:-.02em;line-height:1.2}.price small{white-space:nowrap}
@@ -177,6 +177,8 @@
         .plan li{display:flex;gap:8px;align-items:flex-start}
         .plan li .icon{width:18px;height:18px;color:var(--ink);margin-top:3px}
         .plan .muted-li{color:var(--muted)}
+        .plan .year{margin-top:-12px;color:var(--muted);font-size:.9rem}
+        .plan .everything{font-weight:600;font-size:.95rem;margin-bottom:-6px}
         .plan .btn{margin-top:auto;width:100%;white-space:normal;text-align:center;padding:8px 14px;line-height:1.25}
         .note{text-align:center;color:var(--muted);margin-top:24px}
         .quotes{display:grid;gap:20px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
@@ -456,6 +458,8 @@
                             @if ($plan['highlight'])<span class="badge">{{ __('landing.pricing.popular') }}</span>@endif
                             <h3 id="plan-{{ $loop->index }}">{{ $plan['name'] }}</h3>
                             <p class="price">{{ $plan['price'] }} <small>{{ $plan['per'] }}</small></p>
+                            @if ($plan['year'])<p class="year">{{ $plan['year'] }}</p>@endif
+                            @if ($plan['everything'])<p class="everything">{{ $plan['everything'] }}</p>@endif
                             <ul>
                                 @foreach ($plan['limits'] as $line)
                                     <li class="muted-li">{!! $icon('check') !!}<span>{{ $line }}</span></li>

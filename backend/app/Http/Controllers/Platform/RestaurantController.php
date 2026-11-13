@@ -19,6 +19,8 @@ use App\Support\ImpersonationManager;
 use App\Support\PublicMenu\MenuPageCache;
 use App\Support\Qr\QrMap;
 use App\Support\SignUp\SignUp;
+use App\Support\Tables\TableQuery;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -27,6 +29,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Super Admin › Restaurants (PLAN.md §7.3 screen 2): list, create, edit,
@@ -37,8 +40,12 @@ class RestaurantController extends Controller
 {
     public function __construct(private readonly ActivityLogger $activity) {}
 
-    public function index(Request $request): JsonResponse
+    public function index(Request $request): JsonResponse|StreamedResponse
     {
+        // The DataTable asks with page=… (QUESTIONS #185); other callers keep the short list below.
+        if ($request->has('page') || $request->query('format') === 'csv') {
+            return $this->table($request);
+        }
         $data = $request->validate([
             'search' => ['sometimes', 'nullable', 'string', 'max:100'],
             'state' => ['sometimes', 'nullable', Rule::in(array_column(SubscriptionState::cases(), 'value'))],
@@ -62,6 +69,102 @@ class RestaurantController extends Controller
         }
 
         return response()->json(['data' => $rows->take(500)->values()]);
+    }
+
+    /**
+     * Restaurants matching any of the dashboard's usage keys.
+     *
+     * @param  list<string>  $keys
+     */
+    private function usage(QueryBuilder $q, array $keys): QueryBuilder
+    {
+        return $q->where(function (QueryBuilder $w) use ($keys) {
+            $w->whereRaw('1 = 0');
+            foreach ($keys as $key) {
+                match (true) {
+                    in_array($key, ['price_periods', 'promotions', 'order_list', 'print'], true) => $w->orWhere('uses_'.$key, true),
+                    $key === 'limit_photos' => $w->orWhere(fn ($x) => $x->whereNotNull('photos_limit')->whereColumn('photos', '>=', 'photos_limit')),
+                    $key === 'near_photos' => $w->orWhere(fn ($x) => $x->whereNotNull('photos_limit')->whereColumn('photos', '<', 'photos_limit')->whereRaw('photos >= photos_limit * 0.8')),
+                    $key === 'limit_branches' => $w->orWhere(fn ($x) => $x->whereNotNull('branches_limit')->whereColumn('branches', '>=', 'branches_limit')),
+                    str_starts_with($key, 'style:') => substr($key, 6) === 'editorial'
+                        ? $w->orWhere(fn ($x) => $x->whereNull('style')->orWhere('style', 'editorial'))
+                        : $w->orWhere('style', substr($key, 6)),
+                    $key === 'paying' => $w->orWhere('paid_until', '>=', now()->toDateString()),
+                    $key === 'not_paying' => $w->orWhere(fn ($x) => $x->whereNull('paid_until')->orWhere('paid_until', '<', now()->toDateString())),
+                    default => null,
+                };
+            }
+        });
+    }
+
+    /** Restaurants as a server-side table: search, filters, sort, pages, CSV. */
+    private function table(Request $request): JsonResponse|StreamedResponse
+    {
+        $show = explode(',', (string) $request->query('show', ''));
+        $query = Tenant::query()->with(['plan', 'platformTags', 'memberships' => fn ($q) => $q->where('role', Role::Owner)->with('user')])
+            ->when($request->boolean('deleted') || in_array('deleted', $show, true), fn ($q) => $q->onlyTrashed())
+            // Health, views and scans from the dashboard summary (QUESTIONS #186): one subquery per column, no join.
+            ->select('tenants.*')->addSelect(collect(['h_score' => 'score', 'h_band' => 'band', 'h_views' => 'views_30d', 'h_scans' => 'scans_30d'])
+            ->map(fn (string $col) => DB::table('tenant_health')->whereColumn('tenant_health.tenant_id', 'tenants.id')->select($col))->all());
+
+        return TableQuery::respond($query, $request, [
+            'search' => fn ($q, string $s) => $q->where(fn ($w) => $w->where('tenants.name', 'like', "%{$s}%")->orWhere('tenants.slug', 'like', "{$s}%")
+                ->orWhereHas('memberships', fn ($m) => $m->where('role', Role::Owner->value)->whereHas('user', fn ($u) => $u->where('email', 'like', "%{$s}%")->orWhere('name', 'like', "%{$s}%")))),
+            'filters' => [
+                'state' => fn ($q, array $v) => $q->inState($v),
+                'plan' => fn ($q, array $v) => $q->whereIn('tenants.plan_id', array_map('intval', $v)),
+                'tag' => fn ($q, array $v) => $q->whereHas('platformTags', fn ($w) => $w->whereIn('platform_tags.id', array_map('intval', $v))),
+                'follow_up' => fn ($q, array $v) => in_array('due', $v, true) ? $q->whereNotNull('follow_up_on')->where('follow_up_on', '<=', now()->toDateString()) : null,
+                'id' => fn ($q, array $v) => $q->whereIn('tenants.id', array_map('intval', $v)),
+                // Dashboard click-throughs (QUESTIONS #186), from the nightly summary.
+                'health' => fn ($q, array $v) => $q->whereIn('tenants.id', DB::table('tenant_health')->whereIn('band', $v)->select('tenant_id')),
+                'usage' => fn ($q, array $v) => $q->whereIn('tenants.id', $this->usage(DB::table('tenant_health'), $v)->select('tenant_id')),
+            ],
+            'date' => 'tenants.created_at',
+            'sorts' => [
+                'name' => 'tenants.name',
+                'created_at' => 'tenants.created_at',
+                'paid_until' => 'tenants.paid_until',
+                'health' => fn ($q, string $dir) => $q->orderBy('h_score', $dir),
+                'views' => fn ($q, string $dir) => $q->orderBy('h_views', $dir),
+                'scans' => fn ($q, string $dir) => $q->orderBy('h_scans', $dir),
+                'plan' => fn ($q, string $dir) => $q->orderBy(Plan::select('price_minor')->whereColumn('plans.id', 'tenants.plan_id'), $dir),
+            ],
+            'default_sort' => '-created_at',
+            'csv' => ['name' => 'restaurants', 'columns' => [
+                'ID' => fn (Tenant $t) => $t->id,
+                'Name' => fn (Tenant $t) => $t->name,
+                'Menu address' => fn (Tenant $t) => url('/'.$t->slug),
+                'Status' => fn (Tenant $t) => $t->subscriptionState()->value,
+                'Plan' => fn (Tenant $t) => $t->plan?->name['en'] ?? '',
+                'Owner' => fn (Tenant $t) => $t->memberships->firstWhere('role', Role::Owner)?->user?->name,
+                'Owner e-mail' => fn (Tenant $t) => $t->memberships->firstWhere('role', Role::Owner)?->user?->email,
+                'Paid until' => fn (Tenant $t) => $t->paid_until?->toDateString(),
+                'Trial ends' => fn (Tenant $t) => $t->trial_ends_at?->toDateString(),
+                'Tags' => fn (Tenant $t) => $t->platformTags->pluck('name')->implode(', '),
+                'Created' => fn (Tenant $t) => $t->created_at?->toDateString(),
+                'Health score' => fn (Tenant $t) => $t->getAttributes()['h_score'] ?? null,
+                'Menu views (30 days)' => fn (Tenant $t) => $t->getAttributes()['h_views'] ?? null,
+                'QR scans (30 days)' => fn (Tenant $t) => $t->getAttributes()['h_scans'] ?? null,
+            ]],
+        ], fn (Tenant $t) => $this->row($t));
+    }
+
+    /** Bulk: add or remove a tag on many restaurants at once. */
+    public function bulkTag(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'ids' => ['required', 'array', 'min:1', 'max:1000'],
+            'ids.*' => ['integer'],
+            'tag_id' => ['required', 'integer', Rule::exists('platform_tags', 'id')],
+            'remove' => ['sometimes', 'boolean'],
+        ]);
+        $tag = PlatformTag::findOrFail($data['tag_id']);
+        $ids = Tenant::withTrashed()->whereIn('id', $data['ids'])->pluck('id');
+        $request->boolean('remove') ? $tag->tenants()->detach($ids) : $tag->tenants()->syncWithoutDetaching($ids);
+        $this->activity->log($request->boolean('remove') ? 'platform.tag_removed_bulk' : 'platform.tag_added_bulk', $tag, ['restaurants' => ['to' => $ids->count()]], null);
+
+        return response()->json(['data' => ['count' => $ids->count()]]);
     }
 
     public function show(int $restaurant): JsonResponse
@@ -264,6 +367,7 @@ class RestaurantController extends Controller
     private function row(Tenant $t): array
     {
         $owner = $t->relationLoaded('memberships') ? $t->memberships->firstWhere('role', Role::Owner)?->user : null;
+        $h = $t->getAttributes();
 
         return [
             'id' => $t->id,
@@ -287,6 +391,10 @@ class RestaurantController extends Controller
             'tags' => $t->relationLoaded('platformTags') ? $t->platformTags->sortBy('name')->map(fn (PlatformTag $g) => CrmController::tag($g))->values()->all() : [],
             'follow_up_on' => $t->follow_up_on?->toDateString(),
             'follow_up_reason' => $t->follow_up_reason,
+            // From the dashboard summary; null until platform:aggregate has run.
+            'health' => isset($h['h_band']) ? ['band' => $h['h_band'], 'score' => (int) $h['h_score']] : null,
+            'views_30d' => isset($h['h_views']) ? (int) $h['h_views'] : null,
+            'scans_30d' => isset($h['h_scans']) ? (int) $h['h_scans'] : null,
         ];
     }
 }

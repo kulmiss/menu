@@ -19,6 +19,7 @@ use App\Support\Legal\LegalText;
 use App\Support\MailSettings;
 use App\Support\PlatformSettings;
 use App\Support\PublicMenu\ShareImage;
+use App\Support\Tables\TableQuery;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -29,6 +30,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
 
 /**
@@ -79,6 +81,7 @@ class PlatformController extends Controller
             'name' => (object) $p->name,
             'slug' => $p->slug,
             'price_minor' => $p->price_minor,
+            'price_year_minor' => $p->price_year_minor,
             'currency' => $p->currency,
             'interval' => $p->interval,
             'trial_days' => $p->trial_days,
@@ -87,6 +90,7 @@ class PlatformController extends Controller
             'is_public' => $p->is_public,
             'is_active' => $p->is_active,
             'restaurants' => Tenant::where('plan_id', $p->id)->count(),
+            'replaced_by_plan_id' => $p->replaced_by_plan_id,
         ])]);
     }
 
@@ -98,6 +102,7 @@ class PlatformController extends Controller
             'name' => [$plan ? 'sometimes' : 'required', Translations::required(60)],
             'slug' => [$plan ? 'sometimes' : 'required', 'string', 'max:50', 'regex:/^[a-z0-9-]+$/', Rule::unique('plans', 'slug')->ignore($model->id)],
             'price_minor' => ['sometimes', 'integer', 'min:0'],
+            'price_year_minor' => ['sometimes', 'nullable', 'integer', 'min:0'],
             'currency' => ['sometimes', 'string', 'size:3', 'alpha'],
             'interval' => ['sometimes', Rule::in(['month', 'year'])],
             'trial_days' => ['sometimes', 'integer', 'between:0,365'],
@@ -196,8 +201,44 @@ class PlatformController extends Controller
 
     // ---- Activity log ----------------------------------------------------
 
-    public function activity(Request $request): JsonResponse
+    public function activity(Request $request): JsonResponse|StreamedResponse
     {
+        if ($request->has('page') || $request->query('format') === 'csv') {
+            $row = fn (ActivityLog $l) => [
+                'id' => $l->id,
+                'at' => $l->created_at->toIso8601String(),
+                'tenant' => $l->tenant_id ? ['id' => $l->tenant_id, 'name' => $l->tenant?->name] : null,
+                'actor' => $l->actor?->name,
+                'impersonator' => $l->impersonator?->name,
+                'action' => $l->action,
+                'subject' => $l->subject_type ? $l->subject_type.' #'.$l->subject_id : null,
+                'changes' => $l->changes,
+            ];
+
+            return TableQuery::respond(ActivityLog::query()->with(['actor:id,name,email', 'impersonator:id,name', 'tenant:id,name']), $request, [
+                'search' => fn ($q, string $s) => $q->where(fn ($w) => $w->where('action', 'like', "%{$s}%")
+                    ->orWhereHas('actor', fn ($u) => $u->where('name', 'like', "%{$s}%")->orWhere('email', 'like', "%{$s}%"))),
+                'filters' => [
+                    'scope' => fn ($q, array $v) => count($v) === 1 ? ($v[0] === 'platform' ? $q->whereNull('tenant_id') : $q->whereNotNull('tenant_id')) : null,
+                    // An area is a group of action prefixes, e.g. "item|menu|category".
+                    'area' => function ($q, array $v) {
+                        $prefixes = array_filter(explode('|', implode('|', $v)), fn ($p) => preg_match('/^[a-z_]+$/', $p));
+                        $q->where(fn ($w) => array_map(fn ($p) => $w->orWhere('action', 'like', $p.'.%'), $prefixes ?: ['-']));
+                    },
+                    'restaurant' => fn ($q, array $v) => $q->whereIn('tenant_id', array_map('intval', $v)),
+                ],
+                'date' => 'created_at',
+                'sorts' => ['at' => 'created_at'],
+                'default_sort' => '-at',
+                'csv' => ['name' => 'activity-log', 'columns' => [
+                    'When' => fn (ActivityLog $l) => $l->created_at->toDateTimeString(),
+                    'Restaurant' => fn (ActivityLog $l) => $l->tenant_id ? $l->tenant->name : 'Platform',
+                    'Who' => fn (ActivityLog $l) => $l->actor?->name,
+                    'Action' => fn (ActivityLog $l) => $l->action,
+                    'Subject' => fn (ActivityLog $l) => $l->subject_type ? $l->subject_type.' #'.$l->subject_id : null,
+                ]],
+            ], $row);
+        }
         $data = $request->validate([
             'tenant_id' => ['sometimes', 'nullable', 'integer'],
             'platform_only' => ['sometimes', 'boolean'],

@@ -32,7 +32,10 @@ final class LegalText
     }
 
     /**
-     * @return array{updated: string|null, blocks: list<array<string, mixed>>, toc: list<array{id: string, text: string}>}
+     * `intro` is everything before the first section (always shown); `sections`
+     * are the "## " sections with their blocks (shown collapsible).
+     *
+     * @return array{updated: string|null, blocks: list<array<string, mixed>>, toc: list<array{id: string, text: string}>, intro: list<array<string, mixed>>, sections: list<array{id: string, title: string, blocks: list<array<string, mixed>>}>}
      */
     public static function parse(string $text): array
     {
@@ -93,7 +96,19 @@ final class LegalText
             }
         }
 
-        return ['updated' => $updated, 'blocks' => $blocks, 'toc' => $toc];
+        $intro = [];
+        $sections = [];
+        foreach ($blocks as $block) {
+            if ($block['type'] === 'h2') {
+                $sections[] = ['id' => $block['id'], 'title' => $block['text'], 'blocks' => []];
+            } elseif ($sections === []) {
+                $intro[] = $block;
+            } else {
+                $sections[count($sections) - 1]['blocks'][] = $block;
+            }
+        }
+
+        return ['updated' => $updated, 'blocks' => $blocks, 'toc' => $toc, 'intro' => $intro, 'sections' => $sections];
     }
 
     /**

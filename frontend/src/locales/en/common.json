@@ -28,7 +28,9 @@
     "info": "Restaurant info",
     "promotions": "Promotions",
     "insights": "Insights",
-    "platform": "Platform"
+    "platform": "Platform",
+    "upgrade": "Upgrade",
+    "dishes": "All dishes"
   },
   "language": {
     "label": "Language",

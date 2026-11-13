@@ -167,7 +167,14 @@ export function PrintMaterialsPage() {
   const [theme, setTheme] = useState<Theme>('light')
   const [headline, setHeadline] = useState('')
   const [bleed, setBleed] = useState(false)
-  const [picked, setPicked] = useState<number[] | null>(null)
+  // ?codes=1,2,3 from the QR codes table ("Print materials for these codes").
+  const [picked, setPicked] = useState<number[] | null>(() => {
+    const ids = (new URLSearchParams(window.location.search).get('codes') ?? '')
+      .split(',')
+      .map(Number)
+      .filter((n) => Number.isInteger(n) && n > 0)
+    return ids.length ? ids : null
+  })
   const [busy, setBusy] = useState<string | null>(null)
 
   const rows = useMemo(() => codes.data ?? [], [codes.data])
