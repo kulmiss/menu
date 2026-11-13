@@ -6,6 +6,10 @@ _Last updated: 2026-11-12 13:00 EAT. Everything requested is merged into `develo
 > **English only for now (owner, 2026-11-10):** texts stay in `t()` / `__()`; the database keeps per-language fields; language switches stay hidden while one language is on.
 > **Working mode (owner):** small PRs into `develop`, CI green, tests for each change, decisions in QUESTIONS.md. Stop only for: changes outside this project, steps that can't be undone, licence doubts, the same CI failure 3 times, or the working limit.
 
+
+## Mobile app backend (2026-11-14) — QUESTIONS #187–#190
+For the Flutter app [kulmiss/menu-admin-app](https://github.com/kulmiss/menu-admin-app). Merge in this order (each is stacked on the one before): #92 token sign-in, devices, account → #93 "log in as" token → #94 push + inbox → #95 `mobile/config` + Privacy Policy lines. Live: `php artisan migrate --force` (4 migrations). Optional push setup: docs/deploy.md §10a (`FCM_CREDENTIALS`). New scheduled commands: `mobile:prune-tokens` 03:25, `push:plan-reminders` 09:00, `push:followups` 08:00, `push:health` every 15 min, inbox prune 03:35. API: docs/mobile-api.md. The web admin and the customer menu are unchanged; full Pest suite: 479 passed.
+
 ## Where we are (2026-11-12)
 - `develop` has every change; `main` still has only the bootstrap commit. The release PR `develop` → `main` carries the summary and go-live checklist; the owner merges it.
 - Go-live checklist and test summary: `docs/final-report.md`. Deployment: `docs/deploy.md`. Link previews: `docs/share-preview.md`.
