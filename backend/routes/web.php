@@ -26,8 +26,9 @@ Route::withoutMiddleware($cookieFree)->group(function () {
     Route::get('/sitemap.xml', [SiteController::class, 'sitemap']);
 });
 // News e-mails: signed unsubscribe links (owner, 2026-11-13). The POST also serves
-// mail clients' one-click "List-Unsubscribe-Post", so it skips the CSRF check.
-Route::middleware(['signed', 'throttle:30,1'])->prefix('news/{user}')->whereNumber('user')->group(function () {
+// mail clients' one-click "List-Unsubscribe-Post". The signature is the
+// protection, so these pages need no session or CSRF cookie and set none.
+Route::withoutMiddleware($cookieFree)->middleware(['signed', 'throttle:30,1'])->prefix('news/{user}')->whereNumber('user')->group(function () {
     Route::get('unsubscribe', [NewsSubscriptionController::class, 'show'])->name('news.unsubscribe');
     Route::post('unsubscribe', [NewsSubscriptionController::class, 'unsubscribe'])->name('news.unsubscribe.do');
     Route::post('resubscribe', [NewsSubscriptionController::class, 'resubscribe'])->name('news.resubscribe');
