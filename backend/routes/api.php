@@ -26,6 +26,8 @@ use App\Http\Controllers\Api\Restaurant\QrCodeController;
 use App\Http\Controllers\Api\TeamController;
 use App\Http\Controllers\Api\TenantController;
 use App\Http\Controllers\Auth\SignUpController;
+use App\Http\Controllers\NewsSubscriptionController;
+use App\Http\Controllers\Platform\CampaignController;
 use App\Http\Controllers\Platform\CrmController;
 use App\Http\Controllers\Platform\DashboardWidgetController as PlatformDashboardWidgetController;
 use App\Http\Controllers\Platform\InvoiceController;
@@ -62,6 +64,7 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('me', MeController::class);
+        Route::put('me/news', [NewsSubscriptionController::class, 'update']);
         Route::post('impersonation/stop', [AnnouncementController::class, 'stopImpersonating']);
 
         // Super Admin (PLAN.md §7.3): Super Admins with two-factor sign-in only.
@@ -102,6 +105,15 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::delete('notes/{note}', [CrmController::class, 'destroyNote'])->whereNumber('note');
             Route::put('restaurants/{restaurant}/follow-up', [CrmController::class, 'followUp'])->whereNumber('restaurant');
             Route::get('widgets/follow-ups', [CrmController::class, 'due']);
+            // Messages: e-mails to restaurant owners (owner, 2026-11-13)
+            Route::get('campaigns', [CampaignController::class, 'index']);
+            Route::get('campaigns/{campaign}', [CampaignController::class, 'show'])->whereNumber('campaign');
+            Route::post('campaigns/count', [CampaignController::class, 'count']);
+            Route::post('campaigns/preview', [CampaignController::class, 'preview']);
+            Route::post('campaigns/test', [CampaignController::class, 'test'])->middleware('throttle:10,1');
+            Route::post('campaigns', [CampaignController::class, 'store']);
+            Route::post('campaigns/{campaign}/retry', [CampaignController::class, 'retry'])->whereNumber('campaign');
+            Route::put('campaigns/rate', [CampaignController::class, 'rate']);
             // Invoices (owner, 2026-11-13)
             Route::get('invoices', [InvoiceController::class, 'index']);
             Route::get('invoices.csv', [InvoiceController::class, 'export']);

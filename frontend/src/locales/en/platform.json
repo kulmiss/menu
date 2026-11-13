@@ -18,7 +18,8 @@
     "announcements": "Announcements",
     "activity": "Activity log",
     "settings": "Settings",
-    "invoices": "Invoices"
+    "invoices": "Invoices",
+    "messages": "Messages"
   },
   "dash": {
     "restaurants": "Restaurants",
@@ -494,5 +495,76 @@
     "widget": "Follow-ups due",
     "today": "today",
     "overdue": "overdue since {{date}}"
+  },
+  "messages": {
+    "hint": "E-mails to restaurant owners: news, offers and reminders. They go out a few per minute through the e-mail queue.",
+    "new": "New email",
+    "none": "No e-mails sent yet.",
+    "counts": "{{sent}} of {{total}} sent · {{failed}} failed",
+    "pending_one": "{{count}} waiting",
+    "pending_other": "{{count}} waiting",
+    "pending": "{{count}} waiting",
+    "status": {
+      "sending": "Sending",
+      "done": "Done"
+    },
+    "rate": "E-mails per minute",
+    "rate_hint": "How many campaign e-mails the queue sends each minute. Keep it below your mail provider's limit.",
+    "back": "Back to messages",
+    "retry_one": "Resend to {{count}} failed",
+    "retry_other": "Resend to {{count}} failed",
+    "retry": "Resend to {{count}} failed",
+    "requeued": "Failed addresses are queued again.",
+    "col": {
+      "email": "E-mail",
+      "restaurant": "Restaurant",
+      "status": "Status"
+    },
+    "recipient": {
+      "pending": "Waiting",
+      "sent": "Sent",
+      "failed": "Failed"
+    },
+    "compose_hint": "Write the e-mail, choose who gets it, check the preview and send yourself a test first.",
+    "subject": "Subject",
+    "body": "Message",
+    "toolbar": "Formatting",
+    "bold": "Bold",
+    "bold_text": "bold text",
+    "link": "Link",
+    "link_text": "link text",
+    "list": "List",
+    "list_text": "list item",
+    "body_hint": "Placeholders are filled in for each restaurant. Blank lines start a new paragraph.",
+    "recipients": "Recipients",
+    "any": "Any",
+    "status_filter": "Status",
+    "statuses": {
+      "active": "Active (paying)",
+      "trial": "On trial",
+      "expiring": "Ending within 14 days",
+      "expired": "Expired",
+      "suspended": "Suspended"
+    },
+    "inactive": "Inactive for at least (days)",
+    "signed_up_from": "Signed up from",
+    "signed_up_to": "Signed up until",
+    "will_reach_one": "Will be sent to {{count}} owner.",
+    "will_reach_other": "Will be sent to {{count}} owners.",
+    "will_reach": "Will be sent to {{count}} owners.",
+    "unsubscribe_note": "Owners who unsubscribed from news are left out. Every e-mail has an unsubscribe link.",
+    "preview": "Preview",
+    "preview_for": "As {{name}} will see it.",
+    "preview_sample": "With sample details (no owner matches yet).",
+    "test": "Send me a test",
+    "test_sent": "Test sent to {{email}}.",
+    "send_one": "Send to {{count}} owner",
+    "send_other": "Send to {{count}} owners",
+    "send": "Send to {{count}} owners",
+    "confirm_title_one": "Send this e-mail to {{count}} owner?",
+    "confirm_title_other": "Send this e-mail to {{count}} owners?",
+    "confirm_title": "Send this e-mail to {{count}} owners?",
+    "confirm_text": "It can't be stopped once it starts. Sending takes a few minutes; you can follow it here.",
+    "queued": "The e-mail is being sent."
   }
 }

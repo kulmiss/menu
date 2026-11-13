@@ -54,6 +54,8 @@ class PlatformSettings
         'invoice_footer' => '',
         'invoice_tax_rate' => 0, // VAT %, included in the amount paid
         'invoice_email' => true, // e-mail each new invoice to the owner
+        // Messages (bulk e-mail): e-mails sent per minute by the cron queue worker.
+        'campaign_rate' => 30,
         'socials' => ['telegram' => '', 'facebook' => '', 'instagram' => '', 'tiktok' => '', 'x' => '', 'youtube' => '', 'linkedin' => ''],
     ];
 

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\NewsSubscriptionController;
 use App\Http\Controllers\PublicMenuController;
 use App\Http\Controllers\SiteController;
 use App\Http\Controllers\SpaController;
@@ -10,6 +11,13 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [SiteController::class, 'home']);
 Route::get('/{page}', [SiteController::class, 'legal'])->whereIn('page', ['terms', 'privacy']);
 Route::get('/robots.txt', [SiteController::class, 'robots']);
+// News e-mails: signed unsubscribe links (owner, 2026-11-13). The POST also serves
+// mail clients' one-click "List-Unsubscribe-Post", so it skips the CSRF check.
+Route::middleware(['signed', 'throttle:30,1'])->prefix('news/{user}')->whereNumber('user')->group(function () {
+    Route::get('unsubscribe', [NewsSubscriptionController::class, 'show'])->name('news.unsubscribe');
+    Route::post('unsubscribe', [NewsSubscriptionController::class, 'unsubscribe'])->name('news.unsubscribe.do');
+    Route::post('resubscribe', [NewsSubscriptionController::class, 'resubscribe'])->name('news.resubscribe');
+});
 Route::get('/sitemap.xml', [SiteController::class, 'sitemap']);
 
 // Admin + Super Admin SPA: every URL below these prefixes loads the same page.

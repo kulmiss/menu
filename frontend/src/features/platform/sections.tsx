@@ -13,6 +13,9 @@ const SCREENS = {
   invoices: lazy(() =>
     import('./invoices').then((m) => ({ default: m.InvoicesPage }))
   ),
+  messages: lazy(() =>
+    import('./messages').then((m) => ({ default: m.MessagesPage }))
+  ),
   themes: lazy(() =>
     import('./screens').then((m) => ({ default: m.ThemesPage }))
   ),

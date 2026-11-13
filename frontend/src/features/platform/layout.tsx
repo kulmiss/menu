@@ -12,6 +12,7 @@ const NAV = [
   'plans',
   'payments',
   'invoices',
+  'messages',
   'themes',
   'announcements',
   'activity',

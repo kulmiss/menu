@@ -165,6 +165,34 @@ export const restaurantQ = (id: number) =>
 export const plansQ = () => q<PlanRow[]>('plans')
 export const paymentsQ = (params: string) =>
   q<PaymentRow[]>(`payments${params ? `?${params}` : ''}`)
+export type CampaignRow = {
+  id: number
+  subject: string
+  status: 'sending' | 'done'
+  recipients: number
+  sent: number
+  failed: number
+  pending: number
+  created_at: string
+  finished_at: string | null
+}
+export const campaignsQ = () => q<CampaignRow[]>('campaigns')
+export const campaignQ = (id: number) =>
+  q<
+    CampaignRow & {
+      body: string
+      list: {
+        id: number
+        email: string
+        name: string
+        restaurant: string
+        status: 'pending' | 'sent' | 'failed'
+        attempts: number
+        error: string | null
+        sent_at: string | null
+      }[]
+    }
+  >(`campaigns/${id}`)
 export const tagsQ = () => q<TagRef[]>('tags')
 export const notesQ = (id: number) => q<NoteRow[]>(`restaurants/${id}/notes`)
 export const followUpsQ = () =>

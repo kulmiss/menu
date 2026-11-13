@@ -27,6 +27,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->api(append: [GuardImpersonation::class]);
         $middleware->web(append: [GuardImpersonation::class, UseWelcomeBroker::class]);
 
+        // One-click unsubscribe (List-Unsubscribe-Post) comes from mail clients without a CSRF token; the link is signed.
+        $middleware->preventRequestForgery(except: ['news/*/unsubscribe']);
+
         $middleware->alias([
             'idempotent' => EnsureIdempotency::class,
             'feature' => RequireFeature::class,

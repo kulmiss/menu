@@ -322,7 +322,10 @@
       "no_invoices": "No invoices yet.",
       "pdf": "(PDF, opens in a new tab)",
       "void": "Void"
-    }
+    },
+    "news_title": "Platform news",
+    "news_intro": "Occasional e-mails about new features and offers. E-mails about your account, such as invoices and security, are always sent.",
+    "news_label": "Send me news by e-mail"
   },
   "team": {
     "title": "Team",

@@ -1,5 +1,6 @@
 <?php
 
+use App\Jobs\SendCampaignBatch;
 use App\Models\Tenant;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -19,6 +20,10 @@ Schedule::command('queue:work --stop-when-empty --max-time=50 --tries=3')->every
 
 // Heartbeat for the Super Admin's "System health" (cron last run).
 Schedule::call(fn () => Cache::forever('cron:last_run', now()->toIso8601String()))->everyMinute()->name('cron-heartbeat');
+
+// Super Admin → Messages: a few e-mails per minute (owner, 2026-11-13).
+Schedule::call(fn () => SendCampaignBatch::dispatch())->everyMinute()->name('campaigns:send')
+    ->when(fn () => SendCampaignBatch::pending());
 
 Schedule::command('menu:refresh-pages')->hourly();
 Schedule::command('menu:refresh-pages --all')->dailyAt('00:05');

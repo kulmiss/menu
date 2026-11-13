@@ -75,7 +75,7 @@ Upload the whole `backend/` folder (it now contains `vendor/` and `public/app/`)
    * * * * * cd /home/USER/menu/backend && php artisan schedule:run >> /dev/null 2>&1
    ```
 
-   It sends queued e-mails (invitations) every minute, rebuilds menu pages whose subscription changed (hourly) and every page at 00:05 (so "New" badges expire), cleans old statistics and deleted restaurants (03:15, 03:30) and removes self sign-ups whose e-mail was not confirmed within 7 days (`signup:prune`, 03:20; the menu address becomes free again, each removal is in the activity log). Sign-up e-mails (confirm, welcome, approval) go through the same queue. Check with `php artisan schedule:list`.
+   It sends queued e-mails (invitations) every minute, rebuilds menu pages whose subscription changed (hourly) and every page at 00:05 (so "New" badges expire), cleans old statistics and deleted restaurants (03:15, 03:30) and removes self sign-ups whose e-mail was not confirmed within 7 days (`signup:prune`, 03:20; the menu address becomes free again, each removal is in the activity log). Sign-up e-mails (confirm, welcome, approval) go through the same queue, and so do Super Admin → Messages campaigns (a few per minute, set on the Messages screen; keep it under your mail provider's hourly limit). Check with `php artisan schedule:list`.
    Some hosts need the full PHP path, e.g. `/usr/local/bin/php` or `/opt/cpanel/ea-php83/root/usr/bin/php`.
 8. **PHP settings** (cPanel → MultiPHP INI Editor): `upload_max_filesize = 10M`, `post_max_size = 12M`, `memory_limit = 256M` (photo resizing), and OPcache on (section 5).
 9. Open `https://menu.example.com/up` → "Application up". Then create the Super Admin (section 8).
