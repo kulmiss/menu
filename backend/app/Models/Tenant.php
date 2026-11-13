@@ -39,6 +39,8 @@ use Illuminate\Support\Facades\DB;
  * @property string $currency_code
  * @property array<string, mixed>|null $currency_format
  * @property int $cache_version
+ * @property bool $insights_report monthly Insights report by e-mail (QUESTIONS #180)
+ * @property string|null $insights_report_sent YYYY-MM of the last monthly report sent
  *
  * A restaurant: the tenant every restaurant-owned row belongs to.
  */
@@ -93,6 +95,7 @@ class Tenant extends Model
             'follow_up_on' => 'date',
             'currency_format' => 'array',
             'cache_version' => 'integer',
+            'insights_report' => 'boolean',
         ];
     }
 

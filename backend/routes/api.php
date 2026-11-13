@@ -20,7 +20,9 @@ use App\Http\Controllers\Api\Restaurant\BranchController;
 use App\Http\Controllers\Api\Restaurant\DashboardWidgetController;
 use App\Http\Controllers\Api\Restaurant\InfoController;
 use App\Http\Controllers\Api\Restaurant\InsightsController;
+use App\Http\Controllers\Api\Restaurant\InsightsExportController;
 use App\Http\Controllers\Api\Restaurant\PdfMenuController;
+use App\Http\Controllers\Api\Restaurant\PricePeriodController;
 use App\Http\Controllers\Api\Restaurant\PromotionController;
 use App\Http\Controllers\Api\Restaurant\QrCodeController;
 use App\Http\Controllers\Api\TeamController;
@@ -229,12 +231,20 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::post('qr-codes', [QrCodeController::class, 'store']);
             Route::patch('qr-codes/{qr}', [QrCodeController::class, 'update']);
             Route::delete('qr-codes/{qr}', [QrCodeController::class, 'destroy']);
+            Route::get('print-materials', [QrCodeController::class, 'printInfo']);
+            Route::get('print-materials.pdf', [QrCodeController::class, 'printMaterials']);
             Route::get('qr-codes/{qr}.{format}', [QrCodeController::class, 'download'])->whereIn('format', ['svg', 'png', 'pdf']);
 
             Route::get('announcements', [AnnouncementController::class, 'index']);
             Route::post('announcements/{announcement}/read', [AnnouncementController::class, 'read'])->whereNumber('announcement');
 
             Route::get('insights', [InsightsController::class, 'index'])->middleware('feature:insights');
+            Route::middleware('feature:insights')->group(function () {
+                Route::get('insights/export.csv', [InsightsExportController::class, 'csv']);
+                Route::get('insights/report.pdf', [InsightsExportController::class, 'pdf']);
+                Route::get('insights/settings', [InsightsExportController::class, 'settings']);
+                Route::put('insights/settings', [InsightsExportController::class, 'updateSettings']);
+            });
             Route::get('dashboard', [InsightsController::class, 'dashboard']);
             Route::prefix('widgets')->controller(DashboardWidgetController::class)->group(function () {
                 Route::get('setup', 'setup');
@@ -245,6 +255,14 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
                 Route::get('plan', 'plan');
             });
 
+            // Time-based prices (owner, 2026-11-14)
+            Route::middleware('feature:price_periods')->group(function () {
+                Route::get('price-periods', [PricePeriodController::class, 'index']);
+                Route::get('price-periods/preview', [PricePeriodController::class, 'preview']);
+                Route::post('price-periods', [PricePeriodController::class, 'store']);
+                Route::put('price-periods/{period}', [PricePeriodController::class, 'update'])->whereNumber('period');
+                Route::delete('price-periods/{period}', [PricePeriodController::class, 'destroy'])->whereNumber('period');
+            });
             Route::get('promotions', [PromotionController::class, 'index']);
             Route::post('promotions', [PromotionController::class, 'store'])->middleware('feature:promotions');
             Route::post('promotions/reorder', [PromotionController::class, 'reorder'])->middleware('feature:promotions');

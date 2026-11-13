@@ -26,6 +26,7 @@ class Features
         'style_grid' => true,
         'style_bistro' => true,
         'style_minimal' => true, // D · Minimal, text only (owner, 2026-11-12)
+        'price_periods' => true, // time-based prices: happy hour, lunch (owner, 2026-11-14; off on Free)
     ];
 
     /** @var array<int, array<string, bool>> */

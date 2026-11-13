@@ -378,7 +378,65 @@
     "delete": "Delete {{name}}",
     "delete_title": "Delete this code?",
     "delete_desc": "Printed copies stop working. The code is never reused.",
-    "print_tip": "Printing tip: print at 100 % size (no “fit to page”), on matt paper, at least 3 cm wide. Test-scan one card before printing many."
+    "print_tip": "Printing tip: print at 100 % size (no “fit to page”), on matt paper, at least 3 cm wide. Test-scan one card before printing many.",
+    "print_materials": "Print materials",
+    "print_materials_hint": "Posters, table tents, stickers and a window sign with your logo and colours."
+  },
+  "print": {
+    "title": "Print materials",
+    "description": "Posters, table tents, stickers and a window sign with your logo, your colour and your QR code. Print them at home or at a print shop.",
+    "what": "What to print",
+    "materials": {
+      "tent": "Table tent",
+      "poster_a5": "Poster A5",
+      "poster_a4": "Poster A4",
+      "window": "Window sign",
+      "sticker_round": "Round stickers",
+      "sticker_square": "Square stickers"
+    },
+    "sizes": {
+      "tent": "A6, two per A4 — fold in the middle",
+      "poster_a5": "148 × 210 mm",
+      "poster_a4": "210 × 297 mm",
+      "window": "A4 landscape, big code",
+      "sticker_round": "60 mm, 12 per A4, with cut lines",
+      "sticker_square": "60 mm, 12 per A4, with cut lines"
+    },
+    "look": "Look",
+    "design": "Design",
+    "designs": {
+      "classic": "Classic",
+      "bold": "Bold",
+      "minimal": "Minimal"
+    },
+    "colours": "Colours",
+    "themes": {
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "headline": "Headline",
+    "headline_hint": "Up to 40 letters. Leave empty for the default.",
+    "bleed": "For a print shop (3 mm bleed)",
+    "bleed_hint": "Adds 3 mm of background on every side, as print shops ask. Leave off for a home or office printer.",
+    "codes": "Which QR codes",
+    "codes_hint_pages": "One page for each code you choose.",
+    "codes_hint_tent": "One tent for each code (two per page). One code fills a whole page.",
+    "codes_hint_stickers": "One sticker for each code (12 per page). One code fills a whole sheet.",
+    "tables_of": "Tables — {{name}}",
+    "all": "Choose all",
+    "none": "Clear",
+    "preview": "Preview",
+    "preview_label": "Preview of the first code",
+    "count": "{{count}} codes chosen",
+    "count_one": "{{count}} code chosen",
+    "count_other": "{{count}} codes chosen",
+    "choose": "Choose at least one QR code.",
+    "download": "Download PDF",
+    "open": "Open the PDF",
+    "social": "For social media",
+    "social_hint": "A picture with the first chosen code, in the same design.",
+    "post": "Square post (1080 × 1080)",
+    "story": "Story (1080 × 1920)"
   },
   "promotions": {
     "title": "Promotions",
@@ -412,7 +470,38 @@
     "delete_title": "Delete this promotion?",
     "delete_desc": "It disappears from the menu right away.",
     "empty": "No promotions yet. Add a special or an announcement.",
-    "view_menu": "View menu"
+    "view_menu": "View menu",
+    "periods": {
+      "title": "Price periods",
+      "description": "Special prices at set times, such as a happy hour or lunch prices. Guests see the normal price crossed out and “Happy hour until 18:00”.",
+      "new": "New price period",
+      "edit": "Edit price period",
+      "not_included": "Price periods are not included in your plan. Contact us to upgrade.",
+      "empty": "No price periods yet.",
+      "dishes_one": "{{count}} dish",
+      "dishes_other": "{{count}} dishes",
+      "dishes": "{{count}} dishes",
+      "delete_confirm": "Delete this price period? Normal prices apply again right away.",
+      "now_title": "What guests see now",
+      "now_at": "Restaurant time: {{time}}. The menu changes by itself when a period starts or ends.",
+      "main": "Main menu (all branches)",
+      "none_running": "No price period is running now: guests see the normal prices.",
+      "name": "Name shown to guests",
+      "name_hint": "e.g. Happy hour",
+      "days": "Days",
+      "from": "From",
+      "to": "Until",
+      "time_hint": "In the restaurant's time zone. An end time earlier than the start runs past midnight.",
+      "prices": "Special prices",
+      "add_dish": "Add a dish",
+      "no_dishes": "Add at least one dish.",
+      "normal": "Normal {{price}}",
+      "mode": "Kind of price",
+      "percent": "% off",
+      "fixed": "New price",
+      "remove": "Remove {{name}}",
+      "active": "Use this price period"
+    }
   },
   "addons": {
     "title": "Add-ons",
@@ -528,7 +617,24 @@
     "privacy": "Search engines, link previews and speed tests are not counted. Numbers update within a minute.",
     "max": "highest {{count}}",
     "max_one": "highest {{count}}",
-    "max_other": "highest {{count}}"
+    "max_other": "highest {{count}}",
+    "export": {
+      "button": "Export",
+      "for": "Last {{count}} days",
+      "for_one": "Last {{count}} day",
+      "for_other": "Last {{count}} days",
+      "pdf": "Report (PDF)",
+      "csv_daily": "Views and scans per day (CSV)",
+      "csv_qr": "Scans per QR code and table (CSV)",
+      "csv_dishes": "Dish views and “My order” adds (CSV)"
+    },
+    "monthly": {
+      "title": "Monthly report by e-mail",
+      "hint": "On the 1st of every month, the owners get last month's report as a PDF: menu views, QR scans, top dishes and top codes, compared with the month before.",
+      "label": "E-mail me the monthly report",
+      "on": "Monthly report switched on. The first one comes on the 1st.",
+      "off": "Monthly report switched off."
+    }
   },
   "dashboard": {
     "title": "Dashboard",
