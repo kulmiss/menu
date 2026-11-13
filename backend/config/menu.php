@@ -36,6 +36,9 @@ return [
 
     'default_currency' => env('MENU_DEFAULT_CURRENCY', 'ETB'),
 
+    // Currencies a restaurant can pick when it signs up (ISO 4217).
+    'currencies' => ['ETB', 'KES', 'SOS', 'DJF', 'UGX', 'TZS', 'RWF', 'SDG', 'ERN', 'AED', 'SAR', 'USD', 'EUR', 'GBP'],
+
     /*
     | Allergens: the fixed EU-14 list (QUESTIONS #17). Names are translated
     | by the apps; the database stores these keys.
@@ -64,7 +67,7 @@ return [
     | Slugs a restaurant can never take: they collide with platform routes.
     */
     'reserved_slugs' => [
-        'admin', 'api', 'app', 'assets', 'auth', 'build', 'css', 'dashboard', 'docs',
+        'admin', 'api', 'app', 'assets', 'auth', 'build', 'css', 'dashboard', 'docs', 'email',
         'favicon.ico', 'help', 'img', 'images', 'js', 'login', 'logout', 'media',
         'menu', 'menu-cache', 'platform', 'privacy', 'q', 'register', 'robots.txt', 'sanctum',
         'settings', 'signup', 'sitemap.xml', 'static', 'sw.js', 'status', 'storage', 'support',

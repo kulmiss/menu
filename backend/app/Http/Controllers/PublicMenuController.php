@@ -39,7 +39,7 @@ class PublicMenuController extends Controller
         }
 
         $state = $tenant->subscriptionState();
-        if (in_array($state, [SubscriptionState::Unavailable, SubscriptionState::Suspended], true)) {
+        if (in_array($state, [SubscriptionState::Unavailable, SubscriptionState::Suspended, SubscriptionState::Pending], true)) {
             return response()->view('public.unavailable', ['tenant' => $tenant], 503, [
                 'Retry-After' => '86400',
                 'X-Robots-Tag' => 'noindex',

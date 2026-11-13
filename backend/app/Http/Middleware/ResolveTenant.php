@@ -33,6 +33,12 @@ class ResolveTenant
 
         abort_if($tenant === null || $membership === null, 404);
 
+        // Until the e-mail is confirmed, the admin shows only "Check your inbox" (owner, 2026-11-13).
+        // A Super Admin "logged in as" the owner can still look around.
+        if (! $user->hasVerifiedEmail() && ! ($request->hasSession() && $request->session()->has('impersonation_id'))) {
+            abort(response()->json(['message' => __('signup.unverified'), 'code' => 'email.unverified'], 403));
+        }
+
         $this->current->set($tenant, $membership->setRelation('tenant', $tenant));
 
         // Controllers receive the Tenant model, not the raw id.

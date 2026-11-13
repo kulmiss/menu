@@ -64,7 +64,8 @@ it('finds restaurants with no views and no edits for 14 days', function () {
 
 it('shows the growth funnel with conversion between steps', function () {
     foreach (range(1, 4) as $n) {
-        $t = Tenant::factory()->create(['created_at' => now()->subDays(5)]);
+        // One self sign-up still waiting for the e-mail check (owner, 2026-11-13).
+        $t = Tenant::factory()->create(['created_at' => now()->subDays(5), 'signup_state' => $n === 4 ? Tenant::SIGNUP_UNVERIFIED : null]);
         if ($n <= 2) {
             [, $category] = sampleMenu($t);
             asTenant($t, fn () => collect(range(1, 4))->each(fn ($i) => Item::create(['category_id' => $category->id, 'name' => ['en' => 'D'.$i], 'price_minor' => 1])));
@@ -78,7 +79,8 @@ it('shows the growth funnel with conversion between steps', function () {
     $this->actingAs(superAdmin())->getJson(p('widgets/funnel?days=30'))->assertOk()
         ->assertJsonPath('data.steps', [
             ['key' => 'signups', 'count' => 4, 'percent' => null],
-            ['key' => 'menu', 'count' => 2, 'percent' => 50],
+            ['key' => 'verified', 'count' => 3, 'percent' => 75],
+            ['key' => 'menu', 'count' => 2, 'percent' => 67],
             ['key' => 'scanned', 'count' => 1, 'percent' => 50],
             ['key' => 'paying', 'count' => 1, 'percent' => 100],
         ]);
@@ -161,6 +163,6 @@ it('reads every cached widget back from a real (serializing) cache store', funct
         $first = $this->actingAs($admin)->getJson(p('widgets/'.$widget))->assertOk()->json();
         $this->actingAs($admin)->getJson(p('widgets/'.$widget))->assertOk()->assertExactJson($first);
     }
-    $this->actingAs($admin)->getJson(p('widgets/funnel?days=30'))->assertJsonPath('data.steps.2.count', 1);
+    $this->actingAs($admin)->getJson(p('widgets/funnel?days=30'))->assertJsonPath('data.steps.3.count', 1);
     Cache::flush();
 });

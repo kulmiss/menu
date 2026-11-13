@@ -110,13 +110,15 @@ class DashboardWidgetController extends Controller
         $row = Cache::remember("platform:w:funnel:{$days}", 300, fn () => (array) DB::table('tenants as t')
             ->whereNull('t.deleted_at')->where('t.created_at', '>=', now()->subDays($days))
             ->selectRaw('COUNT(*) as signups')
+            // Self sign-ups count once the e-mail is confirmed; restaurants the Super Admin creates count right away.
+            ->selectRaw("SUM(t.signup_state IS NULL OR t.signup_state <> 'unverified') as verified")
             ->selectRaw('SUM((SELECT COUNT(*) FROM items i WHERE i.tenant_id = t.id) >= 5) as menu')
             ->selectRaw("SUM(EXISTS (SELECT 1 FROM stats_daily s WHERE s.tenant_id = t.id AND s.metric = 'qr_scan')) as scanned")
             ->selectRaw('SUM(EXISTS (SELECT 1 FROM payments p WHERE p.tenant_id = t.id)) as paying')
             ->first());
         $steps = [];
         $previous = null;
-        foreach (['signups', 'menu', 'scanned', 'paying'] as $key) {
+        foreach (['signups', 'verified', 'menu', 'scanned', 'paying'] as $key) {
             $count = (int) ($row[$key] ?? 0);
             $steps[] = ['key' => $key, 'count' => $count, 'percent' => $previous === null ? null : ($previous > 0 ? (int) round($count * 100 / $previous) : 0)];
             $previous = $count;
@@ -150,7 +152,7 @@ class DashboardWidgetController extends Controller
     {
         $rows = DB::table('tenants as t')->whereNull('t.deleted_at')->orderByDesc('t.created_at')->limit(10)
             ->leftJoin('tenant_appearance as a', 'a.tenant_id', '=', 't.id')
-            ->select(['t.id', 't.name', 't.slug', 't.created_at', 't.qr_downloaded_at', 'a.logo_media_id', 'a.cover_media_id'])
+            ->select(['t.id', 't.name', 't.slug', 't.signup_state', 't.created_at', 't.qr_downloaded_at', 'a.logo_media_id', 'a.cover_media_id'])
             ->selectRaw('(SELECT COUNT(*) FROM items i WHERE i.tenant_id = t.id) as dishes')
             ->selectRaw('(SELECT COUNT(*) FROM items i WHERE i.tenant_id = t.id AND i.media_id IS NOT NULL) as photos')
             ->selectRaw('EXISTS (SELECT 1 FROM opening_hours h WHERE h.tenant_id = t.id) as hours')
@@ -168,6 +170,7 @@ class DashboardWidgetController extends Controller
 
             return [
                 'id' => (int) $r->id, 'name' => $r->name, 'slug' => $r->slug,
+                'signup_state' => $r->signup_state,
                 'created_at' => Carbon::parse($r->created_at)->toIso8601String(),
                 'steps' => $steps,
                 'percent' => (int) round(count(array_filter($steps)) * 100 / count($steps)),

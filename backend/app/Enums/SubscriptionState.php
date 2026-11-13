@@ -10,11 +10,13 @@ enum SubscriptionState: string
     case ReadOnly = 'read_only';
     case Unavailable = 'unavailable';
     case Suspended = 'suspended';
+    // Self-registered, not live yet: e-mail not verified, or waiting for the Super Admin's approval.
+    case Pending = 'pending';
 
     /** The restaurant admin may change data. */
     public function allowsWrites(): bool
     {
-        return in_array($this, [self::Trial, self::Active, self::Grace], true);
+        return in_array($this, [self::Trial, self::Active, self::Grace, self::Pending], true);
     }
 
     /** The public menu is shown to customers. */

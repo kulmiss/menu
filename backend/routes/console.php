@@ -22,6 +22,8 @@ Schedule::call(fn () => Cache::forever('cron:last_run', now()->toIso8601String()
 
 Schedule::command('menu:refresh-pages')->hourly();
 Schedule::command('menu:refresh-pages --all')->dailyAt('00:05');
+// Self sign-ups that never confirmed their e-mail (owner, 2026-11-13).
+Schedule::command('signup:prune')->dailyAt('03:20');
 
 // Insights keep 13 months of daily counters (enough for "same month last year").
 Schedule::call(fn () => DB::table('stats_daily')->where('date', '<', now()->subDays(400)->toDateString())->delete())

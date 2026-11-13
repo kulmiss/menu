@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\Restaurant\PromotionController;
 use App\Http\Controllers\Api\Restaurant\QrCodeController;
 use App\Http\Controllers\Api\TeamController;
 use App\Http\Controllers\Api\TenantController;
+use App\Http\Controllers\Auth\SignUpController;
 use App\Http\Controllers\Platform\DashboardWidgetController as PlatformDashboardWidgetController;
 use App\Http\Controllers\Platform\PaymentController;
 use App\Http\Controllers\Platform\PlatformController;
@@ -48,6 +49,14 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
     Route::get('invitations/{token}', [AcceptInvitationController::class, 'show'])
         ->middleware('throttle:30,1');
 
+    // Self sign-up (owner, 2026-11-13).
+    Route::prefix('signup')->controller(SignUpController::class)->group(function () {
+        Route::get('config', 'config')->middleware('throttle:60,1');
+        Route::get('slug', 'slug')->middleware('throttle:30,1');
+        Route::post('/', 'store')->middleware(['guest', 'throttle:10,1']);
+        Route::post('email', 'changeEmail')->middleware(['auth:sanctum', 'throttle:6,1']);
+    });
+
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('me', MeController::class);
         Route::post('impersonation/stop', [AnnouncementController::class, 'stopImpersonating']);
@@ -70,6 +79,8 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::post('restaurants/{restaurant}/restore', [RestaurantController::class, 'restore'])->whereNumber('restaurant');
             Route::post('restaurants/{restaurant}/suspend', [RestaurantController::class, 'suspend'])->whereNumber('restaurant');
             Route::post('restaurants/{restaurant}/unsuspend', [RestaurantController::class, 'unsuspend'])->whereNumber('restaurant');
+            Route::post('restaurants/{restaurant}/approve', [RestaurantController::class, 'approve'])->whereNumber('restaurant');
+            Route::post('restaurants/{restaurant}/reject', [RestaurantController::class, 'reject'])->whereNumber('restaurant');
             Route::post('restaurants/{restaurant}/resend-welcome', [RestaurantController::class, 'resendWelcome'])->whereNumber('restaurant')->middleware('throttle:6,1');
             Route::put('restaurants/{restaurant}/features', [RestaurantController::class, 'features'])->whereNumber('restaurant');
             Route::post('restaurants/{restaurant}/payments', [PaymentController::class, 'store'])->whereNumber('restaurant');
@@ -91,6 +102,8 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::put('settings', [PlatformController::class, 'saveSettings']);
             Route::post('settings/share-image', [PlatformController::class, 'saveShareImage']);
             Route::delete('settings/share-image', [PlatformController::class, 'deleteShareImage']);
+            Route::post('settings/logo', [PlatformController::class, 'saveLogo']);
+            Route::delete('settings/logo', [PlatformController::class, 'deleteLogo']);
             Route::get('settings/mail', [PlatformController::class, 'mailSettings']);
             Route::put('settings/mail', [PlatformController::class, 'saveMailSettings']);
             Route::delete('settings/mail', [PlatformController::class, 'clearMailSettings']);

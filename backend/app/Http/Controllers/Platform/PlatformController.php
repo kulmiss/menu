@@ -12,6 +12,7 @@ use App\Models\TenantAppearance;
 use App\Models\Theme;
 use App\Rules\Translations;
 use App\Support\ActivityLogger;
+use App\Support\EmailLogo;
 use App\Support\Features;
 use App\Support\ImageProcessor;
 use App\Support\MailSettings;
@@ -21,10 +22,12 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Throwable;
 
 /**
@@ -224,7 +227,7 @@ class PlatformController extends Controller
 
     public function settings(): JsonResponse
     {
-        return response()->json(['data' => [...PlatformSettings::all(), 'share_image_url' => ShareImage::for(null)['url']]]);
+        return response()->json(['data' => [...PlatformSettings::forScreen(), 'share_image_url' => ShareImage::for(null)['url'], 'logo_url' => EmailLogo::url(), 'plans' => Plan::orderBy('sort')->get(['id', 'name', 'slug'])->map(fn (Plan $p) => ['id' => $p->id, 'name' => $p->name['en'] ?? $p->slug, 'slug' => $p->slug])]]);
     }
 
     /** The default link preview for menus without a banner (owner, 2026-11-12). */
@@ -235,6 +238,24 @@ class PlatformController extends Controller
         $this->activity->log('platform.share_image_saved', null, [], null);
         // Every menu without a banner now points at the new picture.
         Artisan::call('menu:refresh-pages', ['--all' => true]);
+
+        return $this->settings();
+    }
+
+    /** Platform logo for the e-mail header (owner, 2026-11-13). */
+    public function saveLogo(Request $request): JsonResponse
+    {
+        $request->validate(['image' => ['required', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120']]);
+        EmailLogo::store($request->file('image'));
+        $this->activity->log('platform.logo_saved', null, [], null);
+
+        return $this->settings();
+    }
+
+    public function deleteLogo(): JsonResponse
+    {
+        EmailLogo::forget();
+        $this->activity->log('platform.logo_removed', null, [], null);
 
         return $this->settings();
     }
@@ -257,7 +278,35 @@ class PlatformController extends Controller
             'default_currency' => ['sometimes', 'string', 'size:3', 'alpha'],
             'terms' => ['sometimes', 'nullable', 'string', 'max:20000'],
             'privacy' => ['sometimes', 'nullable', 'string', 'max:20000'],
+            // Sign-up (owner, 2026-11-13)
+            'signup_open' => ['sometimes', 'boolean'],
+            'signup_plan_id' => ['sometimes', 'nullable', 'integer', Rule::exists('plans', 'id')],
+            'signup_approval' => ['sometimes', 'boolean'],
+            'signup_notify' => ['sometimes', 'boolean'],
+            'turnstile_enabled' => ['sometimes', 'boolean'],
+            'turnstile_site_key' => ['sometimes', 'nullable', 'string', 'max:100'],
+            'turnstile_secret' => ['sometimes', 'nullable', 'string', 'max:200'],
+            'disposable_domains' => ['sometimes', 'array', 'max:500'],
+            'disposable_domains.*' => ['string', 'max:100', 'regex:/^[a-z0-9.-]+\.[a-z]{2,}$/i'],
+            'upgrade_whatsapp' => ['sometimes', 'nullable', 'string', 'max:30', 'regex:/^\+?[0-9 ]{6,20}$/'],
         ]);
+        if (array_key_exists('turnstile_secret', $data)) {
+            // Empty keeps the stored secret; send clear_turnstile_secret to remove it.
+            if (($data['turnstile_secret'] ?? '') === '') {
+                unset($data['turnstile_secret']);
+            } else {
+                $data['turnstile_secret'] = Crypt::encryptString($data['turnstile_secret']);
+            }
+        }
+        if ($request->boolean('clear_turnstile_secret')) {
+            $data['turnstile_secret'] = '';
+        }
+        if (isset($data['disposable_domains'])) {
+            $data['disposable_domains'] = array_values(array_unique(array_map(fn ($d) => Str::lower(trim((string) $d)), $data['disposable_domains'])));
+        }
+        if (($data['turnstile_enabled'] ?? false) && (($data['turnstile_site_key'] ?? PlatformSettings::get('turnstile_site_key')) === '' || (! isset($data['turnstile_secret']) && PlatformSettings::turnstileSecret() === ''))) {
+            throw ValidationException::withMessages(['turnstile_enabled' => __('signup.turnstile_keys_needed')]);
+        }
         PlatformSettings::save($data);
         $this->activity->log('platform.settings_saved', null, ['keys' => ['to' => array_keys($data)]], null);
 

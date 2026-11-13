@@ -2,13 +2,10 @@
 
 namespace App\Actions\Fortify;
 
-use App\Enums\Role;
 use App\Models\Invitation;
 use App\Models\Membership;
 use App\Models\Plan;
-use App\Models\Tenant;
 use App\Models\User;
-use App\Rules\ValidSlug;
 use App\Support\ActivityLogger;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -18,12 +15,10 @@ use Illuminate\Validation\ValidationException;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
 
 /**
- * Self-service sign-up, all or nothing:
- * - normally creates the owner, their restaurant (tenant) on a trial and the
- *   owner membership;
- * - with an `invitation_token` (sign-up from an invitation email) creates the
- *   user and joins the inviting restaurant instead — no new restaurant. The
- *   email must be the invited one, so it counts as verified.
+ * Fortify registration, now only for invitations: with an `invitation_token`
+ * (sign-up from an invitation email) it creates the user and joins the
+ * inviting restaurant — no new restaurant. The email must be the invited one,
+ * so it counts as verified. New restaurants use App\Support\SignUp\SignUp.
  */
 class CreateNewUser implements CreatesNewUsers
 {
@@ -36,49 +31,11 @@ class CreateNewUser implements CreatesNewUsers
      */
     public function create(array $input): User
     {
-        if (filled($input['invitation_token'] ?? null)) {
-            return $this->createFromInvitation($input);
-        }
+        // A new restaurant signs up through POST /api/v1/signup (owner, 2026-11-13:
+        // e-mail check, Free plan, anti-spam); this route only joins invitations.
+        abort_unless(filled($input['invitation_token'] ?? null), 404);
 
-        $data = Validator::make($input, [
-            'name' => ['required', 'string', 'max:120'],
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique(User::class)],
-            'password' => $this->passwordRules(),
-            'restaurant_name' => ['required', 'string', 'max:120'],
-            'slug' => ['required', new ValidSlug],
-            'locale' => ['nullable', Rule::in(config('menu.locales'))],
-        ])->validate();
-
-        return DB::transaction(function () use ($data) {
-            $user = User::create([
-                'name' => $data['name'],
-                'email' => $data['email'],
-                'password' => $data['password'],
-                'locale' => $data['locale'] ?? 'en',
-            ]);
-
-            $plan = Plan::where('slug', 'trial')->first();
-            $trialDays = $plan->trial_days ?? (int) config('menu.trial_days');
-
-            $tenant = Tenant::create([
-                'slug' => $data['slug'],
-                'name' => $data['restaurant_name'],
-                'plan_id' => $plan?->getKey(),
-                'trial_ends_at' => now()->addDays($trialDays),
-                'default_locale' => $data['locale'] ?? 'en',
-                'currency_code' => config('menu.default_currency', 'ETB'),
-            ]);
-
-            Membership::create([
-                'tenant_id' => $tenant->getKey(),
-                'user_id' => $user->getKey(),
-                'role' => Role::Owner,
-            ]);
-
-            $this->activity->log('tenant.created', $tenant, ['slug' => $tenant->slug], $tenant->getKey());
-
-            return $user;
-        });
+        return $this->createFromInvitation($input);
     }
 
     /**
