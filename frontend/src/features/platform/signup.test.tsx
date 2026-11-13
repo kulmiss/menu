@@ -91,7 +91,7 @@ describe('Super Admin sign-up controls', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Buna & Bread' }))
     await userEvent.click(screen.getByRole('button', { name: 'Reject' }))
     await userEvent.fill(
-      screen.getByLabelText('Reason'),
+      screen.getByLabelText('Reason', { exact: true }),
       'Not a restaurant, please contact us.'
     )
     await userEvent.click(screen.getByRole('button', { name: 'Continue' }))

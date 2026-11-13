@@ -37,7 +37,8 @@ _Last updated: 2026-11-12 13:00 EAT. Everything requested is merged into `develo
 ## History (newest first)
 
 ## Nine features (2026-11-13, in progress)
-- #60 Invoices and receipts (QUESTIONS #173). Live server once: `php artisan migrate --force` then `php artisan invoices:backfill`; fill Super Admin → Settings → Billing.
+- #60 Invoices and receipts (QUESTIONS #173).
+- #61 Restaurant notes, tags and follow-ups for the Super Admin (QUESTIONS #174). Live: `php artisan migrate --force`. Live server once: `php artisan migrate --force` then `php artisan invoices:backfill`; fill Super Admin → Settings → Billing.
 
 ## Landing page (#59, 2026-11-13) — QUESTIONS #172
 - `/` redesigned (Blade, no framework JS): hero with a real demo screenshot and QR code, how it works, features, 4 styles, speed, pricing from the database, optional real testimonials, FAQ, CTA, footer. Super Admin → Settings → Landing page. `robots.txt` and `sitemap.xml` are routes.

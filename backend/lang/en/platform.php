@@ -21,6 +21,7 @@ return [
     'no_owner' => 'This restaurant has no owner to log in as.',
     'invoice_no_owner' => 'This restaurant has no owner to send the invoice to.',
     'invoice_already_void' => 'This invoice is already void.',
+    'note_not_yours' => 'You can only change your own notes.',
     'suspended_reason' => 'Your restaurant is suspended: :reason',
     'slug_taken' => 'This web address is already taken.',
     'mail_test' => [

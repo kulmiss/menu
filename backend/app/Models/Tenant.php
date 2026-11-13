@@ -28,6 +28,8 @@ use Illuminate\Support\Facades\DB;
  * @property int|null $plan_id
  * @property Carbon|null $trial_ends_at
  * @property Carbon|null $paid_until
+ * @property Carbon|null $follow_up_on
+ * @property string|null $follow_up_reason
  * @property Carbon|null $qr_downloaded_at first QR code / table card download (setup checklist)
  * @property Carbon|null $setup_hidden_at dashboard setup checklist hidden
  * @property Carbon|null $suspended_at
@@ -40,7 +42,7 @@ use Illuminate\Support\Facades\DB;
  *
  * A restaurant: the tenant every restaurant-owned row belongs to.
  */
-#[Fillable(['slug', 'name', 'plan_id', 'trial_ends_at', 'paid_until', 'timezone', 'default_locale', 'currency_code', 'currency_format', 'signup_state'])]
+#[Fillable(['slug', 'name', 'plan_id', 'trial_ends_at', 'paid_until', 'timezone', 'default_locale', 'currency_code', 'currency_format', 'signup_state', 'follow_up_on', 'follow_up_reason'])]
 class Tenant extends Model
 {
     /** @use HasFactory<TenantFactory> */
@@ -88,6 +90,7 @@ class Tenant extends Model
             'qr_downloaded_at' => 'datetime',
             'setup_hidden_at' => 'datetime',
             'suspended_at' => 'datetime',
+            'follow_up_on' => 'date',
             'currency_format' => 'array',
             'cache_version' => 'integer',
         ];
@@ -209,5 +212,11 @@ class Tenant extends Model
         // Drop the static guest page once the change is saved, so a visitor
         // racing the transaction can't store the old version again.
         DB::afterCommit(fn () => MenuPageCache::forget($this));
+    }
+
+    /** @return BelongsToMany<PlatformTag, $this> Super Admin labels */
+    public function platformTags(): BelongsToMany
+    {
+        return $this->belongsToMany(PlatformTag::class, 'platform_tag_tenant');
     }
 }

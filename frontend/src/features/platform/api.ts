@@ -57,6 +57,25 @@ export type Restaurant = {
   created_at: string | null
   deleted_at: string | null
   url: string
+  /** Super Admin CRM (owner, 2026-11-13). */
+  tags?: TagRef[]
+  follow_up_on?: string | null
+  follow_up_reason?: string | null
+}
+
+export type TagRef = {
+  id: number
+  name: string
+  color: string
+  restaurants?: number
+}
+export type NoteRow = {
+  id: number
+  body: string
+  author: { id: number; name: string } | null
+  mine: boolean
+  created_at: string
+  edited: boolean
 }
 
 export type PaymentRow = {
@@ -146,6 +165,19 @@ export const restaurantQ = (id: number) =>
 export const plansQ = () => q<PlanRow[]>('plans')
 export const paymentsQ = (params: string) =>
   q<PaymentRow[]>(`payments${params ? `?${params}` : ''}`)
+export const tagsQ = () => q<TagRef[]>('tags')
+export const notesQ = (id: number) => q<NoteRow[]>(`restaurants/${id}/notes`)
+export const followUpsQ = () =>
+  q<
+    {
+      id: number
+      name: string
+      date: string
+      reason: string | null
+      overdue: boolean
+      tags: TagRef[]
+    }[]
+  >('widgets/follow-ups')
 export const invoicesQ = (params: string) =>
   q<InvoiceRow[]>(`invoices${params ? `?${params}` : ''}`)
 /** Opened in a new tab; the session cookie authorises it. */

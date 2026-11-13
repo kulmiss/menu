@@ -26,6 +26,7 @@ use App\Http\Controllers\Api\Restaurant\QrCodeController;
 use App\Http\Controllers\Api\TeamController;
 use App\Http\Controllers\Api\TenantController;
 use App\Http\Controllers\Auth\SignUpController;
+use App\Http\Controllers\Platform\CrmController;
 use App\Http\Controllers\Platform\DashboardWidgetController as PlatformDashboardWidgetController;
 use App\Http\Controllers\Platform\InvoiceController;
 use App\Http\Controllers\Platform\PaymentController;
@@ -89,6 +90,18 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::post('restaurants/{restaurant}/impersonate', [RestaurantController::class, 'impersonate'])->whereNumber('restaurant');
             Route::get('payments', [PaymentController::class, 'index']);
             Route::get('payments.csv', [PaymentController::class, 'export']);
+            // CRM: tags, notes, follow-ups (owner, 2026-11-13)
+            Route::get('tags', [CrmController::class, 'tags']);
+            Route::post('tags', [CrmController::class, 'storeTag']);
+            Route::patch('tags/{tag}', [CrmController::class, 'updateTag'])->whereNumber('tag');
+            Route::delete('tags/{tag}', [CrmController::class, 'destroyTag'])->whereNumber('tag');
+            Route::put('restaurants/{restaurant}/tags', [CrmController::class, 'setTags'])->whereNumber('restaurant');
+            Route::get('restaurants/{restaurant}/notes', [CrmController::class, 'notes'])->whereNumber('restaurant');
+            Route::post('restaurants/{restaurant}/notes', [CrmController::class, 'storeNote'])->whereNumber('restaurant');
+            Route::patch('notes/{note}', [CrmController::class, 'updateNote'])->whereNumber('note');
+            Route::delete('notes/{note}', [CrmController::class, 'destroyNote'])->whereNumber('note');
+            Route::put('restaurants/{restaurant}/follow-up', [CrmController::class, 'followUp'])->whereNumber('restaurant');
+            Route::get('widgets/follow-ups', [CrmController::class, 'due']);
             // Invoices (owner, 2026-11-13)
             Route::get('invoices', [InvoiceController::class, 'index']);
             Route::get('invoices.csv', [InvoiceController::class, 'export']);
