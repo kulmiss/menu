@@ -10,6 +10,9 @@ const SCREENS = {
   payments: lazy(() =>
     import('./screens').then((m) => ({ default: m.PaymentsPage }))
   ),
+  invoices: lazy(() =>
+    import('./invoices').then((m) => ({ default: m.InvoicesPage }))
+  ),
   themes: lazy(() =>
     import('./screens').then((m) => ({ default: m.ThemesPage }))
   ),

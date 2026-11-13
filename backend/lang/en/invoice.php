@@ -1,0 +1,37 @@
+<?php
+
+// Invoice PDF and e-mail (owner, 2026-11-13).
+return [
+    'title' => 'INVOICE',
+    'number' => 'Invoice number',
+    'date' => 'Invoice date',
+    'status' => ['paid' => 'PAID', 'void' => 'VOID'],
+    'from' => 'From',
+    'bill_to' => 'Bill to',
+    'tax_id' => 'Tax ID: :id',
+    'menu_address' => 'Menu: :url',
+    'owner' => 'Owner: :name',
+    'description' => 'Description',
+    'period' => 'Period',
+    'amount' => 'Amount',
+    'line' => ':plan plan — digital menu subscription',
+    'line_no_plan' => 'Digital menu subscription',
+    'subtotal' => 'Subtotal',
+    'tax' => 'VAT :rate% (included)',
+    'total' => 'Total',
+    'payment' => 'Payment',
+    'paid_on' => 'Paid on :date by :method',
+    'reference' => 'Reference: :ref',
+    'methods' => ['cash' => 'cash', 'bank' => 'bank transfer', 'mobile_money' => 'mobile money', 'other' => 'other'],
+    'note' => 'Note',
+    'replaces' => 'This invoice replaces :number.',
+    'voided' => 'Voided on :date: :reason',
+    'mail' => [
+        'subject' => 'Invoice :number from :platform',
+        'greeting' => 'Hello :name,',
+        'line' => 'Thank you for your payment for :restaurant. Your invoice :number is attached.',
+        'period' => 'It covers :start to :end.',
+        'action' => 'Open billing',
+        'salutation' => 'Thank you, the :platform team',
+    ],
+];

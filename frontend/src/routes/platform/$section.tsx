@@ -6,6 +6,7 @@ const SECTIONS = [
   'restaurants',
   'plans',
   'payments',
+  'invoices',
   'themes',
   'announcements',
   'activity',

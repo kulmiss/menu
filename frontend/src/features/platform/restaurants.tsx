@@ -42,6 +42,7 @@ import {
   send,
   usePlatformMutation,
 } from './api'
+import { InvoiceActions } from './invoices'
 import { PageTitle } from './layout'
 
 type Props = { state?: string; open?: number; onState: (s?: string) => void }
@@ -581,17 +582,19 @@ function RestaurantSheet({ id, onClose }: { id: number; onClose: () => void }) {
               )}
               <ul className='divide-y rounded-md border'>
                 {r.payments.map((p) => (
-                  <li
-                    key={p.id}
-                    className='flex justify-between gap-2 px-3 py-1.5'
-                  >
-                    <span>
-                      {p.paid_at} · {t(`platform.methods.${p.method}`)}
-                      {p.reference ? ` · ${p.reference}` : ''}
-                    </span>
-                    <span className='tabular-nums'>
-                      {money(p.amount_minor, p.currency)} → {p.period_end}
-                    </span>
+                  <li key={p.id} className='grid gap-1 px-3 py-1.5'>
+                    <div className='flex justify-between gap-2'>
+                      <span>
+                        {p.paid_at} · {t(`platform.methods.${p.method}`)}
+                        {p.reference ? ` · ${p.reference}` : ''}
+                      </span>
+                      <span className='tabular-nums'>
+                        {money(p.amount_minor, p.currency)} → {p.period_end}
+                      </span>
+                    </div>
+                    {p.invoices?.map((inv) => (
+                      <InvoiceActions key={inv.id} invoice={inv} />
+                    ))}
                   </li>
                 ))}
                 {r.payments.length === 0 && (

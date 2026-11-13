@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Platform;
 
 use App\Http\Controllers\Controller;
+use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\Tenant;
 use App\Support\ActivityLogger;
+use App\Support\Billing\Invoices;
+use App\Support\PlatformSettings;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -20,7 +23,7 @@ use Illuminate\Validation\Rule;
  */
 class PaymentController extends Controller
 {
-    public function __construct(private readonly ActivityLogger $activity) {}
+    public function __construct(private readonly ActivityLogger $activity, private readonly Invoices $invoices) {}
 
     public function index(Request $request): JsonResponse
     {
@@ -69,13 +72,21 @@ class PaymentController extends Controller
             if (isset($data['plan_id'])) {
                 $tenant->forceFill(['plan_id' => $data['plan_id']])->save();
             }
+            // Every payment gets its invoice in the same transaction (owner, 2026-11-13).
+            $this->invoices->issue($payment->setRelation('tenant', $tenant), $request->user());
 
             return $payment;
         });
+        if (PlatformSettings::get('invoice_email')) {
+            $invoice = Invoice::where('payment_id', $payment->id)->latest('id')->first();
+            if ($invoice !== null) {
+                $this->invoices->send($invoice);
+            }
+        }
         $tenant->bumpCacheVersion();
         $this->activity->log('platform.payment_recorded', $payment, ['amount' => ['to' => $payment->amount_minor], 'period_end' => ['to' => $payment->period_end->toDateString()]], null);
 
-        return response()->json(['data' => self::row($payment->load(['tenant', 'plan']))], 201);
+        return response()->json(['data' => self::row($payment->load(['tenant', 'plan', 'invoices']))], 201);
     }
 
     /** CSV for the accountant (opens in Excel; UTF-8 with BOM). */
@@ -106,7 +117,7 @@ class PaymentController extends Controller
             'tenant_id' => ['sometimes', 'nullable', 'integer'],
         ]);
 
-        return Payment::with(['tenant', 'plan'])
+        return Payment::with(['tenant', 'plan', 'invoices'])
             ->when($data['from'] ?? null, fn ($q, $d) => $q->where('paid_at', '>=', $d))
             ->when($data['to'] ?? null, fn ($q, $d) => $q->where('paid_at', '<=', $d))
             ->when($data['tenant_id'] ?? null, fn ($q, $t) => $q->where('tenant_id', $t))
@@ -128,6 +139,7 @@ class PaymentController extends Controller
             'period_start' => $p->period_start->toDateString(),
             'period_end' => $p->period_end->toDateString(),
             'notes' => $p->notes,
+            'invoices' => $p->relationLoaded('invoices') ? $p->invoices->sortByDesc('id')->map(fn (Invoice $i) => ['id' => $i->id, 'number' => $i->number, 'status' => $i->status])->values()->all() : [],
         ];
     }
 }

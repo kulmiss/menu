@@ -42,6 +42,7 @@ import {
   usePlatformMutation,
 } from './api'
 import { EmailSettings } from './email-settings'
+import { BillingSettings, type BillingSettingsData } from './invoices'
 import { LandingSettings, type LandingSettingsData } from './landing-settings'
 import { PageTitle } from './layout'
 import { ShareImageCard } from './share-image'
@@ -926,6 +927,7 @@ function SettingsForm({
       </form>
       <SignupSettings initial={initial as unknown as SignupSettingsData} />
       <LandingSettings initial={initial as unknown as LandingSettingsData} />
+      <BillingSettings initial={initial as unknown as BillingSettingsData} />
       <ShareImageCard
         url={initial.share_image_url ?? ''}
         custom={!!initial.share_image}

@@ -11,6 +11,7 @@ const NAV = [
   'restaurants',
   'plans',
   'payments',
+  'invoices',
   'themes',
   'announcements',
   'activity',

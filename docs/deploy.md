@@ -145,6 +145,7 @@ php artisan down --retry=30
 php artisan migrate --force
 php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan event:cache
 php artisan menu:refresh-pages --all     # rebuild the static menu pages with the new design
+php artisan invoices:backfill            # once after the invoices release: invoices for older payments (no e-mails; safe to repeat)
 php artisan up
 ```
 

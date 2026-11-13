@@ -69,7 +69,7 @@ class RestaurantController extends Controller
             'members' => $tenant->memberships->map(fn (Membership $m) => ['id' => $m->user_id, 'name' => $m->user->name, 'email' => $m->user->email, 'role' => $m->role->value])->values(),
             'features' => Features::for($tenant),
             'overrides' => $overrides,
-            'payments' => Payment::with('plan')->where('tenant_id', $tenant->id)->latest('paid_at')->get()->map(fn (Payment $p) => PaymentController::row($p))->values(),
+            'payments' => Payment::with(['plan', 'invoices'])->where('tenant_id', $tenant->id)->latest('paid_at')->get()->map(fn (Payment $p) => PaymentController::row($p))->values(),
             'counts' => [
                 'menus' => DB::table('menus')->where('tenant_id', $tenant->id)->count(),
                 'items' => DB::table('items')->where('tenant_id', $tenant->id)->count(),

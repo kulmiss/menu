@@ -46,6 +46,14 @@ class PlatformSettings
         // Real quotes only, added by the Super Admin: [{quote, name, role}]. Hidden while empty.
         'landing_testimonials' => [],
         // Footer links: network => URL (empty = hidden).
+        // Billing (owner, 2026-11-13): shown on every invoice, copied into it when issued.
+        'billing_company' => '',
+        'billing_address' => '',
+        'billing_tax_id' => '',
+        'invoice_prefix' => 'INV',
+        'invoice_footer' => '',
+        'invoice_tax_rate' => 0, // VAT %, included in the amount paid
+        'invoice_email' => true, // e-mail each new invoice to the owner
         'socials' => ['telegram' => '', 'facebook' => '', 'instagram' => '', 'tiktok' => '', 'x' => '', 'youtube' => '', 'linkedin' => ''],
     ];
 

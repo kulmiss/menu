@@ -35,6 +35,7 @@ import { Route as AdminSettingsIndexRouteImport } from './routes/admin/settings/
 import { Route as AdminMenuIndexRouteImport } from './routes/admin/menu/index'
 import { Route as AuthInviteTokenRouteImport } from './routes/auth/invite/$token'
 import { Route as AdminSettingsSecurityRouteImport } from './routes/admin/settings/security'
+import { Route as AdminSettingsBillingRouteImport } from './routes/admin/settings/billing'
 
 const PlatformRouteRoute = PlatformRouteRouteImport.update({
   id: '/platform',
@@ -166,6 +167,11 @@ const AdminSettingsSecurityRoute = AdminSettingsSecurityRouteImport.update({
   path: '/security',
   getParentRoute: () => AdminSettingsRouteRoute,
 } as any)
+const AdminSettingsBillingRoute = AdminSettingsBillingRouteImport.update({
+  id: '/billing',
+  path: '/billing',
+  getParentRoute: () => AdminSettingsRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -190,6 +196,7 @@ export interface FileRoutesByFullPath {
   '/platform/$section': typeof PlatformSectionRoute
   '/admin/': typeof AdminIndexRoute
   '/platform/': typeof PlatformIndexRoute
+  '/admin/settings/billing': typeof AdminSettingsBillingRoute
   '/admin/settings/security': typeof AdminSettingsSecurityRoute
   '/auth/invite/$token': typeof AuthInviteTokenRoute
   '/admin/menu/': typeof AdminMenuIndexRoute
@@ -215,6 +222,7 @@ export interface FileRoutesByTo {
   '/platform/$section': typeof PlatformSectionRoute
   '/admin': typeof AdminIndexRoute
   '/platform': typeof PlatformIndexRoute
+  '/admin/settings/billing': typeof AdminSettingsBillingRoute
   '/admin/settings/security': typeof AdminSettingsSecurityRoute
   '/auth/invite/$token': typeof AuthInviteTokenRoute
   '/admin/menu': typeof AdminMenuIndexRoute
@@ -244,6 +252,7 @@ export interface FileRoutesById {
   '/platform/$section': typeof PlatformSectionRoute
   '/admin/': typeof AdminIndexRoute
   '/platform/': typeof PlatformIndexRoute
+  '/admin/settings/billing': typeof AdminSettingsBillingRoute
   '/admin/settings/security': typeof AdminSettingsSecurityRoute
   '/auth/invite/$token': typeof AuthInviteTokenRoute
   '/admin/menu/': typeof AdminMenuIndexRoute
@@ -274,6 +283,7 @@ export interface FileRouteTypes {
     | '/platform/$section'
     | '/admin/'
     | '/platform/'
+    | '/admin/settings/billing'
     | '/admin/settings/security'
     | '/auth/invite/$token'
     | '/admin/menu/'
@@ -299,6 +309,7 @@ export interface FileRouteTypes {
     | '/platform/$section'
     | '/admin'
     | '/platform'
+    | '/admin/settings/billing'
     | '/admin/settings/security'
     | '/auth/invite/$token'
     | '/admin/menu'
@@ -327,6 +338,7 @@ export interface FileRouteTypes {
     | '/platform/$section'
     | '/admin/'
     | '/platform/'
+    | '/admin/settings/billing'
     | '/admin/settings/security'
     | '/auth/invite/$token'
     | '/admin/menu/'
@@ -529,15 +541,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSettingsSecurityRouteImport
       parentRoute: typeof AdminSettingsRouteRoute
     }
+    '/admin/settings/billing': {
+      id: '/admin/settings/billing'
+      path: '/billing'
+      fullPath: '/admin/settings/billing'
+      preLoaderRoute: typeof AdminSettingsBillingRouteImport
+      parentRoute: typeof AdminSettingsRouteRoute
+    }
   }
 }
 
 interface AdminSettingsRouteRouteChildren {
+  AdminSettingsBillingRoute: typeof AdminSettingsBillingRoute
   AdminSettingsSecurityRoute: typeof AdminSettingsSecurityRoute
   AdminSettingsIndexRoute: typeof AdminSettingsIndexRoute
 }
 
 const AdminSettingsRouteRouteChildren: AdminSettingsRouteRouteChildren = {
+  AdminSettingsBillingRoute: AdminSettingsBillingRoute,
   AdminSettingsSecurityRoute: AdminSettingsSecurityRoute,
   AdminSettingsIndexRoute: AdminSettingsIndexRoute,
 }

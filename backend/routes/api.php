@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\Menu\MediaController;
 use App\Http\Controllers\Api\Menu\MenuController;
 use App\Http\Controllers\Api\Menu\TagController;
 use App\Http\Controllers\Api\Restaurant\AppearanceController;
+use App\Http\Controllers\Api\Restaurant\BillingController;
 use App\Http\Controllers\Api\Restaurant\BranchController;
 use App\Http\Controllers\Api\Restaurant\DashboardWidgetController;
 use App\Http\Controllers\Api\Restaurant\InfoController;
@@ -26,6 +27,7 @@ use App\Http\Controllers\Api\TeamController;
 use App\Http\Controllers\Api\TenantController;
 use App\Http\Controllers\Auth\SignUpController;
 use App\Http\Controllers\Platform\DashboardWidgetController as PlatformDashboardWidgetController;
+use App\Http\Controllers\Platform\InvoiceController;
 use App\Http\Controllers\Platform\PaymentController;
 use App\Http\Controllers\Platform\PlatformController;
 use App\Http\Controllers\Platform\RestaurantController;
@@ -87,6 +89,12 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::post('restaurants/{restaurant}/impersonate', [RestaurantController::class, 'impersonate'])->whereNumber('restaurant');
             Route::get('payments', [PaymentController::class, 'index']);
             Route::get('payments.csv', [PaymentController::class, 'export']);
+            // Invoices (owner, 2026-11-13)
+            Route::get('invoices', [InvoiceController::class, 'index']);
+            Route::get('invoices.csv', [InvoiceController::class, 'export']);
+            Route::get('invoices/{invoice}/pdf', [InvoiceController::class, 'pdf'])->whereNumber('invoice');
+            Route::post('invoices/{invoice}/resend', [InvoiceController::class, 'resend'])->whereNumber('invoice')->middleware('throttle:10,1');
+            Route::post('invoices/{invoice}/void', [InvoiceController::class, 'void'])->whereNumber('invoice');
             Route::get('plans', [PlatformController::class, 'plans']);
             Route::post('plans', [PlatformController::class, 'savePlan']);
             Route::patch('plans/{plan}', [PlatformController::class, 'savePlan'])->whereNumber('plan');
@@ -218,6 +226,10 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::get('appearance', [AppearanceController::class, 'show']);
             Route::put('appearance', [AppearanceController::class, 'update']);
             Route::get('appearance/preview', [AppearanceController::class, 'preview'])->name('appearance.preview');
+            // Settings → Billing (owner only)
+            Route::get('billing', [BillingController::class, 'show']);
+            Route::get('billing/invoices/{invoice}/pdf', [BillingController::class, 'pdf'])->whereNumber('invoice');
+
             Route::get('menu-pdf', [PdfMenuController::class, 'download'])->middleware(['feature:pdf_menu', 'throttle:20,1']);
 
             Route::get('tags', [TagController::class, 'index']);

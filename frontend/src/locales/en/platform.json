@@ -17,7 +17,8 @@
     "themes": "Themes",
     "announcements": "Announcements",
     "activity": "Activity log",
-    "settings": "Settings"
+    "settings": "Settings",
+    "invoices": "Invoices"
   },
   "dash": {
     "restaurants": "Restaurants",
@@ -412,5 +413,49 @@
       "youtube": "YouTube",
       "linkedin": "LinkedIn"
     }
+  },
+  "invoices": {
+    "hint": "Every recorded payment gets an invoice with the next number. Invoices are never changed or deleted: void a wrong one and issue a new one.",
+    "view": "Open invoice {{number}} (PDF, new tab)",
+    "resend": "Resend",
+    "sent": "Invoice e-mailed to the owner.",
+    "void": "Void",
+    "void_title": "Void invoice {{number}}",
+    "void_hint": "The invoice stays in the list, marked VOID with your reason. Its number is never used again.",
+    "reason": "Reason",
+    "reissue": "Issue a new invoice for the same payment",
+    "voided": "Invoice voided.",
+    "voided_reissued": "Invoice voided and a new one issued.",
+    "search": "Search",
+    "search_hint": "Number, restaurant or e-mail",
+    "all": "All",
+    "status_label": "Status",
+    "status": {
+      "paid": "Paid",
+      "void": "Void"
+    },
+    "none": "No invoices match.",
+    "col": {
+      "number": "Invoice",
+      "issued": "Issued",
+      "restaurant": "Restaurant",
+      "plan": "Plan",
+      "period": "Period",
+      "total": "Total"
+    }
+  },
+  "billing": {
+    "title": "Billing",
+    "hint": "Shown on every new invoice. Invoices already issued keep the details they were issued with.",
+    "billing_company": "Company name",
+    "billing_address": "Company address",
+    "billing_tax_id": "Tax ID (TIN)",
+    "invoice_prefix": "Invoice prefix",
+    "invoice_tax_rate": "VAT %",
+    "prefix_hint": "Next invoice: {{example}}. Numbers run on without gaps and start again at 0001 each year.",
+    "tax_hint": "VAT is shown as included in the amount paid; 0 hides the VAT line.",
+    "invoice_footer": "Footer text",
+    "invoice_email": "E-mail invoices to owners",
+    "invoice_email_hint": "Each new invoice is e-mailed to the restaurant's owners with the PDF attached."
   }
 }

@@ -71,6 +71,24 @@ export type PaymentRow = {
   period_start: string
   period_end: string
   notes: string | null
+  invoices?: InvoiceRef[]
+}
+
+export type InvoiceRef = { id: number; number: string; status: 'paid' | 'void' }
+
+export type InvoiceRow = InvoiceRef & {
+  issued_at: string
+  tenant: { id: number | null; name: string }
+  owner_email: string
+  plan: string | null
+  period_start: string
+  period_end: string
+  total_minor: number
+  currency: string
+  payment_id: number | null
+  void_reason: string | null
+  replaces_id: number | null
+  emailed_at: string | null
 }
 
 export type RestaurantDetail = Restaurant & {
@@ -128,6 +146,11 @@ export const restaurantQ = (id: number) =>
 export const plansQ = () => q<PlanRow[]>('plans')
 export const paymentsQ = (params: string) =>
   q<PaymentRow[]>(`payments${params ? `?${params}` : ''}`)
+export const invoicesQ = (params: string) =>
+  q<InvoiceRow[]>(`invoices${params ? `?${params}` : ''}`)
+/** Opened in a new tab; the session cookie authorises it. */
+export const invoicePdfUrl = (id: number) =>
+  `${api.defaults.baseURL}/platform/invoices/${id}/pdf`
 export const themesQ = () =>
   q<
     {
