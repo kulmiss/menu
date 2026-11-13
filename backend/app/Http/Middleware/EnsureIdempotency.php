@@ -24,6 +24,9 @@ class EnsureIdempotency
     /** Largest response we keep for replay; bigger ones are replayed as 409. */
     private const MAX_STORED_BYTES = 1_000_000;
 
+    /** Marker for answers with secrets (Cache-Control: no-store): the key is kept, the body is not. */
+    private const NO_STORE = 'no-store';
+
     public function handle(Request $request, Closure $next): Response
     {
         if (! in_array($request->getMethod(), self::MUTATING, true)) {
@@ -85,6 +88,9 @@ class EnsureIdempotency
         if ($existing->status === IdempotencyKey::PENDING || $existing->response_status === null) {
             return $this->error(409, 'idempotency.in_progress');
         }
+        if ($existing->response_type === self::NO_STORE) {
+            return $this->error(409, 'idempotency.not_replayable');
+        }
 
         return response($existing->response_body ?? '', $existing->response_status, array_filter([
             'Content-Type' => $existing->response_type,
@@ -100,6 +106,13 @@ class EnsureIdempotency
         // Server errors and oversized bodies are not stored: the client may retry them.
         if ($status >= 500 || strlen($body) > self::MAX_STORED_BYTES) {
             $record->delete();
+
+            return;
+        }
+
+        // Answers carrying secrets (recovery codes, tokens) are never written to the database.
+        if (str_contains((string) $response->headers->get('Cache-Control'), 'no-store')) {
+            $record->update(['status' => IdempotencyKey::DONE, 'response_status' => $status, 'response_body' => null, 'response_type' => self::NO_STORE]);
 
             return;
         }

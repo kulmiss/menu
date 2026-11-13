@@ -11,6 +11,7 @@ return [
         'invalid' => 'The Idempotency-Key header is not valid.',
         'mismatch' => 'This Idempotency-Key was already used for a different request.',
         'in_progress' => 'This request is still being processed. Please try again in a moment.',
+        'not_replayable' => 'This request was already done. Its answer is not kept for security; please reload.',
     ],
     'subscription' => [
         'read_only' => 'Your subscription has expired, so changes are paused. Renew to edit your menu again.',

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureAccessToken;
 use App\Http\Middleware\EnsureIdempotency;
 use App\Http\Middleware\EnsureSuperAdmin;
 use App\Http\Middleware\EnsureTenantWritable;
@@ -32,6 +33,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'idempotent' => EnsureIdempotency::class,
+            'mobile.token' => EnsureAccessToken::class,
             'feature' => RequireFeature::class,
             'platform' => EnsureSuperAdmin::class,
             'tenant' => ResolveTenant::class,
