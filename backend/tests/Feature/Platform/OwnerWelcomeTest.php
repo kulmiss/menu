@@ -4,6 +4,7 @@ use App\Models\Tenant;
 use App\Models\User;
 use App\Notifications\OwnerWelcomeNotification;
 use App\Support\PlatformSettings;
+use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Notification;
 
@@ -110,7 +111,7 @@ it('sends a normal password reset, not "choose your password", to an owner who h
     $this->actingAs(superAdmin())->postJson(p("restaurants/{$tenant->id}/resend-welcome"), [], idem())
         ->assertOk()->assertJsonPath('data.kind', 'reset')->assertJsonPath('message', fn ($m) => str_contains($m, 'reset your password'));
 
-    Notification::assertSentTo($owner, Illuminate\Auth\Notifications\ResetPassword::class);
+    Notification::assertSentTo($owner, ResetPassword::class);
     Notification::assertSentToTimes($owner, OwnerWelcomeNotification::class, 1); // only the first welcome, when the restaurant was made
     $this->assertDatabaseHas('activity_log', ['action' => 'platform.password_reset_sent', 'subject_id' => $tenant->id]);
 

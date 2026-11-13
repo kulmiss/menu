@@ -168,7 +168,9 @@ describe('Super Admin screens', () => {
       .toBe('/platform/restaurants/7/resend-welcome')
     // The toast says which e-mail went out.
     await expect
-      .poll(() => toastSuccess.mock.calls.at(-1)?.[0])
+      .poll(
+        () => toastSuccess.mock.calls[toastSuccess.mock.calls.length - 1]?.[0]
+      )
       .toMatch(/got a "reset your password" e-mail/)
   })
 
