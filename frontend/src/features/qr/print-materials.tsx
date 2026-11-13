@@ -584,9 +584,17 @@ const slug = (s: string) =>
 function loadImage(src: string): Promise<HTMLImageElement | null> {
   return new Promise((resolve) => {
     const img = new Image()
+    // A picture that never arrives must not block the download.
+    const timer = setTimeout(() => resolve(null), 8000)
     img.crossOrigin = 'anonymous'
-    img.onload = () => resolve(img)
-    img.onerror = () => resolve(null)
+    img.onload = () => {
+      clearTimeout(timer)
+      resolve(img)
+    }
+    img.onerror = () => {
+      clearTimeout(timer)
+      resolve(null)
+    }
     img.src = src
   })
 }

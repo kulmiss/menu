@@ -130,33 +130,37 @@ describe('Print materials', () => {
     expect(screen.container.textContent).not.toContain('Download PDF')
   })
 
-  it('draws a square picture for social media in the browser', async () => {
-    const created: Blob[] = []
-    const createObjectURL = vi
-      .spyOn(URL, 'createObjectURL')
-      .mockImplementation((b) => (created.push(b as Blob), 'blob:x'))
-    const click = vi
-      .spyOn(HTMLAnchorElement.prototype, 'click')
-      .mockImplementation(() => {})
-    const screen = await setup()
-    await expect.element(screen.getByText('Scan for our menu')).toBeVisible()
+  it(
+    'draws a square picture for social media in the browser',
+    { timeout: 40_000 },
+    async () => {
+      const created: Blob[] = []
+      const createObjectURL = vi
+        .spyOn(URL, 'createObjectURL')
+        .mockImplementation((b) => (created.push(b as Blob), 'blob:x'))
+      const click = vi
+        .spyOn(HTMLAnchorElement.prototype, 'click')
+        .mockImplementation(() => {})
+      const screen = await setup()
+      await expect.element(screen.getByText('Scan for our menu')).toBeVisible()
 
-    await userEvent.click(
-      screen.getByRole('button', { name: 'Square post (1080 × 1080)' })
-    )
-    await expect.poll(() => created.length).toBe(1)
-    expect(created[0].type).toBe('image/png')
-    const bitmap = await createImageBitmap(created[0])
-    expect([bitmap.width, bitmap.height]).toEqual([1080, 1080])
-    expect(click).toHaveBeenCalled()
+      await userEvent.click(
+        screen.getByRole('button', { name: 'Square post (1080 × 1080)' })
+      )
+      await expect.poll(() => created.length, { timeout: 15_000 }).toBe(1)
+      expect(created[0].type).toBe('image/png')
+      const bitmap = await createImageBitmap(created[0])
+      expect([bitmap.width, bitmap.height]).toEqual([1080, 1080])
+      expect(click).toHaveBeenCalled()
 
-    await userEvent.click(
-      screen.getByRole('button', { name: 'Story (1080 × 1920)' })
-    )
-    await expect.poll(() => created.length).toBe(2)
-    const story = await createImageBitmap(created[1])
-    expect([story.width, story.height]).toEqual([1080, 1920])
-    createObjectURL.mockRestore()
-    click.mockRestore()
-  })
+      await userEvent.click(
+        screen.getByRole('button', { name: 'Story (1080 × 1920)' })
+      )
+      await expect.poll(() => created.length, { timeout: 15_000 }).toBe(2)
+      const story = await createImageBitmap(created[1])
+      expect([story.width, story.height]).toEqual([1080, 1920])
+      createObjectURL.mockRestore()
+      click.mockRestore()
+    }
+  )
 })
