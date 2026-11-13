@@ -162,6 +162,53 @@ describe('Super Admin screens', () => {
       .toBe('/platform/restaurants/7/resend-welcome')
   })
 
+  it('logs in as the owner in one click, without a reason', async () => {
+    fake = fakeApi({
+      'GET /platform/restaurants': { data: { data: [restaurant] } },
+      'GET /platform/plans': { data: { data: [] } },
+      'GET /platform/restaurants/7': {
+        data: {
+          data: {
+            ...restaurant,
+            members: [
+              {
+                id: 3,
+                name: 'Ayaan',
+                email: 'ayaan@example.com',
+                role: 'owner',
+              },
+            ],
+            features: {},
+            overrides: {},
+            payments: [],
+            counts: { menus: 1, items: 20, branches: 1, views_30d: 80 },
+          },
+        },
+      },
+      // Answered with an error so the test page doesn't navigate to /admin.
+      'POST /platform/restaurants/7/impersonate': {
+        status: 422,
+        data: { message: 'No owner' },
+      },
+    })
+    const screen = await renderWithQuery(
+      <RestaurantsPage onState={() => {}} />,
+      { me: admin }
+    )
+    await userEvent.click(screen.getByRole('button', { name: 'Sahan Grill' }))
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Log in as owner' })
+    )
+
+    await expect
+      .poll(() => fake.calls.find((c) => c.method === 'POST')?.url)
+      .toBe('/platform/restaurants/7/impersonate')
+    const call = fake.calls.find((c) => c.method === 'POST')
+    expect(call?.url).toBe('/platform/restaurants/7/impersonate')
+    expect(call?.data ?? {}).toEqual({})
+    expect(document.querySelector('#reason')).toBeNull()
+  })
+
   it('creates a plan with limits and features', async () => {
     fake = fakeApi({
       'GET /platform/plans': { data: { data: [] } },

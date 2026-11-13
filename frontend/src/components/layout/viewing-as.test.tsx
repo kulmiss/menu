@@ -40,7 +40,6 @@ describe('Viewing as (log in as)', () => {
         tenant_id: 5,
         tenant_name: 'Buna & Bread',
         user_name: 'Sara',
-        ends_at: '2026-11-11T13:00:00+00:00',
       }),
     })
 

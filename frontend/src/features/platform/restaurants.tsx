@@ -330,7 +330,7 @@ function RestaurantSheet({ id, onClose }: { id: number; onClose: () => void }) {
     }) => send(m, path, body)
   )
   const [reason, setReason] = useState<{
-    kind: 'suspend' | 'impersonate'
+    kind: 'suspend'
     text: string
   } | null>(null)
   const [pay, setPay] = useState({
@@ -359,8 +359,9 @@ function RestaurantSheet({ id, onClose }: { id: number; onClose: () => void }) {
     }
   }
 
-  async function impersonate(text: string) {
-    if (await run('post', `restaurants/${id}/impersonate`, { reason: text }))
+  // One click, no reason (owner, 2026-11-13).
+  async function impersonate() {
+    if (await run('post', `restaurants/${id}/impersonate`))
       window.location.assign('/admin')
   }
 
@@ -647,9 +648,7 @@ function RestaurantSheet({ id, onClose }: { id: number; onClose: () => void }) {
 
             <section className='flex flex-wrap gap-2 border-t pt-4'>
               {!r.deleted_at && (
-                <Button
-                  onClick={() => setReason({ kind: 'impersonate', text: '' })}
-                >
+                <Button disabled={act.isPending} onClick={impersonate}>
                   {t('platform.restaurants.log_in_as')}
                 </Button>
               )}
@@ -715,16 +714,10 @@ function RestaurantSheet({ id, onClose }: { id: number; onClose: () => void }) {
           <Dialog open onOpenChange={(o) => !o && setReason(null)}>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>
-                  {reason.kind === 'suspend'
-                    ? t('platform.restaurants.suspend')
-                    : t('platform.restaurants.log_in_as')}
-                </DialogTitle>
+                <DialogTitle>{t('platform.restaurants.suspend')}</DialogTitle>
               </DialogHeader>
               <p className='text-sm text-muted-foreground'>
-                {reason.kind === 'suspend'
-                  ? t('platform.restaurants.suspend_hint')
-                  : t('platform.restaurants.log_in_as_hint')}
+                {t('platform.restaurants.suspend_hint')}
               </p>
               <Label htmlFor='reason'>{t('platform.restaurants.reason')}</Label>
               <Textarea
@@ -743,8 +736,6 @@ function RestaurantSheet({ id, onClose }: { id: number; onClose: () => void }) {
                 <Button
                   disabled={reason.text.trim().length < 5 || act.isPending}
                   onClick={async () => {
-                    if (reason.kind === 'impersonate')
-                      return impersonate(reason.text.trim())
                     if (
                       await run(
                         'post',
