@@ -33,6 +33,7 @@ use App\Http\Controllers\Platform\BackupController;
 use App\Http\Controllers\Platform\CampaignController;
 use App\Http\Controllers\Platform\CrmController;
 use App\Http\Controllers\Platform\DashboardWidgetController as PlatformDashboardWidgetController;
+use App\Http\Controllers\Platform\InsightsController as PlatformInsightsController;
 use App\Http\Controllers\Platform\InvoiceController;
 use App\Http\Controllers\Platform\PaymentController;
 use App\Http\Controllers\Platform\PlatformController;
@@ -75,12 +76,14 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
         Route::prefix('platform')->middleware('platform')->group(function () {
             Route::get('dashboard', [PlatformController::class, 'dashboard']);
             Route::prefix('widgets')->controller(PlatformDashboardWidgetController::class)->group(function () {
-                foreach (['revenue', 'expiring', 'inactive', 'funnel', 'top', 'signups', 'health'] as $widget) {
+                foreach (['expiring', 'inactive', 'signups', 'health'] as $widget) {
                     Route::get($widget, $widget);
                 }
                 Route::get('plan-mix', 'planMix');
                 Route::post('email/{tenant}', 'email')->whereNumber('tenant')->middleware('throttle:20,1');
             });
+            Route::get('insights', [PlatformInsightsController::class, 'meta']);
+            Route::get('insights/{widget}', [PlatformInsightsController::class, 'show'])->whereIn('widget', PlatformInsightsController::WIDGETS);
             Route::get('restaurants', [RestaurantController::class, 'index']);
             Route::post('restaurants', [RestaurantController::class, 'store']);
             Route::post('restaurants/bulk-tag', [RestaurantController::class, 'bulkTag']);

@@ -71,9 +71,15 @@ describe('Super Admin screens', () => {
       },
     })
     const screen = await renderWithQuery(<PlatformDashboard />, { me: admin })
-    await expect.element(screen.getByText('1,200')).toBeVisible()
-    // The eight widgets load after the page; with no answers they show their error state.
+    await expect
+      .element(screen.getByRole('link', { name: /Trial\s*3/ }))
+      .toHaveAttribute('href', '/platform/$section?state=trial')
+    // Insights and the to-do widgets load after the page; with no answers they show their error state.
+    await expect.element(screen.getByText('Overview')).toBeVisible()
     await expect.element(screen.getByText('System health')).toBeVisible()
+    await expect
+      .element(screen.getByRole('button', { name: 'Last 30 days' }))
+      .toHaveAttribute('aria-pressed', 'true')
   })
 
   it('records a payment for a restaurant', async () => {

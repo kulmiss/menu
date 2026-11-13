@@ -117,6 +117,53 @@ export function RestaurantsPage({ open }: Props) {
           : (r.stage_ends_at ?? '—'),
     },
     {
+      id: 'health',
+      label: t('platform.ins.health'),
+      sort: 'health',
+      text: (r) =>
+        r.health
+          ? `${t(`platform.ins.band.${r.health.band}`)} ${r.health.score}`
+          : '',
+      cell: (r) =>
+        r.health ? (
+          <span className='inline-flex items-center gap-1.5 whitespace-nowrap'>
+            <span
+              className={`size-2.5 rounded-full ${r.health.band === 'healthy' ? 'bg-emerald-600 dark:bg-emerald-500' : r.health.band === 'at_risk' ? 'bg-amber-500 dark:bg-amber-400' : 'bg-muted-foreground/50'}`}
+              aria-hidden
+            />
+            {t(`platform.ins.band.${r.health.band}`)}
+            <span className='text-muted-foreground tabular-nums'>
+              {r.health.score}
+            </span>
+          </span>
+        ) : (
+          '—'
+        ),
+    },
+    {
+      id: 'views',
+      label: t('platform.ins.views_30d'),
+      sort: 'views',
+      text: (r) => String(r.views_30d ?? ''),
+      cell: (r) => (
+        <span className='tabular-nums'>
+          {r.views_30d?.toLocaleString() ?? '—'}
+        </span>
+      ),
+    },
+    {
+      id: 'scans',
+      label: t('platform.ins.scans_30d'),
+      sort: 'scans',
+      hidden: true,
+      text: (r) => String(r.scans_30d ?? ''),
+      cell: (r) => (
+        <span className='tabular-nums'>
+          {r.scans_30d?.toLocaleString() ?? '—'}
+        </span>
+      ),
+    },
+    {
       id: 'created_at',
       label: t('platform.restaurants.created_on'),
       sort: 'created_at',
@@ -148,6 +195,36 @@ export function RestaurantsPage({ open }: Props) {
       options: (tags.data ?? []).map((g) => ({
         value: String(g.id),
         label: g.name,
+      })),
+    },
+    {
+      id: 'health',
+      label: t('platform.ins.health'),
+      options: (['healthy', 'at_risk', 'inactive'] as const).map((b) => ({
+        value: b,
+        label: t(`platform.ins.band.${b}`),
+      })),
+    },
+    {
+      id: 'usage',
+      label: t('platform.ins.usage'),
+      options: [
+        'paying',
+        'not_paying',
+        'price_periods',
+        'promotions',
+        'order_list',
+        'print',
+        'limit_photos',
+        'near_photos',
+        'limit_branches',
+        'style:editorial',
+        'style:grid',
+        'style:bistro',
+        'style:minimal',
+      ].map((k) => ({
+        value: k,
+        label: t(`platform.ins.u.${k.replace(':', '_')}`),
       })),
     },
     {

@@ -63,6 +63,10 @@ export type Restaurant = {
   tags?: TagRef[]
   follow_up_on?: string | null
   follow_up_reason?: string | null
+  /** From the dashboard summary (QUESTIONS #186); null before the first build. */
+  health?: { band: 'healthy' | 'at_risk' | 'inactive'; score: number } | null
+  views_30d?: number | null
+  scans_30d?: number | null
 }
 
 export type TagRef = {

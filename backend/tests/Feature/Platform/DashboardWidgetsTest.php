@@ -2,7 +2,6 @@
 
 use App\Enums\Role;
 use App\Models\ActivityLog;
-use App\Models\Item;
 use App\Models\Plan;
 use App\Models\Tenant;
 use App\Support\Stats;
@@ -17,22 +16,6 @@ function payment(Tenant $tenant, int $amount, string $paidAt): void
     DB::table('payments')->insert(['tenant_id' => $tenant->id, 'amount_minor' => $amount, 'currency' => 'ETB', 'method' => 'cash',
         'paid_at' => $paidAt, 'period_start' => $paidAt, 'period_end' => $paidAt, 'created_at' => now(), 'updated_at' => now()]);
 }
-
-it('shows revenue this month vs last month, MRR and 12 months', function () {
-    $monthly = Plan::create(['name' => ['en' => 'Pro'], 'slug' => 'pro-test', 'price_minor' => 50000, 'interval' => 'month', 'limits' => []]);
-    $yearly = Plan::create(['name' => ['en' => 'Pro year'], 'slug' => 'pro-year', 'price_minor' => 1200000, 'interval' => 'year', 'limits' => []]);
-    $a = Tenant::factory()->create(['plan_id' => $monthly->id, 'paid_until' => now()->addMonth()]);
-    Tenant::factory()->create(['plan_id' => $yearly->id, 'paid_until' => now()->addYear()]);
-    Tenant::factory()->create(['plan_id' => $monthly->id, 'paid_until' => now()->subDay()]); // lapsed: not in MRR
-    payment($a, 50000, now()->startOfMonth()->addDay()->toDateTimeString());
-    payment($a, 30000, now()->subMonthNoOverflow()->startOfMonth()->addDay()->toDateTimeString());
-
-    $this->actingAs(superAdmin())->getJson(p('widgets/revenue'))->assertOk()
-        ->assertJsonPath('data.this_month', 50000)
-        ->assertJsonPath('data.last_month', 30000)
-        ->assertJsonPath('data.mrr', 150000)
-        ->assertJsonCount(12, 'data.months');
-});
 
 it('lists trials and subscriptions ending soon and e-mails the owner, logged', function () {
     Mail::fake();
@@ -62,31 +45,7 @@ it('finds restaurants with no views and no edits for 14 days', function () {
         ->assertJsonPath('data.0.last_activity', now()->subDays(20)->toDateString());
 });
 
-it('shows the growth funnel with conversion between steps', function () {
-    foreach (range(1, 4) as $n) {
-        // One self sign-up still waiting for the e-mail check (owner, 2026-11-13).
-        $t = Tenant::factory()->create(['created_at' => now()->subDays(5), 'signup_state' => $n === 4 ? Tenant::SIGNUP_UNVERIFIED : null]);
-        if ($n <= 2) {
-            [, $category] = sampleMenu($t);
-            asTenant($t, fn () => collect(range(1, 4))->each(fn ($i) => Item::create(['category_id' => $category->id, 'name' => ['en' => 'D'.$i], 'price_minor' => 1])));
-        }
-        if ($n === 1) {
-            Stats::hit($t->id, now()->toDateString(), 0, 'qr_scan', 1);
-            payment($t, 100, now()->toDateTimeString());
-        }
-    }
-
-    $this->actingAs(superAdmin())->getJson(p('widgets/funnel?days=30'))->assertOk()
-        ->assertJsonPath('data.steps', [
-            ['key' => 'signups', 'count' => 4, 'percent' => null],
-            ['key' => 'verified', 'count' => 3, 'percent' => 75],
-            ['key' => 'menu', 'count' => 2, 'percent' => 67],
-            ['key' => 'scanned', 'count' => 1, 'percent' => 50],
-            ['key' => 'paying', 'count' => 1, 'percent' => 100],
-        ]);
-});
-
-it('shows top restaurants, new sign-ups with setup progress, plan mix and health', function () {
+it('shows new sign-ups with setup progress, plan mix and health', function () {
     $big = Plan::create(['name' => ['en' => 'Big'], 'slug' => 'big', 'price_minor' => 90000, 'interval' => 'month', 'limits' => []]);
     $small = Plan::create(['name' => ['en' => 'Small'], 'slug' => 'small', 'price_minor' => 10000, 'interval' => 'month', 'limits' => []]);
     $star = Tenant::factory()->create(['name' => 'Star', 'plan_id' => $big->id, 'paid_until' => now()->addMonth()]);
@@ -95,9 +54,6 @@ it('shows top restaurants, new sign-ups with setup progress, plan mix and health
     Cache::forever('cron:last_run', now()->subMinutes(30)->toIso8601String());
     $admin = superAdmin();
 
-    $this->actingAs($admin)->getJson(p('widgets/top'))->assertOk()
-        ->assertJsonPath('data.views.0', ['id' => $star->id, 'name' => 'Star', 'total' => 500])
-        ->assertJsonPath('data.plans.0.plan', ['en' => 'Big']);
     $this->actingAs($admin)->getJson(p('widgets/signups'))->assertOk()
         ->assertJsonPath('data.0.id', $star->id)->assertJsonPath('data.0.percent', 0)
         ->assertJsonPath('data.0.steps.logo', false);
@@ -111,8 +67,8 @@ it('shows top restaurants, new sign-ups with setup progress, plan mix and health
 
 it('is only for Super Admins with two-factor', function () {
     [$owner] = member(Role::Owner);
-    $this->actingAs($owner)->getJson(p('widgets/revenue'))->assertNotFound();
-    $this->actingAs(superAdmin(twoFactor: false))->getJson(p('widgets/revenue'))->assertStatus(403);
+    $this->actingAs($owner)->getJson(p('widgets/expiring'))->assertNotFound();
+    $this->actingAs(superAdmin(twoFactor: false))->getJson(p('widgets/expiring'))->assertStatus(403);
 });
 
 it('stays fast with 200 restaurants and 6 months of statistics', function () {
@@ -140,7 +96,7 @@ it('stays fast with 200 restaurants and 6 months of statistics', function () {
     DB::table('stats_daily')->insert($rows);
     $admin = superAdmin();
 
-    foreach (['revenue', 'expiring', 'inactive', 'funnel?days=90', 'top', 'signups', 'health', 'plan-mix'] as $widget) {
+    foreach (['expiring', 'inactive', 'signups', 'health', 'plan-mix'] as $widget) {
         DB::enableQueryLog();
         DB::flushQueryLog();
         $started = microtime(true);
@@ -159,10 +115,9 @@ it('reads every cached widget back from a real (serializing) cache store', funct
     Stats::hit($t->id, now()->toDateString(), 0, 'qr_scan', 1);
     $admin = superAdmin();
 
-    foreach (['revenue', 'expiring', 'inactive', 'funnel?days=30', 'top', 'signups', 'health', 'plan-mix'] as $widget) {
+    foreach (['expiring', 'inactive', 'signups', 'health', 'plan-mix'] as $widget) {
         $first = $this->actingAs($admin)->getJson(p('widgets/'.$widget))->assertOk()->json();
         $this->actingAs($admin)->getJson(p('widgets/'.$widget))->assertOk()->assertExactJson($first);
     }
-    $this->actingAs($admin)->getJson(p('widgets/funnel?days=30'))->assertJsonPath('data.steps.3.count', 1);
     Cache::flush();
 });

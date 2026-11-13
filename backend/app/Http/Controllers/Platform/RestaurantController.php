@@ -20,6 +20,7 @@ use App\Support\PublicMenu\MenuPageCache;
 use App\Support\Qr\QrMap;
 use App\Support\SignUp\SignUp;
 use App\Support\Tables\TableQuery;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -70,12 +71,41 @@ class RestaurantController extends Controller
         return response()->json(['data' => $rows->take(500)->values()]);
     }
 
+    /**
+     * Restaurants matching any of the dashboard's usage keys.
+     *
+     * @param  list<string>  $keys
+     */
+    private function usage(QueryBuilder $q, array $keys): QueryBuilder
+    {
+        return $q->where(function (QueryBuilder $w) use ($keys) {
+            $w->whereRaw('1 = 0');
+            foreach ($keys as $key) {
+                match (true) {
+                    in_array($key, ['price_periods', 'promotions', 'order_list', 'print'], true) => $w->orWhere('uses_'.$key, true),
+                    $key === 'limit_photos' => $w->orWhere(fn ($x) => $x->whereNotNull('photos_limit')->whereColumn('photos', '>=', 'photos_limit')),
+                    $key === 'near_photos' => $w->orWhere(fn ($x) => $x->whereNotNull('photos_limit')->whereColumn('photos', '<', 'photos_limit')->whereRaw('photos >= photos_limit * 0.8')),
+                    $key === 'limit_branches' => $w->orWhere(fn ($x) => $x->whereNotNull('branches_limit')->whereColumn('branches', '>=', 'branches_limit')),
+                    str_starts_with($key, 'style:') => substr($key, 6) === 'editorial'
+                        ? $w->orWhere(fn ($x) => $x->whereNull('style')->orWhere('style', 'editorial'))
+                        : $w->orWhere('style', substr($key, 6)),
+                    $key === 'paying' => $w->orWhere('paid_until', '>=', now()->toDateString()),
+                    $key === 'not_paying' => $w->orWhere(fn ($x) => $x->whereNull('paid_until')->orWhere('paid_until', '<', now()->toDateString())),
+                    default => null,
+                };
+            }
+        });
+    }
+
     /** Restaurants as a server-side table: search, filters, sort, pages, CSV. */
     private function table(Request $request): JsonResponse|StreamedResponse
     {
         $show = explode(',', (string) $request->query('show', ''));
         $query = Tenant::query()->with(['plan', 'platformTags', 'memberships' => fn ($q) => $q->where('role', Role::Owner)->with('user')])
-            ->when($request->boolean('deleted') || in_array('deleted', $show, true), fn ($q) => $q->onlyTrashed());
+            ->when($request->boolean('deleted') || in_array('deleted', $show, true), fn ($q) => $q->onlyTrashed())
+            // Health, views and scans from the dashboard summary (QUESTIONS #186): one subquery per column, no join.
+            ->select('tenants.*')->addSelect(collect(['h_score' => 'score', 'h_band' => 'band', 'h_views' => 'views_30d', 'h_scans' => 'scans_30d'])
+            ->map(fn (string $col) => DB::table('tenant_health')->whereColumn('tenant_health.tenant_id', 'tenants.id')->select($col))->all());
 
         return TableQuery::respond($query, $request, [
             'search' => fn ($q, string $s) => $q->where(fn ($w) => $w->where('tenants.name', 'like', "%{$s}%")->orWhere('tenants.slug', 'like', "{$s}%")
@@ -86,12 +116,18 @@ class RestaurantController extends Controller
                 'tag' => fn ($q, array $v) => $q->whereHas('platformTags', fn ($w) => $w->whereIn('platform_tags.id', array_map('intval', $v))),
                 'follow_up' => fn ($q, array $v) => in_array('due', $v, true) ? $q->whereNotNull('follow_up_on')->where('follow_up_on', '<=', now()->toDateString()) : null,
                 'id' => fn ($q, array $v) => $q->whereIn('tenants.id', array_map('intval', $v)),
+                // Dashboard click-throughs (QUESTIONS #186), from the nightly summary.
+                'health' => fn ($q, array $v) => $q->whereIn('tenants.id', DB::table('tenant_health')->whereIn('band', $v)->select('tenant_id')),
+                'usage' => fn ($q, array $v) => $q->whereIn('tenants.id', $this->usage(DB::table('tenant_health'), $v)->select('tenant_id')),
             ],
             'date' => 'tenants.created_at',
             'sorts' => [
                 'name' => 'tenants.name',
                 'created_at' => 'tenants.created_at',
                 'paid_until' => 'tenants.paid_until',
+                'health' => fn ($q, string $dir) => $q->orderBy('h_score', $dir),
+                'views' => fn ($q, string $dir) => $q->orderBy('h_views', $dir),
+                'scans' => fn ($q, string $dir) => $q->orderBy('h_scans', $dir),
                 'plan' => fn ($q, string $dir) => $q->orderBy(Plan::select('price_minor')->whereColumn('plans.id', 'tenants.plan_id'), $dir),
             ],
             'default_sort' => '-created_at',
@@ -107,6 +143,9 @@ class RestaurantController extends Controller
                 'Trial ends' => fn (Tenant $t) => $t->trial_ends_at?->toDateString(),
                 'Tags' => fn (Tenant $t) => $t->platformTags->pluck('name')->implode(', '),
                 'Created' => fn (Tenant $t) => $t->created_at?->toDateString(),
+                'Health score' => fn (Tenant $t) => $t->getAttributes()['h_score'] ?? null,
+                'Menu views (30 days)' => fn (Tenant $t) => $t->getAttributes()['h_views'] ?? null,
+                'QR scans (30 days)' => fn (Tenant $t) => $t->getAttributes()['h_scans'] ?? null,
             ]],
         ], fn (Tenant $t) => $this->row($t));
     }
@@ -328,6 +367,7 @@ class RestaurantController extends Controller
     private function row(Tenant $t): array
     {
         $owner = $t->relationLoaded('memberships') ? $t->memberships->firstWhere('role', Role::Owner)?->user : null;
+        $h = $t->getAttributes();
 
         return [
             'id' => $t->id,
@@ -351,6 +391,10 @@ class RestaurantController extends Controller
             'tags' => $t->relationLoaded('platformTags') ? $t->platformTags->sortBy('name')->map(fn (PlatformTag $g) => CrmController::tag($g))->values()->all() : [],
             'follow_up_on' => $t->follow_up_on?->toDateString(),
             'follow_up_reason' => $t->follow_up_reason,
+            // From the dashboard summary; null until platform:aggregate has run.
+            'health' => isset($h['h_band']) ? ['band' => $h['h_band'], 'score' => (int) $h['h_score']] : null,
+            'views_30d' => isset($h['h_views']) ? (int) $h['h_views'] : null,
+            'scans_30d' => isset($h['h_scans']) ? (int) $h['h_scans'] : null,
         ];
     }
 }
