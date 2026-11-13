@@ -3,6 +3,7 @@ import { meFixture } from '@/test-utils/fixtures'
 import { renderWithQuery } from '@/test-utils/render'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { userEvent } from 'vitest/browser'
+import { toast } from '@/lib/toast'
 import { PlatformDashboard } from './dashboard'
 import { RestaurantsPage } from './restaurants'
 import { PlansPage } from './screens'
@@ -149,17 +150,26 @@ describe('Super Admin screens', () => {
         },
       },
       'POST /platform/restaurants/7/resend-welcome': {
-        data: { data: { sent_to: 'ayaan@example.com' } },
+        data: {
+          data: { sent_to: 'ayaan@example.com', kind: 'reset' },
+          message:
+            'The owner has signed in before, so ayaan@example.com got a "reset your password" e-mail.',
+        },
       },
     })
+    const toastSuccess = vi.spyOn(toast, 'success')
     const screen = await renderWithQuery(<RestaurantsPage />, { me: admin })
     await userEvent.click(screen.getByRole('button', { name: 'Sahan Grill' }))
     await userEvent.click(
-      screen.getByRole('button', { name: 'Resend set-password e-mail' })
+      screen.getByRole('button', { name: 'E-mail a password link' })
     )
     await expect
       .poll(() => fake.calls.find((c) => c.method === 'POST')?.url)
       .toBe('/platform/restaurants/7/resend-welcome')
+    // The toast says which e-mail went out.
+    await expect
+      .poll(() => toastSuccess.mock.calls.at(-1)?.[0])
+      .toMatch(/got a "reset your password" e-mail/)
   })
 
   it('logs in as the owner in one click, without a reason', async () => {

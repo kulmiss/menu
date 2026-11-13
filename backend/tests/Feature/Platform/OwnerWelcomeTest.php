@@ -72,7 +72,7 @@ it('resends the set-password e-mail with a fresh link; the old one stops working
     $admin = superAdmin();
 
     $this->actingAs($admin)->postJson(p("restaurants/{$tenant->id}/resend-welcome"), [], idem())
-        ->assertOk()->assertJsonPath('data.sent_to', 'ayaan@example.com');
+        ->assertOk()->assertJsonPath('data.sent_to', 'ayaan@example.com')->assertJsonPath('data.kind', 'welcome');
 
     Notification::assertSentToTimes($owner, OwnerWelcomeNotification::class, 2);
     Notification::assertSentTo($owner, OwnerWelcomeNotification::class, function (OwnerWelcomeNotification $n) use (&$tokens, $owner) {
@@ -100,4 +100,20 @@ it('keeps resending to the Super Admin', function () {
     $empty = Tenant::factory()->create();
     $this->actingAs(superAdmin())->postJson(p("restaurants/{$empty->id}/resend-welcome"), [], idem())->assertStatus(422);
     Notification::assertSentToTimes($owner, OwnerWelcomeNotification::class, 1);
+});
+
+it('sends a normal password reset, not "choose your password", to an owner who has signed in before (owner, 2026-11-14)', function () {
+    Notification::fake();
+    [$tenant, $owner] = newRestaurant();
+    $owner->forceFill(['last_login_at' => now()->subDay()])->save();
+
+    $this->actingAs(superAdmin())->postJson(p("restaurants/{$tenant->id}/resend-welcome"), [], idem())
+        ->assertOk()->assertJsonPath('data.kind', 'reset')->assertJsonPath('message', fn ($m) => str_contains($m, 'reset your password'));
+
+    Notification::assertSentTo($owner, Illuminate\Auth\Notifications\ResetPassword::class);
+    Notification::assertSentToTimes($owner, OwnerWelcomeNotification::class, 1); // only the first welcome, when the restaurant was made
+    $this->assertDatabaseHas('activity_log', ['action' => 'platform.password_reset_sent', 'subject_id' => $tenant->id]);
+
+    // A second click within a minute: the reset broker's own throttle.
+    $this->postJson(p("restaurants/{$tenant->id}/resend-welcome"), [], idem())->assertStatus(429);
 });
