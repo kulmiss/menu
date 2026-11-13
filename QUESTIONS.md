@@ -230,6 +230,8 @@ New rules added by the owner (now in PLAN.md §2): Docker is for local developme
 
 | 170 | "Log in as": not recorded at all | Owner, 2026-11-13 (replaces the recording part of #169): no `impersonations` row, no activity-log line, and changes made while logged in as an owner count as the owner's (`impersonator_id` stays empty). Kept: one click with no reason; the automatic end after 2 hours (the next request answers 409 `impersonation.expired`, the server switches back to the Super Admin and the admin page goes straight to `/platform`); the safety blocks (owner password, e-mail/profile, two-factor, team role changes and removals, menu address; owners have no "delete restaurant" action, the old block entry stays as a guard); two-factor sign-in stays required for every Super Admin. The `impersonations` table stays (unused) so no migration is needed. Admin first load 230,393 B (budget 230,400). |
 
+| 171 | Admin first-load budget 240 KB | Owner, 2026-11-13: the CI ceiling for the admin's first download (entry + `/admin` layout and dashboard, gzipped, `scripts/bundle-size.mjs`) goes from 225 KB to **240 KB** (245,760 B). Today it is 230,393 B, so about 15 KB of room. New admin code no longer has to be squeezed below the old line, but on-demand loading stays the habit (rare screens, Super Admin texts and sign-up texts keep loading lazily). The customer menu budgets are unchanged (inline script ≤ 5 KB, page ≤ 30 KB gzip, LCP 1.3 s / TBT 200 ms median of 5). PLAN.md §15.3 updated. |
+
 ## Open
 
 - Owner action: protect `main` in GitHub settings (require PR, no force push, no deletion). Claude's access can't change branch settings.

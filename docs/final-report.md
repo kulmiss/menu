@@ -63,7 +63,7 @@ The tests cover: auth, 2FA and tenancy isolation; roles and permissions per endp
 |---|---|
 | ESLint, Prettier | pass |
 | TypeScript build | pass |
-| Admin first load | **224.9 KB** gzip (budget 225 KB) |
+| Admin first load | **225.0 KB** gzip (budget 240 KB since 2026-11-13) |
 | Vitest (browser mode, Chromium) | **228 tests** in 50 files, all passing |
 
 The guest-page script tests include opening-hours logic, service-worker updates, sheet scroll lock and swipe-to-close, back to top, the "Add to my order" bar, and contrast ≥ 4.5:1 of the hours pill in all styles, light and dark.
