@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { Outlet } from '@tanstack/react-router'
+import { Outlet, useRouterState } from '@tanstack/react-router'
 import { getCookie } from '@/lib/cookies'
 import { cn } from '@/lib/utils'
 import { LayoutProvider } from '@/context/layout-provider'
@@ -7,6 +7,7 @@ import { SearchProvider } from '@/context/search-provider'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { AppSidebar } from '@/components/layout/app-sidebar'
 import { PasswordBanner } from '@/components/layout/password-banner'
+import { canOpen } from '@/components/layout/role-access'
 import { SubscriptionBanner } from '@/components/layout/subscription-banner'
 import { SkipToMain } from '@/components/skip-to-main'
 import { useCurrentTenant, useMe } from '@/features/auth/use-me'
@@ -16,6 +17,13 @@ const CheckInbox = lazy(() => import('@/features/signup/check-inbox'))
 const TwoFactorGate = lazy(() =>
   import('@/features/settings/two-factor-gate').then((m) => ({
     default: m.TwoFactorGate,
+  }))
+)
+const NoAccess = lazy(() =>
+  import('@/features/errors/error-page').then((m) => ({
+    default: () => (
+      <m.ErrorPage code='403' kind='forbidden' className='min-h-0' />
+    ),
   }))
 )
 const NoRestaurant = lazy(() =>
@@ -31,6 +39,7 @@ type AuthenticatedLayoutProps = {
 export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
   const me = useMe()
   const tenant = useCurrentTenant()
+  const path = useRouterState({ select: (s) => s.location.pathname })
   const defaultOpen = getCookie('sidebar_state') !== 'false'
 
   // Until the address is confirmed, only "Check your inbox" (owner, 2026-11-13).
@@ -81,7 +90,13 @@ export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
           >
             <SubscriptionBanner tenant={tenant} />
             <PasswordBanner />
-            {children ?? <Outlet />}
+            {canOpen(path, tenant.membership?.role ?? null) ? (
+              (children ?? <Outlet />)
+            ) : (
+              <Suspense fallback={null}>
+                <NoAccess />
+              </Suspense>
+            )}
           </SidebarInset>
         </SidebarProvider>
       </LayoutProvider>
