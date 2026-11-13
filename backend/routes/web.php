@@ -2,10 +2,13 @@
 
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\PublicMenuController;
+use App\Http\Controllers\SiteController;
 use App\Http\Controllers\SpaController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', fn () => view('welcome'));
+// The platform's own pages (owner, 2026-11-13). "terms" and "privacy" are reserved menu addresses.
+Route::get('/', [SiteController::class, 'home']);
+Route::get('/{page}', [SiteController::class, 'legal'])->whereIn('page', ['terms', 'privacy']);
 
 // Admin + Super Admin SPA: every URL below these prefixes loads the same page.
 Route::get('/{area}/{path?}', SpaController::class)
@@ -13,8 +16,6 @@ Route::get('/{area}/{path?}', SpaController::class)
     ->where('path', '.*')
     ->name('spa');
 
-// Guest menu page. Normally served as a static file by the web server; PHP
-// only renders it when the copy is missing (PLAN.md §15.2.1).
 // Link in "Confirm your e-mail" (owner, 2026-11-13).
 Route::get('/email/verify/{id}/{hash}', VerifyEmailController::class)->whereNumber('id')->middleware('throttle:30,1')->name('signup.verify');
 
@@ -25,6 +26,8 @@ Route::get('/Q/{code}', [PublicMenuController::class, 'qr'])->where('code', '[A-
 Route::get('/{slug}/{branch}/menu.pdf', [PublicMenuController::class, 'pdf'])->where(['slug' => '[a-z0-9-]+', 'branch' => '[a-z0-9-]+']);
 Route::get('/{slug}/menu.pdf', [PublicMenuController::class, 'pdf'])->where('slug', '[a-z0-9-]+');
 
+// Guest menu page. Normally served as a static file by the web server; PHP
+// only renders it when the copy is missing (PLAN.md §15.2.1).
 Route::get('/{slug}/{branch?}', [PublicMenuController::class, 'show'])
     ->where(['slug' => '[a-z0-9-]+', 'branch' => '[a-z0-9-]+'])
     ->name('public.menu');

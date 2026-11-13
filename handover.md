@@ -36,6 +36,13 @@ _Last updated: 2026-11-12 13:00 EAT. Everything requested is merged into `develo
 
 ## History (newest first)
 
+## Self sign-up (#52–#55, 2026-11-13) — QUESTIONS #162–#168
+- #52 "Log in as owner" in one click: no reason, no time limit, not recorded.
+- #53 Backend: `POST /api/v1/signup`, e-mail confirmation (24 h signed link), Free plan (migration), `signup_state` on tenants (unverified / pending approval → public menu off), approval, rejection, `signup:prune` (7 days), anti-spam (rate limits, honeypot, optional Turnstile, blocked domains), branded e-mails with the platform logo, upgrade contact on 402.
+- #54 Screens: sign-up page, "Check your inbox" gate, sign-in messages, welcome card, Super Admin sign-up settings, e-mail logo, pending approvals, upgrade toast button.
+- #55 Public home, `/terms`, `/privacy`; browser check (`docs/screenshots/self-signup/`); docs.
+- Merge in order: #52 → #53 → #54 → #55 (each branch contains the one before).
+
 ## Customer-menu round (#36–#47, 2026-11-12) — QUESTIONS #149–#160
 - **Live updates (#36–#37):** `public/sw.js` compares the fresh page with the saved one (ETag or text) and tells the page (`'mu'`); the page reloads when nothing is open (guard `sessionStorage.mu`, 10 s) and `sheet.js` shows "Menu updated".
 - **Branches (#38):** no picker; `.sub` branch name under the h1 when there are several branches; `otherBranches` (flag `show_other_branches`, default on) in the footer; QR rows carry `branch` (main branch for restaurant codes).
