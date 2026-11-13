@@ -112,9 +112,12 @@ function PromotionsScreen() {
                       className='size-12 rounded object-cover'
                     />
                   )}
-                  <div className='min-w-0 flex-1'>
+                  {/* basis-40: on phones the buttons move to their own line instead of squeezing the title. */}
+                  <div className='min-w-0 flex-1 basis-40'>
                     <div className='flex flex-wrap items-center gap-2'>
-                      <p className='font-medium'>{tr(p.title, ctx.locale)}</p>
+                      <p className='font-medium break-words'>
+                        {tr(p.title, ctx.locale)}
+                      </p>
                       <Badge variant='outline'>
                         {t(`promotions.types.${p.type}`)}
                       </Badge>
@@ -125,7 +128,7 @@ function PromotionsScreen() {
                     <p className='text-sm text-muted-foreground'>{when(p)}</p>
                   </div>
                   {canEdit && (
-                    <div className='flex gap-1'>
+                    <div className='ms-auto flex gap-1 [&>button]:size-11 sm:[&>button]:size-9'>
                       <Button
                         variant='ghost'
                         size='icon'
