@@ -735,7 +735,7 @@
     "still_active": "Still active",
     "paying_now": "Paying now",
     "health": "Health",
-    "health_hint": "Score 0–100: setup 30, edits 20, menu views 30, plan 20. Inactive = no views and no edits in 30 days.",
+    "health_hint": "Score 0–100: setup 30, edits 20, menu views 30, plan 20. Inactive = no views, no edits and no team sign-in in 30 days.",
     "band": {
       "healthy": "Healthy",
       "at_risk": "At risk",
@@ -745,16 +745,19 @@
     "none_in_band": "No restaurants here.",
     "see_all": "See all in the table",
     "engagement": "Engagement",
-    "engagement_hint": "From changes made by restaurant teams. Sign-ins are not recorded.",
+    "engagement_hint": "From restaurant teams' sign-ins and changes, and guests' menu views.",
     "e": {
       "edited_7d": "Teams that made changes, 7 days",
       "edited_30d": "Teams that made changes, 30 days",
-      "active_7d": "Active (views or changes), 7 days",
-      "active_30d": "Active (views or changes), 30 days",
+      "active_7d": "Active (views, changes or sign-ins), 7 days",
+      "active_30d": "Active (views, changes or sign-ins), 30 days",
       "edits_per_week": "Changes per week",
       "setup_done": "Setup complete",
       "setup_avg": "Average setup",
-      "last_edit": "Last change: {{date}}"
+      "last_edit": "Last change: {{date}}",
+      "signed_in_7d": "Teams that signed in, 7 days",
+      "signed_in_30d": "Teams that signed in, 30 days",
+      "last_sign_in": "Last sign-in: {{date}}"
     },
     "open_activity": "Open the activity log",
     "usage": "Feature use",
@@ -792,14 +795,16 @@
       "365d": "Last 12 months"
     },
     "team": "Restaurant teams",
-    "team_hint": "Team members of all restaurants. 'Active' means made a change; sign-ins are not recorded.",
+    "team_hint": "Team members of all restaurants. 'Active' means signed in or made a change. Only each person's latest sign-in is kept, counted from when sign-ins started being recorded.",
     "t": {
       "members": "Team members",
       "roles": "Owners · managers · staff",
-      "active_7d": "Made changes, 7 days",
-      "active_30d": "Made changes, 30 days",
+      "active_7d": "Active, 7 days",
+      "active_30d": "Active, 30 days",
       "percent_2fa": "Two-factor on",
-      "owners_percent_2fa": "Owners with two-factor"
+      "owners_percent_2fa": "Owners with two-factor",
+      "signed_in_7d": "Signed in, 7 days",
+      "signed_in_30d": "Signed in, 30 days"
     },
     "views_30d": "Views (30 days)",
     "scans_30d": "QR scans (30 days)",
