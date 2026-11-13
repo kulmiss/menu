@@ -170,3 +170,14 @@ it('shows each section as a closed, collapsible block, with the intro always vis
         ->and($html)->toContain("addEventListener('beforeprint'")
         ->and($html)->toContain('prefers-reduced-motion: no-preference');
 });
+
+it('shows friendly error pages, light and dark, without cookies (pre-launch check)', function () {
+    $res = $this->get('/no-such-restaurant-here')->assertNotFound()
+        ->assertSee('Page not found')->assertSee('prefers-color-scheme:dark', false)->assertSee(url('/'), false);
+    expect($res->headers->getCookies())->toBe([]);
+    foreach ([403, 419, 429, 500, 503] as $code) {
+        $html = view("errors.{$code}")->render();
+        expect($html)->toContain(__("errors.{$code}.title"))->not->toContain('errors.');
+    }
+    expect(view('errors.503')->render())->not->toContain('<a href'); // maintenance: no link that leads back here
+});
