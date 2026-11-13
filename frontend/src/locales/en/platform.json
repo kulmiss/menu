@@ -350,8 +350,6 @@
     "signup_approval_hint": "New restaurants wait in Restaurants → “Pending sign-up” until you approve them. Their menu is not public until then.",
     "signup_notify": "E-mail me about every new sign-up",
     "signup_notify_hint": "Sent to every Super Admin when an owner confirms their e-mail.",
-    "whatsapp": "WhatsApp number for upgrades",
-    "whatsapp_hint": "Shown as “Upgrade on WhatsApp” when a restaurant reaches a plan limit. Empty: the support e-mail is used.",
     "spam": "Anti-spam",
     "turnstile_enabled": "Cloudflare Turnstile check",
     "turnstile_enabled_hint": "Off by default. Sign-up also has a hidden honeypot field and rate limits, so it works without it.",
@@ -372,5 +370,47 @@
     "remove": "Remove",
     "saved": "Logo saved.",
     "failed": "The logo could not be saved. Use a PNG, JPEG or WebP picture under 5 MB."
+  },
+  "landing": {
+    "title": "Landing page",
+    "hint": "The public home page that turns restaurant owners into sign-ups. Plans and prices come from Plans; the platform name from the settings above.",
+    "open": "Open the landing page",
+    "headline": "Headline",
+    "headline_default": "Your restaurant menu on every phone, in seconds",
+    "subline": "Subline",
+    "subline_default": "Guests scan a QR code and see your dishes, photos and prices. Change a price and every phone shows it at once. No app to install, free to start.",
+    "text_hint": "Leave empty to use the default text (shown in grey), which is translated when more languages are added.",
+    "color": "Brand colour",
+    "color_hint": "Buttons and highlights use it; text shades are adjusted automatically so they stay readable in light and dark mode.",
+    "whatsapp": "WhatsApp number",
+    "whatsapp_hint": "Used for “Contact us on WhatsApp” on the paid plans and the “Upgrade on WhatsApp” hint in the admin. Empty: the support e-mail is used.",
+    "sections": "Sections shown",
+    "section": {
+      "how": "How it works",
+      "features": "Features",
+      "styles": "Menu styles",
+      "speed": "Speed",
+      "pricing": "Pricing",
+      "testimonials": "Testimonials",
+      "faq": "Questions and answers",
+      "cta": "Final call to action"
+    },
+    "testimonials": "Testimonials",
+    "testimonials_hint": "Only real quotes from real customers, with their permission. The section stays hidden while this list is empty.",
+    "quote": "Quote",
+    "quote_name": "Name",
+    "quote_role": "Restaurant or role (optional)",
+    "add_quote": "Add a testimonial",
+    "remove_quote": "Remove",
+    "socials": "Links in the footer",
+    "social": {
+      "telegram": "Telegram",
+      "facebook": "Facebook",
+      "instagram": "Instagram",
+      "tiktok": "TikTok",
+      "x": "X",
+      "youtube": "YouTube",
+      "linkedin": "LinkedIn"
+    }
   }
 }

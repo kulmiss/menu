@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Route;
 // The platform's own pages (owner, 2026-11-13). "terms" and "privacy" are reserved menu addresses.
 Route::get('/', [SiteController::class, 'home']);
 Route::get('/{page}', [SiteController::class, 'legal'])->whereIn('page', ['terms', 'privacy']);
+Route::get('/robots.txt', [SiteController::class, 'robots']);
+Route::get('/sitemap.xml', [SiteController::class, 'sitemap']);
 
 // Admin + Super Admin SPA: every URL below these prefixes loads the same page.
 Route::get('/{area}/{path?}', SpaController::class)

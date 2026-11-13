@@ -36,6 +36,10 @@ _Last updated: 2026-11-12 13:00 EAT. Everything requested is merged into `develo
 
 ## History (newest first)
 
+## Landing page (#59, 2026-11-13) — QUESTIONS #172
+- `/` redesigned (Blade, no framework JS): hero with a real demo screenshot and QR code, how it works, features, 4 styles, speed, pricing from the database, optional real testimonials, FAQ, CTA, footer. Super Admin → Settings → Landing page. `robots.txt` and `sitemap.xml` are routes.
+- New screenshots after a design change of the guest menu: `php artisan db:seed --class=DemoSeeder` (laptop only), `php artisan serve`, then `cd frontend; node scripts/landing-screenshots.mjs`.
+
 ## Self sign-up (#52–#58, 2026-11-13) — QUESTIONS #162–#171
 - #52 "Log in as owner" in one click: no reason, no time limit, not recorded.
 - #53 Backend: `POST /api/v1/signup`, e-mail confirmation (24 h signed link), Free plan (migration), `signup_state` on tenants (unverified / pending approval → public menu off), approval, rejection, `signup:prune` (7 days), anti-spam (rate limits, honeypot, optional Turnstile, blocked domains), branded e-mails with the platform logo, upgrade contact on 402.
