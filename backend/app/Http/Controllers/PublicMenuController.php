@@ -105,7 +105,7 @@ class PublicMenuController extends Controller
 
         $file = MenuPageCache::dir($tenant->slug, $place?->slug).'/menu.pdf';
         if (! is_file($file)) {
-            $pdf = $current->runAs($tenant, fn () => (new PdfMenu)->render($data->build($tenant, null, $place), [
+            $pdf = $current->runAs($tenant, fn () => (new PdfMenu)->render($data->build($tenant, null, $place, periods: false), [
                 'photos' => (bool) $appearance->show_photos,
                 'columns' => 1,
             ]));

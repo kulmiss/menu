@@ -14,6 +14,7 @@ export const FEATURES = [
   'remove_branding',
   'pdf_menu',
   'order_list',
+  'price_periods',
   'style_editorial',
   'style_grid',
   'style_bistro',

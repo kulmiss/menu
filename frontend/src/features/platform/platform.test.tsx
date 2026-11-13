@@ -218,7 +218,7 @@ describe('Super Admin screens', () => {
     await userEvent.click(screen.getByRole('button', { name: 'New plan' }))
     await userEvent.type(screen.getByLabelText('Name', { exact: true }), 'Pro')
     await userEvent.type(screen.getByLabelText('Code'), 'pro')
-    await userEvent.type(screen.getByLabelText('Price'), '900')
+    await userEvent.type(screen.getByLabelText('Price', { exact: true }), '900')
     await userEvent.type(
       screen.getByLabelText('Branches', { exact: true }),
       '5'

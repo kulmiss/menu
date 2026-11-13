@@ -108,6 +108,7 @@ return [
             'pdf_menu' => 'PDF menu',
             'order_list' => '“My order” list',
             'promotions' => 'Specials and announcements',
+            'price_periods' => 'Happy hour and lunch prices',
             'insights' => 'Insights',
             'branches' => 'Several branches',
             'import_export' => 'Import from a spreadsheet',

@@ -133,7 +133,7 @@ class SiteController extends Controller
             }
             $styles = count(array_filter(['editorial', 'grid', 'bistro', 'minimal'], fn ($st) => $on['style_'.$st]));
             $included = $styles > 0 ? [trans_choice('landing.pricing.feature.styles', $styles, ['n' => $styles])] : [];
-            foreach (['pdf_menu', 'order_list', 'promotions', 'insights', 'branches', 'import_export', 'remove_branding'] as $key) {
+            foreach (['pdf_menu', 'order_list', 'promotions', 'price_periods', 'insights', 'branches', 'import_export', 'remove_branding'] as $key) {
                 if ($on[$key]) {
                     $included[] = __("landing.pricing.feature.{$key}", ['name' => $platform]);
                 }

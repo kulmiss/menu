@@ -31,6 +31,9 @@ return [
     // Specials on the demo restaurant (CI measures style A without banner and specials).
     'demo_specials' => (bool) env('DEMO_MENU_SPECIALS', true),
 
+    // Demo happy hour running all day (CI measures a page during a price period).
+    'demo_price_period' => (bool) env('DEMO_MENU_PRICE_PERIOD', false),
+
     // Where the demo seeders find the downloaded demo photos (php artisan demo:photos).
     'demo_photos_path' => env('DEMO_PHOTOS_PATH'),
 

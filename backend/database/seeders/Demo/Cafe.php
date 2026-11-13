@@ -12,6 +12,7 @@ use App\Models\Item;
 use App\Models\Membership;
 use App\Models\OpeningHour;
 use App\Models\Plan;
+use App\Models\PricePeriod;
 use App\Models\Promotion;
 use App\Models\QrCode;
 use App\Models\Tenant;
@@ -154,6 +155,17 @@ class Cafe
         ]);
         Promotion::create(['type' => 'announcement', 'title' => ['en' => 'New:'], 'body' => ['en' => 'Avocado spris and mango juice pressed every morning.'], 'sort' => 2]);
         Promotion::create(['type' => 'announcement', 'title' => ['en' => 'Holiday:'], 'body' => ['en' => 'Closed for Genna (Ethiopian Christmas) on 7 January.'], 'sort' => 3]);
+
+        // Time-based prices (owner, 2026-11-14): coffee happy hour on weekday afternoons.
+        // CI measures a page during a period with DEMO_MENU_PRICE_PERIOD=1 (then it runs all day).
+        $allDay = (bool) config('menu.demo_price_period');
+        $period = PricePeriod::create([
+            'name' => ['en' => 'Happy hour'], 'weekdays' => $allDay ? [0, 1, 2, 3, 4, 5, 6] : [1, 2, 3, 4, 5],
+            'starts_at' => $allDay ? '00:00' : '16:00', 'ends_at' => $allDay ? '23:59' : '18:00',
+        ]);
+        $period->items()->create(['item_id' => $items['Macchiato']->id, 'mode' => 'fixed', 'value' => 6000]);
+        $period->items()->create(['item_id' => $items['Espresso']->id, 'mode' => 'percent', 'value' => 20]);
+        $period->items()->create(['item_id' => $items['Avocado toast']->id, 'mode' => 'percent', 'value' => 15]);
     }
 
     /**

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { Link } from '@tanstack/react-router'
 import { Copy, Loader2, MapPin, Plus, Printer, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { validationErrors } from '@/lib/api'
@@ -75,9 +76,21 @@ export function QrCodesPage() {
     <>
       <AdminHeader />
       <Main>
-        <div className='mb-4'>
-          <h1 className='text-2xl font-bold tracking-tight'>{t('qr.title')}</h1>
-          <p className='text-muted-foreground'>{t('qr.description')}</p>
+        <div className='mb-4 flex flex-wrap items-start justify-between gap-3'>
+          <div>
+            <h1 className='text-2xl font-bold tracking-tight'>
+              {t('qr.title')}
+            </h1>
+            <p className='text-muted-foreground'>{t('qr.description')}</p>
+          </div>
+          <Button asChild className='min-h-11'>
+            <Link
+              to='/admin/print-materials'
+              title={t('qr.print_materials_hint')}
+            >
+              <Printer /> {t('qr.print_materials')}
+            </Link>
+          </Button>
         </div>
         <div className='grid gap-4'>
           {codes.isPending ? (

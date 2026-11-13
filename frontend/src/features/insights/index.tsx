@@ -22,6 +22,7 @@ import { branchesQuery } from '@/features/branches/api'
 import { tr } from '@/features/menu/text'
 import { useMenuContext } from '@/features/menu/use-menu-context'
 import { insightsQuery } from './api'
+import { ExportMenu, MonthlyReportCard } from './export'
 
 const ViewsChart = lazy(() => import('./views-chart'))
 
@@ -85,6 +86,11 @@ export function InsightsPage() {
                 ))}
               </SelectContent>
             </Select>
+            <ExportMenu
+              tenantId={ctx.tenantId}
+              days={days}
+              branch={branch === 'all' ? null : Number(branch)}
+            />
           </div>
         </div>
 
@@ -196,6 +202,7 @@ export function InsightsPage() {
             </CardContent>
           </Card>
         </div>
+        <MonthlyReportCard tenantId={ctx.tenantId} canEdit={ctx.canWrite} />
         <p className='mt-4 text-xs text-muted-foreground'>
           {t('insights.privacy')}
         </p>
