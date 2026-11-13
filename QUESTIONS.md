@@ -217,5 +217,8 @@ New rules added by the owner (now in PLAN.md §2): Docker is for local developme
 ## Open
 
 - Owner action: protect `main` in GitHub settings (require PR, no force push, no deletion). Claude's access can't change branch settings.
-- PR #1 is still open: merge it into `develop`.
+- Owner action: merge the release PR `develop` → `main`, then follow the go-live checklist in `docs/final-report.md`.
 - MySQL must be running in Laragon for `setup-local.bat`.
+- Not built for now (owner, 2026-11-12): optimistic price edits in the admin (PLAN.md §15.3).
+
+Closed: PR #1 (Step 2 plan) was merged on 2026-11-10.

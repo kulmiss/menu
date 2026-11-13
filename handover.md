@@ -1,43 +1,52 @@
 # Handover
 
-_Last updated: 2026-11-11 20:45 EAT. #26–#30 open and stacked; all requested work is done — waiting for the owner to merge #30 and run the laptop steps below._
+_Last updated: 2026-11-12 13:00 EAT. Everything requested is merged into `develop` (#1–#47; #31 was a temporary test PR, closed). Speed work is finished (owner, 2026-11-12): CI limits stay as they are. Next: the release PR `develop` → `main` (owner merges), then go-live with `docs/deploy.md` and `docs/final-report.md`._
 
-> **Speed is the top priority (owner, 2026-11-10): PLAN.md §15 applies to every partition and every partition report includes the §15.5 numbers.**
-> **English only for now (owner, 2026-11-10):** texts stay in `t()` / `__()` and the database keeps per-language fields; language switches and translation screens are hidden while one language is enabled.
-> **Working mode (owner):** go through all remaining partitions without stopping for OK, then write the Step 4 final report. Stop only for: changes outside this project, steps that can't be undone, licence doubts, the same CI failure 3 times, or the working limit.
+> **Speed:** PLAN.md §15 still applies, but no more LCP optimising (owner, 2026-11-12). CI checks every style with and without a banner, plus style A without banner and specials; limits LCP 1.3 s / TBT 200 ms (median of 5), targets 1.2 s / 100 ms.
+> **English only for now (owner, 2026-11-10):** texts stay in `t()` / `__()`; the database keeps per-language fields; language switches stay hidden while one language is on.
+> **Working mode (owner):** small PRs into `develop`, CI green, tests for each change, decisions in QUESTIONS.md. Stop only for: changes outside this project, steps that can't be undone, licence doubts, the same CI failure 3 times, or the working limit.
 
-## Where we are
-`develop` contains #3–#25. Open, stacked (merge only the newest):
+## Where we are (2026-11-12)
+- `develop` has every change; `main` still has only the bootstrap commit. The release PR `develop` → `main` carries the summary and go-live checklist; the owner merges it.
+- Go-live checklist and test summary: `docs/final-report.md`. Deployment: `docs/deploy.md`. Link previews: `docs/share-preview.md`.
+- Not built (owner, 2026-11-12: skipped for now): optimistic price edits in the admin (PLAN.md §15.3).
 
-| Change | Branch | PR |
-|---|---|---|
-| Share menu button | `feat/share-menu` | #26 |
-| Printable PDF menu | `feat/pdf-menu` (on #26) | #27 |
-| "My order" list | `feat/my-order` (on #27) | #28 |
-| Restaurant dashboard widgets | `feat/restaurant-dashboard` (on #28) | #29 |
-| Super Admin dashboard widgets | `feat/platform-dashboard` (on #29) | #30 (merged) |
-| Sales demo with real photos | `feat/sales-demo` | #32 — **CI speed job not green yet** (see below) |
+### Merged PRs
+| PRs | What |
+|---|---|
+| #1–#15 | Plan; Partitions 1–11 (setup, auth & tenancy, menu data & editor, speed plan, settings & 2FA, customer page, appearance, branches/tables/QR, info & hours, branch size prices, promotions, insights, Super Admin) |
+| #16–#20 | Menu styles A/B/C, dish photo galleries, "Viewing as" badge, SMTP settings, banner |
+| #21–#25 | Demo data, deploy guide, final QA, `media:regenerate`, photo-free menus |
+| #26–#30 | Share menu, PDF menu, "My order", restaurant and Super Admin dashboards |
+| #32–#35 | Sales demo with 110 real (Pexels) photos, CI speed on medians, small "+" button |
+| #36–#37 | Menu changes reach open phones; "Menu updated" notice |
+| #38–#45 | One URL per branch; hours pill; sheet scroll lock; back to top; sticky "Add to my order"; footer; style D · Minimal; link preview picture |
+| #46–#47 | LCP without a banner; CI without banner (all styles) and A without banner/specials |
 
-**Queued next (owner, 2026-11-11 19:40), after "My order":** dashboard widgets as small stacked PRs.
-- Super Admin (/platform): revenue (this vs last month, MRR, 12-month SVG bars); expiring trials/subscriptions 7/14 days + "Remind" e-mail (editable, logged); inactive restaurants (no views and no edits 14+ days) + "Email owner"; growth funnel (sign-ups → ≥5 dishes → first QR scan → paying, 30/90 days, %); top restaurants (views/scans 30 days, biggest plans); new sign-ups with setup progress %; system health (disk, photo storage, cron last run, queued/failed mails, errors today, PHP/Laravel; warnings: cron > 10 min, disk < 10 %); plan mix donut + upgrades/downgrades this month.
-- Restaurant dashboard: setup checklist (logo, banner, ≥5 dishes, photos, hours, info, QR downloaded; links; "Hide"); views/scans today vs yesterday + 7-day mini chart; missing photos (most viewed first, "Add photo", only when photos shown); "My order" stats (most-added dishes, average list value 7/30 days — anonymous sendBeacon counts from the on-demand cart file: dish id, quantity, list total; bots filtered; only when the list is on); plan & usage bars (dishes, branches, photos, languages, team) with upgrade hint; platform news on top when new.
-- Rules: admin first load ≤ 225 KB (widgets on demand), plain SVG charts, parallel widgets with skeleton/empty/error states, staff never see plan/usage/money (server-enforced), fast queries (indexes, no N+1, cache totals a few minutes; test with 200 restaurants × 6 months), tests per widget, t(), light/dark, 375 px, contrast.
+### Laptop / server steps for this release
+1. `git pull`; `composer install`; `php artisan migrate`; `pnpm install && pnpm build`.
+2. `php artisan media:regenerate` (800 px sizes and link-preview pictures for older photos), then `php artisan menu:refresh-pages --all`.
+3. Cron every minute: `php artisan schedule:run` (page refresh, mail queue, health heartbeat).
+4. Production `.env`: `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL=https://…` (also used for link previews). Never run the demo seeders there.
 
-## Sales demo (#32) — open issue
-- `DemoSeeder` (full) / `DemoCafeSeeder`; `database/seeders/Demo/{Cafe,Showcase,Platform,Insights,MenuBuilder,Photos}.php`; `php artisan demo:photos` + `scripts/download-demo-photos.ps1`; 110 photos listed in `demo-photos/photos.json`, `CREDITS.md`. Decisions #140–#146.
-- Guest-page speed with real-weight photos: LCP went 1.50 s → 1.2007 s in CI (limit 1200 ms); TBT on CI runners varies 21–586 ms between runs. The speed job fails by fractions of a millisecond or on noisy TBT. Temp PR #31 (sample photos, closed) shows it. Options for the owner: accept a slightly higher LCP limit for menus with real photos, lighter banner (lower quality / smaller size), or fewer demo dishes.
+### Workspace notes for the next session
+- Screenshot/Lighthouse helpers lived in `/tmp` (not committed): Nginx on :8124 serving `public/menu-cache` (pattern must allow `/{slug}/{branch}`), `php artisan serve` on :8099, `npx lighthouse@12.8.2`.
+- The Pest suite deletes `public/menu-cache` (PdfMenuTest): don't take screenshots while it runs.
+- Pest is not parallel here (`--parallel` is not installed); the full run takes ~3 min.
+
+## History (newest first)
+
+## Customer-menu round (#36–#47, 2026-11-12) — QUESTIONS #149–#160
+- **Live updates (#36–#37):** `public/sw.js` compares the fresh page with the saved one (ETag or text) and tells the page (`'mu'`); the page reloads when nothing is open (guard `sessionStorage.mu`, 10 s) and `sheet.js` shows "Menu updated".
+- **Branches (#38):** no picker; `.sub` branch name under the h1 when there are several branches; `otherBranches` (flag `show_other_branches`, default on) in the footer; QR rows carry `branch` (main branch for restaurant codes).
+- **Guest page UI (#39–#43):** `.st` pill with a dot (CSS only); `w.mL` scroll lock + swipe-to-close and back-to-top in `sheet.js`; dish sheet styles injected once (`#sst`), sticky `.sf` bar with `.oa`; footer `footer.ft#info` replaces the info `<details>` (`hoursSummary` groups days), PDF link no longer tied to branding, `.nr[hidden]` fix.
+- **Style D (#44):** `minimal` in `TenantAppearance::STYLES` / `PageTheme::STYLES`, feature `style_minimal`, `style-minimal.css`; no dish/special photos; `sizes` line ("Small 60 · Large 80", `MenuPageData::number()`); flags `show_logo` / `show_banner`; demo "Nine Wells Coffee".
+- **Link preview (#45):** `App\Support\PublicMenu\ShareImage` (banner og → platform `share_image` → `public/images/share-default.jpg`), `ImageProcessor::shareImage()` ≤ 300 KB, absolute APP_URL addresses with `?v=`; Super Admin upload `POST/DELETE platform/settings/share-image`.
+- **LCP without banner (#46–#47):** Blade picks `$lcp` (first special, else first dish), preloads it with high priority, defers all other photos; equal-height special cards; `$lcpSizes` per style (A `44vw` → 320 px file on phones). CI matrix: style × banner/no-banner + editorial no-banner-no-specials (`DEMO_MENU_BANNER`, `DEMO_MENU_SPECIALS`).
 
 ## Super Admin dashboard (#30)
 - `Platform\DashboardWidgetController` (revenue, expiring, inactive, funnel?days=30|90, top, signups, health, plan-mix, POST email/{tenant}); routes under `platform/widgets/*`; cron heartbeat `Cache::forever('cron:last_run')` and `queue:work --stop-when-empty` every minute in `routes/console.php`; indexes migration `2026_11_11_210001`.
 - Frontend `features/platform/widgets.tsx` (lazy from `features/platform/dashboard.tsx`), shared `features/dashboard/widget-card.tsx` (`Widget`, `Bar`). Decisions #135–#139.
-
-## Owner's laptop steps (after merging #30)
-1. `git pull` develop; `composer install`; `php artisan migrate`; `pnpm install && pnpm build` (frontend).
-2. `php artisan menu:refresh-pages --all` (new share button, PDF link, order list, styles in every static page).
-3. `php artisan media:regenerate --dry-run`, then without `--dry-run` (800 px sizes for older photos).
-4. cPanel cron: `* * * * * php /path/artisan schedule:run >> /dev/null 2>&1` — needed for page refresh, the mail queue and the health heartbeat (the health widget warns until it runs).
-5. Try: Share menu on a phone, PDF download (editor + guest link), My order (add, show to waiter, next visit), both dashboards (as owner, staff, Super Admin).
-6. Protect `main` in GitHub settings; then the go-live steps in `docs/deploy.md`.
 
 ## Restaurant dashboard (#29)
 - `Api\Restaurant\DashboardWidgetController` (setup, hideSetup, trend, missingPhotos, orders, plan); routes `t/{id}/widgets/*`; tenants `qr_downloaded_at`, `setup_hidden_at` (`Tenant::markQrDownloaded()` in QR downloads).
@@ -109,16 +118,6 @@ _Last updated: 2026-11-11 20:45 EAT. #26–#30 open and stacked; all requested w
 - CI `guest-menu-speed` is a matrix over the three styles (`DEMO_MENU_STYLE`).
 - Speed (local, Nginx static copy, Lighthouse 12.8.2 mobile simulated, median of 3): A 100/100/100/100, LCP 0.73 s, CLS 0, 10.4 KB gzip HTML; B 100 ×4, LCP 0.69 s, CLS 0, 10.5 KB; C 100 ×4, LCP 0.73 s, CLS 0, 10.3 KB. Inline JS 4.2 KB. Admin first load 230,364 B of 230,400.
 - Tests: backend **253**, frontend **178**.
-
-## Owner's change list (2026-11-11) — do these as separate small PRs into develop, then Partitions 12–14
-1. **New customer menu UI** — modern, premium, photo-first; smooth category tabs, elegant item sheet, reduced-motion-safe animations, good empty/sold-out states. **First 2–3 directions as mockups on the design canvas (phone, light + dark, demo café) → owner picks (the ONLY stop).** Keep all budgets (Lighthouse 100, < 30 KB before images, inline script ≤ 5 KB, LCP < 1.2 s).
-2. **Food photos** — easy add/change/crop/remove per dish, also from a phone (camera/gallery), upload progress + preview; **up to 5 photos per dish** (first = main; swipe in the item sheet); plan photo limits; auto resize/compress (WebP sizes + blur placeholder).
-3. **"Log in as" indicator** — remove the red banner; small quiet badge "Viewing as <restaurant>" + "Back to platform" in the admin header, only the Super Admin sees it; owner never sees anything; keep activity log + safety blocks.
-4. **SMTP settings in Super Admin → Settings → Email** — host, port, encryption (none/SSL/TLS), username, password (encrypted, shown only as ••••), from address/name; "Send test email" with clear success/error; fall back to .env when empty; every platform e-mail uses them.
-5. **Restaurant banner at the top of the menu** — check the existing cover photo; upload/crop to the recommended size with live preview and remove; logo + name over/under it; fast (sizes, priority) and no layout shift.
-
-Rules unchanged: tests, CI green, budgets kept (load on demand, don't raise limits), t() everywhere, 44 px targets, contrast ≥ 4.5:1, light + dark. Decisions → QUESTIONS.md.
-Also queued: `docker-compose.yml` vite service needs `COREPACK_ENABLE_DOWNLOAD_PROMPT=0` (the pnpm prompt stops the container); optional "Resend set-password e-mail" button + friendlier welcome mail for owners created by the Super Admin.
 
 ## What Partition 11 contains (PR #15)
 - Tables `payments`, `platform_settings`, `platform_announcements` (+ `announcement_reads`), `impersonations`. Plan features (`App\Support\Features`, `feature:` middleware, `features` in `/me` tenants, guest page footer/promotions).
@@ -197,9 +196,6 @@ Also queued: `docker-compose.yml` vite service needs `COREPACK_ENABLE_DOWNLOAD_P
 | Admin first load | 218 KB gzip | ≤ 225 KB |
 Measured locally with Nginx serving the static copy (same setup as CI). Note: without gzip (`php artisan serve`) LCP rises to ~1.4 s — compression on the server matters (on by default in `.htaccess`/Nginx).
 
-## Checks at this point
-Backend: Pint, Larastan 6, Pest **225**. Frontend: lint, Prettier, build, Vitest **177**, bundle 224.9 KB. Lighthouse CI green (demo page unchanged). Browser check of the guest page at 390 px: list, search, sheet with photo/sizes/allergens, no console errors.
-
 ## Packages added in this build (all pinned by the lockfiles)
 | Package | Version | Licence | Where |
 |---|---|---|---|
@@ -217,17 +213,5 @@ Removed: axios. Composer constraints are `~6.0.1` / `~1.9.0` (patch updates only
 ## Claude's workspace notes
 Workspace can run `pnpm install`, `composer install --prefer-source` (Packagist blocked: new Composer packages need the owner's PC or the lock-entry trick used for openspout), MariaDB (`service mariadb start` after idle), Chromium (`PLAYWRIGHT_BROWSERS_PATH=/tmp/pw` with a `chromium_headless_shell-1217` → `-1243` symlink), Nginx, Lighthouse (`npx lighthouse@12.8.2 --chrome-path=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome`).
 
-## Next steps (in order)
-10 Insights (beacon counting) → 12 Demo data (extend DemoSeeder) → 13 Docs (deploy, OPcache, Cloudflare, cron for `schedule:run`) → 14 Final QA → Step 4 final report.
-Still open from §15.3: optimistic price edits in the admin.
-
-## Blockers / owner actions
-- Merge the newest PR (contains everything before it).
-- `main` branch protection still to add.
-- Production needs the Laravel scheduler cron (`* * * * * php artisan schedule:run`) for `menu:refresh-pages` (documented in Partition 13).
-
 ## Pinned references
 - shadcn-admin `e16c87f` (v2.2.1, MIT); Laravel skeleton v13.11.0 `06d016a`; design mockups https://claude.ai/artifact/HKJ6v8zV9y2b7oQoYb33B5
-
-## Prompt for the next chat
-> Continue the Menu project in kulmiss/menu from handover.md (newest PR, see the table). Speed is the top priority (PLAN.md §15); English only. Work through all remaining partitions (8 → 14) without stopping for my OK, then write the Step 4 final report. Same rules: stacked PRs (I merge only the newest), CI checks every PR, tests in every partition, shared hosting is the main target.
