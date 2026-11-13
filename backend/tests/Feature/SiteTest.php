@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Role;
 use App\Models\Plan;
 use App\Models\Tenant;
 use App\Support\BrandColor;
@@ -105,18 +106,39 @@ it('keeps text on the brand colour readable', function () {
     expect(BrandColor::palette('red')['brand'])->toBe(BrandColor::DEFAULT);
 });
 
-it('shows the Terms and Privacy texts from platform settings, escaped', function () {
+it('shows Terms and Privacy as headings, lists and paragraphs, with contents and date, never as raw HTML', function () {
     PlatformSettings::save([
-        'terms' => "1. Use the menu fairly.\nNo spam.\n\n2. <script>alert(1)</script> is shown as text.",
+        'terms' => "Last updated: 2 March 2027\n\nIntro line one.\nIntro line two.\n\n## 1. Using Menu\n\n- **Fair use:** no spam.\n  - not even a little\n- Write to info@kulmiss.com or https://kulmiss.com/help.\n\n## 2. <script>alert(1)</script> & more\n\nText with <b>tags</b>.",
         'privacy' => '',
     ]);
 
     $this->get('/terms')->assertOk()
         ->assertSee('Terms of Service')
-        ->assertSee('1. Use the menu fairly.<br />', false)
-        ->assertSee('&lt;script&gt;', false)
-        ->assertDontSee('<script>alert(1)</script>', false);
+        ->assertSee('Last updated: 2 March 2027')
+        ->assertSee('On this page')
+        ->assertSee('<a href="#using-menu">1. Using Menu</a>', false)
+        ->assertSee('<h2 id="using-menu">1. Using Menu</h2>', false)
+        ->assertSee('<p>Intro line one.<br>Intro line two.</p>', false)
+        ->assertSee('<li><strong>Fair use:</strong> no spam.', false)
+        ->assertSee('<li>not even a little</li>', false)
+        ->assertSee('<a href="mailto:info@kulmiss.com">info@kulmiss.com</a>', false)
+        ->assertSee('<a href="https://kulmiss.com/help">https://kulmiss.com/help</a>.', false)
+        ->assertSee('&lt;script&gt;alert(1)&lt;/script&gt; &amp; more', false)
+        ->assertSee('Text with &lt;b&gt;tags&lt;/b&gt;.', false)
+        ->assertDontSee('<script>alert(1)</script>', false)
+        ->assertDontSee('<b>tags</b>', false);
     $this->get('/privacy')->assertOk()
         ->assertSee('Privacy Policy')
         ->assertSee('has not been published yet');
+});
+
+it('serves public pages and guest menus without any cookie', function () {
+    [, $tenant] = member(Role::Owner);
+    sampleMenu($tenant);
+    foreach (['/', '/terms', '/privacy', '/'.$tenant->slug, '/sitemap.xml'] as $url) {
+        $res = $this->get($url)->assertOk();
+        expect($res->headers->getCookies())->toBe([], $url);
+    }
+    // The admin still gets its session cookie.
+    expect($this->get('/admin')->headers->getCookies())->not->toBe([]);
 });

@@ -7,6 +7,7 @@ use App\Models\Tenant;
 use App\Support\BrandColor;
 use App\Support\EmailLogo;
 use App\Support\Features;
+use App\Support\Legal\LegalText;
 use App\Support\PlatformSettings;
 use App\Support\PublicMenu\MenuPageData;
 use App\Support\Qr\QrImages;
@@ -73,13 +74,11 @@ class SiteController extends Controller
 
     public function legal(string $page): View
     {
-        $text = trim((string) PlatformSettings::get($page));
-
         return view('site.legal', [
             'platform' => (string) PlatformSettings::get('name'),
             'title' => __("site.{$page}"),
-            // Blank lines separate paragraphs; each paragraph keeps its line breaks.
-            'paragraphs' => $text === '' ? [] : preg_split('/\R{2,}/u', $text),
+            // Headings, lists and paragraphs as data; the view escapes every piece (no HTML from the setting).
+            'doc' => LegalText::parse((string) PlatformSettings::get($page)),
         ]);
     }
 

@@ -1,12 +1,26 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Download, Loader2, Plus } from 'lucide-react'
+import {
+  AlertTriangle,
+  Download,
+  ExternalLink,
+  Loader2,
+  Plus,
+  RotateCcw,
+} from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { api, validationErrors } from '@/lib/api'
 import { toast } from '@/lib/toast'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
   Dialog,
@@ -26,7 +40,9 @@ import {
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Switch } from '@/components/ui/switch'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
+import { ConfirmDialog } from '@/components/confirm-dialog'
 import {
   FEATURES,
   LIMITS,
@@ -881,59 +897,232 @@ function SettingsForm({
       {e.errors[k] && <p className='text-sm text-destructive'>{e.errors[k]}</p>}
     </div>
   )
+  const general = (
+    <Card className='max-w-2xl'>
+      <CardHeader>
+        <CardTitle>{t('platform.settings.tabs.general')}</CardTitle>
+        <CardDescription>{t('platform.settings.general_hint')}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form
+          className='grid gap-4'
+          onSubmit={async (ev) => {
+            ev.preventDefault()
+            try {
+              await save.mutateAsync({
+                ...v,
+                support_email: v.support_email || null,
+                domain: v.domain || null,
+              })
+              toast.success(t('platform.saved'))
+            } catch (err) {
+              e.catchErr(err)
+            }
+          }}
+        >
+          <div className='grid gap-4 sm:grid-cols-2'>
+            {input('name')}
+            {input('support_email', { type: 'email' })}
+            {input('domain', { placeholder: 'menu.example.com' })}
+            {input('default_currency', { maxLength: 3 })}
+          </div>
+          <Alert>
+            <AlertTriangle aria-hidden />
+            <AlertTitle className='line-clamp-none'>
+              {t('platform.legal.draft')}
+            </AlertTitle>
+            <AlertDescription>{t('platform.legal.format')}</AlertDescription>
+          </Alert>
+          {(['terms', 'privacy'] as const).map((k) => (
+            <LegalField
+              key={k}
+              page={k}
+              value={v[k]}
+              onChange={(text) => setV((x) => ({ ...x, [k]: text }))}
+              t={t}
+            />
+          ))}
+          <Button
+            type='submit'
+            className='justify-self-start'
+            disabled={save.isPending}
+          >
+            {t('common.save')}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  )
   return (
     <>
       <PageTitle title={t('platform.nav.settings')} />
-      <form
-        className='grid max-w-2xl gap-4'
-        onSubmit={async (ev) => {
-          ev.preventDefault()
-          try {
-            await save.mutateAsync({
-              ...v,
-              support_email: v.support_email || null,
-              domain: v.domain || null,
-            })
-            toast.success(t('platform.saved'))
-          } catch (err) {
-            e.catchErr(err)
-          }
-        }}
-      >
-        <div className='grid gap-4 sm:grid-cols-2'>
-          {input('name')}
-          {input('support_email', { type: 'email' })}
-          {input('domain', { placeholder: 'menu.example.com' })}
-          {input('default_currency', { maxLength: 3 })}
-        </div>
-        {(['terms', 'privacy'] as const).map((k) => (
-          <div key={k} className='grid gap-1'>
-            <Label htmlFor={`st-${k}`}>{t(`platform.settings.${k}`)}</Label>
-            <Textarea
-              id={`st-${k}`}
-              rows={5}
-              value={v[k]}
-              onChange={(x) => setV({ ...v, [k]: x.target.value })}
+      <SettingsTabs
+        t={t}
+        tabs={{
+          general,
+          signup: (
+            <SignupSettings
+              initial={initial as unknown as SignupSettingsData}
             />
-          </div>
-        ))}
-        <Button
-          type='submit'
-          className='justify-self-start'
-          disabled={save.isPending}
-        >
-          {t('common.save')}
-        </Button>
-      </form>
-      <SignupSettings initial={initial as unknown as SignupSettingsData} />
-      <LandingSettings initial={initial as unknown as LandingSettingsData} />
-      <BillingSettings initial={initial as unknown as BillingSettingsData} />
-      <ShareImageCard
-        url={initial.share_image_url ?? ''}
-        custom={!!initial.share_image}
+          ),
+          landing: (
+            <LandingSettings
+              initial={initial as unknown as LandingSettingsData}
+            />
+          ),
+          billing: (
+            <BillingSettings
+              initial={initial as unknown as BillingSettingsData}
+            />
+          ),
+          branding: (
+            <div className='grid gap-6'>
+              <EmailLogoCard url={initial.logo_url} />
+              <ShareImageCard
+                url={initial.share_image_url ?? ''}
+                custom={!!initial.share_image}
+              />
+            </div>
+          ),
+          email: <EmailSettings />,
+        }}
       />
-      <EmailLogoCard url={initial.logo_url} />
-      <EmailSettings />
     </>
+  )
+}
+
+/** Terms / Privacy text with "View page" and "Reset to default text" (QUESTIONS #181). */
+function LegalField({
+  page,
+  value,
+  onChange,
+  t,
+}: {
+  page: 'terms' | 'privacy'
+  value: string
+  onChange: (text: string) => void
+  t: (k: string) => string
+}) {
+  const [confirm, setConfirm] = useState(false)
+  const reset = usePlatformMutation(() =>
+    send('post', `settings/legal/${page}/reset`, {})
+  )
+  return (
+    <div className='grid gap-1'>
+      <div className='flex flex-wrap items-end justify-between gap-2'>
+        <Label htmlFor={`st-${page}`}>{t(`platform.settings.${page}`)}</Label>
+        <div className='flex flex-wrap gap-1'>
+          <Button
+            asChild
+            variant='ghost'
+            size='sm'
+            className='min-h-11 sm:min-h-8'
+          >
+            <a href={`/${page}`} target='_blank' rel='noopener'>
+              <ExternalLink aria-hidden /> {t('platform.legal.view')}
+            </a>
+          </Button>
+          <Button
+            type='button'
+            variant='outline'
+            size='sm'
+            className='min-h-11 sm:min-h-8'
+            onClick={() => setConfirm(true)}
+          >
+            <RotateCcw aria-hidden /> {t('platform.legal.reset')}
+          </Button>
+        </div>
+      </div>
+      <Textarea
+        id={`st-${page}`}
+        rows={14}
+        className='font-mono text-sm'
+        value={value}
+        onChange={(x) => onChange(x.target.value)}
+      />
+      <ConfirmDialog
+        open={confirm}
+        onOpenChange={setConfirm}
+        title={t(`platform.legal.reset_title_${page}`)}
+        desc={t('platform.legal.reset_desc')}
+        confirmText={t('platform.legal.reset')}
+        destructive
+        isLoading={reset.isPending}
+        handleConfirm={async () => {
+          const res = (await reset.mutateAsync(undefined)) as {
+            data: { data: Record<string, string> }
+          }
+          onChange(res.data.data[page])
+          setConfirm(false)
+          toast.success(t('platform.legal.reset_done'))
+        }}
+      />
+    </div>
+  )
+}
+
+const SETTINGS_TABS = [
+  'general',
+  'signup',
+  'landing',
+  'billing',
+  'branding',
+  'email',
+] as const
+type SettingsTab = (typeof SETTINGS_TABS)[number]
+
+/**
+ * Settings split into tabs (side list on wide screens, a scrollable row on
+ * phones). Every tab stays mounted, so unsaved edits survive switching; the
+ * open tab is kept in the address (#email) so reloads and links land on it.
+ */
+function SettingsTabs({
+  t,
+  tabs,
+}: {
+  t: (k: string) => string
+  tabs: Record<SettingsTab, React.ReactNode>
+}) {
+  const [tab, setTab] = useState<SettingsTab>(() => {
+    const hash = window.location.hash.slice(1)
+    return (SETTINGS_TABS as readonly string[]).includes(hash)
+      ? (hash as SettingsTab)
+      : 'general'
+  })
+  return (
+    <Tabs
+      value={tab}
+      onValueChange={(v) => {
+        setTab(v as SettingsTab)
+        window.history.replaceState(window.history.state, '', `#${v}`)
+      }}
+      className='gap-6 lg:flex-row lg:items-start'
+    >
+      <TabsList
+        aria-label={t('platform.nav.settings')}
+        className='h-auto w-full justify-start overflow-x-auto lg:sticky lg:top-20 lg:w-52 lg:shrink-0 lg:flex-col lg:items-stretch'
+      >
+        {SETTINGS_TABS.map((k) => (
+          <TabsTrigger
+            key={k}
+            value={k}
+            className='min-h-11 flex-none px-3 lg:min-h-9 lg:justify-start'
+          >
+            {t(`platform.settings.tabs.${k}`)}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+      {SETTINGS_TABS.map((k) => (
+        <TabsContent
+          key={k}
+          value={k}
+          forceMount
+          hidden={tab !== k}
+          className='min-w-0'
+        >
+          {tabs[k]}
+        </TabsContent>
+      ))}
+    </Tabs>
   )
 }

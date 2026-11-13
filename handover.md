@@ -44,6 +44,8 @@ _Last updated: 2026-11-12 13:00 EAT. Everything requested is merged into `develo
 - #66 Print materials (QUESTIONS #179), branch `feat/print-materials` (on top of #65). `App\Support\Print\{Canvas,PrintMaterials}`, `GET t/{tenant}/print-materials(.pdf)`, admin `/admin/print-materials`. Live: nothing to run.
 - #67 Insights export (QUESTIONS #180), branch `feat/insights-export` (on top of #66). `App\Support\Insights\{InsightsReport,ReportPdf}`, `InsightsExportController`, `insights:monthly` + `MonthlyInsightsNotification`. Live: `php artisan migrate --force` (two columns on `tenants`); the existing cron line runs `insights:monthly` hourly.
 
+- #68 SMTP test address · #69 Settings in tabs (on #68) · #70 Terms and Privacy (on #69; QUESTIONS #181, migration seeds the texts only when empty).
+
 **Merge order:** #65 → #66 → #67 (each is stacked on the previous one; after #65 is merged the next PR shows only its own commit).
 
 - #60 Invoices and receipts (QUESTIONS #173).

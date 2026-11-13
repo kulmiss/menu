@@ -146,6 +146,7 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::get('activity', [PlatformController::class, 'activity']);
             Route::get('settings', [PlatformController::class, 'settings']);
             Route::put('settings', [PlatformController::class, 'saveSettings']);
+            Route::post('settings/legal/{page}/reset', [PlatformController::class, 'resetLegal'])->whereIn('page', ['terms', 'privacy']);
             Route::post('settings/share-image', [PlatformController::class, 'saveShareImage']);
             Route::delete('settings/share-image', [PlatformController::class, 'deleteShareImage']);
             Route::post('settings/logo', [PlatformController::class, 'saveLogo']);

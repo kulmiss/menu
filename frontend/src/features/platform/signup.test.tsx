@@ -138,6 +138,7 @@ describe('Super Admin sign-up controls', () => {
     })
     const screen = await renderWithQuery(<SettingsPage />, { me: admin })
 
+    await userEvent.click(screen.getByRole('tab', { name: 'Sign-up' }))
     await userEvent.click(
       screen.getByRole('switch', { name: 'Public sign-up' })
     )
@@ -151,7 +152,7 @@ describe('Super Admin sign-up controls', () => {
     await expect
       .element(screen.getByLabelText('Turnstile secret key'))
       .toHaveAttribute('placeholder', 'Saved (leave empty to keep it)')
-    const save = screen.getByRole('button', { name: 'Save' }).nth(1)
+    const save = screen.getByRole('button', { name: 'Save' })
     await userEvent.click(save)
 
     await expect
@@ -201,6 +202,7 @@ describe('Super Admin landing page settings', () => {
     })
     const screen = await renderWithQuery(<SettingsPage />, { me: admin })
 
+    await userEvent.click(screen.getByRole('tab', { name: 'Landing page' }))
     await userEvent.fill(
       screen.getByLabelText('Headline'),
       'QR menus for Addis restaurants'
@@ -222,7 +224,7 @@ describe('Super Admin landing page settings', () => {
       screen.getByLabelText('Telegram'),
       'https://t.me/menu_et'
     )
-    await userEvent.click(screen.getByRole('button', { name: 'Save' }).nth(2))
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }))
 
     await expect
       .poll(() => fake.calls.find((c) => c.method === 'PUT')?.data)
@@ -240,5 +242,125 @@ describe('Super Admin landing page settings', () => {
         ],
         socials: { telegram: 'https://t.me/menu_et', facebook: '' },
       })
+  })
+
+  it('splits settings into tabs, keeps unsaved edits and remembers the tab in the address', async () => {
+    window.history.replaceState(null, '', '#email')
+    fake = fakeApi({
+      'GET /platform/settings': {
+        data: {
+          data: {
+            name: 'Menu Hub',
+            share_image_url: '/img/share.jpg',
+            logo_url: null,
+            signup_open: true,
+            signup_plan_id: null,
+            signup_approval: false,
+            signup_notify: true,
+            turnstile_enabled: false,
+            turnstile_site_key: '',
+            turnstile_secret_set: false,
+            disposable_domains: [],
+            upgrade_whatsapp: '',
+            plans: [{ id: 1, name: 'Free', slug: 'free' }],
+          },
+        },
+      },
+      'GET /platform/settings/mail': { status: 404 },
+    })
+    const screen = await renderWithQuery(<SettingsPage />, { me: admin })
+
+    // Opens on the tab named in the address.
+    await expect
+      .element(screen.getByRole('tab', { name: 'Email (SMTP)' }))
+      .toHaveAttribute('aria-selected', 'true')
+
+    await userEvent.click(screen.getByRole('tab', { name: 'General' }))
+    expect(window.location.hash).toBe('#general')
+    await userEvent.fill(screen.getByLabelText('Platform name'), 'Menu Hub ET')
+    // Only the open tab is shown.
+    await expect.element(screen.getByLabelText('Platform name')).toBeVisible()
+    await userEvent.click(screen.getByRole('tab', { name: 'Billing' }))
+    await expect
+      .element(screen.getByLabelText('Platform name'))
+      .not.toBeVisible()
+    await userEvent.click(screen.getByRole('tab', { name: 'General' }))
+    await expect
+      .element(screen.getByLabelText('Platform name'))
+      .toHaveValue('Menu Hub ET')
+    window.history.replaceState(null, '', '#')
+  })
+
+  it('shows the draft note and resets the Terms to the default text after confirming', async () => {
+    window.history.replaceState(null, '', '#general')
+    fake = fakeApi({
+      'GET /platform/settings': {
+        data: {
+          data: {
+            name: 'Menu',
+            terms: 'My own terms',
+            privacy: 'My own privacy text',
+            share_image_url: '/img/share.jpg',
+            logo_url: null,
+            signup_open: true,
+            signup_plan_id: null,
+            signup_approval: false,
+            signup_notify: true,
+            turnstile_enabled: false,
+            turnstile_site_key: '',
+            turnstile_secret_set: false,
+            disposable_domains: [],
+            upgrade_whatsapp: '',
+            plans: [{ id: 1, name: 'Free', slug: 'free' }],
+          },
+        },
+      },
+      'GET /platform/settings/mail': { status: 404 },
+      'POST /platform/settings/legal/terms/reset': {
+        data: {
+          data: { terms: 'Last updated: 13 November 2026\n\nDefault terms' },
+        },
+      },
+    })
+    const screen = await renderWithQuery(<SettingsPage />, { me: admin })
+
+    await expect
+      .element(
+        screen.getByText('Draft — have a lawyer review before relying on it.')
+      )
+      .toBeVisible()
+    const terms = screen.getByLabelText('Terms of use')
+    await expect.element(terms).toHaveValue('My own terms')
+    await expect
+      .element(screen.getByRole('link', { name: 'View page' }).first())
+      .toHaveAttribute('href', '/terms')
+
+    // Cancel keeps the text and sends nothing.
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Reset to default text' }).first()
+    )
+    await expect
+      .element(screen.getByRole('alertdialog'))
+      .toHaveTextContent('Reset the Terms of Service?')
+    await userEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+    expect(fake.calls.some((c) => c.method === 'POST')).toBe(false)
+
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Reset to default text' }).first()
+    )
+    await userEvent.click(
+      screen
+        .getByRole('alertdialog')
+        .getByRole('button', { name: 'Reset to default text' })
+    )
+    await expect
+      .element(terms)
+      .toHaveValue('Last updated: 13 November 2026\n\nDefault terms')
+    expect(
+      fake.calls.filter((c) => c.method === 'POST').map((c) => c.url)
+    ).toEqual(['/platform/settings/legal/terms/reset'])
+    await expect
+      .element(screen.getByLabelText('Privacy policy'))
+      .toHaveValue('My own privacy text')
   })
 })

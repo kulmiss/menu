@@ -216,7 +216,16 @@
     "domain": "Domain",
     "default_currency": "Default currency",
     "terms": "Terms of use",
-    "privacy": "Privacy policy"
+    "privacy": "Privacy policy",
+    "general_hint": "The platform name, contact address, domain and legal texts shown to restaurants and guests.",
+    "tabs": {
+      "general": "General",
+      "signup": "Sign-up",
+      "landing": "Landing page",
+      "billing": "Billing",
+      "branding": "Logo & link preview",
+      "email": "Email (SMTP)"
+    }
   },
   "share": {
     "title": "Link preview",
@@ -638,5 +647,15 @@
     "invoices": "Invoices",
     "payments": "Payments",
     "tags": "Tags"
+  },
+  "legal": {
+    "draft": "Draft — have a lawyer review before relying on it.",
+    "format": "Shown on /terms and /privacy. Format: the first line \"Last updated: …\"; \"## \" starts a section (listed in the contents); \"- \" starts a list item (two spaces before it for a sub-item); **bold**; a blank line starts a new paragraph. HTML is shown as text.",
+    "view": "View page",
+    "reset": "Reset to default text",
+    "reset_title_terms": "Reset the Terms of Service?",
+    "reset_title_privacy": "Reset the Privacy Policy?",
+    "reset_desc": "Your text is replaced by the default text and saved at once. This can't be undone.",
+    "reset_done": "Default text restored and saved."
   }
 }
