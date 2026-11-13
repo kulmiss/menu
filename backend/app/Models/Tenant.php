@@ -24,6 +24,7 @@ use Illuminate\Support\Facades\DB;
  * @property string $slug
  * @property string $name
  * @property string $status
+ * @property string|null $signup_state unverified|pending_approval|null (self sign-up; null = live)
  * @property int|null $plan_id
  * @property Carbon|null $trial_ends_at
  * @property Carbon|null $paid_until
@@ -39,7 +40,7 @@ use Illuminate\Support\Facades\DB;
  *
  * A restaurant: the tenant every restaurant-owned row belongs to.
  */
-#[Fillable(['slug', 'name', 'plan_id', 'trial_ends_at', 'paid_until', 'timezone', 'default_locale', 'currency_code', 'currency_format'])]
+#[Fillable(['slug', 'name', 'plan_id', 'trial_ends_at', 'paid_until', 'timezone', 'default_locale', 'currency_code', 'currency_format', 'signup_state'])]
 class Tenant extends Model
 {
     /** @use HasFactory<TenantFactory> */
@@ -48,6 +49,11 @@ class Tenant extends Model
     public const STATUS_ACTIVE = 'active';
 
     public const STATUS_SUSPENDED = 'suspended';
+
+    /** Self sign-up (owner, 2026-11-13): not live until the e-mail is verified / the Super Admin approves. */
+    public const SIGNUP_UNVERIFIED = 'unverified';
+
+    public const SIGNUP_PENDING = 'pending_approval';
 
     /** @var array<string, mixed> */
     protected $attributes = [
@@ -124,6 +130,10 @@ class Tenant extends Model
 
         if ($this->status === self::STATUS_SUSPENDED) {
             return SubscriptionState::Suspended;
+        }
+
+        if ($this->signup_state !== null) {
+            return SubscriptionState::Pending;
         }
 
         if ($this->paid_until !== null && $now->lt($this->paid_until)) {

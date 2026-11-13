@@ -3,6 +3,7 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { AlertTriangle, Check, Mail, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { api, isApiError } from '@/lib/api'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -60,6 +61,7 @@ type Signup = {
   created_at: string
   percent: number
   steps: Record<string, boolean>
+  signup_state?: 'unverified' | 'pending_approval' | null
 }
 type Health = {
   disk_free: number | null
@@ -450,6 +452,11 @@ function SignupsWidget() {
               <li key={r.id} className='grid gap-1 text-sm'>
                 <div className='flex min-w-0 justify-between gap-2'>
                   <span className='min-w-0 truncate font-medium'>{r.name}</span>
+                  {r.signup_state && (
+                    <Badge variant='outline' className='shrink-0'>
+                      {t(`platform.restaurants.signup_short_${r.signup_state}`)}
+                    </Badge>
+                  )}
                   <span className='tabular-nums'>{r.percent}%</span>
                 </div>
                 <Bar

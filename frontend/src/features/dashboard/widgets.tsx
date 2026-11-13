@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { Check, ImagePlus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { api, tenantUrl } from '@/lib/api'
@@ -58,6 +58,7 @@ export default function DashboardWidgets({ tenantId, locale, manager }: Props) {
       className='grid gap-4'
       style={{ gridTemplateColumns: 'minmax(0, 1fr)' }}
     >
+      {manager && welcomed() && <WelcomeCard tenantId={tenantId} />}
       {manager && <SetupWidget tenantId={tenantId} />}
       <TrendWidget tenantId={tenantId} />
       {manager && (
@@ -68,6 +69,59 @@ export default function DashboardWidgets({ tenantId, locale, manager }: Props) {
       )}
       {manager && <MissingPhotosWidget tenantId={tenantId} locale={locale} />}
     </div>
+  )
+}
+
+/** The e-mail confirmation link opens /admin?welcome=1 (owner, 2026-11-13). */
+const welcomed = () =>
+  new URLSearchParams(window.location.search).get('welcome') === '1'
+
+function WelcomeCard({ tenantId }: { tenantId: number }) {
+  const { t } = useTranslation()
+  const navigate = useNavigate()
+  const query = useQuery(widget<Setup>(tenantId, 'setup'))
+  const next = (query.data?.steps ?? []).filter((s) => !s.done).slice(0, 3)
+  return (
+    <section
+      aria-labelledby='welcome-title'
+      className='grid gap-3 rounded-xl border border-primary/40 bg-primary/5 p-4'
+    >
+      <div className='flex items-start justify-between gap-2'>
+        <div>
+          <h2 id='welcome-title' className='text-lg font-semibold'>
+            {t('dashboard.welcome.title')}
+          </h2>
+          <p className='text-sm text-muted-foreground'>
+            {t('dashboard.welcome.text')}
+          </p>
+        </div>
+        <Button
+          variant='ghost'
+          className='min-h-11 shrink-0 sm:min-h-9'
+          onClick={() => navigate({ to: '/admin', replace: true })}
+        >
+          {t('dashboard.welcome.close')}
+        </Button>
+      </div>
+      <ol className='grid gap-2 sm:grid-cols-3'>
+        {next.map((step, i) => (
+          <li key={step.key}>
+            <Button
+              asChild
+              variant='outline'
+              className='min-h-11 w-full justify-start'
+            >
+              <Link to={step.link}>
+                <span className='flex size-6 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground'>
+                  {i + 1}
+                </span>
+                {t(`dashboard.w.steps.${step.key}`)}
+              </Link>
+            </Button>
+          </li>
+        ))}
+      </ol>
+    </section>
   )
 }
 

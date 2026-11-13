@@ -1,14 +1,16 @@
-import { useState } from 'react'
+import { use, useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate } from '@tanstack/react-router'
+import { loadPageTexts } from '@/i18n'
 import { Loader2, LogIn } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { applyFieldErrors } from '@/lib/api'
 import { handleServerError } from '@/lib/handle-server-error'
 import { safeRedirect } from '@/lib/safe-redirect'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
@@ -131,8 +133,18 @@ export function SignInForm({ redirectTo }: { redirectTo?: string }) {
   )
 }
 
-export function SignInPage({ redirect }: { redirect?: string }) {
+// "Create a free account" and the e-mail confirmation messages.
+const texts = loadPageTexts('signup')
+/** Where the e-mail confirmation link sent the visitor (VerifyEmailController). */
+const OUTCOMES = ['done', 'already', 'expired', 'invalid']
+
+type SignInPageProps = { redirect?: string; verify?: string }
+
+export function SignInPage({ redirect, verify: raw }: SignInPageProps) {
+  use(texts)
   const { t } = useTranslation()
+  const verify = raw && OUTCOMES.includes(raw) ? raw : undefined
+  const good = verify === 'done' || verify === 'already'
   return (
     <AuthCard
       title={t('auth.sign_in')}
@@ -144,12 +156,21 @@ export function SignInPage({ redirect }: { redirect?: string }) {
             search={{ redirect }}
             className={authLinkClass}
           >
-            {t('auth.sign_up')}
+            {t('signup.create_link')}
           </Link>
         </>
       }
       footer={<LegalNote />}
     >
+      {verify && (
+        <Alert
+          variant={good ? 'default' : 'destructive'}
+          role={good ? 'status' : 'alert'}
+          className='mb-4'
+        >
+          <AlertDescription>{t(`signup.verify.${verify}`)}</AlertDescription>
+        </Alert>
+      )}
       <SignInForm redirectTo={redirect} />
     </AuthCard>
   )

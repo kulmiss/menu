@@ -29,9 +29,12 @@ This is the go-live checklist and the test summary. Deployment details are in [`
 - [ ] Super Admin → Settings → Email: SMTP details, then **Send test email**. Add SPF and DKIM DNS records for the sender's domain (`deploy.md` §7).
 - [ ] Optional: Super Admin → Settings → Link preview: upload your own default share picture.
 - [ ] Plans and features (menu styles A–D, PDF menu, "My order", branding) as you sell them.
+- [ ] Super Admin → Settings → Sign-up: keep public sign-up on (or off), plan for new sign-ups (default **Free**; its limits are under Plans), "Require my approval", "E-mail me about every new sign-up", WhatsApp number for upgrades. Optional: Cloudflare Turnstile keys, blocked e-mail domains. Settings → E-mail logo.
+- [ ] Write the Terms and Privacy texts (Settings): `/terms` and `/privacy` show them and the sign-up form links to them.
 - [ ] Create a test restaurant from Super Admin. Check that the owner receives the welcome e-mail and can set a password; use **Resend set-password e-mail** if not.
 
 ### Smoke test on the live site (phone and desktop)
+- [ ] Self sign-up: open the home page → "Create a free account", sign up with a real address, confirm from the e-mail, check the welcome screen and welcome e-mail, then delete the test restaurant.
 - [ ] Owner: log in, add a dish with a photo, set opening hours, download a QR code and a PDF menu.
 - [ ] Guest: open the menu from the QR code; search; open a dish; "My order" → show to waiter; share; back to top; light and dark mode.
 - [ ] Branches: the branch URL shows only that branch; "Other branches" in the footer.
@@ -53,7 +56,7 @@ All checks run on every PR in GitHub Actions (`.github/workflows/ci.yml`) and we
 | Migrate → rollback → migrate | pass |
 | Pest | **365 tests**, ~2,300 assertions, all passing |
 
-The tests cover: auth, 2FA and tenancy isolation; roles and permissions per endpoint; menus, items, photos, import/export; branches, tables and QR codes (scanned back with a QR reader); opening hours; promotions; insights and beacon; Super Admin, plans, features and "log in as" limits; idempotency keys; the guest page (static copy, styles A–D, photo loading, branch URLs, footer, link-preview tags read from the page `<head>`); PDF menus; demo seeders; e-mail settings and owner e-mails.
+The tests cover: auth, 2FA and tenancy isolation; roles and permissions per endpoint; menus, items, photos, import/export; branches, tables and QR codes (scanned back with a QR reader); opening hours; promotions; insights and beacon; Super Admin, plans, features and one-click "log in as" (not recorded, 2-hour limit, safety blocks); idempotency keys; the guest page (static copy, styles A–D, photo loading, branch URLs, footer, link-preview tags read from the page `<head>`); PDF menus; demo seeders; e-mail settings and owner e-mails.
 
 ### Admin and guest-page scripts
 | Check | Result |

@@ -36,7 +36,8 @@
     "grace": "Grace period",
     "read_only": "Read-only",
     "unavailable": "Unavailable",
-    "suspended": "Suspended"
+    "suspended": "Suspended",
+    "pending": "Pending sign-up"
   },
   "restaurants": {
     "hint": "Every restaurant on the platform.",
@@ -74,14 +75,24 @@
     "resend_welcome": "Resend set-password e-mail",
     "resend_welcome_hint": "Sends the owner the welcome e-mail again with a new link (valid 7 days). Earlier links stop working.",
     "welcome_sent": "Set-password e-mail sent to the owner.",
-    "log_in_as_hint": "You will see the restaurant admin as the owner for up to 60 minutes. Everything you do is recorded with your name. Passwords, e-mail, two-factor, team and the menu address can't be changed.",
     "suspend": "Suspend",
     "unsuspend": "Lift suspension",
     "suspend_hint": "The menu shows “unavailable” and the team can't make changes. The owner sees the reason.",
     "reason": "Reason",
     "restore": "Restore",
     "delete": "Delete restaurant",
-    "delete_confirm": "Delete {{name}}? It can be restored for 30 days, then it is removed for good."
+    "delete_confirm": "Delete {{name}}? It can be restored for 30 days, then it is removed for good.",
+    "signup_unverified": "Sign-up: e-mail not confirmed yet",
+    "signup_pending_approval": "Sign-up: waiting for your approval",
+    "approval": "New sign-up waiting for approval",
+    "approval_hint": "The owner confirmed their e-mail. Approve to put the menu online, or reject with a reason (the owner gets it by e-mail and the account is removed).",
+    "approve": "Approve",
+    "approved": "Approved. The owner was told by e-mail.",
+    "reject": "Reject",
+    "reject_hint": "The owner gets this reason by e-mail. The account and restaurant are removed and the menu address is free again.",
+    "rejected": "Sign-up rejected and removed.",
+    "signup_short_unverified": "E-mail not confirmed",
+    "signup_short_pending_approval": "Needs approval"
   },
   "features": {
     "branches": "More branches",
@@ -266,6 +277,7 @@
     "last_days_other": "Last {{count}} days",
     "funnel_steps": {
       "signups": "Signed up",
+      "verified": "E-mail confirmed",
       "menu": "5 or more dishes",
       "scanned": "First QR scan",
       "paying": "Paying"
@@ -325,5 +337,40 @@
     "minutes_ago": "{{count}} minutes ago",
     "ends_trial": "trial ends in {{count}} days",
     "ends_subscription": "subscription ends in {{count}} days"
+  },
+  "signup": {
+    "title": "Sign-up",
+    "hint": "Restaurants can create their own account at /auth/sign-up, confirm their e-mail and start on a plan.",
+    "signup_open": "Public sign-up",
+    "signup_open_hint": "When off, the sign-up page shows “Registration is closed”.",
+    "plan": "Plan for new sign-ups",
+    "plan_free": "{{name}} (default)",
+    "plan_hint": "Every self-registered restaurant starts on this plan, with no end date. Edit its limits under Plans.",
+    "signup_approval": "Require my approval",
+    "signup_approval_hint": "New restaurants wait in Restaurants → “Pending sign-up” until you approve them. Their menu is not public until then.",
+    "signup_notify": "E-mail me about every new sign-up",
+    "signup_notify_hint": "Sent to every Super Admin when an owner confirms their e-mail.",
+    "whatsapp": "WhatsApp number for upgrades",
+    "whatsapp_hint": "Shown as “Upgrade on WhatsApp” when a restaurant reaches a plan limit. Empty: the support e-mail is used.",
+    "spam": "Anti-spam",
+    "turnstile_enabled": "Cloudflare Turnstile check",
+    "turnstile_enabled_hint": "Off by default. Sign-up also has a hidden honeypot field and rate limits, so it works without it.",
+    "site_key": "Turnstile site key",
+    "secret": "Turnstile secret key",
+    "secret_saved": "Saved (leave empty to keep it)",
+    "secret_clear": "Remove the saved secret key",
+    "turnstile_help": "Create a free widget at dash.cloudflare.com → Turnstile and paste both keys. The secret is stored encrypted and never shown again.",
+    "domains": "Blocked e-mail domains",
+    "domains_hint": "Disposable e-mail services, one domain per line. Sign-ups and e-mail changes with these domains are refused."
+  },
+  "logo": {
+    "title": "E-mail logo",
+    "hint": "Shown at the top of every platform e-mail (sign-up, welcome, invitations). PNG, JPEG or WebP; resized to at most 480 × 120.",
+    "alt": "Current e-mail logo",
+    "none": "No logo yet: e-mails show the platform name.",
+    "choose": "Upload logo",
+    "remove": "Remove",
+    "saved": "Logo saved.",
+    "failed": "The logo could not be saved. Use a PNG, JPEG or WebP picture under 5 MB."
   }
 }

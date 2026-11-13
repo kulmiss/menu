@@ -34,6 +34,25 @@ describe('handleServerError', () => {
     )
   })
 
+  it('offers the upgrade contact when a plan limit is reached', () => {
+    const limit = (upgrade: unknown) =>
+      apiError(402, { message: 'Your plan allows 30 dishes.', upgrade })
+    handleServerError(
+      limit({ whatsapp: 'https://wa.me/251911000000', email: 'help@menu.et' })
+    )
+    expect(toastError).toHaveBeenLastCalledWith('Your plan allows 30 dishes.', [
+      'Upgrade on WhatsApp',
+      'https://wa.me/251911000000',
+    ])
+    handleServerError(limit({ whatsapp: null, email: 'help@menu.et' }))
+    expect(toastError).toHaveBeenLastCalledWith('Your plan allows 30 dishes.', [
+      'Upgrade by email',
+      'mailto:help@menu.et',
+    ])
+    handleServerError(limit({ whatsapp: null, email: null }))
+    expect(toastError).toHaveBeenLastCalledWith('Your plan allows 30 dishes.')
+  })
+
   it('maps status codes to messages', () => {
     expect(errorKey(apiError(402))).toBe('errors.read_only')
     expect(errorKey(apiError(403))).toBe('errors.forbidden')

@@ -581,6 +581,11 @@
         "languages": "Languages",
         "team": "Team members"
       }
+    },
+    "welcome": {
+      "title": "Welcome! Your email is confirmed",
+      "text": "Your restaurant is ready. Start with these three steps; the full checklist is below.",
+      "close": "Close"
     }
   },
   "drawer": {
@@ -604,7 +609,8 @@
   "subscription": {
     "grace": "Your subscription has expired. Renew by {{date}} to keep editing.",
     "read_only": "Your subscription has expired. The admin is read-only until you renew; the menu goes offline on {{date}}.",
-    "unavailable": "Your subscription has expired and your menu is offline. Renew to bring it back."
+    "unavailable": "Your subscription has expired and your menu is offline. Renew to bring it back.",
+    "pending": "Your account is waiting for approval. You can set up your menu now; guests can see it once it is approved."
   },
   "no_restaurant": {
     "title": "No restaurant yet",
@@ -612,7 +618,6 @@
   },
   "impersonation": {
     "viewing_as": "Viewing as {{name}}",
-    "until": "Until {{time}}. Everything you do is recorded.",
     "back": "Back to platform"
   },
   "search": {
@@ -624,5 +629,9 @@
     "label": "Switch restaurant",
     "title": "Your restaurants",
     "current": "Current restaurant"
+  },
+  "upgrade": {
+    "whatsapp": "Upgrade on WhatsApp",
+    "email": "Upgrade by email"
   }
 }

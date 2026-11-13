@@ -147,3 +147,35 @@ describe('Dashboard widgets', () => {
     await expect.element(screen.getByText('Shiro')).toBeVisible()
   })
 })
+
+describe('Welcome after confirming the e-mail', () => {
+  afterEach(() => {
+    fake.restore()
+    window.history.replaceState(null, '', '/')
+  })
+
+  it('shows the next setup steps when opened from the confirmation link', async () => {
+    fake = fakeApi(all)
+    window.history.replaceState(null, '', '/?welcome=1')
+    const screen = await renderWithQuery(
+      <DashboardWidgets tenantId={1} locale='en' manager />
+    )
+    await expect
+      .element(screen.getByText('Welcome! Your email is confirmed'))
+      .toBeVisible()
+    await expect
+      .element(
+        screen.getByRole('link', { name: /Download your QR codes/ }).first()
+      )
+      .toHaveAttribute('href', '/admin/qr-codes')
+  })
+
+  it('is not shown on a normal visit', async () => {
+    fake = fakeApi(all)
+    const screen = await renderWithQuery(
+      <DashboardWidgets tenantId={1} locale='en' manager />
+    )
+    await expect.element(screen.getByText('Finish setting up')).toBeVisible()
+    expect(screen.container.textContent).not.toContain('Welcome!')
+  })
+})

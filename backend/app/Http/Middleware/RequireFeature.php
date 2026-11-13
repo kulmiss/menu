@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Support\Features;
+use App\Support\UpgradeContact;
 use App\Tenancy\CurrentTenant;
 use Closure;
 use Illuminate\Http\Request;
@@ -20,6 +21,7 @@ class RequireFeature
             return response()->json([
                 'message' => __('platform.feature_off', ['feature' => __('platform.features.'.$feature)]),
                 'code' => 'features.'.$feature,
+                'upgrade' => UpgradeContact::payload(),
             ], 402);
         }
 

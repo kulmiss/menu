@@ -44,6 +44,11 @@ import {
 import { EmailSettings } from './email-settings'
 import { PageTitle } from './layout'
 import { ShareImageCard } from './share-image'
+import {
+  EmailLogoCard,
+  SignupSettings,
+  type SignupSettingsData,
+} from './signup-settings'
 
 function useErrors() {
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -918,10 +923,12 @@ function SettingsForm({
           {t('common.save')}
         </Button>
       </form>
+      <SignupSettings initial={initial as unknown as SignupSettingsData} />
       <ShareImageCard
         url={initial.share_image_url ?? ''}
         custom={!!initial.share_image}
       />
+      <EmailLogoCard url={initial.logo_url} />
       <EmailSettings />
     </>
   )

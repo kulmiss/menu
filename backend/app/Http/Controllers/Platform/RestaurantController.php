@@ -17,6 +17,7 @@ use App\Support\Features;
 use App\Support\ImpersonationManager;
 use App\Support\PublicMenu\MenuPageCache;
 use App\Support\Qr\QrMap;
+use App\Support\SignUp\SignUp;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -25,7 +26,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
 
 /**
  * Super Admin › Restaurants (PLAN.md §7.3 screen 2): list, create, edit,
@@ -118,6 +118,27 @@ class RestaurantController extends Controller
         $this->activity->log('platform.restaurant_created', $tenant, ['slug' => ['to' => $tenant->slug]], null);
 
         return response()->json(['data' => $this->row($tenant->load('plan'))], 201);
+    }
+
+    /** Approve a self-registered restaurant waiting for review (Settings → Sign-up → "Require my approval"). */
+    public function approve(int $restaurant, SignUp $signUp): JsonResponse
+    {
+        $tenant = Tenant::findOrFail($restaurant);
+        abort_unless($tenant->signup_state === Tenant::SIGNUP_PENDING, 422, __('signup.not_pending'));
+        $signUp->approve($tenant);
+
+        return response()->json(['data' => $this->row($tenant->fresh(['plan']) ?? $tenant)]);
+    }
+
+    /** Reject it: the owner gets the reason by e-mail and the restaurant is removed (the slug is free again). */
+    public function reject(Request $request, int $restaurant, SignUp $signUp): JsonResponse
+    {
+        $tenant = Tenant::findOrFail($restaurant);
+        abort_unless($tenant->signup_state === Tenant::SIGNUP_PENDING, 422, __('signup.not_pending'));
+        $data = $request->validate(['reason' => ['required', 'string', 'min:3', 'max:500']]);
+        $signUp->reject($tenant, $data['reason']);
+
+        return response()->json(['data' => ['deleted' => true]]);
     }
 
     /**
@@ -226,14 +247,10 @@ class RestaurantController extends Controller
     public function impersonate(Request $request, int $restaurant, ImpersonationManager $manager): JsonResponse
     {
         $tenant = Tenant::findOrFail($restaurant);
-        $data = $request->validate(['reason' => ['required', 'string', 'min:5', 'max:300']]);
         $owner = $tenant->memberships()->where('role', Role::Owner)->with('user')->first()?->user;
-        if ($owner === null) {
-            throw ValidationException::withMessages(['reason' => __('platform.no_owner')]);
-        }
-        $admin = $request->user();
-        $this->activity->log('platform.impersonation_started', $tenant, ['reason' => ['to' => $data['reason']], 'user' => ['to' => $owner->email]], $tenant->id);
-        $manager->start($request, $admin, $tenant, $owner, $data['reason']);
+        abort_if($owner === null, 422, __('platform.no_owner'));
+        // One click, no reason, nothing recorded (owner, 2026-11-13).
+        $manager->start($request, $request->user(), $tenant, $owner);
 
         return response()->json(['data' => ['tenant_id' => $tenant->id, 'redirect' => '/admin']]);
     }
@@ -248,6 +265,7 @@ class RestaurantController extends Controller
             'name' => $t->name,
             'slug' => $t->slug,
             'state' => $t->subscriptionState()->value,
+            'signup_state' => $t->signup_state,
             'status' => $t->status,
             'suspended_reason' => $t->suspended_reason,
             'plan' => $t->plan ? ['id' => $t->plan->id, 'name' => $t->plan->name['en'] ?? $t->plan->slug] : null,

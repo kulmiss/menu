@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 /**
  * While "logged in as" a restaurant user (PLAN.md §5): ends the session after
- * 60 minutes, and refuses actions a Super Admin must never do on someone's
+ * 2 hours, and refuses actions a Super Admin must never do on someone's
  * behalf — password, e-mail and two-factor changes, team ownership, the
  * restaurant address and deleting the restaurant.
  */

@@ -3,7 +3,7 @@ import { renderWithQuery } from '@/test-utils/render'
 import { navigate } from '@/test-utils/router-mock'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { userEvent } from 'vitest/browser'
-import { SignInForm } from './sign-in'
+import { SignInForm, SignInPage } from './sign-in'
 
 vi.mock('@tanstack/react-router', async (orig) =>
   (await import('@/test-utils/router-mock')).routerMock(await orig())
@@ -114,5 +114,33 @@ describe('SignInForm', () => {
     const screen = await renderWithQuery(<SignInForm />)
 
     expect(screen.container.textContent).not.toMatch(/GitHub|Facebook/)
+  })
+})
+
+describe('SignInPage', () => {
+  it('links to the free sign-up page', async () => {
+    const screen = await renderWithQuery(<SignInPage />)
+    await expect
+      .element(screen.getByRole('link', { name: 'Create a free account' }))
+      .toHaveAttribute('href', '/auth/sign-up')
+  })
+
+  it('explains where the e-mail confirmation link led', async () => {
+    const done = await renderWithQuery(<SignInPage verify='done' />)
+    await expect
+      .element(done.getByRole('status'))
+      .toHaveTextContent(
+        'Your email is confirmed. Sign in to set up your menu.'
+      )
+    done.unmount()
+
+    const expired = await renderWithQuery(<SignInPage verify='expired' />)
+    await expect
+      .element(expired.getByRole('alert'))
+      .toHaveTextContent(/This confirmation link has expired/)
+    expired.unmount()
+
+    const junk = await renderWithQuery(<SignInPage verify='<script>' />)
+    expect(junk.container.querySelector('[role="alert"]')).toBeNull()
   })
 })

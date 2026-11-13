@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Notifications\VerifyEmailNotification;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -56,5 +57,11 @@ class User extends Authenticatable implements MustVerifyEmail
         $tenantId = $tenant instanceof Tenant ? $tenant->getKey() : $tenant;
 
         return $this->memberships()->where('tenant_id', $tenantId)->first();
+    }
+
+    /** "Confirm your e-mail" with a 24-hour link that works signed out (owner, 2026-11-13). */
+    public function sendEmailVerificationNotification(): void
+    {
+        $this->notify(new VerifyEmailNotification);
     }
 }

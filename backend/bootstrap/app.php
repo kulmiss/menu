@@ -23,7 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Sanctum cookie auth for the SPA on the same domain.
         $middleware->statefulApi();
 
-        // "Log in as": time limit and blocked actions, for the API and Fortify (web).
+        // "Log in as": 2-hour limit and blocked actions, for the API and Fortify (web).
         $middleware->api(append: [GuardImpersonation::class]);
         $middleware->web(append: [GuardImpersonation::class, UseWelcomeBroker::class]);
 

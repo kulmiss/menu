@@ -88,12 +88,14 @@ export function loadScreenTexts(
 // Super Admin area and single rarely visited screens (owner, 2026-11-11:
 // load on demand instead of raising the size limit).
 const pageLoaders = import.meta.glob<{ default: Record<string, unknown> }>(
-  '../locales/en/{appearance,platform}.json'
+  '../locales/en/{appearance,platform,signup}.json'
 )
 const pagesLoaded = new Map<string, Promise<void>>()
 
 /** Loads the texts of one area into "common" under its own key. */
-export function loadPageTexts(page: 'appearance' | 'platform'): Promise<void> {
+export function loadPageTexts(
+  page: 'appearance' | 'platform' | 'signup'
+): Promise<void> {
   let promise = pagesLoaded.get(page)
   if (!promise) {
     promise = pageLoaders[`../locales/en/${page}.json`]().then((m) => {

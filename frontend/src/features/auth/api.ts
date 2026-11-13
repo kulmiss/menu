@@ -10,6 +10,7 @@ export type SubscriptionState =
   | 'read_only'
   | 'unavailable'
   | 'suspended'
+  | 'pending'
 
 /** A restaurant the signed-in user belongs to (TenantResource). */
 export type Tenant = {
@@ -48,7 +49,6 @@ export type Me = {
     tenant_id: number
     tenant_name: string
     user_name: string
-    ends_at: string
   } | null
   tenants: Tenant[]
 }
@@ -79,10 +79,8 @@ export async function signIn(input: SignInInput): Promise<boolean> {
 export type SignUpInput = {
   name: string
   email: string
-  /** Not needed when signing up from an invitation. */
-  restaurant_name?: string
-  slug?: string
-  invitation_token?: string
+  /** Fortify sign-up is for invitations only; restaurants use /signup. */
+  invitation_token: string
   password: string
   password_confirmation: string
   locale?: string

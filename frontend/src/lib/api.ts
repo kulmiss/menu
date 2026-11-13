@@ -169,6 +169,10 @@ async function send<T>(request: SentRequest): Promise<ApiResponse<T>> {
     if (xsrf) request.headers.set('X-XSRF-TOKEN', xsrf)
     return send<T>({ ...request, csrfRetried: true })
   }
+  // "Log in as" ended after 2 hours: the server already switched back.
+  if ((response.data as { code?: unknown })?.code === 'impersonation.expired') {
+    location.assign('/platform')
+  }
   throw new ApiError(
     `Request failed with status code ${response.status}`,
     request,
