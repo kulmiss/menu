@@ -38,6 +38,10 @@ class PlatformSettings
         ],
         // "Upgrade" hint when a plan limit is reached (payments are manual).
         'upgrade_whatsapp' => '',
+        // Menu Admin app (QUESTIONS #190): older versions must update; flags switch app features remotely.
+        'app_min_version' => '1.0.0',
+        'app_latest_version' => '1.0.0',
+        'app_flags' => [],
         // Public landing page (owner, 2026-11-13). Empty texts use the translated defaults.
         'brand_color' => '#c2410c',
         'landing_headline' => '',

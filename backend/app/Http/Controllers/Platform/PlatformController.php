@@ -336,6 +336,11 @@ class PlatformController extends Controller
             'disposable_domains' => ['sometimes', 'array', 'max:500'],
             'disposable_domains.*' => ['string', 'max:100', 'regex:/^[a-z0-9.-]+\.[a-z]{2,}$/i'],
             'upgrade_whatsapp' => ['sometimes', 'nullable', 'string', 'max:30', 'regex:/^\+?[0-9 ]{6,20}$/'],
+            // Menu Admin app (QUESTIONS #190)
+            'app_min_version' => ['sometimes', 'string', 'max:20', 'regex:/^\d+\.\d+\.\d+$/'],
+            'app_latest_version' => ['sometimes', 'string', 'max:20', 'regex:/^\d+\.\d+\.\d+$/'],
+            'app_flags' => ['sometimes', 'array', 'max:50'],
+            'app_flags.*' => ['boolean'],
             // Billing (owner, 2026-11-13)
             'billing_company' => ['sometimes', 'nullable', 'string', 'max:120'],
             'billing_address' => ['sometimes', 'nullable', 'string', 'max:300'],
