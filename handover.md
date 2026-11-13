@@ -36,13 +36,14 @@ _Last updated: 2026-11-12 13:00 EAT. Everything requested is merged into `develo
 
 ## History (newest first)
 
-## Self sign-up (#52–#56, 2026-11-13) — QUESTIONS #162–#169
+## Self sign-up (#52–#57, 2026-11-13) — QUESTIONS #162–#170
 - #52 "Log in as owner" in one click: no reason, no time limit, not recorded.
 - #53 Backend: `POST /api/v1/signup`, e-mail confirmation (24 h signed link), Free plan (migration), `signup_state` on tenants (unverified / pending approval → public menu off), approval, rejection, `signup:prune` (7 days), anti-spam (rate limits, honeypot, optional Turnstile, blocked domains), branded e-mails with the platform logo, upgrade contact on 402.
 - #54 Screens: sign-up page, "Check your inbox" gate, sign-in messages, welcome card, Super Admin sign-up settings, e-mail logo, pending approvals, upgrade toast button.
 - #55 Public home, `/terms`, `/privacy`; browser check (`docs/screenshots/self-signup/`); docs.
-- #56 "Log in as" recorded again silently, 2-hour limit, safety blocks back (QUESTIONS #169).
-- Merge in order: #52 → #53 → #54 → #55 → #56 (each branch contains the one before).
+- #56 "Log in as": 2-hour limit and safety blocks back (QUESTIONS #169).
+- #57 "Log in as" not recorded at all; on the 2-hour end the admin goes to /platform (QUESTIONS #170).
+- Merge in order: #52 → #53 → #54 → #55 → #56 → #57 (each branch contains the one before).
 
 ## Customer-menu round (#36–#47, 2026-11-12) — QUESTIONS #149–#160
 - **Live updates (#36–#37):** `public/sw.js` compares the fresh page with the saved one (ETag or text) and tells the page (`'mu'`); the page reloads when nothing is open (guard `sessionStorage.mu`, 10 s) and `sheet.js` shows "Menu updated".
@@ -130,7 +131,7 @@ _Last updated: 2026-11-12 13:00 EAT. Everything requested is merged into `develo
 ## What Partition 11 contains (PR #15)
 - Tables `payments`, `platform_settings`, `platform_announcements` (+ `announcement_reads`), `impersonations`. Plan features (`App\Support\Features`, `feature:` middleware, `features` in `/me` tenants, guest page footer/promotions).
 - API `/api/v1/platform/*` (middleware `platform`: Super Admin + 2FA, never while logged in as): dashboard, restaurants (list/filter, create with owner + set-password mail, edit, suspend/unsuspend, delete/restore, features, payments, impersonate), payments + CSV, plans (limits + features), themes, announcements, activity log, settings. Restaurant side: `t/{id}/announcements` (+ read), `POST impersonation/stop`.
-- "Log in as": `App\Support\ImpersonationManager` + `GuardImpersonation` (api + web groups): 60 minutes, blocked URIs, `impersonator_id` in every log entry; `/me.impersonation` drives the red banner. **Changed 2026-11-13 (QUESTIONS #162):** one click, no reason, no limit, no blocks, nothing recorded; `GuardImpersonation` removed. **Then (#56, QUESTIONS #169):** still no reason, but recorded silently again, 2-hour limit, blocks back.
+- "Log in as": `App\Support\ImpersonationManager` + `GuardImpersonation` (api + web groups): 60 minutes, blocked URIs, `impersonator_id` in every log entry; `/me.impersonation` drives the red banner. **Changed 2026-11-13 (QUESTIONS #162):** one click, no reason, no limit, no blocks, nothing recorded; `GuardImpersonation` removed. **Then (#56/#57, QUESTIONS #169–#170):** still no reason and nothing recorded; 2-hour limit (redirect to /platform) and the blocks are back.
 - SPA `/platform` (own texts `locales/en/platform.json`, loaded by the route), one `/platform/$section` route; 2FA gate; restaurant sheet (plan, trial date, payments, features, team, log in as, suspend, delete/restore); plans, payments (CSV), themes, announcements, activity, settings, security.
 - Admin: feature-aware sidebar, lazy "logged in as" banner, platform link for Super Admins without a restaurant, dashboard news (lazy).
 - Tests: backend **225**, frontend **177**. Admin first load **224.9 KB** / 225 KB (QUESTIONS #97).

@@ -90,6 +90,34 @@ describe('api client', () => {
 })
 
 describe('api helpers', () => {
+  it('goes back to the platform when "log in as" ended (2 hours)', async () => {
+    // Catch the page navigation instead of leaving the test page.
+    const assign = vi.fn()
+    const nav = (window as unknown as { navigation: EventTarget }).navigation
+    const stop = (e: Event) => {
+      e.preventDefault()
+      assign(
+        new URL(
+          (e as unknown as { destination: { url: string } }).destination.url
+        ).pathname
+      )
+    }
+    nav.addEventListener('navigate', stop)
+    fake = fakeApi({
+      'GET /t/1/menus': {
+        status: 409,
+        data: { message: 'Ended.', code: 'impersonation.expired' },
+      },
+      'POST /t/1/menus': { status: 409, data: { message: 'Busy.' } },
+    })
+    await expect(api.get('/t/1/menus')).rejects.toBeInstanceOf(ApiError)
+    expect(assign).toHaveBeenCalledWith('/platform')
+    // Any other 409 (a save still running) stays on the page.
+    await expect(api.post('/t/1/menus', {})).rejects.toBeInstanceOf(ApiError)
+    expect(assign).toHaveBeenCalledTimes(1)
+    nav.removeEventListener('navigate', stop)
+  })
+
   it('builds restaurant URLs', () => {
     expect(tenantUrl(3)).toBe('/t/3')
     expect(tenantUrl(3, '/members/9')).toBe('/t/3/members/9')

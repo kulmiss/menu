@@ -146,18 +146,17 @@ function impersonate(User $admin, Tenant $tenant): array
     ];
 }
 
-it('logs in as the owner in one click, records it silently and keeps the safety blocks', function () {
+it('logs in as the owner in one click, records nothing and keeps the safety blocks', function () {
     $admin = superAdmin();
     [$owner, $tenant] = member(Role::Owner);
+    [, , $staff] = member(Role::Staff, $tenant);
     [, , $item] = sampleMenu($tenant);
 
     $session = impersonate($admin, $tenant);
-    // Who, which restaurant, when.
-    $record = Impersonation::sole();
-    expect([$record->super_admin_id, $record->tenant_id, $record->user_id, $record->ended_at])->toBe([$admin->id, $tenant->id, $owner->id, null])
-        ->and($record->started_at)->not->toBeNull();
-    $start = ActivityLog::where('action', 'platform.impersonation_started')->sole();
-    expect([$start->actor_id, $start->tenant_id])->toBe([$admin->id, $tenant->id]);
+    // Nothing recorded (owner, 2026-11-13).
+    expect(Impersonation::count())->toBe(0)
+        ->and(ActivityLog::where('action', 'like', 'platform.impersonation%')->count())->toBe(0)
+        ->and(ActivityLog::where('actor_id', $admin->id)->count())->toBe(0);
 
     $this->actingAs($owner)->withSession($session);
     $this->getJson('/api/v1/me')->assertJsonPath('data.id', $owner->id)
@@ -165,10 +164,11 @@ it('logs in as the owner in one click, records it silently and keeps the safety 
         ->assertJsonPath('data.impersonation.tenant_name', $tenant->name);
     $this->getJson(p('dashboard'))->assertNotFound();
 
-    // Every change carries the Super Admin's id.
+    // Changes count as the owner's: no Super Admin attached.
     $this->patchJson(t($tenant, "items/{$item->id}"), ['name' => ['en' => 'Cortado']], idem())->assertOk();
     $log = ActivityLog::where('action', 'item.updated')->latest('id')->first();
-    expect([$log->actor_id, $log->impersonator_id])->toBe([$owner->id, $admin->id]);
+    expect([$log->actor_id, $log->impersonator_id])->toBe([$owner->id, null])
+        ->and(ActivityLog::whereNotNull('impersonator_id')->count())->toBe(0);
 
     // Password, e-mail, two-factor and team stay blocked.
     $this->putJson('/api/v1/auth/user/password', ['current_password' => 'password', 'password' => 'new-password-123', 'password_confirmation' => 'new-password-123'], idem())
@@ -178,8 +178,12 @@ it('logs in as the owner in one click, records it silently and keeps the safety 
     $this->patchJson(t($tenant, 'account/slug'), ['slug' => 'other-name'], idem())->assertForbidden();
     expect(Hash::check('password', $owner->fresh()->password))->toBeTrue();
 
+    $this->deleteJson(t($tenant, "members/{$staff->id}"), [], idem())->assertForbidden();
+    $this->patchJson(t($tenant, "members/{$staff->id}"), ['role' => 'manager'], idem())->assertForbidden();
+    expect($staff->fresh()->role)->toBe(Role::Staff);
+
     $this->postJson('/api/v1/impersonation/stop', [], idem())->assertOk()->assertJsonPath('data.redirect', '/platform')->assertSessionMissing('impersonation_id');
-    expect(Impersonation::whereNull('ended_at')->exists())->toBeFalse();
+    expect(Impersonation::count())->toBe(0)->and(ActivityLog::where('actor_id', $admin->id)->count())->toBe(0);
 });
 
 it('ends "log in as" automatically after 2 hours', function () {
@@ -193,7 +197,10 @@ it('ends "log in as" automatically after 2 hours', function () {
     $this->travel(2)->minutes();
     $this->getJson(t($tenant))->assertStatus(409)
         ->assertJsonPath('code', 'impersonation.expired')->assertSessionMissing('impersonation_id');
-    expect(Impersonation::whereNull('ended_at')->exists())->toBeFalse();
+    // Signed back in as the Super Admin; the screen goes to /platform.
+    app('auth')->forgetGuards();
+    $this->getJson('/api/v1/me')->assertJsonPath('data.id', $admin->id)->assertJsonPath('data.impersonation', null);
+    expect(Impersonation::count())->toBe(0);
 });
 
 it('never shows "viewing as" to the restaurant owner in their own session', function () {

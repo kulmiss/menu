@@ -249,8 +249,7 @@ class RestaurantController extends Controller
         $tenant = Tenant::findOrFail($restaurant);
         $owner = $tenant->memberships()->where('role', Role::Owner)->with('user')->first()?->user;
         abort_if($owner === null, 422, __('platform.no_owner'));
-        // One click, no reason asked; recorded silently (owner, 2026-11-13).
-        $this->activity->log('platform.impersonation_started', $tenant, ['user' => ['to' => $owner->email]], $tenant->id);
+        // One click, no reason, nothing recorded (owner, 2026-11-13).
         $manager->start($request, $request->user(), $tenant, $owner);
 
         return response()->json(['data' => ['tenant_id' => $tenant->id, 'redirect' => '/admin']]);
