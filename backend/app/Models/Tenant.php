@@ -10,6 +10,7 @@ use App\Tenancy\CurrentTenant;
 use Carbon\CarbonInterface;
 use Database\Factories\TenantFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -165,6 +166,40 @@ class Tenant extends Model
             $now->lt($readOnlyEnds) => SubscriptionState::ReadOnly,
             default => SubscriptionState::Unavailable,
         };
+    }
+
+    /**
+     * Restaurants in one of these subscription states, in SQL (same rules as
+     * subscriptionState(), so lists can filter and count without loading rows).
+     *
+     * @param  Builder<Tenant>  $query
+     * @param  list<string>  $states
+     */
+    public function scopeInState(Builder $query, array $states, ?CarbonInterface $now = null): void
+    {
+        $now = ($now ?? now())->toDateTimeString();
+        $grace = (int) config('menu.grace_days');
+        $readOnly = (int) config('menu.read_only_days');
+        $t = $this->getTable();
+        $expired = "GREATEST(COALESCE({$t}.paid_until, {$t}.trial_ends_at), COALESCE({$t}.trial_ends_at, {$t}.paid_until))";
+        $base = "{$t}.status <> '".self::STATUS_SUSPENDED."' AND {$t}.signup_state IS NULL";
+        $over = "{$base} AND ({$t}.paid_until IS NULL OR {$t}.paid_until <= ?) AND ({$t}.trial_ends_at IS NULL OR {$t}.trial_ends_at <= ?) AND {$expired} IS NOT NULL";
+        $sql = [
+            'suspended' => ["{$t}.status = '".self::STATUS_SUSPENDED."'", []],
+            'pending' => ["{$t}.status <> '".self::STATUS_SUSPENDED."' AND {$t}.signup_state IS NOT NULL", []],
+            'active' => ["{$base} AND ({$t}.paid_until > ? OR ({$t}.paid_until IS NULL AND {$t}.trial_ends_at IS NULL))", [$now]],
+            'trial' => ["{$base} AND ({$t}.paid_until IS NULL OR {$t}.paid_until <= ?) AND {$t}.trial_ends_at > ?", [$now, $now]],
+            'grace' => ["{$over} AND DATE_ADD({$expired}, INTERVAL {$grace} DAY) > ?", [$now, $now, $now]],
+            'read_only' => ["{$over} AND DATE_ADD({$expired}, INTERVAL {$grace} DAY) <= ? AND DATE_ADD({$expired}, INTERVAL ".($grace + $readOnly).' DAY) > ?', [$now, $now, $now, $now]],
+            'unavailable' => ["{$over} AND DATE_ADD({$expired}, INTERVAL ".($grace + $readOnly).' DAY) <= ?', [$now, $now, $now]],
+        ];
+        $query->where(function ($w) use ($states, $sql) {
+            foreach ($states as $state) {
+                if (isset($sql[$state])) {
+                    $w->orWhereRaw('('.$sql[$state][0].')', $sql[$state][1]);
+                }
+            }
+        });
     }
 
     /** The moment the current stage of the expiry timeline ends, for banners. */

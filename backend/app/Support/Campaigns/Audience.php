@@ -61,6 +61,7 @@ class Audience
     private static function tenants(array $filters): Collection
     {
         $query = Tenant::query()->with('plan')->whereNull('signup_state')
+            ->when($filters['restaurant_ids'] ?? null, fn ($q, $ids) => $q->whereIn('id', array_map('intval', (array) $ids)))
             ->when($filters['plan_id'] ?? null, fn ($q, $id) => $q->where('plan_id', $id))
             ->when($filters['tag_id'] ?? null, fn ($q, $tag) => $q->whereHas('platformTags', fn ($w) => $w->whereKey($tag)))
             ->when($filters['signed_up_from'] ?? null, fn ($q, $d) => $q->where('created_at', '>=', $d.' 00:00:00'))

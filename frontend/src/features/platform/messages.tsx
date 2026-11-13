@@ -35,8 +35,10 @@ import {
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
+import { DataTable } from '@/components/data-table'
 import {
   campaignQ,
+  type CampaignRow,
   campaignsQ,
   plansQ,
   send,
@@ -56,16 +58,27 @@ type Filters = {
   inactive_days?: number
   signed_up_from?: string
   signed_up_to?: string
+  /** Restaurants picked in the restaurants table (QUESTIONS #185). */
+  restaurant_ids?: number[]
 }
+
+/** ?restaurants=1,2,3 from the restaurants table's "E-mail owners". */
+const pickedRestaurants = (): number[] =>
+  (new URLSearchParams(window.location.search).get('restaurants') ?? '')
+    .split(',')
+    .map(Number)
+    .filter((n) => Number.isInteger(n) && n > 0)
 
 /** Super Admin → Messages: e-mails to restaurant owners (owner, 2026-11-13). */
 export function MessagesPage() {
-  const [composing, setComposing] = useState(false)
+  const [picked] = useState(pickedRestaurants)
+  const [composing, setComposing] = useState(picked.length > 0)
   const [open, setOpen] = useState<number | null>(null)
 
   if (composing)
     return (
       <Composer
+        picked={picked}
         onDone={(id) => {
           setComposing(false)
           setOpen(id)
@@ -109,43 +122,94 @@ function CampaignList({
         </Button>
       </PageTitle>
       <RateSetting />
-      {list.isPending ? (
-        <Skeleton className='h-40' />
-      ) : (
-        <ul className='grid gap-2'>
-          {list.data?.map((c) => (
-            <li key={c.id}>
-              <button
-                type='button'
-                onClick={() => onOpen(c.id)}
-                className='grid w-full gap-1 rounded-md border p-3 text-start hover:bg-accent/50'
-              >
-                <span className='flex flex-wrap items-center justify-between gap-2'>
-                  <span className='font-medium'>{c.subject}</span>
-                  <Badge
-                    variant={c.status === 'done' ? 'secondary' : 'outline'}
-                  >
-                    {t(`platform.messages.status.${c.status}`)}
-                  </Badge>
-                </span>
-                <span className='text-sm text-muted-foreground'>
-                  {date(c.created_at)} ·{' '}
-                  {t('platform.messages.counts', {
-                    sent: c.sent,
-                    total: c.recipients,
-                    failed: c.failed,
-                  })}
-                </span>
-              </button>
-            </li>
-          ))}
-          {list.data?.length === 0 && (
-            <li className='p-6 text-center text-muted-foreground'>
-              {t('platform.messages.none')}
-            </li>
-          )}
-        </ul>
-      )}
+      <DataTable<CampaignRow>
+        id='platform-campaigns'
+        rows={list.data}
+        loading={list.isPending}
+        error={list.isError}
+        onRetry={() => list.refetch()}
+        csvName='campaigns'
+        rowId={(c) => c.id}
+        onRowClick={(c) => onOpen(c.id)}
+        searchPlaceholder={t('platform.messages.search')}
+        dateLabel={t('platform.messages.col.created')}
+        dateOf={(c) => c.created_at}
+        filters={[
+          {
+            id: 'status',
+            label: t('platform.messages.col.status'),
+            options: ['sending', 'done'].map((s) => ({
+              value: s,
+              label: t(`platform.messages.status.${s}`),
+            })),
+            match: (c, v) => v.includes(c.status),
+          },
+          {
+            id: 'failures',
+            label: t('platform.messages.with_failures'),
+            options: [
+              { value: '1', label: t('platform.messages.with_failures') },
+            ],
+            match: (c) => c.failed > 0,
+          },
+        ]}
+        empty={t('platform.messages.none')}
+        columns={[
+          {
+            id: 'subject',
+            label: t('platform.messages.col.subject'),
+            primary: true,
+            text: (c) => c.subject,
+            sortValue: (c) => c.subject.toLowerCase(),
+            cell: (c) => <span className='font-medium'>{c.subject}</span>,
+          },
+          {
+            id: 'status',
+            label: t('platform.messages.col.status'),
+            text: (c) => t(`platform.messages.status.${c.status}`),
+            cell: (c) => (
+              <Badge variant={c.status === 'done' ? 'secondary' : 'outline'}>
+                {t(`platform.messages.status.${c.status}`)}
+              </Badge>
+            ),
+          },
+          {
+            id: 'created',
+            label: t('platform.messages.col.created'),
+            text: (c) => c.created_at,
+            sortValue: (c) => c.created_at,
+            cell: (c) => date(c.created_at),
+          },
+          {
+            id: 'recipients',
+            label: t('platform.messages.col.recipients'),
+            align: 'end',
+            text: (c) => c.recipients,
+            sortValue: (c) => c.recipients,
+            cell: (c) => c.recipients,
+          },
+          {
+            id: 'sent',
+            label: t('platform.messages.col.sent'),
+            align: 'end',
+            text: (c) => c.sent,
+            sortValue: (c) => c.sent,
+            cell: (c) => c.sent,
+          },
+          {
+            id: 'failed',
+            label: t('platform.messages.col.failed'),
+            align: 'end',
+            text: (c) => c.failed,
+            sortValue: (c) => c.failed,
+            cell: (c) => (
+              <span className={c.failed ? 'font-medium text-destructive' : ''}>
+                {c.failed}
+              </span>
+            ),
+          },
+        ]}
+      />
     </>
   )
 }
@@ -288,9 +352,11 @@ function CampaignDetail({ id, onBack }: { id: number; onBack: () => void }) {
 }
 
 function Composer({
+  picked = [],
   onDone,
   onCancel,
 }: {
+  picked?: number[]
   onDone: (id: number) => void
   onCancel: () => void
 }) {
@@ -299,7 +365,9 @@ function Composer({
   const tags = useQuery(tagsQ())
   const [subject, setSubject] = useState('')
   const [body, setBody] = useState('')
-  const [filters, setFilters] = useState<Filters>({})
+  const [filters, setFilters] = useState<Filters>(
+    picked.length ? { restaurant_ids: picked } : {}
+  )
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [preview, setPreview] = useState<{
     subject: string
@@ -478,6 +546,23 @@ function Composer({
           <legend className='px-1 text-sm font-medium'>
             {t('platform.messages.recipients')}
           </legend>
+          {filters.restaurant_ids && (
+            <div className='mb-3 flex flex-wrap items-center gap-2 rounded-md bg-muted/60 p-2 text-sm'>
+              {t('platform.messages.picked', {
+                count: filters.restaurant_ids.length,
+              })}
+              <Button
+                type='button'
+                variant='ghost'
+                size='sm'
+                onClick={() =>
+                  setFilters(({ restaurant_ids: _, ...rest }) => rest)
+                }
+              >
+                {t('platform.messages.picked_clear')}
+              </Button>
+            </div>
+          )}
           <div className='grid gap-3 sm:grid-cols-3'>
             <div className='grid gap-1'>
               <span className='text-sm font-medium'>

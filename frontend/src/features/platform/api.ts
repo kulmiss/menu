@@ -4,6 +4,7 @@ import {
   useQueryClient,
 } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { type Page } from '@/components/data-table'
 import { type SubscriptionState } from '@/features/auth/api'
 
 export const FEATURES = [
@@ -137,6 +138,14 @@ export type PlanRow = {
 }
 
 export const pkeys = { all: ['platform'] as const }
+
+/** One page of a platform DataTable (QUESTIONS #185). */
+export const fetchPage = async <T>(path: string, params: URLSearchParams) =>
+  (
+    await api.get<{ data: T[]; meta: Page<T>['meta'] }>(
+      `/platform/${path}?${params}`
+    )
+  ).data
 const get = async <T>(path: string) =>
   (await api.get<{ data: T }>(`/platform/${path}`)).data.data
 const q = <T>(path: string) =>

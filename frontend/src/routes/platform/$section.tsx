@@ -21,10 +21,17 @@ const SECTIONS = [
 export const Route = createFileRoute('/platform/$section')({
   validateSearch: (
     search: Record<string, unknown>
-  ): { state?: string; open?: number; tag?: number } => ({
+  ): {
+    state?: string
+    open?: number
+    tag?: number
+    restaurants?: string
+  } => ({
     state: optionalString(search.state),
     open: optionalId(search.open),
     tag: optionalId(search.tag),
+    // Messages: e-mail the restaurants picked in the restaurants table.
+    restaurants: optionalString(search.restaurants),
   }),
   beforeLoad: ({ params }) => {
     if (!SECTIONS.includes(params.section)) throw notFound()

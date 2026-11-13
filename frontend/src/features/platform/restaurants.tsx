@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useNavigate } from '@tanstack/react-router'
 import { ExternalLink, Loader2, Mail, Plus, Tag } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { validationErrors } from '@/lib/api'
@@ -31,14 +32,16 @@ import {
 } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
+import { type Col, DataTable, type TableFilter } from '@/components/data-table'
 import {
   FEATURES,
   type Restaurant,
   STATES,
   money,
+  fetchPage,
+  pkeys,
   plansQ,
   restaurantQ,
-  restaurantsQ,
   tagsQ,
   send,
   usePlatformMutation,
@@ -48,34 +51,116 @@ import { InvoiceActions } from './invoices'
 import { PageTitle } from './layout'
 
 type Props = {
-  state?: string
   open?: number
-  tag?: number
-  onState: (s?: string) => void
 }
 
-export function RestaurantsPage({
-  state,
-  open,
-  tag: initialTag,
-  onState,
-}: Props) {
+export function RestaurantsPage({ open }: Props) {
   const { t } = useTranslation()
-  const [search, setSearch] = useState('')
-  const [deleted, setDeleted] = useState(false)
   const [selected, setSelected] = useState<number | null>(open ?? null)
   const [creating, setCreating] = useState(false)
-  const [tag, setTag] = useState(initialTag ? String(initialTag) : 'all')
-  const [due, setDue] = useState(false)
   const [managing, setManaging] = useState(false)
   const tags = useQuery(tagsQ())
-  const params = new URLSearchParams()
-  if (search.trim()) params.set('search', search.trim())
-  if (state) params.set('state', state)
-  if (deleted) params.set('deleted', '1')
-  if (tag !== 'all') params.set('tag_id', tag)
-  if (due) params.set('follow_up', 'due')
-  const list = useQuery(restaurantsQ(params.toString()))
+  const plans = useQuery(plansQ())
+  const columns: Col<Restaurant>[] = [
+    {
+      id: 'name',
+      label: t('platform.restaurants.name'),
+      primary: true,
+      sort: 'name',
+      text: (r) => r.name,
+      cell: (r) => (
+        <div className='grid gap-1'>
+          <span className='font-medium'>{r.name}</span>
+          <span className='text-xs text-muted-foreground'>/{r.slug}</span>
+          {(r.tags?.length ?? 0) > 0 && (
+            <span className='flex flex-wrap gap-1'>
+              {r.tags?.map((g) => (
+                <TagChip key={g.id} tag={g} />
+              ))}
+            </span>
+          )}
+          {r.follow_up_on && (
+            <span className='text-xs text-muted-foreground'>
+              {t('platform.crm.follow_up_on', { date: r.follow_up_on })}
+            </span>
+          )}
+        </div>
+      ),
+    },
+    {
+      id: 'owner',
+      label: t('platform.restaurants.owner'),
+      text: (r) => r.owner?.email ?? '',
+      cell: (r) => r.owner?.email ?? '—',
+    },
+    {
+      id: 'plan',
+      label: t('platform.restaurants.plan'),
+      sort: 'plan',
+      text: (r) => r.plan?.name ?? '',
+      cell: (r) => r.plan?.name ?? '—',
+    },
+    {
+      id: 'state',
+      label: t('platform.restaurants.state'),
+      text: (r) => t(`platform.states.${r.state}`),
+      cell: (r) => <StateBadge state={r.state} />,
+    },
+    {
+      id: 'until',
+      label: t('platform.restaurants.until'),
+      sort: 'paid_until',
+      text: (r) => r.deleted_at ?? r.stage_ends_at ?? '',
+      cell: (r) =>
+        r.deleted_at
+          ? t('platform.restaurants.deleted_on', { date: r.deleted_at })
+          : (r.stage_ends_at ?? '—'),
+    },
+    {
+      id: 'created_at',
+      label: t('platform.restaurants.created_on'),
+      sort: 'created_at',
+      hidden: true,
+      text: (r) => r.created_at ?? '',
+      cell: (r) => r.created_at ?? '—',
+    },
+  ]
+  const filters: TableFilter<Restaurant>[] = [
+    {
+      id: 'state',
+      label: t('platform.restaurants.state'),
+      options: STATES.map((s) => ({
+        value: s,
+        label: t(`platform.states.${s}`),
+      })),
+    },
+    {
+      id: 'plan',
+      label: t('platform.restaurants.plan'),
+      options: (plans.data ?? []).map((p) => ({
+        value: String(p.id),
+        label: p.name.en ?? p.slug,
+      })),
+    },
+    {
+      id: 'tag',
+      label: t('platform.crm.tag'),
+      options: (tags.data ?? []).map((g) => ({
+        value: String(g.id),
+        label: g.name,
+      })),
+    },
+    {
+      id: 'follow_up',
+      label: t('platform.crm.due_filter'),
+      options: [{ value: 'due', label: t('platform.crm.due_filter') }],
+    },
+    {
+      id: 'show',
+      label: t('platform.restaurants.deleted'),
+      options: [{ value: 'deleted', label: t('platform.restaurants.deleted') }],
+    },
+  ]
 
   return (
     <>
@@ -87,156 +172,119 @@ export function RestaurantsPage({
           <Plus /> {t('platform.restaurants.new')}
         </Button>
       </PageTitle>
-      <div className='mb-3 flex flex-wrap gap-2'>
-        <Input
-          className='w-64'
-          placeholder={t('platform.restaurants.search')}
-          aria-label={t('platform.restaurants.search')}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <Select
-          value={state ?? 'all'}
-          onValueChange={(v) => onState(v === 'all' ? undefined : v)}
-        >
-          <SelectTrigger
-            className='w-44'
-            aria-label={t('platform.restaurants.state')}
+      <DataTable<Restaurant>
+        id='platform-restaurants'
+        queryKey={[...pkeys.all, 'restaurants', 'table']}
+        fetch={(params) => fetchPage<Restaurant>('restaurants', params)}
+        csvUrl={(params) => `/api/v1/platform/restaurants?format=csv&${params}`}
+        columns={columns}
+        filters={filters}
+        dateLabel={t('platform.restaurants.created_on')}
+        rowId={(r) => r.id}
+        searchPlaceholder={t('platform.restaurants.search')}
+        onRowClick={(r) => setSelected(r.id)}
+        empty={t('platform.restaurants.none')}
+        actions={
+          <Button
+            variant='ghost'
+            className='min-h-11 sm:min-h-9'
+            onClick={() => setManaging(true)}
           >
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value='all'>
-              {t('platform.restaurants.all_states')}
-            </SelectItem>
-            {STATES.map((s) => (
-              <SelectItem key={s} value={s}>
-                {t(`platform.states.${s}`)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={tag} onValueChange={setTag}>
-          <SelectTrigger className='w-40' aria-label={t('platform.crm.tag')}>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value='all'>{t('platform.crm.all_tags')}</SelectItem>
-            {tags.data?.map((g) => (
-              <SelectItem key={g.id} value={String(g.id)}>
-                {g.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Button
-          variant={due ? 'secondary' : 'ghost'}
-          onClick={() => setDue((d) => !d)}
-          aria-pressed={due}
-        >
-          {t('platform.crm.due_filter')}
-        </Button>
-        <Button
-          variant={deleted ? 'secondary' : 'ghost'}
-          onClick={() => setDeleted((d) => !d)}
-          aria-pressed={deleted}
-        >
-          {t('platform.restaurants.deleted')}
-        </Button>
-        <Button variant='ghost' onClick={() => setManaging(true)}>
-          <Tag /> {t('platform.crm.manage_tags')}
-        </Button>
-      </div>
-      {list.isPending ? (
-        <Skeleton className='h-48' />
-      ) : (
-        <div className='overflow-x-auto rounded-md border'>
-          <table className='w-full text-sm'>
-            <thead className='bg-muted/50 text-start text-xs text-muted-foreground'>
-              <tr>
-                <th className='p-2 text-start'>
-                  {t('platform.restaurants.name')}
-                </th>
-                <th className='p-2 text-start'>
-                  {t('platform.restaurants.owner')}
-                </th>
-                <th className='p-2 text-start'>
-                  {t('platform.restaurants.plan')}
-                </th>
-                <th className='p-2 text-start'>
-                  {t('platform.restaurants.state')}
-                </th>
-                <th className='p-2 text-start'>
-                  {t('platform.restaurants.until')}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {list.data?.map((r) => (
-                <tr
-                  key={r.id}
-                  className='cursor-pointer border-t hover:bg-accent/50'
-                  onClick={() => setSelected(r.id)}
-                >
-                  <td className='p-2'>
-                    <button
-                      type='button'
-                      className='text-start font-medium hover:underline'
-                      onClick={() => setSelected(r.id)}
-                    >
-                      {r.name}
-                    </button>
-                    <div className='text-xs text-muted-foreground'>
-                      /{r.slug}
-                    </div>
-                    {(r.tags?.length ?? 0) > 0 && (
-                      <div className='mt-1 flex flex-wrap gap-1'>
-                        {r.tags?.map((g) => (
-                          <TagChip key={g.id} tag={g} />
-                        ))}
-                      </div>
-                    )}
-                    {r.follow_up_on && (
-                      <div className='mt-1 text-xs text-muted-foreground'>
-                        {t('platform.crm.follow_up_on', {
-                          date: r.follow_up_on,
-                        })}
-                      </div>
-                    )}
-                  </td>
-                  <td className='p-2'>{r.owner?.email ?? '—'}</td>
-                  <td className='p-2'>{r.plan?.name ?? '—'}</td>
-                  <td className='p-2'>
-                    <StateBadge state={r.state} />
-                  </td>
-                  <td className='p-2 tabular-nums'>
-                    {r.deleted_at
-                      ? t('platform.restaurants.deleted_on', {
-                          date: r.deleted_at,
-                        })
-                      : (r.stage_ends_at ?? '—')}
-                  </td>
-                </tr>
-              ))}
-              {list.data?.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={5}
-                    className='p-6 text-center text-muted-foreground'
-                  >
-                    {t('platform.restaurants.none')}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
+            <Tag /> {t('platform.crm.manage_tags')}
+          </Button>
+        }
+        bulk={(rows, clear) => (
+          <RestaurantBulk rows={rows} tags={tags.data ?? []} onDone={clear} />
+        )}
+      />
       {selected !== null && (
         <RestaurantSheet id={selected} onClose={() => setSelected(null)} />
       )}
       {creating && <CreateDialog onClose={() => setCreating(false)} />}
       {managing && <ManageTagsDialog onClose={() => setManaging(false)} />}
+    </>
+  )
+}
+
+/** Bulk actions for the selected restaurants: tag, untag, e-mail the owners. */
+function RestaurantBulk({
+  rows,
+  tags,
+  onDone,
+}: {
+  rows: Restaurant[]
+  tags: { id: number; name: string }[]
+  onDone: () => void
+}) {
+  const { t } = useTranslation()
+  const navigate = useNavigate()
+  const qc = useQueryClient()
+  const [tag, setTag] = useState('')
+  const bulk = usePlatformMutation((remove: boolean) =>
+    send('post', 'restaurants/bulk-tag', {
+      ids: rows.map((r) => r.id),
+      tag_id: Number(tag),
+      remove,
+    })
+  )
+  const run = async (remove: boolean) => {
+    await bulk.mutateAsync(remove)
+    await qc.invalidateQueries({ queryKey: [...pkeys.all, 'restaurants'] })
+    toast.success(
+      t(remove ? 'platform.crm.bulk_untagged' : 'platform.crm.bulk_tagged', {
+        count: rows.length,
+      })
+    )
+    onDone()
+  }
+  return (
+    <>
+      <Select value={tag} onValueChange={setTag}>
+        <SelectTrigger
+          className='min-h-11 w-40 sm:min-h-8'
+          aria-label={t('platform.crm.tag')}
+        >
+          <SelectValue placeholder={t('platform.crm.tag')} />
+        </SelectTrigger>
+        <SelectContent>
+          {tags.map((g) => (
+            <SelectItem key={g.id} value={String(g.id)}>
+              {g.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Button
+        size='sm'
+        className='min-h-11 sm:min-h-8'
+        disabled={!tag || bulk.isPending}
+        onClick={() => run(false)}
+      >
+        <Tag aria-hidden /> {t('platform.crm.bulk_tag')}
+      </Button>
+      <Button
+        size='sm'
+        variant='outline'
+        className='min-h-11 sm:min-h-8'
+        disabled={!tag || bulk.isPending}
+        onClick={() => run(true)}
+      >
+        {t('platform.crm.bulk_untag')}
+      </Button>
+      <Button
+        size='sm'
+        variant='outline'
+        className='min-h-11 sm:min-h-8'
+        onClick={() =>
+          navigate({
+            to: '/platform/$section',
+            params: { section: 'messages' },
+            search: { restaurants: rows.map((r) => r.id).join(',') },
+          })
+        }
+      >
+        <Mail aria-hidden /> {t('platform.crm.bulk_email')}
+      </Button>
     </>
   )
 }
@@ -278,7 +326,7 @@ function CreateDialog({ onClose }: { onClose: () => void }) {
         plan_id: v.plan_id === 'default' ? null : Number(v.plan_id),
         trial_days: Number(v.trial_days),
       })
-      toast.success(t('platform.restaurants.created'))
+      toast.success(t('platform.restaurants.created_on'))
       onClose()
     } catch (err) {
       setErrors(validationErrors(err) ?? {})

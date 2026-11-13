@@ -139,9 +139,12 @@ class CampaignController extends Controller
             'filters.inactive_days' => ['nullable', 'integer', 'between:1,3650'],
             'filters.signed_up_from' => ['nullable', 'date_format:Y-m-d'],
             'filters.signed_up_to' => ['nullable', 'date_format:Y-m-d'],
+            // Restaurants picked in the restaurants table (QUESTIONS #185).
+            'filters.restaurant_ids' => ['nullable', 'array', 'max:1000'],
+            'filters.restaurant_ids.*' => ['integer'],
         ]);
 
-        return array_filter((array) ($data['filters'] ?? []), fn ($v) => $v !== null && $v !== '');
+        return array_filter((array) ($data['filters'] ?? []), fn ($v) => $v !== null && $v !== '' && $v !== []);
     }
 
     /**

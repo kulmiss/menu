@@ -32,6 +32,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Switch } from '@/components/ui/switch'
+import { DataTable } from '@/components/data-table'
 import { type BackupRow, backupsQ, send, usePlatformMutation } from './api'
 import { PageTitle } from './layout'
 
@@ -100,106 +101,142 @@ export function BackupsPage() {
               total: bytes(d.disk_total),
             })}
           </p>
-          <div className='overflow-x-auto rounded-md border'>
-            <table className='w-full text-sm'>
-              <thead className='bg-muted/50 text-xs text-muted-foreground'>
-                <tr>
-                  {['date', 'size', 'location', 'status', 'actions'].map(
-                    (h) => (
-                      <th key={h} className='p-2 text-start'>
-                        {t(`platform.backups.col.${h}`)}
-                      </th>
-                    )
-                  )}
-                </tr>
-              </thead>
-              <tbody>
-                {d.backups.map((b) => (
-                  <tr key={b.id} className='border-t align-top'>
-                    <td className='p-2 whitespace-nowrap'>
-                      {when(b.created_at)}
-                      <div className='text-xs text-muted-foreground'>
-                        {t(`platform.backups.kind.${b.kind}`)}
-                      </div>
-                    </td>
-                    <td className='p-2 tabular-nums'>{bytes(b.size)}</td>
-                    <td className='p-2'>
-                      {b.status === 'ok' && t('platform.backups.server')}
-                      {b.offsite === 'uploaded' &&
-                        ` + ${t('platform.backups.offsite')}`}
-                      {b.offsite === 'failed' && (
-                        <span className='text-destructive'>
-                          {' '}
-                          · {t('platform.backups.offsite_failed')}
-                        </span>
-                      )}
-                    </td>
-                    <td className='p-2'>
-                      <Badge
-                        variant={
-                          b.status === 'failed'
-                            ? 'destructive'
-                            : b.status === 'ok'
-                              ? 'secondary'
-                              : 'outline'
-                        }
-                      >
-                        {t(`platform.backups.status.${b.status}`)}
-                      </Badge>
-                      {b.error && (
-                        <p className='mt-1 max-w-xs text-xs text-muted-foreground'>
-                          {b.error}
-                        </p>
-                      )}
-                    </td>
-                    <td className='p-1'>
-                      <span className='flex'>
-                        {b.status === 'ok' && (
-                          <Button
-                            size='sm'
-                            variant='ghost'
-                            className='min-h-11 sm:min-h-8'
-                            onClick={() => setDownloading(b)}
-                          >
-                            <Download className='size-4' />{' '}
-                            {t('platform.backups.download')}
-                          </Button>
-                        )}
-                        {!['queued', 'running'].includes(b.status) && (
-                          <Button
-                            size='sm'
-                            variant='ghost'
-                            className='min-h-11 text-destructive sm:min-h-8'
-                            aria-label={t('platform.backups.delete')}
-                            onClick={() => {
-                              if (
-                                window.confirm(
-                                  t('platform.backups.delete_confirm')
-                                )
-                              )
-                                remove.mutate(b.id)
-                            }}
-                          >
-                            <Trash2 className='size-4' />
-                          </Button>
-                        )}
+          <DataTable<BackupRow>
+            id='platform-backups'
+            rows={d.backups}
+            rowId={(b) => b.id}
+            csvName='backups'
+            searchPlaceholder={t('platform.backups.search')}
+            dateLabel={t('platform.backups.col.date')}
+            dateOf={(b) => b.created_at}
+            empty={t('platform.backups.none')}
+            filters={[
+              {
+                id: 'status',
+                label: t('platform.backups.col.status'),
+                options: ['ok', 'failed', 'running', 'queued'].map((s) => ({
+                  value: s,
+                  label: t(`platform.backups.status.${s}`),
+                })),
+                match: (b, v) => v.includes(b.status),
+              },
+              {
+                id: 'kind',
+                label: t('platform.backups.kind_label'),
+                options: ['scheduled', 'manual'].map((k) => ({
+                  value: k,
+                  label: t(`platform.backups.kind.${k}`),
+                })),
+                match: (b, v) => v.includes(b.kind),
+              },
+            ]}
+            columns={[
+              {
+                id: 'date',
+                label: t('platform.backups.col.date'),
+                primary: true,
+                text: (b) => b.created_at,
+                sortValue: (b) => b.created_at,
+                cell: (b) => (
+                  <span className='whitespace-nowrap'>
+                    {when(b.created_at)}
+                    <span className='block text-xs text-muted-foreground'>
+                      {t(`platform.backups.kind.${b.kind}`)}
+                    </span>
+                  </span>
+                ),
+              },
+              {
+                id: 'size',
+                label: t('platform.backups.col.size'),
+                align: 'end',
+                text: (b) => b.size,
+                sortValue: (b) => b.size,
+                cell: (b) => bytes(b.size),
+              },
+              {
+                id: 'location',
+                label: t('platform.backups.col.location'),
+                text: (b) =>
+                  b.offsite === 'uploaded'
+                    ? `${t('platform.backups.server')} + ${t('platform.backups.offsite')}`
+                    : t('platform.backups.server'),
+                cell: (b) => (
+                  <>
+                    {b.status === 'ok' && t('platform.backups.server')}
+                    {b.offsite === 'uploaded' &&
+                      ` + ${t('platform.backups.offsite')}`}
+                    {b.offsite === 'failed' && (
+                      <span className='text-destructive'>
+                        {' '}
+                        · {t('platform.backups.offsite_failed')}
                       </span>
-                    </td>
-                  </tr>
-                ))}
-                {d.backups.length === 0 && (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      className='p-6 text-center text-muted-foreground'
+                    )}
+                  </>
+                ),
+              },
+              {
+                id: 'status',
+                label: t('platform.backups.col.status'),
+                text: (b) => t(`platform.backups.status.${b.status}`),
+                cell: (b) => (
+                  <>
+                    <Badge
+                      variant={
+                        b.status === 'failed'
+                          ? 'destructive'
+                          : b.status === 'ok'
+                            ? 'secondary'
+                            : 'outline'
+                      }
                     >
-                      {t('platform.backups.none')}
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                      {t(`platform.backups.status.${b.status}`)}
+                    </Badge>
+                    {b.error && (
+                      <p className='mt-1 max-w-xs text-xs text-muted-foreground'>
+                        {b.error}
+                      </p>
+                    )}
+                  </>
+                ),
+              },
+              {
+                id: 'actions',
+                label: t('platform.backups.col.actions'),
+                cell: (b) => (
+                  <span className='flex'>
+                    {b.status === 'ok' && (
+                      <Button
+                        size='sm'
+                        variant='ghost'
+                        className='min-h-11 sm:min-h-8'
+                        onClick={() => setDownloading(b)}
+                      >
+                        <Download className='size-4' />{' '}
+                        {t('platform.backups.download')}
+                      </Button>
+                    )}
+                    {!['queued', 'running'].includes(b.status) && (
+                      <Button
+                        size='sm'
+                        variant='ghost'
+                        className='min-h-11 text-destructive sm:min-h-8'
+                        aria-label={t('platform.backups.delete')}
+                        onClick={() => {
+                          if (
+                            window.confirm(t('platform.backups.delete_confirm'))
+                          )
+                            remove.mutate(b.id)
+                        }}
+                      >
+                        <Trash2 className='size-4' />
+                      </Button>
+                    )}
+                  </span>
+                ),
+              },
+            ]}
+          />
           <p className='text-sm text-muted-foreground'>
             {t('platform.backups.restore_note')}
           </p>

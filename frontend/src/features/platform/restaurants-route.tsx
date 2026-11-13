@@ -1,17 +1,11 @@
-import { useNavigate, useSearch } from '@tanstack/react-router'
+import { useSearch } from '@tanstack/react-router'
 import { RestaurantsPage } from './restaurants'
 
-/** Restaurants screen wired to the address (?state=…&open=…). */
+/**
+ * Restaurants screen. Filters, sort and page are read from the address by the
+ * DataTable itself (?state=trial&tag=3&page=2…); `open` opens a restaurant.
+ */
 export default function RestaurantsRoute() {
-  const { state, open, tag } = useSearch({ from: '/platform/$section' })
-  const navigate = useNavigate({ from: '/platform/$section' })
-  return (
-    <RestaurantsPage
-      key={`tag-${tag ?? 'all'}`}
-      state={state}
-      open={open}
-      tag={tag}
-      onState={(s) => navigate({ search: { state: s } })}
-    />
-  )
+  const { open } = useSearch({ from: '/platform/$section' })
+  return <RestaurantsPage open={open} />
 }

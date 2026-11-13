@@ -95,7 +95,8 @@
     "reject_hint": "The owner gets this reason by e-mail. The account and restaurant are removed and the menu address is free again.",
     "rejected": "Sign-up rejected and removed.",
     "signup_short_unverified": "E-mail not confirmed",
-    "signup_short_pending_approval": "Needs approval"
+    "signup_short_pending_approval": "Needs approval",
+    "created_on": "Created"
   },
   "features": {
     "branches": "More branches",
@@ -135,7 +136,8 @@
       "method": "Method",
       "reference": "Reference",
       "period": "Period"
-    }
+    },
+    "search": "Search restaurant or reference"
   },
   "plans": {
     "hint": "What restaurants pay for and what they can use.",
@@ -207,11 +209,28 @@
     "send": "Publish"
   },
   "activity": {
-    "hint": "Changes on the platform and in restaurants (12 months).",
+    "hint": "Changes on the platform and in restaurants.",
     "action": "Filter by action",
     "platform_only": "Platform only",
     "platform": "Platform",
-    "as": "as {{name}}"
+    "as": "as {{name}}",
+    "when": "When",
+    "what": "Action",
+    "who": "Who",
+    "subject": "Subject",
+    "search": "Search action or person",
+    "scope": "Where",
+    "restaurants": "Restaurants",
+    "area": "Area",
+    "areas": {
+      "platform": "Platform",
+      "signup": "Sign-ups",
+      "team": "Team",
+      "menu": "Menu",
+      "restaurant": "Restaurant settings",
+      "promotions": "Promotions",
+      "insights": "Insights"
+    }
   },
   "settings": {
     "name": "Platform name",
@@ -512,7 +531,16 @@
     "no_notes": "No notes yet.",
     "widget": "Follow-ups due",
     "today": "today",
-    "overdue": "overdue since {{date}}"
+    "overdue": "overdue since {{date}}",
+    "bulk_tag": "Add tag",
+    "bulk_untag": "Remove tag",
+    "bulk_email": "E-mail owners",
+    "bulk_tagged_one": "Tag added to {{count}} restaurant.",
+    "bulk_tagged_other": "Tag added to {{count}} restaurants.",
+    "bulk_tagged": "Tag added to {{count}} restaurants.",
+    "bulk_untagged_one": "Tag removed from {{count}} restaurant.",
+    "bulk_untagged_other": "Tag removed from {{count}} restaurants.",
+    "bulk_untagged": "Tag removed from {{count}} restaurants."
   },
   "messages": {
     "hint": "E-mails to restaurant owners: news, offers and reminders. They go out a few per minute through the e-mail queue.",
@@ -534,9 +562,12 @@
     "retry": "Resend to {{count}} failed",
     "requeued": "Failed addresses are queued again.",
     "col": {
-      "email": "E-mail",
-      "restaurant": "Restaurant",
-      "status": "Status"
+      "subject": "Subject",
+      "status": "Status",
+      "created": "Created",
+      "recipients": "Recipients",
+      "sent": "Sent",
+      "failed": "Failed"
     },
     "recipient": {
       "pending": "Waiting",
@@ -583,7 +614,13 @@
     "confirm_title_other": "Send this e-mail to {{count}} owners?",
     "confirm_title": "Send this e-mail to {{count}} owners?",
     "confirm_text": "It can't be stopped once it starts. Sending takes a few minutes; you can follow it here.",
-    "queued": "The e-mail is being sent."
+    "queued": "The e-mail is being sent.",
+    "picked": "Only the {{count}} restaurants picked in the restaurants list (other filters still apply).",
+    "picked_one": "Only the {{count}} restaurant picked in the restaurants list (other filters still apply).",
+    "picked_other": "Only the {{count}} restaurants picked in the restaurants list (other filters still apply).",
+    "picked_clear": "Send to all matching restaurants instead",
+    "search": "Search subject",
+    "with_failures": "With failed e-mails"
   },
   "backups": {
     "hint": "The database and every uploaded photo, zipped every night at 02:30 and kept outside the public folder.",
@@ -635,7 +672,9 @@
     "backup_s3_prefix": "Folder in the bucket",
     "backup_s3_key": "Access key ID",
     "backup_s3_secret": "Secret access key",
-    "offsite_hint": "Works with Backblaze B2, Cloudflare R2, AWS S3 and others. The secret key is stored encrypted and never shown again."
+    "offsite_hint": "Works with Backblaze B2, Cloudflare R2, AWS S3 and others. The secret key is stored encrypted and never shown again.",
+    "search": "Search backups",
+    "kind_label": "Kind"
   },
   "search": {
     "button": "Search…",

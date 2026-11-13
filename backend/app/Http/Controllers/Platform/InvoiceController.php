@@ -6,18 +6,58 @@ use App\Http\Controllers\Controller;
 use App\Models\Invoice;
 use App\Support\Billing\InvoicePdf;
 use App\Support\Billing\Invoices;
+use App\Support\Tables\TableQuery;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /** Super Admin › Invoices (owner, 2026-11-13): list, CSV, PDF, resend, void. */
 class InvoiceController extends Controller
 {
     public function __construct(private readonly Invoices $invoices) {}
 
-    public function index(Request $request): JsonResponse
+    public function index(Request $request): JsonResponse|StreamedResponse
     {
+        if ($request->has('page') || $request->query('format') === 'csv') {
+            $money = fn (int $m) => number_format($m / 100, 2, '.', '');
+
+            return TableQuery::respond(Invoice::query()->with('replaces'), $request, [
+                'search' => fn ($q, string $s) => $q->where(fn ($w) => $w->where('number', 'like', "%{$s}%")
+                    ->orWhere('customer->name', 'like', "%{$s}%")->orWhere('customer->email', 'like', "%{$s}%")),
+                'filters' => [
+                    'status' => fn ($q, array $v) => $q->whereIn('status', array_intersect($v, ['paid', 'void'])),
+                    'plan' => fn ($q, array $v) => $q->whereIn('plan_id', array_map('intval', $v)),
+                    'method' => fn ($q, array $v) => $q->whereIn('method', $v),
+                    'restaurant' => fn ($q, array $v) => $q->whereIn('tenant_id', array_map('intval', $v)),
+                ],
+                'date' => 'issued_at',
+                'sorts' => ['issued_at' => 'issued_at', 'number' => 'number', 'total' => 'total_minor'],
+                'default_sort' => '-issued_at',
+                'csv' => ['name' => 'invoices', 'columns' => [
+                    'Number' => fn (Invoice $i) => $i->number,
+                    'Issued' => fn (Invoice $i) => $i->issued_at->toDateString(),
+                    'Status' => fn (Invoice $i) => $i->status,
+                    'Restaurant' => fn (Invoice $i) => $i->customer['name'] ?? '',
+                    'Owner e-mail' => fn (Invoice $i) => $i->customer['email'] ?? '',
+                    'Plan' => fn (Invoice $i) => $i->plan_name,
+                    'Period start' => fn (Invoice $i) => $i->period_start->toDateString(),
+                    'Period end' => fn (Invoice $i) => $i->period_end->toDateString(),
+                    'Subtotal' => fn (Invoice $i) => $money($i->subtotal_minor),
+                    'VAT %' => fn (Invoice $i) => $i->tax_rate,
+                    'VAT' => fn (Invoice $i) => $money($i->tax_minor),
+                    'Total' => fn (Invoice $i) => $money($i->total_minor),
+                    'Currency' => fn (Invoice $i) => $i->currency,
+                    'Method' => fn (Invoice $i) => $i->method,
+                    'Reference' => fn (Invoice $i) => $i->reference,
+                    'Paid on' => fn (Invoice $i) => $i->paid_at->toDateString(),
+                    'Void reason' => fn (Invoice $i) => $i->void_reason,
+                    'Replaces' => fn (Invoice $i) => $i->replaces?->number,
+                ]],
+            ], fn (Invoice $i) => self::row($i));
+        }
+
         return response()->json(['data' => $this->filtered($request)->limit(500)->get()->map(fn (Invoice $i) => self::row($i))]);
     }
 

@@ -352,7 +352,10 @@
     "remove_named": "Remove {{name}}",
     "remove_confirm": "Remove {{name}} from the team? They lose access right away.",
     "leave": "Leave restaurant",
-    "leave_confirm": "Leave {{restaurant}}? You will need a new invitation to come back."
+    "leave_confirm": "Leave {{restaurant}}? You will need a new invitation to come back.",
+    "search": "Search name or e-mail",
+    "name": "Name",
+    "email": "E-mail"
   },
   "qr": {
     "title": "QR codes",
@@ -380,7 +383,14 @@
     "delete_desc": "Printed copies stop working. The code is never reused.",
     "print_tip": "Printing tip: print at 100 % size (no “fit to page”), on matt paper, at least 3 cm wide. Test-scan one card before printing many.",
     "print_materials": "Print materials",
-    "print_materials_hint": "Posters, table tents, stickers and a window sign with your logo and colours."
+    "print_materials_hint": "Posters, table tents, stickers and a window sign with your logo and colours.",
+    "search": "Search codes",
+    "kind": "Kind",
+    "branch": "Opens",
+    "code": "QR code",
+    "address": "Address",
+    "files": "Download",
+    "print_selected": "Print materials for these codes"
   },
   "print": {
     "title": "Print materials",
@@ -500,7 +510,13 @@
       "percent": "% off",
       "fixed": "New price",
       "remove": "Remove {{name}}",
-      "active": "Use this price period"
+      "active": "Use this price period",
+      "search": "Search price periods",
+      "status": "Status",
+      "on": "On",
+      "time": "Time",
+      "dishes_col": "Dishes",
+      "actions": "Actions"
     }
   },
   "addons": {
@@ -770,5 +786,88 @@
     },
     "plans": "See all plans",
     "contact": "Your data stays as it is. Contact us and we switch your plan."
+  },
+  "table": {
+    "search": "Search…",
+    "clear": "Clear filters",
+    "view": "View",
+    "columns": "Columns",
+    "density": "Row height",
+    "comfortable": "Comfortable",
+    "compact": "Compact",
+    "export": "Export CSV",
+    "bulk": "Actions for the selected rows",
+    "selected": "{{count}} selected",
+    "selected_one": "{{count}} selected",
+    "selected_other": "{{count}} selected",
+    "unselect": "Clear selection",
+    "select_page": "Select all rows on this page",
+    "select_row": "Select row",
+    "error": "This list could not be loaded.",
+    "retry": "Try again",
+    "empty": "Nothing here yet.",
+    "no_match": "Nothing matches these filters.",
+    "n_chosen": "{{count}} chosen",
+    "n_chosen_one": "{{count}} chosen",
+    "n_chosen_other": "{{count}} chosen",
+    "last_days": "Last {{count}} days",
+    "last_days_one": "Last {{count}} day",
+    "last_days_other": "Last {{count}} days",
+    "from": "From",
+    "to": "To",
+    "pages": "Pages",
+    "showing": "{{first}}–{{last}} of {{total}}",
+    "per_page": "Rows",
+    "first": "First page",
+    "previous": "Previous page",
+    "next": "Next page",
+    "last": "Last page",
+    "page_of": "Page {{page}} of {{pages}}",
+    "open": "Open {{name}}",
+    "rows": "Rows"
+  },
+  "dishes": {
+    "title": "All dishes",
+    "description": "Every dish of every menu in one list: find, check and change many dishes at once.",
+    "dish": "Dish",
+    "category": "Category",
+    "menu": "Menu",
+    "price": "Price",
+    "from": "from {{price}}",
+    "status": "Status",
+    "updated": "Last changed",
+    "search": "Search dishes",
+    "empty": "No dishes yet. Add them in the menu editor.",
+    "statuses": {
+      "sold_out": "Sold out",
+      "hidden": "Hidden",
+      "on_menu": "On the menu",
+      "no_photo": "No photo",
+      "new": "New",
+      "popular": "Popular"
+    },
+    "actions": {
+      "sold_out": "Sold out",
+      "available": "Available",
+      "hide": "Hide",
+      "show": "Show",
+      "price": "Change price",
+      "delete": "Delete"
+    },
+    "percent": "Change prices by (%)",
+    "percent_hint": "Use a minus for a lower price, e.g. -10. Sizes change too.",
+    "apply": "Apply",
+    "delete_title": "Delete {{count}} dishes?",
+    "delete_title_one": "Delete {{count}} dish?",
+    "delete_title_other": "Delete {{count}} dishes?",
+    "delete_desc": "The dishes and their photos are removed from every menu. This can’t be undone.",
+    "done": {
+      "sold_out": "{{count}} dishes marked sold out.",
+      "available": "{{count}} dishes available again.",
+      "hide": "{{count}} dishes hidden.",
+      "show": "{{count}} dishes shown.",
+      "delete": "{{count}} dishes deleted.",
+      "price": "Prices of {{count}} dishes changed."
+    }
   }
 }

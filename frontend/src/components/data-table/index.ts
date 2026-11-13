@@ -1,4 +1,1 @@
-export { DataTablePagination } from './pagination'
-export { DataTableColumnHeader } from './column-header'
-export { DataTableToolbar } from './toolbar'
-export { DataTableBulkActions } from './bulk-actions'
+export { DataTable, type Col, type Page, type TableFilter } from './data-table'

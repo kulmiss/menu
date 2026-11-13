@@ -83,6 +83,7 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             });
             Route::get('restaurants', [RestaurantController::class, 'index']);
             Route::post('restaurants', [RestaurantController::class, 'store']);
+            Route::post('restaurants/bulk-tag', [RestaurantController::class, 'bulkTag']);
             Route::get('restaurants/{restaurant}', [RestaurantController::class, 'show'])->whereNumber('restaurant');
             Route::patch('restaurants/{restaurant}', [RestaurantController::class, 'update'])->whereNumber('restaurant');
             Route::delete('restaurants/{restaurant}', [RestaurantController::class, 'destroy'])->whereNumber('restaurant');
@@ -190,6 +191,7 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::delete('categories/{category}', [CategoryController::class, 'destroy'])->whereNumber('category');
             Route::post('categories/{category}/duplicate', [CategoryController::class, 'duplicate'])->whereNumber('category');
 
+            Route::get('items', [ItemController::class, 'index']);
             Route::post('items', [ItemController::class, 'store']);
             Route::post('items/reorder', [ItemController::class, 'reorder']);
             Route::post('items/bulk', [ItemController::class, 'bulk']);

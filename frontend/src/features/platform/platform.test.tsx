@@ -103,10 +103,7 @@ describe('Super Admin screens', () => {
         data: { data: {} },
       },
     })
-    const screen = await renderWithQuery(
-      <RestaurantsPage onState={() => {}} />,
-      { me: admin }
-    )
+    const screen = await renderWithQuery(<RestaurantsPage />, { me: admin })
     await userEvent.click(screen.getByRole('button', { name: 'Sahan Grill' }))
     await userEvent.type(screen.getByLabelText('Amount (SOS)'), '1500')
     await userEvent.clear(screen.getByLabelText('Months'))
@@ -149,10 +146,7 @@ describe('Super Admin screens', () => {
         data: { data: { sent_to: 'ayaan@example.com' } },
       },
     })
-    const screen = await renderWithQuery(
-      <RestaurantsPage onState={() => {}} />,
-      { me: admin }
-    )
+    const screen = await renderWithQuery(<RestaurantsPage />, { me: admin })
     await userEvent.click(screen.getByRole('button', { name: 'Sahan Grill' }))
     await userEvent.click(
       screen.getByRole('button', { name: 'Resend set-password e-mail' })
@@ -191,10 +185,7 @@ describe('Super Admin screens', () => {
         data: { message: 'No owner' },
       },
     })
-    const screen = await renderWithQuery(
-      <RestaurantsPage onState={() => {}} />,
-      { me: admin }
-    )
+    const screen = await renderWithQuery(<RestaurantsPage />, { me: admin })
     await userEvent.click(screen.getByRole('button', { name: 'Sahan Grill' }))
     await userEvent.click(
       screen.getByRole('button', { name: 'Log in as owner' })

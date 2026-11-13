@@ -54,10 +54,15 @@ describe('Invoices', () => {
       .element(link)
       .toHaveAttribute('href', '/api/v1/platform/invoices/5/pdf')
     await expect.element(screen.getByText('1,200 ETB')).toBeVisible()
-    await userEvent.fill(screen.getByLabelText('Search'), 'sahan')
+    await userEvent.fill(
+      screen.getByRole('searchbox', { name: 'Number, restaurant or e-mail' }),
+      'sahan'
+    )
     await expect
       .poll(() =>
-        fake.calls.some((c) => c.url === '/platform/invoices?q=sahan')
+        fake.calls.some((c) =>
+          c.url.startsWith('/platform/invoices?q=sahan&page=1')
+        )
       )
       .toBe(true)
 
