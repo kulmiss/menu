@@ -39,6 +39,7 @@ _Last updated: 2026-11-12 13:00 EAT. Everything requested is merged into `develo
 ## Nine features (2026-11-13, in progress)
 - #60 Invoices and receipts (QUESTIONS #173).
 - #61 Restaurant notes, tags and follow-ups for the Super Admin (QUESTIONS #174). Live: `php artisan migrate --force`.
+- #64 Global search for the Super Admin, Ctrl/⌘+K (QUESTIONS #177). Live: migrate (indexes).
 - #63 Backups: daily zip of database + media, retention 7/4/3, optional S3-compatible off-site copy, alerts; restore steps in deploy.md (QUESTIONS #176). Live: migrate; fill Backups → settings; check that `storage/app/backups` has room.
 - #62 Messages: e-mails to restaurant owners with filters, preview, test, throttled queue sending, retries and unsubscribe (QUESTIONS #175). Live: migrate; the existing cron line sends them. Live server once: `php artisan migrate --force` then `php artisan invoices:backfill`; fill Super Admin → Settings → Billing.
 

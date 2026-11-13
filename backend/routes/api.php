@@ -35,6 +35,7 @@ use App\Http\Controllers\Platform\InvoiceController;
 use App\Http\Controllers\Platform\PaymentController;
 use App\Http\Controllers\Platform\PlatformController;
 use App\Http\Controllers\Platform\RestaurantController;
+use App\Http\Controllers\Platform\SearchController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
@@ -115,6 +116,8 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::post('campaigns', [CampaignController::class, 'store']);
             Route::post('campaigns/{campaign}/retry', [CampaignController::class, 'retry'])->whereNumber('campaign');
             Route::put('campaigns/rate', [CampaignController::class, 'rate']);
+            // Global search (owner, 2026-11-13)
+            Route::get('search', SearchController::class)->middleware('throttle:120,1');
             // Backups (owner, 2026-11-13)
             Route::get('backups', [BackupController::class, 'index']);
             Route::post('backups', [BackupController::class, 'store'])->middleware('throttle:6,1');

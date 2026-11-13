@@ -620,5 +620,19 @@
     "backup_s3_key": "Access key ID",
     "backup_s3_secret": "Secret access key",
     "offsite_hint": "Works with Backblaze B2, Cloudflare R2, AWS S3 and others. The secret key is stored encrypted and never shown again."
+  },
+  "search": {
+    "button": "Search…",
+    "title": "Search the platform",
+    "hint": "Restaurants, owners, invoices, payments and tags.",
+    "placeholder": "Restaurant, owner e-mail, invoice number…",
+    "type": "Type at least 2 letters.",
+    "searching": "Searching…",
+    "none": "Nothing found for “{{q}}”.",
+    "restaurants": "Restaurants",
+    "owners": "Owners",
+    "invoices": "Invoices",
+    "payments": "Payments",
+    "tags": "Tags"
   }
 }

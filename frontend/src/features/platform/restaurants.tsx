@@ -47,15 +47,25 @@ import { CrmSection, ManageTagsDialog, TagChip } from './crm'
 import { InvoiceActions } from './invoices'
 import { PageTitle } from './layout'
 
-type Props = { state?: string; open?: number; onState: (s?: string) => void }
+type Props = {
+  state?: string
+  open?: number
+  tag?: number
+  onState: (s?: string) => void
+}
 
-export function RestaurantsPage({ state, open, onState }: Props) {
+export function RestaurantsPage({
+  state,
+  open,
+  tag: initialTag,
+  onState,
+}: Props) {
   const { t } = useTranslation()
   const [search, setSearch] = useState('')
   const [deleted, setDeleted] = useState(false)
   const [selected, setSelected] = useState<number | null>(open ?? null)
   const [creating, setCreating] = useState(false)
-  const [tag, setTag] = useState('all')
+  const [tag, setTag] = useState(initialTag ? String(initialTag) : 'all')
   const [due, setDue] = useState(false)
   const [managing, setManaging] = useState(false)
   const tags = useQuery(tagsQ())
