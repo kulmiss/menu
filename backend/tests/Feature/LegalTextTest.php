@@ -66,3 +66,31 @@ it('lets a Super Admin reset one text to the default', function () {
         ->and(PlatformSettings::get('privacy'))->toBe('Edited too.');
     $this->actingAs(superAdmin())->postJson(p('settings/legal/cookies/reset'), [], idem())->assertNotFound();
 });
+
+it('replaces the first Privacy default (with Google Fonts) only when it was not edited', function () {
+    $run = fn () => (require database_path('migrations/2026_11_14_400001_update_privacy_default.php'))->up();
+    $old = file_get_contents(database_path('legal-history/privacy-2026-11-13-v1.md'));
+    expect($old)->toContain('Google Fonts')
+        ->and(LegalText::default('privacy'))->not->toContain('Google');
+
+    PlatformSettings::save(['privacy' => str_replace("\n", "\r\n", $old)]); // saved from a Windows textarea
+    $run();
+    expect(PlatformSettings::get('privacy'))->toBe(LegalText::default('privacy'));
+
+    PlatformSettings::save(['privacy' => $old."\nOur own extra line."]);
+    $run();
+    $run();
+    expect(PlatformSettings::get('privacy'))->toEndWith('Our own extra line.');
+});
+
+it('loads the admin fonts from the app itself, never from Google', function () {
+    $html = file_get_contents(base_path('../frontend/index.html'));
+    $css = file_get_contents(base_path('../frontend/src/styles/fonts.css'));
+    expect($html)->not->toContain('googleapis')->not->toContain('gstatic')
+        ->and($css)->not->toContain('http');
+    preg_match_all("#url\\('\\.\\./assets/fonts/([^']+)'\\)#", $css, $m);
+    expect($m[1])->toHaveCount(16);
+    foreach ($m[1] as $file) {
+        expect(is_file(base_path('../frontend/src/assets/fonts/'.$file)))->toBeTrue($file);
+    }
+});
