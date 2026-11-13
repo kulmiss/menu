@@ -119,7 +119,7 @@ function EmailForm({ initial }: { initial: MailSettings }) {
   }
 
   return (
-    <Card className='mt-6 max-w-2xl'>
+    <Card className='max-w-2xl'>
       <CardHeader>
         <CardTitle className='flex items-center gap-2'>
           <Mail className='size-5' aria-hidden /> {t('platform.mail.title')}

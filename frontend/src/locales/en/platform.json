@@ -215,7 +215,16 @@
     "domain": "Domain",
     "default_currency": "Default currency",
     "terms": "Terms of use",
-    "privacy": "Privacy policy"
+    "privacy": "Privacy policy",
+    "general_hint": "The platform name, contact address, domain and legal texts shown to restaurants and guests.",
+    "tabs": {
+      "general": "General",
+      "signup": "Sign-up",
+      "landing": "Landing page",
+      "billing": "Billing",
+      "branding": "Logo & link preview",
+      "email": "Email (SMTP)"
+    }
   },
   "share": {
     "title": "Link preview",
