@@ -24,6 +24,7 @@ import { Route as AdminTeamRouteImport } from './routes/admin/team'
 import { Route as AdminTagsRouteImport } from './routes/admin/tags'
 import { Route as AdminQrCodesRouteImport } from './routes/admin/qr-codes'
 import { Route as AdminPromotionsRouteImport } from './routes/admin/promotions'
+import { Route as AdminPrintMaterialsRouteImport } from './routes/admin/print-materials'
 import { Route as AdminInsightsRouteImport } from './routes/admin/insights'
 import { Route as AdminInfoRouteImport } from './routes/admin/info'
 import { Route as AdminImportRouteImport } from './routes/admin/import'
@@ -112,6 +113,11 @@ const AdminPromotionsRoute = AdminPromotionsRouteImport.update({
   path: '/promotions',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminPrintMaterialsRoute = AdminPrintMaterialsRouteImport.update({
+  id: '/print-materials',
+  path: '/print-materials',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdminInsightsRoute = AdminInsightsRouteImport.update({
   id: '/insights',
   path: '/insights',
@@ -184,6 +190,7 @@ export interface FileRoutesByFullPath {
   '/admin/import': typeof AdminImportRoute
   '/admin/info': typeof AdminInfoRoute
   '/admin/insights': typeof AdminInsightsRoute
+  '/admin/print-materials': typeof AdminPrintMaterialsRoute
   '/admin/promotions': typeof AdminPromotionsRoute
   '/admin/qr-codes': typeof AdminQrCodesRoute
   '/admin/tags': typeof AdminTagsRoute
@@ -210,6 +217,7 @@ export interface FileRoutesByTo {
   '/admin/import': typeof AdminImportRoute
   '/admin/info': typeof AdminInfoRoute
   '/admin/insights': typeof AdminInsightsRoute
+  '/admin/print-materials': typeof AdminPrintMaterialsRoute
   '/admin/promotions': typeof AdminPromotionsRoute
   '/admin/qr-codes': typeof AdminQrCodesRoute
   '/admin/tags': typeof AdminTagsRoute
@@ -240,6 +248,7 @@ export interface FileRoutesById {
   '/admin/import': typeof AdminImportRoute
   '/admin/info': typeof AdminInfoRoute
   '/admin/insights': typeof AdminInsightsRoute
+  '/admin/print-materials': typeof AdminPrintMaterialsRoute
   '/admin/promotions': typeof AdminPromotionsRoute
   '/admin/qr-codes': typeof AdminQrCodesRoute
   '/admin/tags': typeof AdminTagsRoute
@@ -271,6 +280,7 @@ export interface FileRouteTypes {
     | '/admin/import'
     | '/admin/info'
     | '/admin/insights'
+    | '/admin/print-materials'
     | '/admin/promotions'
     | '/admin/qr-codes'
     | '/admin/tags'
@@ -297,6 +307,7 @@ export interface FileRouteTypes {
     | '/admin/import'
     | '/admin/info'
     | '/admin/insights'
+    | '/admin/print-materials'
     | '/admin/promotions'
     | '/admin/qr-codes'
     | '/admin/tags'
@@ -326,6 +337,7 @@ export interface FileRouteTypes {
     | '/admin/import'
     | '/admin/info'
     | '/admin/insights'
+    | '/admin/print-materials'
     | '/admin/promotions'
     | '/admin/qr-codes'
     | '/admin/tags'
@@ -464,6 +476,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPromotionsRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/print-materials': {
+      id: '/admin/print-materials'
+      path: '/print-materials'
+      fullPath: '/admin/print-materials'
+      preLoaderRoute: typeof AdminPrintMaterialsRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/insights': {
       id: '/admin/insights'
       path: '/insights'
@@ -574,6 +593,7 @@ interface AdminRouteRouteChildren {
   AdminImportRoute: typeof AdminImportRoute
   AdminInfoRoute: typeof AdminInfoRoute
   AdminInsightsRoute: typeof AdminInsightsRoute
+  AdminPrintMaterialsRoute: typeof AdminPrintMaterialsRoute
   AdminPromotionsRoute: typeof AdminPromotionsRoute
   AdminQrCodesRoute: typeof AdminQrCodesRoute
   AdminTagsRoute: typeof AdminTagsRoute
@@ -590,6 +610,7 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminImportRoute: AdminImportRoute,
   AdminInfoRoute: AdminInfoRoute,
   AdminInsightsRoute: AdminInsightsRoute,
+  AdminPrintMaterialsRoute: AdminPrintMaterialsRoute,
   AdminPromotionsRoute: AdminPromotionsRoute,
   AdminQrCodesRoute: AdminQrCodesRoute,
   AdminTagsRoute: AdminTagsRoute,

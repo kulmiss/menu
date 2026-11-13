@@ -378,7 +378,65 @@
     "delete": "Delete {{name}}",
     "delete_title": "Delete this code?",
     "delete_desc": "Printed copies stop working. The code is never reused.",
-    "print_tip": "Printing tip: print at 100 % size (no “fit to page”), on matt paper, at least 3 cm wide. Test-scan one card before printing many."
+    "print_tip": "Printing tip: print at 100 % size (no “fit to page”), on matt paper, at least 3 cm wide. Test-scan one card before printing many.",
+    "print_materials": "Print materials",
+    "print_materials_hint": "Posters, table tents, stickers and a window sign with your logo and colours."
+  },
+  "print": {
+    "title": "Print materials",
+    "description": "Posters, table tents, stickers and a window sign with your logo, your colour and your QR code. Print them at home or at a print shop.",
+    "what": "What to print",
+    "materials": {
+      "tent": "Table tent",
+      "poster_a5": "Poster A5",
+      "poster_a4": "Poster A4",
+      "window": "Window sign",
+      "sticker_round": "Round stickers",
+      "sticker_square": "Square stickers"
+    },
+    "sizes": {
+      "tent": "A6, two per A4 — fold in the middle",
+      "poster_a5": "148 × 210 mm",
+      "poster_a4": "210 × 297 mm",
+      "window": "A4 landscape, big code",
+      "sticker_round": "60 mm, 12 per A4, with cut lines",
+      "sticker_square": "60 mm, 12 per A4, with cut lines"
+    },
+    "look": "Look",
+    "design": "Design",
+    "designs": {
+      "classic": "Classic",
+      "bold": "Bold",
+      "minimal": "Minimal"
+    },
+    "colours": "Colours",
+    "themes": {
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "headline": "Headline",
+    "headline_hint": "Up to 40 letters. Leave empty for the default.",
+    "bleed": "For a print shop (3 mm bleed)",
+    "bleed_hint": "Adds 3 mm of background on every side, as print shops ask. Leave off for a home or office printer.",
+    "codes": "Which QR codes",
+    "codes_hint_pages": "One page for each code you choose.",
+    "codes_hint_tent": "One tent for each code (two per page). One code fills a whole page.",
+    "codes_hint_stickers": "One sticker for each code (12 per page). One code fills a whole sheet.",
+    "tables_of": "Tables — {{name}}",
+    "all": "Choose all",
+    "none": "Clear",
+    "preview": "Preview",
+    "preview_label": "Preview of the first code",
+    "count": "{{count}} codes chosen",
+    "count_one": "{{count}} code chosen",
+    "count_other": "{{count}} codes chosen",
+    "choose": "Choose at least one QR code.",
+    "download": "Download PDF",
+    "open": "Open the PDF",
+    "social": "For social media",
+    "social_hint": "A picture with the first chosen code, in the same design.",
+    "post": "Square post (1080 × 1080)",
+    "story": "Story (1080 × 1920)"
   },
   "promotions": {
     "title": "Promotions",

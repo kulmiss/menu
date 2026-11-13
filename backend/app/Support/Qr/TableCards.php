@@ -59,11 +59,29 @@ class TableCards
         }
 
         // The code: 70 mm wide including its quiet zone, black on white.
-        $matrix = QrImages::matrix($card['url']);
         $size = 70.0;
-        $module = $size / count($matrix);
         $left = $x + (self::W - $size) / 2;
         $top = $y + 33;
+        self::qr($pdf, $left, $top, $size, $card['url']);
+
+        $pdf->SetXY($x + 8, $top + $size + 3);
+        $pdf->SetFont('Helvetica', '', 12);
+        $pdf->Cell(self::W - 16, 6, self::text(__('qr.scan')), 0, 2, 'C');
+        if ($card['label']) {
+            $pdf->SetFont('Helvetica', 'B', 22);
+            $pdf->Cell(self::W - 16, 11, self::fit($pdf, $card['label'], self::W - 16), 0, 2, 'C');
+        }
+        $pdf->SetFont('Helvetica', '', 8);
+        $pdf->SetTextColor(110, 104, 98);
+        $pdf->SetXY($x + 8, $y + self::H - 14);
+        $pdf->Cell(self::W - 16, 4, self::text(preg_replace('#^https?://#', '', $card['url']) ?? ''), 0, 0, 'C');
+    }
+
+    /** The code as vector squares, quiet zone included, black on white. */
+    public static function qr(FPDF $pdf, float $left, float $top, float $size, string $url): void
+    {
+        $matrix = QrImages::matrix($url);
+        $module = $size / count($matrix);
         $pdf->SetFillColor(255, 255, 255);
         $pdf->Rect($left, $top, $size, $size, 'F');
         $pdf->SetFillColor(0, 0, 0);
@@ -79,18 +97,6 @@ class TableCards
                 }
             }
         }
-
-        $pdf->SetXY($x + 8, $top + $size + 3);
-        $pdf->SetFont('Helvetica', '', 12);
-        $pdf->Cell(self::W - 16, 6, self::text(__('qr.scan')), 0, 2, 'C');
-        if ($card['label']) {
-            $pdf->SetFont('Helvetica', 'B', 22);
-            $pdf->Cell(self::W - 16, 11, self::fit($pdf, $card['label'], self::W - 16), 0, 2, 'C');
-        }
-        $pdf->SetFont('Helvetica', '', 8);
-        $pdf->SetTextColor(110, 104, 98);
-        $pdf->SetXY($x + 8, $y + self::H - 14);
-        $pdf->Cell(self::W - 16, 4, self::text(preg_replace('#^https?://#', '', $card['url']) ?? ''), 0, 0, 'C');
     }
 
     private static function cutMarks(FPDF $pdf): void
@@ -106,14 +112,14 @@ class TableCards
     }
 
     /** FPDF's core fonts use Windows-1252; other letters are approximated. */
-    private static function text(string $s): string
+    public static function text(string $s): string
     {
         $converted = @iconv('UTF-8', 'windows-1252//TRANSLIT//IGNORE', $s);
 
         return $converted === false ? '' : $converted;
     }
 
-    private static function fit(FPDF $pdf, string $s, float $width): string
+    public static function fit(FPDF $pdf, string $s, float $width): string
     {
         $t = self::text($s);
         if ($pdf->GetStringWidth($t) <= $width) {

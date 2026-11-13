@@ -230,6 +230,8 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::post('qr-codes', [QrCodeController::class, 'store']);
             Route::patch('qr-codes/{qr}', [QrCodeController::class, 'update']);
             Route::delete('qr-codes/{qr}', [QrCodeController::class, 'destroy']);
+            Route::get('print-materials', [QrCodeController::class, 'printInfo']);
+            Route::get('print-materials.pdf', [QrCodeController::class, 'printMaterials']);
             Route::get('qr-codes/{qr}.{format}', [QrCodeController::class, 'download'])->whereIn('format', ['svg', 'png', 'pdf']);
 
             Route::get('announcements', [AnnouncementController::class, 'index']);
