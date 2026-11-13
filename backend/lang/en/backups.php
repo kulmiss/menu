@@ -8,6 +8,7 @@ return [
     'not_ready' => 'This backup is not available for download.',
     'mail' => [
         'subject' => 'Backup problem on :platform',
+        'greeting' => 'A backup needs your attention',
         'line' => 'Open Backups to see the details, check the free disk space, and press "Back up now".',
         'action' => 'Open Backups',
     ],
