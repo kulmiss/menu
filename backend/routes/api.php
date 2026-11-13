@@ -153,7 +153,7 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::get('settings/mail', [PlatformController::class, 'mailSettings']);
             Route::put('settings/mail', [PlatformController::class, 'saveMailSettings']);
             Route::delete('settings/mail', [PlatformController::class, 'clearMailSettings']);
-            Route::post('settings/mail/test', [PlatformController::class, 'testMail'])->middleware('throttle:6,1');
+            Route::post('settings/mail/test', [PlatformController::class, 'testMail'])->middleware('throttle:5,1');
         });
         Route::post('invitations/{token}/accept', [AcceptInvitationController::class, 'accept']);
 

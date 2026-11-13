@@ -391,18 +391,26 @@ class PlatformController extends Controller
     }
 
     /** Sends a short e-mail with the saved settings and reports what happened. */
+    /**
+     * Test e-mail to the address typed next to the button (owner, 2026-11-13);
+     * the address is not saved. 5 tests a minute per Super Admin (route throttle).
+     */
     public function testMail(Request $request): JsonResponse
     {
-        $data = $request->validate(['to' => ['nullable', 'email']]);
-        $to = $data['to'] ?? (string) $request->user()?->email;
+        $to = $request->validate(['to' => ['required', 'string', 'max:254', 'email:rfc,filter']])['to'];
         try {
             Mail::raw(__('platform.mail_test.body', ['app' => PlatformSettings::get('name')]), function ($m) use ($to) {
                 $m->to($to)->subject(__('platform.mail_test.subject', ['app' => PlatformSettings::get('name')]));
             });
         } catch (Throwable $e) {
+            // The server's whole answer, so the problem can be fixed without reading logs.
+            $error = trim($e->getMessage()) ?: $e::class;
+
             return response()->json([
-                'message' => __('platform.mail_test.failed', ['reason' => Str::limit($e->getMessage(), 300)]),
+                'message' => __('platform.mail_test.failed', ['email' => $to, 'reason' => $error]),
                 'code' => 'mail.failed',
+                'sent_to' => $to,
+                'error' => $error,
             ], 422);
         }
 

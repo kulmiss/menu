@@ -30,7 +30,7 @@ return [
         'subject' => 'Test e-mail from :app',
         'body' => "This is a test e-mail from :app.\n\nIf you can read this, the e-mail settings work.",
         'sent' => 'Test e-mail sent to :email. Check the inbox (and the spam folder).',
-        'failed' => 'The test e-mail could not be sent: :reason',
+        'failed' => 'The test e-mail to :email could not be sent. The mail server said: :reason',
     ],
     'remind' => [
         'sent' => '{1} E-mail sent to the owner.|[2,*] E-mail sent to :count owners.',
