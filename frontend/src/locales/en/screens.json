@@ -612,7 +612,6 @@
   },
   "impersonation": {
     "viewing_as": "Viewing as {{name}}",
-    "until": "Until {{time}}. Everything you do is recorded.",
     "back": "Back to platform"
   },
   "search": {

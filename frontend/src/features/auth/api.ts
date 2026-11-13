@@ -48,7 +48,6 @@ export type Me = {
     tenant_id: number
     tenant_name: string
     user_name: string
-    ends_at: string
   } | null
   tenants: Tenant[]
 }

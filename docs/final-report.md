@@ -53,7 +53,7 @@ All checks run on every PR in GitHub Actions (`.github/workflows/ci.yml`) and we
 | Migrate → rollback → migrate | pass |
 | Pest | **365 tests**, ~2,300 assertions, all passing |
 
-The tests cover: auth, 2FA and tenancy isolation; roles and permissions per endpoint; menus, items, photos, import/export; branches, tables and QR codes (scanned back with a QR reader); opening hours; promotions; insights and beacon; Super Admin, plans, features and "log in as" limits; idempotency keys; the guest page (static copy, styles A–D, photo loading, branch URLs, footer, link-preview tags read from the page `<head>`); PDF menus; demo seeders; e-mail settings and owner e-mails.
+The tests cover: auth, 2FA and tenancy isolation; roles and permissions per endpoint; menus, items, photos, import/export; branches, tables and QR codes (scanned back with a QR reader); opening hours; promotions; insights and beacon; Super Admin, plans, features and one-click "log in as"; idempotency keys; the guest page (static copy, styles A–D, photo loading, branch URLs, footer, link-preview tags read from the page `<head>`); PDF menus; demo seeders; e-mail settings and owner e-mails.
 
 ### Admin and guest-page scripts
 | Check | Result |

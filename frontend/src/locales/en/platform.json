@@ -74,7 +74,6 @@
     "resend_welcome": "Resend set-password e-mail",
     "resend_welcome_hint": "Sends the owner the welcome e-mail again with a new link (valid 7 days). Earlier links stop working.",
     "welcome_sent": "Set-password e-mail sent to the owner.",
-    "log_in_as_hint": "You will see the restaurant admin as the owner for up to 60 minutes. Everything you do is recorded with your name. Passwords, e-mail, two-factor, team and the menu address can't be changed.",
     "suspend": "Suspend",
     "unsuspend": "Lift suspension",
     "suspend_hint": "The menu shows “unavailable” and the team can't make changes. The owner sees the reason.",

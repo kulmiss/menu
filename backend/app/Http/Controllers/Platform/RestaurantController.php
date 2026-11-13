@@ -26,7 +26,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
 
 /**
  * Super Admin › Restaurants (PLAN.md §7.3 screen 2): list, create, edit,
@@ -248,14 +247,10 @@ class RestaurantController extends Controller
     public function impersonate(Request $request, int $restaurant, ImpersonationManager $manager): JsonResponse
     {
         $tenant = Tenant::findOrFail($restaurant);
-        $data = $request->validate(['reason' => ['required', 'string', 'min:5', 'max:300']]);
         $owner = $tenant->memberships()->where('role', Role::Owner)->with('user')->first()?->user;
-        if ($owner === null) {
-            throw ValidationException::withMessages(['reason' => __('platform.no_owner')]);
-        }
-        $admin = $request->user();
-        $this->activity->log('platform.impersonation_started', $tenant, ['reason' => ['to' => $data['reason']], 'user' => ['to' => $owner->email]], $tenant->id);
-        $manager->start($request, $admin, $tenant, $owner, $data['reason']);
+        abort_if($owner === null, 422, __('platform.no_owner'));
+        // One click, nothing recorded (owner, 2026-11-13).
+        $manager->start($request, $request->user(), $tenant, $owner);
 
         return response()->json(['data' => ['tenant_id' => $tenant->id, 'redirect' => '/admin']]);
     }
