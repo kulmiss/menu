@@ -88,7 +88,7 @@ it('creates the owner and the restaurant on the Free plan, not live, and asks to
 it('has a Free plan on every install, with the proposed limits and features', function () {
     $free = Plan::where('slug', 'free')->sole();
     expect($free->price_minor)->toBe(0)
-        ->and($free->limits)->toBe(['branches' => 1, 'menus' => 2, 'items' => 30, 'photos' => 30, 'tables' => 10]);
+        ->and($free->limits)->toEqual(['branches' => 1, 'menus' => 2, 'items' => 30, 'photos' => 30, 'tables' => 10]);
     $features = DB::table('plan_features')->where('plan_id', $free->id)->pluck('enabled', 'feature_key')->map(fn ($v) => (bool) $v)->all();
     expect($features)->toMatchArray([
         'insights' => false, 'promotions' => false, 'import_export' => false, 'branches' => false, 'remove_branding' => false,
