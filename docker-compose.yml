@@ -1,0 +1,66 @@
+# Local development only. Production does not use Docker on shared hosting.
+# Start: docker compose up -d   ·   App: http://localhost:8080   ·   Mail: http://localhost:8025
+services:
+  app:
+    build: docker/php
+    volumes:
+      - ./:/var/www
+      # vendor/ and Composer's cache live in Docker volumes: far faster than a
+      # Windows folder, and they survive container restarts.
+      - vendor:/var/www/backend/vendor
+      - composer-cache:/root/.composer/cache
+    environment:
+      DB_HOST: db
+      DB_USERNAME: menu
+      DB_PASSWORD: menu
+      MAIL_MAILER: smtp
+      MAIL_HOST: mail
+      MAIL_PORT: 1025
+    depends_on:
+      - db
+
+  web:
+    image: nginx:1.27-alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/var/www:ro
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: menu
+      MYSQL_USER: menu
+      MYSQL_PASSWORD: menu
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3307:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+  mail:
+    image: axllent/mailpit:v1
+    ports:
+      - "8026:8025"
+
+  vite:
+    image: node:22-bookworm
+    working_dir: /var/www/frontend
+    environment:
+      # Corepack would otherwise stop and ask before downloading pnpm.
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
+      CI: "true" # pnpm: no "remove modules directory?" prompt
+    command: sh -c "corepack enable && pnpm install && pnpm dev --host 0.0.0.0"
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./:/var/www
+
+volumes:
+  db-data:
+  vendor:
+  composer-cache:

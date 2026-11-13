@@ -1,0 +1,210 @@
+# Checks only. CI never commits or pushes.
+name: CI
+
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: menu_test
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd="mysqladmin ping -proot"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+    env:
+      DB_CONNECTION: mysql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_DATABASE: menu_test
+      DB_USERNAME: root
+      DB_PASSWORD: root
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: gd, intl, pdo_mysql, zip, exif, bcmath
+          coverage: none
+      - name: Validate composer files
+        run: composer validate --strict
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+      - name: Code style (Pint)
+        run: vendor/bin/pint --test
+      - name: Static analysis (Larastan)
+        run: vendor/bin/phpstan analyse --no-progress --memory-limit=1G
+      - name: Migrate → rollback → migrate
+        run: |
+          php artisan migrate --force
+          php artisan migrate:rollback --force
+          php artisan migrate --force
+      - name: Tests (Pest)
+        run: php artisan test
+
+  frontend:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: frontend/package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm lint
+      - name: Formatting
+        run: pnpm format:check
+      - name: Build (also generates routes) + typecheck
+        run: pnpm build
+      # PLAN.md §15: the admin's first download, gzipped. Fails the PR if it
+      # grows past the budget. Target 150 KB; current ceiling while the owner
+      # decides how to get there (see PLAN.md §15.6).
+      - name: Admin bundle budget
+        run: node scripts/bundle-size.mjs --budget-kb=225
+      - name: Install test browser
+        # The runner image already has Chromium's system libraries; if the Ubuntu
+        # package mirror is unreachable (it was on 2026-11-11), install the browser alone.
+        run: pnpm exec playwright install chromium --with-deps || pnpm exec playwright install chromium
+      - name: Tests (Vitest)
+        run: pnpm test
+
+  # Guest menu speed budget (PLAN.md §15.5): Lighthouse, mobile, throttled,
+  # median of 3 runs on the demo menu, served as production serves it.
+  # A PR that breaks a budget fails here.
+  guest-menu-speed:
+    name: guest-menu-speed (${{ matrix.style }}, ${{ matrix.banner }})
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        # Every menu style must meet every speed budget (owner, 2026-11-11).
+        style: [editorial, grid, bistro, minimal]
+        # …with the banner and without it: then the first photo is the largest paint (owner, 2026-11-12).
+        banner: [banner, no-banner]
+        # …and A without banner and specials: its full-width first dish photo is then the largest paint.
+        include:
+          - style: editorial
+            banner: no-banner-no-specials
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: menu
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd="mysqladmin ping -proot"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+    env:
+      DB_CONNECTION: mysql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_DATABASE: menu
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      APP_URL: http://localhost:8124
+      DEMO_MENU_STYLE: ${{ matrix.style }}
+      DEMO_MENU_BANNER: ${{ matrix.banner == 'banner' && '1' || '0' }}
+      DEMO_MENU_SPECIALS: ${{ matrix.banner == 'no-banner-no-specials' && '0' || '1' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: gd, intl, pdo_mysql, zip, exif, bcmath
+          coverage: none
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist --no-dev
+      - name: Demo restaurant
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+          php artisan migrate --force
+          php artisan db:seed --class=DemoSeeder --force
+      - name: Build the static page (first visit renders and stores it)
+        run: |
+          php artisan serve --port=8123 > /tmp/serve.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://localhost:8123/up > /dev/null && break; sleep 1; done
+          curl -sf -o /dev/null http://localhost:8123/demo
+          test -f public/menu-cache/demo/index.html.gz
+          grep -q 'class="S-${{ matrix.style }}[ "]' public/menu-cache/demo/index.html
+          if [ "${{ matrix.banner }}" = banner ]; then grep -q '<div class="cv' public/menu-cache/demo/index.html; else ! grep -q '<div class="cv' public/menu-cache/demo/index.html; fi
+          if [ "${{ matrix.banner }}" = no-banner-no-specials ]; then ! grep -q '<div class="spc' public/menu-cache/demo/index.html; else grep -q '<div class="spc' public/menu-cache/demo/index.html; fi
+          echo "Guest page: $(stat -c %s public/menu-cache/demo/index.html) bytes, $(stat -c %s public/menu-cache/demo/index.html.gz) gzip"
+      - name: Serve it like production (Nginx, no PHP)
+        run: |
+          command -v nginx || (sudo apt-get update -q && sudo apt-get install -y -q nginx-light)
+          sed "s#__PUBLIC__#$PWD/public#" ../ci/lighthouse/nginx.conf > /tmp/lh-nginx.conf
+          nginx -e /tmp/lh-nginx-error.log -c /tmp/lh-nginx.conf
+          curl -sfI -H 'Accept-Encoding: gzip' http://localhost:8124/demo
+      - name: Lighthouse CI
+        working-directory: ci/lighthouse
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npx --no-install lhci autorun --config=./lighthouserc.json
+      - name: Speed vs. targets (median of 5 runs)
+        if: always()
+        run: |
+          python3 - <<'PY' | tee -a "$GITHUB_STEP_SUMMARY"
+          import glob, json, statistics
+          runs = [json.load(open(f)) for f in glob.glob('../ci/lighthouse/.lighthouseci/lhr-*.json')]
+          if not runs:
+              raise SystemExit('No Lighthouse results.')
+          med = lambda f: statistics.median(f(r) for r in runs)
+          rows = [
+              ('LCP', med(lambda r: r['audits']['largest-contentful-paint']['numericValue']), 1200, 1300, 'ms'),
+              ('Blocking time (TBT)', med(lambda r: r['audits']['total-blocking-time']['numericValue']), 100, 200, 'ms'),
+              ('CLS', med(lambda r: r['audits']['cumulative-layout-shift']['numericValue']), 0.02, 0.02, ''),
+              ('Performance score', med(lambda r: r['categories']['performance']['score'] * 100), 98, None, ''),
+          ]
+          print('### Guest menu speed — ${{ matrix.style }}, ${{ matrix.banner }} (median of %d runs)' % len(runs))
+          print('| Measure | Median | Target | CI fails above |')
+          print('|---|---|---|---|')
+          for name, value, target, gate, unit in rows:
+              ok = value >= target if name.startswith('Performance') else value <= target
+              print(f"| {name} | {value:.4g}{unit} {'✅' if ok else '⚠️'} | {target}{unit} | {gate if gate is not None else 'report only'}{unit if gate is not None else ''} |")
+          PY
+      - name: Lighthouse reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-${{ matrix.style }}-${{ matrix.banner }}
+          path: /tmp/lhci
+          if-no-files-found: ignore

@@ -1,0 +1,155 @@
+/* Guest menu page, shared by the three styles (style-*.css adds one of them).
+   Inlined into the HTML (PLAN.md §15.2.3): system fonts, no web fonts. */
+:root{color-scheme:light dark}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-padding-top:7rem}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.45 var(--ff,system-ui,sans-serif)}
+h1,h2,h3,p{margin:0}
+button{font:inherit;color:inherit}
+.w{max-width:44rem;margin:0 auto;padding:0 1rem}
+h1,h2,h3,.nm{font-family:var(--fh,inherit)}
+.top{position:relative;max-width:44rem;margin:0 auto}
+header{padding:1.25rem 1rem .5rem;display:flex;align-items:center;gap:.75rem}
+.lg{flex:none;width:3.5rem;height:3.5rem;border-radius:.9rem;object-fit:cover;background:var(--card)}
+.cv{aspect-ratio:21/9;background:var(--card) center/cover no-repeat;overflow:hidden}
+.cv img{display:block;width:100%;height:100%;object-fit:cover}
+/* Logo and name on the banner (setting "over"): readable white text on a dark fade. */
+/* Banner and header share one grid cell, so a tall header makes the banner taller instead of spilling out. */
+.ov{display:grid}
+.ov>*{grid-area:1/1;min-width:0}
+.ov .cv{height:100%}
+.ov header{align-self:end;padding:3.5rem 1rem 1rem;background:linear-gradient(#0000,#000c);color:#fff}
+.ov .sub{color:#fff}
+.ov .st,.ov .st.op{background:#0009;border-color:#fff5;color:#fff}
+h1{font-size:1.6rem;line-height:1.2}
+.sub{color:var(--mu);font-size:.9rem;margin-top:.25rem}
+.bar{position:sticky;top:0;z-index:2;background:var(--bg);border-bottom:1px solid var(--ln);padding:.5rem 0}
+.sr{display:flex;gap:.5rem}
+.ib{flex:none;width:2.75rem;height:2.75rem;border-radius:99px;display:flex;align-items:center;justify-content:center;background:var(--card);border:1px solid var(--ln);color:var(--fg)}
+.sr input{flex:1;min-width:0;height:2.75rem;padding:0 .9rem;border:1px solid var(--ln);border-radius:99px;background:var(--card);color:var(--fg);font:inherit}
+.ch{display:flex;gap:.4rem;overflow-x:auto;scrollbar-width:none;padding-top:.5rem}
+.ch::-webkit-scrollbar{display:none}
+
+.ch a,.ch button{flex:none;min-height:2.75rem;display:inline-flex;align-items:center;padding:0 .9rem;border-radius:99px;border:1px solid var(--ln);background:none;color:var(--fg);text-decoration:none;font-size:.875rem;white-space:nowrap;cursor:pointer}
+.ch .on,.ch [aria-pressed=true]{background:var(--a);color:var(--af);border-color:var(--a)}
+.mn{margin-top:1.5rem}
+.mh{font-size:1.25rem;padding:.25rem 0}
+.mn.off .mh:after{content:" · " attr(data-off);color:var(--mu);font-size:.85rem;font-weight:400}
+section{padding-top:1.25rem}
+h2{font-size:1.1rem}
+.cd{color:var(--mu);font-size:.9rem;margin-top:.2rem}
+ul{list-style:none;margin:.5rem 0 0;padding:0}
+li{border-bottom:1px solid var(--ln)}
+li[hidden],section[hidden]{display:none}
+.it{display:grid;width:100%;padding:.85rem 0;border:0;background:none;text-align:start;cursor:pointer;column-gap:.9rem;align-items:start}
+.tx{display:contents}
+.nm,.sm,.pr,.tg{display:block;min-width:0}
+.nm{font-weight:600}
+.sm{color:var(--mu);font-size:.875rem;margin-top:.15rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pr{margin-top:.35rem;font-weight:600;font-size:.95rem;color:var(--a)}
+.bd{display:inline-block;font-size:.72rem;font-weight:600;padding:.05rem .45rem;border-radius:99px;background:var(--card);border:1px solid var(--ln);margin:.35rem .3rem 0 0;color:var(--mu)}
+.bd.hl{background:var(--a);border-color:var(--a);color:var(--af)}
+.so .nm,.so .pr{color:var(--mu)}
+.so .pr{text-decoration:line-through}
+.so .bd.x0{background:var(--fg);border-color:var(--fg);color:var(--bg)}
+.im{overflow:hidden;background:var(--card) center/cover no-repeat}
+.im img{display:block;width:100%;height:100%;object-fit:cover}
+.so .im img{filter:grayscale(1);opacity:.6}
+/* "My order" quick add */
+.it{position:relative}
+/* 44 px tap area, 30 px visible circle with a thin "+", on the photo's corner;
+   rows without a photo keep room for it at the end, so it never covers text. */
+.ad{position:absolute;top:var(--adt,0);inset-inline-end:0;z-index:1;width:2.75rem;height:2.75rem;font-size:0}
+.ad:before{content:"";position:absolute;inset:.4375rem;border-radius:50%;background:linear-gradient(var(--af),var(--af)) center/.75rem 2px no-repeat,linear-gradient(var(--af),var(--af)) center/2px .75rem no-repeat,var(--a);box-shadow:0 1px 3px #0004}
+.np>.ad{top:50%;margin-top:-1.375rem}
+li>.it.ao.np{padding-inline-end:2.75rem}
+.nr{color:var(--mu);padding:3rem 1rem;text-align:center;display:flex;flex-direction:column;align-items:center;gap:.75rem}
+.nr svg{color:var(--ln)}
+
+.st.ld{visibility:hidden}
+.pw{user-select:all}
+
+.an{margin:1rem 0 0;padding:.6rem .8rem;border-radius:.75rem;background:var(--card);border:1px solid var(--ln);font-size:.9rem}
+.an[hidden],.spc[hidden]{display:none}
+.spc{margin-top:1rem}
+.sp{display:flex;width:100%;padding:0;border:1px solid var(--ln);border-radius:1rem;overflow:hidden;background:var(--card);text-align:start;cursor:pointer}
+div.sp{cursor:default}
+.sp picture{flex:0 0 34%;max-width:9.5rem}
+/* Every special card is the same height (one-line title, two-line text), so their photos are the same
+   size and the first one on screen counts as the largest paint, not a later one (LCP without a banner). */
+.sp{min-height:9.5rem;align-items:stretch;column-gap:0}
+.sp img{display:block;width:100%;height:100%;object-fit:cover}
+.sp .nm{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.sp .tx{display:block;flex:1;padding:.75rem .9rem;align-self:center}
+.sp .bd{margin:0 0 .35rem}
+dialog{position:fixed;border:0;padding:0;margin:auto auto 0;width:100%;max-width:44rem;max-height:92vh;border-radius:1rem 1rem 0 0;background:var(--bg);color:var(--fg)}
+dialog::backdrop{background:#0008}
+@media (min-width:48rem){dialog{margin:auto;border-radius:1rem}}
+.sh{padding:1rem 1rem 1.5rem}
+.gw{position:relative;margin:-1rem -1rem 1rem}
+.gl{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
+.gl::-webkit-scrollbar{display:none}
+.gl img{flex:0 0 100%;display:block;width:100%;height:auto;aspect-ratio:3/2;object-fit:cover;background:var(--card);scroll-snap-align:center}
+.gc{position:absolute;bottom:.6rem;inset-inline-end:.75rem;font-size:.75rem;font-weight:600;padding:.15rem .5rem;border-radius:99px;background:#000a;color:#fff}
+.ga{display:none;position:absolute;top:50%;inset-inline-start:.5rem;width:2.75rem;height:2.75rem;margin-top:-1.375rem;border:0;border-radius:99px;background:#000a;color:#fff;font-size:1.5rem;line-height:1;cursor:pointer}
+.ga.gn{inset-inline-start:auto;inset-inline-end:.5rem}
+@media (hover:hover){.ga{display:block}}
+.sh h3{font-size:1.5rem;line-height:1.2;padding-inline-end:2.5rem}
+.sh>.pr{font-size:1.15rem}
+.sh h4{margin:1rem 0 .25rem;font-size:.95rem}
+.sh p{margin-top:.5rem;white-space:pre-line}
+.sh .ro{display:flex;justify-content:space-between;gap:1rem;padding:.3rem 0;border-bottom:1px solid var(--ln);font-size:.95rem}
+.x{position:absolute;top:.6rem;inset-inline-end:.6rem;width:2.75rem;height:2.75rem;border-radius:99px;border:0;background:var(--bg);font-size:1.25rem;line-height:1;cursor:pointer;box-shadow:0 1px 4px #0003}
+.mu{color:var(--mu);font-size:.875rem}
+/* Share sheet (fallback when the phone has no share sheet) */
+.su{width:100%;margin-top:.75rem;height:2.75rem;padding:0 .75rem;border:1px solid var(--ln);border-radius:.6rem;background:var(--card);color:var(--fg);font:inherit}
+.sl{display:grid;gap:.5rem;margin-top:.75rem}
+.sl a,.sl button{display:flex;align-items:center;justify-content:center;min-height:2.75rem;border-radius:99px;border:1px solid var(--ln);background:var(--card);color:var(--fg);font:inherit;font-weight:600;text-decoration:none;cursor:pointer}
+.sl button{background:var(--a);border-color:var(--a);color:var(--af)}
+.of{position:fixed;inset:auto 0 0;background:var(--fg);color:var(--bg);text-align:center;font-size:.85rem;padding:.5rem}
+@media (prefers-reduced-motion:no-preference){
+html,.gl{scroll-behavior:smooth}
+dialog[open]{animation:up .28s cubic-bezier(.2,.8,.2,1)}
+dialog[open]::backdrop{animation:fd .28s ease}
+.it .im img{transition:transform .4s ease}
+.it:active .im img{transform:scale(.98)}
+.ch a,.ch button{transition:background-color .2s,color .2s,border-color .2s}
+}
+@keyframes up{from{transform:translateY(2rem);opacity:0}}
+@keyframes fd{from{opacity:0}}
+/* Opening-hours pill: dot + text, green when open, red when closed (owner, 2026-11-12). */
+.st{display:inline-flex;align-items:center;gap:.45rem;margin:.5rem 0 .25rem;padding:.3rem .75rem;border-radius:99px;font-size:.8125rem;font-weight:600;line-height:1.25;background:var(--card);border:1px solid var(--ln);color:var(--fg)}
+.st[hidden]{display:none}
+.st:before{content:"";flex:none;width:.5rem;height:.5rem;border-radius:50%;background:#d92d20;box-shadow:0 0 0 3px #d92d2026}
+.st.op{color:#0b5e33;border-color:#0f6b3a40;background:#0f6b3a12}
+.st.op:before{background:#12a15c;box-shadow:0 0 0 3px #12a15c33}
+@media (prefers-color-scheme:dark){.st.op{color:#7ee2a8}.st:before{background:#f97066}}
+/* Closure notices: a calm card, spaced from the header and the search bar. */
+.nt{display:flex;gap:.6rem;max-width:44rem;margin:.5rem auto;padding:.65rem .9rem;font-size:.875rem;line-height:1.4;border-radius:.75rem;background:var(--card);border:1px solid var(--ln)}
+.nt:before{content:"";flex:none;width:.5rem;height:.5rem;margin-top:.45rem;border-radius:50%;background:var(--a)}
+.nt:last-child{margin-bottom:.75rem}
+/* Footer: name, hours, address, contact, Wi-Fi, branches, socials (owner, 2026-11-12). */
+.nr[hidden]{display:none}
+.ft{margin-top:2.5rem;padding:2rem 0 calc(2.5rem + env(safe-area-inset-bottom));background:var(--card);border-top:1px solid var(--ln);font-size:.9375rem}
+.fh{display:flex;align-items:center;gap:.75rem}
+.fl{flex:none;width:3rem;height:3rem;border-radius:.75rem;object-fit:cover}
+.fn{font-size:1.25rem;font-weight:700;line-height:1.2}
+.fh .sub{margin-top:.1rem}
+.ab{white-space:pre-line;color:var(--mu);margin-top:.75rem;max-width:36rem}
+.fg{display:grid;gap:1.5rem 2rem;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));margin-top:1.75rem}
+.ft h2{display:flex;align-items:center;gap:.45rem;font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mu);margin-bottom:.6rem}
+.ft h2 svg{width:1rem;height:1rem}
+.hs div{display:flex;justify-content:space-between;gap:1rem;padding:.3rem 0;border-bottom:1px dashed var(--ln)}
+.hs dt{color:var(--mu);white-space:nowrap}.hs dd{margin:0;font-variant-numeric:tabular-nums;text-align:end}
+.fbt,.pdl a{display:inline-flex;align-items:center;gap:.5rem;min-height:2.75rem;margin-top:.6rem;padding:0 1.1rem;border-radius:99px;border:1px solid var(--ln);background:var(--bg);color:var(--fg);font-weight:600;text-decoration:none}
+.ft ul{margin:0}.ft li{border:0;background:none;border-radius:0;box-shadow:none;overflow:visible}
+.fc{display:grid;grid-template-columns:minmax(0,1fr);gap:.4rem}
+.fc a{display:flex;align-items:center;gap:.75rem;min-height:2.75rem;color:var(--fg);text-decoration:none}
+.fc svg{flex:none;width:2.5rem;height:2.5rem;padding:.55rem;border-radius:99px;background:var(--bg);border:1px solid var(--ln);color:var(--a)}
+.fc span{display:flex;flex-direction:column;line-height:1.25;overflow-wrap:anywhere}.fc small{font-size:.75rem;color:var(--mu)}
+.ob{display:block}.ob li{padding:.15rem 0}.ob a{display:inline-flex;align-items:center;min-height:2.75rem;font-weight:600;color:var(--fg)}.ob span{display:block;font-size:.875rem;color:var(--mu);margin-top:-.4rem}
+.fso{display:flex;flex-direction:row;flex-wrap:wrap;gap:.5rem;margin-top:1.75rem}
+.fso a{display:flex;align-items:center;justify-content:center;width:2.75rem;height:2.75rem;border-radius:99px;background:var(--bg);border:1px solid var(--ln);color:var(--fg)}
+.pdl{margin-top:1.25rem}
+.pb{margin-top:2rem;padding-top:1rem;border-top:1px solid var(--ln);text-align:center;font-size:.8rem;color:var(--mu)}
+.ft a:focus-visible{outline:2px solid var(--a);outline-offset:2px}
