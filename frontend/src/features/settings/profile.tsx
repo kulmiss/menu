@@ -9,7 +9,7 @@ import {
 } from '@/i18n'
 import { Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { validationErrors } from '@/lib/api'
+import { api, validationErrors } from '@/lib/api'
 import { handleServerError } from '@/lib/handle-server-error'
 import { toast } from '@/lib/toast'
 import { useDirection } from '@/context/direction-provider'
@@ -23,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
 import { ME_KEY } from '@/features/auth/api'
 import { useMe } from '@/features/auth/use-me'
 import { updateProfile } from './api'
@@ -128,6 +129,45 @@ export function ProfileSettings() {
           {t('common.save')}
         </Button>
       </form>
+    </SettingsSection>
+  )
+}
+
+/** News e-mails from the platform (owner, 2026-11-13); account e-mails are always sent. */
+export function NewsSetting() {
+  const { t } = useTranslation()
+  const me = useMe()
+  const qc = useQueryClient()
+  const [on, setOn] = useState(me.news_subscribed !== false)
+  const [busy, setBusy] = useState(false)
+
+  return (
+    <SettingsSection
+      title={t('settings.news_title')}
+      intro={t('settings.news_intro')}
+    >
+      <div className='flex items-center justify-between gap-4'>
+        <Label htmlFor='news-switch'>{t('settings.news_label')}</Label>
+        <Switch
+          id='news-switch'
+          checked={on}
+          disabled={busy}
+          onCheckedChange={async (next) => {
+            setBusy(true)
+            setOn(next)
+            try {
+              await api.put('/me/news', { subscribed: next })
+              await qc.invalidateQueries({ queryKey: ME_KEY })
+              toast.success(t('settings.saved'))
+            } catch (err) {
+              setOn(!next)
+              handleServerError(err)
+            } finally {
+              setBusy(false)
+            }
+          }}
+        />
+      </div>
     </SettingsSection>
   )
 }

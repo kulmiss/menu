@@ -34,7 +34,6 @@ export type SignupSettingsData = {
   turnstile_site_key: string
   turnstile_secret_set: boolean
   disposable_domains: string[]
-  upgrade_whatsapp: string
   plans: { id: number; name: string; slug: string }[]
 }
 
@@ -59,7 +58,6 @@ export function SignupSettings({ initial }: { initial: SignupSettingsData }) {
     turnstile_secret: '',
     clear_turnstile_secret: false,
     disposable_domains: (initial.disposable_domains ?? []).join('\n'),
-    upgrade_whatsapp: initial.upgrade_whatsapp ?? '',
   })
 
   const toggle = (
@@ -101,7 +99,6 @@ export function SignupSettings({ initial }: { initial: SignupSettingsData }) {
           .split(/[\s,]+/)
           .map((d) => d.trim().toLowerCase())
           .filter(Boolean),
-        upgrade_whatsapp: v.upgrade_whatsapp.trim() || null,
       })
       setV({ ...v, turnstile_secret: '', clear_turnstile_secret: false })
       toast.success(t('platform.saved'))
@@ -159,21 +156,6 @@ export function SignupSettings({ initial }: { initial: SignupSettingsData }) {
           </div>
           {toggle('signup_approval')}
           {toggle('signup_notify')}
-
-          <div className='grid gap-1'>
-            <Label htmlFor='su-whatsapp'>{t('platform.signup.whatsapp')}</Label>
-            <Input
-              id='su-whatsapp'
-              inputMode='tel'
-              placeholder='+251 911 000 000'
-              value={v.upgrade_whatsapp}
-              onChange={(e) => setV({ ...v, upgrade_whatsapp: e.target.value })}
-            />
-            <p className='text-sm text-muted-foreground'>
-              {t('platform.signup.whatsapp_hint')}
-            </p>
-            {error('upgrade_whatsapp')}
-          </div>
 
           <fieldset className='grid gap-3 rounded-md border p-3'>
             <legend className='px-1 text-sm font-medium'>

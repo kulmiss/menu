@@ -42,6 +42,8 @@ export type Me = {
   email: string
   locale: string
   email_verified: boolean
+  /** Platform news e-mails on (account e-mails are always sent). */
+  news_subscribed?: boolean
   two_factor_enabled: boolean
   is_super_admin: boolean
   /** Set while a Super Admin is "logged in as" this user. */

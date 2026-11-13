@@ -3,8 +3,10 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
@@ -25,6 +27,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $notes
  * @property-read Tenant $tenant
  * @property-read Plan|null $plan
+ * @property-read Collection<int, Invoice> $invoices
  */
 #[Fillable(['tenant_id', 'plan_id', 'amount_minor', 'currency', 'method', 'reference', 'paid_at', 'period_start', 'period_end', 'recorded_by', 'notes'])]
 class Payment extends Model
@@ -46,5 +49,11 @@ class Payment extends Model
     public function plan(): BelongsTo
     {
         return $this->belongsTo(Plan::class);
+    }
+
+    /** @return HasMany<Invoice, $this> */
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
     }
 }

@@ -289,7 +289,52 @@ class PlatformController extends Controller
             'disposable_domains' => ['sometimes', 'array', 'max:500'],
             'disposable_domains.*' => ['string', 'max:100', 'regex:/^[a-z0-9.-]+\.[a-z]{2,}$/i'],
             'upgrade_whatsapp' => ['sometimes', 'nullable', 'string', 'max:30', 'regex:/^\+?[0-9 ]{6,20}$/'],
+            // Billing (owner, 2026-11-13)
+            'billing_company' => ['sometimes', 'nullable', 'string', 'max:120'],
+            'billing_address' => ['sometimes', 'nullable', 'string', 'max:300'],
+            'billing_tax_id' => ['sometimes', 'nullable', 'string', 'max:60'],
+            'invoice_prefix' => ['sometimes', 'string', 'min:1', 'max:10', 'regex:/^[A-Za-z0-9]+$/'],
+            'invoice_footer' => ['sometimes', 'nullable', 'string', 'max:300'],
+            'invoice_tax_rate' => ['sometimes', 'numeric', 'between:0,100'],
+            'invoice_email' => ['sometimes', 'boolean'],
+            // Landing page (owner, 2026-11-13)
+            'brand_color' => ['sometimes', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'landing_headline' => ['sometimes', 'nullable', 'string', 'max:120'],
+            'landing_subline' => ['sometimes', 'nullable', 'string', 'max:300'],
+            'landing_sections' => ['sometimes', 'array'],
+            'landing_sections.*' => ['boolean'],
+            'landing_testimonials' => ['sometimes', 'array', 'max:12'],
+            'landing_testimonials.*.quote' => ['required', 'string', 'max:400'],
+            'landing_testimonials.*.name' => ['required', 'string', 'max:80'],
+            'landing_testimonials.*.role' => ['nullable', 'string', 'max:80'],
+            'socials' => ['sometimes', 'array'],
+            'socials.*' => ['nullable', 'string', 'max:255', 'url:https,http'],
         ]);
+        if (isset($data['landing_sections'])) {
+            $data['landing_sections'] = array_map('boolval', array_intersect_key($data['landing_sections'], PlatformSettings::DEFAULTS['landing_sections']) + PlatformSettings::DEFAULTS['landing_sections']);
+        }
+        if (isset($data['socials'])) {
+            $data['socials'] = array_map(fn ($u) => (string) $u, array_intersect_key($data['socials'], PlatformSettings::DEFAULTS['socials']) + array_map(fn () => '', PlatformSettings::DEFAULTS['socials']));
+        }
+        if (isset($data['landing_testimonials'])) {
+            $data['landing_testimonials'] = array_values(array_map(fn (array $t) => ['quote' => trim($t['quote']), 'name' => trim($t['name']), 'role' => trim((string) ($t['role'] ?? ''))], $data['landing_testimonials']));
+        }
+        if (isset($data['invoice_prefix'])) {
+            $data['invoice_prefix'] = strtoupper($data['invoice_prefix']);
+        }
+        if (isset($data['invoice_tax_rate'])) {
+            $data['invoice_tax_rate'] = round((float) $data['invoice_tax_rate'], 2);
+        }
+        foreach (['billing_company', 'billing_address', 'billing_tax_id', 'invoice_footer'] as $key) {
+            if (array_key_exists($key, $data)) {
+                $data[$key] = trim((string) $data[$key]);
+            }
+        }
+        foreach (['landing_headline', 'landing_subline'] as $key) {
+            if (array_key_exists($key, $data)) {
+                $data[$key] = trim((string) $data[$key]);
+            }
+        }
         if (array_key_exists('turnstile_secret', $data)) {
             // Empty keeps the stored secret; send clear_turnstile_secret to remove it.
             if (($data['turnstile_secret'] ?? '') === '') {

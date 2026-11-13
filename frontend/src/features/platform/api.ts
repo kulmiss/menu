@@ -57,6 +57,25 @@ export type Restaurant = {
   created_at: string | null
   deleted_at: string | null
   url: string
+  /** Super Admin CRM (owner, 2026-11-13). */
+  tags?: TagRef[]
+  follow_up_on?: string | null
+  follow_up_reason?: string | null
+}
+
+export type TagRef = {
+  id: number
+  name: string
+  color: string
+  restaurants?: number
+}
+export type NoteRow = {
+  id: number
+  body: string
+  author: { id: number; name: string } | null
+  mine: boolean
+  created_at: string
+  edited: boolean
 }
 
 export type PaymentRow = {
@@ -71,6 +90,24 @@ export type PaymentRow = {
   period_start: string
   period_end: string
   notes: string | null
+  invoices?: InvoiceRef[]
+}
+
+export type InvoiceRef = { id: number; number: string; status: 'paid' | 'void' }
+
+export type InvoiceRow = InvoiceRef & {
+  issued_at: string
+  tenant: { id: number | null; name: string }
+  owner_email: string
+  plan: string | null
+  period_start: string
+  period_end: string
+  total_minor: number
+  currency: string
+  payment_id: number | null
+  void_reason: string | null
+  replaces_id: number | null
+  emailed_at: string | null
 }
 
 export type RestaurantDetail = Restaurant & {
@@ -128,6 +165,83 @@ export const restaurantQ = (id: number) =>
 export const plansQ = () => q<PlanRow[]>('plans')
 export const paymentsQ = (params: string) =>
   q<PaymentRow[]>(`payments${params ? `?${params}` : ''}`)
+export type CampaignRow = {
+  id: number
+  subject: string
+  status: 'sending' | 'done'
+  recipients: number
+  sent: number
+  failed: number
+  pending: number
+  created_at: string
+  finished_at: string | null
+}
+export const campaignsQ = () => q<CampaignRow[]>('campaigns')
+export const campaignQ = (id: number) =>
+  q<
+    CampaignRow & {
+      body: string
+      list: {
+        id: number
+        email: string
+        name: string
+        restaurant: string
+        status: 'pending' | 'sent' | 'failed'
+        attempts: number
+        error: string | null
+        sent_at: string | null
+      }[]
+    }
+  >(`campaigns/${id}`)
+export type BackupRow = {
+  id: number
+  filename: string | null
+  size: number
+  kind: 'scheduled' | 'manual'
+  status: 'queued' | 'running' | 'ok' | 'failed'
+  offsite: 'uploaded' | 'failed' | null
+  error: string | null
+  created_at: string
+  finished_at: string | null
+}
+export const backupsQ = () =>
+  q<{
+    backups: BackupRow[]
+    disk_free: number | null
+    disk_total: number | null
+    problem: string | null
+    settings: {
+      backup_enabled: boolean
+      backup_keep_daily: number
+      backup_keep_weekly: number
+      backup_keep_monthly: number
+      backup_s3_enabled: boolean
+      backup_s3_endpoint: string
+      backup_s3_region: string
+      backup_s3_bucket: string
+      backup_s3_prefix: string
+      backup_s3_key: string
+      backup_s3_secret_set: boolean
+    }
+  }>('backups')
+export const tagsQ = () => q<TagRef[]>('tags')
+export const notesQ = (id: number) => q<NoteRow[]>(`restaurants/${id}/notes`)
+export const followUpsQ = () =>
+  q<
+    {
+      id: number
+      name: string
+      date: string
+      reason: string | null
+      overdue: boolean
+      tags: TagRef[]
+    }[]
+  >('widgets/follow-ups')
+export const invoicesQ = (params: string) =>
+  q<InvoiceRow[]>(`invoices${params ? `?${params}` : ''}`)
+/** Opened in a new tab; the session cookie authorises it. */
+export const invoicePdfUrl = (id: number) =>
+  `${api.defaults.baseURL}/platform/invoices/${id}/pdf`
 export const themesQ = () =>
   q<
     {

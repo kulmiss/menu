@@ -91,7 +91,7 @@ describe('Super Admin sign-up controls', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Buna & Bread' }))
     await userEvent.click(screen.getByRole('button', { name: 'Reject' }))
     await userEvent.fill(
-      screen.getByLabelText('Reason'),
+      screen.getByLabelText('Reason', { exact: true }),
       'Not a restaurant, please contact us.'
     )
     await userEvent.click(screen.getByRole('button', { name: 'Continue' }))
@@ -148,10 +148,6 @@ describe('Super Admin sign-up controls', () => {
       screen.getByLabelText('Blocked e-mail domains'),
       'mailinator.com\nYopmail.com'
     )
-    await userEvent.fill(
-      screen.getByLabelText('WhatsApp number for upgrades'),
-      '+251 911 000 000'
-    )
     await expect
       .element(screen.getByLabelText('Turnstile secret key'))
       .toHaveAttribute('placeholder', 'Saved (leave empty to keep it)')
@@ -166,7 +162,83 @@ describe('Super Admin sign-up controls', () => {
         signup_plan_id: null,
         turnstile_secret: '',
         disposable_domains: ['mailinator.com', 'yopmail.com'],
+      })
+  })
+})
+
+describe('Super Admin landing page settings', () => {
+  afterEach(() => fake.restore())
+
+  it('saves texts, colour, sections, real testimonials and footer links', async () => {
+    fake = fakeApi({
+      'GET /platform/settings': {
+        data: {
+          data: {
+            name: 'Menu',
+            share_image_url: '/img/share.jpg',
+            logo_url: null,
+            signup_open: true,
+            signup_plan_id: null,
+            signup_approval: false,
+            signup_notify: true,
+            turnstile_enabled: false,
+            turnstile_site_key: '',
+            turnstile_secret_set: false,
+            disposable_domains: [],
+            upgrade_whatsapp: '',
+            plans: [{ id: 1, name: 'Free', slug: 'free' }],
+            brand_color: '#c2410c',
+            landing_headline: '',
+            landing_subline: '',
+            landing_sections: { how: true, features: true, speed: true },
+            landing_testimonials: [],
+            socials: { telegram: '' },
+          },
+        },
+      },
+      'GET /platform/settings/mail': { status: 404 },
+      'PUT /platform/settings': { data: { data: {} } },
+    })
+    const screen = await renderWithQuery(<SettingsPage />, { me: admin })
+
+    await userEvent.fill(
+      screen.getByLabelText('Headline'),
+      'QR menus for Addis restaurants'
+    )
+    await userEvent.fill(
+      screen.getByLabelText('WhatsApp number', { exact: true }),
+      '+251 911 000 000'
+    )
+    await userEvent.click(screen.getByRole('checkbox', { name: 'Speed' }))
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Add a testimonial' })
+    )
+    await userEvent.fill(
+      screen.getByLabelText('Quote'),
+      'Guests find the menu on their own now.'
+    )
+    await userEvent.fill(screen.getByLabelText('Name', { exact: true }), 'Hana')
+    await userEvent.fill(
+      screen.getByLabelText('Telegram'),
+      'https://t.me/menu_et'
+    )
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }).nth(2))
+
+    await expect
+      .poll(() => fake.calls.find((c) => c.method === 'PUT')?.data)
+      .toMatchObject({
+        landing_headline: 'QR menus for Addis restaurants',
         upgrade_whatsapp: '+251 911 000 000',
+        brand_color: '#c2410c',
+        landing_sections: { speed: false, pricing: true, faq: true },
+        landing_testimonials: [
+          {
+            quote: 'Guests find the menu on their own now.',
+            name: 'Hana',
+            role: '',
+          },
+        ],
+        socials: { telegram: 'https://t.me/menu_et', facebook: '' },
       })
   })
 })

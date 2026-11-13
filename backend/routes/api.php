@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\Menu\MediaController;
 use App\Http\Controllers\Api\Menu\MenuController;
 use App\Http\Controllers\Api\Menu\TagController;
 use App\Http\Controllers\Api\Restaurant\AppearanceController;
+use App\Http\Controllers\Api\Restaurant\BillingController;
 use App\Http\Controllers\Api\Restaurant\BranchController;
 use App\Http\Controllers\Api\Restaurant\DashboardWidgetController;
 use App\Http\Controllers\Api\Restaurant\InfoController;
@@ -25,10 +26,16 @@ use App\Http\Controllers\Api\Restaurant\QrCodeController;
 use App\Http\Controllers\Api\TeamController;
 use App\Http\Controllers\Api\TenantController;
 use App\Http\Controllers\Auth\SignUpController;
+use App\Http\Controllers\NewsSubscriptionController;
+use App\Http\Controllers\Platform\BackupController;
+use App\Http\Controllers\Platform\CampaignController;
+use App\Http\Controllers\Platform\CrmController;
 use App\Http\Controllers\Platform\DashboardWidgetController as PlatformDashboardWidgetController;
+use App\Http\Controllers\Platform\InvoiceController;
 use App\Http\Controllers\Platform\PaymentController;
 use App\Http\Controllers\Platform\PlatformController;
 use App\Http\Controllers\Platform\RestaurantController;
+use App\Http\Controllers\Platform\SearchController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
@@ -59,6 +66,7 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('me', MeController::class);
+        Route::put('me/news', [NewsSubscriptionController::class, 'update']);
         Route::post('impersonation/stop', [AnnouncementController::class, 'stopImpersonating']);
 
         // Super Admin (PLAN.md §7.3): Super Admins with two-factor sign-in only.
@@ -87,6 +95,42 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::post('restaurants/{restaurant}/impersonate', [RestaurantController::class, 'impersonate'])->whereNumber('restaurant');
             Route::get('payments', [PaymentController::class, 'index']);
             Route::get('payments.csv', [PaymentController::class, 'export']);
+            // CRM: tags, notes, follow-ups (owner, 2026-11-13)
+            Route::get('tags', [CrmController::class, 'tags']);
+            Route::post('tags', [CrmController::class, 'storeTag']);
+            Route::patch('tags/{tag}', [CrmController::class, 'updateTag'])->whereNumber('tag');
+            Route::delete('tags/{tag}', [CrmController::class, 'destroyTag'])->whereNumber('tag');
+            Route::put('restaurants/{restaurant}/tags', [CrmController::class, 'setTags'])->whereNumber('restaurant');
+            Route::get('restaurants/{restaurant}/notes', [CrmController::class, 'notes'])->whereNumber('restaurant');
+            Route::post('restaurants/{restaurant}/notes', [CrmController::class, 'storeNote'])->whereNumber('restaurant');
+            Route::patch('notes/{note}', [CrmController::class, 'updateNote'])->whereNumber('note');
+            Route::delete('notes/{note}', [CrmController::class, 'destroyNote'])->whereNumber('note');
+            Route::put('restaurants/{restaurant}/follow-up', [CrmController::class, 'followUp'])->whereNumber('restaurant');
+            Route::get('widgets/follow-ups', [CrmController::class, 'due']);
+            // Messages: e-mails to restaurant owners (owner, 2026-11-13)
+            Route::get('campaigns', [CampaignController::class, 'index']);
+            Route::get('campaigns/{campaign}', [CampaignController::class, 'show'])->whereNumber('campaign');
+            Route::post('campaigns/count', [CampaignController::class, 'count']);
+            Route::post('campaigns/preview', [CampaignController::class, 'preview']);
+            Route::post('campaigns/test', [CampaignController::class, 'test'])->middleware('throttle:10,1');
+            Route::post('campaigns', [CampaignController::class, 'store']);
+            Route::post('campaigns/{campaign}/retry', [CampaignController::class, 'retry'])->whereNumber('campaign');
+            Route::put('campaigns/rate', [CampaignController::class, 'rate']);
+            // Global search (owner, 2026-11-13)
+            Route::get('search', SearchController::class)->middleware('throttle:120,1');
+            // Backups (owner, 2026-11-13)
+            Route::get('backups', [BackupController::class, 'index']);
+            Route::post('backups', [BackupController::class, 'store'])->middleware('throttle:6,1');
+            Route::put('backups/settings', [BackupController::class, 'settings']);
+            Route::post('backups/{backup}/link', [BackupController::class, 'link'])->whereNumber('backup')->middleware('throttle:6,1');
+            Route::get('backups/{backup}/file', [BackupController::class, 'file'])->whereNumber('backup')->middleware('signed')->name('platform.backups.file');
+            Route::delete('backups/{backup}', [BackupController::class, 'destroy'])->whereNumber('backup');
+            // Invoices (owner, 2026-11-13)
+            Route::get('invoices', [InvoiceController::class, 'index']);
+            Route::get('invoices.csv', [InvoiceController::class, 'export']);
+            Route::get('invoices/{invoice}/pdf', [InvoiceController::class, 'pdf'])->whereNumber('invoice');
+            Route::post('invoices/{invoice}/resend', [InvoiceController::class, 'resend'])->whereNumber('invoice')->middleware('throttle:10,1');
+            Route::post('invoices/{invoice}/void', [InvoiceController::class, 'void'])->whereNumber('invoice');
             Route::get('plans', [PlatformController::class, 'plans']);
             Route::post('plans', [PlatformController::class, 'savePlan']);
             Route::patch('plans/{plan}', [PlatformController::class, 'savePlan'])->whereNumber('plan');
@@ -218,6 +262,10 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::get('appearance', [AppearanceController::class, 'show']);
             Route::put('appearance', [AppearanceController::class, 'update']);
             Route::get('appearance/preview', [AppearanceController::class, 'preview'])->name('appearance.preview');
+            // Settings → Billing (owner only)
+            Route::get('billing', [BillingController::class, 'show']);
+            Route::get('billing/invoices/{invoice}/pdf', [BillingController::class, 'pdf'])->whereNumber('invoice');
+
             Route::get('menu-pdf', [PdfMenuController::class, 'download'])->middleware(['feature:pdf_menu', 'throttle:20,1']);
 
             Route::get('tags', [TagController::class, 'index']);

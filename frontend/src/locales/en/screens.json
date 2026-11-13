@@ -304,7 +304,28 @@
     "done": "Done",
     "confirm_password": "Confirm your password",
     "confirm_password_intro": "For your security, enter your password to continue.",
-    "wrong_password": "The password is not correct."
+    "wrong_password": "The password is not correct.",
+    "billing": {
+      "tab": "Billing",
+      "plan_title": "Your plan",
+      "plan_intro": "Payments are recorded by the platform team after you pay by mobile money or bank transfer.",
+      "plan": "Plan",
+      "no_plan": "No plan",
+      "paid_until": "Paid until",
+      "trial_until": "Trial until",
+      "no_end": "No end date",
+      "price": "Price",
+      "per_month": "/ month",
+      "per_year": "/ year",
+      "invoices_title": "Invoices",
+      "invoices_intro": "Download an invoice for every payment.",
+      "no_invoices": "No invoices yet.",
+      "pdf": "(PDF, opens in a new tab)",
+      "void": "Void"
+    },
+    "news_title": "Platform news",
+    "news_intro": "Occasional e-mails about new features and offers. E-mails about your account, such as invoices and security, are always sent.",
+    "news_label": "Send me news by e-mail"
   },
   "team": {
     "title": "Team",

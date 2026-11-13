@@ -12,6 +12,7 @@ use Database\Seeders\Demo\Photos;
 use Database\Seeders\Demo\Platform;
 use Database\Seeders\Demo\Showcase;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Artisan;
 
 /**
  * The sales demo (never on a live server: refused when APP_ENV=production).
@@ -82,6 +83,7 @@ class DemoSeeder extends Seeder
             $platform->announcement($admin);
         }
         $this->step('Payments for the café and showcases', fn () => $platform->payFor($paying, $admin));
+        $this->step('Invoices for every payment', fn () => Artisan::call('invoices:backfill'));
     }
 
     /**

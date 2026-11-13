@@ -52,3 +52,28 @@ it('puts the platform logo at the top of every e-mail', function () {
     $this->actingAs($admin)->deleteJson(p('settings/logo'), [], idem())->assertOk()->assertJsonPath('data.logo_url', null);
     Storage::disk('public')->assertMissing($path);
 });
+
+it('saves the landing page settings (owner, 2026-11-13)', function () {
+    $admin = superAdmin();
+
+    $this->actingAs($admin)->putJson(p('settings'), [
+        'brand_color' => '#1E3A8A',
+        'landing_headline' => '  QR menus for Addis  ',
+        'landing_subline' => '',
+        'landing_sections' => ['faq' => false, 'unknown' => true],
+        'landing_testimonials' => [['quote' => 'Guests order faster.', 'name' => 'Hana']],
+        'socials' => ['telegram' => 'https://t.me/menu_et', 'myspace' => 'https://myspace.com/x'],
+    ], idem())->assertOk()
+        ->assertJsonPath('data.brand_color', '#1E3A8A')
+        ->assertJsonPath('data.landing_headline', 'QR menus for Addis')
+        ->assertJsonPath('data.landing_sections.faq', false)
+        ->assertJsonPath('data.landing_sections.pricing', true)
+        ->assertJsonMissingPath('data.landing_sections.unknown')
+        ->assertJsonPath('data.landing_testimonials.0.role', '')
+        ->assertJsonPath('data.socials.telegram', 'https://t.me/menu_et')
+        ->assertJsonMissingPath('data.socials.myspace');
+
+    $this->actingAs($admin)->putJson(p('settings'), ['brand_color' => 'red'], idem())->assertUnprocessable()->assertJsonValidationErrors('brand_color');
+    $this->actingAs($admin)->putJson(p('settings'), ['socials' => ['telegram' => 'javascript:alert(1)']], idem())->assertUnprocessable();
+    $this->actingAs($admin)->putJson(p('settings'), ['landing_testimonials' => [['quote' => 'No name']]], idem())->assertUnprocessable();
+});

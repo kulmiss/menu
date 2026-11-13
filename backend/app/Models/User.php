@@ -11,8 +11,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Carbon;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 
+/**
+ * @property Carbon|null $news_unsubscribed_at News e-mails off (account e-mails still sent)
+ */
 #[Fillable(['name', 'email', 'password', 'locale'])]
 #[Hidden(['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes'])]
 class User extends Authenticatable implements MustVerifyEmail
@@ -43,6 +47,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'is_super_admin' => 'boolean',
             'two_factor_confirmed_at' => 'datetime',
             'last_login_at' => 'datetime',
+            'news_unsubscribed_at' => 'datetime',
         ];
     }
 

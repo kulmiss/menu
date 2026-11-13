@@ -1,8 +1,12 @@
 import { fakeApi } from '@/test-utils/fake-api'
 import { renderWithQuery } from '@/test-utils/render'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { userEvent } from 'vitest/browser'
 import PlatformWidgets from './widgets'
+
+vi.mock('@tanstack/react-router', async (orig) =>
+  (await import('@/test-utils/router-mock')).routerMock(await orig())
+)
 
 const months = Array.from({ length: 12 }, (_, i) => ({
   month: `2026-${String(i + 1).padStart(2, '0')}`,
@@ -90,6 +94,20 @@ const all = {
             hours: false,
             qr: false,
           },
+        },
+      ],
+    },
+  },
+  'GET /platform/widgets/follow-ups': {
+    data: {
+      data: [
+        {
+          id: 4,
+          name: 'Kaldi Corner',
+          date: '2026-11-10',
+          reason: 'Renewal call',
+          overdue: true,
+          tags: [{ id: 1, name: 'At risk', color: '#ca8a04' }],
         },
       ],
     },
@@ -220,5 +238,10 @@ describe('Super Admin dashboard widgets', () => {
       .toBeVisible()
     await expect.element(screen.getByText('Quiet Place')).toBeVisible()
     await expect.element(screen.getByText('8.3.12')).toBeVisible()
+    // CRM follow-ups (owner, 2026-11-13)
+    await expect.element(screen.getByText('Follow-ups due')).toBeVisible()
+    await expect
+      .element(screen.getByText('overdue since 2026-11-10'))
+      .toBeVisible()
   })
 })

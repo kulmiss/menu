@@ -19,6 +19,11 @@ return [
     'impersonation_expired' => 'The “log in as” session ended after 2 hours. You are back in the platform area.',
     'impersonation_blocked' => 'This isn’t allowed while logged in as someone else.',
     'no_owner' => 'This restaurant has no owner to log in as.',
+    'invoice_no_owner' => 'This restaurant has no owner to send the invoice to.',
+    'invoice_already_void' => 'This invoice is already void.',
+    'note_not_yours' => 'You can only change your own notes.',
+    'backup_running' => 'A backup is already running.',
+    'backup_s3_incomplete' => 'Fill in the endpoint, bucket, access key and secret key first.',
     'suspended_reason' => 'Your restaurant is suspended: :reason',
     'slug_taken' => 'This web address is already taken.',
     'mail_test' => [

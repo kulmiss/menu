@@ -3,14 +3,20 @@ import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import { AdminHeader } from '@/components/layout/admin-header'
 import { Main } from '@/components/layout/main'
+import { useCurrentTenant } from '@/features/auth/use-me'
 
 /** Personal settings: profile and language, password and two-factor. */
 export function Settings() {
   const { t } = useTranslation()
   const { pathname } = useLocation()
+  const owner = useCurrentTenant()?.membership?.role === 'owner'
   const tabs = [
     { to: '/admin/settings', label: t('nav.profile') },
     { to: '/admin/settings/security', label: t('nav.security') },
+    // Plan and invoices: owners only (owner, 2026-11-13).
+    ...(owner
+      ? [{ to: '/admin/settings/billing', label: t('settings.billing.tab') }]
+      : []),
   ] as const
 
   return (

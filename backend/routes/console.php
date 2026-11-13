@@ -1,6 +1,9 @@
 <?php
 
+use App\Jobs\SendCampaignBatch;
 use App\Models\Tenant;
+use App\Support\Backups\Backups;
+use App\Support\PlatformSettings;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
@@ -19,6 +22,15 @@ Schedule::command('queue:work --stop-when-empty --max-time=50 --tries=3')->every
 
 // Heartbeat for the Super Admin's "System health" (cron last run).
 Schedule::call(fn () => Cache::forever('cron:last_run', now()->toIso8601String()))->everyMinute()->name('cron-heartbeat');
+
+// Super Admin → Messages: a few e-mails per minute (owner, 2026-11-13).
+Schedule::call(fn () => SendCampaignBatch::dispatch())->everyMinute()->name('campaigns:send')
+    ->when(fn () => SendCampaignBatch::pending());
+
+// Backups (owner, 2026-11-13): daily, and an hourly check that warns the Super Admins.
+Schedule::command('backup:run --scheduled')->dailyAt('02:30')->withoutOverlapping(120);
+Schedule::call(fn () => app(Backups::class)->check())->hourlyAt(17)->name('backup:check')
+    ->when(fn () => (bool) PlatformSettings::get('backup_enabled'));
 
 Schedule::command('menu:refresh-pages')->hourly();
 Schedule::command('menu:refresh-pages --all')->dailyAt('00:05');

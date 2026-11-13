@@ -24,6 +24,7 @@ class MeController extends Controller
                 'email' => $user->email,
                 'locale' => $user->locale,
                 'email_verified' => $user->hasVerifiedEmail(),
+                'news_subscribed' => $user->news_unsubscribed_at === null,
                 'two_factor_enabled' => $user->two_factor_confirmed_at !== null,
                 'is_super_admin' => $user->is_super_admin,
                 // Set while a Super Admin is "logged in as" this user (red banner).

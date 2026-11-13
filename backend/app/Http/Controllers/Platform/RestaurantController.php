@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Membership;
 use App\Models\Payment;
 use App\Models\Plan;
+use App\Models\PlatformTag;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Notifications\OwnerWelcomeNotification;
@@ -43,8 +44,12 @@ class RestaurantController extends Controller
             'state' => ['sometimes', 'nullable', Rule::in(array_column(SubscriptionState::cases(), 'value'))],
             'plan_id' => ['sometimes', 'nullable', 'integer'],
             'deleted' => ['sometimes', 'boolean'],
+            'tag_id' => ['sometimes', 'nullable', 'integer'],
+            'follow_up' => ['sometimes', 'nullable', 'in:due'],
         ]);
-        $query = Tenant::query()->with(['plan', 'memberships' => fn ($q) => $q->where('role', Role::Owner)->with('user')])
+        $query = Tenant::query()->with(['plan', 'platformTags', 'memberships' => fn ($q) => $q->where('role', Role::Owner)->with('user')])
+            ->when($data['tag_id'] ?? null, fn ($q, $tag) => $q->whereHas('platformTags', fn ($w) => $w->whereKey($tag)))
+            ->when(($data['follow_up'] ?? null) === 'due', fn ($q) => $q->whereNotNull('follow_up_on')->where('follow_up_on', '<=', now()->toDateString()))
             ->when($request->boolean('deleted'), fn ($q) => $q->onlyTrashed())
             ->when($data['search'] ?? null, fn ($q, $s) => $q->where(fn ($w) => $w->where('name', 'like', "%{$s}%")->orWhere('slug', 'like', "%{$s}%")))
             ->when($data['plan_id'] ?? null, fn ($q, $p) => $q->where('plan_id', $p))
@@ -61,7 +66,7 @@ class RestaurantController extends Controller
 
     public function show(int $restaurant): JsonResponse
     {
-        $tenant = Tenant::withTrashed()->with(['plan', 'memberships.user'])->findOrFail($restaurant);
+        $tenant = Tenant::withTrashed()->with(['plan', 'platformTags', 'memberships.user'])->findOrFail($restaurant);
         $overrides = DB::table('tenant_feature_overrides')->where('tenant_id', $tenant->id)->pluck('enabled', 'feature_key');
 
         return response()->json(['data' => [
@@ -69,7 +74,7 @@ class RestaurantController extends Controller
             'members' => $tenant->memberships->map(fn (Membership $m) => ['id' => $m->user_id, 'name' => $m->user->name, 'email' => $m->user->email, 'role' => $m->role->value])->values(),
             'features' => Features::for($tenant),
             'overrides' => $overrides,
-            'payments' => Payment::with('plan')->where('tenant_id', $tenant->id)->latest('paid_at')->get()->map(fn (Payment $p) => PaymentController::row($p))->values(),
+            'payments' => Payment::with(['plan', 'invoices'])->where('tenant_id', $tenant->id)->latest('paid_at')->get()->map(fn (Payment $p) => PaymentController::row($p))->values(),
             'counts' => [
                 'menus' => DB::table('menus')->where('tenant_id', $tenant->id)->count(),
                 'items' => DB::table('items')->where('tenant_id', $tenant->id)->count(),
@@ -278,6 +283,10 @@ class RestaurantController extends Controller
             'created_at' => $t->created_at?->toDateString(),
             'deleted_at' => $t->deleted_at instanceof Carbon ? $t->deleted_at->toDateString() : null,
             'url' => url('/'.$t->slug),
+            // CRM (Super Admin only)
+            'tags' => $t->relationLoaded('platformTags') ? $t->platformTags->sortBy('name')->map(fn (PlatformTag $g) => CrmController::tag($g))->values()->all() : [],
+            'follow_up_on' => $t->follow_up_on?->toDateString(),
+            'follow_up_reason' => $t->follow_up_reason,
         ];
     }
 }

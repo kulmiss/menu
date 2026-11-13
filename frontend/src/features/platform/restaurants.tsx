@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { ExternalLink, Loader2, Mail, Plus } from 'lucide-react'
+import { ExternalLink, Loader2, Mail, Plus, Tag } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { validationErrors } from '@/lib/api'
 import { slugify } from '@/lib/slug'
@@ -39,23 +39,42 @@ import {
   plansQ,
   restaurantQ,
   restaurantsQ,
+  tagsQ,
   send,
   usePlatformMutation,
 } from './api'
+import { CrmSection, ManageTagsDialog, TagChip } from './crm'
+import { InvoiceActions } from './invoices'
 import { PageTitle } from './layout'
 
-type Props = { state?: string; open?: number; onState: (s?: string) => void }
+type Props = {
+  state?: string
+  open?: number
+  tag?: number
+  onState: (s?: string) => void
+}
 
-export function RestaurantsPage({ state, open, onState }: Props) {
+export function RestaurantsPage({
+  state,
+  open,
+  tag: initialTag,
+  onState,
+}: Props) {
   const { t } = useTranslation()
   const [search, setSearch] = useState('')
   const [deleted, setDeleted] = useState(false)
   const [selected, setSelected] = useState<number | null>(open ?? null)
   const [creating, setCreating] = useState(false)
+  const [tag, setTag] = useState(initialTag ? String(initialTag) : 'all')
+  const [due, setDue] = useState(false)
+  const [managing, setManaging] = useState(false)
+  const tags = useQuery(tagsQ())
   const params = new URLSearchParams()
   if (search.trim()) params.set('search', search.trim())
   if (state) params.set('state', state)
   if (deleted) params.set('deleted', '1')
+  if (tag !== 'all') params.set('tag_id', tag)
+  if (due) params.set('follow_up', 'due')
   const list = useQuery(restaurantsQ(params.toString()))
 
   return (
@@ -97,12 +116,35 @@ export function RestaurantsPage({ state, open, onState }: Props) {
             ))}
           </SelectContent>
         </Select>
+        <Select value={tag} onValueChange={setTag}>
+          <SelectTrigger className='w-40' aria-label={t('platform.crm.tag')}>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value='all'>{t('platform.crm.all_tags')}</SelectItem>
+            {tags.data?.map((g) => (
+              <SelectItem key={g.id} value={String(g.id)}>
+                {g.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Button
+          variant={due ? 'secondary' : 'ghost'}
+          onClick={() => setDue((d) => !d)}
+          aria-pressed={due}
+        >
+          {t('platform.crm.due_filter')}
+        </Button>
         <Button
           variant={deleted ? 'secondary' : 'ghost'}
           onClick={() => setDeleted((d) => !d)}
           aria-pressed={deleted}
         >
           {t('platform.restaurants.deleted')}
+        </Button>
+        <Button variant='ghost' onClick={() => setManaging(true)}>
+          <Tag /> {t('platform.crm.manage_tags')}
         </Button>
       </div>
       {list.isPending ? (
@@ -147,6 +189,20 @@ export function RestaurantsPage({ state, open, onState }: Props) {
                     <div className='text-xs text-muted-foreground'>
                       /{r.slug}
                     </div>
+                    {(r.tags?.length ?? 0) > 0 && (
+                      <div className='mt-1 flex flex-wrap gap-1'>
+                        {r.tags?.map((g) => (
+                          <TagChip key={g.id} tag={g} />
+                        ))}
+                      </div>
+                    )}
+                    {r.follow_up_on && (
+                      <div className='mt-1 text-xs text-muted-foreground'>
+                        {t('platform.crm.follow_up_on', {
+                          date: r.follow_up_on,
+                        })}
+                      </div>
+                    )}
                   </td>
                   <td className='p-2'>{r.owner?.email ?? '—'}</td>
                   <td className='p-2'>{r.plan?.name ?? '—'}</td>
@@ -180,6 +236,7 @@ export function RestaurantsPage({ state, open, onState }: Props) {
         <RestaurantSheet id={selected} onClose={() => setSelected(null)} />
       )}
       {creating && <CreateDialog onClose={() => setCreating(false)} />}
+      {managing && <ManageTagsDialog onClose={() => setManaging(false)} />}
     </>
   )
 }
@@ -581,17 +638,19 @@ function RestaurantSheet({ id, onClose }: { id: number; onClose: () => void }) {
               )}
               <ul className='divide-y rounded-md border'>
                 {r.payments.map((p) => (
-                  <li
-                    key={p.id}
-                    className='flex justify-between gap-2 px-3 py-1.5'
-                  >
-                    <span>
-                      {p.paid_at} · {t(`platform.methods.${p.method}`)}
-                      {p.reference ? ` · ${p.reference}` : ''}
-                    </span>
-                    <span className='tabular-nums'>
-                      {money(p.amount_minor, p.currency)} → {p.period_end}
-                    </span>
+                  <li key={p.id} className='grid gap-1 px-3 py-1.5'>
+                    <div className='flex justify-between gap-2'>
+                      <span>
+                        {p.paid_at} · {t(`platform.methods.${p.method}`)}
+                        {p.reference ? ` · ${p.reference}` : ''}
+                      </span>
+                      <span className='tabular-nums'>
+                        {money(p.amount_minor, p.currency)} → {p.period_end}
+                      </span>
+                    </div>
+                    {p.invoices?.map((inv) => (
+                      <InvoiceActions key={inv.id} invoice={inv} />
+                    ))}
                   </li>
                 ))}
                 {r.payments.length === 0 && (
@@ -601,6 +660,14 @@ function RestaurantSheet({ id, onClose }: { id: number; onClose: () => void }) {
                 )}
               </ul>
             </section>
+
+            <CrmSection
+              key={`${r.id}-${r.follow_up_on ?? ''}`}
+              id={r.id}
+              tags={r.tags ?? []}
+              followUpOn={r.follow_up_on ?? null}
+              followUpReason={r.follow_up_reason ?? null}
+            />
 
             <section className='grid gap-2'>
               <h3 className='font-semibold'>

@@ -36,6 +36,24 @@ _Last updated: 2026-11-12 13:00 EAT. Everything requested is merged into `develo
 
 ## History (newest first)
 
+## Nine features (2026-11-13, in progress) — 5 of 9 done, stopped at a clean point
+
+**Next (not started), in this order, each a small PR on top of the previous branch (`feat/platform-search`, PR #64):**
+6. **Somali + Amharic** (`feat/languages`): `locales/{so,am}/{common,screens,platform,signup,appearance}.json` + `lang/{so,am}/*.php` + guest-page strings, all marked `"_status": "machine_draft"` (the `__LOCALE_STATUS__` define in vite.config.ts already reads it); export a review list (CSV: key, English, Somali, Amharic). Per-user language already saved (`users.locale`, profile select appears when `LANGUAGES.length > 1`); default from PlatformSettings `default_locale`. Re-enable per-field menu translations (DB fields are already per language; admin dish form shows fields for the restaurant's enabled languages). Guest page: language switch only with >1 language, `?lang=` → separate static page per language in menu-cache, fallback to main language; switch code in the on-demand file (inline script is 4.80 KB of 5 KB). Noto Sans Ethiopic subset WOFF2 loaded only for `am`. Plan limit `languages` (Free: English + 1). CI speed jobs for a Somali and an Amharic page.
+7. **Time-based prices** (`feat/price-periods`): `price_periods` (name, weekdays, start/end time in the restaurant's time zone, branch nullable) + `price_period_items` (item/variant, fixed price or % off); feature key `price_periods` per plan; guest page shows special price + crossed-out normal price + label "Happy hour until 18:00"; "My order" uses the current price; scheduler rebuilds affected static pages at each start/end (`menu:refresh-pages --tenant`); admin Promotions → Price periods with "what guests see now" preview; CI speed job during a period.
+8. **Print materials** (`feat/print-materials`): QR codes → Print materials: table tent (A6 foldable), A5/A4 poster, round/square sticker sheets with cut lines, window sign; 3–4 designs, editable headline, per branch/table, light/dark; FPDF with vector QR (TableCards already draws vector QR) + PNG for social media; "Menu by …" on plans without `remove_branding`.
+9. **Insights export** (`feat/insights-export`): CSV (daily views, scans per QR/table, dish views, "My order" adds; period + branch) and a PDF report (summary, chart, top dishes, top QR codes, previous-period comparison) from `stats_daily`; optional monthly e-mail on the 1st (restaurant setting); feature `insights`; Owner/Manager only (Staff can't export).
+
+- #60 Invoices and receipts (QUESTIONS #173).
+- #61 Restaurant notes, tags and follow-ups for the Super Admin (QUESTIONS #174). Live: `php artisan migrate --force`.
+- #64 Global search for the Super Admin, Ctrl/⌘+K (QUESTIONS #177). Live: migrate (indexes).
+- #63 Backups: daily zip of database + media, retention 7/4/3, optional S3-compatible off-site copy, alerts; restore steps in deploy.md (QUESTIONS #176). Live: migrate; fill Backups → settings; check that `storage/app/backups` has room.
+- #62 Messages: e-mails to restaurant owners with filters, preview, test, throttled queue sending, retries and unsubscribe (QUESTIONS #175). Live: migrate; the existing cron line sends them. Live server once: `php artisan migrate --force` then `php artisan invoices:backfill`; fill Super Admin → Settings → Billing.
+
+## Landing page (#59, 2026-11-13) — QUESTIONS #172
+- `/` redesigned (Blade, no framework JS): hero with a real demo screenshot and QR code, how it works, features, 4 styles, speed, pricing from the database, optional real testimonials, FAQ, CTA, footer. Super Admin → Settings → Landing page. `robots.txt` and `sitemap.xml` are routes.
+- New screenshots after a design change of the guest menu: `php artisan db:seed --class=DemoSeeder` (laptop only), `php artisan serve`, then `cd frontend; node scripts/landing-screenshots.mjs`.
+
 ## Self sign-up (#52–#58, 2026-11-13) — QUESTIONS #162–#171
 - #52 "Log in as owner" in one click: no reason, no time limit, not recorded.
 - #53 Backend: `POST /api/v1/signup`, e-mail confirmation (24 h signed link), Free plan (migration), `signup_state` on tenants (unverified / pending approval → public menu off), approval, rejection, `signup:prune` (7 days), anti-spam (rate limits, honeypot, optional Turnstile, blocked domains), branded e-mails with the platform logo, upgrade contact on 402.

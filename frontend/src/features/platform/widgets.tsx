@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
+import { Link } from '@tanstack/react-router'
 import { AlertTriangle, Check, Mail, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { api, isApiError } from '@/lib/api'
@@ -17,6 +18,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Bar, Widget } from '@/features/dashboard/widget-card'
+import { followUpsQ } from './api'
+import { TagChip } from './crm'
 
 /**
  * Super Admin dashboard widgets (owner, 2026-11-11), downloaded after the
@@ -108,6 +111,7 @@ export default function PlatformWidgets() {
       style={{ gridTemplateColumns: 'minmax(0, 1fr)' }}
     >
       <HealthWidget />
+      <FollowUpsWidget />
       <div className='grid min-w-0 gap-4 lg:grid-cols-2'>
         <RevenueWidget />
         <PlanMixWidget />
@@ -435,6 +439,53 @@ function TopWidget() {
 }
 
 const STEPS = ['logo', 'banner', 'dishes', 'photos', 'hours', 'qr'] as const
+
+/** CRM: follow-ups due today and overdue (owner, 2026-11-13). */
+function FollowUpsWidget() {
+  const { t } = useTranslation()
+  const query = useQuery(followUpsQ())
+  if (query.data && query.data.length === 0) return null
+  return (
+    <Widget title={t('platform.crm.widget')} query={query}>
+      {(rows) => (
+        <ul className='grid gap-2'>
+          {rows.map((r) => (
+            <li
+              key={r.id}
+              className='flex flex-wrap items-center gap-2 text-sm'
+            >
+              <Link
+                to='/platform/$section'
+                params={{ section: 'restaurants' }}
+                search={{ open: r.id }}
+                className='inline-flex min-h-11 items-center font-medium hover:underline sm:min-h-8'
+              >
+                {r.name}
+              </Link>
+              <span
+                className={
+                  r.overdue
+                    ? 'font-medium text-destructive'
+                    : 'text-muted-foreground'
+                }
+              >
+                {r.overdue
+                  ? t('platform.crm.overdue', { date: r.date })
+                  : t('platform.crm.today')}
+              </span>
+              {r.reason && (
+                <span className='text-muted-foreground'>· {r.reason}</span>
+              )}
+              {r.tags.map((g) => (
+                <TagChip key={g.id} tag={g} />
+              ))}
+            </li>
+          ))}
+        </ul>
+      )}
+    </Widget>
+  )
+}
 
 function SignupsWidget() {
   const { t } = useTranslation()
