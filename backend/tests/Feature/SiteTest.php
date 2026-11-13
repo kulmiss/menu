@@ -5,7 +5,6 @@ use App\Models\Plan;
 use App\Models\Tenant;
 use App\Support\BrandColor;
 use App\Support\PlatformSettings;
-use Illuminate\Support\Facades\DB;
 
 it('shows the landing page with the platform name, sign-up and sign-in', function () {
     PlatformSettings::save(['name' => 'Buna Menus']);
@@ -43,25 +42,31 @@ it('hides "Create a free account" when sign-up is closed', function () {
         ->assertSee('href="/auth/sign-in"', false);
 });
 
-it('shows the real plans from the database, Free first and highlighted', function () {
+it('shows the plan ladder from the database: Free first, then what each plan adds', function () {
     PlatformSettings::save(['upgrade_whatsapp' => '+251 911 000 000']);
-    $pro = Plan::create(['name' => ['en' => 'Pro'], 'slug' => 'pro', 'price_minor' => 120000, 'currency' => 'ETB', 'interval' => 'month', 'limits' => ['items' => 300, 'branches' => 3], 'is_public' => true, 'is_active' => true, 'sort' => 2]);
-    DB::table('plan_features')->insert(['plan_id' => $pro->id, 'feature_key' => 'insights', 'enabled' => true]);
     Plan::create(['name' => ['en' => 'Trial'], 'slug' => 'trial', 'price_minor' => 0, 'currency' => 'ETB', 'interval' => 'month', 'limits' => [], 'is_public' => true, 'is_active' => true, 'sort' => 1]);
     Plan::create(['name' => ['en' => 'Secret'], 'slug' => 'secret', 'price_minor' => 9900, 'currency' => 'ETB', 'interval' => 'month', 'limits' => [], 'is_public' => false, 'is_active' => true, 'sort' => 3]);
 
     $html = $this->get('/')->assertOk()
-        ->assertSeeInOrder(['Free · No card needed', 'Free', 'Up to 30 dishes', '1 branch', 'Create a free account', 'Pro', 'Br 1,200', '/ month', 'Up to 300 dishes', 'Unlimited photos', 'Up to 3 branches', 'Insights', 'Contact us on WhatsApp'])
+        ->assertSeeInOrder([
+            'Free · No card needed', 'Free', 'Unlimited dishes, menus and QR codes', 'Up to 100 photos', '1 branch', '2 menu styles', 'PDF menu', 'Posters, table tents and stickers', 'Import and export (spreadsheet)', 'Create a free account',
+            'Plus', 'Br 490', '/ month', 'or Br 4,900 / year (2 months free)', 'Everything in Free, plus:', 'Up to 500 photos', 'All 4 menu styles', 'Specials and announcements', 'Insights and monthly report', 'Contact us on WhatsApp',
+            'Pro', 'Br 990', 'Everything in Plus, plus:', 'Up to 2,000 photos', 'Up to 3 branches', 'Happy hour and lunch prices', 'No “Menu by Menu” line',
+            'Business', 'Br 2,490', 'Everything in Pro, plus:', 'Unlimited photos', 'Unlimited branches',
+        ])
         ->assertSee('https://wa.me/251911000000?text=', false)
         ->assertDontSee('Secret')
         ->getContent();
-    expect(substr_count($html, 'class="card plan'))->toBe(2); // the free "Trial" plan isn't offered
+    expect(substr_count($html, 'class="card plan'))->toBe(4); // the free "Trial" plan isn't offered
+    // Plus doesn't repeat what Free already has.
+    $plus = substr($html, strpos($html, '>Plus</h3>'), 1500);
+    expect($plus)->not->toContain('PDF menu')->not->toContain('Unlimited dishes')->not->toContain('1 branch');
 
     // Structured data with the same offers.
     preg_match('#<script type="application/ld\+json">(.+?)</script>#s', $html, $m);
     $ld = json_decode($m[1], true);
     $app = collect($ld['@graph'])->firstWhere('@type', 'SoftwareApplication');
-    expect($app['offers'])->toHaveCount(2)->and($app['offers'][1])->toMatchArray(['price' => '1200', 'priceCurrency' => 'ETB']);
+    expect($app['offers'])->toHaveCount(4)->and($app['offers'][1])->toMatchArray(['price' => '490', 'priceCurrency' => 'ETB']);
 });
 
 it('lets the Super Admin edit the texts and switch sections off; testimonials only when real ones exist', function () {

@@ -121,9 +121,20 @@ export function PlansPage() {
                 </div>
                 <p>
                   {money(p.price_minor, p.currency)} /{' '}
-                  {t(`platform.plans.${p.interval}`)} ·{' '}
-                  {t('platform.plans.trial', { count: p.trial_days })}
+                  {t(`platform.plans.${p.interval}`)}
+                  {p.price_year_minor != null &&
+                    ` · ${money(p.price_year_minor, p.currency)} / ${t('platform.plans.year')}`}{' '}
+                  · {t('platform.plans.trial', { count: p.trial_days })}
                 </p>
+                {p.replaced_by_plan_id != null && (
+                  <p className='text-muted-foreground'>
+                    {t('platform.plans.replaced', {
+                      name:
+                        plans.data?.find((x) => x.id === p.replaced_by_plan_id)
+                          ?.name.en ?? '',
+                    })}
+                  </p>
+                )}
                 <p className='text-muted-foreground'>
                   {LIMITS.filter((k) => p.limits[k] != null)
                     .map((k) => `${t(`platform.limits.${k}`)} ${p.limits[k]}`)
@@ -163,6 +174,8 @@ function PlanDialog({
     name: plan?.name.en ?? '',
     slug: plan?.slug ?? '',
     price: plan ? String(plan.price_minor / 100) : '',
+    price_year:
+      plan?.price_year_minor != null ? String(plan.price_year_minor / 100) : '',
     currency: plan?.currency ?? 'ETB',
     interval: plan?.interval ?? 'month',
     trial_days: String(plan?.trial_days ?? 14),
@@ -187,6 +200,8 @@ function PlanDialog({
         name: { ...(plan?.name ?? {}), en: v.name },
         slug: v.slug,
         price_minor: Math.round(Number(v.price || 0) * 100),
+        price_year_minor:
+          v.price_year === '' ? null : Math.round(Number(v.price_year) * 100),
         currency: v.currency.toUpperCase(),
         interval: v.interval,
         trial_days: Number(v.trial_days),
@@ -242,6 +257,16 @@ function PlanDialog({
                 inputMode='decimal'
                 value={v.price}
                 onChange={(x) => setV({ ...v, price: x.target.value })}
+              />
+            </div>
+            <div className='grid gap-1'>
+              <Label htmlFor='pl-year'>{t('platform.plans.price_year')}</Label>
+              <Input
+                id='pl-year'
+                inputMode='decimal'
+                placeholder={t('platform.plans.price_year_none')}
+                value={v.price_year}
+                onChange={(x) => setV({ ...v, price_year: x.target.value })}
               />
             </div>
             <div className='grid grid-cols-2 gap-2'>

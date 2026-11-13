@@ -18,6 +18,8 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 import { AdminHeader } from '@/components/layout/admin-header'
 import { Main } from '@/components/layout/main'
+import { UpgradePage } from '@/components/upgrade-page'
+import { useCurrentTenant } from '@/features/auth/use-me'
 import { branchesQuery } from '@/features/branches/api'
 import { tr } from '@/features/menu/text'
 import { useMenuContext } from '@/features/menu/use-menu-context'
@@ -27,7 +29,13 @@ import { ExportMenu, MonthlyReportCard } from './export'
 const ViewsChart = lazy(() => import('./views-chart'))
 
 /** Insights (PLAN.md screen 12): views and scans per day, top dishes, scans per code. */
+/** The screen, or the upgrade card when the plan doesn't include it. */
 export function InsightsPage() {
+  const included = useCurrentTenant()?.features?.insights !== false
+  return included ? <InsightsScreen /> : <UpgradePage feature='insights' />
+}
+
+function InsightsScreen() {
   const { t } = useTranslation()
   const ctx = useMenuContext()
   const [days, setDays] = useState(30)

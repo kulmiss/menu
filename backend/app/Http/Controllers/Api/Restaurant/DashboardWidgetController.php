@@ -7,11 +7,15 @@ use App\Models\Branch;
 use App\Models\Item;
 use App\Models\Media;
 use App\Models\OpeningHour;
+use App\Models\Plan;
 use App\Models\Tenant;
 use App\Models\TenantAppearance;
 use App\Models\TenantProfile;
 use App\Support\Features;
 use App\Support\PlanLimits;
+use App\Support\Plans\PlanLadder;
+use App\Support\PlatformSettings;
+use App\Support\UpgradeContact;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
@@ -152,12 +156,11 @@ class DashboardWidgetController extends Controller
         Gate::authorize('restaurant.manage');
         $tenant->loadMissing('plan');
         $ends = $tenant->paid_until ?? $tenant->trial_ends_at;
+        // Dishes are unlimited on every standard plan; photos and branches are what's counted (QUESTIONS #184).
         $usage = [
             'items' => Item::count(),
-            'branches' => Branch::count(),
             'photos' => Media::count(),
-            'languages' => 1, // English only for now (owner, 2026-11-10)
-            'team' => DB::table('memberships')->where('tenant_id', $tenant->id)->count(),
+            'branches' => Branch::count(),
         ];
 
         return response()->json(['data' => [
@@ -170,6 +173,47 @@ class DashboardWidgetController extends Controller
                 'used' => $used,
                 'limit' => $limits->limit($key),
             ])->values(),
+            'next' => $this->nextPlan($tenant),
+            'upgrade' => UpgradeContact::payload(),
         ]]);
+    }
+
+    /**
+     * The next public plan up the ladder and what it adds, for "Upgrade to …".
+     *
+     * @return array{name: object, adds: list<string>}|null
+     */
+    private function nextPlan(Tenant $tenant): ?array
+    {
+        $current = $tenant->plan;
+        if ($current === null) {
+            return null;
+        }
+        $next = Plan::where('is_public', true)->where('is_active', true)->where('price_minor', '>', $current->price_minor)
+            ->orderBy('price_minor')->first();
+        if ($next === null) {
+            return null;
+        }
+        $have = Features::for($tenant);
+        $gets = PlanLadder::effective($next);
+        $adds = [];
+        $styles = count(array_filter(['editorial', 'grid', 'bistro', 'minimal'], fn ($s) => $gets['features']['style_'.$s]));
+        if ($styles > count(Features::styles($tenant))) {
+            $adds[] = trans_choice('landing.pricing.feature.styles', $styles, ['n' => $styles]);
+        }
+        foreach (['promotions', 'insights', 'price_periods', 'remove_branding', 'import_export'] as $key) {
+            if ($gets['features'][$key] && ! $have[$key]) {
+                $adds[] = __("landing.pricing.feature.{$key}", ['name' => PlatformSettings::get('name')]);
+            }
+        }
+        foreach (['photos', 'branches'] as $key) {
+            $mine = $current->limits[$key] ?? null;
+            $theirs = $gets['limits'][$key] ?? null;
+            if ($mine !== null && ($theirs === null || $theirs > $mine)) {
+                $adds[] = $theirs === null ? __("landing.pricing.unlimited.{$key}") : trans_choice("landing.pricing.limit.{$key}", $theirs, ['n' => number_format($theirs)]);
+            }
+        }
+
+        return ['name' => (object) $next->name, 'adds' => $adds];
     }
 }

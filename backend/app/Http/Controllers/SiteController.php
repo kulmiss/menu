@@ -113,35 +113,45 @@ class SiteController extends Controller
             ->sortBy(fn (Plan $p) => $p->id === $signup?->id ? -1 : $p->sort);
         $features = DB::table('plan_features')->whereIn('plan_id', $plans->pluck('id'))->get()->groupBy('plan_id');
 
-        return $plans->map(function (Plan $p) use ($signup, $features, $contact, $platform) {
+        $previous = null;
+        $out = [];
+        foreach ($plans as $p) {
             $own = ($features[$p->id] ?? collect())->pluck('enabled', 'feature_key')->map(fn ($v) => (bool) $v)->all();
-            $on = array_map(fn ($default) => $default, Features::DEFAULTS);
-            foreach ($on as $key => $default) {
+            $on = [];
+            foreach (Features::DEFAULTS as $key => $default) {
                 $on[$key] = $own[$key] ?? $default;
             }
             $limits = (array) ($p->limits ?? []);
-            $limits['members'] ??= $limits['team'] ?? null;
             $lines = [];
-            foreach (['items', 'photos', 'menus', 'branches', 'tables', 'members', 'languages'] as $key) {
+            // Dishes and menus first: unlimited on every plan of the ladder (QUESTIONS #184).
+            $lines[] = ($limits['items'] ?? null) === null && ($limits['menus'] ?? null) === null
+                ? __('landing.pricing.unlimited.items')
+                : trans_choice('landing.pricing.limit.items', (int) ($limits['items'] ?? 0), ['n' => number_format((int) ($limits['items'] ?? 0))]);
+            foreach (['photos', 'branches'] as $key) {
                 $n = $limits[$key] ?? null;
-                if ($n !== null) {
-                    $lines[] = trans_choice("landing.pricing.limit.{$key}", (int) $n, ['n' => number_format((int) $n)]);
-                } elseif (in_array($key, ['items', 'photos'], true)) {
-                    $lines[] = __("landing.pricing.unlimited.{$key}");
-                }
+                $lines[] = $n === null ? __("landing.pricing.unlimited.{$key}") : trans_choice("landing.pricing.limit.{$key}", (int) $n, ['n' => number_format((int) $n)]);
             }
             $styles = count(array_filter(['editorial', 'grid', 'bistro', 'minimal'], fn ($st) => $on['style_'.$st]));
-            $included = $styles > 0 ? [trans_choice('landing.pricing.feature.styles', $styles, ['n' => $styles])] : [];
-            foreach (['pdf_menu', 'order_list', 'promotions', 'price_periods', 'insights', 'branches', 'import_export', 'remove_branding'] as $key) {
-                if ($on[$key]) {
-                    $included[] = __("landing.pricing.feature.{$key}", ['name' => $platform]);
+            $have = [];
+            if ($styles > 0) {
+                $have['styles:'.$styles] = trans_choice('landing.pricing.feature.styles', $styles, ['n' => $styles]);
+            }
+            foreach (['pdf_menu', 'order_list', 'print', 'import_export', 'promotions', 'insights', 'price_periods', 'remove_branding'] as $key) {
+                if ($key === 'print' || $on[$key]) {
+                    $have[$key] = __("landing.pricing.feature.{$key}", ['name' => $platform]);
                 }
             }
+            // A ladder: each plan lists only what it adds to the one before.
+            $included = $previous === null ? $have : array_diff_key($have, $previous['have']);
             $isFree = $p->price_minor === 0;
             $name = $p->name[app()->getLocale()] ?? $p->name['en'] ?? $p->slug;
             $message = __('landing.pricing.whatsapp_text', ['plan' => $name]);
+            $year = $isFree || $p->interval !== 'month' || ! $p->price_year_minor ? null : __('landing.pricing.yearly', [
+                'price' => MenuPageData::money((int) $p->price_year_minor, $p->currency),
+                'months' => max(0, (int) round(12 - $p->price_year_minor / max(1, $p->price_minor))),
+            ]);
 
-            return [
+            $out[] = [
                 'name' => $name,
                 'free' => $isFree,
                 'highlight' => $p->id === $signup?->id,
@@ -149,13 +159,18 @@ class SiteController extends Controller
                 'price_value' => $p->price_minor / 100,
                 'currency' => $p->currency,
                 'per' => $isFree ? __('landing.pricing.no_expiry') : __('landing.pricing.per.'.($p->interval === 'year' ? 'year' : 'month')),
-                'limits' => $lines,
-                'features' => $included,
+                'year' => $year,
+                'everything' => $previous === null ? null : __('landing.pricing.everything', ['plan' => $previous['name']]),
+                'limits' => $previous === null ? $lines : array_values(array_diff($lines, $previous['lines'])),
+                'features' => array_values($included),
                 'contact' => $isFree ? null : ($contact['whatsapp'] !== null
                     ? ['href' => $contact['whatsapp'].'?text='.rawurlencode($message), 'label' => __('landing.pricing.whatsapp'), 'whatsapp' => true]
                     : ($contact['email'] !== null ? ['href' => 'mailto:'.$contact['email'].'?subject='.rawurlencode($message), 'label' => __('landing.pricing.email'), 'whatsapp' => false] : null)),
             ];
-        })->values()->all();
+            $previous = ['name' => $name, 'have' => $have, 'lines' => $lines];
+        }
+
+        return $out;
     }
 
     /**

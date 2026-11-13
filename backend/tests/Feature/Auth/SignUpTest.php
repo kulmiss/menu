@@ -85,13 +85,13 @@ it('creates the owner and the restaurant on the Free plan, not live, and asks to
     $this->get('/buna-and-bread')->assertStatus(503);
 });
 
-it('has a Free plan on every install, with the proposed limits and features', function () {
+it('has a Free plan on every install, with the ladder limits and features (QUESTIONS #184)', function () {
     $free = Plan::where('slug', 'free')->sole();
     expect($free->price_minor)->toBe(0)
-        ->and($free->limits)->toEqual(['branches' => 1, 'menus' => 2, 'items' => 30, 'photos' => 30, 'tables' => 10]);
+        ->and($free->limits)->toEqual(['branches' => 1, 'photos' => 100]);
     $features = DB::table('plan_features')->where('plan_id', $free->id)->pluck('enabled', 'feature_key')->map(fn ($v) => (bool) $v)->all();
     expect($features)->toMatchArray([
-        'insights' => false, 'promotions' => false, 'import_export' => false, 'branches' => false, 'remove_branding' => false,
+        'insights' => false, 'promotions' => false, 'import_export' => true, 'branches' => false, 'remove_branding' => false, 'price_periods' => false,
         'pdf_menu' => true, 'order_list' => true, 'style_grid' => true, 'style_minimal' => true, 'style_editorial' => false, 'style_bistro' => false,
     ]);
 });
@@ -288,7 +288,7 @@ it('shows "registration is closed" when sign-up is off', function () {
 });
 
 it('gives new sign-ups the plan chosen in the settings', function () {
-    $pro = Plan::create(['name' => ['en' => 'Pro'], 'slug' => 'pro', 'limits' => []]);
+    $pro = Plan::create(['name' => ['en' => 'Pro'], 'slug' => 'pro-test', 'limits' => []]);
     PlatformSettings::save(['signup_plan_id' => $pro->id]);
     register()->assertCreated();
     expect(Tenant::where('slug', 'buna-and-bread')->sole()->plan_id)->toBe($pro->id);
@@ -313,13 +313,15 @@ it('enforces the Free plan limits with an upgrade contact', function () {
     $menu = $this->postJson(t($tenant, 'menus'), ['name' => ['en' => 'Food']], idem())->assertCreated()->json('data.id');
     $category = $this->postJson(t($tenant, 'categories'), ['menu_id' => $menu, 'name' => ['en' => 'Mains']], idem())->assertCreated()->json('data.id');
     asTenant($tenant, function () use ($category) {
-        foreach (range(1, 30) as $i) {
+        foreach (range(1, 40) as $i) {
             Item::create(['category_id' => $category, 'name' => ['en' => 'Dish '.$i], 'price_minor' => 100]);
         }
     });
 
-    $this->postJson(t($tenant, 'items'), ['category_id' => $category, 'name' => ['en' => 'One too many'], 'price_minor' => 100], idem())
-        ->assertStatus(402)->assertJsonPath('code', 'limits.items')
+    // Dishes are unlimited on Free now (QUESTIONS #184); a second branch is not.
+    $this->postJson(t($tenant, 'items'), ['category_id' => $category, 'name' => ['en' => 'Dish 41'], 'price_minor' => 100], idem())->assertCreated();
+    $this->postJson(t($tenant, 'branches'), ['name' => ['en' => 'Piassa']], idem())
+        ->assertStatus(402)
         ->assertJsonPath('upgrade.whatsapp', 'https://wa.me/251915550100')
         ->assertJsonPath('upgrade.email', 'sales@menu.example');
     $this->getJson(t($tenant, 'insights'))->assertStatus(402)->assertJsonPath('upgrade.whatsapp', 'https://wa.me/251915550100');

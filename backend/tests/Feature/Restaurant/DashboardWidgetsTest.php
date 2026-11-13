@@ -7,6 +7,8 @@ use App\Models\OpeningHour;
 use App\Models\Plan;
 use App\Models\TenantAppearance;
 use App\Models\TenantProfile;
+use App\Support\Features;
+use App\Support\PlatformSettings;
 use App\Support\Stats;
 use Illuminate\Support\Facades\DB;
 
@@ -105,8 +107,25 @@ it('shows the plan, days left and usage against the limits', function () {
         ->assertJsonPath('data.plan', ['en' => 'Basic'])
         ->assertJsonPath('data.days_left', 12)
         ->assertJsonPath('data.usage.0', ['key' => 'items', 'used' => 1, 'limit' => 10])
-        ->assertJsonPath('data.usage.1', ['key' => 'branches', 'used' => 1, 'limit' => null])
-        ->assertJsonPath('data.usage.4.used', 1);
+        ->assertJsonPath('data.usage.1', ['key' => 'photos', 'used' => 0, 'limit' => 50])
+        ->assertJsonPath('data.usage.2', ['key' => 'branches', 'used' => 1, 'limit' => null]);
+});
+
+it('suggests the next plan up the ladder and what it adds (QUESTIONS #184)', function () {
+    [$owner, $tenant] = member(Role::Owner);
+    $tenant->forceFill(['plan_id' => Plan::where('slug', 'free')->value('id')])->save();
+    PlatformSettings::save(['upgrade_whatsapp' => '+251 911 000 000']);
+
+    $data = $this->actingAs($owner)->getJson(t($tenant, 'widgets/plan'))->assertOk()->json('data');
+    expect($data['usage'][0])->toBe(['key' => 'items', 'used' => 0, 'limit' => null])
+        ->and($data['usage'][1]['limit'])->toBe(100)
+        ->and($data['next']['name'])->toBe(['en' => 'Plus'])
+        ->and($data['next']['adds'])->toBe(['All 4 menu styles', 'Specials and announcements', 'Insights and monthly report', 'Up to 500 photos'])
+        ->and($data['upgrade']['whatsapp'])->toBe('https://wa.me/251911000000');
+
+    $tenant->forceFill(['plan_id' => Plan::where('slug', 'business')->value('id')])->save();
+    Features::forget();
+    expect($this->actingAs($owner)->getJson(t($tenant, 'widgets/plan'))->json('data.next'))->toBeNull();
 });
 
 it('answers each widget in a few queries', function () {

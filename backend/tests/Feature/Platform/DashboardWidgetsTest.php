@@ -19,7 +19,7 @@ function payment(Tenant $tenant, int $amount, string $paidAt): void
 }
 
 it('shows revenue this month vs last month, MRR and 12 months', function () {
-    $monthly = Plan::create(['name' => ['en' => 'Pro'], 'slug' => 'pro', 'price_minor' => 50000, 'interval' => 'month', 'limits' => []]);
+    $monthly = Plan::create(['name' => ['en' => 'Pro'], 'slug' => 'pro-test', 'price_minor' => 50000, 'interval' => 'month', 'limits' => []]);
     $yearly = Plan::create(['name' => ['en' => 'Pro year'], 'slug' => 'pro-year', 'price_minor' => 1200000, 'interval' => 'year', 'limits' => []]);
     $a = Tenant::factory()->create(['plan_id' => $monthly->id, 'paid_until' => now()->addMonth()]);
     Tenant::factory()->create(['plan_id' => $yearly->id, 'paid_until' => now()->addYear()]);
@@ -116,7 +116,7 @@ it('is only for Super Admins with two-factor', function () {
 });
 
 it('stays fast with 200 restaurants and 6 months of statistics', function () {
-    $plan = Plan::create(['name' => ['en' => 'Pro'], 'slug' => 'pro', 'price_minor' => 50000, 'interval' => 'month', 'limits' => []]);
+    $plan = Plan::create(['name' => ['en' => 'Pro'], 'slug' => 'pro-test', 'price_minor' => 50000, 'interval' => 'month', 'limits' => []]);
     $now = now();
     $tenants = [];
     foreach (range(1, 200) as $n) {

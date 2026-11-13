@@ -124,9 +124,11 @@ export type PlanRow = {
   name: Record<string, string>
   slug: string
   price_minor: number
+  price_year_minor: number | null
   currency: string
   interval: 'month' | 'year'
   trial_days: number
+  replaced_by_plan_id: number | null
   limits: Partial<Record<string, number | null>>
   features: Record<string, boolean>
   is_public: boolean

@@ -703,11 +703,11 @@
       "near_limit": "Almost at your plan's limit. Ask us about a bigger plan.",
       "usage": {
         "items": "Dishes",
-        "branches": "Branches",
         "photos": "Photos",
-        "languages": "Languages",
-        "team": "Team members"
-      }
+        "branches": "Branches"
+      },
+      "next": "Upgrade to {{name}}",
+      "next_hint": "Everything you have now, plus:"
     },
     "welcome": {
       "title": "Welcome! Your email is confirmed",
@@ -759,6 +759,16 @@
   },
   "upgrade": {
     "whatsapp": "Upgrade on WhatsApp",
-    "email": "Upgrade by email"
+    "email": "Upgrade by email",
+    "title": {
+      "insights": "Insights is part of our paid plans",
+      "promotions": "Promotions are part of our paid plans"
+    },
+    "text": {
+      "insights": "See how many guests open your menu, which dishes they look at, which tables scan most, and get a monthly report by e-mail. Export everything to CSV or PDF.",
+      "promotions": "Show specials and announcements at the top of your menu, and set happy-hour or lunch prices that switch on and off by themselves."
+    },
+    "plans": "See all plans",
+    "contact": "Your data stays as it is. Contact us and we switch your plan."
   }
 }

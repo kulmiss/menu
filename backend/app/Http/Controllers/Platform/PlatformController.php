@@ -79,6 +79,7 @@ class PlatformController extends Controller
             'name' => (object) $p->name,
             'slug' => $p->slug,
             'price_minor' => $p->price_minor,
+            'price_year_minor' => $p->price_year_minor,
             'currency' => $p->currency,
             'interval' => $p->interval,
             'trial_days' => $p->trial_days,
@@ -87,6 +88,7 @@ class PlatformController extends Controller
             'is_public' => $p->is_public,
             'is_active' => $p->is_active,
             'restaurants' => Tenant::where('plan_id', $p->id)->count(),
+            'replaced_by_plan_id' => $p->replaced_by_plan_id,
         ])]);
     }
 
@@ -98,6 +100,7 @@ class PlatformController extends Controller
             'name' => [$plan ? 'sometimes' : 'required', Translations::required(60)],
             'slug' => [$plan ? 'sometimes' : 'required', 'string', 'max:50', 'regex:/^[a-z0-9-]+$/', Rule::unique('plans', 'slug')->ignore($model->id)],
             'price_minor' => ['sometimes', 'integer', 'min:0'],
+            'price_year_minor' => ['sometimes', 'nullable', 'integer', 'min:0'],
             'currency' => ['sometimes', 'string', 'size:3', 'alpha'],
             'interval' => ['sometimes', Rule::in(['month', 'year'])],
             'trial_days' => ['sometimes', 'integer', 'between:0,365'],

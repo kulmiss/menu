@@ -178,7 +178,7 @@ class Showcase
                 ],
             ],
             [
-                'slug' => 'demo-bakery', 'name' => 'Crumb & Juice', 'email' => 'bakery@example.com', 'plan' => 'starter', 'age' => 5,
+                'slug' => 'demo-bakery', 'name' => 'Crumb & Juice', 'email' => 'bakery@example.com', 'plan' => 'plus', 'age' => 5,
                 'style' => 'bistro', 'color' => '#2e6b47', 'logo' => 'wheat', 'banner' => 'bakery-interior', 'banner_text' => 'under',
                 'about' => "Sourdough, pastries and cold-pressed juice from 06:30.\nEverything is baked on site — come early for warm croissants.",
                 'address' => 'Old Airport, Addis Ababa', 'phone' => '+251 11 000 0433', 'hours' => [['06:30', '20:00']],

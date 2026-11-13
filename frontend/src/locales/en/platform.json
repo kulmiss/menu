@@ -157,9 +157,12 @@
     "price": "Price",
     "currency": "Currency",
     "trial_days": "Trial days",
-    "limits": "Limits (empty = unlimited)",
+    "limits": "Limits (empty = unlimited). Only photos and branches are counted on the standard plans.",
     "public": "Shown at sign-up",
-    "active": "Can be chosen"
+    "active": "Can be chosen",
+    "price_year": "Price for a year (optional)",
+    "price_year_none": "Not offered",
+    "replaced": "Old plan: its restaurants move to {{name}} when their paid time ends."
   },
   "limits": {
     "menus": "Menus",
