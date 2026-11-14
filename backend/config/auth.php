@@ -41,6 +41,8 @@ return [
         'web' => [
             'driver' => 'session',
             'provider' => 'users',
+            // "Remember me" lasts 90 days (owner, 2026-11-14), not Laravel's 400.
+            'remember' => (int) env('AUTH_REMEMBER_MINUTES', 90 * 24 * 60),
         ],
     ],
 
