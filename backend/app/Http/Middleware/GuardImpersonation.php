@@ -25,6 +25,7 @@ class GuardImpersonation
         'v1/t/{tenant}/account/slug',
         'v1/t/{tenant}/members/{member}',
         'v1/t/{tenant}/account',
+        'v1/me/sessions/logout-others',
         // The app's own account routes (QUESTIONS #188).
         'v1/mobile/account/profile',
         'v1/mobile/account/password',

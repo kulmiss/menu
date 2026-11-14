@@ -25,6 +25,7 @@ use App\Http\Controllers\Api\Restaurant\PdfMenuController;
 use App\Http\Controllers\Api\Restaurant\PricePeriodController;
 use App\Http\Controllers\Api\Restaurant\PromotionController;
 use App\Http\Controllers\Api\Restaurant\QrCodeController;
+use App\Http\Controllers\Api\SessionController;
 use App\Http\Controllers\Api\TeamController;
 use App\Http\Controllers\Api\TenantController;
 use App\Http\Controllers\Auth\SignUpController;
@@ -107,6 +108,8 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::post('notifications/read', [PushController::class, 'read']);
         });
         Route::put('me/news', [NewsSubscriptionController::class, 'update']);
+        // Web only (needs the browser session); blocked during "log in as".
+        Route::post('me/sessions/logout-others', [SessionController::class, 'logoutOthers'])->middleware('throttle:6,1');
         Route::post('impersonation/stop', [AnnouncementController::class, 'stopImpersonating']);
 
         // Super Admin (PLAN.md §7.3): Super Admins with two-factor sign-in only.
