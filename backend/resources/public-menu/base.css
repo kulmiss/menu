@@ -17,7 +17,7 @@ header{padding:1.25rem 1rem .5rem;display:flex;align-items:center;gap:.75rem}
 /* Banner and header share one grid cell, so a tall header makes the banner taller instead of spilling out. */
 .ov{display:grid}
 .ov>*{grid-area:1/1;min-width:0}
-.ov .cv{height:100%}
+.ov .cv{height:100%;width:100%}
 .ov header{align-self:end;padding:3.5rem 1rem 1rem;background:linear-gradient(#0000,#000c);color:#fff}
 .ov .sub{color:#fff}
 .ov .st,.ov .st.op{background:#0009;border-color:#fff5;color:#fff}
