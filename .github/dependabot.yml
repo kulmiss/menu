@@ -1,0 +1,24 @@
+# Dependabot (free on private repos). Monthly and grouped, so few PRs and few CI
+# minutes; security fixes still arrive at once as separate PRs when alerts are on.
+version: 2
+updates:
+  - package-ecosystem: composer
+    directory: /backend
+    target-branch: develop
+    schedule: { interval: monthly }
+    open-pull-requests-limit: 3
+    groups:
+      composer: { patterns: ["*"], update-types: [minor, patch] }
+  - package-ecosystem: npm
+    directory: /frontend
+    target-branch: develop
+    schedule: { interval: monthly }
+    open-pull-requests-limit: 3
+    groups:
+      npm: { patterns: ["*"], update-types: [minor, patch] }
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: develop
+    schedule: { interval: monthly }
+    groups:
+      actions: { patterns: ["*"] }
