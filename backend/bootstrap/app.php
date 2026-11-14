@@ -7,6 +7,7 @@ use App\Http\Middleware\EnsureTenantWritable;
 use App\Http\Middleware\GuardImpersonation;
 use App\Http\Middleware\RequireFeature;
 use App\Http\Middleware\ResolveTenant;
+use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\UseWelcomeBroker;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -21,6 +22,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Security headers on every answer (SECURITY_REPORT.md H1).
+        $middleware->append(SecurityHeaders::class);
+
         // Sanctum cookie auth for the SPA on the same domain.
         $middleware->statefulApi();
 

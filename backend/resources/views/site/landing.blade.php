@@ -56,7 +56,7 @@
     <meta name="twitter:image" content="{{ $ogImage }}">
     <link rel="preload" as="image" href="{{ asset('landing/hero-600.webp') }}" imagesrcset="{{ asset('landing/hero-300.webp') }} 300w, {{ asset('landing/hero-450.webp') }} 450w, {{ asset('landing/hero-600.webp') }} 600w" imagesizes="240px" fetchpriority="high">
     <script type="application/ld+json">{!! $jsonLd !!}</script>
-    <script>document.documentElement.classList.add('js')</script>
+    <script nonce="{{ \App\Support\Security\Csp::nonce() }}">document.documentElement.classList.add('js')</script>
     <style>
         :root{color-scheme:light dark;--bg:#fff;--fg:#0f172a;--muted:#475569;--card:#fff;--soft:#f6f7f9;--line:#e4e7ec;--brand:{{ $colors['brand'] }};--on-brand:{{ $colors['on_brand'] }};--ink:{{ $colors['ink'] }};--shadow:0 1px 2px rgb(15 23 42/.06),0 8px 24px rgb(15 23 42/.08);--radius:16px}
         @media (prefers-color-scheme:dark){.phone{box-shadow:0 30px 60px -20px rgb(0 0 0/.6),0 0 0 1px rgb(255 255 255/.16)}:root{--bg:{{ \App\Support\BrandColor::DARK_BG }};--fg:#f1f5f9;--muted:#a7b3c5;--card:#121a2e;--soft:#0f1628;--line:#24304a;--ink:{{ $colors['ink_dark'] }};--shadow:0 1px 2px rgb(0 0 0/.4),0 8px 24px rgb(0 0 0/.35)}}
@@ -583,7 +583,7 @@
     </div>
 </footer>
 
-<script>
+<script nonce="{{ \App\Support\Security\Csp::nonce() }}">
 (function () {
     var header = document.querySelector('.site-header');
     var onScroll = function () { header.classList.toggle('scrolled', window.scrollY > 8); };

@@ -87,7 +87,7 @@
             <a class="top" href="#top">{{ __('site.back_to_top') }}</a>
         @endif
     </article>
-    <script>
+    <script nonce="{{ \App\Support\Security\Csp::nonce() }}">
         (function () {
             var d = document, all = [].slice.call(d.querySelectorAll('details.sec'));
             // Open the section a link points to (contents, or #section in the address), then show it.

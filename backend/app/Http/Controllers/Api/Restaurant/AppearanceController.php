@@ -71,6 +71,7 @@ class AppearanceController extends Controller
         $appearance->setRelation('cover', $appearance->cover_media_id ? Media::find($appearance->cover_media_id) : null);
 
         $html = view('public.menu', [...$data->build($tenant, $appearance), 'preview' => true])->render();
+        $request->attributes->set('guest_menu', true);
 
         return response($html, 200, [
             'Content-Type' => 'text/html; charset=UTF-8',
