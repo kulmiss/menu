@@ -82,8 +82,8 @@ it('keeps the list code out of the inline script and the list on the phone only'
 
     expect(InlineAssets::js())->not->toContain('localStorage')->not->toContain('mC');
     expect($file)->toContain('w.mC={')->toContain('localStorage')->toContain("'mo:'+D.id+':'+D.b")
-        // Only anonymous counts leave the phone: dish, quantity, list total.
-        ->toContain('{t:D.id,b:D.b,c:[id,1,total()')->toContain('{t:D.id,b:D.b,w:total()');
+        // Only anonymous counts leave the phone: dish, quantity, list total (after adding; it counted the new dish twice).
+        ->toContain('{t:D.id,b:D.b,c:[id,1,total()[1]]}')->toContain('{t:D.id,b:D.b,w:total()');
     expect(strlen(InlineAssets::js()))->toBeLessThan(5 * 1024);
 });
 
