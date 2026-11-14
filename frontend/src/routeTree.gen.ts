@@ -9,39 +9,39 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as PlatformRouteRouteImport } from './routes/platform/route'
-import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as PlatformIndexRouteImport } from './routes/platform/index'
+import { Route as AdminRouteRouteImport } from './routes/admin/route'
+import { Route as PlatformRouteRouteImport } from './routes/platform/route'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
-import { Route as PlatformSectionRouteImport } from './routes/platform/$section'
-import { Route as AuthTwoFactorRouteImport } from './routes/auth/two-factor'
-import { Route as AuthSignUpRouteImport } from './routes/auth/sign-up'
-import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
-import { Route as AuthResetPasswordRouteImport } from './routes/auth/reset-password'
-import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
-import { Route as AdminTeamRouteImport } from './routes/admin/team'
-import { Route as AdminTagsRouteImport } from './routes/admin/tags'
-import { Route as AdminQrCodesRouteImport } from './routes/admin/qr-codes'
-import { Route as AdminPromotionsRouteImport } from './routes/admin/promotions'
-import { Route as AdminPrintMaterialsRouteImport } from './routes/admin/print-materials'
-import { Route as AdminInsightsRouteImport } from './routes/admin/insights'
-import { Route as AdminInfoRouteImport } from './routes/admin/info'
-import { Route as AdminImportRouteImport } from './routes/admin/import'
-import { Route as AdminDishesRouteImport } from './routes/admin/dishes'
-import { Route as AdminBranchesRouteImport } from './routes/admin/branches'
-import { Route as AdminAppearanceRouteImport } from './routes/admin/appearance'
 import { Route as AdminAddonsRouteImport } from './routes/admin/addons'
+import { Route as AdminAppearanceRouteImport } from './routes/admin/appearance'
+import { Route as AdminBranchesRouteImport } from './routes/admin/branches'
+import { Route as AdminDishesRouteImport } from './routes/admin/dishes'
+import { Route as AdminImportRouteImport } from './routes/admin/import'
+import { Route as AdminInfoRouteImport } from './routes/admin/info'
+import { Route as AdminInsightsRouteImport } from './routes/admin/insights'
+import { Route as AdminPrintMaterialsRouteImport } from './routes/admin/print-materials'
+import { Route as AdminPromotionsRouteImport } from './routes/admin/promotions'
+import { Route as AdminQrCodesRouteImport } from './routes/admin/qr-codes'
 import { Route as AdminSettingsRouteRouteImport } from './routes/admin/settings/route'
-import { Route as AdminSettingsIndexRouteImport } from './routes/admin/settings/index'
+import { Route as AdminTagsRouteImport } from './routes/admin/tags'
+import { Route as AdminTeamRouteImport } from './routes/admin/team'
+import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
+import { Route as AuthResetPasswordRouteImport } from './routes/auth/reset-password'
+import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
+import { Route as AuthSignUpRouteImport } from './routes/auth/sign-up'
+import { Route as AuthTwoFactorRouteImport } from './routes/auth/two-factor'
+import { Route as PlatformIndexRouteImport } from './routes/platform/index'
+import { Route as PlatformSectionRouteImport } from './routes/platform/$section'
 import { Route as AdminMenuIndexRouteImport } from './routes/admin/menu/index'
-import { Route as AuthInviteTokenRouteImport } from './routes/auth/invite/$token'
-import { Route as AdminSettingsSecurityRouteImport } from './routes/admin/settings/security'
+import { Route as AdminSettingsIndexRouteImport } from './routes/admin/settings/index'
 import { Route as AdminSettingsBillingRouteImport } from './routes/admin/settings/billing'
+import { Route as AdminSettingsSecurityRouteImport } from './routes/admin/settings/security'
+import { Route as AuthInviteTokenRouteImport } from './routes/auth/invite/$token'
 
-const PlatformRouteRoute = PlatformRouteRouteImport.update({
-  id: '/platform',
-  path: '/platform',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRouteRoute = AdminRouteRouteImport.update({
@@ -49,104 +49,14 @@ const AdminRouteRoute = AdminRouteRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const PlatformRouteRoute = PlatformRouteRouteImport.update({
+  id: '/platform',
+  path: '/platform',
   getParentRoute: () => rootRouteImport,
-} as any)
-const PlatformIndexRoute = PlatformIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => PlatformRouteRoute,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const PlatformSectionRoute = PlatformSectionRouteImport.update({
-  id: '/$section',
-  path: '/$section',
-  getParentRoute: () => PlatformRouteRoute,
-} as any)
-const AuthTwoFactorRoute = AuthTwoFactorRouteImport.update({
-  id: '/auth/two-factor',
-  path: '/auth/two-factor',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthSignUpRoute = AuthSignUpRouteImport.update({
-  id: '/auth/sign-up',
-  path: '/auth/sign-up',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthSignInRoute = AuthSignInRouteImport.update({
-  id: '/auth/sign-in',
-  path: '/auth/sign-in',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthResetPasswordRoute = AuthResetPasswordRouteImport.update({
-  id: '/auth/reset-password',
-  path: '/auth/reset-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
-  id: '/auth/forgot-password',
-  path: '/auth/forgot-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminTeamRoute = AdminTeamRouteImport.update({
-  id: '/team',
-  path: '/team',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminTagsRoute = AdminTagsRouteImport.update({
-  id: '/tags',
-  path: '/tags',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminQrCodesRoute = AdminQrCodesRouteImport.update({
-  id: '/qr-codes',
-  path: '/qr-codes',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminPromotionsRoute = AdminPromotionsRouteImport.update({
-  id: '/promotions',
-  path: '/promotions',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminPrintMaterialsRoute = AdminPrintMaterialsRouteImport.update({
-  id: '/print-materials',
-  path: '/print-materials',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminInsightsRoute = AdminInsightsRouteImport.update({
-  id: '/insights',
-  path: '/insights',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminInfoRoute = AdminInfoRouteImport.update({
-  id: '/info',
-  path: '/info',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminImportRoute = AdminImportRouteImport.update({
-  id: '/import',
-  path: '/import',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminDishesRoute = AdminDishesRouteImport.update({
-  id: '/dishes',
-  path: '/dishes',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminBranchesRoute = AdminBranchesRouteImport.update({
-  id: '/branches',
-  path: '/branches',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminAppearanceRoute = AdminAppearanceRouteImport.update({
-  id: '/appearance',
-  path: '/appearance',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const AdminAddonsRoute = AdminAddonsRouteImport.update({
@@ -154,9 +64,104 @@ const AdminAddonsRoute = AdminAddonsRouteImport.update({
   path: '/addons',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminAppearanceRoute = AdminAppearanceRouteImport.update({
+  id: '/appearance',
+  path: '/appearance',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminBranchesRoute = AdminBranchesRouteImport.update({
+  id: '/branches',
+  path: '/branches',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminDishesRoute = AdminDishesRouteImport.update({
+  id: '/dishes',
+  path: '/dishes',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminImportRoute = AdminImportRouteImport.update({
+  id: '/import',
+  path: '/import',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminInfoRoute = AdminInfoRouteImport.update({
+  id: '/info',
+  path: '/info',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminInsightsRoute = AdminInsightsRouteImport.update({
+  id: '/insights',
+  path: '/insights',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminPrintMaterialsRoute = AdminPrintMaterialsRouteImport.update({
+  id: '/print-materials',
+  path: '/print-materials',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminPromotionsRoute = AdminPromotionsRouteImport.update({
+  id: '/promotions',
+  path: '/promotions',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminQrCodesRoute = AdminQrCodesRouteImport.update({
+  id: '/qr-codes',
+  path: '/qr-codes',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdminSettingsRouteRoute = AdminSettingsRouteRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminTagsRoute = AdminTagsRouteImport.update({
+  id: '/tags',
+  path: '/tags',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminTeamRoute = AdminTeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
+  id: '/auth/forgot-password',
+  path: '/auth/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthResetPasswordRoute = AuthResetPasswordRouteImport.update({
+  id: '/auth/reset-password',
+  path: '/auth/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthSignInRoute = AuthSignInRouteImport.update({
+  id: '/auth/sign-in',
+  path: '/auth/sign-in',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthSignUpRoute = AuthSignUpRouteImport.update({
+  id: '/auth/sign-up',
+  path: '/auth/sign-up',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthTwoFactorRoute = AuthTwoFactorRouteImport.update({
+  id: '/auth/two-factor',
+  path: '/auth/two-factor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlatformIndexRoute = PlatformIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PlatformRouteRoute,
+} as any)
+const PlatformSectionRoute = PlatformSectionRouteImport.update({
+  id: '/$section',
+  path: '/$section',
+  getParentRoute: () => PlatformRouteRoute,
+} as any)
+const AdminMenuIndexRoute = AdminMenuIndexRouteImport.update({
+  id: '/menu/',
+  path: '/menu/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const AdminSettingsIndexRoute = AdminSettingsIndexRouteImport.update({
@@ -164,25 +169,20 @@ const AdminSettingsIndexRoute = AdminSettingsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminSettingsRouteRoute,
 } as any)
-const AdminMenuIndexRoute = AdminMenuIndexRouteImport.update({
-  id: '/menu/',
-  path: '/menu/',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AuthInviteTokenRoute = AuthInviteTokenRouteImport.update({
-  id: '/auth/invite/$token',
-  path: '/auth/invite/$token',
-  getParentRoute: () => rootRouteImport,
+const AdminSettingsBillingRoute = AdminSettingsBillingRouteImport.update({
+  id: '/billing',
+  path: '/billing',
+  getParentRoute: () => AdminSettingsRouteRoute,
 } as any)
 const AdminSettingsSecurityRoute = AdminSettingsSecurityRouteImport.update({
   id: '/security',
   path: '/security',
   getParentRoute: () => AdminSettingsRouteRoute,
 } as any)
-const AdminSettingsBillingRoute = AdminSettingsBillingRouteImport.update({
-  id: '/billing',
-  path: '/billing',
-  getParentRoute: () => AdminSettingsRouteRoute,
+const AuthInviteTokenRoute = AuthInviteTokenRouteImport.update({
+  id: '/auth/invite/$token',
+  path: '/auth/invite/$token',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -383,11 +383,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/platform': {
-      id: '/platform'
-      path: '/platform'
-      fullPath: '/platform'
-      preLoaderRoute: typeof PlatformRouteRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -397,144 +397,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/platform': {
+      id: '/platform'
+      path: '/platform'
+      fullPath: '/platform'
+      preLoaderRoute: typeof PlatformRouteRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/platform/': {
-      id: '/platform/'
-      path: '/'
-      fullPath: '/platform/'
-      preLoaderRoute: typeof PlatformIndexRouteImport
-      parentRoute: typeof PlatformRouteRoute
     }
     '/admin/': {
       id: '/admin/'
       path: '/'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/platform/$section': {
-      id: '/platform/$section'
-      path: '/$section'
-      fullPath: '/platform/$section'
-      preLoaderRoute: typeof PlatformSectionRouteImport
-      parentRoute: typeof PlatformRouteRoute
-    }
-    '/auth/two-factor': {
-      id: '/auth/two-factor'
-      path: '/auth/two-factor'
-      fullPath: '/auth/two-factor'
-      preLoaderRoute: typeof AuthTwoFactorRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/sign-up': {
-      id: '/auth/sign-up'
-      path: '/auth/sign-up'
-      fullPath: '/auth/sign-up'
-      preLoaderRoute: typeof AuthSignUpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/sign-in': {
-      id: '/auth/sign-in'
-      path: '/auth/sign-in'
-      fullPath: '/auth/sign-in'
-      preLoaderRoute: typeof AuthSignInRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/reset-password': {
-      id: '/auth/reset-password'
-      path: '/auth/reset-password'
-      fullPath: '/auth/reset-password'
-      preLoaderRoute: typeof AuthResetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/forgot-password': {
-      id: '/auth/forgot-password'
-      path: '/auth/forgot-password'
-      fullPath: '/auth/forgot-password'
-      preLoaderRoute: typeof AuthForgotPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/team': {
-      id: '/admin/team'
-      path: '/team'
-      fullPath: '/admin/team'
-      preLoaderRoute: typeof AdminTeamRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/tags': {
-      id: '/admin/tags'
-      path: '/tags'
-      fullPath: '/admin/tags'
-      preLoaderRoute: typeof AdminTagsRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/qr-codes': {
-      id: '/admin/qr-codes'
-      path: '/qr-codes'
-      fullPath: '/admin/qr-codes'
-      preLoaderRoute: typeof AdminQrCodesRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/promotions': {
-      id: '/admin/promotions'
-      path: '/promotions'
-      fullPath: '/admin/promotions'
-      preLoaderRoute: typeof AdminPromotionsRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/print-materials': {
-      id: '/admin/print-materials'
-      path: '/print-materials'
-      fullPath: '/admin/print-materials'
-      preLoaderRoute: typeof AdminPrintMaterialsRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/insights': {
-      id: '/admin/insights'
-      path: '/insights'
-      fullPath: '/admin/insights'
-      preLoaderRoute: typeof AdminInsightsRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/info': {
-      id: '/admin/info'
-      path: '/info'
-      fullPath: '/admin/info'
-      preLoaderRoute: typeof AdminInfoRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/import': {
-      id: '/admin/import'
-      path: '/import'
-      fullPath: '/admin/import'
-      preLoaderRoute: typeof AdminImportRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/dishes': {
-      id: '/admin/dishes'
-      path: '/dishes'
-      fullPath: '/admin/dishes'
-      preLoaderRoute: typeof AdminDishesRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/branches': {
-      id: '/admin/branches'
-      path: '/branches'
-      fullPath: '/admin/branches'
-      preLoaderRoute: typeof AdminBranchesRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/appearance': {
-      id: '/admin/appearance'
-      path: '/appearance'
-      fullPath: '/admin/appearance'
-      preLoaderRoute: typeof AdminAppearanceRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/addons': {
@@ -544,11 +418,144 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAddonsRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/appearance': {
+      id: '/admin/appearance'
+      path: '/appearance'
+      fullPath: '/admin/appearance'
+      preLoaderRoute: typeof AdminAppearanceRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/branches': {
+      id: '/admin/branches'
+      path: '/branches'
+      fullPath: '/admin/branches'
+      preLoaderRoute: typeof AdminBranchesRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/dishes': {
+      id: '/admin/dishes'
+      path: '/dishes'
+      fullPath: '/admin/dishes'
+      preLoaderRoute: typeof AdminDishesRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/import': {
+      id: '/admin/import'
+      path: '/import'
+      fullPath: '/admin/import'
+      preLoaderRoute: typeof AdminImportRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/info': {
+      id: '/admin/info'
+      path: '/info'
+      fullPath: '/admin/info'
+      preLoaderRoute: typeof AdminInfoRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/insights': {
+      id: '/admin/insights'
+      path: '/insights'
+      fullPath: '/admin/insights'
+      preLoaderRoute: typeof AdminInsightsRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/print-materials': {
+      id: '/admin/print-materials'
+      path: '/print-materials'
+      fullPath: '/admin/print-materials'
+      preLoaderRoute: typeof AdminPrintMaterialsRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/promotions': {
+      id: '/admin/promotions'
+      path: '/promotions'
+      fullPath: '/admin/promotions'
+      preLoaderRoute: typeof AdminPromotionsRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/qr-codes': {
+      id: '/admin/qr-codes'
+      path: '/qr-codes'
+      fullPath: '/admin/qr-codes'
+      preLoaderRoute: typeof AdminQrCodesRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/settings': {
       id: '/admin/settings'
       path: '/settings'
       fullPath: '/admin/settings'
       preLoaderRoute: typeof AdminSettingsRouteRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/tags': {
+      id: '/admin/tags'
+      path: '/tags'
+      fullPath: '/admin/tags'
+      preLoaderRoute: typeof AdminTagsRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/team': {
+      id: '/admin/team'
+      path: '/team'
+      fullPath: '/admin/team'
+      preLoaderRoute: typeof AdminTeamRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/auth/forgot-password': {
+      id: '/auth/forgot-password'
+      path: '/auth/forgot-password'
+      fullPath: '/auth/forgot-password'
+      preLoaderRoute: typeof AuthForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/reset-password': {
+      id: '/auth/reset-password'
+      path: '/auth/reset-password'
+      fullPath: '/auth/reset-password'
+      preLoaderRoute: typeof AuthResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/sign-in': {
+      id: '/auth/sign-in'
+      path: '/auth/sign-in'
+      fullPath: '/auth/sign-in'
+      preLoaderRoute: typeof AuthSignInRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/sign-up': {
+      id: '/auth/sign-up'
+      path: '/auth/sign-up'
+      fullPath: '/auth/sign-up'
+      preLoaderRoute: typeof AuthSignUpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/two-factor': {
+      id: '/auth/two-factor'
+      path: '/auth/two-factor'
+      fullPath: '/auth/two-factor'
+      preLoaderRoute: typeof AuthTwoFactorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/platform/': {
+      id: '/platform/'
+      path: '/'
+      fullPath: '/platform/'
+      preLoaderRoute: typeof PlatformIndexRouteImport
+      parentRoute: typeof PlatformRouteRoute
+    }
+    '/platform/$section': {
+      id: '/platform/$section'
+      path: '/$section'
+      fullPath: '/platform/$section'
+      preLoaderRoute: typeof PlatformSectionRouteImport
+      parentRoute: typeof PlatformRouteRoute
+    }
+    '/admin/menu/': {
+      id: '/admin/menu/'
+      path: '/menu'
+      fullPath: '/admin/menu/'
+      preLoaderRoute: typeof AdminMenuIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/settings/': {
@@ -558,19 +565,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSettingsIndexRouteImport
       parentRoute: typeof AdminSettingsRouteRoute
     }
-    '/admin/menu/': {
-      id: '/admin/menu/'
-      path: '/menu'
-      fullPath: '/admin/menu/'
-      preLoaderRoute: typeof AdminMenuIndexRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/auth/invite/$token': {
-      id: '/auth/invite/$token'
-      path: '/auth/invite/$token'
-      fullPath: '/auth/invite/$token'
-      preLoaderRoute: typeof AuthInviteTokenRouteImport
-      parentRoute: typeof rootRouteImport
+    '/admin/settings/billing': {
+      id: '/admin/settings/billing'
+      path: '/billing'
+      fullPath: '/admin/settings/billing'
+      preLoaderRoute: typeof AdminSettingsBillingRouteImport
+      parentRoute: typeof AdminSettingsRouteRoute
     }
     '/admin/settings/security': {
       id: '/admin/settings/security'
@@ -579,12 +579,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSettingsSecurityRouteImport
       parentRoute: typeof AdminSettingsRouteRoute
     }
-    '/admin/settings/billing': {
-      id: '/admin/settings/billing'
-      path: '/billing'
-      fullPath: '/admin/settings/billing'
-      preLoaderRoute: typeof AdminSettingsBillingRouteImport
-      parentRoute: typeof AdminSettingsRouteRoute
+    '/auth/invite/$token': {
+      id: '/auth/invite/$token'
+      path: '/auth/invite/$token'
+      fullPath: '/auth/invite/$token'
+      preLoaderRoute: typeof AuthInviteTokenRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
