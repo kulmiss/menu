@@ -16,6 +16,7 @@ const NAV = [
   'invoices',
   'messages',
   'backups',
+  'mobile-app',
   'themes',
   'announcements',
   'activity',

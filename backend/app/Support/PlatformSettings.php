@@ -44,6 +44,7 @@ class PlatformSettings
         'app_min_version' => '1.0.0',
         'app_latest_version' => '1.0.0',
         'app_flags' => [],
+        'mobile' => [], // Super Admin → Mobile app, see App\Support\MobileApp (QUESTIONS #193)
         'features_global' => [], // feature key => false to switch it off for everyone (Settings → Features)
         // Public landing page (owner, 2026-11-13). Empty texts use the translated defaults.
         'brand_color' => '#c2410c',

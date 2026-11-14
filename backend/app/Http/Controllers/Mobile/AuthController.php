@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\PersonalAccessToken;
 use App\Models\User;
 use App\Notifications\SecurityNotice;
+use App\Support\MobileApp;
 use App\Support\Security\LoginCheck;
 use App\Support\Security\RecoveryCodes;
 use App\Support\Security\SecurityLog;
@@ -40,6 +41,9 @@ class AuthController extends Controller
         $user = LoginCheck::user($data['email'], $data['password']);
         if ($user === null) {
             throw ValidationException::withMessages(['email' => __('auth.failed')]);
+        }
+        if ($closed = $this->closed($user)) {
+            return $closed;
         }
 
         if ($user->two_factor_secret !== null && $user->two_factor_confirmed_at !== null) {
@@ -139,6 +143,20 @@ class AuthController extends Controller
             'token' => $new->plainTextToken,
             'user' => ['id' => $user->id, 'name' => $user->name, 'email' => $user->email, 'is_super_admin' => $user->is_super_admin],
         ]);
+    }
+
+    /** Super Admin → Mobile app: maintenance and "app sign-in off" (QUESTIONS #193). */
+    private function closed(User $user): ?JsonResponse
+    {
+        $m = MobileApp::settings();
+        if ($m['maintenance'] && ! $user->is_super_admin) {
+            return response()->json(['message' => $m['maintenance_message'] ?: __('mobile.maintenance'), 'code' => 'mobile.maintenance', 'web' => url('/admin')], 503);
+        }
+        if (! MobileApp::signInAllowed((bool) $user->is_super_admin)) {
+            return response()->json(['message' => $m['sign_in_message'] ?: __('mobile.app_off'), 'code' => 'mobile.app_off', 'web' => url('/admin')], 403);
+        }
+
+        return null;
     }
 
     private function challengeKey(string $challenge): string

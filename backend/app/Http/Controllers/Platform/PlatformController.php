@@ -19,6 +19,7 @@ use App\Support\ImageProcessor;
 use App\Support\ImageTooLarge;
 use App\Support\Legal\LegalText;
 use App\Support\MailSettings;
+use App\Support\MobileApp;
 use App\Support\PlatformSettings;
 use App\Support\PublicMenu\ShareImage;
 use App\Support\Security\OutboundHost;
@@ -412,6 +413,11 @@ class PlatformController extends Controller
             throw ValidationException::withMessages(['turnstile_enabled' => __('signup.turnstile_keys_needed')]);
         }
         PlatformSettings::save($data);
+        // The older version fields now live in Super Admin → Mobile app (QUESTIONS #193).
+        $versions = array_filter(['min_version' => $data['app_min_version'] ?? null, 'latest_version' => $data['app_latest_version'] ?? null]);
+        if ($versions !== []) {
+            MobileApp::save($versions);
+        }
         $this->activity->log('platform.settings_saved', null, ['keys' => ['to' => array_keys($data)]], null);
 
         return $this->settings();

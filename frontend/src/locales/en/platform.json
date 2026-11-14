@@ -20,7 +20,9 @@
     "settings": "Settings",
     "invoices": "Invoices",
     "messages": "Messages",
-    "backups": "Backups"
+    "backups": "Backups",
+    "mobile_app": "Mobile app",
+    "mobile-app": "Mobile app"
   },
   "dash": {
     "restaurants": "Restaurants",
@@ -858,5 +860,137 @@
     "unsaved": "{{count}} changes not saved",
     "global_off": "Off for everyone (Settings → Features)",
     "load_failed": "The switches could not be loaded. Try again."
+  },
+  "mobile": {
+    "hint": "What the Menu Admin app shows and allows. The app reads this when it starts and when it comes back to the screen, so changes reach phones within a minute or two.",
+    "tabs": {
+      "access": "Access",
+      "versions": "Versions",
+      "banner": "Banner",
+      "features": "App features",
+      "links": "Links",
+      "push": "Push",
+      "devices": "Devices",
+      "stats": "Stats"
+    },
+    "saved": "Saved. Phones get it the next time the app opens.",
+    "link_hint": "An app screen (starts with /, e.g. /inbox or /r/12/menu) or an https:// link.",
+    "audience": "Who",
+    "audiences": {
+      "all": "Everyone",
+      "restaurant": "Restaurant teams",
+      "super_admin": "Super Admins"
+    },
+    "access": {
+      "title": "Who can use the app",
+      "hint": "Switch app sign-in off for restaurant teams or Super Admins. People who can’t use the app see your message and a link to the website.",
+      "restaurant": "Restaurant teams can sign in to the app",
+      "super_admin": "Super Admins can sign in to the app",
+      "message": "Message when the app is off",
+      "message_hint": "Leave empty for: “The app is not available for your account right now. Please use the website.”",
+      "maintenance": "Maintenance mode",
+      "maintenance_hint": "Everyone except Super Admins sees the message below instead of the app. Use it during server updates.",
+      "maintenance_message": "Maintenance message",
+      "maintenance_on": "Maintenance mode is on: restaurant teams can’t use the app."
+    },
+    "versions": {
+      "title": "App versions",
+      "hint": "Below the minimum version the app must be updated before it can be used. Below the recommended version people are asked to update but can skip.",
+      "latest": "Latest version",
+      "recommended": "Recommended update below",
+      "recommended_hint": "Optional — e.g. 1.1.0 asks everyone older to update.",
+      "min": "Minimum supported version",
+      "min_hint": "Older apps must update.",
+      "notes": "Release notes (shown in the update prompt)"
+    },
+    "banner": {
+      "title": "Announcement banner",
+      "hint": "A short line at the top of the app, between the dates you choose. Leave the text empty for no banner.",
+      "text": "Text",
+      "text_hint": "Up to 200 characters.",
+      "link": "Link (optional)",
+      "starts": "Shows from",
+      "ends": "Until",
+      "preview": "Preview"
+    },
+    "features": {
+      "title": "App features",
+      "hint": "Switches that only exist in the app.",
+      "global_note": "Restaurant features (sold out, branches, insights…) follow Settings → Features and each plan automatically.",
+      "biometric_lock": "App lock with fingerprint or face",
+      "biometric_lock_hint": "Off: the app lock and its PIN are not offered (an existing lock is removed).",
+      "push": "Push notifications",
+      "push_hint": "Off: notifications still arrive in the in-app inbox, but phones get no push.",
+      "analytics": "Usage analytics",
+      "analytics_hint": "Firebase Analytics; people can also switch it off in the app.",
+      "crash_reports": "Crash reports",
+      "crash_reports_hint": "Firebase Crashlytics."
+    },
+    "links": {
+      "title": "Links in the app",
+      "hint": "Store pages for updates, and the links in the app’s About and Help.",
+      "play_store": "Google Play page",
+      "app_store": "App Store page",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "support_whatsapp": "Support WhatsApp number",
+      "default_hint": "Leave empty to use this site’s page."
+    },
+    "push": {
+      "title": "Send a push notification",
+      "hint": "Goes to the in-app inbox of everyone chosen who is signed in to the app, and as a push to phones that allow it.",
+      "heading": "Title",
+      "body": "Message",
+      "link": "Opens (optional)",
+      "role": "Role",
+      "roles": {
+        "any": "Any role",
+        "owner": "Owners",
+        "manager": "Managers",
+        "staff": "Staff"
+      },
+      "plan": "Plan",
+      "any_plan": "Any plan",
+      "restaurants": "Only these restaurants (IDs, optional)",
+      "restaurants_hint": "Restaurant numbers from the Restaurants list, separated by commas.",
+      "review": "Review and send",
+      "confirm_title": "Send this push?",
+      "confirm": "It goes to {{count}} people signed in to the app; {{app}} of them get it on their phone.",
+      "send": "Send now",
+      "sent": "Sent to {{count}} people.",
+      "history": "Sent pushes",
+      "none": "Nothing sent yet.",
+      "row": "{{when}} · {{who}} · {{count}} people ({{app}} by push) · by {{by}}"
+    },
+    "devices": {
+      "user": "Person",
+      "restaurants": "Restaurants",
+      "device": "Device",
+      "platform": "Platform",
+      "version": "App version",
+      "push": "Push",
+      "last_seen": "Last seen",
+      "actions": "Actions",
+      "sign_out": "Sign out",
+      "sign_out_named": "Sign {{name}} out on {{device}}",
+      "signed_out": "Signed out on that device.",
+      "sign_out_all": "Sign out all devices",
+      "sign_out_all_hint": "Everyone is signed out of the app on every phone (your own device stays). They can sign in again unless app sign-in is off.",
+      "all_signed_out": "Signed out {{count}} devices.",
+      "search": "Name, e-mail or device",
+      "empty": "Nobody is signed in to the app yet."
+    },
+    "stats": {
+      "active_7d": "Active, 7 days",
+      "active_30d": "Active, 30 days",
+      "devices": "Signed-in devices",
+      "people": "People",
+      "push_opt_in": "Push allowed",
+      "below_min": "Need to update",
+      "platforms": "Android vs iOS",
+      "versions": "Versions in use",
+      "last_30": "Devices used in the last 30 days",
+      "unknown": "Unknown"
+    }
   }
 }

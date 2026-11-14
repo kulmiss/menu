@@ -19,6 +19,9 @@ const SCREENS = {
   backups: lazy(() =>
     import('./backups').then((m) => ({ default: m.BackupsPage }))
   ),
+  'mobile-app': lazy(() =>
+    import('./mobile-app').then((m) => ({ default: m.MobileAppPage }))
+  ),
   themes: lazy(() =>
     import('./screens').then((m) => ({ default: m.ThemesPage }))
   ),

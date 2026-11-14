@@ -42,6 +42,7 @@ use App\Http\Controllers\Platform\DashboardWidgetController as PlatformDashboard
 use App\Http\Controllers\Platform\FeatureSwitchController;
 use App\Http\Controllers\Platform\InsightsController as PlatformInsightsController;
 use App\Http\Controllers\Platform\InvoiceController;
+use App\Http\Controllers\Platform\MobileAppController;
 use App\Http\Controllers\Platform\PaymentController;
 use App\Http\Controllers\Platform\PlatformController;
 use App\Http\Controllers\Platform\RestaurantController;
@@ -190,6 +191,15 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::patch('announcements/{announcement}', [PlatformController::class, 'saveAnnouncement'])->whereNumber('announcement');
             Route::delete('announcements/{announcement}', [PlatformController::class, 'deleteAnnouncement'])->whereNumber('announcement');
             Route::get('activity', [PlatformController::class, 'activity']);
+            // Super Admin → Mobile app (QUESTIONS #193).
+            Route::get('mobile-app', [MobileAppController::class, 'show']);
+            Route::put('mobile-app', [MobileAppController::class, 'update']);
+            Route::get('mobile-app/pushes', [MobileAppController::class, 'pushes']);
+            Route::post('mobile-app/pushes', [MobileAppController::class, 'sendPush'])->middleware('throttle:10,1');
+            Route::get('mobile-app/devices', [MobileAppController::class, 'devices']);
+            Route::delete('mobile-app/devices/{device}', [MobileAppController::class, 'signOutDevice'])->whereNumber('device');
+            Route::post('mobile-app/devices/sign-out-all', [MobileAppController::class, 'signOutAll'])->middleware('throttle:3,1');
+            Route::get('mobile-app/stats', [MobileAppController::class, 'stats']);
             Route::get('settings/features', [FeatureSwitchController::class, 'index']);
             Route::put('settings/features', [FeatureSwitchController::class, 'update']);
             Route::get('settings', [PlatformController::class, 'settings']);
