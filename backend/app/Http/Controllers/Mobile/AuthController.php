@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Notifications\SecurityNotice;
 use App\Support\Security\LoginCheck;
 use App\Support\Security\RecoveryCodes;
+use App\Support\Security\SecurityLog;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -80,6 +81,7 @@ class AuthController extends Controller
         }
 
         if (! $ok) {
+            SecurityLog::event('two_factor.failed', $user->id);
             $pending['tries']++;
             $pending['tries'] >= self::CHALLENGE_TRIES ? Cache::forget($key) : Cache::put($key, $pending, now()->addMinutes(self::CHALLENGE_MINUTES));
             throw ValidationException::withMessages(['code' => __('mobile.code_invalid')]);
@@ -100,7 +102,8 @@ class AuthController extends Controller
     /** Signs out every device of this user (the web session stays). */
     public function logoutAll(Request $request): Response
     {
-        $request->user()->tokens()->delete();
+        $count = $request->user()->tokens()->delete();
+        SecurityLog::event('tokens.revoked', $request->user()->id, null, ['count' => $count, 'why' => 'logout_all']);
 
         return response()->noContent();
     }

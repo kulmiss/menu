@@ -31,6 +31,7 @@ final class LoginCheck
         $email = Str::lower(trim($email));
         $key = 'login-acct:'.sha1(Str::transliterate($email));
         if (RateLimiter::tooManyAttempts($key, self::PER_ACCOUNT_HOUR)) {
+            SecurityLog::event('login.locked', null, $email);
             throw new ThrottleRequestsException(__('auth.throttle', ['seconds' => RateLimiter::availableIn($key)]), null, [
                 'Retry-After' => RateLimiter::availableIn($key),
             ]);
@@ -41,6 +42,7 @@ final class LoginCheck
         $ok = Hash::check($password, $user !== null ? $user->password : (self::$dummy ??= Hash::make(Str::random(32))));
         if ($user === null || ! $ok) {
             RateLimiter::hit($key, 3600);
+            SecurityLog::event('login.failed', $user?->id, $email, ['known' => $user !== null]);
 
             return null;
         }

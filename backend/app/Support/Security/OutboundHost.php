@@ -16,8 +16,18 @@ final class OutboundHost
 {
     public const SMTP_PORTS = [25, 465, 587, 2525];
 
-    /** A reason to refuse, or null when the host may be used. */
+    /** A reason to refuse, or null when the host may be used. Refusals are logged. */
     public static function problem(string $host, bool $allowLoopback = false): ?string
+    {
+        $problem = self::check($host, $allowLoopback);
+        if ($problem !== null) {
+            SecurityLog::event('outbound.refused', auth()->id() !== null ? (int) auth()->id() : null, null, ['why' => $problem]);
+        }
+
+        return $problem;
+    }
+
+    private static function check(string $host, bool $allowLoopback): ?string
     {
         $host = strtolower(trim($host, " \t\n\r\0\x0B[]."));
         if ($host === '') {

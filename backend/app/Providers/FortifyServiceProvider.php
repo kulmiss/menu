@@ -12,6 +12,7 @@ use App\Http\Responses\GenericResetLinkResponse;
 use App\Models\User;
 use App\Notifications\SecurityNotice;
 use App\Support\Security\LoginCheck;
+use App\Support\Security\SecurityLog;
 use App\Support\SignUp\SignUp;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Auth\Notifications\ResetPassword;
@@ -26,6 +27,7 @@ use Laravel\Fortify\Contracts\SuccessfulPasswordResetLinkRequestResponse;
 use Laravel\Fortify\Events\RecoveryCodesGenerated;
 use Laravel\Fortify\Events\TwoFactorAuthenticationConfirmed;
 use Laravel\Fortify\Events\TwoFactorAuthenticationDisabled;
+use Laravel\Fortify\Events\TwoFactorAuthenticationFailed;
 use Laravel\Fortify\Fortify;
 use Laravel\Fortify\Http\Controllers\RecoveryCodeController as FortifyRecoveryCodeController;
 use Laravel\Fortify\Http\Requests\TwoFactorLoginRequest;
@@ -67,6 +69,7 @@ class FortifyServiceProvider extends ServiceProvider
         $this->app->bind(FortifyRecoveryCodeController::class, RecoveryCodeController::class);
 
         // "Was this you?" e-mails for two-factor changes, web and app (SECURITY_REPORT.md M4).
+        Event::listen(TwoFactorAuthenticationFailed::class, fn ($e) => SecurityLog::event('two_factor.failed', $e->user->id));
         Event::listen(TwoFactorAuthenticationConfirmed::class, fn ($e) => $e->user->notify(new SecurityNotice('two_factor_on')));
         Event::listen(TwoFactorAuthenticationDisabled::class, fn ($e) => $e->user->notify(new SecurityNotice('two_factor_off')));
         Event::listen(RecoveryCodesGenerated::class, fn ($e) => $e->user->notify(new SecurityNotice('recovery_codes')));
