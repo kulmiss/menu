@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Platform;
 
 use App\Enums\SubscriptionState;
 use App\Http\Controllers\Controller;
+use App\Jobs\PushAnnouncement;
 use App\Models\ActivityLog;
 use App\Models\Plan;
 use App\Models\PlatformAnnouncement;
@@ -12,19 +13,27 @@ use App\Models\TenantAppearance;
 use App\Models\Theme;
 use App\Rules\Translations;
 use App\Support\ActivityLogger;
+use App\Support\EmailLogo;
 use App\Support\Features;
 use App\Support\ImageProcessor;
+use App\Support\ImageTooLarge;
+use App\Support\Legal\LegalText;
 use App\Support\MailSettings;
 use App\Support\PlatformSettings;
 use App\Support\PublicMenu\ShareImage;
+use App\Support\Security\OutboundHost;
+use App\Support\Tables\TableQuery;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
 
 /**
@@ -75,6 +84,7 @@ class PlatformController extends Controller
             'name' => (object) $p->name,
             'slug' => $p->slug,
             'price_minor' => $p->price_minor,
+            'price_year_minor' => $p->price_year_minor,
             'currency' => $p->currency,
             'interval' => $p->interval,
             'trial_days' => $p->trial_days,
@@ -83,6 +93,7 @@ class PlatformController extends Controller
             'is_public' => $p->is_public,
             'is_active' => $p->is_active,
             'restaurants' => Tenant::where('plan_id', $p->id)->count(),
+            'replaced_by_plan_id' => $p->replaced_by_plan_id,
         ])]);
     }
 
@@ -94,6 +105,7 @@ class PlatformController extends Controller
             'name' => [$plan ? 'sometimes' : 'required', Translations::required(60)],
             'slug' => [$plan ? 'sometimes' : 'required', 'string', 'max:50', 'regex:/^[a-z0-9-]+$/', Rule::unique('plans', 'slug')->ignore($model->id)],
             'price_minor' => ['sometimes', 'integer', 'min:0'],
+            'price_year_minor' => ['sometimes', 'nullable', 'integer', 'min:0'],
             'currency' => ['sometimes', 'string', 'size:3', 'alpha'],
             'interval' => ['sometimes', Rule::in(['month', 'year'])],
             'trial_days' => ['sometimes', 'integer', 'between:0,365'],
@@ -170,6 +182,10 @@ class PlatformController extends Controller
         }
         $model->fill([...$data, 'created_by' => $model->created_by ?? $request->user()?->getAuthIdentifier()])->save();
         $this->activity->log('platform.announcement_saved', $model, null, null);
+        // A new announcement that shows now goes to the restaurants' phones too (QUESTIONS #189).
+        if ($announcement === null && ($model->starts_at === null || $model->starts_at->lte(now()))) {
+            PushAnnouncement::dispatch($model->id)->afterCommit();
+        }
 
         return response()->json(['data' => self::announcementRow($model)], $announcement ? 200 : 201);
     }
@@ -192,8 +208,44 @@ class PlatformController extends Controller
 
     // ---- Activity log ----------------------------------------------------
 
-    public function activity(Request $request): JsonResponse
+    public function activity(Request $request): JsonResponse|StreamedResponse
     {
+        if ($request->has('page') || $request->query('format') === 'csv') {
+            $row = fn (ActivityLog $l) => [
+                'id' => $l->id,
+                'at' => $l->created_at->toIso8601String(),
+                'tenant' => $l->tenant_id ? ['id' => $l->tenant_id, 'name' => $l->tenant?->name] : null,
+                'actor' => $l->actor?->name,
+                'impersonator' => $l->impersonator?->name,
+                'action' => $l->action,
+                'subject' => $l->subject_type ? $l->subject_type.' #'.$l->subject_id : null,
+                'changes' => $l->changes,
+            ];
+
+            return TableQuery::respond(ActivityLog::query()->with(['actor:id,name,email', 'impersonator:id,name', 'tenant:id,name']), $request, [
+                'search' => fn ($q, string $s) => $q->where(fn ($w) => $w->where('action', 'like', "%{$s}%")
+                    ->orWhereHas('actor', fn ($u) => $u->where('name', 'like', "%{$s}%")->orWhere('email', 'like', "%{$s}%"))),
+                'filters' => [
+                    'scope' => fn ($q, array $v) => count($v) === 1 ? ($v[0] === 'platform' ? $q->whereNull('tenant_id') : $q->whereNotNull('tenant_id')) : null,
+                    // An area is a group of action prefixes, e.g. "item|menu|category".
+                    'area' => function ($q, array $v) {
+                        $prefixes = array_filter(explode('|', implode('|', $v)), fn ($p) => preg_match('/^[a-z_]+$/', $p));
+                        $q->where(fn ($w) => array_map(fn ($p) => $w->orWhere('action', 'like', $p.'.%'), $prefixes ?: ['-']));
+                    },
+                    'restaurant' => fn ($q, array $v) => $q->whereIn('tenant_id', array_map('intval', $v)),
+                ],
+                'date' => 'created_at',
+                'sorts' => ['at' => 'created_at'],
+                'default_sort' => '-at',
+                'csv' => ['name' => 'activity-log', 'columns' => [
+                    'When' => fn (ActivityLog $l) => $l->created_at->toDateTimeString(),
+                    'Restaurant' => fn (ActivityLog $l) => $l->tenant_id ? $l->tenant->name : 'Platform',
+                    'Who' => fn (ActivityLog $l) => $l->actor?->name,
+                    'Action' => fn (ActivityLog $l) => $l->action,
+                    'Subject' => fn (ActivityLog $l) => $l->subject_type ? $l->subject_type.' #'.$l->subject_id : null,
+                ]],
+            ], $row);
+        }
         $data = $request->validate([
             'tenant_id' => ['sometimes', 'nullable', 'integer'],
             'platform_only' => ['sometimes', 'boolean'],
@@ -224,17 +276,39 @@ class PlatformController extends Controller
 
     public function settings(): JsonResponse
     {
-        return response()->json(['data' => [...PlatformSettings::all(), 'share_image_url' => ShareImage::for(null)['url']]]);
+        return response()->json(['data' => [...PlatformSettings::forScreen(), 'share_image_url' => ShareImage::for(null)['url'], 'logo_url' => EmailLogo::url(), 'plans' => Plan::orderBy('sort')->get(['id', 'name', 'slug'])->map(fn (Plan $p) => ['id' => $p->id, 'name' => $p->name['en'] ?? $p->slug, 'slug' => $p->slug])]]);
     }
 
     /** The default link preview for menus without a banner (owner, 2026-11-12). */
     public function saveShareImage(Request $request, ImageProcessor $images): JsonResponse
     {
         $request->validate(['image' => ['required', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240', 'dimensions:min_width=600,min_height=315']]);
-        ShareImage::store($request->file('image'), $images);
+        try {
+            ShareImage::store($request->file('image'), $images);
+        } catch (ImageTooLarge) {
+            throw ValidationException::withMessages(['image' => __('menu.media.too_many_pixels')]);
+        }
         $this->activity->log('platform.share_image_saved', null, [], null);
         // Every menu without a banner now points at the new picture.
         Artisan::call('menu:refresh-pages', ['--all' => true]);
+
+        return $this->settings();
+    }
+
+    /** Platform logo for the e-mail header (owner, 2026-11-13). */
+    public function saveLogo(Request $request): JsonResponse
+    {
+        $request->validate(['image' => ['required', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120']]);
+        EmailLogo::store($request->file('image'));
+        $this->activity->log('platform.logo_saved', null, [], null);
+
+        return $this->settings();
+    }
+
+    public function deleteLogo(): JsonResponse
+    {
+        EmailLogo::forget();
+        $this->activity->log('platform.logo_removed', null, [], null);
 
         return $this->settings();
     }
@@ -255,9 +329,88 @@ class PlatformController extends Controller
             'support_email' => ['sometimes', 'nullable', 'email'],
             'domain' => ['sometimes', 'nullable', 'string', 'max:120', 'regex:/^[a-z0-9.-]+$/i'],
             'default_currency' => ['sometimes', 'string', 'size:3', 'alpha'],
-            'terms' => ['sometimes', 'nullable', 'string', 'max:20000'],
-            'privacy' => ['sometimes', 'nullable', 'string', 'max:20000'],
+            'terms' => ['sometimes', 'nullable', 'string', 'max:50000'],
+            'privacy' => ['sometimes', 'nullable', 'string', 'max:50000'],
+            'owner_two_factor_required' => ['sometimes', 'boolean'],
+            // Sign-up (owner, 2026-11-13)
+            'signup_open' => ['sometimes', 'boolean'],
+            'signup_plan_id' => ['sometimes', 'nullable', 'integer', Rule::exists('plans', 'id')],
+            'signup_approval' => ['sometimes', 'boolean'],
+            'signup_notify' => ['sometimes', 'boolean'],
+            'turnstile_enabled' => ['sometimes', 'boolean'],
+            'turnstile_site_key' => ['sometimes', 'nullable', 'string', 'max:100'],
+            'turnstile_secret' => ['sometimes', 'nullable', 'string', 'max:200'],
+            'disposable_domains' => ['sometimes', 'array', 'max:500'],
+            'disposable_domains.*' => ['string', 'max:100', 'regex:/^[a-z0-9.-]+\.[a-z]{2,}$/i'],
+            'upgrade_whatsapp' => ['sometimes', 'nullable', 'string', 'max:30', 'regex:/^\+?[0-9 ]{6,20}$/'],
+            // Menu Admin app (QUESTIONS #190)
+            'app_min_version' => ['sometimes', 'string', 'max:20', 'regex:/^\d+\.\d+\.\d+$/'],
+            'app_latest_version' => ['sometimes', 'string', 'max:20', 'regex:/^\d+\.\d+\.\d+$/'],
+            'app_flags' => ['sometimes', 'array', 'max:50'],
+            'app_flags.*' => ['boolean'],
+            // Billing (owner, 2026-11-13)
+            'billing_company' => ['sometimes', 'nullable', 'string', 'max:120'],
+            'billing_address' => ['sometimes', 'nullable', 'string', 'max:300'],
+            'billing_tax_id' => ['sometimes', 'nullable', 'string', 'max:60'],
+            'invoice_prefix' => ['sometimes', 'string', 'min:1', 'max:10', 'regex:/^[A-Za-z0-9]+$/'],
+            'invoice_footer' => ['sometimes', 'nullable', 'string', 'max:300'],
+            'invoice_tax_rate' => ['sometimes', 'numeric', 'between:0,100'],
+            'invoice_email' => ['sometimes', 'boolean'],
+            // Landing page (owner, 2026-11-13)
+            'brand_color' => ['sometimes', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'landing_headline' => ['sometimes', 'nullable', 'string', 'max:120'],
+            'landing_subline' => ['sometimes', 'nullable', 'string', 'max:300'],
+            'landing_sections' => ['sometimes', 'array'],
+            'landing_sections.*' => ['boolean'],
+            'landing_testimonials' => ['sometimes', 'array', 'max:12'],
+            'landing_testimonials.*.quote' => ['required', 'string', 'max:400'],
+            'landing_testimonials.*.name' => ['required', 'string', 'max:80'],
+            'landing_testimonials.*.role' => ['nullable', 'string', 'max:80'],
+            'socials' => ['sometimes', 'array'],
+            'socials.*' => ['nullable', 'string', 'max:255', 'url:https,http'],
         ]);
+        if (isset($data['landing_sections'])) {
+            $data['landing_sections'] = array_map('boolval', array_intersect_key($data['landing_sections'], PlatformSettings::DEFAULTS['landing_sections']) + PlatformSettings::DEFAULTS['landing_sections']);
+        }
+        if (isset($data['socials'])) {
+            $data['socials'] = array_map(fn ($u) => (string) $u, array_intersect_key($data['socials'], PlatformSettings::DEFAULTS['socials']) + array_map(fn () => '', PlatformSettings::DEFAULTS['socials']));
+        }
+        if (isset($data['landing_testimonials'])) {
+            $data['landing_testimonials'] = array_values(array_map(fn (array $t) => ['quote' => trim($t['quote']), 'name' => trim($t['name']), 'role' => trim((string) ($t['role'] ?? ''))], $data['landing_testimonials']));
+        }
+        if (isset($data['invoice_prefix'])) {
+            $data['invoice_prefix'] = strtoupper($data['invoice_prefix']);
+        }
+        if (isset($data['invoice_tax_rate'])) {
+            $data['invoice_tax_rate'] = round((float) $data['invoice_tax_rate'], 2);
+        }
+        foreach (['billing_company', 'billing_address', 'billing_tax_id', 'invoice_footer'] as $key) {
+            if (array_key_exists($key, $data)) {
+                $data[$key] = trim((string) $data[$key]);
+            }
+        }
+        foreach (['landing_headline', 'landing_subline'] as $key) {
+            if (array_key_exists($key, $data)) {
+                $data[$key] = trim((string) $data[$key]);
+            }
+        }
+        if (array_key_exists('turnstile_secret', $data)) {
+            // Empty keeps the stored secret; send clear_turnstile_secret to remove it.
+            if (($data['turnstile_secret'] ?? '') === '') {
+                unset($data['turnstile_secret']);
+            } else {
+                $data['turnstile_secret'] = Crypt::encryptString($data['turnstile_secret']);
+            }
+        }
+        if ($request->boolean('clear_turnstile_secret')) {
+            $data['turnstile_secret'] = '';
+        }
+        if (isset($data['disposable_domains'])) {
+            $data['disposable_domains'] = array_values(array_unique(array_map(fn ($d) => Str::lower(trim((string) $d)), $data['disposable_domains'])));
+        }
+        if (($data['turnstile_enabled'] ?? false) && (($data['turnstile_site_key'] ?? PlatformSettings::get('turnstile_site_key')) === '' || (! isset($data['turnstile_secret']) && PlatformSettings::turnstileSecret() === ''))) {
+            throw ValidationException::withMessages(['turnstile_enabled' => __('signup.turnstile_keys_needed')]);
+        }
         PlatformSettings::save($data);
         $this->activity->log('platform.settings_saved', null, ['keys' => ['to' => array_keys($data)]], null);
 
@@ -273,14 +426,18 @@ class PlatformController extends Controller
     {
         $data = $request->validate([
             'host' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9.-]+$/i'],
-            'port' => ['required', 'integer', 'between:1,65535'],
+            // Mail ports only, and no private network addresses (SECURITY_REPORT.md M7).
+            'port' => ['required', 'integer', Rule::in(OutboundHost::SMTP_PORTS)],
             'encryption' => ['required', Rule::in(MailSettings::ENCRYPTIONS)],
             'username' => ['nullable', 'string', 'max:255'],
             'password' => ['nullable', 'string', 'max:255'],
             'clear_password' => ['sometimes', 'boolean'],
             'from_address' => ['nullable', 'email', 'max:255'],
             'from_name' => ['nullable', 'string', 'max:100'],
-        ]);
+        ], ['port.in' => __('platform.mail_port_allowed')]);
+        if (OutboundHost::problem($data['host'], allowLoopback: true) !== null) {
+            throw ValidationException::withMessages(['host' => __('platform.mail_host_private')]);
+        }
         MailSettings::save($data, $data['password'] ?? null, (bool) ($data['clear_password'] ?? false));
         // Never log the password; only which fields were sent.
         $this->activity->log('platform.mail_settings_saved', null, ['host' => ['to' => $data['host']], 'password_changed' => ['to' => ($data['password'] ?? '') !== '']], null);
@@ -297,18 +454,43 @@ class PlatformController extends Controller
     }
 
     /** Sends a short e-mail with the saved settings and reports what happened. */
+    /** "Reset to default text" for the Terms or the Privacy Policy (QUESTIONS #181): saves and returns it. */
+    public function resetLegal(string $page): JsonResponse
+    {
+        $text = LegalText::default($page);
+        PlatformSettings::save([$page => $text]);
+        $this->activity->log('platform.legal_reset', null, ['page' => ['to' => $page]], null);
+
+        return response()->json(['data' => [$page => $text]]);
+    }
+
+    /**
+     * Test e-mail to the address typed next to the button (owner, 2026-11-13);
+     * the address is not saved. 5 tests a minute per Super Admin (route throttle).
+     */
     public function testMail(Request $request): JsonResponse
     {
-        $data = $request->validate(['to' => ['nullable', 'email']]);
-        $to = $data['to'] ?? (string) $request->user()?->email;
+        $to = $request->validate(['to' => ['required', 'string', 'max:254', 'email:rfc,filter']])['to'];
+        $saved = MailSettings::stored();
+        if ($saved !== null && OutboundHost::problem((string) ($saved['host'] ?? ''), allowLoopback: true) !== null) {
+            throw ValidationException::withMessages(['host' => __('platform.mail_host_private')]);
+        }
+        if ($saved !== null && ! in_array((int) ($saved['port'] ?? 0), OutboundHost::SMTP_PORTS, true)) {
+            throw ValidationException::withMessages(['port' => __('platform.mail_port_allowed')]);
+        }
         try {
             Mail::raw(__('platform.mail_test.body', ['app' => PlatformSettings::get('name')]), function ($m) use ($to) {
                 $m->to($to)->subject(__('platform.mail_test.subject', ['app' => PlatformSettings::get('name')]));
             });
         } catch (Throwable $e) {
+            // The server's whole answer, so the problem can be fixed without reading logs.
+            $error = trim($e->getMessage()) ?: $e::class;
+
             return response()->json([
-                'message' => __('platform.mail_test.failed', ['reason' => Str::limit($e->getMessage(), 300)]),
+                'message' => __('platform.mail_test.failed', ['email' => $to, 'reason' => $error]),
                 'code' => 'mail.failed',
+                'sent_to' => $to,
+                'error' => $error,
             ], 422);
         }
 

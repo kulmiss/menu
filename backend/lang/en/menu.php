@@ -2,11 +2,16 @@
 
 // English source strings for the API. Other languages: lang/{so,am,ar}/menu.php (Partition 8).
 return [
+    'price_period' => [
+        'percent' => 'A discount can be at most 90%.',
+        'size' => 'This size belongs to another dish.',
+    ],
     'idempotency' => [
         'missing' => 'This request needs an Idempotency-Key header.',
         'invalid' => 'The Idempotency-Key header is not valid.',
         'mismatch' => 'This Idempotency-Key was already used for a different request.',
         'in_progress' => 'This request is still being processed. Please try again in a moment.',
+        'not_replayable' => 'This request was already done. Its answer is not kept for security; please reload.',
     ],
     'subscription' => [
         'read_only' => 'Your subscription has expired, so changes are paused. Renew to edit your menu again.',
@@ -57,6 +62,7 @@ return [
         'type' => 'Upload a JPEG, PNG or WebP photo.',
         'heic' => 'iPhone HEIC photos cannot be used yet. In Settings › Camera › Formats choose "Most Compatible", or share the photo as JPEG.',
         'unreadable' => 'This file could not be read as a photo.',
+        'too_many_pixels' => 'This photo is too large to process (over 50 megapixels). Use a normal phone photo, or make it smaller first.',
     ],
     'import' => [
         'file_type' => 'Upload a .csv or .xlsx file.',

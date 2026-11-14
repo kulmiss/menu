@@ -25,6 +25,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 import { Switch } from '@/components/ui/switch'
 import { ConfirmDialog } from '@/components/confirm-dialog'
+import { DataTable } from '@/components/data-table'
 import { AdminHeader } from '@/components/layout/admin-header'
 import { Main } from '@/components/layout/main'
 import { type Role, type Tenant } from '@/features/auth/api'
@@ -132,18 +133,78 @@ function Members({ tenant, role }: { tenant: Tenant; role: Role | null }) {
         ) : members.isError ? (
           <p className='text-sm text-destructive'>{t('errors.generic')}</p>
         ) : (
-          <ul className='divide-y'>
-            {members.data.map((m) => (
-              <MemberRow key={m.id} member={m} tenant={tenant} role={role} />
-            ))}
-          </ul>
+          <DataTable<Member>
+            id='team-members'
+            rows={members.data}
+            rowId={(m) => m.id}
+            csvName='team'
+            searchPlaceholder={t('team.search')}
+            filters={[
+              {
+                id: 'role',
+                label: t('team.role'),
+                options: (['owner', 'manager', 'staff'] as const).map((r) => ({
+                  value: r,
+                  label: t(`roles.${r}`),
+                })),
+                match: (m, v) => v.includes(m.role),
+              },
+            ]}
+            columns={[
+              {
+                id: 'name',
+                label: t('team.name'),
+                primary: true,
+                text: (m) => m.user.name,
+                sortValue: (m) => m.user.name.toLowerCase(),
+                cell: (m) => <MemberName member={m} />,
+              },
+              {
+                id: 'email',
+                label: t('team.email'),
+                text: (m) => m.user.email,
+                sortValue: (m) => m.user.email,
+                cell: (m) => <span dir='ltr'>{m.user.email}</span>,
+              },
+              {
+                id: 'role',
+                label: t('team.role'),
+                text: (m) => t(`roles.${m.role}`),
+                sortValue: (m) => ['owner', 'manager', 'staff'].indexOf(m.role),
+                cell: (m) => (
+                  <MemberControls member={m} tenant={tenant} role={role} />
+                ),
+              },
+            ]}
+          />
         )}
       </CardContent>
     </Card>
   )
 }
 
-function MemberRow({
+function MemberName({ member }: { member: Member }) {
+  const { t } = useTranslation()
+  const me = useMe()
+  return (
+    <span className='flex min-w-0 items-center gap-3'>
+      <Avatar className='size-9'>
+        <AvatarFallback>{initials(member.user.name)}</AvatarFallback>
+      </Avatar>
+      <span className='truncate font-medium'>
+        {member.user.name}
+        {member.user.id === me.id && (
+          <span className='ms-1 text-sm font-normal text-muted-foreground'>
+            ({t('team.you')})
+          </span>
+        )}
+      </span>
+    </span>
+  )
+}
+
+/** Role, price permission and remove/leave for one member. */
+function MemberControls({
   member,
   tenant,
   role,
@@ -181,24 +242,7 @@ function MemberRow({
   }
 
   return (
-    <li className='flex flex-wrap items-center gap-x-3 gap-y-2 py-3'>
-      <Avatar className='size-9'>
-        <AvatarFallback>{initials(member.user.name)}</AvatarFallback>
-      </Avatar>
-      <div className='min-w-0 flex-1 basis-40'>
-        <p className='truncate font-medium'>
-          {member.user.name}
-          {isSelf && (
-            <span className='ms-1 text-sm font-normal text-muted-foreground'>
-              ({t('team.you')})
-            </span>
-          )}
-        </p>
-        <p className='truncate text-sm text-muted-foreground' dir='ltr'>
-          {member.user.email}
-        </p>
-      </div>
-
+    <>
       <div className='flex flex-wrap items-center gap-3'>
         {member.role === 'staff' && (
           <label className='flex min-h-11 items-center gap-2 text-sm sm:min-h-9'>
@@ -270,7 +314,7 @@ function MemberRow({
         isLoading={remove.isPending}
         handleConfirm={confirmRemove}
       />
-    </li>
+    </>
   )
 }
 

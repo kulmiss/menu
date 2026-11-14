@@ -18,6 +18,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { ConfirmDialog } from '@/components/confirm-dialog'
 import { AdminHeader } from '@/components/layout/admin-header'
 import { Main } from '@/components/layout/main'
+import { UpgradePage } from '@/components/upgrade-page'
 import { useCurrentTenant } from '@/features/auth/use-me'
 import { tr } from '@/features/menu/text'
 import { useMenuContext } from '@/features/menu/use-menu-context'
@@ -27,10 +28,17 @@ import {
   useDeletePromotion,
   useReorderPromotions,
 } from './api'
+import { PricePeriodsSection } from './price-periods'
 import { PromotionDialog } from './promotion-dialog'
 
 /** Promotions (PLAN.md screen 11): specials and announcements with dates. */
+/** The screen, or the upgrade card when the plan doesn't include it. */
 export function PromotionsPage() {
+  const included = useCurrentTenant()?.features?.promotions !== false
+  return included ? <PromotionsScreen /> : <UpgradePage feature='promotions' />
+}
+
+function PromotionsScreen() {
   const { t } = useTranslation()
   const ctx = useMenuContext()
   const tenant = useCurrentTenant()
@@ -167,6 +175,13 @@ export function PromotionsPage() {
             ))}
           </div>
         )}
+        <PricePeriodsSection
+          tenantId={ctx.tenantId}
+          locale={ctx.locale}
+          currency={tenant?.currency_code ?? ''}
+          canEdit={canEdit && ctx.canEditPrices}
+          included={tenant?.features?.price_periods !== false}
+        />
       </Main>
       {editing !== null && (
         <PromotionDialog

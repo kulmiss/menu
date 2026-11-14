@@ -1,8 +1,10 @@
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { Link, Outlet, useLocation, useNavigate } from '@tanstack/react-router'
-import { LogOut, Shield } from 'lucide-react'
+import { LogOut, Search, Shield } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
+import { PasswordBanner } from '@/components/layout/password-banner'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { signOut } from '@/features/auth/api'
 import { useMe } from '@/features/auth/use-me'
@@ -11,6 +13,9 @@ const NAV = [
   'restaurants',
   'plans',
   'payments',
+  'invoices',
+  'messages',
+  'backups',
   'themes',
   'announcements',
   'activity',
@@ -20,6 +25,9 @@ const NAV = [
 const NAV_LINK =
   'rounded-md px-3 py-1.5 text-sm whitespace-nowrap text-muted-foreground hover:bg-accent data-[status=active]:bg-accent data-[status=active]:font-medium data-[status=active]:text-foreground'
 
+// Global search (Ctrl/⌘ + K), downloaded on first use.
+const GlobalSearch = lazy(() => import('./global-search'))
+
 /** Super Admin area: a slim top bar, its own route tree (PLAN.md §3.2). */
 export function PlatformLayout() {
   const { t } = useTranslation()
@@ -28,6 +36,17 @@ export function PlatformLayout() {
   const qc = useQueryClient()
   const path = useLocation({ select: (l) => l.pathname })
   const needs2fa = !me.two_factor_enabled && path !== '/platform/security'
+  const [searching, setSearching] = useState(false)
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        setSearching((s) => !s)
+      }
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [])
 
   return (
     <div className='min-h-svh bg-background'>
@@ -39,6 +58,28 @@ export function PlatformLayout() {
             {me.email}
           </span>
           <div className='ms-auto flex items-center gap-1'>
+            {!needs2fa && (
+              <Button
+                variant='outline'
+                size='sm'
+                className='min-h-11 gap-2 text-muted-foreground sm:min-h-8 sm:w-56 sm:justify-between'
+                onClick={() => setSearching(true)}
+                aria-keyshortcuts='Control+K Meta+K'
+              >
+                <span className='flex items-center gap-2'>
+                  <Search className='size-4' />
+                  <span className='hidden sm:inline'>
+                    {t('platform.search.button')}
+                  </span>
+                  <span className='sr-only sm:hidden'>
+                    {t('platform.search.button')}
+                  </span>
+                </span>
+                <kbd className='hidden rounded border px-1.5 text-[10px] font-medium sm:inline'>
+                  Ctrl K
+                </kbd>
+              </Button>
+            )}
             {me.tenants.length > 0 && (
               <Button asChild variant='ghost' size='sm'>
                 <Link to='/admin'>{t('platform.to_admin')}</Link>
@@ -84,6 +125,12 @@ export function PlatformLayout() {
           ))}
         </nav>
       </header>
+      {searching && (
+        <Suspense fallback={null}>
+          <GlobalSearch open={searching} onOpenChange={setSearching} />
+        </Suspense>
+      )}
+      <PasswordBanner platform />
       <main id='content' className='mx-auto max-w-6xl px-4 py-6'>
         {needs2fa ? (
           <div

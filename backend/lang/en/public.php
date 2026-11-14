@@ -4,6 +4,9 @@
 // can be added later (PLAN.md §11, English only for now).
 return [
     'from' => 'from :price',
+    // Time-based prices (owner, 2026-11-14)
+    'deal_until' => ':name until :time',
+    'was' => 'was :price',
     'search' => 'Search the menu',
     'no_results' => 'Nothing matches your search.',
     'sold_out' => 'Sold out',

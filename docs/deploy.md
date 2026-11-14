@@ -2,7 +2,7 @@
 
 Shared hosting (cPanel) is the main target; a VPS with Nginx works the same way with a few extras. Production runs **without Docker**.
 
-Contents: [1 Requirements](#1-requirements) · [2 Build a release](#2-build-a-release-on-your-computer) · [3 Shared hosting](#3-shared-hosting-cpanel) · [4 VPS](#4-vps-nginx--php-fpm) · [5 OPcache](#5-opcache) · [6 Cloudflare](#6-cloudflare-optional) · [7 E-mail](#7-e-mail-smtp-spf-dkim-dmarc) · [8 First Super Admin](#8-the-first-super-admin) · [9 Updating](#9-updating-to-a-new-version) · [10 Backups](#10-backups) · [11 Troubleshooting](#11-troubleshooting)
+Contents: [1 Requirements](#1-requirements) · [2 Build a release](#2-build-a-release-on-your-computer) · [3 Shared hosting](#3-shared-hosting-cpanel) · [4 VPS](#4-vps-nginx--php-fpm) · [5 OPcache](#5-opcache) · [6 Cloudflare](#6-cloudflare-optional) · [7 E-mail](#7-e-mail-smtp-spf-dkim-dmarc) · [8 First Super Admin](#8-the-first-super-admin) · [9 Updating](#9-updating-to-a-new-version) · [10 Backups](#10-backups) · [11 Troubleshooting](#11-troubleshooting) · [12 Go-live checklist](#12-go-live-checklist)
 
 ## 1. Requirements
 
@@ -44,8 +44,11 @@ Upload the whole `backend/` folder (it now contains `vendor/` and `public/app/`)
    DB_USERNAME=...
    DB_PASSWORD=...
 
+   LOG_STACK=daily               # one log file per day, kept 14 days (storage/logs)
+   LOG_LEVEL=warning
+
    SESSION_DRIVER=database
-   SESSION_SECURE_COOKIE=true
+   SESSION_SECURE_COOKIE=true    # needs HTTPS (section 1)
    CACHE_STORE=database          # or file
    QUEUE_CONNECTION=database     # emptied every minute by the scheduler (cron below)
 
@@ -63,11 +66,12 @@ Upload the whole `backend/` folder (it now contains `vendor/` and `public/app/`)
 
    ```bash
    php artisan key:generate --force
-   php artisan migrate --force
+   php artisan migrate --force          # creates the tables, the Free/Plus/Pro/Business plans and the Terms/Privacy texts
+   php artisan platform:aggregate       # builds the Super Admin dashboard numbers (the cron keeps them fresh)
    php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan event:cache
    ```
 
-   Never run the demo seeders on a live server: they create restaurants with known passwords (`DemoSeeder` refuses when `APP_ENV=production`).
+   Never run the demo seeders on a live server: they create restaurants with known passwords (`DemoSeeder` refuses when `APP_ENV=production`). Plain `php artisan db:seed` adds nothing.
 6. **Writable folders** (755 for folders, owned by your cPanel user): `storage/`, `bootstrap/cache/`, `public/media/`, `public/menu-cache/`, `public/menu-assets/`.
 7. **Cron** (cPanel → Cron Jobs, every minute) — the only cron line needed:
 
@@ -75,7 +79,24 @@ Upload the whole `backend/` folder (it now contains `vendor/` and `public/app/`)
    * * * * * cd /home/USER/menu/backend && php artisan schedule:run >> /dev/null 2>&1
    ```
 
-   It sends queued e-mails (invitations) every minute, rebuilds menu pages whose subscription changed (hourly) and every page at 00:05 (so "New" badges expire), cleans old statistics and deleted restaurants (03:15, 03:30). Check with `php artisan schedule:list`.
+   Everything below runs from that one line. The app's clock is **UTC**; the daily jobs are set so they run at night in Addis Ababa (UTC+3). Check with `php artisan schedule:list` (it shows UTC).
+
+   | UTC | Addis Ababa | Job | What it does |
+   |---|---|---|---|
+   | every minute | | `queue:work --stop-when-empty` | sends queued e-mails: sign-up (confirm, welcome, approval), invitations, invoices, Messages campaigns |
+   | every minute | | `campaigns:send` | Super Admin → Messages: a few e-mails per minute (rate on the Messages screen; keep it under your mail provider's limit) |
+   | every minute | | `menu:price-periods` | rebuilds a menu page when a happy hour starts or ends |
+   | every minute | | heartbeat | lets the dashboard's System health show "cron last run" |
+   | hourly | | `menu:refresh-pages` | rebuilds pages whose subscription changed (grace → read-only → unavailable) |
+   | hourly | | `insights:monthly` | on the 1st from 07:00 restaurant time: last month's PDF report to restaurants that switched it on |
+   | hourly :07 | | `plans:move-replaced` | moves restaurants from an old plan to its replacement once their paid time ends |
+   | hourly :12 | | `platform:aggregate --days=2` | Super Admin dashboard numbers for today and yesterday |
+   | hourly :17 | | backup check | warns (dashboard + one e-mail a day) when no backup succeeded for 26 hours |
+   | 21:05 | 00:05 | `menu:refresh-pages --all` | rebuilds every menu page just after midnight (so "New" badges expire) |
+   | 22:10 | 01:10 | `platform:aggregate --days=35` | rebuilds the last 35 days of dashboard numbers |
+   | 23:30 | 02:30 | `backup:run --scheduled` | nightly backup (section 10) |
+   | 00:15 · 00:20 · 00:30 | 03:15 · 03:20 · 03:30 | clean-up | statistics older than 400 days; unconfirmed sign-ups after 7 days (`signup:prune`, logged); restaurants deleted more than 30 days ago |
+
    Some hosts need the full PHP path, e.g. `/usr/local/bin/php` or `/opt/cpanel/ea-php83/root/usr/bin/php`.
 8. **PHP settings** (cPanel → MultiPHP INI Editor): `upload_max_filesize = 10M`, `post_max_size = 12M`, `memory_limit = 256M` (photo resizing), and OPcache on (section 5).
 9. Open `https://menu.example.com/up` → "Application up". Then create the Super Admin (section 8).
@@ -134,7 +155,7 @@ Super Admins are created on the server, not in the app. In `backend/`:
 php artisan tinker --execute="\$u = App\Models\User::create(['name' => 'Your Name', 'email' => 'you@example.com', 'password' => 'a-long-password']); \$u->forceFill(['is_super_admin' => true, 'email_verified_at' => now()])->save();"
 ```
 
-Then sign in at `https://menu.example.com/auth/sign-in` and open `https://menu.example.com/platform`. Until two-factor sign-in is on, the platform shows only **Set up two-factor**: scan the QR code with an authenticator app, enter the code and keep the recovery codes. After that the whole platform opens.
+Use your own name, e-mail and a password of at least 10 characters. Then sign in at `https://menu.example.com/auth/sign-in` and open `https://menu.example.com/platform`. Until two-factor sign-in is on, the platform shows only **Set up two-factor**: scan the QR code with an authenticator app, enter the code and keep the recovery codes. After that the whole platform opens.
 
 ## 9. Updating to a new version
 
@@ -145,6 +166,7 @@ php artisan down --retry=30
 php artisan migrate --force
 php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan event:cache
 php artisan menu:refresh-pages --all     # rebuild the static menu pages with the new design
+php artisan invoices:backfill            # once after the invoices release: invoices for older payments (no e-mails; safe to repeat)
 php artisan up
 ```
 
@@ -159,7 +181,45 @@ If OPcache has `validate_timestamps=0`, reload PHP (cPanel: change the PHP versi
 
 ## 10. Backups
 
-Back up daily: the **database** (cPanel → Backup, or `mysqldump`), **`public/media/`** (photos) and **`.env`** (the `APP_KEY` is needed to read saved SMTP passwords and two-factor secrets). `public/menu-cache/` and `public/menu-assets/` are rebuilt automatically and need no backup.
+**Automatic (Super Admin → Backups).** Every night at 02:30 Addis Ababa time (23:30 UTC) the scheduler (the same cron line) writes one zip to `storage/app/backups/` — outside the public folder, never downloadable without signing in:
+
+- `database.sql` — the whole database as SQL (made in PHP, no `mysqldump` needed; caches and sessions are left empty),
+- `media/…` — every uploaded photo and logo,
+- `manifest.json` — date, row and file counts.
+
+Old zips are thinned out to the newest one of each of the last **7 days, 4 weeks and 3 months** (change it on the Backups screen). Optional off-site copy: switch on "Copy to S3-compatible storage" and fill in the endpoint, region, bucket, access key and secret key (stored encrypted). Examples: Backblaze B2 `https://s3.<region>.backblazeb2.com` (region e.g. `eu-central-003`), Cloudflare R2 `https://<account-id>.r2.cloudflarestorage.com` (region `auto`), AWS `https://s3.<region>.amazonaws.com`.
+
+If a backup fails, or none succeeded for 26 hours, the dashboard's System health shows a warning and every Super Admin gets one e-mail a day. **Also keep a copy of `.env`** somewhere safe (password manager): the `APP_KEY` in it is needed to read saved SMTP passwords, two-factor secrets and the off-site secret key.
+
+Run one by hand: `php artisan backup:run`.
+
+### Restoring a backup
+
+There is no restore button on purpose: restoring replaces everything. Tested on the demo data on 2026-11-13 (34 restaurants, 30,451 statistics rows, 257 photos: every table count and every photo identical after restore).
+
+1. **Download** the zip (Backups → Download, then your password or a two-factor code) or take it from `storage/app/backups/` / the off-site bucket.
+2. **Put the site in maintenance mode:** `cd /home/USER/menu/backend && php artisan down`
+3. **Unzip** it somewhere outside `public`: `unzip backup-YYYYMMDD-HHMMSS-N.zip -d ~/restore`
+   (an **encrypted** backup, `….zip.enc`, first: `php artisan backup:decrypt backup-….zip.enc` — needs the same `BACKUP_KEY`, see [security.md](security.md#backups-h4))
+4. **Database** — either
+   - cPanel → phpMyAdmin → your database → *Import* → choose `database.sql` (the file drops and recreates every table), or
+   - Terminal: `mysql -u DB_USER -p DB_NAME < ~/restore/database.sql`
+   (To try it first, import into a new empty database and point a copy of the site at it.)
+5. **Photos:** `rm -rf public/media && cp -a ~/restore/media public/media` (keep permissions 755 / owner = your cPanel user).
+6. **`.env`:** keep the current one; if the server is new, restore your saved `.env` (same `APP_KEY`).
+7. **Rebuild what isn't backed up:** `php artisan optimize:clear && php artisan migrate --force && php artisan menu:refresh-pages --all`
+8. **Back online:** `php artisan up`, then open a menu, sign in to the admin and check Backups shows the restored list.
+
+## 10a. Mobile app push notifications (optional)
+
+The Menu Admin app works without this; pushes then only show in the app's inbox.
+
+1. Firebase console → your project → Project settings → **Service accounts** → **Generate new private key**. A JSON file downloads. Keep it secret.
+2. Upload it to the server **outside `public_html`**, e.g. `storage/app/private/firebase.json`, permissions `600`.
+3. In `.env`: `FCM_CREDENTIALS=storage/app/private/firebase.json`, then `php artisan config:cache`.
+4. Nothing else: the existing cron line sends the queued pushes every minute. Test: sign in on the app, then record a payment as another Super Admin, or wait for the 08:00/09:00 reminders.
+
+Never commit this file. It is not inside the backup zip; keep a copy in your password manager.
 
 ## 11. Troubleshooting
 
@@ -171,3 +231,35 @@ Back up daily: the **database** (cPanel → Backup, or `mysqldump`), **`public/m
 | Photos fail to upload | `upload_max_filesize`/`post_max_size`, `memory_limit`, GD with WebP, `public/media/` writable. iPhone HEIC photos: the admin explains how to pick JPEG. |
 | Menu shows old content | `php artisan menu:refresh-pages --all`; make sure no "Cache Everything" rule caches HTML (section 6). |
 | QR links don't open | `/q/CODE` needs the `.htaccess` rule and `public/qr.php`; `storage/app/qr-map.php` must be writable (rebuilt automatically). |
+
+## 12. Go-live checklist
+
+Tick these in order on the live server. Details are in the sections above.
+
+**Before you start**
+1. Merge the release PR `develop` → `main` on GitHub, and protect `main` (Settings → Branches: require a pull request, no force push, no deletion).
+2. Build the release from `main` on your computer (section 2): `pnpm build` in `frontend/`, `composer install --no-dev …` in `backend/`.
+
+**Server**
+3. PHP 8.3 with the extensions in section 1; OPcache on (section 5); `upload_max_filesize = 10M`, `post_max_size = 12M`, `memory_limit = 256M`.
+4. Upload `backend/` outside `public_html`; document root → `backend/public`; HTTPS certificate active; `.htaccess` uploaded (hidden file).
+5. Create the database and user (utf8mb4).
+6. `.env` from section 3.4: `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL=https://…` exactly as people type it, database, `SESSION_SECURE_COOKIE=true`, `QUEUE_CONNECTION=database`, `LOG_STACK=daily`, mail settings.
+7. In `backend/`: `php artisan key:generate --force` → `php artisan migrate --force` → `php artisan platform:aggregate` → `php artisan optimize` (= the four cache commands). **Never** run `DemoSeeder`.
+8. Folder permissions (section 3.6). Save a copy of `.env` (with `APP_KEY`) in your password manager.
+9. Cron line, every minute (section 3.7). After two minutes `php artisan schedule:list` shows the jobs, and `https://your-domain/up` answers "Application up".
+
+**Platform set-up**
+10. Create the first Super Admin (section 8), sign in, turn on two-factor and keep the recovery codes.
+11. Settings → General: platform name, support e-mail, domain, currency. Read the Terms and Privacy texts ("Draft — have a lawyer review") and adjust them.
+12. Settings → Email (SMTP): fill in, **Send test email** to your own address; add SPF, DKIM and DMARC (section 7).
+13. Settings → Sign-up: public sign-up on/off, "Require my approval", WhatsApp number for upgrades. Settings → Landing page and Billing as you like. Plans: check prices and limits.
+14. Backups: press **Back up now**, then **Download** it once to be sure; optional off-site copy (section 10).
+
+**Smoke test (phone and computer)**
+15. Self sign-up with a real address → confirmation e-mail → welcome screen and welcome e-mail.
+16. As that owner: add 5 dishes with photos, a logo and banner, opening hours; download a QR code; open the menu from the QR code on a phone.
+17. Guest: search, open a dish, "My order" → Show to waiter, Share, light and dark mode.
+18. Change a price; reopen the menu on the phone → the new price shows.
+19. Super Admin: the new restaurant is in Restaurants; record a test payment → invoice e-mail arrives; dashboard numbers appear (after the next hour) and System health shows the cron running.
+20. Delete the test restaurant (Restaurants → Delete; it is removed for good after 30 days).

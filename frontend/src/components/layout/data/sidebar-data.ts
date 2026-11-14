@@ -1,4 +1,5 @@
 import {
+  ListChecks,
   BookOpen,
   FileSpreadsheet,
   LayoutDashboard,
@@ -40,6 +41,7 @@ export const sidebarData: SidebarData = {
       title: 'nav.menu_group',
       items: [
         { title: 'nav.menu', url: '/admin/menu', icon: BookOpen },
+        { title: 'nav.dishes', url: '/admin/dishes', icon: ListChecks },
         {
           title: 'nav.addons',
           url: '/admin/addons',

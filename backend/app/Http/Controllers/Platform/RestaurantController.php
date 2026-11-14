@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Membership;
 use App\Models\Payment;
 use App\Models\Plan;
+use App\Models\PlatformTag;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Notifications\OwnerWelcomeNotification;
@@ -17,6 +18,9 @@ use App\Support\Features;
 use App\Support\ImpersonationManager;
 use App\Support\PublicMenu\MenuPageCache;
 use App\Support\Qr\QrMap;
+use App\Support\SignUp\SignUp;
+use App\Support\Tables\TableQuery;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -25,7 +29,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Super Admin › Restaurants (PLAN.md §7.3 screen 2): list, create, edit,
@@ -36,15 +40,23 @@ class RestaurantController extends Controller
 {
     public function __construct(private readonly ActivityLogger $activity) {}
 
-    public function index(Request $request): JsonResponse
+    public function index(Request $request): JsonResponse|StreamedResponse
     {
+        // The DataTable asks with page=… (QUESTIONS #185); other callers keep the short list below.
+        if ($request->has('page') || $request->query('format') === 'csv') {
+            return $this->table($request);
+        }
         $data = $request->validate([
             'search' => ['sometimes', 'nullable', 'string', 'max:100'],
             'state' => ['sometimes', 'nullable', Rule::in(array_column(SubscriptionState::cases(), 'value'))],
             'plan_id' => ['sometimes', 'nullable', 'integer'],
             'deleted' => ['sometimes', 'boolean'],
+            'tag_id' => ['sometimes', 'nullable', 'integer'],
+            'follow_up' => ['sometimes', 'nullable', 'in:due'],
         ]);
-        $query = Tenant::query()->with(['plan', 'memberships' => fn ($q) => $q->where('role', Role::Owner)->with('user')])
+        $query = Tenant::query()->with(['plan', 'platformTags', 'memberships' => fn ($q) => $q->where('role', Role::Owner)->with('user')])
+            ->when($data['tag_id'] ?? null, fn ($q, $tag) => $q->whereHas('platformTags', fn ($w) => $w->whereKey($tag)))
+            ->when(($data['follow_up'] ?? null) === 'due', fn ($q) => $q->whereNotNull('follow_up_on')->where('follow_up_on', '<=', now()->toDateString()))
             ->when($request->boolean('deleted'), fn ($q) => $q->onlyTrashed())
             ->when($data['search'] ?? null, fn ($q, $s) => $q->where(fn ($w) => $w->where('name', 'like', "%{$s}%")->orWhere('slug', 'like', "%{$s}%")))
             ->when($data['plan_id'] ?? null, fn ($q, $p) => $q->where('plan_id', $p))
@@ -59,9 +71,105 @@ class RestaurantController extends Controller
         return response()->json(['data' => $rows->take(500)->values()]);
     }
 
+    /**
+     * Restaurants matching any of the dashboard's usage keys.
+     *
+     * @param  list<string>  $keys
+     */
+    private function usage(QueryBuilder $q, array $keys): QueryBuilder
+    {
+        return $q->where(function (QueryBuilder $w) use ($keys) {
+            $w->whereRaw('1 = 0');
+            foreach ($keys as $key) {
+                match (true) {
+                    in_array($key, ['price_periods', 'promotions', 'order_list', 'print'], true) => $w->orWhere('uses_'.$key, true),
+                    $key === 'limit_photos' => $w->orWhere(fn ($x) => $x->whereNotNull('photos_limit')->whereColumn('photos', '>=', 'photos_limit')),
+                    $key === 'near_photos' => $w->orWhere(fn ($x) => $x->whereNotNull('photos_limit')->whereColumn('photos', '<', 'photos_limit')->whereRaw('photos >= photos_limit * 0.8')),
+                    $key === 'limit_branches' => $w->orWhere(fn ($x) => $x->whereNotNull('branches_limit')->whereColumn('branches', '>=', 'branches_limit')),
+                    str_starts_with($key, 'style:') => substr($key, 6) === 'editorial'
+                        ? $w->orWhere(fn ($x) => $x->whereNull('style')->orWhere('style', 'editorial'))
+                        : $w->orWhere('style', substr($key, 6)),
+                    $key === 'paying' => $w->orWhere('paid_until', '>=', now()->toDateString()),
+                    $key === 'not_paying' => $w->orWhere(fn ($x) => $x->whereNull('paid_until')->orWhere('paid_until', '<', now()->toDateString())),
+                    default => null,
+                };
+            }
+        });
+    }
+
+    /** Restaurants as a server-side table: search, filters, sort, pages, CSV. */
+    private function table(Request $request): JsonResponse|StreamedResponse
+    {
+        $show = explode(',', (string) $request->query('show', ''));
+        $query = Tenant::query()->with(['plan', 'platformTags', 'memberships' => fn ($q) => $q->where('role', Role::Owner)->with('user')])
+            ->when($request->boolean('deleted') || in_array('deleted', $show, true), fn ($q) => $q->onlyTrashed())
+            // Health, views and scans from the dashboard summary (QUESTIONS #186): one subquery per column, no join.
+            ->select('tenants.*')->addSelect(collect(['h_score' => 'score', 'h_band' => 'band', 'h_views' => 'views_30d', 'h_scans' => 'scans_30d'])
+            ->map(fn (string $col) => DB::table('tenant_health')->whereColumn('tenant_health.tenant_id', 'tenants.id')->select($col))->all());
+
+        return TableQuery::respond($query, $request, [
+            'search' => fn ($q, string $s) => $q->where(fn ($w) => $w->where('tenants.name', 'like', "%{$s}%")->orWhere('tenants.slug', 'like', "{$s}%")
+                ->orWhereHas('memberships', fn ($m) => $m->where('role', Role::Owner->value)->whereHas('user', fn ($u) => $u->where('email', 'like', "%{$s}%")->orWhere('name', 'like', "%{$s}%")))),
+            'filters' => [
+                'state' => fn ($q, array $v) => $q->inState($v),
+                'plan' => fn ($q, array $v) => $q->whereIn('tenants.plan_id', array_map('intval', $v)),
+                'tag' => fn ($q, array $v) => $q->whereHas('platformTags', fn ($w) => $w->whereIn('platform_tags.id', array_map('intval', $v))),
+                'follow_up' => fn ($q, array $v) => in_array('due', $v, true) ? $q->whereNotNull('follow_up_on')->where('follow_up_on', '<=', now()->toDateString()) : null,
+                'id' => fn ($q, array $v) => $q->whereIn('tenants.id', array_map('intval', $v)),
+                // Dashboard click-throughs (QUESTIONS #186), from the nightly summary.
+                'health' => fn ($q, array $v) => $q->whereIn('tenants.id', DB::table('tenant_health')->whereIn('band', $v)->select('tenant_id')),
+                'usage' => fn ($q, array $v) => $q->whereIn('tenants.id', $this->usage(DB::table('tenant_health'), $v)->select('tenant_id')),
+            ],
+            'date' => 'tenants.created_at',
+            'sorts' => [
+                'name' => 'tenants.name',
+                'created_at' => 'tenants.created_at',
+                'paid_until' => 'tenants.paid_until',
+                'health' => fn ($q, string $dir) => $q->orderBy('h_score', $dir),
+                'views' => fn ($q, string $dir) => $q->orderBy('h_views', $dir),
+                'scans' => fn ($q, string $dir) => $q->orderBy('h_scans', $dir),
+                'plan' => fn ($q, string $dir) => $q->orderBy(Plan::select('price_minor')->whereColumn('plans.id', 'tenants.plan_id'), $dir),
+            ],
+            'default_sort' => '-created_at',
+            'csv' => ['name' => 'restaurants', 'columns' => [
+                'ID' => fn (Tenant $t) => $t->id,
+                'Name' => fn (Tenant $t) => $t->name,
+                'Menu address' => fn (Tenant $t) => url('/'.$t->slug),
+                'Status' => fn (Tenant $t) => $t->subscriptionState()->value,
+                'Plan' => fn (Tenant $t) => $t->plan?->name['en'] ?? '',
+                'Owner' => fn (Tenant $t) => $t->memberships->firstWhere('role', Role::Owner)?->user?->name,
+                'Owner e-mail' => fn (Tenant $t) => $t->memberships->firstWhere('role', Role::Owner)?->user?->email,
+                'Paid until' => fn (Tenant $t) => $t->paid_until?->toDateString(),
+                'Trial ends' => fn (Tenant $t) => $t->trial_ends_at?->toDateString(),
+                'Tags' => fn (Tenant $t) => $t->platformTags->pluck('name')->implode(', '),
+                'Created' => fn (Tenant $t) => $t->created_at?->toDateString(),
+                'Health score' => fn (Tenant $t) => $t->getAttributes()['h_score'] ?? null,
+                'Menu views (30 days)' => fn (Tenant $t) => $t->getAttributes()['h_views'] ?? null,
+                'QR scans (30 days)' => fn (Tenant $t) => $t->getAttributes()['h_scans'] ?? null,
+            ]],
+        ], fn (Tenant $t) => $this->row($t));
+    }
+
+    /** Bulk: add or remove a tag on many restaurants at once. */
+    public function bulkTag(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'ids' => ['required', 'array', 'min:1', 'max:1000'],
+            'ids.*' => ['integer'],
+            'tag_id' => ['required', 'integer', Rule::exists('platform_tags', 'id')],
+            'remove' => ['sometimes', 'boolean'],
+        ]);
+        $tag = PlatformTag::findOrFail($data['tag_id']);
+        $ids = Tenant::withTrashed()->whereIn('id', $data['ids'])->pluck('id');
+        $request->boolean('remove') ? $tag->tenants()->detach($ids) : $tag->tenants()->syncWithoutDetaching($ids);
+        $this->activity->log($request->boolean('remove') ? 'platform.tag_removed_bulk' : 'platform.tag_added_bulk', $tag, ['restaurants' => ['to' => $ids->count()]], null);
+
+        return response()->json(['data' => ['count' => $ids->count()]]);
+    }
+
     public function show(int $restaurant): JsonResponse
     {
-        $tenant = Tenant::withTrashed()->with(['plan', 'memberships.user'])->findOrFail($restaurant);
+        $tenant = Tenant::withTrashed()->with(['plan', 'platformTags', 'memberships.user'])->findOrFail($restaurant);
         $overrides = DB::table('tenant_feature_overrides')->where('tenant_id', $tenant->id)->pluck('enabled', 'feature_key');
 
         return response()->json(['data' => [
@@ -69,7 +177,7 @@ class RestaurantController extends Controller
             'members' => $tenant->memberships->map(fn (Membership $m) => ['id' => $m->user_id, 'name' => $m->user->name, 'email' => $m->user->email, 'role' => $m->role->value])->values(),
             'features' => Features::for($tenant),
             'overrides' => $overrides,
-            'payments' => Payment::with('plan')->where('tenant_id', $tenant->id)->latest('paid_at')->get()->map(fn (Payment $p) => PaymentController::row($p))->values(),
+            'payments' => Payment::with(['plan', 'invoices'])->where('tenant_id', $tenant->id)->latest('paid_at')->get()->map(fn (Payment $p) => PaymentController::row($p))->values(),
             'counts' => [
                 'menus' => DB::table('menus')->where('tenant_id', $tenant->id)->count(),
                 'items' => DB::table('items')->where('tenant_id', $tenant->id)->count(),
@@ -120,6 +228,27 @@ class RestaurantController extends Controller
         return response()->json(['data' => $this->row($tenant->load('plan'))], 201);
     }
 
+    /** Approve a self-registered restaurant waiting for review (Settings → Sign-up → "Require my approval"). */
+    public function approve(int $restaurant, SignUp $signUp): JsonResponse
+    {
+        $tenant = Tenant::findOrFail($restaurant);
+        abort_unless($tenant->signup_state === Tenant::SIGNUP_PENDING, 422, __('signup.not_pending'));
+        $signUp->approve($tenant);
+
+        return response()->json(['data' => $this->row($tenant->fresh(['plan']) ?? $tenant)]);
+    }
+
+    /** Reject it: the owner gets the reason by e-mail and the restaurant is removed (the slug is free again). */
+    public function reject(Request $request, int $restaurant, SignUp $signUp): JsonResponse
+    {
+        $tenant = Tenant::findOrFail($restaurant);
+        abort_unless($tenant->signup_state === Tenant::SIGNUP_PENDING, 422, __('signup.not_pending'));
+        $data = $request->validate(['reason' => ['required', 'string', 'min:3', 'max:500']]);
+        $signUp->reject($tenant, $data['reason']);
+
+        return response()->json(['data' => ['deleted' => true]]);
+    }
+
     /**
      * "Resend set-password e-mail" (owner, 2026-11-12): a new welcome e-mail
      * with a fresh 7-day link for the restaurant's owner. Earlier links stop working.
@@ -129,10 +258,21 @@ class RestaurantController extends Controller
         $tenant = Tenant::findOrFail($restaurant);
         $owner = $tenant->memberships()->where('role', Role::Owner)->with('user')->first()?->user;
         abort_if($owner === null, 422, __('platform.remind.no_owner'));
+
+        // An owner who has signed in before already has a password: a normal
+        // "reset your password" e-mail, not "choose your password" (owner, 2026-11-14).
+        if ($owner->last_login_at !== null) {
+            $status = Password::broker()->sendResetLink(['email' => $owner->email]);
+            abort_if($status === Password::RESET_THROTTLED, 429, __($status));
+            $this->activity->log('platform.password_reset_sent', $tenant, ['email' => ['to' => $owner->email]], null);
+
+            return response()->json(['data' => ['sent_to' => $owner->email, 'kind' => 'reset'], 'message' => __('platform.remind.reset_sent', ['email' => $owner->email])]);
+        }
+
         $this->welcome($owner, $tenant, reminder: true);
         $this->activity->log('platform.welcome_resent', $tenant, ['email' => ['to' => $owner->email]], null);
 
-        return response()->json(['data' => ['sent_to' => $owner->email]]);
+        return response()->json(['data' => ['sent_to' => $owner->email, 'kind' => 'welcome'], 'message' => __('platform.remind.welcome_sent', ['email' => $owner->email])]);
     }
 
     private function welcome(User $user, Tenant $tenant, bool $reminder = false): void
@@ -226,28 +366,36 @@ class RestaurantController extends Controller
     public function impersonate(Request $request, int $restaurant, ImpersonationManager $manager): JsonResponse
     {
         $tenant = Tenant::findOrFail($restaurant);
-        $data = $request->validate(['reason' => ['required', 'string', 'min:5', 'max:300']]);
         $owner = $tenant->memberships()->where('role', Role::Owner)->with('user')->first()?->user;
-        if ($owner === null) {
-            throw ValidationException::withMessages(['reason' => __('platform.no_owner')]);
-        }
-        $admin = $request->user();
-        $this->activity->log('platform.impersonation_started', $tenant, ['reason' => ['to' => $data['reason']], 'user' => ['to' => $owner->email]], $tenant->id);
-        $manager->start($request, $admin, $tenant, $owner, $data['reason']);
+        abort_if($owner === null, 422, __('platform.no_owner'));
+        // One click, no reason, nothing recorded (owner, 2026-11-13).
+        $manager->start($request, $request->user(), $tenant, $owner);
 
         return response()->json(['data' => ['tenant_id' => $tenant->id, 'redirect' => '/admin']]);
+    }
+
+    /** "Log in as" from the mobile app: a 2-hour token for the owner (QUESTIONS #188). */
+    public function impersonateToken(Request $request, int $restaurant, ImpersonationManager $manager): JsonResponse
+    {
+        $tenant = Tenant::findOrFail($restaurant);
+        $owner = $tenant->memberships()->where('role', Role::Owner)->with('user')->first()?->user;
+        abort_if($owner === null, 422, __('platform.no_owner'));
+
+        return response()->json(['data' => $manager->startToken($request->user(), $tenant, $owner)])->header('Cache-Control', 'no-store');
     }
 
     /** @return array<string, mixed> */
     private function row(Tenant $t): array
     {
         $owner = $t->relationLoaded('memberships') ? $t->memberships->firstWhere('role', Role::Owner)?->user : null;
+        $h = $t->getAttributes();
 
         return [
             'id' => $t->id,
             'name' => $t->name,
             'slug' => $t->slug,
             'state' => $t->subscriptionState()->value,
+            'signup_state' => $t->signup_state,
             'status' => $t->status,
             'suspended_reason' => $t->suspended_reason,
             'plan' => $t->plan ? ['id' => $t->plan->id, 'name' => $t->plan->name['en'] ?? $t->plan->slug] : null,
@@ -260,6 +408,14 @@ class RestaurantController extends Controller
             'created_at' => $t->created_at?->toDateString(),
             'deleted_at' => $t->deleted_at instanceof Carbon ? $t->deleted_at->toDateString() : null,
             'url' => url('/'.$t->slug),
+            // CRM (Super Admin only)
+            'tags' => $t->relationLoaded('platformTags') ? $t->platformTags->sortBy('name')->map(fn (PlatformTag $g) => CrmController::tag($g))->values()->all() : [],
+            'follow_up_on' => $t->follow_up_on?->toDateString(),
+            'follow_up_reason' => $t->follow_up_reason,
+            // From the dashboard summary; null until platform:aggregate has run.
+            'health' => isset($h['h_band']) ? ['band' => $h['h_band'], 'score' => (int) $h['h_score']] : null,
+            'views_30d' => isset($h['h_views']) ? (int) $h['h_views'] : null,
+            'scans_30d' => isset($h['h_scans']) ? (int) $h['h_scans'] : null,
         ];
     }
 }

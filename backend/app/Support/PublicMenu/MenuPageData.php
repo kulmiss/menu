@@ -34,10 +34,13 @@ class MenuPageData
 {
     public function __construct(private readonly CurrentTenant $current) {}
 
-    /** @return array<string, mixed> */
-    public function build(Tenant $tenant, ?TenantAppearance $appearance = null, ?Branch $branch = null): array
+    /**
+     * @param  bool  $periods  apply time-based prices running now (off for the printable PDF menu)
+     * @return array<string, mixed>
+     */
+    public function build(Tenant $tenant, ?TenantAppearance $appearance = null, ?Branch $branch = null, bool $periods = true): array
     {
-        return $this->current->runAs($tenant, function () use ($tenant, $appearance, $branch) {
+        return $this->current->runAs($tenant, function () use ($tenant, $appearance, $branch, $periods) {
             $branches = Branch::where('is_active', true)->orderByDesc('is_default')->orderBy('sort')->orderBy('id')->get();
             $branch ??= $branches->firstWhere('is_default', true) ?? $branches->first();
             $branchId = $branch?->id;
@@ -100,6 +103,9 @@ class MenuPageData
                 }
             }
 
+            // Time-based prices running now (owner, 2026-11-14); the scheduler rebuilds the page at each start and end.
+            $deals = $periods ? PricePeriods::apply($menus, PricePeriods::active($tenant, $branchId), $text) : [];
+
             // Opening hours: the branch's own, else the restaurant's; closures still to come.
             $allHours = OpeningHour::whereNull('branch_id')->orWhere('branch_id', $branchId)->orderBy('weekday')->orderBy('opens_at')->get();
             $own = $allHours->where('branch_id', $branchId);
@@ -118,7 +124,7 @@ class MenuPageData
             $prices = $theme['show_prices'];
             $sizesLine = $theme['style'] === 'minimal';
 
-            $menuRows = $menus->map(function (Menu $menu) use ($text, $money, $describe, $photos, $calories, $prices, $sizesLine, &$tagsUsed) {
+            $menuRows = $menus->map(function (Menu $menu) use ($text, $money, $describe, $photos, $calories, $prices, $sizesLine, $deals, &$tagsUsed) {
                 return [
                     'id' => $menu->id,
                     'name' => $text($menu->name),
@@ -128,7 +134,8 @@ class MenuPageData
                         'id' => $c->id,
                         'name' => $text($c->name),
                         'description' => $describe($c->description),
-                        'items' => $c->items->map(function (Item $item) use ($text, $money, $describe, $photos, $calories, $prices, $sizesLine, &$tagsUsed) {
+                        'items' => $c->items->map(function (Item $item) use ($text, $money, $describe, $photos, $calories, $prices, $sizesLine, $deals, &$tagsUsed) {
+                            $deal = $deals[$item->id] ?? null;
                             $tags = $item->tags->map(fn (Tag $t) => ['key' => $t->key ?? 'c'.$t->id, 'label' => $t->key ? __('public.tags.'.$t->key) : $text($t->name)])->values()->all();
                             foreach ($tags as $tag) {
                                 $tagsUsed[$tag['key']] = $tag['label'];
@@ -141,6 +148,11 @@ class MenuPageData
                                 'price' => $item->variants->isNotEmpty()
                                     ? ($prices ? __('public.from', ['price' => $money($item->fromPriceMinor())]) : '')
                                     : $money($item->price_minor),
+                                // Time-based price: the normal price, crossed out, and "Happy hour until 18:00".
+                                'was' => $deal === null || ! $prices ? '' : ($item->variants->isEmpty()
+                                    ? $money($deal['was'])
+                                    : __('public.from', ['price' => $money((int) $item->variants->map(fn (ItemVariant $v) => $deal['sizes'][$v->id] ?? (int) $v->price_minor)->min())])),
+                                'deal' => $deal['label'] ?? '',
                                 // Style D lists the sizes on the menu itself: "Small 60 · Large 80".
                                 'sizes' => $sizesLine && $prices && $item->variants->count() > 1
                                     ? $item->variants->map(fn (ItemVariant $v) => $text($v->name).' '.self::number((int) $v->price_minor))->implode(' · ')
@@ -162,7 +174,7 @@ class MenuPageData
                                 ],
                                 'sheet' => array_filter([
                                     'd' => $describe($item->description),
-                                    'v' => $item->variants->map(fn (ItemVariant $v) => [$text($v->name), $money($v->price_minor)])->values()->all(),
+                                    'v' => $item->variants->map(fn (ItemVariant $v) => [$text($v->name), $money($v->price_minor).($prices && isset($deal['sizes'][$v->id]) ? ' · '.__('public.was', ['price' => $money($deal['sizes'][$v->id])]) : '')])->values()->all(),
                                     'a' => $item->addonGroups->map(fn (AddonGroup $g) => [
                                         $text($g->name), $g->min_choices, $g->max_choices,
                                         $g->options->map(fn (AddonOption $o) => [$text($o->name), $prices && $o->price_minor > 0 ? '+'.$money($o->price_minor) : '', $o->is_sold_out ? 1 : 0])->values()->all(),

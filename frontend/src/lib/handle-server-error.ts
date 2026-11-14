@@ -37,5 +37,16 @@ export function handleServerError(error: unknown) {
   const status = errorStatus(error)
   const message = status > 0 && status < 500 ? serverMessage(error) : null
 
-  toast.error(message ?? i18n.t(errorKey(error)))
+  // Plan limit reached: a button to the contact from platform settings.
+  const up = (error as { response?: { data?: { upgrade?: Upgrade } } }).response
+    ?.data?.upgrade
+  const href = up?.whatsapp || (up?.email && `mailto:${up.email}`)
+  const text = message ?? i18n.t(errorKey(error))
+  if (!href) return toast.error(text)
+  toast.error(text, [
+    i18n.t(up?.whatsapp ? 'upgrade.whatsapp' : 'upgrade.email'),
+    href,
+  ])
 }
+
+type Upgrade = { whatsapp: string | null; email: string | null }

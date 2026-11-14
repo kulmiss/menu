@@ -39,7 +39,7 @@ class PublicMenuController extends Controller
         }
 
         $state = $tenant->subscriptionState();
-        if (in_array($state, [SubscriptionState::Unavailable, SubscriptionState::Suspended], true)) {
+        if (in_array($state, [SubscriptionState::Unavailable, SubscriptionState::Suspended, SubscriptionState::Pending], true)) {
             return response()->view('public.unavailable', ['tenant' => $tenant], 503, [
                 'Retry-After' => '86400',
                 'X-Robots-Tag' => 'noindex',
@@ -64,6 +64,7 @@ class PublicMenuController extends Controller
             MenuPageCache::write($tenant->slug, $html, $place?->slug);
         }
 
+        $request->attributes->set('guest_menu', true);
         $response = response($html, 200, [
             'Content-Type' => 'text/html; charset=UTF-8',
             'Cache-Control' => 'public, max-age=0, must-revalidate',
@@ -105,7 +106,7 @@ class PublicMenuController extends Controller
 
         $file = MenuPageCache::dir($tenant->slug, $place?->slug).'/menu.pdf';
         if (! is_file($file)) {
-            $pdf = $current->runAs($tenant, fn () => (new PdfMenu)->render($data->build($tenant, null, $place), [
+            $pdf = $current->runAs($tenant, fn () => (new PdfMenu)->render($data->build($tenant, null, $place, periods: false), [
                 'photos' => (bool) $appearance->show_photos,
                 'columns' => 1,
             ]));

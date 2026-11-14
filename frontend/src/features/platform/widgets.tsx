@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
+import { Link } from '@tanstack/react-router'
 import { AlertTriangle, Check, Mail, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { api, isApiError } from '@/lib/api'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -16,6 +18,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Bar, Widget } from '@/features/dashboard/widget-card'
+import { followUpsQ } from './api'
+import { TagChip } from './crm'
 
 /**
  * Super Admin dashboard widgets (owner, 2026-11-11), downloaded after the
@@ -23,13 +27,6 @@ import { Bar, Widget } from '@/features/dashboard/widget-card'
  * its own error and never breaks the others. Charts are plain SVG.
  */
 type Names = Record<string, string> | null
-type Revenue = {
-  currency: string
-  this_month: number
-  last_month: number
-  mrr: number
-  months: { month: string; total: number }[]
-}
 type Expiring = {
   id: number
   name: string
@@ -43,16 +40,6 @@ type Inactive = {
   slug: string
   last_activity: string | null
 }
-type Funnel = {
-  days: number
-  steps: { key: string; count: number; percent: number | null }[]
-}
-type Top = {
-  views: Ranked[]
-  scans: Ranked[]
-  plans: { id: number; name: string; plan: Names; price_minor: number }[]
-}
-type Ranked = { id: number; name: string; total: number }
 type Signup = {
   id: number
   name: string
@@ -60,6 +47,7 @@ type Signup = {
   created_at: string
   percent: number
   steps: Record<string, boolean>
+  signup_state?: 'unverified' | 'pending_approval' | null
 }
 type Health = {
   disk_free: number | null
@@ -88,8 +76,6 @@ const w = <T,>(name: string) => ({
   staleTime: 60_000,
 })
 const nameOf = (n: Names) => (n ? (n.en ?? Object.values(n)[0] ?? '') : '')
-const money = (minor: number, currency: string) =>
-  `${(minor / 100).toLocaleString(undefined, { maximumFractionDigits: 2 })} ${currency}`
 const gb = (bytes: number | null) =>
   bytes === null ? '–' : `${(bytes / 1024 ** 3).toFixed(1)} GB`
 
@@ -106,108 +92,15 @@ export default function PlatformWidgets() {
       style={{ gridTemplateColumns: 'minmax(0, 1fr)' }}
     >
       <HealthWidget />
+      <FollowUpsWidget />
       <div className='grid min-w-0 gap-4 lg:grid-cols-2'>
-        <RevenueWidget />
         <PlanMixWidget />
         <ExpiringWidget onEmail={setEmail} />
         <InactiveWidget onEmail={setEmail} />
-        <FunnelWidget />
-        <TopWidget />
       </div>
       <SignupsWidget />
       {email && <EmailDialog target={email} onClose={() => setEmail(null)} />}
     </div>
-  )
-}
-
-function RevenueWidget() {
-  const { t } = useTranslation()
-  const query = useQuery(w<Revenue>('revenue'))
-  return (
-    <Widget title={t('platform.w.revenue')} query={query}>
-      {(r) => {
-        const change =
-          r.last_month > 0
-            ? Math.round(((r.this_month - r.last_month) * 100) / r.last_month)
-            : null
-        const max = Math.max(1, ...r.months.map((m) => m.total))
-        const label = (m: string) =>
-          new Date(m + '-15').toLocaleDateString(undefined, { month: 'short' })
-        return (
-          <div className='grid gap-3'>
-            <div className='grid grid-cols-3 gap-2 text-sm'>
-              <div>
-                <p className='text-muted-foreground'>
-                  {t('platform.w.this_month')}
-                </p>
-                <p className='text-lg font-bold tabular-nums'>
-                  {money(r.this_month, r.currency)}
-                </p>
-                {change !== null && (
-                  <p className='text-xs text-muted-foreground'>
-                    {t('platform.w.vs_last', {
-                      change: `${change > 0 ? '+' : ''}${change}%`,
-                    })}
-                  </p>
-                )}
-              </div>
-              <div>
-                <p className='text-muted-foreground'>
-                  {t('platform.w.last_month')}
-                </p>
-                <p className='text-lg font-bold tabular-nums'>
-                  {money(r.last_month, r.currency)}
-                </p>
-              </div>
-              <div>
-                <p className='text-muted-foreground'>{t('platform.w.mrr')}</p>
-                <p className='text-lg font-bold tabular-nums'>
-                  {money(r.mrr, r.currency)}
-                </p>
-              </div>
-            </div>
-            {r.months.every((m) => m.total === 0) ? (
-              <p className='text-sm text-muted-foreground'>
-                {t('platform.w.no_data')}
-              </p>
-            ) : (
-              <svg
-                viewBox='0 0 360 110'
-                className='h-28 w-full'
-                role='img'
-                aria-label={`${t('platform.w.revenue_chart')}: ${r.months.map((m) => `${label(m.month)} ${money(m.total, r.currency)}`).join(', ')}`}
-              >
-                {r.months.map((m, i) => {
-                  const h = Math.round((m.total / max) * 80)
-                  return (
-                    <g key={m.month}>
-                      <rect
-                        x={i * 30 + 4}
-                        y={90 - h}
-                        width='22'
-                        height={Math.max(h, 1)}
-                        rx='3'
-                        fill='var(--primary)'
-                      />
-                      <text
-                        x={i * 30 + 15}
-                        y='106'
-                        textAnchor='middle'
-                        fontSize='10'
-                        fill='currentColor'
-                        opacity='0.75'
-                      >
-                        {label(m.month)}
-                      </text>
-                    </g>
-                  )
-                })}
-              </svg>
-            )}
-          </div>
-        )
-      }}
-    </Widget>
   )
 }
 
@@ -327,112 +220,54 @@ function InactiveWidget({ onEmail }: { onEmail: OnEmail }) {
   )
 }
 
-function FunnelWidget() {
-  const { t } = useTranslation()
-  const [days, setDays] = useState<30 | 90>(30)
-  const query = useQuery(w<Funnel>(`funnel?days=${days}`))
-  return (
-    <Widget title={t('platform.w.funnel')} query={query}>
-      {(f) => {
-        const first = Math.max(1, f.steps[0]?.count ?? 0)
-        return (
-          <div className='grid gap-3'>
-            <Toggle
-              value={days}
-              options={[30, 90]}
-              label={(d) => t('platform.w.last_days', { count: d })}
-              onChange={setDays}
-            />
-            {f.steps[0]?.count === 0 ? (
-              <p className='text-sm text-muted-foreground'>
-                {t('platform.w.no_data')}
-              </p>
-            ) : (
-              f.steps.map((s) => (
-                <div key={s.key} className='grid gap-1'>
-                  <div className='flex justify-between text-sm'>
-                    <span>{t(`platform.w.funnel_steps.${s.key}`)}</span>
-                    <span className='tabular-nums'>
-                      {s.count}
-                      {s.percent !== null && (
-                        <span className='ms-2 text-muted-foreground'>
-                          ({s.percent}%)
-                        </span>
-                      )}
-                    </span>
-                  </div>
-                  <Bar
-                    value={Math.round((s.count * 100) / first)}
-                    label={t(`platform.w.funnel_steps.${s.key}`)}
-                  />
-                </div>
-              ))
-            )}
-          </div>
-        )
-      }}
-    </Widget>
-  )
-}
+const STEPS = ['logo', 'banner', 'dishes', 'photos', 'hours', 'qr'] as const
 
-function TopWidget() {
+/** CRM: follow-ups due today and overdue (owner, 2026-11-13). */
+function FollowUpsWidget() {
   const { t } = useTranslation()
-  const query = useQuery(w<Top>('top'))
-  const list = (
-    title: string,
-    rows: { id: number; name: string; value: string }[]
-  ) => (
-    <div className='grid content-start gap-1'>
-      <p className='text-sm font-medium'>{title}</p>
-      {rows.length === 0 ? (
-        <p className='text-sm text-muted-foreground'>
-          {t('platform.w.no_data')}
-        </p>
-      ) : (
-        <ol className='grid gap-1 text-sm'>
+  const query = useQuery(followUpsQ())
+  if (query.data && query.data.length === 0) return null
+  return (
+    <Widget title={t('platform.crm.widget')} query={query}>
+      {(rows) => (
+        <ul className='grid gap-2'>
           {rows.map((r) => (
-            <li key={r.id} className='flex min-w-0 justify-between gap-2'>
-              <span className='min-w-0 truncate'>{r.name}</span>
-              <span className='text-muted-foreground tabular-nums'>
-                {r.value}
+            <li
+              key={r.id}
+              className='flex flex-wrap items-center gap-2 text-sm'
+            >
+              <Link
+                to='/platform/$section'
+                params={{ section: 'restaurants' }}
+                search={{ open: r.id }}
+                className='inline-flex min-h-11 items-center font-medium hover:underline sm:min-h-8'
+              >
+                {r.name}
+              </Link>
+              <span
+                className={
+                  r.overdue
+                    ? 'font-medium text-destructive'
+                    : 'text-muted-foreground'
+                }
+              >
+                {r.overdue
+                  ? t('platform.crm.overdue', { date: r.date })
+                  : t('platform.crm.today')}
               </span>
+              {r.reason && (
+                <span className='text-muted-foreground'>· {r.reason}</span>
+              )}
+              {r.tags.map((g) => (
+                <TagChip key={g.id} tag={g} />
+              ))}
             </li>
           ))}
-        </ol>
-      )}
-    </div>
-  )
-  return (
-    <Widget
-      title={t('platform.w.top')}
-      hint={t('platform.w.top_hint')}
-      query={query}
-    >
-      {(d) => (
-        <div className='grid gap-4 sm:grid-cols-3'>
-          {list(
-            t('platform.w.most_views'),
-            d.views.map((r) => ({ ...r, value: r.total.toLocaleString() }))
-          )}
-          {list(
-            t('platform.w.most_scans'),
-            d.scans.map((r) => ({ ...r, value: r.total.toLocaleString() }))
-          )}
-          {list(
-            t('platform.w.biggest_plans'),
-            d.plans.map((r) => ({
-              id: r.id,
-              name: r.name,
-              value: nameOf(r.plan),
-            }))
-          )}
-        </div>
+        </ul>
       )}
     </Widget>
   )
 }
-
-const STEPS = ['logo', 'banner', 'dishes', 'photos', 'hours', 'qr'] as const
 
 function SignupsWidget() {
   const { t } = useTranslation()
@@ -450,6 +285,11 @@ function SignupsWidget() {
               <li key={r.id} className='grid gap-1 text-sm'>
                 <div className='flex min-w-0 justify-between gap-2'>
                   <span className='min-w-0 truncate font-medium'>{r.name}</span>
+                  {r.signup_state && (
+                    <Badge variant='outline' className='shrink-0'>
+                      {t(`platform.restaurants.signup_short_${r.signup_state}`)}
+                    </Badge>
+                  )}
                   <span className='tabular-nums'>{r.percent}%</span>
                 </div>
                 <Bar

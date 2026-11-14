@@ -36,6 +36,8 @@ export function fakeApi(routes: Record<string, Handler>) {
 
     const handler =
       routes[`${request.method} ${request.url}`] ??
+      // A route without "?…" also answers requests with a query string (tables).
+      routes[`${request.method} ${request.url.split('?')[0]}`] ??
       // ensureCsrfCookie(): always fine unless a test says otherwise.
       (request.url === '/sanctum/csrf-cookie' ? { status: 204 } : undefined)
     const reply: Reply =

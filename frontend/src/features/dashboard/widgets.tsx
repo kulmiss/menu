@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { Check, ImagePlus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { api, tenantUrl } from '@/lib/api'
@@ -40,6 +40,8 @@ type PlanInfo = {
   trial: boolean
   days_left: number | null
   usage: Usage[]
+  next?: { name: Names; adds: string[] } | null
+  upgrade?: { whatsapp: string | null; email: string | null }
 }
 
 const widget = <T,>(t: number, name: string) => ({
@@ -58,6 +60,7 @@ export default function DashboardWidgets({ tenantId, locale, manager }: Props) {
       className='grid gap-4'
       style={{ gridTemplateColumns: 'minmax(0, 1fr)' }}
     >
+      {manager && welcomed() && <WelcomeCard tenantId={tenantId} />}
       {manager && <SetupWidget tenantId={tenantId} />}
       <TrendWidget tenantId={tenantId} />
       {manager && (
@@ -68,6 +71,59 @@ export default function DashboardWidgets({ tenantId, locale, manager }: Props) {
       )}
       {manager && <MissingPhotosWidget tenantId={tenantId} locale={locale} />}
     </div>
+  )
+}
+
+/** The e-mail confirmation link opens /admin?welcome=1 (owner, 2026-11-13). */
+const welcomed = () =>
+  new URLSearchParams(window.location.search).get('welcome') === '1'
+
+function WelcomeCard({ tenantId }: { tenantId: number }) {
+  const { t } = useTranslation()
+  const navigate = useNavigate()
+  const query = useQuery(widget<Setup>(tenantId, 'setup'))
+  const next = (query.data?.steps ?? []).filter((s) => !s.done).slice(0, 3)
+  return (
+    <section
+      aria-labelledby='welcome-title'
+      className='grid gap-3 rounded-xl border border-primary/40 bg-primary/5 p-4'
+    >
+      <div className='flex items-start justify-between gap-2'>
+        <div>
+          <h2 id='welcome-title' className='text-lg font-semibold'>
+            {t('dashboard.welcome.title')}
+          </h2>
+          <p className='text-sm text-muted-foreground'>
+            {t('dashboard.welcome.text')}
+          </p>
+        </div>
+        <Button
+          variant='ghost'
+          className='min-h-11 shrink-0 sm:min-h-9'
+          onClick={() => navigate({ to: '/admin', replace: true })}
+        >
+          {t('dashboard.welcome.close')}
+        </Button>
+      </div>
+      <ol className='grid gap-2 sm:grid-cols-3'>
+        {next.map((step, i) => (
+          <li key={step.key}>
+            <Button
+              asChild
+              variant='outline'
+              className='min-h-11 w-full justify-start'
+            >
+              <Link to={step.link}>
+                <span className='flex size-6 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground'>
+                  {i + 1}
+                </span>
+                {t(`dashboard.w.steps.${step.key}`)}
+              </Link>
+            </Button>
+          </li>
+        ))}
+      </ol>
+    </section>
   )
 }
 
@@ -392,7 +448,8 @@ function PlanWidget({
                 {u.limit !== null && (
                   <Bar value={pct} label={t(`dashboard.w.usage.${u.key}`)} />
                 )}
-                {u.limit !== null && pct >= 80 && (
+                {/* Not for a limit of 1 (one branch on Free/Plus): it would show from day one (owner, 2026-11-14). */}
+                {u.limit !== null && u.limit > 1 && pct >= 80 && (
                   <p className='text-xs font-medium'>
                     {t('dashboard.w.near_limit')}
                   </p>
@@ -400,6 +457,40 @@ function PlanWidget({
               </div>
             )
           })}
+          {p.next && p.next.adds.length > 0 && (
+            <div className='grid gap-2 rounded-md border p-3'>
+              <p className='text-sm font-semibold'>
+                {t('dashboard.w.next', { name: tr(p.next.name, locale) })}
+              </p>
+              <p className='text-xs text-muted-foreground'>
+                {t('dashboard.w.next_hint')}
+              </p>
+              <ul className='grid gap-1 text-sm'>
+                {p.next.adds.map((line) => (
+                  <li key={line} className='flex gap-2'>
+                    <Check
+                      className='mt-0.5 size-4 shrink-0 text-primary'
+                      aria-hidden
+                    />
+                    {line}
+                  </li>
+                ))}
+              </ul>
+              {(p.upgrade?.whatsapp || p.upgrade?.email) && (
+                <Button asChild size='sm' className='min-h-11 w-fit sm:min-h-8'>
+                  <a
+                    href={p.upgrade.whatsapp ?? `mailto:${p.upgrade.email}`}
+                    target={p.upgrade.whatsapp ? '_blank' : undefined}
+                    rel='noopener'
+                  >
+                    {t(
+                      p.upgrade.whatsapp ? 'upgrade.whatsapp' : 'upgrade.email'
+                    )}
+                  </a>
+                </Button>
+              )}
+            </div>
+          )}
         </div>
       )}
     </Widget>

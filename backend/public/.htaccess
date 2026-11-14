@@ -5,6 +5,9 @@
 
     RewriteEngine On
 
+    # Uploaded and generated files are never run as code (SECURITY_REPORT.md L5).
+    RewriteRule ^(media|menu-cache|menu-assets|app|images|landing)/.*\.(php\d?|phtml|phar|pht|inc|cgi|pl|py|sh)$ - [F,L,NC]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
@@ -38,6 +41,22 @@
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
+</IfModule>
+
+# ---- Security headers (SECURITY_REPORT.md H1) ------------------------------
+# For the static files (guest menu copies, assets, photos). Laravel sets the
+# same on its own answers; "setifempty" keeps those.
+<IfModule mod_headers.c>
+    Header setifempty X-Content-Type-Options "nosniff"
+    Header setifempty Referrer-Policy "strict-origin-when-cross-origin"
+    Header setifempty Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()"
+    # Only on HTTPS: browsers then refuse plain http for a year.
+    Header always setifempty Strict-Transport-Security "max-age=31536000" "expr=%{HTTPS} == 'on'"
+    # Guest menu copies: scripts are limited by the <meta> policy in the page itself.
+    <If "%{REQUEST_URI} =~ m#^/menu-cache/#">
+        Header setifempty Content-Security-Policy "object-src 'none'; base-uri 'none'"
+        Header setifempty Cross-Origin-Opener-Policy "same-origin"
+    </If>
 </IfModule>
 
 # ---- Speed (PLAN.md §15) -------------------------------------------------

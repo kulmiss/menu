@@ -31,6 +31,14 @@ it('seeds the complete sales demo: café, three showcases, small restaurants and
     $this->seed(DemoSeeder::class);
     $cafe = Tenant::where('slug', DemoSeeder::SLUG)->sole();
 
+    // Every demo account is confirmed, so nobody lands on "Check your inbox" (owner, 2026-11-13).
+    expect(User::whereNull('email_verified_at')->count())->toBe(0)
+        ->and(Tenant::whereNotNull('signup_state')->count())->toBe(0);
+    browser();
+    $this->actingAs(User::where('email', 'demo@example.com')->sole())->getJson(t($cafe))->assertOk();
+    app('auth')->forgetGuards();
+    $this->flushSession();
+
     asTenant($cafe, function () {
         expect(Menu::count())->toBe(3)
             ->and(Menu::where('slug', 'breakfast')->sole()->schedule_mode)->toBe(Menu::SCHEDULED)

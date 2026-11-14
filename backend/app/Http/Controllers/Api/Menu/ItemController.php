@@ -15,6 +15,7 @@ use App\Support\ActivityLogger;
 use App\Support\MediaJanitor;
 use App\Support\MenuCopier;
 use App\Support\PlanLimits;
+use App\Support\Tables\TableQuery;
 use App\Tenancy\CurrentTenant;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
@@ -26,6 +27,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Exists;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Items. Owners and managers edit everything; every member can mark items
@@ -41,6 +43,71 @@ class ItemController extends Controller
     public const MAX_PHOTOS = 5;
 
     public function __construct(private readonly CurrentTenant $current, private readonly PlanLimits $limits) {}
+
+    /**
+     * All dishes as a server-side table (owner, 2026-11-13, QUESTIONS #185):
+     * search, menu/category/status filters, sort, pages; CSV for Owner/Manager.
+     */
+    public function index(Request $request, Tenant $tenant): JsonResponse|StreamedResponse
+    {
+        if ($request->query('format') === 'csv') {
+            Gate::authorize('restaurant.manage'); // Staff can't export
+        }
+        $locale = $tenant->default_locale;
+        $text = fn (?array $v): string => (string) (($v ?? [])[$locale] ?? (reset($v) ?: ''));
+        $query = Item::query()->with(['category:id,menu_id,name', 'category.menu:id,name', 'media', 'variants:id,item_id,price_minor'])
+            ->select('items.*');
+
+        return TableQuery::respond($query, $request, [
+            'search' => fn ($q, string $s) => $q->where('items.name', 'like', "%{$s}%"),
+            'filters' => [
+                'menu' => fn ($q, array $v) => $q->whereHas('category', fn ($c) => $c->whereIn('menu_id', array_map('intval', $v))),
+                'category' => fn ($q, array $v) => $q->whereIn('items.category_id', array_map('intval', $v)),
+                'status' => fn ($q, array $v) => $q->where(function ($w) use ($v) {
+                    foreach ($v as $status) {
+                        match ($status) {
+                            'sold_out' => $w->orWhere('items.is_sold_out', true),
+                            'hidden' => $w->orWhere('items.is_visible', false),
+                            'no_photo' => $w->orWhereNull('items.media_id'),
+                            'new' => $w->orWhere('items.is_new', true),
+                            'popular' => $w->orWhere('items.is_popular', true),
+                            default => null,
+                        };
+                    }
+                }),
+            ],
+            'date' => 'items.updated_at',
+            'sorts' => [
+                'name' => fn ($q, string $dir) => $q->orderBy('items.name->'.$locale, $dir),
+                'price' => fn ($q, string $dir) => $q->orderByRaw('COALESCE(items.price_minor, (SELECT MIN(v.price_minor) FROM item_variants v WHERE v.item_id = items.id)) '.$dir),
+                'updated_at' => 'items.updated_at',
+                'category' => fn ($q, string $dir) => $q->orderBy(Category::select('sort')->whereColumn('categories.id', 'items.category_id'), $dir)->orderBy('items.sort', $dir),
+            ],
+            'default_sort' => 'category',
+            'csv' => ['name' => $tenant->slug.'-dishes', 'columns' => [
+                'Dish' => fn (Item $i) => $text($i->name),
+                'Category' => fn (Item $i) => $text($i->category->name),
+                'Menu' => fn (Item $i) => $text($i->category->menu->name),
+                'Price' => fn (Item $i) => $i->price_minor !== null ? number_format($i->price_minor / 100, 2, '.', '') : ($i->variants->isEmpty() ? '' : 'from '.number_format($i->variants->min('price_minor') / 100, 2, '.', '')),
+                'Sold out' => fn (Item $i) => $i->is_sold_out ? 'yes' : 'no',
+                'Visible' => fn (Item $i) => $i->is_visible ? 'yes' : 'no',
+                'Photo' => fn (Item $i) => $i->media_id ? 'yes' : 'no',
+                'Updated' => fn (Item $i) => $i->updated_at?->toDateString(),
+            ]],
+        ], fn (Item $i) => [
+            'id' => $i->id,
+            'name' => (object) $i->name,
+            'category' => ['id' => $i->category_id, 'name' => (object) $i->category->name],
+            'menu' => ['id' => $i->category->menu->id, 'name' => (object) $i->category->menu->name],
+            'price_minor' => $i->price_minor,
+            'from_minor' => $i->price_minor === null && $i->variants->isNotEmpty() ? (int) $i->variants->min('price_minor') : null,
+            'sizes' => $i->variants->count(),
+            'is_sold_out' => (bool) $i->is_sold_out,
+            'is_visible' => (bool) $i->is_visible,
+            'photo' => $i->media?->urls()[320] ?? $i->media?->urls()['jpg'] ?? null,
+            'updated_at' => $i->updated_at?->toIso8601String(),
+        ]);
+    }
 
     public function show(Tenant $tenant, int $item): ItemResource
     {

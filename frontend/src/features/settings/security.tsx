@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Loader2, ShieldCheck, ShieldOff } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { validationErrors } from '@/lib/api'
+import { api, validationErrors } from '@/lib/api'
 import { handleServerError } from '@/lib/handle-server-error'
 import { toast } from '@/lib/toast'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -34,11 +34,16 @@ import {
 } from './api'
 import { SettingsSection } from './section'
 
-export function SecuritySettings() {
+export function SecuritySettings({
+  startSetup = false,
+}: {
+  startSetup?: boolean
+}) {
   return (
     <>
       <PasswordSection />
-      <TwoFactorSection />
+      <TwoFactorSection startSetup={startSetup} />
+      <OtherBrowsersSection />
     </>
   )
 }
@@ -123,7 +128,7 @@ function PasswordSection() {
 type Step = 'idle' | 'setup' | 'codes'
 
 /** Two-factor sign-in: optional for restaurants, required for Super Admins (QUESTIONS #28). */
-function TwoFactorSection() {
+function TwoFactorSection({ startSetup }: { startSetup: boolean }) {
   const { t } = useTranslation()
   const me = useMe()
   const qc = useQueryClient()
@@ -153,6 +158,17 @@ function TwoFactorSection() {
   })
 
   const refreshMe = () => qc.invalidateQueries({ queryKey: ME_KEY })
+
+  // One tap from the dashboard card or the reminder e-mail: ask for the password, then show the QR code.
+  const started = useRef(false)
+  useEffect(() => {
+    if (!startSetup || started.current || me.two_factor_enabled) return
+    started.current = true
+    setAsking(() => async () => {
+      await enableTwoFactor()
+      setStep('setup')
+    })
+  }, [startSetup, me.two_factor_enabled])
 
   async function run(action: () => Promise<void>) {
     setBusy(true)
@@ -218,7 +234,13 @@ function TwoFactorSection() {
                 variant='outline'
                 className='min-h-11 sm:min-h-9'
                 disabled={busy}
-                onClick={() => withPassword(async () => setStep('codes'))}
+                onClick={() =>
+                  // Only hashes are stored (SECURITY_REPORT.md M5): new codes are the only way to see some.
+                  withPassword(async () => {
+                    await regenerateRecoveryCodes()
+                    setStep('codes')
+                  })
+                }
               >
                 {t('settings.twofa_show_codes')}
               </Button>
@@ -334,6 +356,11 @@ function TwoFactorSection() {
               <li key={c}>{c}</li>
             ))}
           </ul>
+          {codes.isSuccess && codes.data.length === 0 && (
+            <p className='text-sm text-muted-foreground'>
+              {t('settings.twofa_codes_gone')}
+            </p>
+          )}
           <div className='flex flex-wrap gap-2'>
             <Button
               variant='outline'
@@ -371,14 +398,51 @@ function TwoFactorSection() {
   )
 }
 
+/** "Sign out of all other browsers" (SECURITY_REPORT.md L7). Hidden during "log in as". */
+function OtherBrowsersSection() {
+  const { t } = useTranslation()
+  const me = useMe()
+  const [asking, setAsking] = useState(false)
+  if (me.impersonation) return null
+
+  return (
+    <SettingsSection
+      title={t('settings.sessions_title')}
+      intro={t('settings.sessions_intro')}
+    >
+      <Button
+        variant='outline'
+        className='min-h-11 w-fit sm:min-h-9'
+        onClick={() => setAsking(true)}
+      >
+        {t('settings.sessions_logout_others')}
+      </Button>
+      <PasswordPrompt
+        open={asking}
+        onOpenChange={setAsking}
+        check={(password) =>
+          api.post('/me/sessions/logout-others', { password })
+        }
+        onConfirmed={async () => {
+          setAsking(false)
+          toast.success(t('settings.sessions_done'))
+        }}
+      />
+    </SettingsSection>
+  )
+}
+
 function PasswordPrompt({
   open,
   onOpenChange,
   onConfirmed,
+  check = confirmPassword,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   onConfirmed: () => Promise<void>
+  /** What the password is sent to; Fortify's "confirm password" by default. */
+  check?: (password: string) => Promise<unknown>
 }) {
   const { t } = useTranslation()
   const [password, setPassword] = useState('')
@@ -390,7 +454,7 @@ function PasswordPrompt({
     setBusy(true)
     setError(null)
     try {
-      await confirmPassword(password)
+      await check(password)
       setPassword('')
       await onConfirmed()
     } catch (err) {

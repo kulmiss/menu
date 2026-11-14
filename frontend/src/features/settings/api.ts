@@ -4,6 +4,8 @@ export const updateProfile = (v: {
   name: string
   email: string
   locale: string
+  /** Needed only when the e-mail changes (SECURITY_REPORT.md H3). */
+  current_password?: string
 }) => api.put('/auth/user/profile-information', v)
 
 export const updatePassword = (v: {

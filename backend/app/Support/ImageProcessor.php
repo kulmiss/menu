@@ -23,6 +23,56 @@ class ImageProcessor
     /** Longest side kept from the original. The browser already downscales to this. */
     public const MAX_SIDE = 2048;
 
+    /**
+     * Upload limits checked from the file header BEFORE decoding (SECURITY_REPORT.md M6):
+     * a tiny "decompression bomb" PNG of 30 000 × 30 000 px would otherwise make GD
+     * try to allocate gigabytes and kill the PHP worker. 50 MP covers 50 MP phone modes.
+     */
+    public const MAX_PIXELS = 50_000_000;
+
+    public const MAX_INPUT_SIDE = 16_384;
+
+    /**
+     * Width and height from the header, or null when the file is too big to
+     * decode safely (pixels, side, or this server's PHP memory_limit).
+     *
+     * @return array{0: int, 1: int}|null
+     */
+    public static function safeSize(string $path): ?array
+    {
+        $info = @getimagesize($path);
+        if ($info === false || $info[0] < 1 || $info[1] < 1) {
+            return null;
+        }
+        [$w, $h] = [(int) $info[0], (int) $info[1]];
+        if ($w > self::MAX_INPUT_SIDE || $h > self::MAX_INPUT_SIDE || $w * $h > self::MAX_PIXELS) {
+            return null;
+        }
+        // GD keeps 4 bytes per pixel, plus a copy while flattening/resizing.
+        $limit = self::memoryLimit();
+        if ($limit > 0 && memory_get_usage(true) + $w * $h * 9 > $limit) {
+            return null;
+        }
+
+        return [$w, $h];
+    }
+
+    private static function memoryLimit(): int
+    {
+        $v = trim((string) ini_get('memory_limit'));
+        if ($v === '' || $v === '-1') {
+            return 0;
+        }
+        $n = (int) $v;
+
+        return match (strtolower(substr($v, -1))) {
+            'g' => $n * 1024 ** 3,
+            'm' => $n * 1024 ** 2,
+            'k' => $n * 1024,
+            default => $n,
+        };
+    }
+
     public const WIDTHS = [320, 640, 800, 1280];
 
     /** Strong compression (PLAN.md §15): photos are the heaviest part of a menu. */
@@ -140,6 +190,9 @@ class ImageProcessor
 
     private function load(string $path, string $mime): GdImage
     {
+        if (self::safeSize($path) === null) {
+            throw new ImageTooLarge('Image too large to decode safely.');
+        }
         $image = match ($mime) {
             'image/jpeg' => @imagecreatefromjpeg($path),
             'image/png' => @imagecreatefrompng($path),

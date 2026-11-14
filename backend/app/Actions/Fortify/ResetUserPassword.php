@@ -3,6 +3,8 @@
 namespace App\Actions\Fortify;
 
 use App\Models\User;
+use App\Notifications\SecurityNotice;
+use App\Support\Security\SecurityLog;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\ResetsUserPasswords;
 
@@ -15,8 +17,12 @@ class ResetUserPassword implements ResetsUserPasswords
      */
     public function reset(User $user, array $input): void
     {
-        Validator::make($input, ['password' => $this->passwordRules()])->validate();
+        Validator::make($input, ['password' => $this->passwordRules($user->email)])->validate();
 
-        $user->forceFill(['password' => $input['password']])->save();
+        $user->forceFill(['password' => $input['password'], 'password_weak' => false])->save();
+        // Whoever had the old password may have signed in to the app: sign every device out.
+        $user->revokeAppTokens();
+        $user->notify(new SecurityNotice('password_reset'));
+        SecurityLog::event('password.reset', $user->id);
     }
 }

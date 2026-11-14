@@ -1,12 +1,25 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Download, Loader2, Plus } from 'lucide-react'
+import {
+  AlertTriangle,
+  ExternalLink,
+  Loader2,
+  Plus,
+  RotateCcw,
+} from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { api, validationErrors } from '@/lib/api'
+import { validationErrors } from '@/lib/api'
 import { toast } from '@/lib/toast'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
   Dialog,
@@ -26,15 +39,19 @@ import {
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Switch } from '@/components/ui/switch'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
+import { ConfirmDialog } from '@/components/confirm-dialog'
+import { type Col, DataTable } from '@/components/data-table'
 import {
   FEATURES,
   LIMITS,
   type PlanRow,
-  activityQ,
   announcementsQ,
+  type PaymentRow,
+  fetchPage,
   money,
-  paymentsQ,
+  pkeys,
   plansQ,
   send,
   settingsQ,
@@ -42,8 +59,15 @@ import {
   usePlatformMutation,
 } from './api'
 import { EmailSettings } from './email-settings'
+import { BillingSettings, type BillingSettingsData } from './invoices'
+import { LandingSettings, type LandingSettingsData } from './landing-settings'
 import { PageTitle } from './layout'
 import { ShareImageCard } from './share-image'
+import {
+  EmailLogoCard,
+  SignupSettings,
+  type SignupSettingsData,
+} from './signup-settings'
 
 function useErrors() {
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -98,9 +122,20 @@ export function PlansPage() {
                 </div>
                 <p>
                   {money(p.price_minor, p.currency)} /{' '}
-                  {t(`platform.plans.${p.interval}`)} ·{' '}
-                  {t('platform.plans.trial', { count: p.trial_days })}
+                  {t(`platform.plans.${p.interval}`)}
+                  {p.price_year_minor != null &&
+                    ` · ${money(p.price_year_minor, p.currency)} / ${t('platform.plans.year')}`}{' '}
+                  · {t('platform.plans.trial', { count: p.trial_days })}
                 </p>
+                {p.replaced_by_plan_id != null && (
+                  <p className='text-muted-foreground'>
+                    {t('platform.plans.replaced', {
+                      name:
+                        plans.data?.find((x) => x.id === p.replaced_by_plan_id)
+                          ?.name.en ?? '',
+                    })}
+                  </p>
+                )}
                 <p className='text-muted-foreground'>
                   {LIMITS.filter((k) => p.limits[k] != null)
                     .map((k) => `${t(`platform.limits.${k}`)} ${p.limits[k]}`)
@@ -140,6 +175,8 @@ function PlanDialog({
     name: plan?.name.en ?? '',
     slug: plan?.slug ?? '',
     price: plan ? String(plan.price_minor / 100) : '',
+    price_year:
+      plan?.price_year_minor != null ? String(plan.price_year_minor / 100) : '',
     currency: plan?.currency ?? 'ETB',
     interval: plan?.interval ?? 'month',
     trial_days: String(plan?.trial_days ?? 14),
@@ -164,6 +201,8 @@ function PlanDialog({
         name: { ...(plan?.name ?? {}), en: v.name },
         slug: v.slug,
         price_minor: Math.round(Number(v.price || 0) * 100),
+        price_year_minor:
+          v.price_year === '' ? null : Math.round(Number(v.price_year) * 100),
         currency: v.currency.toUpperCase(),
         interval: v.interval,
         trial_days: Number(v.trial_days),
@@ -219,6 +258,16 @@ function PlanDialog({
                 inputMode='decimal'
                 value={v.price}
                 onChange={(x) => setV({ ...v, price: x.target.value })}
+              />
+            </div>
+            <div className='grid gap-1'>
+              <Label htmlFor='pl-year'>{t('platform.plans.price_year')}</Label>
+              <Input
+                id='pl-year'
+                inputMode='decimal'
+                placeholder={t('platform.plans.price_year_none')}
+                value={v.price_year}
+                onChange={(x) => setV({ ...v, price_year: x.target.value })}
               />
             </div>
             <div className='grid grid-cols-2 gap-2'>
@@ -347,113 +396,108 @@ function PlanDialog({
 
 export function PaymentsPage() {
   const { t } = useTranslation()
-  const [from, setFrom] = useState('')
-  const [to, setTo] = useState('')
-  const params = new URLSearchParams()
-  if (from) params.set('from', from)
-  if (to) params.set('to', to)
-  const list = useQuery(paymentsQ(params.toString()))
-  const totals = (list.data ?? []).reduce<Record<string, number>>(
-    (acc, p) => ({
-      ...acc,
-      [p.currency]: (acc[p.currency] ?? 0) + p.amount_minor,
-    }),
-    {}
-  )
+  const plans = useQuery(plansQ())
+  const columns: Col<PaymentRow>[] = [
+    {
+      id: 'paid_at',
+      label: t('platform.payments.col.paid_at'),
+      sort: 'paid_at',
+      text: (p) => p.paid_at,
+      cell: (p) => <span className='tabular-nums'>{p.paid_at}</span>,
+    },
+    {
+      id: 'restaurant',
+      label: t('platform.payments.col.restaurant'),
+      primary: true,
+      sort: 'restaurant',
+      text: (p) => p.tenant?.name ?? '',
+      cell: (p) => p.tenant?.name ?? '—',
+    },
+    {
+      id: 'amount',
+      label: t('platform.payments.col.amount'),
+      sort: 'amount',
+      align: 'end',
+      text: (p) => p.amount_minor / 100,
+      cell: (p) => money(p.amount_minor, p.currency),
+    },
+    {
+      id: 'method',
+      label: t('platform.payments.col.method'),
+      text: (p) => t(`platform.methods.${p.method}`),
+      cell: (p) => t(`platform.methods.${p.method}`),
+    },
+    {
+      id: 'reference',
+      label: t('platform.payments.col.reference'),
+      text: (p) => p.reference ?? '',
+      cell: (p) => p.reference ?? '',
+    },
+    {
+      id: 'plan',
+      label: t('platform.restaurants.plan'),
+      hidden: true,
+      text: (p) => p.plan ?? '',
+      cell: (p) => p.plan ?? '—',
+    },
+    {
+      id: 'period',
+      label: t('platform.payments.col.period'),
+      sort: 'period_end',
+      text: (p) => `${p.period_start} – ${p.period_end}`,
+      cell: (p) => (
+        <span className='tabular-nums'>
+          {p.period_start} → {p.period_end}
+        </span>
+      ),
+    },
+  ]
 
   return (
     <>
       <PageTitle
         title={t('platform.nav.payments')}
         hint={t('platform.payments.hint')}
-      >
-        <Button asChild variant='outline'>
-          <a
-            href={`${api.defaults.baseURL}/platform/payments.csv?${params}`}
-            download
-          >
-            <Download /> CSV
-          </a>
-        </Button>
-      </PageTitle>
-      <div className='mb-3 flex flex-wrap items-end gap-2'>
-        <div className='grid gap-1'>
-          <Label htmlFor='pf' className='text-xs'>
-            {t('platform.payments.from')}
-          </Label>
-          <Input
-            id='pf'
-            type='date'
-            value={from}
-            onChange={(e) => setFrom(e.target.value)}
-          />
-        </div>
-        <div className='grid gap-1'>
-          <Label htmlFor='pt' className='text-xs'>
-            {t('platform.payments.to')}
-          </Label>
-          <Input
-            id='pt'
-            type='date'
-            value={to}
-            onChange={(e) => setTo(e.target.value)}
-          />
-        </div>
-        <p className='ms-auto text-sm'>
-          {t('platform.payments.total')}:{' '}
-          <b>
-            {Object.entries(totals)
-              .map(([c, v]) => money(v, c))
-              .join(' · ') || '—'}
-          </b>
-        </p>
-      </div>
-      <div className='overflow-x-auto rounded-md border'>
-        <table className='w-full text-sm'>
-          <thead className='bg-muted/50 text-xs text-muted-foreground'>
-            <tr>
-              {[
-                'paid_at',
-                'restaurant',
-                'amount',
-                'method',
-                'reference',
-                'period',
-              ].map((h) => (
-                <th key={h} className='p-2 text-start'>
-                  {t(`platform.payments.col.${h}`)}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {list.data?.map((p) => (
-              <tr key={p.id} className='border-t'>
-                <td className='p-2 tabular-nums'>{p.paid_at}</td>
-                <td className='p-2'>{p.tenant?.name ?? '—'}</td>
-                <td className='p-2 tabular-nums'>
-                  {money(p.amount_minor, p.currency)}
-                </td>
-                <td className='p-2'>{t(`platform.methods.${p.method}`)}</td>
-                <td className='p-2'>{p.reference ?? ''}</td>
-                <td className='p-2 tabular-nums'>
-                  {p.period_start} → {p.period_end}
-                </td>
-              </tr>
-            ))}
-            {list.data?.length === 0 && (
-              <tr>
-                <td
-                  colSpan={6}
-                  className='p-6 text-center text-muted-foreground'
-                >
-                  {t('platform.payments.none')}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      />
+      <DataTable<PaymentRow>
+        id='platform-payments'
+        queryKey={[...pkeys.all, 'payments', 'table']}
+        fetch={(params) => fetchPage<PaymentRow>('payments', params)}
+        csvUrl={(params) => `/api/v1/platform/payments?format=csv&${params}`}
+        columns={columns}
+        rowId={(p) => p.id}
+        searchPlaceholder={t('platform.payments.search')}
+        dateLabel={t('platform.payments.col.paid_at')}
+        filters={[
+          {
+            id: 'method',
+            label: t('platform.payments.col.method'),
+            options: ['cash', 'bank', 'mobile_money', 'other'].map((m) => ({
+              value: m,
+              label: t(`platform.methods.${m}`),
+            })),
+          },
+          {
+            id: 'plan',
+            label: t('platform.restaurants.plan'),
+            options: (plans.data ?? []).map((p) => ({
+              value: String(p.id),
+              label: p.name.en ?? p.slug,
+            })),
+          },
+        ]}
+        empty={t('platform.payments.none')}
+        summary={(meta) => (
+          <>
+            {t('platform.payments.total')}:{' '}
+            <b className='tabular-nums'>
+              {Object.entries(meta.totals ?? {})
+                .map(([c, v]) => money(v, c))
+                .join(' · ') || '—'}
+            </b>
+          </>
+        )}
+      />
     </>
   )
 }
@@ -768,65 +812,117 @@ export function AnnouncementsPage() {
 
 // ---- Activity log --------------------------------------------------------
 
+type ActivityRow = {
+  id: number
+  at: string
+  tenant: { id: number; name: string | null } | null
+  actor: string | null
+  impersonator: string | null
+  action: string
+  subject: string | null
+}
+
+/** Groups of action prefixes for the "Area" filter. */
+const AREAS: Record<string, string> = {
+  platform: 'platform',
+  signup: 'signup',
+  team: 'invitation|member',
+  menu: 'item|menu|category|addon_group|addon_option|tag|media',
+  restaurant: 'tenant|branch|table|tables|qr|hours|closure|profile|appearance',
+  promotions: 'promotion|price_period',
+  insights: 'insights',
+}
+
 export function ActivityPage() {
   const { t } = useTranslation()
-  const [action, setAction] = useState('')
-  const [platformOnly, setPlatformOnly] = useState(false)
-  const params = new URLSearchParams()
-  if (action.trim()) params.set('action', action.trim())
-  if (platformOnly) params.set('platform_only', '1')
-  const list = useQuery(activityQ(params.toString()))
+  const columns: Col<ActivityRow>[] = [
+    {
+      id: 'at',
+      label: t('platform.activity.when'),
+      sort: 'at',
+      text: (l) => l.at,
+      cell: (l) => (
+        <span className='whitespace-nowrap text-muted-foreground tabular-nums'>
+          {new Date(l.at).toLocaleString()}
+        </span>
+      ),
+    },
+    {
+      id: 'action',
+      label: t('platform.activity.what'),
+      primary: true,
+      text: (l) => l.action,
+      cell: (l) => <span className='font-mono text-xs'>{l.action}</span>,
+    },
+    {
+      id: 'restaurant',
+      label: t('platform.restaurants.name'),
+      text: (l) => l.tenant?.name ?? t('platform.activity.platform'),
+      cell: (l) => l.tenant?.name ?? t('platform.activity.platform'),
+    },
+    {
+      id: 'actor',
+      label: t('platform.activity.who'),
+      text: (l) => l.actor ?? '',
+      cell: (l) => (
+        <>
+          {l.actor ?? '—'}
+          {l.impersonator && (
+            <span className='text-destructive'>
+              {' '}
+              ({t('platform.activity.as', { name: l.impersonator })})
+            </span>
+          )}
+        </>
+      ),
+    },
+    {
+      id: 'subject',
+      label: t('platform.activity.subject'),
+      hidden: true,
+      text: (l) => l.subject ?? '',
+      cell: (l) => (
+        <span className='text-xs text-muted-foreground'>{l.subject}</span>
+      ),
+    },
+  ]
   return (
     <>
       <PageTitle
         title={t('platform.nav.activity')}
         hint={t('platform.activity.hint')}
       />
-      <div className='mb-3 flex flex-wrap items-center gap-3'>
-        <Input
-          className='w-56'
-          placeholder={t('platform.activity.action')}
-          aria-label={t('platform.activity.action')}
-          value={action}
-          onChange={(e) => setAction(e.target.value)}
-        />
-        <label className='flex items-center gap-2 text-sm'>
-          <Checkbox
-            checked={platformOnly}
-            onCheckedChange={(on) => setPlatformOnly(on === true)}
-          />
-          {t('platform.activity.platform_only')}
-        </label>
-      </div>
-      <div className='overflow-x-auto rounded-md border'>
-        <table className='w-full text-sm'>
-          <tbody>
-            {list.data?.map((l) => (
-              <tr key={l.id} className='border-t align-top'>
-                <td className='p-2 whitespace-nowrap text-muted-foreground tabular-nums'>
-                  {new Date(l.at).toLocaleString()}
-                </td>
-                <td className='p-2'>
-                  {l.tenant?.name ?? t('platform.activity.platform')}
-                </td>
-                <td className='p-2'>
-                  {l.actor ?? '—'}
-                  {l.impersonator && (
-                    <span className='text-destructive'>
-                      {' '}
-                      ({t('platform.activity.as', { name: l.impersonator })})
-                    </span>
-                  )}
-                </td>
-                <td className='p-2 font-mono text-xs'>{l.action}</td>
-                <td className='p-2 text-xs text-muted-foreground'>
-                  {l.subject}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <DataTable<ActivityRow>
+        id='platform-activity'
+        queryKey={[...pkeys.all, 'activity', 'table']}
+        fetch={(params) => fetchPage<ActivityRow>('activity', params)}
+        csvUrl={(params) => `/api/v1/platform/activity?format=csv&${params}`}
+        columns={columns}
+        rowId={(l) => l.id}
+        searchPlaceholder={t('platform.activity.search')}
+        dateLabel={t('platform.activity.when')}
+        filters={[
+          {
+            id: 'scope',
+            label: t('platform.activity.scope'),
+            options: [
+              { value: 'platform', label: t('platform.activity.platform') },
+              {
+                value: 'restaurants',
+                label: t('platform.activity.restaurants'),
+              },
+            ],
+          },
+          {
+            id: 'area',
+            label: t('platform.activity.area'),
+            options: Object.entries(AREAS).map(([k, v]) => ({
+              value: v,
+              label: t(`platform.activity.areas.${k}`),
+            })),
+          },
+        ]}
+      />
     </>
   )
 }
@@ -874,55 +970,232 @@ function SettingsForm({
       {e.errors[k] && <p className='text-sm text-destructive'>{e.errors[k]}</p>}
     </div>
   )
+  const general = (
+    <Card className='max-w-2xl'>
+      <CardHeader>
+        <CardTitle>{t('platform.settings.tabs.general')}</CardTitle>
+        <CardDescription>{t('platform.settings.general_hint')}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form
+          className='grid gap-4'
+          onSubmit={async (ev) => {
+            ev.preventDefault()
+            try {
+              await save.mutateAsync({
+                ...v,
+                support_email: v.support_email || null,
+                domain: v.domain || null,
+              })
+              toast.success(t('platform.saved'))
+            } catch (err) {
+              e.catchErr(err)
+            }
+          }}
+        >
+          <div className='grid gap-4 sm:grid-cols-2'>
+            {input('name')}
+            {input('support_email', { type: 'email' })}
+            {input('domain', { placeholder: 'menu.example.com' })}
+            {input('default_currency', { maxLength: 3 })}
+          </div>
+          <Alert>
+            <AlertTriangle aria-hidden />
+            <AlertTitle className='line-clamp-none'>
+              {t('platform.legal.draft')}
+            </AlertTitle>
+            <AlertDescription>{t('platform.legal.format')}</AlertDescription>
+          </Alert>
+          {(['terms', 'privacy'] as const).map((k) => (
+            <LegalField
+              key={k}
+              page={k}
+              value={v[k]}
+              onChange={(text) => setV((x) => ({ ...x, [k]: text }))}
+              t={t}
+            />
+          ))}
+          <Button
+            type='submit'
+            className='justify-self-start'
+            disabled={save.isPending}
+          >
+            {t('common.save')}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  )
   return (
     <>
       <PageTitle title={t('platform.nav.settings')} />
-      <form
-        className='grid max-w-2xl gap-4'
-        onSubmit={async (ev) => {
-          ev.preventDefault()
-          try {
-            await save.mutateAsync({
-              ...v,
-              support_email: v.support_email || null,
-              domain: v.domain || null,
-            })
-            toast.success(t('platform.saved'))
-          } catch (err) {
-            e.catchErr(err)
-          }
-        }}
-      >
-        <div className='grid gap-4 sm:grid-cols-2'>
-          {input('name')}
-          {input('support_email', { type: 'email' })}
-          {input('domain', { placeholder: 'menu.example.com' })}
-          {input('default_currency', { maxLength: 3 })}
-        </div>
-        {(['terms', 'privacy'] as const).map((k) => (
-          <div key={k} className='grid gap-1'>
-            <Label htmlFor={`st-${k}`}>{t(`platform.settings.${k}`)}</Label>
-            <Textarea
-              id={`st-${k}`}
-              rows={5}
-              value={v[k]}
-              onChange={(x) => setV({ ...v, [k]: x.target.value })}
+      <SettingsTabs
+        t={t}
+        tabs={{
+          general,
+          signup: (
+            <SignupSettings
+              initial={initial as unknown as SignupSettingsData}
             />
-          </div>
-        ))}
-        <Button
-          type='submit'
-          className='justify-self-start'
-          disabled={save.isPending}
-        >
-          {t('common.save')}
-        </Button>
-      </form>
-      <ShareImageCard
-        url={initial.share_image_url ?? ''}
-        custom={!!initial.share_image}
+          ),
+          landing: (
+            <LandingSettings
+              initial={initial as unknown as LandingSettingsData}
+            />
+          ),
+          billing: (
+            <BillingSettings
+              initial={initial as unknown as BillingSettingsData}
+            />
+          ),
+          branding: (
+            <div className='grid gap-6'>
+              <EmailLogoCard url={initial.logo_url} />
+              <ShareImageCard
+                url={initial.share_image_url ?? ''}
+                custom={!!initial.share_image}
+              />
+            </div>
+          ),
+          email: <EmailSettings />,
+        }}
       />
-      <EmailSettings />
     </>
+  )
+}
+
+/** Terms / Privacy text with "View page" and "Reset to default text" (QUESTIONS #181). */
+function LegalField({
+  page,
+  value,
+  onChange,
+  t,
+}: {
+  page: 'terms' | 'privacy'
+  value: string
+  onChange: (text: string) => void
+  t: (k: string) => string
+}) {
+  const [confirm, setConfirm] = useState(false)
+  const reset = usePlatformMutation(() =>
+    send('post', `settings/legal/${page}/reset`, {})
+  )
+  return (
+    <div className='grid gap-1'>
+      <div className='flex flex-wrap items-end justify-between gap-2'>
+        <Label htmlFor={`st-${page}`}>{t(`platform.settings.${page}`)}</Label>
+        <div className='flex flex-wrap gap-1'>
+          <Button
+            asChild
+            variant='ghost'
+            size='sm'
+            className='min-h-11 sm:min-h-8'
+          >
+            <a href={`/${page}`} target='_blank' rel='noopener'>
+              <ExternalLink aria-hidden /> {t('platform.legal.view')}
+            </a>
+          </Button>
+          <Button
+            type='button'
+            variant='outline'
+            size='sm'
+            className='min-h-11 sm:min-h-8'
+            onClick={() => setConfirm(true)}
+          >
+            <RotateCcw aria-hidden /> {t('platform.legal.reset')}
+          </Button>
+        </div>
+      </div>
+      <Textarea
+        id={`st-${page}`}
+        rows={14}
+        className='font-mono text-sm'
+        value={value}
+        onChange={(x) => onChange(x.target.value)}
+      />
+      <ConfirmDialog
+        open={confirm}
+        onOpenChange={setConfirm}
+        title={t(`platform.legal.reset_title_${page}`)}
+        desc={t('platform.legal.reset_desc')}
+        confirmText={t('platform.legal.reset')}
+        destructive
+        isLoading={reset.isPending}
+        handleConfirm={async () => {
+          const res = (await reset.mutateAsync(undefined)) as {
+            data: { data: Record<string, string> }
+          }
+          onChange(res.data.data[page])
+          setConfirm(false)
+          toast.success(t('platform.legal.reset_done'))
+        }}
+      />
+    </div>
+  )
+}
+
+const SETTINGS_TABS = [
+  'general',
+  'signup',
+  'landing',
+  'billing',
+  'branding',
+  'email',
+] as const
+type SettingsTab = (typeof SETTINGS_TABS)[number]
+
+/**
+ * Settings split into tabs (side list on wide screens, a scrollable row on
+ * phones). Every tab stays mounted, so unsaved edits survive switching; the
+ * open tab is kept in the address (#email) so reloads and links land on it.
+ */
+function SettingsTabs({
+  t,
+  tabs,
+}: {
+  t: (k: string) => string
+  tabs: Record<SettingsTab, React.ReactNode>
+}) {
+  const [tab, setTab] = useState<SettingsTab>(() => {
+    const hash = window.location.hash.slice(1)
+    return (SETTINGS_TABS as readonly string[]).includes(hash)
+      ? (hash as SettingsTab)
+      : 'general'
+  })
+  return (
+    <Tabs
+      value={tab}
+      onValueChange={(v) => {
+        setTab(v as SettingsTab)
+        window.history.replaceState(window.history.state, '', `#${v}`)
+      }}
+      className='gap-6 lg:flex-row lg:items-start'
+    >
+      <TabsList
+        aria-label={t('platform.nav.settings')}
+        className='h-auto w-full justify-start overflow-x-auto lg:sticky lg:top-20 lg:w-52 lg:shrink-0 lg:flex-col lg:items-stretch'
+      >
+        {SETTINGS_TABS.map((k) => (
+          <TabsTrigger
+            key={k}
+            value={k}
+            className='min-h-11 flex-none px-3 lg:min-h-9 lg:justify-start'
+          >
+            {t(`platform.settings.tabs.${k}`)}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+      {SETTINGS_TABS.map((k) => (
+        <TabsContent
+          key={k}
+          value={k}
+          forceMount
+          hidden={tab !== k}
+          className='min-w-0'
+        >
+          {tabs[k]}
+        </TabsContent>
+      ))}
+    </Tabs>
   )
 }

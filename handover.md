@@ -6,6 +6,13 @@ _Last updated: 2026-11-12 13:00 EAT. Everything requested is merged into `develo
 > **English only for now (owner, 2026-11-10):** texts stay in `t()` / `__()`; the database keeps per-language fields; language switches stay hidden while one language is on.
 > **Working mode (owner):** small PRs into `develop`, CI green, tests for each change, decisions in QUESTIONS.md. Stop only for: changes outside this project, steps that can't be undone, licence doubts, the same CI failure 3 times, or the working limit.
 
+
+## Security hardening (2026-11-14) — SECURITY_REPORT.md, SECURITY_FINAL_REPORT.md
+Audit (#96) and fixes #97–#114, stacked on #95; merge order and server to-dos are in SECURITY_FINAL_REPORT.md §2 and §5. App side: kulmiss/menu-admin-app #4–#10. Owner's decisions: Owner 2FA encouraged, plus a Super Admin switch (off); no certificate pinning; no Play Integrity (root warning only); stricter passwords for new passwords only, with a banner; nobody signed out. New: `BACKUP_KEY` (`php artisan backup:key --write`), optional `TRUSTED_PROXIES`, security log `storage/logs/security-*.log` (30 days), `security:two-factor-reminders` daily 07:10 UTC, weekly ZAP workflow. New routes must be classified in `tests/Feature/Security/AuthorizationMatrixTest.php`. CI runs jobs only for changed paths (Actions minutes). "Remember me" lasts 90 days (owner, 2026-11-14). Full Pest suite: 566+ passed.
+
+## Mobile app backend (2026-11-14) — QUESTIONS #187–#190
+For the Flutter app [kulmiss/menu-admin-app](https://github.com/kulmiss/menu-admin-app). Merge in this order (each is stacked on the one before): #92 token sign-in, devices, account → #93 "log in as" token → #94 push + inbox → #95 `mobile/config` + Privacy Policy lines. Live: `php artisan migrate --force` (4 migrations). Optional push setup: docs/deploy.md §10a (`FCM_CREDENTIALS`). New scheduled commands: `mobile:prune-tokens` 03:25, `push:plan-reminders` 09:00, `push:followups` 08:00, `push:health` every 15 min, inbox prune 03:35. API: docs/mobile-api.md. The web admin and the customer menu are unchanged; full Pest suite: 479 passed.
+
 ## Where we are (2026-11-12)
 - `develop` has every change; `main` still has only the bootstrap commit. The release PR `develop` → `main` carries the summary and go-live checklist; the owner merges it.
 - Go-live checklist and test summary: `docs/final-report.md`. Deployment: `docs/deploy.md`. Link previews: `docs/share-preview.md`.
@@ -35,6 +42,38 @@ _Last updated: 2026-11-12 13:00 EAT. Everything requested is merged into `develo
 - Pest is not parallel here (`--parallel` is not installed); the full run takes ~3 min.
 
 ## History (newest first)
+
+## Nine features (2026-11-13/14) — 1–5 merged (#64), 6 postponed, 7–9 done in #65–#67
+
+**6. Somali + Amharic — POSTPONED (owner, 2026-11-14).** The app stays English only. The translation structure stays exactly as it is (every text through `t()` / `__()`, `locales/en/*.json`, `lang/en/*.php`, per-language JSON fields in the database, `users.locale`, `LANGUAGES` list), so languages can be added later. Plan for when it comes back: `locales/{so,am}/{common,screens,platform,signup,appearance}.json` + `lang/{so,am}/*.php` + guest-page strings marked `"_status": "machine_draft"`; review CSV (key, English, Somali, Amharic); re-enable per-field menu translations; guest page `?lang=` → one static page per language, switch code in the on-demand file (inline script is at 4.80 KB of 5 KB); Noto Sans Ethiopic subset only for `am`; plan limit `languages`; CI speed jobs for a Somali and an Amharic page.
+
+- #65 Time-based prices (QUESTIONS #178), branch `feat/price-periods`. Live: `php artisan migrate --force`; the existing cron line runs `menu:price-periods` every minute.
+- #66 Print materials (QUESTIONS #179), branch `feat/print-materials` (on top of #65). `App\Support\Print\{Canvas,PrintMaterials}`, `GET t/{tenant}/print-materials(.pdf)`, admin `/admin/print-materials`. Live: nothing to run.
+- #67 Insights export (QUESTIONS #180), branch `feat/insights-export` (on top of #66). `App\Support\Insights\{InsightsReport,ReportPdf}`, `InsightsExportController`, `insights:monthly` + `MonthlyInsightsNotification`. Live: `php artisan migrate --force` (two columns on `tenants`); the existing cron line runs `insights:monthly` hourly.
+
+- #68 SMTP test address · #69 Settings in tabs (on #68) · #70 Terms and Privacy (on #69; QUESTIONS #181, migration seeds the texts only when empty).
+
+**Merge order:** #65 → #66 → #67 (each is stacked on the previous one; after #65 is merged the next PR shows only its own commit).
+
+- #60 Invoices and receipts (QUESTIONS #173).
+- #61 Restaurant notes, tags and follow-ups for the Super Admin (QUESTIONS #174). Live: `php artisan migrate --force`.
+- #64 Global search for the Super Admin, Ctrl/⌘+K (QUESTIONS #177). Live: migrate (indexes).
+- #63 Backups: daily zip of database + media, retention 7/4/3, optional S3-compatible off-site copy, alerts; restore steps in deploy.md (QUESTIONS #176). Live: migrate; fill Backups → settings; check that `storage/app/backups` has room.
+- #62 Messages: e-mails to restaurant owners with filters, preview, test, throttled queue sending, retries and unsubscribe (QUESTIONS #175). Live: migrate; the existing cron line sends them. Live server once: `php artisan migrate --force` then `php artisan invoices:backfill`; fill Super Admin → Settings → Billing.
+
+## Landing page (#59, 2026-11-13) — QUESTIONS #172
+- `/` redesigned (Blade, no framework JS): hero with a real demo screenshot and QR code, how it works, features, 4 styles, speed, pricing from the database, optional real testimonials, FAQ, CTA, footer. Super Admin → Settings → Landing page. `robots.txt` and `sitemap.xml` are routes.
+- New screenshots after a design change of the guest menu: `php artisan db:seed --class=DemoSeeder` (laptop only), `php artisan serve`, then `cd frontend; node scripts/landing-screenshots.mjs`.
+
+## Self sign-up (#52–#58, 2026-11-13) — QUESTIONS #162–#171
+- #52 "Log in as owner" in one click: no reason, no time limit, not recorded.
+- #53 Backend: `POST /api/v1/signup`, e-mail confirmation (24 h signed link), Free plan (migration), `signup_state` on tenants (unverified / pending approval → public menu off), approval, rejection, `signup:prune` (7 days), anti-spam (rate limits, honeypot, optional Turnstile, blocked domains), branded e-mails with the platform logo, upgrade contact on 402.
+- #54 Screens: sign-up page, "Check your inbox" gate, sign-in messages, welcome card, Super Admin sign-up settings, e-mail logo, pending approvals, upgrade toast button.
+- #55 Public home, `/terms`, `/privacy`; browser check (`docs/screenshots/self-signup/`); docs.
+- #56 "Log in as": 2-hour limit and safety blocks back (QUESTIONS #169).
+- #58 CI: admin first-load budget 225 → 240 KB (QUESTIONS #171); customer menu budgets unchanged.
+- #57 "Log in as" not recorded at all; on the 2-hour end the admin goes to /platform (QUESTIONS #170).
+- Merge in order: #52 → #53 → #54 → #55 → #56 → #57 → #58 (each branch contains the one before).
 
 ## Customer-menu round (#36–#47, 2026-11-12) — QUESTIONS #149–#160
 - **Live updates (#36–#37):** `public/sw.js` compares the fresh page with the saved one (ETag or text) and tells the page (`'mu'`); the page reloads when nothing is open (guard `sessionStorage.mu`, 10 s) and `sheet.js` shows "Menu updated".
@@ -122,7 +161,7 @@ _Last updated: 2026-11-12 13:00 EAT. Everything requested is merged into `develo
 ## What Partition 11 contains (PR #15)
 - Tables `payments`, `platform_settings`, `platform_announcements` (+ `announcement_reads`), `impersonations`. Plan features (`App\Support\Features`, `feature:` middleware, `features` in `/me` tenants, guest page footer/promotions).
 - API `/api/v1/platform/*` (middleware `platform`: Super Admin + 2FA, never while logged in as): dashboard, restaurants (list/filter, create with owner + set-password mail, edit, suspend/unsuspend, delete/restore, features, payments, impersonate), payments + CSV, plans (limits + features), themes, announcements, activity log, settings. Restaurant side: `t/{id}/announcements` (+ read), `POST impersonation/stop`.
-- "Log in as": `App\Support\ImpersonationManager` + `GuardImpersonation` (api + web groups): 60 minutes, blocked URIs, `impersonator_id` in every log entry; `/me.impersonation` drives the red banner.
+- "Log in as": `App\Support\ImpersonationManager` + `GuardImpersonation` (api + web groups): 60 minutes, blocked URIs, `impersonator_id` in every log entry; `/me.impersonation` drives the red banner. **Changed 2026-11-13 (QUESTIONS #162):** one click, no reason, no limit, no blocks, nothing recorded; `GuardImpersonation` removed. **Then (#56/#57, QUESTIONS #169–#170):** still no reason and nothing recorded; 2-hour limit (redirect to /platform) and the blocks are back.
 - SPA `/platform` (own texts `locales/en/platform.json`, loaded by the route), one `/platform/$section` route; 2FA gate; restaurant sheet (plan, trial date, payments, features, team, log in as, suspend, delete/restore); plans, payments (CSV), themes, announcements, activity, settings, security.
 - Admin: feature-aware sidebar, lazy "logged in as" banner, platform link for Super Admins without a restaurant, dashboard news (lazy).
 - Tests: backend **225**, frontend **177**. Admin first load **224.9 KB** / 225 KB (QUESTIONS #97).

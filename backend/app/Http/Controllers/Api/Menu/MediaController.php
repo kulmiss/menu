@@ -7,8 +7,10 @@ use App\Http\Resources\MediaResource;
 use App\Models\Media;
 use App\Models\Tenant;
 use App\Support\ImageProcessor;
+use App\Support\ImageTooLarge;
 use App\Support\MediaJanitor;
 use App\Support\PlanLimits;
+use App\Support\Security\SecurityLog;
 use App\Tenancy\CurrentTenant;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -36,6 +38,7 @@ class MediaController extends Controller
         $file = $request->file('file');
         $mime = (string) $file->getMimeType();
         if (! in_array($mime, self::TYPES, true)) {
+            SecurityLog::event('upload.refused', $request->user()?->getAuthIdentifier(), null, ['why' => 'type', 'mime' => substr($mime, 0, 40)]);
             $heic = in_array($mime, ['image/heic', 'image/heif'], true) || preg_match('/\.hei[cf]$/i', (string) $file->getClientOriginalName());
             throw ValidationException::withMessages(['file' => __($heic ? 'menu.media.heic' : 'menu.media.type')]);
         }
@@ -45,6 +48,9 @@ class MediaController extends Controller
         $folder = $current->id().'/'.Str::lower((string) Str::ulid());
         try {
             $result = $images->process((string) $file->getRealPath(), $mime, 'public', $folder, $request->input('purpose') === 'banner');
+        } catch (ImageTooLarge) {
+            SecurityLog::event('upload.refused', $request->user()?->getAuthIdentifier(), null, ['why' => 'pixels']);
+            throw ValidationException::withMessages(['file' => __('menu.media.too_many_pixels')]);
         } catch (Throwable) {
             throw ValidationException::withMessages(['file' => __('menu.media.unreadable')]);
         }

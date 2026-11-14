@@ -1,6 +1,13 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { ProfileSettings } from '@/features/settings/profile'
+import { NewsSetting, ProfileSettings } from '@/features/settings/profile'
 
 export const Route = createFileRoute('/admin/settings/')({
-  component: ProfileSettings,
+  component: function ProfileRoute() {
+    return (
+      <>
+        <ProfileSettings />
+        <NewsSetting />
+      </>
+    )
+  },
 })

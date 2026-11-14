@@ -3,9 +3,15 @@
 namespace App\Http\Controllers\Platform;
 
 use App\Http\Controllers\Controller;
+use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\Tenant;
 use App\Support\ActivityLogger;
+use App\Support\Billing\InvoicePdf;
+use App\Support\Billing\Invoices;
+use App\Support\PlatformSettings;
+use App\Support\Push\Push;
+use App\Support\Tables\TableQuery;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -13,6 +19,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Super Admin › Payments (PLAN.md §7.3 screen 4). Payments are recorded by
@@ -20,10 +27,43 @@ use Illuminate\Validation\Rule;
  */
 class PaymentController extends Controller
 {
-    public function __construct(private readonly ActivityLogger $activity) {}
+    public function __construct(private readonly ActivityLogger $activity, private readonly Invoices $invoices) {}
 
-    public function index(Request $request): JsonResponse
+    public function index(Request $request): JsonResponse|StreamedResponse
     {
+        if ($request->has('page') || $request->query('format') === 'csv') {
+            return TableQuery::respond(Payment::with(['tenant', 'plan', 'invoices']), $request, [
+                'search' => fn ($q, string $s) => $q->where(fn ($w) => $w->where('reference', 'like', "%{$s}%")
+                    ->orWhereHas('tenant', fn ($t) => $t->withTrashed()->where('name', 'like', "%{$s}%"))),
+                'filters' => [
+                    'method' => fn ($q, array $v) => $q->whereIn('method', array_intersect($v, Payment::METHODS)),
+                    'plan' => fn ($q, array $v) => $q->whereIn('plan_id', array_map('intval', $v)),
+                    'restaurant' => fn ($q, array $v) => $q->whereIn('tenant_id', array_map('intval', $v)),
+                ],
+                'date' => 'paid_at',
+                'sorts' => [
+                    'paid_at' => 'paid_at',
+                    'amount' => 'amount_minor',
+                    'period_end' => 'period_end',
+                    'restaurant' => fn ($q, string $dir) => $q->orderBy(Tenant::withTrashed()->select('name')->whereColumn('tenants.id', 'payments.tenant_id'), $dir),
+                ],
+                'default_sort' => '-paid_at',
+                'totals' => ['amount_minor', 'currency'],
+                'csv' => ['name' => 'payments', 'columns' => [
+                    'Paid on' => fn (Payment $p) => $p->paid_at->toDateString(),
+                    'Restaurant' => fn (Payment $p) => $p->tenant->name,
+                    'Plan' => fn (Payment $p) => $p->plan?->name['en'] ?? '',
+                    'Amount' => fn (Payment $p) => number_format($p->amount_minor / 100, 2, '.', ''),
+                    'Currency' => fn (Payment $p) => $p->currency,
+                    'Method' => fn (Payment $p) => $p->method,
+                    'Reference' => fn (Payment $p) => $p->reference,
+                    'Period start' => fn (Payment $p) => $p->period_start->toDateString(),
+                    'Period end' => fn (Payment $p) => $p->period_end->toDateString(),
+                    'Invoice' => fn (Payment $p) => $p->invoices->sortByDesc('id')->first()?->number,
+                ]],
+            ], fn (Payment $p) => self::row($p));
+        }
+
         return response()->json(['data' => $this->filtered($request)->limit(1000)->get()->map(fn (Payment $p) => self::row($p))]);
     }
 
@@ -69,13 +109,26 @@ class PaymentController extends Controller
             if (isset($data['plan_id'])) {
                 $tenant->forceFill(['plan_id' => $data['plan_id']])->save();
             }
+            // Every payment gets its invoice in the same transaction (owner, 2026-11-13).
+            $this->invoices->issue($payment->setRelation('tenant', $tenant), $request->user());
 
             return $payment;
         });
+        if (PlatformSettings::get('invoice_email')) {
+            $invoice = Invoice::where('payment_id', $payment->id)->latest('id')->first();
+            if ($invoice !== null) {
+                $this->invoices->send($invoice);
+            }
+        }
         $tenant->bumpCacheVersion();
+        // Push to the other Super Admins (QUESTIONS #189).
+        Push::send(collect(Push::superAdmins())->reject(fn ($u) => $u->id === $request->user()?->id), 'payment_recorded',
+            __('push.payment_recorded.title', ['restaurant' => $tenant->name]),
+            __('push.payment_recorded.body', ['amount' => InvoicePdf::money($payment->amount_minor, $payment->currency), 'by' => (string) $request->user()?->name]),
+            "/p/restaurants/{$tenant->id}/payments");
         $this->activity->log('platform.payment_recorded', $payment, ['amount' => ['to' => $payment->amount_minor], 'period_end' => ['to' => $payment->period_end->toDateString()]], null);
 
-        return response()->json(['data' => self::row($payment->load(['tenant', 'plan']))], 201);
+        return response()->json(['data' => self::row($payment->load(['tenant', 'plan', 'invoices']))], 201);
     }
 
     /** CSV for the accountant (opens in Excel; UTF-8 with BOM). */
@@ -106,7 +159,7 @@ class PaymentController extends Controller
             'tenant_id' => ['sometimes', 'nullable', 'integer'],
         ]);
 
-        return Payment::with(['tenant', 'plan'])
+        return Payment::with(['tenant', 'plan', 'invoices'])
             ->when($data['from'] ?? null, fn ($q, $d) => $q->where('paid_at', '>=', $d))
             ->when($data['to'] ?? null, fn ($q, $d) => $q->where('paid_at', '<=', $d))
             ->when($data['tenant_id'] ?? null, fn ($q, $t) => $q->where('tenant_id', $t))
@@ -128,6 +181,7 @@ class PaymentController extends Controller
             'period_start' => $p->period_start->toDateString(),
             'period_end' => $p->period_end->toDateString(),
             'notes' => $p->notes,
+            'invoices' => $p->relationLoaded('invoices') ? $p->invoices->sortByDesc('id')->map(fn (Invoice $i) => ['id' => $i->id, 'number' => $i->number, 'status' => $i->status])->values()->all() : [],
         ];
     }
 }

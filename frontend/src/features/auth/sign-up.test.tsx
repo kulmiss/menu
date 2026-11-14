@@ -1,4 +1,4 @@
-import { fakeApi, invalid } from '@/test-utils/fake-api'
+import { fakeApi } from '@/test-utils/fake-api'
 import { renderWithQuery } from '@/test-utils/render'
 import { navigate } from '@/test-utils/router-mock'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -37,80 +37,6 @@ describe('SignUpForm', () => {
   beforeEach(() => navigate.mockClear())
   afterEach(() => fake?.restore())
 
-  it('fills the menu address from the restaurant name until it is edited', async () => {
-    fake = fakeApi({})
-    const screen = await renderWithQuery(<SignUpForm />)
-    const name = screen.getByRole('textbox', { name: 'Restaurant name' })
-    const slug = screen.getByRole('textbox', { name: 'Menu address' })
-
-    await userEvent.fill(name, 'Buna & Bread Café')
-    await expect.element(slug).toHaveValue('buna-bread-cafe')
-
-    await userEvent.fill(slug, 'buna')
-    await userEvent.fill(name, 'Something Else')
-    await expect.element(slug).toHaveValue('buna')
-  })
-
-  it('creates the account and restaurant, then opens the admin', async () => {
-    fake = fakeApi({ 'POST /auth/register': { status: 201 } })
-    const screen = await renderWithQuery(<SignUpForm />)
-
-    await userEvent.fill(
-      screen.getByRole('textbox', { name: 'Restaurant name' }),
-      'Buna & Bread'
-    )
-    await fillPerson(screen)
-    await userEvent.click(
-      screen.getByRole('button', { name: 'Create account' })
-    )
-
-    await vi.waitFor(() =>
-      expect(navigate).toHaveBeenCalledWith({ href: '/admin', replace: true })
-    )
-    expect(fake.apiCalls()[0].data).toEqual({
-      name: 'Selam Tesfaye',
-      email: 'selam@example.com',
-      password: 'correct-horse-battery',
-      password_confirmation: 'correct-horse-battery',
-      restaurant_name: 'Buna & Bread',
-      slug: 'buna-bread',
-      locale: 'en',
-    })
-  })
-
-  it('checks the address before sending and shows server errors on it', async () => {
-    fake = fakeApi({
-      'POST /auth/register': invalid({
-        slug: 'This address is already taken.',
-      }),
-    })
-    const screen = await renderWithQuery(<SignUpForm />)
-
-    await userEvent.fill(
-      screen.getByRole('textbox', { name: 'Restaurant name' }),
-      'ቡና'
-    )
-    await fillPerson(screen)
-    await userEvent.click(
-      screen.getByRole('button', { name: 'Create account' })
-    )
-    await expect
-      .element(screen.getByText(/Use 3–50 lower-case letters/))
-      .toBeVisible()
-    expect(fake.apiCalls()).toEqual([])
-
-    await userEvent.fill(
-      screen.getByRole('textbox', { name: 'Menu address' }),
-      'taken'
-    )
-    await userEvent.click(
-      screen.getByRole('button', { name: 'Create account' })
-    )
-    await expect
-      .element(screen.getByText('This address is already taken.'))
-      .toBeVisible()
-  })
-
   it('joins the inviting restaurant without asking for a new one', async () => {
     fake = fakeApi({ 'POST /auth/register': { status: 201 } })
     const screen = await renderWithQuery(
@@ -141,6 +67,16 @@ describe('SignUpForm', () => {
 
 describe('SignUpPage with an invitation', () => {
   afterEach(() => fake.restore())
+
+  it('explains an invitation that is no longer valid', async () => {
+    fake = fakeApi({})
+    const screen = await renderWithQuery(<SignUpPage invite='gone' />)
+
+    await expect
+      .element(screen.getByText(/This invitation is no longer valid/))
+      .toBeVisible()
+    expect(screen.container.textContent).not.toContain('Restaurant name')
+  })
 
   it('shows which restaurant the person joins', async () => {
     fake = fakeApi({

@@ -278,7 +278,17 @@
     "title": "Settings",
     "intro": "Your own account: name, language, password and sign-in security.",
     "saved": "Saved.",
-    "email_changed": "Saved. Confirm the new address with the link we emailed.",
+    "sessions_title": "Other browsers",
+    "sessions_intro": "Signed in somewhere you no longer use, like a shared or lost computer? End those sessions here. The app has its own list under Account → Devices.",
+    "sessions_logout_others": "Sign out of all other browsers",
+    "sessions_done": "Signed out of all other browsers. This one stays signed in.",
+    "twofa_gate_title": "Turn on two-factor sign-in to continue",
+    "twofa_gate_text": "Your platform asks every restaurant owner to protect their account with a code from their phone. It takes about two minutes; then your restaurant opens as usual.",
+    "password_weak_banner": "Your password is on a list of common or leaked passwords, so it is easy to guess.",
+    "password_weak_action": "Choose a new one",
+    "email_change_sent": "We sent a link to {{email}}. Your address changes when you click it.",
+    "email_change_help": "To change your email, enter your current password. We send a link to the new address and tell the old one.",
+    "email_pending": "Waiting for confirmation: {{email}}. Click the link we sent there (valid for 1 hour).",
     "profile_title": "Profile",
     "profile_intro": "Your name and email, and the language of this app.",
     "interface_language": "App language",
@@ -293,18 +303,40 @@
     "twofa_required": "Required for platform administrators.",
     "twofa_enable": "Turn on",
     "twofa_disable": "Turn off",
-    "twofa_show_codes": "Show recovery codes",
+    "twofa_show_codes": "New recovery codes",
     "twofa_scan": "Scan this code with your authenticator app, then enter the 6-digit code it shows.",
     "twofa_qr": "QR code for your authenticator app",
     "twofa_manual": "Can't scan? Enter this key:",
     "twofa_on": "Two-factor sign-in is on.",
     "twofa_off": "Two-factor sign-in is off.",
-    "twofa_codes_intro": "Keep these codes somewhere safe. Each one lets you sign in once if you lose your phone.",
+    "twofa_codes_intro": "Keep these codes somewhere safe. Each one lets you sign in once if you lose your phone. They are shown only now: for your safety we keep just a fingerprint of them.",
+    "twofa_codes_gone": "Codes are shown only right after they are made. Press \"New recovery codes\" to get a fresh set (the old ones stop working).",
     "twofa_new_codes": "New codes",
     "done": "Done",
     "confirm_password": "Confirm your password",
     "confirm_password_intro": "For your security, enter your password to continue.",
-    "wrong_password": "The password is not correct."
+    "wrong_password": "The password is not correct.",
+    "billing": {
+      "tab": "Billing",
+      "plan_title": "Your plan",
+      "plan_intro": "Payments are recorded by the platform team after you pay by mobile money or bank transfer.",
+      "plan": "Plan",
+      "no_plan": "No plan",
+      "paid_until": "Paid until",
+      "trial_until": "Trial until",
+      "no_end": "No end date",
+      "price": "Price",
+      "per_month": "/ month",
+      "per_year": "/ year",
+      "invoices_title": "Invoices",
+      "invoices_intro": "Download an invoice for every payment.",
+      "no_invoices": "No invoices yet.",
+      "pdf": "(PDF, opens in a new tab)",
+      "void": "Void"
+    },
+    "news_title": "Platform news",
+    "news_intro": "Occasional e-mails about new features and offers. E-mails about your account, such as invoices and security, are always sent.",
+    "news_label": "Send me news by e-mail"
   },
   "team": {
     "title": "Team",
@@ -331,7 +363,10 @@
     "remove_named": "Remove {{name}}",
     "remove_confirm": "Remove {{name}} from the team? They lose access right away.",
     "leave": "Leave restaurant",
-    "leave_confirm": "Leave {{restaurant}}? You will need a new invitation to come back."
+    "leave_confirm": "Leave {{restaurant}}? You will need a new invitation to come back.",
+    "search": "Search name or e-mail",
+    "name": "Name",
+    "email": "E-mail"
   },
   "qr": {
     "title": "QR codes",
@@ -357,7 +392,72 @@
     "delete": "Delete {{name}}",
     "delete_title": "Delete this code?",
     "delete_desc": "Printed copies stop working. The code is never reused.",
-    "print_tip": "Printing tip: print at 100 % size (no “fit to page”), on matt paper, at least 3 cm wide. Test-scan one card before printing many."
+    "print_tip": "Printing tip: print at 100 % size (no “fit to page”), on matt paper, at least 3 cm wide. Test-scan one card before printing many.",
+    "print_materials": "Print materials",
+    "print_materials_hint": "Posters, table tents, stickers and a window sign with your logo and colours.",
+    "search": "Search codes",
+    "kind": "Kind",
+    "branch": "Opens",
+    "code": "QR code",
+    "address": "Address",
+    "files": "Download",
+    "print_selected": "Print materials for these codes"
+  },
+  "print": {
+    "title": "Print materials",
+    "description": "Posters, table tents, stickers and a window sign with your logo, your colour and your QR code. Print them at home or at a print shop.",
+    "what": "What to print",
+    "materials": {
+      "tent": "Table tent",
+      "poster_a5": "Poster A5",
+      "poster_a4": "Poster A4",
+      "window": "Window sign",
+      "sticker_round": "Round stickers",
+      "sticker_square": "Square stickers"
+    },
+    "sizes": {
+      "tent": "A6, two per A4 — fold in the middle",
+      "poster_a5": "148 × 210 mm",
+      "poster_a4": "210 × 297 mm",
+      "window": "A4 landscape, big code",
+      "sticker_round": "60 mm, 12 per A4, with cut lines",
+      "sticker_square": "60 mm, 12 per A4, with cut lines"
+    },
+    "look": "Look",
+    "design": "Design",
+    "designs": {
+      "classic": "Classic",
+      "bold": "Bold",
+      "minimal": "Minimal"
+    },
+    "colours": "Colours",
+    "themes": {
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "headline": "Headline",
+    "headline_hint": "Up to 40 letters. Leave empty for the default.",
+    "bleed": "For a print shop (3 mm bleed)",
+    "bleed_hint": "Adds 3 mm of background on every side, as print shops ask. Leave off for a home or office printer.",
+    "codes": "Which QR codes",
+    "codes_hint_pages": "One page for each code you choose.",
+    "codes_hint_tent": "One tent for each code (two per page). One code fills a whole page.",
+    "codes_hint_stickers": "One sticker for each code (12 per page). One code fills a whole sheet.",
+    "tables_of": "Tables — {{name}}",
+    "all": "Choose all",
+    "none": "Clear",
+    "preview": "Preview",
+    "preview_label": "Preview of the first code",
+    "count": "{{count}} codes chosen",
+    "count_one": "{{count}} code chosen",
+    "count_other": "{{count}} codes chosen",
+    "choose": "Choose at least one QR code.",
+    "download": "Download PDF",
+    "open": "Open the PDF",
+    "social": "For social media",
+    "social_hint": "A picture with the first chosen code, in the same design.",
+    "post": "Square post (1080 × 1080)",
+    "story": "Story (1080 × 1920)"
   },
   "promotions": {
     "title": "Promotions",
@@ -391,7 +491,44 @@
     "delete_title": "Delete this promotion?",
     "delete_desc": "It disappears from the menu right away.",
     "empty": "No promotions yet. Add a special or an announcement.",
-    "view_menu": "View menu"
+    "view_menu": "View menu",
+    "periods": {
+      "title": "Price periods",
+      "description": "Special prices at set times, such as a happy hour or lunch prices. Guests see the normal price crossed out and “Happy hour until 18:00”.",
+      "new": "New price period",
+      "edit": "Edit price period",
+      "not_included": "Price periods are not included in your plan. Contact us to upgrade.",
+      "empty": "No price periods yet.",
+      "dishes_one": "{{count}} dish",
+      "dishes_other": "{{count}} dishes",
+      "dishes": "{{count}} dishes",
+      "delete_confirm": "Delete this price period? Normal prices apply again right away.",
+      "now_title": "What guests see now",
+      "now_at": "Restaurant time: {{time}}. The menu changes by itself when a period starts or ends.",
+      "main": "Main menu (all branches)",
+      "none_running": "No price period is running now: guests see the normal prices.",
+      "name": "Name shown to guests",
+      "name_hint": "e.g. Happy hour",
+      "days": "Days",
+      "from": "From",
+      "to": "Until",
+      "time_hint": "In the restaurant's time zone. An end time earlier than the start runs past midnight.",
+      "prices": "Special prices",
+      "add_dish": "Add a dish",
+      "no_dishes": "Add at least one dish.",
+      "normal": "Normal {{price}}",
+      "mode": "Kind of price",
+      "percent": "% off",
+      "fixed": "New price",
+      "remove": "Remove {{name}}",
+      "active": "Use this price period",
+      "search": "Search price periods",
+      "status": "Status",
+      "on": "On",
+      "time": "Time",
+      "dishes_col": "Dishes",
+      "actions": "Actions"
+    }
   },
   "addons": {
     "title": "Add-ons",
@@ -507,9 +644,29 @@
     "privacy": "Search engines, link previews and speed tests are not counted. Numbers update within a minute.",
     "max": "highest {{count}}",
     "max_one": "highest {{count}}",
-    "max_other": "highest {{count}}"
+    "max_other": "highest {{count}}",
+    "export": {
+      "button": "Export",
+      "for": "Last {{count}} days",
+      "for_one": "Last {{count}} day",
+      "for_other": "Last {{count}} days",
+      "pdf": "Report (PDF)",
+      "csv_daily": "Views and scans per day (CSV)",
+      "csv_qr": "Scans per QR code and table (CSV)",
+      "csv_dishes": "Dish views and “My order” adds (CSV)"
+    },
+    "monthly": {
+      "title": "Monthly report by e-mail",
+      "hint": "On the 1st of every month, the owners get last month's report as a PDF: menu views, QR scans, top dishes and top codes, compared with the month before.",
+      "label": "E-mail me the monthly report",
+      "on": "Monthly report switched on. The first one comes on the 1st.",
+      "off": "Monthly report switched off."
+    }
   },
   "dashboard": {
+    "twofa_title": "Protect your restaurant with two-factor sign-in",
+    "twofa_text": "A 6-digit code from your phone at sign-in, so a stolen password alone can't open your menu, prices or team. Takes about two minutes.",
+    "twofa_action": "Turn it on",
     "title": "Dashboard",
     "intro": "Today at your restaurant.",
     "today_views": "Menu views today",
@@ -576,11 +733,16 @@
       "near_limit": "Almost at your plan's limit. Ask us about a bigger plan.",
       "usage": {
         "items": "Dishes",
-        "branches": "Branches",
         "photos": "Photos",
-        "languages": "Languages",
-        "team": "Team members"
-      }
+        "branches": "Branches"
+      },
+      "next": "Upgrade to {{name}}",
+      "next_hint": "Everything you have now, plus:"
+    },
+    "welcome": {
+      "title": "Welcome! Your email is confirmed",
+      "text": "Your restaurant is ready. Start with these three steps; the full checklist is below.",
+      "close": "Close"
     }
   },
   "drawer": {
@@ -604,7 +766,8 @@
   "subscription": {
     "grace": "Your subscription has expired. Renew by {{date}} to keep editing.",
     "read_only": "Your subscription has expired. The admin is read-only until you renew; the menu goes offline on {{date}}.",
-    "unavailable": "Your subscription has expired and your menu is offline. Renew to bring it back."
+    "unavailable": "Your subscription has expired and your menu is offline. Renew to bring it back.",
+    "pending": "Your account is waiting for approval. You can set up your menu now; guests can see it once it is approved."
   },
   "no_restaurant": {
     "title": "No restaurant yet",
@@ -612,7 +775,6 @@
   },
   "impersonation": {
     "viewing_as": "Viewing as {{name}}",
-    "until": "Until {{time}}. Everything you do is recorded.",
     "back": "Back to platform"
   },
   "search": {
@@ -624,5 +786,102 @@
     "label": "Switch restaurant",
     "title": "Your restaurants",
     "current": "Current restaurant"
+  },
+  "upgrade": {
+    "whatsapp": "Upgrade on WhatsApp",
+    "email": "Upgrade by email",
+    "title": {
+      "insights": "Insights is part of our paid plans",
+      "promotions": "Promotions are part of our paid plans"
+    },
+    "text": {
+      "insights": "See how many guests open your menu, which dishes they look at, which tables scan most, and get a monthly report by e-mail. Export everything to CSV or PDF.",
+      "promotions": "Show specials and announcements at the top of your menu, and set happy-hour or lunch prices that switch on and off by themselves."
+    },
+    "plans": "See all plans",
+    "contact": "Your data stays as it is. Contact us and we switch your plan."
+  },
+  "table": {
+    "search": "Search…",
+    "clear": "Clear filters",
+    "view": "View",
+    "columns": "Columns",
+    "density": "Row height",
+    "comfortable": "Comfortable",
+    "compact": "Compact",
+    "export": "Export CSV",
+    "bulk": "Actions for the selected rows",
+    "selected": "{{count}} selected",
+    "selected_one": "{{count}} selected",
+    "selected_other": "{{count}} selected",
+    "unselect": "Clear selection",
+    "select_page": "Select all rows on this page",
+    "select_row": "Select row",
+    "error": "This list could not be loaded.",
+    "retry": "Try again",
+    "empty": "Nothing here yet.",
+    "no_match": "Nothing matches these filters.",
+    "n_chosen": "{{count}} chosen",
+    "n_chosen_one": "{{count}} chosen",
+    "n_chosen_other": "{{count}} chosen",
+    "last_days": "Last {{count}} days",
+    "last_days_one": "Last {{count}} day",
+    "last_days_other": "Last {{count}} days",
+    "from": "From",
+    "to": "To",
+    "pages": "Pages",
+    "showing": "{{first}}–{{last}} of {{total}}",
+    "per_page": "Rows",
+    "first": "First page",
+    "previous": "Previous page",
+    "next": "Next page",
+    "last": "Last page",
+    "page_of": "Page {{page}} of {{pages}}",
+    "open": "Open {{name}}",
+    "rows": "Rows"
+  },
+  "dishes": {
+    "title": "All dishes",
+    "description": "Every dish of every menu in one list: find, check and change many dishes at once.",
+    "dish": "Dish",
+    "category": "Category",
+    "menu": "Menu",
+    "price": "Price",
+    "from": "from {{price}}",
+    "status": "Status",
+    "updated": "Last changed",
+    "search": "Search dishes",
+    "empty": "No dishes yet. Add them in the menu editor.",
+    "statuses": {
+      "sold_out": "Sold out",
+      "hidden": "Hidden",
+      "on_menu": "On the menu",
+      "no_photo": "No photo",
+      "new": "New",
+      "popular": "Popular"
+    },
+    "actions": {
+      "sold_out": "Sold out",
+      "available": "Available",
+      "hide": "Hide",
+      "show": "Show",
+      "price": "Change price",
+      "delete": "Delete"
+    },
+    "percent": "Change prices by (%)",
+    "percent_hint": "Use a minus for a lower price, e.g. -10. Sizes change too.",
+    "apply": "Apply",
+    "delete_title": "Delete {{count}} dishes?",
+    "delete_title_one": "Delete {{count}} dish?",
+    "delete_title_other": "Delete {{count}} dishes?",
+    "delete_desc": "The dishes and their photos are removed from every menu. This can’t be undone.",
+    "done": {
+      "sold_out": "{{count}} dishes marked sold out.",
+      "available": "{{count}} dishes available again.",
+      "hide": "{{count}} dishes hidden.",
+      "show": "{{count}} dishes shown.",
+      "delete": "{{count}} dishes deleted.",
+      "price": "Prices of {{count}} dishes changed."
+    }
   }
 }

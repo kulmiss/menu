@@ -10,6 +10,7 @@ use App\Tenancy\CurrentTenant;
 use Carbon\CarbonInterface;
 use Database\Factories\TenantFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -24,9 +25,12 @@ use Illuminate\Support\Facades\DB;
  * @property string $slug
  * @property string $name
  * @property string $status
+ * @property string|null $signup_state unverified|pending_approval|null (self sign-up; null = live)
  * @property int|null $plan_id
  * @property Carbon|null $trial_ends_at
  * @property Carbon|null $paid_until
+ * @property Carbon|null $follow_up_on
+ * @property string|null $follow_up_reason
  * @property Carbon|null $qr_downloaded_at first QR code / table card download (setup checklist)
  * @property Carbon|null $setup_hidden_at dashboard setup checklist hidden
  * @property Carbon|null $suspended_at
@@ -36,10 +40,12 @@ use Illuminate\Support\Facades\DB;
  * @property string $currency_code
  * @property array<string, mixed>|null $currency_format
  * @property int $cache_version
+ * @property bool $insights_report monthly Insights report by e-mail (QUESTIONS #180)
+ * @property string|null $insights_report_sent YYYY-MM of the last monthly report sent
  *
  * A restaurant: the tenant every restaurant-owned row belongs to.
  */
-#[Fillable(['slug', 'name', 'plan_id', 'trial_ends_at', 'paid_until', 'timezone', 'default_locale', 'currency_code', 'currency_format'])]
+#[Fillable(['slug', 'name', 'plan_id', 'trial_ends_at', 'paid_until', 'timezone', 'default_locale', 'currency_code', 'currency_format', 'signup_state', 'follow_up_on', 'follow_up_reason'])]
 class Tenant extends Model
 {
     /** @use HasFactory<TenantFactory> */
@@ -48,6 +54,11 @@ class Tenant extends Model
     public const STATUS_ACTIVE = 'active';
 
     public const STATUS_SUSPENDED = 'suspended';
+
+    /** Self sign-up (owner, 2026-11-13): not live until the e-mail is verified / the Super Admin approves. */
+    public const SIGNUP_UNVERIFIED = 'unverified';
+
+    public const SIGNUP_PENDING = 'pending_approval';
 
     /** @var array<string, mixed> */
     protected $attributes = [
@@ -82,8 +93,10 @@ class Tenant extends Model
             'qr_downloaded_at' => 'datetime',
             'setup_hidden_at' => 'datetime',
             'suspended_at' => 'datetime',
+            'follow_up_on' => 'date',
             'currency_format' => 'array',
             'cache_version' => 'integer',
+            'insights_report' => 'boolean',
         ];
     }
 
@@ -126,6 +139,10 @@ class Tenant extends Model
             return SubscriptionState::Suspended;
         }
 
+        if ($this->signup_state !== null) {
+            return SubscriptionState::Pending;
+        }
+
         if ($this->paid_until !== null && $now->lt($this->paid_until)) {
             return SubscriptionState::Active;
         }
@@ -149,6 +166,40 @@ class Tenant extends Model
             $now->lt($readOnlyEnds) => SubscriptionState::ReadOnly,
             default => SubscriptionState::Unavailable,
         };
+    }
+
+    /**
+     * Restaurants in one of these subscription states, in SQL (same rules as
+     * subscriptionState(), so lists can filter and count without loading rows).
+     *
+     * @param  Builder<Tenant>  $query
+     * @param  list<string>  $states
+     */
+    public function scopeInState(Builder $query, array $states, ?CarbonInterface $now = null): void
+    {
+        $now = ($now ?? now())->toDateTimeString();
+        $grace = (int) config('menu.grace_days');
+        $readOnly = (int) config('menu.read_only_days');
+        $t = $this->getTable();
+        $expired = "GREATEST(COALESCE({$t}.paid_until, {$t}.trial_ends_at), COALESCE({$t}.trial_ends_at, {$t}.paid_until))";
+        $base = "{$t}.status <> '".self::STATUS_SUSPENDED."' AND {$t}.signup_state IS NULL";
+        $over = "{$base} AND ({$t}.paid_until IS NULL OR {$t}.paid_until <= ?) AND ({$t}.trial_ends_at IS NULL OR {$t}.trial_ends_at <= ?) AND {$expired} IS NOT NULL";
+        $sql = [
+            'suspended' => ["{$t}.status = '".self::STATUS_SUSPENDED."'", []],
+            'pending' => ["{$t}.status <> '".self::STATUS_SUSPENDED."' AND {$t}.signup_state IS NOT NULL", []],
+            'active' => ["{$base} AND ({$t}.paid_until > ? OR ({$t}.paid_until IS NULL AND {$t}.trial_ends_at IS NULL))", [$now]],
+            'trial' => ["{$base} AND ({$t}.paid_until IS NULL OR {$t}.paid_until <= ?) AND {$t}.trial_ends_at > ?", [$now, $now]],
+            'grace' => ["{$over} AND DATE_ADD({$expired}, INTERVAL {$grace} DAY) > ?", [$now, $now, $now]],
+            'read_only' => ["{$over} AND DATE_ADD({$expired}, INTERVAL {$grace} DAY) <= ? AND DATE_ADD({$expired}, INTERVAL ".($grace + $readOnly).' DAY) > ?', [$now, $now, $now, $now]],
+            'unavailable' => ["{$over} AND DATE_ADD({$expired}, INTERVAL ".($grace + $readOnly).' DAY) <= ?', [$now, $now, $now]],
+        ];
+        $query->where(function ($w) use ($states, $sql) {
+            foreach ($states as $state) {
+                if (isset($sql[$state])) {
+                    $w->orWhereRaw('('.$sql[$state][0].')', $sql[$state][1]);
+                }
+            }
+        });
     }
 
     /** The moment the current stage of the expiry timeline ends, for banners. */
@@ -199,5 +250,11 @@ class Tenant extends Model
         // Drop the static guest page once the change is saved, so a visitor
         // racing the transaction can't store the old version again.
         DB::afterCommit(fn () => MenuPageCache::forget($this));
+    }
+
+    /** @return BelongsToMany<PlatformTag, $this> Super Admin labels */
+    public function platformTags(): BelongsToMany
+    {
+        return $this->belongsToMany(PlatformTag::class, 'platform_tag_tenant');
     }
 }

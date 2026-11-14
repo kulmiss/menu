@@ -20,7 +20,7 @@ class Impersonation extends Model
 {
     public $timestamps = false;
 
-    public const MINUTES = 60;
+    public const MINUTES = 120;
 
     protected function casts(): array
     {

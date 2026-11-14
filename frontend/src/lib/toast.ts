@@ -31,14 +31,23 @@ export function ensureToaster(): Promise<void> {
   return mounted
 }
 
-function show(kind: Kind, text: string) {
+/** [label, href]: a link button inside the toast ("Upgrade on WhatsApp"). */
+type Link = [string, string]
+
+function show(kind: Kind, text: string, link?: Link) {
   void Promise.all([import('sonner'), ensureToaster()]).then(([{ toast }]) => {
-    toast[kind](text)
+    toast[kind](
+      text,
+      link && {
+        duration: 12e3,
+        action: { label: link[0], onClick: () => open(link[1], '_blank') },
+      }
+    )
   })
 }
 
 export const toast = {
   success: (text: string) => show('success', text),
-  error: (text: string) => show('error', text),
+  error: (text: string, link?: Link) => show('error', text, link),
   message: (text: string) => show('message', text),
 }

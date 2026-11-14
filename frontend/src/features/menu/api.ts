@@ -342,12 +342,7 @@ export function useSoldOut(t: number) {
 }
 
 export type BulkAction =
-  | 'show'
-  | 'hide'
-  | 'sold_out'
-  | 'available'
-  | 'move'
-  | 'delete'
+  'show' | 'hide' | 'sold_out' | 'available' | 'move' | 'delete'
 
 export const useBulkItems = (t: number) =>
   useMenuMutation(

@@ -2,22 +2,33 @@
 
 namespace App\Models;
 
+use App\Notifications\VerifyEmailNotification;
+use App\Support\Security\RecoveryCodes;
+use App\Support\Security\SecurityLog;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Carbon;
+use Laravel\Fortify\Events\RecoveryCodeReplaced;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use Laravel\Sanctum\HasApiTokens;
 
+/**
+ * @property array<string, bool>|null $push_settings Push types switched off (QUESTIONS #189)
+ * @property Carbon|null $news_unsubscribed_at News e-mails off (account e-mails still sent)
+ */
 #[Fillable(['name', 'email', 'password', 'locale'])]
 #[Hidden(['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes'])]
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, TwoFactorAuthenticatable;
+    use HasApiTokens, HasFactory, Notifiable, TwoFactorAuthenticatable;
 
     /**
      * Column defaults, so a freshly created model has them without a reload.
@@ -41,7 +52,10 @@ class User extends Authenticatable implements MustVerifyEmail
             'password' => 'hashed',
             'is_super_admin' => 'boolean',
             'two_factor_confirmed_at' => 'datetime',
+            'password_weak' => 'boolean',
             'last_login_at' => 'datetime',
+            'news_unsubscribed_at' => 'datetime',
+            'push_settings' => 'array',
         ];
     }
 
@@ -51,10 +65,66 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Membership::class);
     }
 
+    /**
+     * Fortify writes plain codes; only their hashes are kept (SECURITY_REPORT.md M5).
+     *
+     * @return Attribute<string|null, string|null>
+     */
+    protected function twoFactorRecoveryCodes(): Attribute
+    {
+        return Attribute::make(set: fn (?string $value) => RecoveryCodes::store($this, $value));
+    }
+
+    /**
+     * The plain codes only right after they were made (Fortify's "show codes"
+     * endpoint and the app); afterwards an empty list.
+     *
+     * @return list<string>
+     */
+    public function recoveryCodes(): array
+    {
+        return RecoveryCodes::shown($this);
+    }
+
+    /**
+     * Fortify calls this after a recovery code was used: it is removed, not replaced.
+     *
+     * @param  string  $code
+     */
+    public function replaceRecoveryCode($code): void
+    {
+        RecoveryCodes::consume($this, (string) $code);
+        RecoveryCodeReplaced::dispatch($this, $code);
+    }
+
+    /** @return HasMany<PushToken, $this> */
+    public function pushTokens(): HasMany
+    {
+        return $this->hasMany(PushToken::class);
+    }
+
+    /**
+     * Signs the app out on every device (or every device but one) after a password
+     * reset or change (SECURITY_REPORT.md H2). Push tokens go with their sign-in.
+     */
+    public function revokeAppTokens(?int $exceptTokenId = null): int
+    {
+        $count = $this->tokens()->when($exceptTokenId !== null, fn ($q) => $q->whereKeyNot($exceptTokenId))->delete();
+        SecurityLog::event('tokens.revoked', $this->id, null, ['count' => $count, 'why' => 'password']);
+
+        return $count;
+    }
+
     public function membershipFor(Tenant|int $tenant): ?Membership
     {
         $tenantId = $tenant instanceof Tenant ? $tenant->getKey() : $tenant;
 
         return $this->memberships()->where('tenant_id', $tenantId)->first();
+    }
+
+    /** "Confirm your e-mail" with a 24-hour link that works signed out (owner, 2026-11-13). */
+    public function sendEmailVerificationNotification(): void
+    {
+        $this->notify(new VerifyEmailNotification);
     }
 }

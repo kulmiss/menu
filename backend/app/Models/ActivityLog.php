@@ -34,6 +34,12 @@ class ActivityLog extends Model
         return ['changes' => 'array'];
     }
 
+    /** @return BelongsTo<Tenant, $this> the restaurant, also when deleted */
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class)->withTrashed();
+    }
+
     /** @return BelongsTo<User, $this> */
     public function actor(): BelongsTo
     {

@@ -38,8 +38,13 @@ const all = {
         days_left: 12,
         usage: [
           { key: 'items', used: 9, limit: 10 },
-          { key: 'branches', used: 1, limit: null },
+          { key: 'branches', used: 1, limit: 1 },
         ],
+        next: {
+          name: { en: 'Plus' },
+          adds: ['All 4 menu styles', 'Insights and monthly report'],
+        },
+        upgrade: { whatsapp: 'https://wa.me/251911000000', email: null },
       },
     },
   },
@@ -100,6 +105,18 @@ describe('Dashboard widgets', () => {
     await expect
       .element(screen.getByText(/Almost at your plan's limit/))
       .toBeVisible()
+    await expect.element(screen.getByText('Upgrade to Plus')).toBeVisible()
+    await expect
+      .element(screen.getByText('Insights and monthly report'))
+      .toBeVisible()
+    await expect
+      .element(screen.getByRole('link', { name: 'Upgrade on WhatsApp' }))
+      .toHaveAttribute('href', 'https://wa.me/251911000000')
+    // 9 / 10 dishes warns; 1 / 1 branch (a limit of 1) does not.
+    expect(screen.getByText(/Almost at your plan's limit/).all()).toHaveLength(
+      1
+    )
+    await expect.element(screen.getByText('1 / 1')).toBeVisible()
     await expect
       .element(screen.getByText('Average list Br 420 (3 shown to waiters)'))
       .toBeVisible()
@@ -145,5 +162,37 @@ describe('Dashboard widgets', () => {
       .toBeVisible()
     await expect.element(screen.getByText('Views and scans')).toBeVisible()
     await expect.element(screen.getByText('Shiro')).toBeVisible()
+  })
+})
+
+describe('Welcome after confirming the e-mail', () => {
+  afterEach(() => {
+    fake.restore()
+    window.history.replaceState(null, '', '/')
+  })
+
+  it('shows the next setup steps when opened from the confirmation link', async () => {
+    fake = fakeApi(all)
+    window.history.replaceState(null, '', '/?welcome=1')
+    const screen = await renderWithQuery(
+      <DashboardWidgets tenantId={1} locale='en' manager />
+    )
+    await expect
+      .element(screen.getByText('Welcome! Your email is confirmed'))
+      .toBeVisible()
+    await expect
+      .element(
+        screen.getByRole('link', { name: /Download your QR codes/ }).first()
+      )
+      .toHaveAttribute('href', '/admin/qr-codes')
+  })
+
+  it('is not shown on a normal visit', async () => {
+    fake = fakeApi(all)
+    const screen = await renderWithQuery(
+      <DashboardWidgets tenantId={1} locale='en' manager />
+    )
+    await expect.element(screen.getByText('Finish setting up')).toBeVisible()
+    expect(screen.container.textContent).not.toContain('Welcome!')
   })
 })

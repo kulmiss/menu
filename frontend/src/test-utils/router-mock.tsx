@@ -3,6 +3,9 @@ import { vi } from 'vitest'
 /** Shared spy for `useNavigate()` in mocked router modules. */
 export const navigate = vi.fn(async () => {})
 
+/** What `useSearch()` answers in mocked router modules; tests may fill it. */
+export const search: Record<string, unknown> = {}
+
 /**
  * Router module replacement for component tests: plain links, a spy for
  * navigation. Use as
@@ -12,6 +15,7 @@ export function routerMock(actual: Record<string, unknown>) {
   return {
     ...actual,
     useNavigate: () => navigate,
+    useSearch: () => search,
     Link: ({
       children,
       to,

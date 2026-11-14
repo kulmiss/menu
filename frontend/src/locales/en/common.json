@@ -4,6 +4,7 @@
   },
   "common": {
     "cancel": "Cancel",
+    "close": "Close",
     "continue": "Continue",
     "save": "Save"
   },
@@ -28,7 +29,9 @@
     "info": "Restaurant info",
     "promotions": "Promotions",
     "insights": "Insights",
-    "platform": "Platform"
+    "platform": "Platform",
+    "upgrade": "Upgrade",
+    "dishes": "All dishes"
   },
   "language": {
     "label": "Language",
@@ -52,13 +55,7 @@
     "remember": "Keep me signed in on this device",
     "sign_in": "Sign in",
     "sign_in_intro": "Enter your email and password. No account yet?",
-    "sign_up": "Sign up",
     "sign_up_title": "Create your restaurant",
-    "sign_up_intro": "Start your free trial. Already have an account?",
-    "create_account": "Create account",
-    "restaurant_name": "Restaurant name",
-    "slug": "Menu address",
-    "slug_hint": "Your menu will be at {{url}}. Lower-case letters, numbers and hyphens.",
     "your_name": "Your name",
     "forgot_link": "Forgot password?",
     "forgot_title": "Forgot password",
@@ -97,12 +94,6 @@
     "code": "Enter the 6-digit code.",
     "recovery_code": "Enter a recovery code.",
     "menu_name": "Enter a name."
-  },
-  "verify": {
-    "banner": "Please confirm your email address ({{email}}) using the link we sent you.",
-    "resend": "Send again",
-    "sent": "A new link was sent to {{email}}.",
-    "sent_short": "Sent"
   },
   "invite": {
     "title": "Join {{restaurant}}",

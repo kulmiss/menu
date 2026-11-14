@@ -10,6 +10,7 @@ export type SubscriptionState =
   | 'read_only'
   | 'unavailable'
   | 'suspended'
+  | 'pending'
 
 /** A restaurant the signed-in user belongs to (TenantResource). */
 export type Tenant = {
@@ -32,6 +33,8 @@ export type Tenant = {
   } | null
   /** Plan features (with the Super Admin's overrides); missing = on. */
   features?: Partial<Record<string, boolean>>
+  /** Where "Upgrade" buttons point (WhatsApp link / support e-mail). */
+  upgrade?: { whatsapp: string | null; email: string | null }
 }
 
 /** GET /api/v1/me */
@@ -41,6 +44,14 @@ export type Me = {
   email: string
   locale: string
   email_verified: boolean
+  /** A new address waiting for its confirmation link. */
+  pending_email?: string | null
+  /** The Super Admin requires two-factor for Owners and it isn't on yet (M17). */
+  two_factor_required?: boolean
+  /** On the common-password list: a gentle banner (SECURITY_REPORT.md M3). */
+  password_weak?: boolean
+  /** Platform news e-mails on (account e-mails are always sent). */
+  news_subscribed?: boolean
   two_factor_enabled: boolean
   is_super_admin: boolean
   /** Set while a Super Admin is "logged in as" this user. */
@@ -48,7 +59,6 @@ export type Me = {
     tenant_id: number
     tenant_name: string
     user_name: string
-    ends_at: string
   } | null
   tenants: Tenant[]
 }
@@ -79,10 +89,8 @@ export async function signIn(input: SignInInput): Promise<boolean> {
 export type SignUpInput = {
   name: string
   email: string
-  /** Not needed when signing up from an invitation. */
-  restaurant_name?: string
-  slug?: string
-  invitation_token?: string
+  /** Fortify sign-up is for invitations only; restaurants use /signup. */
+  invitation_token: string
   password: string
   password_confirmation: string
   locale?: string

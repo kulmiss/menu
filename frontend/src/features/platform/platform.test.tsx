@@ -3,6 +3,7 @@ import { meFixture } from '@/test-utils/fixtures'
 import { renderWithQuery } from '@/test-utils/render'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { userEvent } from 'vitest/browser'
+import { toast } from '@/lib/toast'
 import { PlatformDashboard } from './dashboard'
 import { RestaurantsPage } from './restaurants'
 import { PlansPage } from './screens'
@@ -71,9 +72,15 @@ describe('Super Admin screens', () => {
       },
     })
     const screen = await renderWithQuery(<PlatformDashboard />, { me: admin })
-    await expect.element(screen.getByText('1,200')).toBeVisible()
-    // The eight widgets load after the page; with no answers they show their error state.
+    await expect
+      .element(screen.getByRole('link', { name: /Trial\s*3/ }))
+      .toHaveAttribute('href', '/platform/$section?state=trial')
+    // Insights and the to-do widgets load after the page; with no answers they show their error state.
+    await expect.element(screen.getByText('Overview')).toBeVisible()
     await expect.element(screen.getByText('System health')).toBeVisible()
+    await expect
+      .element(screen.getByRole('button', { name: 'Last 30 days' }))
+      .toHaveAttribute('aria-pressed', 'true')
   })
 
   it('records a payment for a restaurant', async () => {
@@ -103,10 +110,7 @@ describe('Super Admin screens', () => {
         data: { data: {} },
       },
     })
-    const screen = await renderWithQuery(
-      <RestaurantsPage onState={() => {}} />,
-      { me: admin }
-    )
+    const screen = await renderWithQuery(<RestaurantsPage />, { me: admin })
     await userEvent.click(screen.getByRole('button', { name: 'Sahan Grill' }))
     await userEvent.type(screen.getByLabelText('Amount (SOS)'), '1500')
     await userEvent.clear(screen.getByLabelText('Months'))
@@ -146,20 +150,72 @@ describe('Super Admin screens', () => {
         },
       },
       'POST /platform/restaurants/7/resend-welcome': {
-        data: { data: { sent_to: 'ayaan@example.com' } },
+        data: {
+          data: { sent_to: 'ayaan@example.com', kind: 'reset' },
+          message:
+            'The owner has signed in before, so ayaan@example.com got a "reset your password" e-mail.',
+        },
       },
     })
-    const screen = await renderWithQuery(
-      <RestaurantsPage onState={() => {}} />,
-      { me: admin }
-    )
+    const toastSuccess = vi.spyOn(toast, 'success')
+    const screen = await renderWithQuery(<RestaurantsPage />, { me: admin })
     await userEvent.click(screen.getByRole('button', { name: 'Sahan Grill' }))
     await userEvent.click(
-      screen.getByRole('button', { name: 'Resend set-password e-mail' })
+      screen.getByRole('button', { name: 'E-mail a password link' })
     )
     await expect
       .poll(() => fake.calls.find((c) => c.method === 'POST')?.url)
       .toBe('/platform/restaurants/7/resend-welcome')
+    // The toast says which e-mail went out.
+    await expect
+      .poll(
+        () => toastSuccess.mock.calls[toastSuccess.mock.calls.length - 1]?.[0]
+      )
+      .toMatch(/got a "reset your password" e-mail/)
+  })
+
+  it('logs in as the owner in one click, without a reason', async () => {
+    fake = fakeApi({
+      'GET /platform/restaurants': { data: { data: [restaurant] } },
+      'GET /platform/plans': { data: { data: [] } },
+      'GET /platform/restaurants/7': {
+        data: {
+          data: {
+            ...restaurant,
+            members: [
+              {
+                id: 3,
+                name: 'Ayaan',
+                email: 'ayaan@example.com',
+                role: 'owner',
+              },
+            ],
+            features: {},
+            overrides: {},
+            payments: [],
+            counts: { menus: 1, items: 20, branches: 1, views_30d: 80 },
+          },
+        },
+      },
+      // Answered with an error so the test page doesn't navigate to /admin.
+      'POST /platform/restaurants/7/impersonate': {
+        status: 422,
+        data: { message: 'No owner' },
+      },
+    })
+    const screen = await renderWithQuery(<RestaurantsPage />, { me: admin })
+    await userEvent.click(screen.getByRole('button', { name: 'Sahan Grill' }))
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Log in as owner' })
+    )
+
+    await expect
+      .poll(() => fake.calls.find((c) => c.method === 'POST')?.url)
+      .toBe('/platform/restaurants/7/impersonate')
+    const call = fake.calls.find((c) => c.method === 'POST')
+    expect(call?.url).toBe('/platform/restaurants/7/impersonate')
+    expect(call?.data ?? {}).toEqual({})
+    expect(document.querySelector('#reason')).toBeNull()
   })
 
   it('creates a plan with limits and features', async () => {
@@ -171,7 +227,7 @@ describe('Super Admin screens', () => {
     await userEvent.click(screen.getByRole('button', { name: 'New plan' }))
     await userEvent.type(screen.getByLabelText('Name', { exact: true }), 'Pro')
     await userEvent.type(screen.getByLabelText('Code'), 'pro')
-    await userEvent.type(screen.getByLabelText('Price'), '900')
+    await userEvent.type(screen.getByLabelText('Price', { exact: true }), '900')
     await userEvent.type(
       screen.getByLabelText('Branches', { exact: true }),
       '5'

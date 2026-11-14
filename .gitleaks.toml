@@ -1,0 +1,10 @@
+# Secret scan settings (CI "changes" job, scripts/pre-commit-secrets.sh).
+# Default gitleaks rules, except that made-up passwords in the backend tests
+# ("correct-horse-battery" and the like) are not secrets.
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Example passwords in tests"
+targetRules = ["generic-api-key"]
+paths = ['''^backend/tests/''']

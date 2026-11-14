@@ -29,7 +29,7 @@ class PdfMenuController extends Controller
         $appearance = TenantAppearance::current();
         // "With photos" in the dialog decides, whatever the menu page shows.
         $appearance->show_photos = $request->boolean('photos');
-        $page = $data->build($tenant, $appearance, $branch);
+        $page = $data->build($tenant, $appearance, $branch, periods: false);
 
         $pdf = (new PdfMenu)->render($page, [
             'menu_id' => isset($options['menu_id']) ? (int) $options['menu_id'] : null,

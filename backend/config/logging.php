@@ -73,6 +73,15 @@ return [
             'replace_placeholders' => true,
         ],
 
+        // Security events (SECURITY_REPORT.md M11): ids and keyed hashes only, 30 days.
+        'security' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/security.log'),
+            'level' => 'info',
+            'days' => (int) env('SECURITY_LOG_DAYS', 30),
+            'replace_placeholders' => true,
+        ],
+
         'monthly' => [
             'driver' => 'monthly',
             'path' => storage_path('logs/laravel.log'),

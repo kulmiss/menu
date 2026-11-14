@@ -219,16 +219,15 @@ describe('QrCodesPage', () => {
 
   it('offers downloads for each code and table cards per branch', async () => {
     const screen = await render(<QrCodesPage />)
-    await expect.element(screen.getByText('Whole restaurant')).toBeVisible()
-    // Every code says which branch it opens (restaurant codes: the main branch).
-    await expect.element(screen.getByText('Opens Main')).toBeVisible()
     await expect
-      .element(screen.getByRole('link', { name: 'PDF' }))
+      .element(screen.getByText('Whole restaurant', { exact: true }))
+      .toBeVisible()
+    // One table for every code, tables included, each with its downloads.
+    await expect
+      .element(screen.getByRole('link', { name: 'PDF · Whole restaurant' }))
       .toHaveAttribute('href', '/api/v1/t/1/qr-codes/7.pdf')
     await expect
       .element(screen.getByRole('link', { name: 'Print table cards' }))
       .toHaveAttribute('href', '/api/v1/t/1/branches/1/table-cards.pdf')
-    // Table codes are printed as cards, not listed one by one.
-    expect(screen.container.textContent).not.toContain('AB23CD45')
   })
 })

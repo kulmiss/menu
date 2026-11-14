@@ -14,6 +14,24 @@ describe('sidebar navigation', () => {
     expect(titles('staff')).not.toContain('nav.team')
   })
 
+  it('keeps features the plan lacks in the menu, marked "Upgrade"', () => {
+    const items = (features?: Record<string, boolean>) =>
+      filterNav(sidebarData.navGroups, 'owner', (k) => k, features).flatMap(
+        (g) => g.items.flatMap((i) => [i, ...(i.items ?? [])])
+      )
+    const insights = (f?: Record<string, boolean>) =>
+      items(f).find((i) => i.title === 'nav.insights')
+    expect(insights({ insights: false })?.badge).toBe('nav.upgrade')
+    expect(insights({ insights: true })?.badge).toBeUndefined()
+    expect(insights(undefined)?.badge).toBeUndefined()
+    // Roles still hide what isn't yours.
+    expect(
+      filterNav(sidebarData.navGroups, 'staff', (k) => k, {
+        insights: false,
+      }).flatMap((g) => g.items.map((i) => i.title))
+    ).not.toContain('nav.team')
+  })
+
   it('points every link into /admin', () => {
     const urls = sidebarData.navGroups.flatMap((g) =>
       g.items.flatMap((i) => (i.items ? i.items.map((s) => s.url) : [i.url]))

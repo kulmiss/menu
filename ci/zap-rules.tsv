@@ -1,0 +1,3 @@
+10055	WARN	(CSP) style-src 'unsafe-inline' is deliberate: Radix inline styles and photo placeholders; scripts are locked by nonce/hash (SECURITY_REPORT.md H1)
+10035	IGNORE	(HSTS) The scan runs over plain http locally; HSTS is sent on https only
+10020	IGNORE	(Anti-clickjacking) Guest menus may be embedded on restaurants' own sites on purpose

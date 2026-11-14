@@ -18,7 +18,7 @@ return [
 
     'prefix' => 'api/v1/auth',
     'domain' => null,
-    'middleware' => ['web', 'idempotent'],
+    'middleware' => ['web', 'idempotent', 'password.throttle'],
 
     'limiters' => [
         'login' => 'login',
