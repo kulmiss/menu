@@ -202,7 +202,7 @@ window.mH = function (b, D) {
       same = L.i.filter(function (y) { return y.k === l.k; })[0];
       if (same) same.q++; else { l.nm = name; l.x = parts.join(', '); l.p = unit(l); L.i.push(l); }
       // Anonymous count for the restaurant's statistics: dish, quantity, list total. Nothing else.
-      if (navigator.sendBeacon) navigator.sendBeacon('/api/v1/beacon', JSON.stringify({ t: D.id, b: D.b, c: [id, 1, total()[1] + (unit(l) || 0)] }));
+      if (navigator.sendBeacon) navigator.sendBeacon('/api/v1/beacon', JSON.stringify({ t: D.id, b: D.b, c: [id, 1, total()[1]] })); // the list already holds the new dish
       save();
       if (b) status.textContent = T.added;
     }

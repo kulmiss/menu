@@ -272,6 +272,12 @@ it('puts the logo and name on or below the banner', function () {
         ->and(pageWithBanner('grid', 'under'))->toContain('class="top hc"');
 });
 
+it('keeps a banner with the name on it inside narrow phones (pre-launch check)', function () {
+    // A tall header made the 16:9 banner wider than a 375 px screen: height 100% + aspect-ratio
+    // gave it a width of its own. Both sizes set = the ratio no longer widens it.
+    expect(pageWithBanner('editorial', 'over'))->toContain('.ov .cv{height:100%;width:100%}');
+});
+
 it('saves where the logo and name go', function () {
     [$owner, $tenant] = member(Role::Owner);
     $values = ['primary_color' => '#b4432a', 'font' => 'system', 'style' => 'grid', 'show_prices' => true, 'show_photos' => true, 'show_descriptions' => true, 'show_calories' => true];

@@ -152,3 +152,9 @@ it('signs exactly like the AWS SDK (botocore reference vector)', function () {
 
     expect($headers['Authorization'])->toEndWith('Signature=bcab6fc58a34b2eb9336f1c2c7cababa8fdc67d8002232f623a80c6d3f02fbd0');
 });
+
+it('words the backup warning e-mail calmly and signs it like the other e-mails (pre-launch check)', function () {
+    $mail = (new BackupProblemNotification('The last backup failed: disk full.'))->toMail(superAdmin());
+    expect($mail->greeting)->toBe('A backup needs your attention')->not->toContain('Whoops')
+        ->and($mail->salutation)->toBe('Thank you, the Menu team');
+});
