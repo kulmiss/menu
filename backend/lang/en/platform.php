@@ -14,6 +14,8 @@ return [
         'style_grid' => 'Menu style B · Fresh grid',
         'style_bistro' => 'Menu style C · Quiet bistro',
         'style_minimal' => 'Menu style D · Minimal',
+        'price_periods' => 'Happy hour (time-based prices)',
+        'sold_out' => '“Sold out” marks',
     ],
     'two_factor_required' => 'Set up two-factor sign-in in your security settings to use the platform area.',
     'impersonation_expired' => 'The “log in as” session ended after 2 hours. You are back in the platform area.',

@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Models\Item;
+use App\Support\Features;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -28,7 +29,7 @@ class ItemSummaryResource extends JsonResource
             'variants' => $this->variants->map(fn ($v) => ['id' => $v->id, 'name' => (object) $v->name, 'price_minor' => $v->price_minor])->values(),
             'media_id' => $this->media_id,
             'media' => $this->whenLoaded('media', fn () => $this->media ? new MediaResource($this->media) : null),
-            'is_sold_out' => $this->is_sold_out,
+            'is_sold_out' => $this->is_sold_out && Features::here('sold_out'), // ignored while "sold out" is off
             'is_visible' => $this->is_visible,
             'is_new' => $this->is_new,
             'is_popular' => $this->is_popular,

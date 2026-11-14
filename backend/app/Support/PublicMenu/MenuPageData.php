@@ -46,6 +46,8 @@ class MenuPageData
             $branchId = $branch?->id;
             $appearance ??= TenantAppearance::current();
             $theme = PageTheme::from($appearance, Features::styles($tenant));
+            // "Sold out" switched off: marks stay in the database but the menu ignores them.
+            $soldOut = Features::enabled($tenant, 'sold_out');
             $locale = $tenant->default_locale ?: 'en';
             $text = fn (?array $v): string => $v === null || $v === [] ? '' : (string) ($v[$locale] ?? reset($v));
 
@@ -85,12 +87,12 @@ class MenuPageData
             if ($overrides->isNotEmpty()) {
                 foreach ($menus as $menu) {
                     foreach ($menu->categories as $category) {
-                        $category->setRelation('items', $category->items->reject(function (Item $item) use ($overrides) {
+                        $category->setRelation('items', $category->items->reject(function (Item $item) use ($overrides, $soldOut) {
                             $o = $overrides->get($item->id);
                             if ($o === null) {
                                 return false;
                             }
-                            if ($o->is_sold_out !== null) {
+                            if ($soldOut && $o->is_sold_out !== null) {
                                 $item->is_sold_out = $o->is_sold_out;
                             }
                             if ($o->price_minor !== null && $item->variants->isEmpty()) {
@@ -124,7 +126,7 @@ class MenuPageData
             $prices = $theme['show_prices'];
             $sizesLine = $theme['style'] === 'minimal';
 
-            $menuRows = $menus->map(function (Menu $menu) use ($text, $money, $describe, $photos, $calories, $prices, $sizesLine, $deals, &$tagsUsed) {
+            $menuRows = $menus->map(function (Menu $menu) use ($text, $money, $describe, $photos, $calories, $prices, $sizesLine, $deals, $soldOut, &$tagsUsed) {
                 return [
                     'id' => $menu->id,
                     'name' => $text($menu->name),
@@ -134,7 +136,7 @@ class MenuPageData
                         'id' => $c->id,
                         'name' => $text($c->name),
                         'description' => $describe($c->description),
-                        'items' => $c->items->map(function (Item $item) use ($text, $money, $describe, $photos, $calories, $prices, $sizesLine, $deals, &$tagsUsed) {
+                        'items' => $c->items->map(function (Item $item) use ($text, $money, $describe, $photos, $calories, $prices, $sizesLine, $deals, $soldOut, &$tagsUsed) {
                             $deal = $deals[$item->id] ?? null;
                             $tags = $item->tags->map(fn (Tag $t) => ['key' => $t->key ?? 'c'.$t->id, 'label' => $t->key ? __('public.tags.'.$t->key) : $text($t->name)])->values()->all();
                             foreach ($tags as $tag) {
@@ -157,7 +159,7 @@ class MenuPageData
                                 'sizes' => $sizesLine && $prices && $item->variants->count() > 1
                                     ? $item->variants->map(fn (ItemVariant $v) => $text($v->name).' '.self::number((int) $v->price_minor))->implode(' · ')
                                     : '',
-                                'sold_out' => $item->is_sold_out,
+                                'sold_out' => $soldOut && $item->is_sold_out,
                                 'new' => $item->is_new && ($item->new_until === null || $item->new_until->isFuture() || $item->new_until->isToday()),
                                 'popular' => $item->is_popular,
                                 'tags' => $tags,
@@ -169,7 +171,7 @@ class MenuPageData
                                     $item->variants->map(fn (ItemVariant $v) => [$v->id, (int) $v->price_minor])->values()->all(),
                                     $item->addonGroups->map(fn (AddonGroup $g) => [
                                         (int) $g->min_choices, (int) $g->max_choices,
-                                        $g->options->map(fn (AddonOption $o) => [$o->id, (int) $o->price_minor, $o->is_sold_out ? 1 : 0])->values()->all(),
+                                        $g->options->map(fn (AddonOption $o) => [$o->id, (int) $o->price_minor, $soldOut && $o->is_sold_out ? 1 : 0])->values()->all(),
                                     ])->values()->all(),
                                 ],
                                 'sheet' => array_filter([
@@ -177,7 +179,7 @@ class MenuPageData
                                     'v' => $item->variants->map(fn (ItemVariant $v) => [$text($v->name), $money($v->price_minor).($prices && isset($deal['sizes'][$v->id]) ? ' · '.__('public.was', ['price' => $money($deal['sizes'][$v->id])]) : '')])->values()->all(),
                                     'a' => $item->addonGroups->map(fn (AddonGroup $g) => [
                                         $text($g->name), $g->min_choices, $g->max_choices,
-                                        $g->options->map(fn (AddonOption $o) => [$text($o->name), $prices && $o->price_minor > 0 ? '+'.$money($o->price_minor) : '', $o->is_sold_out ? 1 : 0])->values()->all(),
+                                        $g->options->map(fn (AddonOption $o) => [$text($o->name), $prices && $o->price_minor > 0 ? '+'.$money($o->price_minor) : '', $soldOut && $o->is_sold_out ? 1 : 0])->values()->all(),
                                     ])->values()->all(),
                                     'al' => array_map(fn ($a) => __('public.allergens.'.$a), $item->allergens()),
                                     'k' => $calories ? $item->calories : null,

@@ -12,10 +12,12 @@ use App\Models\ItemVariant;
 use App\Models\Tenant;
 use App\Rules\Translations;
 use App\Support\ActivityLogger;
+use App\Support\Features;
 use App\Support\MediaJanitor;
 use App\Support\MenuCopier;
 use App\Support\PlanLimits;
 use App\Support\Tables\TableQuery;
+use App\Support\UpgradeContact;
 use App\Tenancy\CurrentTenant;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
@@ -57,16 +59,18 @@ class ItemController extends Controller
         $text = fn (?array $v): string => (string) (($v ?? [])[$locale] ?? (reset($v) ?: ''));
         $query = Item::query()->with(['category:id,menu_id,name', 'category.menu:id,name', 'media', 'variants:id,item_id,price_minor'])
             ->select('items.*');
+        // "Sold out" switched off: the marks stay, but no filter, column or flag shows them.
+        $soldOut = Features::enabled($tenant, 'sold_out');
 
         return TableQuery::respond($query, $request, [
             'search' => fn ($q, string $s) => $q->where('items.name', 'like', "%{$s}%"),
             'filters' => [
                 'menu' => fn ($q, array $v) => $q->whereHas('category', fn ($c) => $c->whereIn('menu_id', array_map('intval', $v))),
                 'category' => fn ($q, array $v) => $q->whereIn('items.category_id', array_map('intval', $v)),
-                'status' => fn ($q, array $v) => $q->where(function ($w) use ($v) {
+                'status' => fn ($q, array $v) => $q->where(function ($w) use ($v, $soldOut) {
                     foreach ($v as $status) {
                         match ($status) {
-                            'sold_out' => $w->orWhere('items.is_sold_out', true),
+                            'sold_out' => $soldOut ? $w->orWhere('items.is_sold_out', true) : $w->orWhereRaw('1 = 0'),
                             'hidden' => $w->orWhere('items.is_visible', false),
                             'no_photo' => $w->orWhereNull('items.media_id'),
                             'new' => $w->orWhere('items.is_new', true),
@@ -84,16 +88,16 @@ class ItemController extends Controller
                 'category' => fn ($q, string $dir) => $q->orderBy(Category::select('sort')->whereColumn('categories.id', 'items.category_id'), $dir)->orderBy('items.sort', $dir),
             ],
             'default_sort' => 'category',
-            'csv' => ['name' => $tenant->slug.'-dishes', 'columns' => [
+            'csv' => ['name' => $tenant->slug.'-dishes', 'columns' => array_filter([
                 'Dish' => fn (Item $i) => $text($i->name),
                 'Category' => fn (Item $i) => $text($i->category->name),
                 'Menu' => fn (Item $i) => $text($i->category->menu->name),
                 'Price' => fn (Item $i) => $i->price_minor !== null ? number_format($i->price_minor / 100, 2, '.', '') : ($i->variants->isEmpty() ? '' : 'from '.number_format($i->variants->min('price_minor') / 100, 2, '.', '')),
-                'Sold out' => fn (Item $i) => $i->is_sold_out ? 'yes' : 'no',
+                'Sold out' => $soldOut ? fn (Item $i) => $i->is_sold_out ? 'yes' : 'no' : null,
                 'Visible' => fn (Item $i) => $i->is_visible ? 'yes' : 'no',
                 'Photo' => fn (Item $i) => $i->media_id ? 'yes' : 'no',
                 'Updated' => fn (Item $i) => $i->updated_at?->toDateString(),
-            ]],
+            ])],
         ], fn (Item $i) => [
             'id' => $i->id,
             'name' => (object) $i->name,
@@ -102,7 +106,7 @@ class ItemController extends Controller
             'price_minor' => $i->price_minor,
             'from_minor' => $i->price_minor === null && $i->variants->isNotEmpty() ? (int) $i->variants->min('price_minor') : null,
             'sizes' => $i->variants->count(),
-            'is_sold_out' => (bool) $i->is_sold_out,
+            'is_sold_out' => $soldOut && $i->is_sold_out,
             'is_visible' => (bool) $i->is_visible,
             'photo' => $i->media?->urls()[320] ?? $i->media?->urls()['jpg'] ?? null,
             'updated_at' => $i->updated_at?->toIso8601String(),
@@ -305,6 +309,19 @@ class ItemController extends Controller
         return ItemSummaryResource::collection($items->each->refresh()->load('variants'));
     }
 
+    /** 402 with the upgrade payload, like the `feature:` middleware, when "sold out" is off. */
+    private function ensureSoldOut(bool $needed): void
+    {
+        $tenant = $this->current->get();
+        if ($needed && $tenant !== null && ! Features::enabled($tenant, 'sold_out')) {
+            abort(response()->json([
+                'message' => __('platform.feature_off', ['feature' => __('platform.features.sold_out')]),
+                'code' => 'features.sold_out',
+                'upgrade' => UpgradeContact::payload(),
+            ], 402));
+        }
+    }
+
     /** One action on many items: show, hide, sold out, available, move, delete. */
     public function bulk(Request $request): Response
     {
@@ -315,6 +332,7 @@ class ItemController extends Controller
             'category_id' => ['required_if:action,move', 'integer', $this->existsHere('categories')],
         ]);
         Gate::authorize(in_array($data['action'], ['sold_out', 'available'], true) ? 'menu.toggle_sold_out' : 'menu.manage');
+        $this->ensureSoldOut(in_array($data['action'], ['sold_out', 'available'], true));
 
         $items = Item::whereIn('id', $data['ids']);
         DB::transaction(function () use ($items, $data) {
@@ -389,6 +407,11 @@ class ItemController extends Controller
             'category_id', 'name', 'summary', 'description', 'price_minor', 'media_id', 'calories', 'prep_minutes',
             'is_sold_out', 'is_visible', 'is_new', 'new_until', 'is_popular', 'show_photo',
         ])->all();
+        // "Sold out" off: an editor can't change the mark (it is kept as it was).
+        $tenant = $this->current->get();
+        if ($tenant !== null && ! Features::enabled($tenant, 'sold_out')) {
+            unset($fields['is_sold_out']);
+        }
 
         // With sizes, the sizes carry the prices (QUESTIONS #37).
         if (! empty($data['variants'])) {

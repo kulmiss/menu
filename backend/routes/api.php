@@ -244,7 +244,7 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::patch('items/{item}', [ItemController::class, 'update'])->whereNumber('item');
             Route::delete('items/{item}', [ItemController::class, 'destroy'])->whereNumber('item');
             Route::post('items/{item}/duplicate', [ItemController::class, 'duplicate'])->whereNumber('item');
-            Route::patch('items/{item}/sold-out', [ItemController::class, 'soldOut'])->whereNumber('item');
+            Route::patch('items/{item}/sold-out', [ItemController::class, 'soldOut'])->whereNumber('item')->middleware('feature:sold_out');
             Route::patch('items/{item}/price', [ItemController::class, 'price'])->whereNumber('item');
 
             Route::get('addon-groups', [AddonGroupController::class, 'index']);
@@ -252,7 +252,7 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::post('addon-groups/reorder', [AddonGroupController::class, 'reorder']);
             Route::patch('addon-groups/{group}', [AddonGroupController::class, 'update'])->whereNumber('group');
             Route::delete('addon-groups/{group}', [AddonGroupController::class, 'destroy'])->whereNumber('group');
-            Route::patch('addon-options/{option}/sold-out', [AddonGroupController::class, 'optionSoldOut'])->whereNumber('option');
+            Route::patch('addon-options/{option}/sold-out', [AddonGroupController::class, 'optionSoldOut'])->whereNumber('option')->middleware('feature:sold_out');
 
             Route::post('media', [MediaController::class, 'store'])->middleware('throttle:30,1');
             Route::delete('media/{media}', [MediaController::class, 'destroy'])->whereNumber('media');

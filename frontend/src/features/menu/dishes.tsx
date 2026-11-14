@@ -26,6 +26,7 @@ import { ConfirmDialog } from '@/components/confirm-dialog'
 import { type Col, DataTable, type Page } from '@/components/data-table'
 import { AdminHeader } from '@/components/layout/admin-header'
 import { Main } from '@/components/layout/main'
+import { useFeature } from '@/features/auth/use-me'
 import { menuKeys, menusQuery, useBulkItems, useBulkPrice } from './api'
 import { formatMoney } from './money'
 import { tr } from './text'
@@ -53,6 +54,7 @@ type DishRow = {
  */
 export function DishesPage() {
   const { t } = useTranslation()
+  const soldOutOn = useFeature('sold_out')
   const ctx = useMenuContext()
   const navigate = useNavigate()
   const menus = useQuery(menusQuery(ctx.tenantId))
@@ -191,7 +193,9 @@ export function DishesPage() {
               label: t('dishes.status'),
               options: (
                 ['sold_out', 'hidden', 'no_photo', 'new', 'popular'] as const
-              ).map((s) => ({ value: s, label: t(`dishes.statuses.${s}`) })),
+              )
+                .filter((s) => soldOutOn || s !== 'sold_out')
+                .map((s) => ({ value: s, label: t(`dishes.statuses.${s}`) })),
             },
           ]}
           onRowClick={(d) =>
@@ -220,6 +224,7 @@ function DishBulk({ rows, onDone }: { rows: DishRow[]; onDone: () => void }) {
   const [deleting, setDeleting] = useState(false)
   const [percent, setPercent] = useState('10')
   const ids = rows.map((r) => r.id)
+  const soldOutOn = useFeature('sold_out')
   const run = async (
     action: 'sold_out' | 'available' | 'show' | 'hide' | 'delete'
   ) => {
@@ -230,22 +235,26 @@ function DishBulk({ rows, onDone }: { rows: DishRow[]; onDone: () => void }) {
   const btn = 'min-h-11 sm:min-h-8'
   return (
     <>
-      <Button
-        size='sm'
-        variant='outline'
-        className={btn}
-        onClick={() => run('sold_out')}
-      >
-        <Ban aria-hidden /> {t('dishes.actions.sold_out')}
-      </Button>
-      <Button
-        size='sm'
-        variant='outline'
-        className={btn}
-        onClick={() => run('available')}
-      >
-        <CheckCircle2 aria-hidden /> {t('dishes.actions.available')}
-      </Button>
+      {soldOutOn && (
+        <>
+          <Button
+            size='sm'
+            variant='outline'
+            className={btn}
+            onClick={() => run('sold_out')}
+          >
+            <Ban aria-hidden /> {t('dishes.actions.sold_out')}
+          </Button>
+          <Button
+            size='sm'
+            variant='outline'
+            className={btn}
+            onClick={() => run('available')}
+          >
+            <CheckCircle2 aria-hidden /> {t('dishes.actions.available')}
+          </Button>
+        </>
+      )}
       {ctx.canManage && (
         <>
           <Button

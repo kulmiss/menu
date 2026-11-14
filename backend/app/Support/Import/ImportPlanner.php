@@ -8,6 +8,7 @@ use App\Models\ItemAllergen;
 use App\Models\ItemVariant;
 use App\Models\Menu;
 use App\Models\Tag;
+use App\Support\Features;
 use App\Support\SystemTags;
 use App\Tenancy\CurrentTenant;
 use Illuminate\Database\Eloquent\Collection;
@@ -121,7 +122,7 @@ class ImportPlanner
                     'name' => [$this->locale => $row['item']],
                     'sort' => ((int) $category->items()->max('sort')) + 1,
                     'is_visible' => $row['visible'] ?? true,
-                    'is_sold_out' => $row['sold_out'] ?? false,
+                    'is_sold_out' => Features::here('sold_out') && ($row['sold_out'] ?? false),
                 ]);
                 $item->setRelation('variants', new Collection);
                 $item->setRelation('tags', new Collection);
@@ -272,13 +273,25 @@ class ImportPlanner
                 $changes['allergens'] = true;
             }
         }
-        foreach (['visible' => 'is_visible', 'sold_out' => 'is_sold_out', 'calories' => 'calories', 'prep_minutes' => 'prep_minutes'] as $col => $attr) {
+        foreach ($this->plainColumns() as $col => $attr) {
             if (array_key_exists($col, $row) && $item->{$attr} !== $row[$col]) {
                 $changes[$col] = true;
             }
         }
 
         return $changes;
+    }
+
+    /**
+     * Sheet columns copied as they are; "sold out" only while that feature is on
+     * (off: the marks are kept, the column is ignored).
+     *
+     * @return array<string, string>
+     */
+    private function plainColumns(): array
+    {
+        return array_filter(['visible' => 'is_visible', 'sold_out' => 'is_sold_out', 'calories' => 'calories', 'prep_minutes' => 'prep_minutes'],
+            fn (string $attr) => $attr !== 'is_sold_out' || Features::here('sold_out'));
     }
 
     /** @param array<string, mixed> $row */
@@ -290,7 +303,7 @@ class ImportPlanner
                 $fields[$field] = [...$item->{$field}, $this->locale => $row[$field]];
             }
         }
-        foreach (['visible' => 'is_visible', 'sold_out' => 'is_sold_out', 'calories' => 'calories', 'prep_minutes' => 'prep_minutes'] as $col => $attr) {
+        foreach ($this->plainColumns() as $col => $attr) {
             if (array_key_exists($col, $row)) {
                 $fields[$attr] = $row[$col];
             }

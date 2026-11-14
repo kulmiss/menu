@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Restaurant;
 use App\Http\Controllers\Controller;
 use App\Models\Item;
 use App\Models\QrCode;
+use App\Support\Features;
 use App\Tenancy\CurrentTenant;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -105,7 +106,8 @@ class InsightsController extends Controller
         return response()->json(['data' => [
             'today' => ['views' => $get($now->toDateString(), 'menu_view'), 'scans' => $get($now->toDateString(), 'qr_scan')],
             'yesterday' => ['views' => $get($now->copy()->subDay()->toDateString(), 'menu_view'), 'scans' => $get($now->copy()->subDay()->toDateString(), 'qr_scan')],
-            'sold_out' => Item::where('is_sold_out', true)->orderBy('name->'.$locale)->limit(50)->get(['id', 'name'])
+            // Empty while "sold out" is switched off (the marks are kept).
+            'sold_out' => ! Features::here('sold_out') ? [] : Item::where('is_sold_out', true)->orderBy('name->'.$locale)->limit(50)->get(['id', 'name'])
                 ->map(fn (Item $i) => ['id' => $i->id, 'name' => (object) $i->name])->values(),
         ]]);
     }

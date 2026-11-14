@@ -9,6 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { useFeature } from '@/features/auth/use-me'
 import { type BulkAction } from '../api'
 import { tr } from '../text'
 import { type Category } from '../types'
@@ -33,6 +34,7 @@ export function BulkBar({
   onClear,
 }: Props) {
   const { t } = useTranslation()
+  const soldOutOn = useFeature('sold_out')
   const disabled = count === 0 || !ctx.canWrite
 
   return (
@@ -53,22 +55,26 @@ export function BulkBar({
       <span className='me-auto text-sm font-medium' aria-live='polite'>
         {t('menu.selected', { count })}
       </span>
-      <Button
-        variant='outline'
-        className='min-h-11 sm:min-h-9'
-        disabled={disabled}
-        onClick={() => onAction('sold_out')}
-      >
-        {t('menu.sold_out')}
-      </Button>
-      <Button
-        variant='outline'
-        className='min-h-11 sm:min-h-9'
-        disabled={disabled}
-        onClick={() => onAction('available')}
-      >
-        {t('menu.available')}
-      </Button>
+      {soldOutOn && (
+        <>
+          <Button
+            variant='outline'
+            className='min-h-11 sm:min-h-9'
+            disabled={disabled}
+            onClick={() => onAction('sold_out')}
+          >
+            {t('menu.sold_out')}
+          </Button>
+          <Button
+            variant='outline'
+            className='min-h-11 sm:min-h-9'
+            disabled={disabled}
+            onClick={() => onAction('available')}
+          >
+            {t('menu.available')}
+          </Button>
+        </>
+      )}
       {(ctx.canManage || ctx.canEditPrices) && (
         <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
