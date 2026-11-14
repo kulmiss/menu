@@ -113,8 +113,8 @@ it('allows 5 test e-mails a minute', function () {
 });
 
 it('reports why a test e-mail failed', function () {
-    // Nothing listens on this port: the connection is refused at once.
-    MailSettings::save(smtpValues(['host' => '127.0.0.1', 'port' => 9, 'encryption' => 'none', 'username' => null]), null);
+    // Nothing listens on this port here: the connection is refused at once.
+    MailSettings::save(smtpValues(['host' => '127.0.0.1', 'port' => 2525, 'encryption' => 'none', 'username' => null]), null);
     currentTransport();
 
     $this->actingAs(superAdmin())->postJson(p('settings/mail/test'), ['to' => 'someone@example.com'], idem())

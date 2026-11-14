@@ -21,6 +21,7 @@ use App\Support\Legal\LegalText;
 use App\Support\MailSettings;
 use App\Support\PlatformSettings;
 use App\Support\PublicMenu\ShareImage;
+use App\Support\Security\OutboundHost;
 use App\Support\Tables\TableQuery;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -424,14 +425,18 @@ class PlatformController extends Controller
     {
         $data = $request->validate([
             'host' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9.-]+$/i'],
-            'port' => ['required', 'integer', 'between:1,65535'],
+            // Mail ports only, and no private network addresses (SECURITY_REPORT.md M7).
+            'port' => ['required', 'integer', Rule::in(OutboundHost::SMTP_PORTS)],
             'encryption' => ['required', Rule::in(MailSettings::ENCRYPTIONS)],
             'username' => ['nullable', 'string', 'max:255'],
             'password' => ['nullable', 'string', 'max:255'],
             'clear_password' => ['sometimes', 'boolean'],
             'from_address' => ['nullable', 'email', 'max:255'],
             'from_name' => ['nullable', 'string', 'max:100'],
-        ]);
+        ], ['port.in' => __('platform.mail_port_allowed')]);
+        if (OutboundHost::problem($data['host'], allowLoopback: true) !== null) {
+            throw ValidationException::withMessages(['host' => __('platform.mail_host_private')]);
+        }
         MailSettings::save($data, $data['password'] ?? null, (bool) ($data['clear_password'] ?? false));
         // Never log the password; only which fields were sent.
         $this->activity->log('platform.mail_settings_saved', null, ['host' => ['to' => $data['host']], 'password_changed' => ['to' => ($data['password'] ?? '') !== '']], null);
@@ -465,6 +470,13 @@ class PlatformController extends Controller
     public function testMail(Request $request): JsonResponse
     {
         $to = $request->validate(['to' => ['required', 'string', 'max:254', 'email:rfc,filter']])['to'];
+        $saved = MailSettings::stored();
+        if ($saved !== null && OutboundHost::problem((string) ($saved['host'] ?? ''), allowLoopback: true) !== null) {
+            throw ValidationException::withMessages(['host' => __('platform.mail_host_private')]);
+        }
+        if ($saved !== null && ! in_array((int) ($saved['port'] ?? 0), OutboundHost::SMTP_PORTS, true)) {
+            throw ValidationException::withMessages(['port' => __('platform.mail_port_allowed')]);
+        }
         try {
             Mail::raw(__('platform.mail_test.body', ['app' => PlatformSettings::get('name')]), function ($m) use ($to) {
                 $m->to($to)->subject(__('platform.mail_test.subject', ['app' => PlatformSettings::get('name')]));

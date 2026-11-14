@@ -9,6 +9,7 @@ use App\Support\ActivityLogger;
 use App\Support\Backups\BackupCrypto;
 use App\Support\Backups\Backups;
 use App\Support\PlatformSettings;
+use App\Support\Security\OutboundHost;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
@@ -103,7 +104,8 @@ class BackupController extends Controller
             'backup_keep_weekly' => ['sometimes', 'integer', 'between:0,52'],
             'backup_keep_monthly' => ['sometimes', 'integer', 'between:0,36'],
             'backup_s3_enabled' => ['sometimes', 'boolean'],
-            'backup_s3_endpoint' => ['sometimes', 'nullable', 'url:https,http', 'max:200'],
+            // https only, and never a private network address (SECURITY_REPORT.md M7).
+            'backup_s3_endpoint' => ['sometimes', 'nullable', 'url:https', 'max:200'],
             'backup_s3_region' => ['sometimes', 'nullable', 'string', 'max:40'],
             'backup_s3_bucket' => ['sometimes', 'nullable', 'string', 'max:100'],
             'backup_s3_prefix' => ['sometimes', 'nullable', 'string', 'max:100', 'regex:/^[A-Za-z0-9._\/-]*$/'],
@@ -114,6 +116,9 @@ class BackupController extends Controller
             if (array_key_exists($k, $data)) {
                 $data[$k] = trim((string) $data[$k]);
             }
+        }
+        if (($data['backup_s3_endpoint'] ?? '') !== '' && OutboundHost::problem((string) parse_url($data['backup_s3_endpoint'], PHP_URL_HOST)) !== null) {
+            throw ValidationException::withMessages(['backup_s3_endpoint' => __('platform.backup_s3_private')]);
         }
         // Empty keeps the stored secret; it is stored encrypted and never sent back.
         if (($data['backup_s3_secret'] ?? '') === '') {

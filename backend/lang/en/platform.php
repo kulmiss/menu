@@ -24,6 +24,9 @@ return [
     'note_not_yours' => 'You can only change your own notes.',
     'backup_running' => 'A backup is already running.',
     'backup_s3_incomplete' => 'Fill in the endpoint, bucket, access key and secret key first.',
+    'backup_s3_private' => 'Use the provider\'s public https address (for example https://s3.eu-central-003.backblazeb2.com), not a local or private network address.',
+    'mail_port_allowed' => 'Use a mail port: 587 (STARTTLS), 465 (SSL), 25 or 2525.',
+    'mail_host_private' => 'This mail server is on a private network address. Use your provider\'s public SMTP host, or "localhost" for this server\'s own mail.',
     'suspended_reason' => 'Your restaurant is suspended: :reason',
     'slug_taken' => 'This web address is already taken.',
     'mail_test' => [
