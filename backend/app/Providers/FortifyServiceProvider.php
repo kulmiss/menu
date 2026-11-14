@@ -8,6 +8,7 @@ use App\Actions\Fortify\UpdateUserPassword;
 use App\Actions\Fortify\UpdateUserProfileInformation;
 use App\Http\Responses\GenericResetLinkResponse;
 use App\Models\User;
+use App\Notifications\SecurityNotice;
 use App\Support\LastSignIn;
 use App\Support\Security\LoginCheck;
 use App\Support\SignUp\SignUp;
@@ -22,6 +23,9 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Contracts\FailedPasswordResetLinkRequestResponse;
 use Laravel\Fortify\Contracts\SuccessfulPasswordResetLinkRequestResponse;
+use Laravel\Fortify\Events\RecoveryCodesGenerated;
+use Laravel\Fortify\Events\TwoFactorAuthenticationConfirmed;
+use Laravel\Fortify\Events\TwoFactorAuthenticationDisabled;
 use Laravel\Fortify\Fortify;
 
 class FortifyServiceProvider extends ServiceProvider
@@ -56,6 +60,10 @@ class FortifyServiceProvider extends ServiceProvider
         $this->app->bind(FailedPasswordResetLinkRequestResponse::class, GenericResetLinkResponse::class);
         $this->app->bind(SuccessfulPasswordResetLinkRequestResponse::class, GenericResetLinkResponse::class);
 
+        // "Was this you?" e-mails for two-factor changes, web and app (SECURITY_REPORT.md M4).
+        Event::listen(TwoFactorAuthenticationConfirmed::class, fn ($e) => $e->user->notify(new SecurityNotice('two_factor_on')));
+        Event::listen(TwoFactorAuthenticationDisabled::class, fn ($e) => $e->user->notify(new SecurityNotice('two_factor_off')));
+        Event::listen(RecoveryCodesGenerated::class, fn ($e) => $e->user->notify(new SecurityNotice('recovery_codes')));
         // Latest sign-in time (QUESTIONS #187). Fires after two-factor when it is on; not for "remember me" cookies.
         Event::listen(Login::class, fn (Login $e) => LastSignIn::record($e->user));
 
