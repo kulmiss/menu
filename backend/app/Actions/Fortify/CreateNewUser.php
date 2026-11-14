@@ -55,7 +55,7 @@ class CreateNewUser implements CreatesNewUsers
         $data = Validator::make($input, [
             'name' => ['required', 'string', 'max:120'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique(User::class)],
-            'password' => $this->passwordRules(),
+            'password' => $this->passwordRules((string) ($input['email'] ?? '')),
             'locale' => ['nullable', Rule::in(config('menu.locales'))],
         ])->validate();
 

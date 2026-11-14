@@ -4,6 +4,7 @@ import { Link, Outlet, useLocation, useNavigate } from '@tanstack/react-router'
 import { LogOut, Search, Shield } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
+import { PasswordBanner } from '@/components/layout/password-banner'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { signOut } from '@/features/auth/api'
 import { useMe } from '@/features/auth/use-me'
@@ -129,6 +130,7 @@ export function PlatformLayout() {
           <GlobalSearch open={searching} onOpenChange={setSearching} />
         </Suspense>
       )}
+      <PasswordBanner platform />
       <main id='content' className='mx-auto max-w-6xl px-4 py-6'>
         {needs2fa ? (
           <div

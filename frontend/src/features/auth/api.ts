@@ -46,6 +46,8 @@ export type Me = {
   email_verified: boolean
   /** A new address waiting for its confirmation link. */
   pending_email?: string | null
+  /** On the common-password list: a gentle banner (SECURITY_REPORT.md M3). */
+  password_weak?: boolean
   /** Platform news e-mails on (account e-mails are always sent). */
   news_subscribed?: boolean
   two_factor_enabled: boolean

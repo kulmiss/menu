@@ -6,6 +6,7 @@ import { LayoutProvider } from '@/context/layout-provider'
 import { SearchProvider } from '@/context/search-provider'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { AppSidebar } from '@/components/layout/app-sidebar'
+import { PasswordBanner } from '@/components/layout/password-banner'
 import { SubscriptionBanner } from '@/components/layout/subscription-banner'
 import { SkipToMain } from '@/components/skip-to-main'
 import { useCurrentTenant, useMe } from '@/features/auth/use-me'
@@ -65,6 +66,7 @@ export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
             )}
           >
             <SubscriptionBanner tenant={tenant} />
+            <PasswordBanner />
             {children ?? <Outlet />}
           </SidebarInset>
         </SidebarProvider>

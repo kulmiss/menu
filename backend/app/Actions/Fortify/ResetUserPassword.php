@@ -15,9 +15,9 @@ class ResetUserPassword implements ResetsUserPasswords
      */
     public function reset(User $user, array $input): void
     {
-        Validator::make($input, ['password' => $this->passwordRules()])->validate();
+        Validator::make($input, ['password' => $this->passwordRules($user->email)])->validate();
 
-        $user->forceFill(['password' => $input['password']])->save();
+        $user->forceFill(['password' => $input['password'], 'password_weak' => false])->save();
         // Whoever had the old password may have signed in to the app: sign every device out.
         $user->revokeAppTokens();
     }

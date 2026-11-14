@@ -85,7 +85,7 @@ class SignUpController extends Controller
             'slug' => ['required', new ValidSlug],
             'name' => ['required', 'string', 'min:2', 'max:120'],
             'email' => ['required', 'string', 'email:rfc', 'max:255'],
-            'password' => $this->passwordRules(),
+            'password' => $this->passwordRules((string) $request->input('email')),
             'currency' => ['required', Rule::in(config('menu.currencies'))],
             'terms' => ['accepted'],
             'locale' => ['nullable', Rule::in(config('menu.locales'))],

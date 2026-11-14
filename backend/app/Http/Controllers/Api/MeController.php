@@ -24,6 +24,8 @@ class MeController extends Controller
                 'email' => $user->email,
                 // A new address waiting for its confirmation link (SECURITY_REPORT.md H3).
                 'pending_email' => $user->pending_email,
+                // On the common-password list: a gentle "please change it" banner (SECURITY_REPORT.md M3).
+                'password_weak' => (bool) $user->password_weak,
                 'locale' => $user->locale,
                 'email_verified' => $user->hasVerifiedEmail(),
                 'news_subscribed' => $user->news_unsubscribed_at === null,

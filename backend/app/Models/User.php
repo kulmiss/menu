@@ -48,6 +48,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'password' => 'hashed',
             'is_super_admin' => 'boolean',
             'two_factor_confirmed_at' => 'datetime',
+            'password_weak' => 'boolean',
             'last_login_at' => 'datetime',
             'news_unsubscribed_at' => 'datetime',
             'push_settings' => 'array',

@@ -3,6 +3,7 @@
 namespace App\Support\Security;
 
 use App\Models\User;
+use App\Rules\NotCommonPassword;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Support\Facades\Hash;
@@ -42,6 +43,12 @@ final class LoginCheck
             RateLimiter::hit($key, 3600);
 
             return null;
+        }
+
+        // A weak password (older than the M3 list) only gets a gentle banner, never a forced reset.
+        $weak = strlen($password) < 10 || NotCommonPassword::isWeak($password, $user->email);
+        if ((bool) $user->password_weak !== $weak) {
+            $user->forceFill(['password_weak' => $weak])->saveQuietly();
         }
 
         return $user;

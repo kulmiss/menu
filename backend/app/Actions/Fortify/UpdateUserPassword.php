@@ -17,10 +17,10 @@ class UpdateUserPassword implements UpdatesUserPasswords
     {
         Validator::make($input, [
             'current_password' => ['required', 'string', 'current_password:web'],
-            'password' => $this->passwordRules(),
+            'password' => $this->passwordRules($user->email),
         ])->validateWithBag('updatePassword');
 
-        $user->forceFill(['password' => $input['password']])->save();
+        $user->forceFill(['password' => $input['password'], 'password_weak' => false])->save();
         // Other browsers sign out through AuthenticateSession; the app on every device here.
         $user->revokeAppTokens();
     }
