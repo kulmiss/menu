@@ -12,6 +12,7 @@ const SECTIONS = [
   'invoices',
   'messages',
   'backups',
+  'mobile-app',
   'themes',
   'announcements',
   'activity',

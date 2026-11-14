@@ -6,6 +6,7 @@ use App\Http\Middleware\EnsureOwnerTwoFactor;
 use App\Http\Middleware\EnsureSuperAdmin;
 use App\Http\Middleware\EnsureTenantWritable;
 use App\Http\Middleware\GuardImpersonation;
+use App\Http\Middleware\MobileAppGate;
 use App\Http\Middleware\RequireFeature;
 use App\Http\Middleware\ResolveTenant;
 use App\Http\Middleware\SecurityHeaders;
@@ -38,7 +39,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->statefulApi();
 
         // "Log in as": 2-hour limit and blocked actions, for the API and Fortify (web).
-        $middleware->api(append: [GuardImpersonation::class]);
+        $middleware->api(append: [GuardImpersonation::class, MobileAppGate::class]);
         $middleware->web(append: [GuardImpersonation::class, UseWelcomeBroker::class]);
 
         // One-click unsubscribe (List-Unsubscribe-Post) comes from mail clients without a CSRF token; the link is signed.

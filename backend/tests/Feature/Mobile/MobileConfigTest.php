@@ -7,7 +7,7 @@ it('gives the app its start-up settings without signing in', function () {
     PlatformSettings::save(['upgrade_whatsapp' => '+251 911 000000', 'support_email' => 'help@example.com']);
 
     $this->getJson('/api/v1/mobile/config')->assertOk()
-        ->assertHeader('Cache-Control', 'max-age=300, public')
+        ->assertHeader('Cache-Control', 'max-age=60, public')
         ->assertJsonPath('data.min_version', '1.0.0')
         ->assertJsonPath('data.links.support_whatsapp', 'https://wa.me/251911000000')
         ->assertJsonPath('data.links.support_email', 'help@example.com')
