@@ -21,5 +21,7 @@ class UpdateUserPassword implements UpdatesUserPasswords
         ])->validateWithBag('updatePassword');
 
         $user->forceFill(['password' => $input['password']])->save();
+        // Other browsers sign out through AuthenticateSession; the app on every device here.
+        $user->revokeAppTokens();
     }
 }

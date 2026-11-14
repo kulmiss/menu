@@ -66,6 +66,15 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(PushToken::class);
     }
 
+    /**
+     * Signs the app out on every device (or every device but one) after a password
+     * reset or change (SECURITY_REPORT.md H2). Push tokens go with their sign-in.
+     */
+    public function revokeAppTokens(?int $exceptTokenId = null): int
+    {
+        return $this->tokens()->when($exceptTokenId !== null, fn ($q) => $q->whereKeyNot($exceptTokenId))->delete();
+    }
+
     public function membershipFor(Tenant|int $tenant): ?Membership
     {
         $tenantId = $tenant instanceof Tenant ? $tenant->getKey() : $tenant;
