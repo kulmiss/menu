@@ -216,6 +216,8 @@ export type BackupRow = {
   kind: 'scheduled' | 'manual'
   status: 'queued' | 'running' | 'ok' | 'failed'
   offsite: 'uploaded' | 'failed' | null
+  /** Encrypted with BACKUP_KEY (SECURITY_REPORT.md H4). */
+  encrypted?: boolean
   error: string | null
   created_at: string
   finished_at: string | null
@@ -226,6 +228,8 @@ export const backupsQ = () =>
     disk_free: number | null
     disk_total: number | null
     problem: string | null
+    /** off = readable zips and no off-site copy; invalid = BACKUP_KEY is wrong. */
+    encryption?: 'on' | 'off' | 'invalid'
     settings: {
       backup_enabled: boolean
       backup_keep_daily: number

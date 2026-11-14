@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Backups\BackupCrypto;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
@@ -35,6 +36,12 @@ class Backup extends Model
     }
 
     /** Outside the public folder; never served by the web server. */
+    /** Encrypted with BACKUP_KEY (SECURITY_REPORT.md H4). */
+    public function encrypted(): bool
+    {
+        return $this->filename !== null && str_ends_with($this->filename, BackupCrypto::SUFFIX);
+    }
+
     public static function dir(): string
     {
         return storage_path('app/backups');

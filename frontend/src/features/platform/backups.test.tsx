@@ -19,6 +19,41 @@ let fake: ReturnType<typeof fakeApi>
 describe('Backups', () => {
   afterEach(() => fake.restore())
 
+  it('warns while backups are not encrypted (SECURITY_REPORT.md H4)', async () => {
+    fake = fakeApi({
+      'GET /platform/backups': {
+        data: {
+          data: {
+            backups: [],
+            disk_free: null,
+            disk_total: null,
+            problem: null,
+            encryption: 'off',
+            settings: {
+              backup_enabled: true,
+              backup_keep_daily: 7,
+              backup_keep_weekly: 4,
+              backup_keep_monthly: 3,
+              backup_s3_enabled: true,
+              backup_s3_endpoint: '',
+              backup_s3_region: 'auto',
+              backup_s3_bucket: '',
+              backup_s3_prefix: '',
+              backup_s3_key: '',
+              backup_s3_secret_set: false,
+            },
+          },
+        },
+      },
+    })
+    const screen = await renderWithQuery(<BackupsPage />, { me: admin })
+
+    await expect
+      .element(screen.getByText(/Backups are not encrypted/))
+      .toBeVisible()
+    await expect.element(screen.getByText(/backup:key --write/)).toBeVisible()
+  })
+
   it('lists backups, warns about problems and asks for the password before downloading', async () => {
     fake = fakeApi({
       'GET /platform/backups': {

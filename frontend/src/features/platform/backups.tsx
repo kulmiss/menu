@@ -95,6 +95,17 @@ export function BackupsPage() {
               <AlertDescription>{d.problem}</AlertDescription>
             </Alert>
           )}
+          {d.encryption && d.encryption !== 'on' && (
+            <Alert
+              variant='destructive'
+              role={d.encryption === 'invalid' ? 'alert' : 'status'}
+            >
+              <AlertTriangle />
+              <AlertDescription>
+                {t(`platform.backups.encryption_${d.encryption}`)}
+              </AlertDescription>
+            </Alert>
+          )}
           <p className='text-sm text-muted-foreground'>
             {t('platform.backups.disk', {
               free: bytes(d.disk_free),

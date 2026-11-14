@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Jobs\RunBackup;
 use App\Models\Backup;
 use App\Support\ActivityLogger;
+use App\Support\Backups\BackupCrypto;
 use App\Support\Backups\Backups;
 use App\Support\PlatformSettings;
 use Illuminate\Http\JsonResponse;
@@ -35,6 +36,8 @@ class BackupController extends Controller
             'disk_free' => @disk_free_space($root) ?: null,
             'disk_total' => @disk_total_space($root) ?: null,
             'problem' => PlatformSettings::get('backup_enabled') ? Backups::problem() : null,
+            // on | off | invalid: off means readable zips and no off-site copy (SECURITY_REPORT.md H4).
+            'encryption' => BackupCrypto::misconfigured() ? 'invalid' : (BackupCrypto::enabled() ? 'on' : 'off'),
             'settings' => array_intersect_key(PlatformSettings::forScreen(), array_flip([
                 'backup_enabled', 'backup_keep_daily', 'backup_keep_weekly', 'backup_keep_monthly',
                 'backup_s3_enabled', 'backup_s3_endpoint', 'backup_s3_region', 'backup_s3_bucket', 'backup_s3_prefix', 'backup_s3_key', 'backup_s3_secret_set',
@@ -78,7 +81,9 @@ class BackupController extends Controller
     {
         abort_unless($backup->status === 'ok' && $backup->path() && is_file((string) $backup->path()), 404);
 
-        return response()->download((string) $backup->path(), (string) $backup->filename, ['Content-Type' => 'application/zip', 'Cache-Control' => 'private, no-store']);
+        $type = $backup->encrypted() ? 'application/octet-stream' : 'application/zip';
+
+        return response()->download((string) $backup->path(), (string) $backup->filename, ['Content-Type' => $type, 'Cache-Control' => 'private, no-store']);
     }
 
     public function destroy(Backup $backup): JsonResponse
@@ -133,7 +138,7 @@ class BackupController extends Controller
     {
         return [
             'id' => $b->id, 'filename' => $b->filename, 'size' => $b->size, 'kind' => $b->kind, 'status' => $b->status,
-            'offsite' => $b->offsite, 'error' => $b->error,
+            'offsite' => $b->offsite, 'error' => $b->error, 'encrypted' => $b->encrypted(),
             'created_at' => $b->created_at->toIso8601String(), 'finished_at' => $b->finished_at?->toIso8601String(),
         ];
     }

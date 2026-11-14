@@ -26,6 +26,10 @@ use ZipArchive;
  * S3-compatible storage. Old backups are thinned out to the newest one per
  * day / week / month (7 / 4 / 3 by default). No restore from the screen:
  * see docs/deploy.md.
+ *
+ * With BACKUP_KEY set the zip is encrypted (…zip.enc) and only the encrypted
+ * file is kept and copied off-site; without it there is no off-site copy
+ * (SECURITY_REPORT.md H4).
  */
 class Backups
 {
@@ -36,6 +40,12 @@ class Backups
     {
         $backup ??= Backup::create(['kind' => $kind, 'status' => 'running', 'created_by' => $by?->id]);
         $backup->forceFill(['status' => 'running', 'started_at' => now(), 'error' => null])->save();
+        if (BackupCrypto::misconfigured()) {
+            $backup->forceFill(['status' => 'failed', 'error' => (string) __('backups.key_invalid'), 'finished_at' => now()])->save();
+            $this->alert($backup->error);
+
+            return $backup;
+        }
         File::ensureDirectoryExists(Backup::dir(), 0700);
         $name = 'backup-'.now()->format('Ymd-His').'-'.$backup->id.'.zip';
         $path = Backup::dir().'/'.$name;
@@ -60,9 +70,16 @@ class Backups
                 throw new RuntimeException('Writing the zip failed (disk full?)');
             }
             @chmod($path, 0600);
+            if (($key = BackupCrypto::key()) !== null) {
+                BackupCrypto::encryptFile($path, $path.BackupCrypto::SUFFIX, $key);
+                @unlink($path);
+                $name .= BackupCrypto::SUFFIX;
+                $path .= BackupCrypto::SUFFIX;
+            }
             $backup->forceFill(['filename' => $name, 'size' => (int) filesize($path), 'status' => 'ok', 'finished_at' => now()])->save();
         } catch (Throwable $e) {
             @unlink($path);
+            @unlink($path.BackupCrypto::SUFFIX);
             $backup->forceFill(['status' => 'failed', 'error' => mb_substr($e->getMessage(), 0, 500), 'finished_at' => now()])->save();
             $this->alert($backup->error);
 
@@ -82,6 +99,13 @@ class Backups
     {
         $client = self::s3();
         if ($client === null || $backup->path() === null) {
+            return;
+        }
+        if (! $backup->encrypted()) {
+            // Never send a readable copy of every restaurant's data to a third party.
+            $backup->forceFill(['offsite' => 'failed', 'error' => (string) __('backups.offsite_needs_key')])->save();
+            $this->alert($backup->error);
+
             return;
         }
         try {

@@ -4,6 +4,7 @@ use App\Enums\Role;
 use App\Jobs\RunBackup;
 use App\Models\Backup;
 use App\Notifications\BackupProblemNotification;
+use App\Support\Backups\BackupCrypto;
 use App\Support\Backups\Backups;
 use App\Support\Backups\S3;
 use App\Support\PlatformSettings;
@@ -136,10 +137,12 @@ it('queues "Back up now" and copies backups off-site with an AWS Signature V4 up
 
     Http::fake(['*' => Http::response('', 200)]);
     Backup::query()->delete();
+    config(['backups.key' => BackupCrypto::newKey()]); // off-site copies are always encrypted (H4)
     $backup = app(Backups::class)->run();
     expect($backup->offsite)->toBe('uploaded');
     Http::assertSent(fn ($r) => $r->method() === 'PUT'
         && str_starts_with($r->url(), 'https://s3.eu-central-003.backblazeb2.com/my-bucket/menu-backups/backup-')
+        && str_ends_with($r->url(), '.zip.enc')
         && str_contains($r->header('Authorization')[0], 'Credential=AKIDEXAMPLE/'));
 });
 
