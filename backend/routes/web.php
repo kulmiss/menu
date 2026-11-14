@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\ConfirmEmailChangeController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\NewsSubscriptionController;
 use App\Http\Controllers\PublicMenuController;
@@ -41,6 +42,8 @@ Route::get('/{area}/{path?}', SpaController::class)
 
 // Link in "Confirm your e-mail" (owner, 2026-11-13).
 Route::get('/email/verify/{id}/{hash}', VerifyEmailController::class)->whereNumber('id')->middleware('throttle:30,1')->name('signup.verify');
+// New e-mail address: the link sent to it (SECURITY_REPORT.md H3).
+Route::get('/email/change/{user}/{hash}', ConfirmEmailChangeController::class)->whereNumber('user')->middleware('throttle:30,1')->name('email-change.confirm');
 
 Route::withoutMiddleware($cookieFree)->group(function () {
     Route::get('/q/{code}', [PublicMenuController::class, 'qr'])->where('code', '[A-Za-z0-9]{8}')->name('qr');

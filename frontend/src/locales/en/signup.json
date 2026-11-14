@@ -50,6 +50,9 @@
     "done": "Your email is confirmed. Sign in to set up your menu.",
     "already": "Your email was already confirmed. Sign in to continue.",
     "expired": "This confirmation link has expired. Sign in and press \"Resend email\" to get a new one.",
-    "invalid": "This confirmation link is not valid. Sign in and press \"Resend email\" to get a new one."
+    "invalid": "This confirmation link is not valid. Sign in and press \"Resend email\" to get a new one.",
+    "change_done": "Your new email address is confirmed. Sign in with it from now on.",
+    "change_expired": "This link has expired. Sign in with your current address and change it again in Settings.",
+    "change_invalid": "This link is not valid any more. Sign in with your current address and change it again in Settings."
   }
 }

@@ -3,6 +3,7 @@
 use App\Models\PersonalAccessToken;
 use App\Models\User;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Notification;
 use PragmaRX\Google2FA\Google2FA;
 
 function twoFactorUser(): User
@@ -150,12 +151,16 @@ it('changes the password with the current one and signs out the other devices', 
     expect($user->tokens()->pluck('name')->all())->toBe(['Phone']);
 });
 
-it('updates the profile like the web does', function () {
-    $user = User::factory()->create(['email' => 'old@example.com']);
+it('updates the profile like the web does: a new e-mail needs the password and waits for its link', function () {
+    Notification::fake();
+    $user = User::factory()->create(['email' => 'old@example.com', 'password' => 'correct-horse-battery']);
     $token = $user->createToken('Phone', ['mobile'])->plainTextToken;
 
     $this->withHeaders(bearer($token))->putJson('/api/v1/mobile/account/profile', ['name' => 'Selam T.', 'email' => 'new@example.com'], idem())
-        ->assertOk()->assertJsonPath('data.email', 'new@example.com')->assertJsonPath('data.email_verified', false);
+        ->assertUnprocessable()->assertJsonValidationErrors('current_password');
+    $this->withHeaders(bearer($token))->putJson('/api/v1/mobile/account/profile', ['name' => 'Selam T.', 'email' => 'new@example.com', 'current_password' => 'correct-horse-battery'], idem())
+        ->assertOk()->assertJsonPath('data.email', 'old@example.com')->assertJsonPath('data.pending_email', 'new@example.com')
+        ->assertJsonPath('data.name', 'Selam T.');
 });
 
 it('sets up two-factor with the password, a code, and never stores the recovery codes for replay', function () {

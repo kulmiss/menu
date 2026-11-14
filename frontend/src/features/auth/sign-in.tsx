@@ -136,7 +136,16 @@ export function SignInForm({ redirectTo }: { redirectTo?: string }) {
 // "Create a free account" and the e-mail confirmation messages.
 const texts = loadPageTexts('signup')
 /** Where the e-mail confirmation link sent the visitor (VerifyEmailController). */
-const OUTCOMES = ['done', 'already', 'expired', 'invalid']
+const OUTCOMES = [
+  'done',
+  'already',
+  'expired',
+  'invalid',
+  // The link sent to a new e-mail address (ConfirmEmailChangeController).
+  'change_done',
+  'change_expired',
+  'change_invalid',
+]
 
 type SignInPageProps = { redirect?: string; verify?: string }
 
@@ -144,7 +153,8 @@ export function SignInPage({ redirect, verify: raw }: SignInPageProps) {
   use(texts)
   const { t } = useTranslation()
   const verify = raw && OUTCOMES.includes(raw) ? raw : undefined
-  const good = verify === 'done' || verify === 'already'
+  const good =
+    verify === 'done' || verify === 'already' || verify === 'change_done'
   return (
     <AuthCard
       title={t('auth.sign_in')}
