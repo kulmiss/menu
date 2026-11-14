@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Mobile;
 use App\Http\Controllers\Controller;
 use App\Models\PersonalAccessToken;
 use App\Models\User;
+use App\Notifications\SecurityNotice;
 use App\Support\Security\LoginCheck;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -127,6 +128,8 @@ class AuthController extends Controller
     {
         $new = $user->createToken($device['name'], ['mobile'], now()->addDays(PersonalAccessToken::MAX_DAYS));
         $new->accessToken->forceFill(['platform' => $device['platform'], 'app_version' => $device['app_version']])->save();
+        // "Was this you?" for every new app sign-in, except a Super Admin's "log in as" (SECURITY_REPORT.md M4).
+        $user->notify(new SecurityNotice('new_device', ['device' => (string) $device['name'], 'platform' => $device['platform'] === 'ios' ? 'iPhone / iPad' : 'Android']));
 
         return response()->json([
             'token' => $new->plainTextToken,

@@ -3,6 +3,7 @@
 namespace App\Actions\Fortify;
 
 use App\Models\User;
+use App\Notifications\SecurityNotice;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\UpdatesUserPasswords;
 
@@ -23,5 +24,6 @@ class UpdateUserPassword implements UpdatesUserPasswords
         $user->forceFill(['password' => $input['password'], 'password_weak' => false])->save();
         // Other browsers sign out through AuthenticateSession; the app on every device here.
         $user->revokeAppTokens();
+        $user->notify(new SecurityNotice('password_changed'));
     }
 }
