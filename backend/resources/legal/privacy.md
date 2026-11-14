@@ -17,7 +17,7 @@ Each restaurant decides what it puts on its menu. For questions about a restaura
 
 ## 2. What we collect from restaurants
 
-- **Account:** your name, e-mail address, password and language. We store the password only as a secure hash, never as plain text. If you turn on two-step sign-in, its secret is stored encrypted.
+- **Account:** your name, e-mail address, password and language. We store the password only as a secure hash, never as plain text. If you turn on two-step sign-in, its secret is stored encrypted and its recovery codes only as secure hashes. When you change your e-mail address, the new address is kept until you confirm it with the link we send there. If your password is on a list of common or leaked passwords, we note that (yes or no) to suggest a better one.
 - **Team:** the e-mail addresses of people you invite, and their roles.
 - **Restaurant information:** name, menu address, branches, address, phone, WhatsApp, e-mail, social links, opening hours, logo, banner and anything else you add.
 - **Menu content:** menus, dishes, prices and photos. When you upload a photo, we remove hidden data such as location (EXIF).
@@ -25,7 +25,7 @@ Each restaurant decides what it puts on its menu. For questions about a restaura
 - **Settings:** for example, whether you get news e-mails or the monthly report.
 - **Sign-in sessions:** while you are signed in, your session is stored with your IP address and browser type. It is removed after it expires.
 - **Activity log:** a record of changes in your restaurant (who changed what, and when). It stores a scrambled one-way code of the IP address, not the address itself.
-- **Security:** to stop abuse, we use your IP address for a short time (up to one hour) to limit repeated sign-in and sign-up attempts.
+- **Security:** to stop abuse, we use your IP address for a short time (up to one hour) to limit repeated sign-in and sign-up attempts. We also keep a security log of events such as failed sign-ins, password changes and blocked uploads. It holds your account number and scrambled one-way codes of the e-mail address and IP address, never the addresses themselves or any password, and is deleted after 30 days.
 - **Support:** e-mails you send us, and notes our team keeps about your account, such as support history.
 - **Mobile app:** if you use the Menu Admin app: the name and type of your device, the app version, your sign-in (stored only as a secure hash), your phone's push-notification address, your notification choices and the notifications we show in the app. The app can also send crash reports and anonymous usage statistics (which screens and features are used, never your menu content); you can switch usage statistics off in the app's settings.
 
@@ -50,6 +50,7 @@ Each restaurant decides what it puts on its menu. For questions about a restaura
 ## 5. E-mails we send
 
 - **Account e-mails:** e-mail confirmation, welcome, team invitations, password reset, sign-up approval or rejection, invoices, reminders before your paid time ends, and important service messages. These are needed for your account.
+- **Security e-mails:** a short "was this you?" message when your password, e-mail address or two-step sign-in changes, when new recovery codes are made, or when your account signs in to the app on a new device (with the device's name, not its location or IP address). Owners without two-step sign-in get one reminder to turn it on. These can't be switched off, because they protect your account.
 - **Monthly Insights report:** only if you switch it on in Insights.
 - **News:** occasional e-mails to owners about new features and offers. Every news e-mail has an unsubscribe link, and you can also switch it off in Settings → Profile. Account e-mails are still sent.
 
@@ -77,6 +78,7 @@ Our support team can open a restaurant's admin as its owner, to help. They then 
 - **Sign-ups that are never confirmed:** deleted after 7 days.
 - **Refused sign-ups:** deleted when we refuse them, after we tell you why.
 - **Activity log:** as long as the restaurant exists.
+- **Security log:** 30 days.
 - **Guest statistics:** daily counters are deleted after about 13 months.
 - **App sign-ins:** until you sign out, or after 60 days without use (14 days for platform administrators). Notifications in the app: 90 days.
 - **Backups:** we make a backup of the database and photos every day and keep one for each of the last 7 days, 4 weeks and 3 months. Deleted data can stay in a backup until that backup is removed.
@@ -87,7 +89,8 @@ Our support team can open a restaurant's admin as its owner, to help. They then 
 - Passwords are stored only as secure hashes.
 - Two-step sign-in is available to every user and required for our platform administrators.
 - Each restaurant can see only its own data, and team roles limit what each person can do.
-- Backups are stored in a private folder on the server, not on the public website.
+- Backups are encrypted and stored in a private folder on the server, not on the public website. Copies kept off-site, if we switch them on, are always encrypted.
+- Our pages tell browsers to use only secure connections and to load code only from our own site.
 
 No system is perfectly secure. If we learn of a breach that affects your data, we will tell you without delay.
 
