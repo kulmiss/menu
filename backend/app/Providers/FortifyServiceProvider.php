@@ -8,8 +8,10 @@ use App\Actions\Fortify\UpdateUserPassword;
 use App\Actions\Fortify\UpdateUserProfileInformation;
 use App\Http\Responses\GenericResetLinkResponse;
 use App\Models\User;
+use App\Support\LastSignIn;
 use App\Support\Security\LoginCheck;
 use App\Support\SignUp\SignUp;
+use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -53,6 +55,9 @@ class FortifyServiceProvider extends ServiceProvider
         RateLimiter::for('exports', fn (Request $request) => Limit::perMinute(30)->by('exp:'.($request->user()?->getAuthIdentifier() ?? $request->ip())));
         $this->app->bind(FailedPasswordResetLinkRequestResponse::class, GenericResetLinkResponse::class);
         $this->app->bind(SuccessfulPasswordResetLinkRequestResponse::class, GenericResetLinkResponse::class);
+
+        // Latest sign-in time (QUESTIONS #187). Fires after two-factor when it is on; not for "remember me" cookies.
+        Event::listen(Login::class, fn (Login $e) => LastSignIn::record($e->user));
 
         // Self sign-up: confirming the e-mail makes the restaurant live or puts it up for approval.
         Event::listen(Verified::class, fn (Verified $e) => $e->user instanceof User && app(SignUp::class)->verified($e->user));

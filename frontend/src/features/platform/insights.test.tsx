@@ -67,6 +67,9 @@ const all = {
         total: 1500,
         edited_7d: 700,
         edited_30d: 1000,
+        signed_in_7d: 800,
+        signed_in_30d: 1150,
+        last_sign_in_at: '2026-11-13T10:00:00+03:00',
         active_7d: 1100,
         active_30d: 1300,
         last_edit_at: '2026-11-13T09:00:00+03:00',
@@ -138,6 +141,8 @@ const all = {
         owners_percent_2fa: 18,
         active_7d: 650,
         active_30d: 1000,
+        signed_in_7d: 500,
+        signed_in_30d: 900,
       },
     },
   },
@@ -199,6 +204,13 @@ describe('Super Admin insights', () => {
     await expect.element(screen.getByText('Abebe Cafe')).toBeVisible()
     await userEvent.click(screen.getByRole('button', { name: 'Growth' }))
     await expect.element(screen.getByText('+800')).toBeVisible()
+    await expect
+      .element(screen.getByText('Teams that signed in, 7 days'))
+      .toBeVisible()
+    await expect.element(screen.getByText('1,150')).toBeVisible()
+    await expect
+      .element(screen.getByText('Signed in, 30 days', { exact: true }))
+      .toBeVisible()
     await expect
       .element(screen.getByRole('progressbar', { name: 'Two-factor on' }))
       .toHaveAttribute('aria-valuenow', '20')
