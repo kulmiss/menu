@@ -10,6 +10,7 @@ return [
     'offsite_needs_key' => 'Not copied off-site: backups are not encrypted. Add BACKUP_KEY to .env ("php artisan backup:key"), then back up again.',
     'mail' => [
         'subject' => 'Backup problem on :platform',
+        'greeting' => 'A backup needs your attention',
         'line' => 'Open Backups to see the details, check the free disk space, and press "Back up now".',
         'action' => 'Open Backups',
     ],

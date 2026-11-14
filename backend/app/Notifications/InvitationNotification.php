@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Invitation;
+use App\Support\PlatformSettings;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -40,6 +41,7 @@ class InvitationNotification extends Notification implements ShouldQueue
             ->subject(__('menu.invitation.mail_subject', $replace, $this->mailLocale))
             ->line(__('menu.invitation.mail_line', $replace, $this->mailLocale))
             ->action(__('menu.invitation.mail_action', [], $this->mailLocale), url('/auth/invite/'.$this->token))
-            ->line(__('menu.invitation.mail_expiry', $replace, $this->mailLocale));
+            ->line(__('menu.invitation.mail_expiry', $replace, $this->mailLocale))
+            ->salutation(__('invoice.mail.salutation', ['platform' => PlatformSettings::get('name')], $this->mailLocale));
     }
 }
