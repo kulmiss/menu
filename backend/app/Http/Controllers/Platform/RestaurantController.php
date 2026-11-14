@@ -258,10 +258,21 @@ class RestaurantController extends Controller
         $tenant = Tenant::findOrFail($restaurant);
         $owner = $tenant->memberships()->where('role', Role::Owner)->with('user')->first()?->user;
         abort_if($owner === null, 422, __('platform.remind.no_owner'));
+
+        // An owner who has signed in before already has a password: a normal
+        // "reset your password" e-mail, not "choose your password" (owner, 2026-11-14).
+        if ($owner->last_login_at !== null) {
+            $status = Password::broker()->sendResetLink(['email' => $owner->email]);
+            abort_if($status === Password::RESET_THROTTLED, 429, __($status));
+            $this->activity->log('platform.password_reset_sent', $tenant, ['email' => ['to' => $owner->email]], null);
+
+            return response()->json(['data' => ['sent_to' => $owner->email, 'kind' => 'reset'], 'message' => __('platform.remind.reset_sent', ['email' => $owner->email])]);
+        }
+
         $this->welcome($owner, $tenant, reminder: true);
         $this->activity->log('platform.welcome_resent', $tenant, ['email' => ['to' => $owner->email]], null);
 
-        return response()->json(['data' => ['sent_to' => $owner->email]]);
+        return response()->json(['data' => ['sent_to' => $owner->email, 'kind' => 'welcome'], 'message' => __('platform.remind.welcome_sent', ['email' => $owner->email])]);
     }
 
     private function welcome(User $user, Tenant $tenant, bool $reminder = false): void

@@ -129,9 +129,11 @@ final class Stats
     public function engagement(): array
     {
         $h = (array) $this->health()->selectRaw("COUNT(*) AS total, COALESCE(SUM(edits_7d > 0),0) AS edited_7d, COALESCE(SUM(edits_30d > 0),0) AS edited_30d,
-            COALESCE(SUM(views_7d > 0 OR edits_7d > 0),0) AS active_7d, COALESCE(SUM(views_30d > 0 OR edits_30d > 0),0) AS active_30d,
+            COALESCE(SUM(last_sign_in_at >= ?),0) AS signed_in_7d, COALESCE(SUM(last_sign_in_at >= ?),0) AS signed_in_30d,
+            COALESCE(SUM(views_7d > 0 OR edits_7d > 0 OR last_sign_in_at >= ?),0) AS active_7d,
+            COALESCE(SUM(views_30d > 0 OR edits_30d > 0 OR last_sign_in_at >= ?),0) AS active_30d, MAX(last_sign_in_at) AS last_sign_in,
             COALESCE(ROUND(AVG(setup_pct)),0) AS setup, COALESCE(SUM(setup_pct = 100),0) AS setup_done, MAX(last_edit_at) AS last_edit,
-            COALESCE(SUM(band = 'healthy'),0) AS healthy, COALESCE(SUM(band = 'at_risk'),0) AS at_risk, COALESCE(SUM(band = 'inactive'),0) AS inactive")->first();
+            COALESCE(SUM(band = 'healthy'),0) AS healthy, COALESCE(SUM(band = 'at_risk'),0) AS at_risk, COALESCE(SUM(band = 'inactive'),0) AS inactive", [$d7 = CarbonImmutable::today()->subDays(6)->toDateTimeString(), $d30 = CarbonImmutable::today()->subDays(29)->toDateTimeString(), $d7, $d30])->first();
         $weeks = max(1, ((int) $this->from->diffInDays($this->to) + 1) / 7);
         $edits = (int) $this->days($this->from, $this->to)->sum('edits');
         $list = fn (string $band, string $order) => $this->health()->join('tenants', 'tenants.id', '=', 'tenant_health.tenant_id')->whereNull('tenants.deleted_at')
@@ -145,6 +147,9 @@ final class Stats
             'total' => (int) $h['total'],
             'edited_7d' => (int) $h['edited_7d'],
             'edited_30d' => (int) $h['edited_30d'],
+            'signed_in_7d' => (int) $h['signed_in_7d'],
+            'signed_in_30d' => (int) $h['signed_in_30d'],
+            'last_sign_in_at' => $h['last_sign_in'] ? CarbonImmutable::parse($h['last_sign_in'])->toIso8601String() : null,
             'active_7d' => (int) $h['active_7d'],
             'active_30d' => (int) $h['active_30d'],
             'last_edit_at' => $h['last_edit'] ? CarbonImmutable::parse($h['last_edit'])->toIso8601String() : null,
@@ -207,13 +212,14 @@ final class Stats
         $row = DB::table('platform_snapshot')->where('key', 'admins')->value('value');
         $all = $row ? (array) json_decode((string) $row, true) : [];
         $v = $all[(string) $this->plan] ?? $all[$this->plan] ?? null;
-        $v = is_array($v) ? $v : ['members' => 0, 'owners' => 0, 'managers' => 0, 'staff' => 0, 'with_2fa' => 0, 'owners_2fa' => 0, 'active_7d' => 0, 'active_30d' => 0];
+        $v = (is_array($v) ? $v : []) + ['members' => 0, 'owners' => 0, 'managers' => 0, 'staff' => 0, 'with_2fa' => 0, 'owners_2fa' => 0,
+            'active_7d' => 0, 'active_30d' => 0, 'signed_in_7d' => 0, 'signed_in_30d' => 0];
         $pct = fn (int $a, int $b) => $b > 0 ? (int) round($a * 100 / $b) : null;
 
         return $v + [
             'percent_2fa' => $pct((int) $v['with_2fa'], (int) $v['members']),
             'owners_percent_2fa' => $pct((int) $v['owners_2fa'], (int) $v['owners']),
-            'logins_recorded' => false,
+            'logins_recorded' => true,
         ];
     }
 
