@@ -62,6 +62,7 @@ return [
         'type' => 'Upload a JPEG, PNG or WebP photo.',
         'heic' => 'iPhone HEIC photos cannot be used yet. In Settings › Camera › Formats choose "Most Compatible", or share the photo as JPEG.',
         'unreadable' => 'This file could not be read as a photo.',
+        'too_many_pixels' => 'This photo is too large to process (over 50 megapixels). Use a normal phone photo, or make it smaller first.',
     ],
     'import' => [
         'file_type' => 'Upload a .csv or .xlsx file.',

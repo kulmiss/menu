@@ -16,6 +16,7 @@ use App\Support\ActivityLogger;
 use App\Support\EmailLogo;
 use App\Support\Features;
 use App\Support\ImageProcessor;
+use App\Support\ImageTooLarge;
 use App\Support\Legal\LegalText;
 use App\Support\MailSettings;
 use App\Support\PlatformSettings;
@@ -281,7 +282,11 @@ class PlatformController extends Controller
     public function saveShareImage(Request $request, ImageProcessor $images): JsonResponse
     {
         $request->validate(['image' => ['required', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240', 'dimensions:min_width=600,min_height=315']]);
-        ShareImage::store($request->file('image'), $images);
+        try {
+            ShareImage::store($request->file('image'), $images);
+        } catch (ImageTooLarge) {
+            throw ValidationException::withMessages(['image' => __('menu.media.too_many_pixels')]);
+        }
         $this->activity->log('platform.share_image_saved', null, [], null);
         // Every menu without a banner now points at the new picture.
         Artisan::call('menu:refresh-pages', ['--all' => true]);

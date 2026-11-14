@@ -7,6 +7,7 @@ use App\Http\Resources\MediaResource;
 use App\Models\Media;
 use App\Models\Tenant;
 use App\Support\ImageProcessor;
+use App\Support\ImageTooLarge;
 use App\Support\MediaJanitor;
 use App\Support\PlanLimits;
 use App\Tenancy\CurrentTenant;
@@ -45,6 +46,8 @@ class MediaController extends Controller
         $folder = $current->id().'/'.Str::lower((string) Str::ulid());
         try {
             $result = $images->process((string) $file->getRealPath(), $mime, 'public', $folder, $request->input('purpose') === 'banner');
+        } catch (ImageTooLarge) {
+            throw ValidationException::withMessages(['file' => __('menu.media.too_many_pixels')]);
         } catch (Throwable) {
             throw ValidationException::withMessages(['file' => __('menu.media.unreadable')]);
         }

@@ -22,6 +22,7 @@ class EmailLogo
 
     public static function store(UploadedFile $file): string
     {
+        abort_if(ImageProcessor::safeSize((string) $file->getRealPath()) === null, 422, __('menu.media.too_many_pixels'));
         $data = (string) file_get_contents((string) $file->getRealPath());
         $image = imagecreatefromstring($data);
         abort_if($image === false, 422, __('validation.image', ['attribute' => 'image']));
