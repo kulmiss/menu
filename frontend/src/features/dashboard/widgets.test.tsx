@@ -38,7 +38,7 @@ const all = {
         days_left: 12,
         usage: [
           { key: 'items', used: 9, limit: 10 },
-          { key: 'branches', used: 1, limit: null },
+          { key: 'branches', used: 1, limit: 1 },
         ],
         next: {
           name: { en: 'Plus' },
@@ -112,9 +112,11 @@ describe('Dashboard widgets', () => {
     await expect
       .element(screen.getByRole('link', { name: 'Upgrade on WhatsApp' }))
       .toHaveAttribute('href', 'https://wa.me/251911000000')
-    await expect
-      .element(screen.getByText(/Almost at your plan's limit/))
-      .toBeVisible()
+    // 9 / 10 dishes warns; 1 / 1 branch (a limit of 1) does not.
+    expect(screen.getByText(/Almost at your plan's limit/).all()).toHaveLength(
+      1
+    )
+    await expect.element(screen.getByText('1 / 1')).toBeVisible()
     await expect
       .element(screen.getByText('Average list Br 420 (3 shown to waiters)'))
       .toBeVisible()
