@@ -36,6 +36,8 @@ export function ProfileSettings() {
   const { setDir } = useDirection()
   const [name, setName] = useState(me.name)
   const [email, setEmail] = useState(me.email)
+  const [password, setPassword] = useState('')
+  const emailChanged = email.trim().toLowerCase() !== me.email.toLowerCase()
   const [locale, setLocale] = useState<LanguageCode>(
     (LANGUAGES.find((l) => l.code === me.locale)?.code ?? 'en') as LanguageCode
   )
@@ -49,8 +51,13 @@ export function ProfileSettings() {
     try {
       await updateProfileAndLanguage()
       toast.success(
-        email !== me.email ? t('settings.email_changed') : t('settings.saved')
+        emailChanged
+          ? t('settings.email_change_sent', { email: email.trim() })
+          : t('settings.saved')
       )
+      setPassword('')
+      // The address changes only after the link is clicked.
+      setEmail(me.email)
       await qc.invalidateQueries({ queryKey: ME_KEY })
     } catch (error) {
       const fields = validationErrors(error)
@@ -62,7 +69,12 @@ export function ProfileSettings() {
   }
 
   async function updateProfileAndLanguage() {
-    await updateProfile({ name, email, locale })
+    await updateProfile({
+      name,
+      email: emailChanged ? email.trim() : me.email,
+      locale,
+      ...(emailChanged ? { current_password: password } : {}),
+    })
     persistLanguage(locale)
     setDir(languageDir(locale))
     await setLanguage(locale)
@@ -100,7 +112,36 @@ export function ProfileSettings() {
           {errors.email && (
             <p className='text-sm text-destructive'>{errors.email}</p>
           )}
+          {me.pending_email && !emailChanged && (
+            <p className='text-sm text-muted-foreground'>
+              {t('settings.email_pending', { email: me.pending_email })}
+            </p>
+          )}
         </div>
+        {emailChanged && (
+          <div className='grid gap-2'>
+            <Label htmlFor='profile-password'>
+              {t('settings.current_password')}
+            </Label>
+            <Input
+              id='profile-password'
+              type='password'
+              autoComplete='current-password'
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className='min-h-11 sm:min-h-9'
+            />
+            <p className='text-sm text-muted-foreground'>
+              {t('settings.email_change_help')}
+            </p>
+            {errors.current_password && (
+              <p className='text-sm text-destructive'>
+                {errors.current_password}
+              </p>
+            )}
+          </div>
+        )}
         {LANGUAGES.length > 1 && (
           <div className='grid gap-2'>
             <Label>{t('settings.interface_language')}</Label>

@@ -3,15 +3,15 @@
 use App\Models\User;
 use PragmaRX\Google2FA\Google2FA;
 
-it('updates name and email; a new email needs confirming again', function () {
+it('updates the name without a password; a new e-mail waits for its link (see EmailChangeTest)', function () {
     $user = User::factory()->create(['email' => 'old@example.com']);
 
     $this->actingAs($user)->putJson('/api/v1/auth/user/profile-information', [
-        'name' => 'Selam T.', 'email' => 'new@example.com', 'locale' => 'en',
+        'name' => 'Selam T.', 'email' => 'old@example.com', 'locale' => 'en',
     ], idem())->assertOk();
 
-    expect($user->fresh())->name->toBe('Selam T.')->email->toBe('new@example.com')
-        ->and($user->fresh()->hasVerifiedEmail())->toBeFalse();
+    expect($user->fresh())->name->toBe('Selam T.')->email->toBe('old@example.com')
+        ->and($user->fresh()->hasVerifiedEmail())->toBeTrue();
 });
 
 it('changes the password only with the current one', function () {

@@ -27,7 +27,7 @@ class AccountController extends Controller
 
     public function profile(Request $request, UpdateUserProfileInformation $update): JsonResponse
     {
-        $update->update($request->user(), $request->only(['name', 'email', 'locale']));
+        $update->update($request->user(), $request->only(['name', 'email', 'locale', 'current_password']));
 
         return response()->json(['data' => $this->summary($request->user()->fresh())]);
     }
@@ -112,6 +112,6 @@ class AccountController extends Controller
     /** @return array<string, mixed> */
     private function summary(User $user): array
     {
-        return ['id' => $user->id, 'name' => $user->name, 'email' => $user->email, 'email_verified' => $user->hasVerifiedEmail()];
+        return ['id' => $user->id, 'name' => $user->name, 'email' => $user->email, 'pending_email' => $user->pending_email, 'email_verified' => $user->hasVerifiedEmail()];
     }
 }

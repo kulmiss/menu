@@ -44,6 +44,8 @@ export type Me = {
   email: string
   locale: string
   email_verified: boolean
+  /** A new address waiting for its confirmation link. */
+  pending_email?: string | null
   /** Platform news e-mails on (account e-mails are always sent). */
   news_subscribed?: boolean
   two_factor_enabled: boolean

@@ -22,6 +22,8 @@ class MeController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
+                // A new address waiting for its confirmation link (SECURITY_REPORT.md H3).
+                'pending_email' => $user->pending_email,
                 'locale' => $user->locale,
                 'email_verified' => $user->hasVerifiedEmail(),
                 'news_subscribed' => $user->news_unsubscribed_at === null,
