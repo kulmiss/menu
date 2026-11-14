@@ -27,7 +27,7 @@ Each restaurant decides what it puts on its menu. For questions about a restaura
 - **Activity log:** a record of changes in your restaurant (who changed what, and when). It stores a scrambled one-way code of the IP address, not the address itself.
 - **Security:** to stop abuse, we use your IP address for a short time (up to one hour) to limit repeated sign-in and sign-up attempts. We also keep a security log of events such as failed sign-ins, password changes and blocked uploads. It holds your account number and scrambled one-way codes of the e-mail address and IP address, never the addresses themselves or any password, and is deleted after 30 days.
 - **Support:** e-mails you send us, and notes our team keeps about your account, such as support history.
-- **Mobile app:** if you use the Menu Admin app: the name and type of your device, the app version, your sign-in (stored only as a secure hash), your phone's push-notification address, your notification choices and the notifications we show in the app. The app can also send crash reports and anonymous usage statistics (which screens and features are used, never your menu content); you can switch usage statistics off in the app's settings.
+- **Mobile app:** if you use the Menu Admin app: the name and type of your device, the app version, your sign-in (stored only as a secure hash), your phone's push-notification address, your notification choices and the notifications we show in the app. The app can also send crash reports and anonymous usage statistics (which screens and features are used, never your menu content); you can switch each of them off in the app's settings.
 
 ## 3. What we collect from guests
 
