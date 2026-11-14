@@ -26,3 +26,19 @@ short operator view; each section names the finding it closes.
 ## Cookies (M8)
 - The session cookie is `Secure` by default when `APP_URL` starts with `https://`
   (`SESSION_SECURE_COOKIE` still overrides it). It is also `HttpOnly` and `SameSite=Lax`.
+
+## Backups (H4)
+- Set **`BACKUP_KEY`** and every backup zip is encrypted (`backup-….zip.enc`, libsodium XChaCha20-Poly1305,
+  streamed, so memory use stays flat). The key is never inside a backup.
+  ```
+  php artisan backup:key           # prints a new key
+  php artisan backup:key --write   # …and adds it to .env (only if there is none yet)
+  php artisan config:cache         # if you cache the config
+  ```
+- **Keep a copy of the key outside the server** (password manager). Without it no backup can be restored.
+  If the key changes, old backups still need the old key.
+- Without a key, backups stay plain zips, the Backups screen shows a warning, and **no off-site copy** is made.
+  Every restaurant's data never goes to a third party unencrypted.
+- Restore: `php artisan backup:decrypt storage/app/backups/backup-….zip.enc` writes the `.zip` next to it
+  (or `--key=base64:…` on another machine). Then follow docs/deploy.md, "Restoring a backup".
+- Downloads keep the 5-minute signed link and the password / two-factor re-check.

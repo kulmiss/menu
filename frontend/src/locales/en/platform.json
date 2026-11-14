@@ -606,6 +606,8 @@
     "now": "Back up now",
     "started": "Backup started. It appears here when it's done (usually within a few minutes).",
     "disk": "Free disk space: {{free}} of {{total}}.",
+    "encryption_off": "Backups are not encrypted, so there is no off-site copy. On the server run \"php artisan backup:key --write\", save the key in a password manager, then back up again.",
+    "encryption_invalid": "BACKUP_KEY in .env is not valid, so backups fail. Make a new one with \"php artisan backup:key\".",
     "col": {
       "date": "Date",
       "size": "Size",

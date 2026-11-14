@@ -200,6 +200,7 @@ There is no restore button on purpose: restoring replaces everything. Tested on 
 1. **Download** the zip (Backups → Download, then your password or a two-factor code) or take it from `storage/app/backups/` / the off-site bucket.
 2. **Put the site in maintenance mode:** `cd /home/USER/menu/backend && php artisan down`
 3. **Unzip** it somewhere outside `public`: `unzip backup-YYYYMMDD-HHMMSS-N.zip -d ~/restore`
+   (an **encrypted** backup, `….zip.enc`, first: `php artisan backup:decrypt backup-….zip.enc` — needs the same `BACKUP_KEY`, see [security.md](security.md#backups-h4))
 4. **Database** — either
    - cPanel → phpMyAdmin → your database → *Import* → choose `database.sql` (the file drops and recreates every table), or
    - Terminal: `mysql -u DB_USER -p DB_NAME < ~/restore/database.sql`
