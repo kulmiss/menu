@@ -1,4 +1,4 @@
-Last updated: 13 November 2026
+Last updated: 14 November 2026
 
 This Privacy Policy explains what personal data Menu collects, why we collect it, and what you can do about it. Menu is run by Kulmiss ("we", "us"). We follow Ethiopian law, including the Personal Data Protection Proclamation No. 1321/2024.
 
@@ -28,6 +28,7 @@ Each restaurant decides what it puts on its menu. For questions about a restaura
 - **Activity log:** a record of changes in your restaurant (who changed what, and when). It stores a scrambled one-way code of the IP address, not the address itself.
 - **Security:** to stop abuse, we use your IP address for a short time (up to one hour) to limit repeated sign-in and sign-up attempts.
 - **Support:** e-mails you send us, and notes our team keeps about your account, such as support history.
+- **Mobile app:** if you use the Menu Admin app: the name and type of your device, the app version, your sign-in (stored only as a secure hash), your phone's push-notification address, your notification choices and the notifications we show in the app. The app can also send crash reports and anonymous usage statistics (which screens and features are used, never your menu content); you can switch usage statistics off in the app's settings.
 
 ## 3. What we collect from guests
 
@@ -59,6 +60,7 @@ We use a few service providers. They handle data for us only to run Menu:
 
 - **Hosting:** the servers and database where Menu and all its data are stored.
 - **E-mail delivery:** the e-mail service that sends our e-mails.
+- **Mobile app:** Google Firebase delivers push notifications to the app and, for the app only, collects crash reports and anonymous usage statistics.
 - **Only if we switch them on:** Cloudflare, for network protection and speed and for the "are you human?" check on the sign-up form; and an off-site storage provider for copies of our backups.
 
 Some of these providers may handle data outside Ethiopia. We share data with others only when the law requires it, or to protect someone's safety or our rights.
@@ -77,6 +79,7 @@ Our support team can open a restaurant's admin as its owner, to help. They then 
 - **Refused sign-ups:** deleted when we refuse them, after we tell you why.
 - **Activity log:** as long as the restaurant exists.
 - **Guest statistics:** daily counters are deleted after about 13 months.
+- **App sign-ins:** until you sign out, or after 60 days without use (14 days for platform administrators). Notifications in the app: 90 days.
 - **Backups:** we make a backup of the database and photos every day and keep one for each of the last 7 days, 4 weeks and 3 months. Deleted data can stay in a backup until that backup is removed.
 - **Invoices and payment records:** as long as accounting rules require, also after an account is deleted.
 

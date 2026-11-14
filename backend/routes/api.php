@@ -30,6 +30,7 @@ use App\Http\Controllers\Api\TenantController;
 use App\Http\Controllers\Auth\SignUpController;
 use App\Http\Controllers\Mobile\AccountController as MobileAccountController;
 use App\Http\Controllers\Mobile\AuthController as MobileAuthController;
+use App\Http\Controllers\Mobile\ConfigController;
 use App\Http\Controllers\Mobile\DeviceController;
 use App\Http\Controllers\Mobile\PushController;
 use App\Http\Controllers\NewsSubscriptionController;
@@ -61,6 +62,9 @@ Route::post('v1/beacon', BeaconController::class)
 
 // Mobile app sign-in (QUESTIONS #187). Not idempotent on purpose: a replayed
 // answer would have to store the new token in the database.
+// App start-up settings: public, cached 5 minutes (QUESTIONS #190).
+Route::get('v1/mobile/config', ConfigController::class)->middleware('throttle:60,1')->name('mobile.config');
+
 Route::prefix('v1/mobile/auth')->controller(MobileAuthController::class)->group(function () {
     Route::post('login', 'login')->middleware('throttle:mobile-login')->name('mobile.login');
     Route::post('two-factor', 'twoFactor')->middleware('throttle:mobile-two-factor')->name('mobile.two-factor');

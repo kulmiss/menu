@@ -73,7 +73,7 @@ it('replaces the first Privacy default (with Google Fonts) only when it was not 
     $run = fn () => (require database_path('migrations/2026_11_14_400001_update_privacy_default.php'))->up();
     $old = file_get_contents(database_path('legal-history/privacy-2026-11-13-v1.md'));
     expect($old)->toContain('Google Fonts')
-        ->and(LegalText::default('privacy'))->not->toContain('Google');
+        ->and(LegalText::default('privacy'))->not->toContain('Google Fonts');
 
     PlatformSettings::save(['privacy' => str_replace("\n", "\r\n", $old)]); // saved from a Windows textarea
     $run();

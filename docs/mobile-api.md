@@ -2,6 +2,10 @@
 
 The Flutter app [`kulmiss/menu-admin-app`](https://github.com/kulmiss/menu-admin-app) uses the same `/api/v1` JSON API as the web admin, with a **Bearer token** instead of the cookie session. Every create/change request still needs an `Idempotency-Key` header (except sign-in, below). Errors use the usual shapes: `422 {message, errors}`, `402/403/409 {message, code}`.
 
+## Start-up settings (QUESTIONS #190)
+
+`GET /api/v1/mobile/config` (public, cached 5 minutes) → `{name, min_version, latest_version, flags: {name: bool}, links: {privacy, terms, forgot_password, signup, web_admin, support_whatsapp, support_email}}`. The Super Admin sets `app_min_version`, `app_latest_version` (x.y.z) and `app_flags` through `PUT platform/settings` (the app's Settings → Mobile app tab). An app older than `min_version` shows "Update required".
+
 ## Sign-in (QUESTIONS #187)
 
 | Request | Answer |
