@@ -128,3 +128,10 @@ it('never seeds demo data on a live server', function () {
 
     expect(Tenant::count())->toBe(0)->and(User::count())->toBe(0);
 });
+
+it('creates no account with a known password when someone runs plain db:seed (pre-launch check)', function () {
+    $before = User::count();
+    $this->artisan('db:seed', ['--force' => true])->assertSuccessful();
+    expect(User::count())->toBe($before)
+        ->and(User::where('email', 'test@example.com')->exists())->toBeFalse();
+});
