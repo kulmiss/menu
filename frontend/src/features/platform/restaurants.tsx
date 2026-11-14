@@ -532,8 +532,11 @@ function RestaurantSheet({ id, onClose }: { id: number; onClose: () => void }) {
   ) {
     setErrors({})
     try {
-      await act.mutateAsync({ m, path, body })
-      if (done) toast.success(done)
+      const res = await act.mutateAsync({ m, path, body })
+      // The server's own message when it gives one (resend: welcome or reset e-mail).
+      const said = (res as { data?: { message?: unknown } } | undefined)?.data
+        ?.message
+      if (done) toast.success(typeof said === 'string' && said ? said : done)
       return true
     } catch (err) {
       setErrors(validationErrors(err) ?? {})

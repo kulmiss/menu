@@ -3,6 +3,7 @@
 use App\Support\Legal\LegalText;
 use App\Support\PlatformSettings;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 function runLegalSeed(): void
 {
@@ -94,4 +95,22 @@ it('loads the admin fonts from the app itself, never from Google', function () {
     foreach ($m[1] as $file) {
         expect(is_file(base_path('../frontend/src/assets/fonts/'.$file)))->toBeTrue($file);
     }
+});
+
+it('adds the last sign-in line to the Privacy default only when it was not edited (QUESTIONS #187)', function () {
+    $run = fn () => (require database_path('migrations/2026_11_15_100001_last_sign_in.php'))->up();
+    $old = file_get_contents(database_path('legal-history/privacy-2026-11-13-v2.md'));
+    expect($old)->not->toContain('Last sign-in')
+        ->and(LegalText::default('privacy'))->toContain('**Last sign-in:**')
+        ->and(file_get_contents(base_path('../docs/legal/privacy.md')))->toBe(LegalText::default('privacy'));
+
+    Schema::table('tenant_health', fn ($t) => $t->dropColumn('last_sign_in_at'));
+    PlatformSettings::save(['privacy' => $old]);
+    $run();
+    expect(PlatformSettings::get('privacy'))->toBe(LegalText::default('privacy'));
+
+    Schema::table('tenant_health', fn ($t) => $t->dropColumn('last_sign_in_at'));
+    PlatformSettings::save(['privacy' => $old."\nOur own extra line."]);
+    $run();
+    expect(PlatformSettings::get('privacy'))->toEndWith('Our own extra line.');
 });

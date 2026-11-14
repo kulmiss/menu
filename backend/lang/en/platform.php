@@ -35,5 +35,7 @@ return [
     'remind' => [
         'sent' => '{1} E-mail sent to the owner.|[2,*] E-mail sent to :count owners.',
         'no_owner' => 'This restaurant has no owner to e-mail.',
+        'welcome_sent' => 'Set-password e-mail sent to :email.',
+        'reset_sent' => 'The owner has signed in before, so :email got a "reset your password" e-mail.',
     ],
 ];

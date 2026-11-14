@@ -74,6 +74,9 @@ type Engagement = {
   total: number
   edited_7d: number
   edited_30d: number
+  signed_in_7d: number
+  signed_in_30d: number
+  last_sign_in_at: string | null
   active_7d: number
   active_30d: number
   last_edit_at: string | null
@@ -108,6 +111,8 @@ type Team = {
   owners_percent_2fa: number | null
   active_7d: number
   active_30d: number
+  signed_in_7d: number
+  signed_in_30d: number
 }
 
 const insightParams = (f: InsightFilters) => {
@@ -707,6 +712,8 @@ function EngagementWidget({ f }: { f: InsightFilters }) {
           <dl className='grid grid-cols-2 gap-2 text-sm'>
             {(
               [
+                ['signed_in_7d', e.signed_in_7d],
+                ['signed_in_30d', e.signed_in_30d],
                 ['edited_7d', e.edited_7d],
                 ['edited_30d', e.edited_30d],
                 ['active_7d', e.active_7d],
@@ -730,6 +737,13 @@ function EngagementWidget({ f }: { f: InsightFilters }) {
             <Bar value={e.setup_avg} label={t('platform.ins.e.setup_avg')} />
             <span className='w-10 text-end tabular-nums'>{e.setup_avg}%</span>
           </div>
+          <p className='text-xs text-muted-foreground'>
+            {t('platform.ins.e.last_sign_in', {
+              date: e.last_sign_in_at
+                ? new Date(e.last_sign_in_at).toLocaleString()
+                : '–',
+            })}
+          </p>
           <p className='text-xs text-muted-foreground'>
             {t('platform.ins.e.last_edit', {
               date: e.last_edit_at
@@ -899,6 +913,8 @@ function TeamWidget({ f }: { f: InsightFilters }) {
               [
                 ['members', num(d.members)],
                 ['roles', `${d.owners} · ${d.managers} · ${d.staff}`],
+                ['signed_in_7d', num(d.signed_in_7d)],
+                ['signed_in_30d', num(d.signed_in_30d)],
                 ['active_7d', num(d.active_7d)],
                 ['active_30d', num(d.active_30d)],
               ] as const

@@ -7,7 +7,9 @@ use App\Actions\Fortify\ResetUserPassword;
 use App\Actions\Fortify\UpdateUserPassword;
 use App\Actions\Fortify\UpdateUserProfileInformation;
 use App\Models\User;
+use App\Support\LastSignIn;
 use App\Support\SignUp\SignUp;
+use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -38,6 +40,9 @@ class FortifyServiceProvider extends ServiceProvider
 
             return Limit::perMinute(5)->by($key);
         });
+
+        // Latest sign-in time (QUESTIONS #187). Fires after two-factor when it is on; not for "remember me" cookies.
+        Event::listen(Login::class, fn (Login $e) => LastSignIn::record($e->user));
 
         // Self sign-up: confirming the e-mail makes the restaurant live or puts it up for approval.
         Event::listen(Verified::class, fn (Verified $e) => $e->user instanceof User && app(SignUp::class)->verified($e->user));

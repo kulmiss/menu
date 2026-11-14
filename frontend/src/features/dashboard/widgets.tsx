@@ -448,7 +448,8 @@ function PlanWidget({
                 {u.limit !== null && (
                   <Bar value={pct} label={t(`dashboard.w.usage.${u.key}`)} />
                 )}
-                {u.limit !== null && pct >= 80 && (
+                {/* Not for a limit of 1 (one branch on Free/Plus): it would show from day one (owner, 2026-11-14). */}
+                {u.limit !== null && u.limit > 1 && pct >= 80 && (
                   <p className='text-xs font-medium'>
                     {t('dashboard.w.near_limit')}
                   </p>
