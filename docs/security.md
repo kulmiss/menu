@@ -42,3 +42,17 @@ short operator view; each section names the finding it closes.
 - Restore: `php artisan backup:decrypt storage/app/backups/backup-….zip.enc` writes the `.zip` next to it
   (or `--key=base64:…` on another machine). Then follow docs/deploy.md, "Restoring a backup".
 - Downloads keep the 5-minute signed link and the password / two-factor re-check.
+
+## Server settings (M9, L1, L2, L3, L5)
+- **Behind Cloudflare or a host proxy:** set `TRUSTED_PROXIES=*` (or the proxy IPs, comma-separated) in `.env`.
+  Then rate limits and "is this HTTPS?" see the real visitor. Without a proxy, leave it empty: forwarded
+  headers are ignored, so nobody can fake their address.
+- **CORS:** off. Other websites can't read the API from a browser. The admin and the app don't need it.
+- **`/.well-known/security.txt`** names info@kulmiss.com. It must be renewed yearly: a test fails 12 months
+  after the `Expires` date was set, as a reminder.
+- **`APP_DEBUG=true` on a live site** is turned off automatically and logged as critical once a day.
+  Still fix `.env`.
+- **No PHP runs from `media/`, `menu-cache/`, `menu-assets/`, `app/`, `images/`, `landing/`**
+  (`.htaccess` answers 403). The Nginx example runs only `index.php` and `qr.php`.
+- File permissions (cPanel): folders `755`, files `644`, `.env` `600`, `storage/` and `bootstrap/cache/`
+  writable by your user only. The document root must be `backend/public` (docs/deploy.md).

@@ -5,6 +5,9 @@
 
     RewriteEngine On
 
+    # Uploaded and generated files are never run as code (SECURITY_REPORT.md L5).
+    RewriteRule ^(media|menu-cache|menu-assets|app|images|landing)/.*\.(php\d?|phtml|phar|pht|inc|cgi|pl|py|sh)$ - [F,L,NC]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]

@@ -23,6 +23,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Behind Cloudflare or a host's proxy, set TRUSTED_PROXIES (e.g. "*") so rate limits
+        // and HTTPS detection see the visitor, not the proxy (SECURITY_REPORT.md M9).
+        if (($proxies = (string) env('TRUSTED_PROXIES', '')) !== '') {
+            $middleware->trustProxies(at: $proxies === '*' ? '*' : array_map('trim', explode(',', $proxies)));
+        }
+
         // Security headers on every answer (SECURITY_REPORT.md H1).
         $middleware->append(SecurityHeaders::class);
 
