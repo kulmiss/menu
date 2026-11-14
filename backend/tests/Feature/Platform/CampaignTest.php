@@ -56,11 +56,13 @@ it('previews with real placeholders, escapes HTML and sends a test to the Super 
     $admin = superAdmin();
     $this->actingAs($admin);
     [$owner, $tenant] = member(Role::Owner);
+    // A fixed name with an apostrophe: random names sometimes had one, and the test compared it with e(), which escapes it as &#039; while the message text keeps it as is (safe outside attributes).
+    $owner->update(['name' => "Abebe O'Neil"]);
     $tenant->update(['name' => 'Café <b>Bold</b>']);
 
     $preview = $this->postJson(p('campaigns/preview'), campaign([], "**Hi** {owner_name}\n\n<script>x</script>\n\n[Open]({menu_link})"), idem())->assertOk()->json('data');
     expect($preview['subject'])->toBe('News for Café <b>Bold</b>')
-        ->and($preview['html'])->toContain('<strong>Hi</strong> '.e($owner->name))->toContain('&lt;script&gt;')
+        ->and($preview['html'])->toContain("<strong>Hi</strong> Abebe O'Neil</p>")->toContain('&lt;script&gt;')
         ->toContain('href="'.url('/'.$tenant->slug).'"')->not->toContain('<script>');
 
     $this->postJson(p('campaigns/test'), campaign(), idem())->assertOk()->assertJsonPath('data.sent_to', $admin->email);
