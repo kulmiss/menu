@@ -6,7 +6,9 @@ use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
 use App\Actions\Fortify\UpdateUserPassword;
 use App\Actions\Fortify\UpdateUserProfileInformation;
+use App\Http\Responses\GenericResetLinkResponse;
 use App\Models\User;
+use App\Support\Security\LoginCheck;
 use App\Support\SignUp\SignUp;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Auth\Notifications\ResetPassword;
@@ -16,6 +18,8 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
+use Laravel\Fortify\Contracts\FailedPasswordResetLinkRequestResponse;
+use Laravel\Fortify\Contracts\SuccessfulPasswordResetLinkRequestResponse;
 use Laravel\Fortify\Fortify;
 
 class FortifyServiceProvider extends ServiceProvider
@@ -33,11 +37,22 @@ class FortifyServiceProvider extends ServiceProvider
             'email' => $user->getEmailForPasswordReset(),
         ])));
 
-        RateLimiter::for('login', function (Request $request) {
-            $key = Str::transliterate(Str::lower((string) $request->input(Fortify::username())).'|'.$request->ip());
+        // Same answer time whether or not the e-mail has an account (SECURITY_REPORT.md M1).
+        Fortify::authenticateUsing(fn (Request $request) => LoginCheck::user((string) $request->input(Fortify::username()), (string) $request->input('password')));
 
-            return Limit::perMinute(5)->by($key);
-        });
+        // 5 a minute per e-mail and address; 30 wrong passwords an hour per account in LoginCheck (M2).
+        RateLimiter::for('login', fn (Request $request) => LoginCheck::limits((string) $request->input(Fortify::username()), (string) $request->ip()));
+
+        // Forgot / reset password: per address and per e-mail (M2). Answers never say whether
+        // an account exists (M1): see GenericResetLinkResponse.
+        RateLimiter::for('password-email', fn (Request $request) => [
+            Limit::perMinute(5)->by('pw-ip:'.$request->ip()),
+            Limit::perHour(5)->by('pw-mail:'.sha1(Str::lower((string) $request->input('email')))),
+        ]);
+        // CSV / PDF / export downloads are heavy for shared hosting: 30 a minute per user (M2).
+        RateLimiter::for('exports', fn (Request $request) => Limit::perMinute(30)->by('exp:'.($request->user()?->getAuthIdentifier() ?? $request->ip())));
+        $this->app->bind(FailedPasswordResetLinkRequestResponse::class, GenericResetLinkResponse::class);
+        $this->app->bind(SuccessfulPasswordResetLinkRequestResponse::class, GenericResetLinkResponse::class);
 
         // Self sign-up: confirming the e-mail makes the restaurant live or puts it up for approval.
         Event::listen(Verified::class, fn (Verified $e) => $e->user instanceof User && app(SignUp::class)->verified($e->user));

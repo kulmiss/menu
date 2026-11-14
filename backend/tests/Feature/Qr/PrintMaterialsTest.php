@@ -7,7 +7,9 @@ use App\Models\Plan;
 use App\Models\QrCode;
 use App\Support\Features;
 use App\Support\PlatformSettings;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 
 /** Page sizes in points, the number of pages, and all page text (streams inflated). */
@@ -37,6 +39,8 @@ function printUrl($tenant, array $q): string
 }
 
 it('makes every material at its real paper size, with vector QR codes', function () {
+    // 36 PDFs in a row: far more than the 30-a-minute download limit a person needs.
+    RateLimiter::for('exports', fn () => Limit::none());
     [$owner, $tenant] = member(Role::Owner);
     $code = asTenant($tenant, fn () => QrCode::firstOrFail());
 

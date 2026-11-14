@@ -8,6 +8,7 @@ use App\Http\Middleware\GuardImpersonation;
 use App\Http\Middleware\RequireFeature;
 use App\Http\Middleware\ResolveTenant;
 use App\Http\Middleware\SecurityHeaders;
+use App\Http\Middleware\ThrottlePasswordEmails;
 use App\Http\Middleware\UseWelcomeBroker;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -38,6 +39,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'idempotent' => EnsureIdempotency::class,
             'mobile.token' => EnsureAccessToken::class,
+            'password.throttle' => ThrottlePasswordEmails::class,
             'feature' => RequireFeature::class,
             'platform' => EnsureSuperAdmin::class,
             'tenant' => ResolveTenant::class,
