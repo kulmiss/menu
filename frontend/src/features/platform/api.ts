@@ -17,6 +17,8 @@ export const FEATURES = [
   'order_list',
   'price_periods',
   'sold_out',
+  'share',
+  'print_materials',
   'style_editorial',
   'style_grid',
   'style_bistro',

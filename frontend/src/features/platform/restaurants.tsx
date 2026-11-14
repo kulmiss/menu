@@ -47,6 +47,7 @@ import {
   usePlatformMutation,
 } from './api'
 import { CrmSection, ManageTagsDialog, TagChip } from './crm'
+import { useGloballyOff } from './feature-switches'
 import { InvoiceActions } from './invoices'
 import { PageTitle } from './layout'
 
@@ -497,6 +498,7 @@ function CreateDialog({ onClose }: { onClose: () => void }) {
 
 function RestaurantSheet({ id, onClose }: { id: number; onClose: () => void }) {
   const { t } = useTranslation()
+  const globallyOff = useGloballyOff()
   const detail = useQuery(restaurantQ(id))
   const plans = useQuery(plansQ())
   const r = detail.data
@@ -811,6 +813,11 @@ function RestaurantSheet({ id, onClose }: { id: number; onClose: () => void }) {
                     <span className='text-muted-foreground'>
                       ({r.features[f] ? t('platform.on') : t('platform.off')})
                     </span>
+                    {globallyOff.has(f) && (
+                      <span className='block text-xs text-destructive'>
+                        {t('platform.switches.global_off')}
+                      </span>
+                    )}
                   </span>
                   <Select
                     value={

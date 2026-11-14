@@ -46,6 +46,9 @@ class MenuPageData
             $branchId = $branch?->id;
             $appearance ??= TenantAppearance::current();
             $theme = PageTheme::from($appearance, Features::styles($tenant));
+            if (! Features::enabled($tenant, 'share')) {
+                $theme['show_share'] = false;
+            }
             // "Sold out" switched off: marks stay in the database but the menu ignores them.
             $soldOut = Features::enabled($tenant, 'sold_out');
             $locale = $tenant->default_locale ?: 'en';

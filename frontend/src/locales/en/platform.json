@@ -111,7 +111,10 @@
     "pdf_menu": "Printable PDF menu",
     "order_list": "\"My order\" list for guests",
     "price_periods": "Time-based prices (happy hour)",
-    "sold_out": "“Sold out” marks"
+    "sold_out": "“Sold out” marks",
+    "share": "“Share” button on the menu",
+    "print_materials": "Print materials (table tents, posters, stickers)",
+    "signup": "Self sign-up for new restaurants"
   },
   "methods": {
     "cash": "Cash",
@@ -247,7 +250,8 @@
       "landing": "Landing page",
       "billing": "Billing",
       "branding": "Logo & link preview",
-      "email": "Email (SMTP)"
+      "email": "Email (SMTP)",
+      "features": "Features"
     }
   },
   "share": {
@@ -829,5 +833,30 @@
       "style_minimal": "Style: Minimal"
     },
     "last_days": "Last {{count}} days"
+  },
+  "switches": {
+    "title": "Features for the whole platform",
+    "hint": "Switch a feature off here to turn it off everywhere — web admin, mobile app, guest menus and the API — whatever the plan or restaurant switches say. Switching it back on restores each plan and restaurant setting.",
+    "summary": "{{on}} of {{total}} features on",
+    "groups": {
+      "guests": "Guest menu",
+      "tools": "Restaurant tools",
+      "platform": "Platform",
+      "other": "Other"
+    },
+    "on": "On",
+    "off": "Off for everyone",
+    "plans_off_one": "off on {{count}} plan",
+    "plans_off_other": "off on {{count}} plans",
+    "plans_off": "off on {{count}} plans",
+    "restaurants_off_one": "off for {{count}} restaurant",
+    "restaurants_off_other": "off for {{count}} restaurants",
+    "restaurants_off": "off for {{count}} restaurants",
+    "saved": "Feature switches saved. Guest menus update on their next visit.",
+    "unsaved_one": "{{count}} change not saved",
+    "unsaved_other": "{{count}} changes not saved",
+    "unsaved": "{{count}} changes not saved",
+    "global_off": "Off for everyone (Settings → Features)",
+    "load_failed": "The switches could not be loaded. Try again."
   }
 }
