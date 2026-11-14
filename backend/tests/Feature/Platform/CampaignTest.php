@@ -107,10 +107,12 @@ it('lets owners unsubscribe from news by link or in their profile; account e-mai
     [$owner, $tenant] = member(Role::Owner);
     $url = URL::signedRoute('news.unsubscribe', ['user' => $owner->id]);
 
-    $this->get($url)->assertOk()->assertSee('Unsubscribe');
+    $page = $this->get($url)->assertOk()->assertSee('Unsubscribe');
+    expect($page->headers->getCookies())->toBe([]); // a public page: no session or CSRF cookie (pre-launch check)
     $this->get(str_replace('signature=', 'signature=x', $url))->assertForbidden();
     // One-click POST from a mail client: no CSRF token, signed link.
-    $this->post(URL::signedRoute('news.unsubscribe.do', ['user' => $owner->id]))->assertOk()->assertSee('You are unsubscribed');
+    $done = $this->post(URL::signedRoute('news.unsubscribe.do', ['user' => $owner->id]))->assertOk()->assertSee('You are unsubscribed');
+    expect($done->headers->getCookies())->toBe([]);
     expect($owner->fresh()->news_unsubscribed_at)->not->toBeNull();
 
     $this->actingAs(superAdmin());
