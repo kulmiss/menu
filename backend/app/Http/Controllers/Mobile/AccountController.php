@@ -43,7 +43,7 @@ class AccountController extends Controller
 
         $user->forceFill(['password' => $data['password']])->save();
         // Other devices sign in again; this one stays.
-        $user->tokens()->whereKeyNot($user->currentAccessToken()->getKey())->delete();
+        $user->revokeAppTokens($user->currentAccessToken()->getKey());
 
         return response()->noContent();
     }
