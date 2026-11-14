@@ -184,7 +184,6 @@ export function DataTable<T>(props: Props<T>) {
   const params = toParams(state, props.extra)
   const queryKey = [...(props.queryKey ?? [props.id]), params.toString()]
   // The key holds every parameter sent; the fetch function is stable per table.
-  // eslint-disable-next-line @tanstack/query/exhaustive-deps
   const query = useQuery({
     queryKey,
     queryFn: () => fetchPage!(params),
