@@ -138,7 +138,7 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::post('restaurants/{restaurant}/impersonate', [RestaurantController::class, 'impersonate'])->whereNumber('restaurant');
             Route::post('restaurants/{restaurant}/impersonate-token', [RestaurantController::class, 'impersonateToken'])->whereNumber('restaurant')->middleware('mobile.token');
             Route::get('payments', [PaymentController::class, 'index']);
-            Route::get('payments.csv', [PaymentController::class, 'export']);
+            Route::get('payments.csv', [PaymentController::class, 'export'])->middleware('throttle:exports');
             // CRM: tags, notes, follow-ups (owner, 2026-11-13)
             Route::get('tags', [CrmController::class, 'tags']);
             Route::post('tags', [CrmController::class, 'storeTag']);
@@ -171,8 +171,8 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::delete('backups/{backup}', [BackupController::class, 'destroy'])->whereNumber('backup');
             // Invoices (owner, 2026-11-13)
             Route::get('invoices', [InvoiceController::class, 'index']);
-            Route::get('invoices.csv', [InvoiceController::class, 'export']);
-            Route::get('invoices/{invoice}/pdf', [InvoiceController::class, 'pdf'])->whereNumber('invoice');
+            Route::get('invoices.csv', [InvoiceController::class, 'export'])->middleware('throttle:exports');
+            Route::get('invoices/{invoice}/pdf', [InvoiceController::class, 'pdf'])->whereNumber('invoice')->middleware('throttle:exports');
             Route::post('invoices/{invoice}/resend', [InvoiceController::class, 'resend'])->whereNumber('invoice')->middleware('throttle:10,1');
             Route::post('invoices/{invoice}/void', [InvoiceController::class, 'void'])->whereNumber('invoice');
             Route::get('plans', [PlatformController::class, 'plans']);
@@ -255,7 +255,7 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::delete('media/{media}', [MediaController::class, 'destroy'])->whereNumber('media');
 
             Route::get('import/template', [ImportController::class, 'template'])->middleware('feature:import_export');
-            Route::get('export', [ImportController::class, 'export'])->middleware('feature:import_export');
+            Route::get('export', [ImportController::class, 'export'])->middleware(['feature:import_export', 'throttle:exports']);
             Route::post('import/preview', [ImportController::class, 'preview'])->middleware(['throttle:20,1', 'feature:import_export']);
             Route::post('import/commit', [ImportController::class, 'commit'])->middleware('feature:import_export');
 
@@ -269,14 +269,14 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::get('branches/{branch}/overrides', [BranchController::class, 'overrides']);
             Route::put('branches/{branch}/overrides', [BranchController::class, 'saveOverrides']);
             Route::put('menus/{menu}/branches', [BranchController::class, 'menuBranches']);
-            Route::get('branches/{branch}/table-cards.pdf', [QrCodeController::class, 'tableCards']);
+            Route::get('branches/{branch}/table-cards.pdf', [QrCodeController::class, 'tableCards'])->middleware('throttle:exports');
 
             Route::get('qr-codes', [QrCodeController::class, 'index']);
             Route::post('qr-codes', [QrCodeController::class, 'store']);
             Route::patch('qr-codes/{qr}', [QrCodeController::class, 'update']);
             Route::delete('qr-codes/{qr}', [QrCodeController::class, 'destroy']);
             Route::get('print-materials', [QrCodeController::class, 'printInfo']);
-            Route::get('print-materials.pdf', [QrCodeController::class, 'printMaterials']);
+            Route::get('print-materials.pdf', [QrCodeController::class, 'printMaterials'])->middleware('throttle:exports');
             Route::get('qr-codes/{qr}.{format}', [QrCodeController::class, 'download'])->whereIn('format', ['svg', 'png', 'pdf']);
 
             Route::get('announcements', [AnnouncementController::class, 'index']);
@@ -284,8 +284,8 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
 
             Route::get('insights', [InsightsController::class, 'index'])->middleware('feature:insights');
             Route::middleware('feature:insights')->group(function () {
-                Route::get('insights/export.csv', [InsightsExportController::class, 'csv']);
-                Route::get('insights/report.pdf', [InsightsExportController::class, 'pdf']);
+                Route::get('insights/export.csv', [InsightsExportController::class, 'csv'])->middleware('throttle:exports');
+                Route::get('insights/report.pdf', [InsightsExportController::class, 'pdf'])->middleware('throttle:exports');
                 Route::get('insights/settings', [InsightsExportController::class, 'settings']);
                 Route::put('insights/settings', [InsightsExportController::class, 'updateSettings']);
             });
@@ -326,7 +326,7 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::get('appearance/preview', [AppearanceController::class, 'preview'])->name('appearance.preview');
             // Settings → Billing (owner only)
             Route::get('billing', [BillingController::class, 'show']);
-            Route::get('billing/invoices/{invoice}/pdf', [BillingController::class, 'pdf'])->whereNumber('invoice');
+            Route::get('billing/invoices/{invoice}/pdf', [BillingController::class, 'pdf'])->whereNumber('invoice')->middleware('throttle:exports');
 
             Route::get('menu-pdf', [PdfMenuController::class, 'download'])->middleware(['feature:pdf_menu', 'throttle:20,1']);
 

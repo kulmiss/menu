@@ -3,11 +3,11 @@
 namespace App\Providers;
 
 use App\Models\PersonalAccessToken;
+use App\Support\Security\LoginCheck;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 
 /**
@@ -26,8 +26,9 @@ class MobileServiceProvider extends ServiceProvider
         );
 
         // Same limit as the web sign-in (5 a minute per e-mail and address), plus 30 a minute per address.
+        // The website's limits (per e-mail + address, per account per hour), plus 30 a minute per address.
         RateLimiter::for('mobile-login', fn (Request $request) => [
-            Limit::perMinute(5)->by('e:'.Str::transliterate(Str::lower((string) $request->input('email'))).'|'.$request->ip()),
+            ...LoginCheck::limits((string) $request->input('email'), (string) $request->ip()),
             Limit::perMinute(30)->by('ip:'.$request->ip()),
         ]);
         RateLimiter::for('mobile-two-factor', fn (Request $request) => [

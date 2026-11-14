@@ -5,11 +5,11 @@ namespace App\Http\Controllers\Mobile;
 use App\Http\Controllers\Controller;
 use App\Models\PersonalAccessToken;
 use App\Models\User;
+use App\Support\Security\LoginCheck;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -34,8 +34,8 @@ class AuthController extends Controller
             ...$this->deviceRules(),
         ]);
 
-        $user = User::where('email', Str::lower($data['email']))->first();
-        if ($user === null || ! Hash::check($data['password'], $user->password)) {
+        $user = LoginCheck::user($data['email'], $data['password']);
+        if ($user === null) {
             throw ValidationException::withMessages(['email' => __('auth.failed')]);
         }
 
