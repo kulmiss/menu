@@ -7,11 +7,12 @@ use App\Models\Branch;
 use App\Models\BranchItemOverride;
 use App\Models\Item;
 use App\Models\Plan;
+use App\Models\Tenant;
 use App\Support\Features;
 use Illuminate\Support\Facades\DB;
 
 /** "Sold out" as a feature switch (owner, 2026-11-14). */
-function soldOutOff(App\Models\Tenant $tenant, string $how = 'restaurant'): void
+function soldOutOff(Tenant $tenant, string $how = 'restaurant'): void
 {
     if ($how === 'plan') {
         $plan = Plan::create(['name' => ['en' => 'No sold out'], 'slug' => 'no-sold-out', 'price_minor' => 0, 'interval' => 'month', 'limits' => []]);
