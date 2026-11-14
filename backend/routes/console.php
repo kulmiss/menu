@@ -28,7 +28,10 @@ Schedule::call(fn () => SendCampaignBatch::dispatch())->everyMinute()->name('cam
     ->when(fn () => SendCampaignBatch::pending());
 
 // Backups (owner, 2026-11-13): daily, and an hourly check that warns the Super Admins.
-Schedule::command('backup:run --scheduled')->dailyAt('02:30')->withoutOverlapping(120);
+// Times are UTC (the app's clock); the daily jobs run at night in Addis Ababa
+// (UTC+3, no daylight saving): 21:05 = 00:05, 22:10 = 01:10, 23:30 = 02:30,
+// 00:15–00:30 = 03:15–03:30 (owner, 2026-11-14).
+Schedule::command('backup:run --scheduled')->dailyAt('23:30')->withoutOverlapping(120);
 Schedule::call(fn () => app(Backups::class)->check())->hourlyAt(17)->name('backup:check')
     ->when(fn () => (bool) PlatformSettings::get('backup_enabled'));
 
@@ -43,15 +46,15 @@ Schedule::command('plans:move-replaced')->hourlyAt(7)->withoutOverlapping();
 // Super Admin dashboard numbers (QUESTIONS #186): hourly for today and
 // yesterday, nightly for the last 35 days (late payments, restored restaurants).
 Schedule::command('platform:aggregate --days=2')->hourlyAt(12)->withoutOverlapping(30);
-Schedule::command('platform:aggregate --days=35')->dailyAt('01:10')->withoutOverlapping(60);
-Schedule::command('menu:refresh-pages --all')->dailyAt('00:05');
+Schedule::command('platform:aggregate --days=35')->dailyAt('22:10')->withoutOverlapping(60);
+Schedule::command('menu:refresh-pages --all')->dailyAt('21:05');
 // Self sign-ups that never confirmed their e-mail (owner, 2026-11-13).
-Schedule::command('signup:prune')->dailyAt('03:20');
+Schedule::command('signup:prune')->dailyAt('00:20');
 
 // Insights keep 13 months of daily counters (enough for "same month last year").
 Schedule::call(fn () => DB::table('stats_daily')->where('date', '<', now()->subDays(400)->toDateString())->delete())
-    ->dailyAt('03:15')->name('stats:prune');
+    ->dailyAt('00:15')->name('stats:prune');
 
 // Deleted restaurants are kept 30 days (Super Admin can restore), then purged.
 Schedule::call(fn () => Tenant::onlyTrashed()->where('deleted_at', '<', now()->subDays(30))->get()->each->forceDelete())
-    ->dailyAt('03:30')->name('restaurants:purge');
+    ->dailyAt('00:30')->name('restaurants:purge');

@@ -79,23 +79,23 @@ Upload the whole `backend/` folder (it now contains `vendor/` and `public/app/`)
    * * * * * cd /home/USER/menu/backend && php artisan schedule:run >> /dev/null 2>&1
    ```
 
-   Everything below runs from that one line. Times are the server's clock in **UTC** (Addis Ababa = UTC+3); check with `php artisan schedule:list`.
+   Everything below runs from that one line. The app's clock is **UTC**; the daily jobs are set so they run at night in Addis Ababa (UTC+3). Check with `php artisan schedule:list` (it shows UTC).
 
-   | When (UTC) | Job | What it does |
-   |---|---|---|
-   | every minute | `queue:work --stop-when-empty` | sends queued e-mails: sign-up (confirm, welcome, approval), invitations, invoices, Messages campaigns |
-   | every minute | `campaigns:send` | Super Admin → Messages: a few e-mails per minute (rate on the Messages screen; keep it under your mail provider's limit) |
-   | every minute | `menu:price-periods` | rebuilds a menu page when a happy hour starts or ends |
-   | every minute | heartbeat | lets the dashboard's System health show "cron last run" |
-   | hourly | `menu:refresh-pages` | rebuilds pages whose subscription changed (grace → read-only → unavailable) |
-   | hourly | `insights:monthly` | on the 1st from 07:00 restaurant time: last month's PDF report to restaurants that switched it on |
-   | hourly :07 | `plans:move-replaced` | moves restaurants from an old plan to its replacement once their paid time ends |
-   | hourly :12 | `platform:aggregate --days=2` | Super Admin dashboard numbers for today and yesterday |
-   | hourly :17 | backup check | warns (dashboard + one e-mail a day) when no backup succeeded for 26 hours |
-   | 00:05 | `menu:refresh-pages --all` | rebuilds every menu page (so "New" badges expire) |
-   | 01:10 | `platform:aggregate --days=35` | rebuilds the last 35 days of dashboard numbers |
-   | 02:30 | `backup:run --scheduled` | nightly backup (section 10) |
-   | 03:15 · 03:20 · 03:30 | clean-up | statistics older than 400 days; unconfirmed sign-ups after 7 days (`signup:prune`, logged); restaurants deleted more than 30 days ago |
+   | UTC | Addis Ababa | Job | What it does |
+   |---|---|---|---|
+   | every minute | | `queue:work --stop-when-empty` | sends queued e-mails: sign-up (confirm, welcome, approval), invitations, invoices, Messages campaigns |
+   | every minute | | `campaigns:send` | Super Admin → Messages: a few e-mails per minute (rate on the Messages screen; keep it under your mail provider's limit) |
+   | every minute | | `menu:price-periods` | rebuilds a menu page when a happy hour starts or ends |
+   | every minute | | heartbeat | lets the dashboard's System health show "cron last run" |
+   | hourly | | `menu:refresh-pages` | rebuilds pages whose subscription changed (grace → read-only → unavailable) |
+   | hourly | | `insights:monthly` | on the 1st from 07:00 restaurant time: last month's PDF report to restaurants that switched it on |
+   | hourly :07 | | `plans:move-replaced` | moves restaurants from an old plan to its replacement once their paid time ends |
+   | hourly :12 | | `platform:aggregate --days=2` | Super Admin dashboard numbers for today and yesterday |
+   | hourly :17 | | backup check | warns (dashboard + one e-mail a day) when no backup succeeded for 26 hours |
+   | 21:05 | 00:05 | `menu:refresh-pages --all` | rebuilds every menu page just after midnight (so "New" badges expire) |
+   | 22:10 | 01:10 | `platform:aggregate --days=35` | rebuilds the last 35 days of dashboard numbers |
+   | 23:30 | 02:30 | `backup:run --scheduled` | nightly backup (section 10) |
+   | 00:15 · 00:20 · 00:30 | 03:15 · 03:20 · 03:30 | clean-up | statistics older than 400 days; unconfirmed sign-ups after 7 days (`signup:prune`, logged); restaurants deleted more than 30 days ago |
 
    Some hosts need the full PHP path, e.g. `/usr/local/bin/php` or `/opt/cpanel/ea-php83/root/usr/bin/php`.
 8. **PHP settings** (cPanel → MultiPHP INI Editor): `upload_max_filesize = 10M`, `post_max_size = 12M`, `memory_limit = 256M` (photo resizing), and OPcache on (section 5).
@@ -181,7 +181,7 @@ If OPcache has `validate_timestamps=0`, reload PHP (cPanel: change the PHP versi
 
 ## 10. Backups
 
-**Automatic (Super Admin → Backups).** Every night at 02:30 the scheduler (the same cron line) writes one zip to `storage/app/backups/` — outside the public folder, never downloadable without signing in:
+**Automatic (Super Admin → Backups).** Every night at 02:30 Addis Ababa time (23:30 UTC) the scheduler (the same cron line) writes one zip to `storage/app/backups/` — outside the public folder, never downloadable without signing in:
 
 - `database.sql` — the whole database as SQL (made in PHP, no `mysqldump` needed; caches and sessions are left empty),
 - `media/…` — every uploaded photo and logo,
