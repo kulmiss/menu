@@ -2,6 +2,7 @@
 
 namespace App\Support\Backups;
 
+use App\Support\Security\OutboundHost;
 use GuzzleHttp\Psr7\Utils;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
@@ -23,6 +24,7 @@ class S3
 
     public function put(string $file, string $object): void
     {
+        $this->guard();
         $hash = (string) hash_file('sha256', $file);
         $response = Http::timeout(600)->withHeaders($this->sign('PUT', $object, $hash, ['content-type' => 'application/zip', 'content-length' => (string) filesize($file)]))
             ->withBody(Utils::streamFor(fopen($file, 'rb')), 'application/zip')
@@ -34,7 +36,17 @@ class S3
 
     public function delete(string $object): void
     {
+        $this->guard();
         Http::timeout(60)->withHeaders($this->sign('DELETE', $object, hash('sha256', '')))->delete($this->url($object));
+    }
+
+    /** Right before connecting: https and a public address (SECURITY_REPORT.md M7). */
+    private function guard(): void
+    {
+        $host = (string) parse_url($this->endpoint, PHP_URL_HOST);
+        if (! str_starts_with(strtolower($this->endpoint), 'https://') || OutboundHost::problem($host) !== null) {
+            throw new RuntimeException('Off-site storage refused: the endpoint must be https on a public address.');
+        }
     }
 
     private function url(string $object): string
