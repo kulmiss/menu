@@ -218,7 +218,13 @@ function TwoFactorSection() {
                 variant='outline'
                 className='min-h-11 sm:min-h-9'
                 disabled={busy}
-                onClick={() => withPassword(async () => setStep('codes'))}
+                onClick={() =>
+                  // Only hashes are stored (SECURITY_REPORT.md M5): new codes are the only way to see some.
+                  withPassword(async () => {
+                    await regenerateRecoveryCodes()
+                    setStep('codes')
+                  })
+                }
               >
                 {t('settings.twofa_show_codes')}
               </Button>
@@ -334,6 +340,11 @@ function TwoFactorSection() {
               <li key={c}>{c}</li>
             ))}
           </ul>
+          {codes.isSuccess && codes.data.length === 0 && (
+            <p className='text-sm text-muted-foreground'>
+              {t('settings.twofa_codes_gone')}
+            </p>
+          )}
           <div className='flex flex-wrap gap-2'>
             <Button
               variant='outline'

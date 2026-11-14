@@ -7,6 +7,7 @@ use App\Models\PersonalAccessToken;
 use App\Models\User;
 use App\Notifications\SecurityNotice;
 use App\Support\Security\LoginCheck;
+use App\Support\Security\RecoveryCodes;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -71,7 +72,7 @@ class AuthController extends Controller
         if (! empty($data['code'])) {
             $ok = $provider->verify(decrypt($user->two_factor_secret), preg_replace('/\s+/', '', $data['code']));
         } elseif (! empty($data['recovery_code'])) {
-            $code = collect($user->recoveryCodes())->first(fn ($c) => hash_equals($c, trim((string) $data['recovery_code'])));
+            $code = RecoveryCodes::match($user, (string) $data['recovery_code']);
             if ($code !== null) {
                 $user->replaceRecoveryCode($code);
                 $ok = true;

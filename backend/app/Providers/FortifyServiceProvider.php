@@ -6,6 +6,8 @@ use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
 use App\Actions\Fortify\UpdateUserPassword;
 use App\Actions\Fortify\UpdateUserProfileInformation;
+use App\Http\Controllers\Auth\RecoveryCodeController;
+use App\Http\Requests\HashedTwoFactorLoginRequest;
 use App\Http\Responses\GenericResetLinkResponse;
 use App\Models\User;
 use App\Notifications\SecurityNotice;
@@ -25,6 +27,8 @@ use Laravel\Fortify\Events\RecoveryCodesGenerated;
 use Laravel\Fortify\Events\TwoFactorAuthenticationConfirmed;
 use Laravel\Fortify\Events\TwoFactorAuthenticationDisabled;
 use Laravel\Fortify\Fortify;
+use Laravel\Fortify\Http\Controllers\RecoveryCodeController as FortifyRecoveryCodeController;
+use Laravel\Fortify\Http\Requests\TwoFactorLoginRequest;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -57,6 +61,10 @@ class FortifyServiceProvider extends ServiceProvider
         RateLimiter::for('exports', fn (Request $request) => Limit::perMinute(30)->by('exp:'.($request->user()?->getAuthIdentifier() ?? $request->ip())));
         $this->app->bind(FailedPasswordResetLinkRequestResponse::class, GenericResetLinkResponse::class);
         $this->app->bind(SuccessfulPasswordResetLinkRequestResponse::class, GenericResetLinkResponse::class);
+
+        // Recovery codes are checked against their hashes (SECURITY_REPORT.md M5).
+        $this->app->bind(TwoFactorLoginRequest::class, HashedTwoFactorLoginRequest::class);
+        $this->app->bind(FortifyRecoveryCodeController::class, RecoveryCodeController::class);
 
         // "Was this you?" e-mails for two-factor changes, web and app (SECURITY_REPORT.md M4).
         Event::listen(TwoFactorAuthenticationConfirmed::class, fn ($e) => $e->user->notify(new SecurityNotice('two_factor_on')));

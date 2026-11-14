@@ -3,15 +3,18 @@
 namespace App\Models;
 
 use App\Notifications\VerifyEmailNotification;
+use App\Support\Security\RecoveryCodes;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
+use Laravel\Fortify\Events\RecoveryCodeReplaced;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Sanctum\HasApiTokens;
 
@@ -59,6 +62,38 @@ class User extends Authenticatable implements MustVerifyEmail
     public function memberships(): HasMany
     {
         return $this->hasMany(Membership::class);
+    }
+
+    /**
+     * Fortify writes plain codes; only their hashes are kept (SECURITY_REPORT.md M5).
+     *
+     * @return Attribute<string|null, string|null>
+     */
+    protected function twoFactorRecoveryCodes(): Attribute
+    {
+        return Attribute::make(set: fn (?string $value) => RecoveryCodes::store($this, $value));
+    }
+
+    /**
+     * The plain codes only right after they were made (Fortify's "show codes"
+     * endpoint and the app); afterwards an empty list.
+     *
+     * @return list<string>
+     */
+    public function recoveryCodes(): array
+    {
+        return RecoveryCodes::shown($this);
+    }
+
+    /**
+     * Fortify calls this after a recovery code was used: it is removed, not replaced.
+     *
+     * @param  string  $code
+     */
+    public function replaceRecoveryCode($code): void
+    {
+        RecoveryCodes::consume($this, (string) $code);
+        RecoveryCodeReplaced::dispatch($this, $code);
     }
 
     /** @return HasMany<PushToken, $this> */
