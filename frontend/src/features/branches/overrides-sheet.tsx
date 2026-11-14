@@ -21,6 +21,7 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useFeature } from '@/features/auth/use-me'
 import { menusQuery, treeQuery } from '@/features/menu/api'
 import { MoneyInput } from '@/features/menu/components/money-input'
 import { formatMoney } from '@/features/menu/money'
@@ -98,6 +99,7 @@ function OverridesForm({
   onClose,
 }: Props & { initial: Override[]; sections: Section[] }) {
   const { t } = useTranslation()
+  const soldOutOn = useFeature('sold_out')
   const save = useSaveOverrides(tenantId, branch.id)
   const [rows, setRows] = useState<Record<number, Override>>(() =>
     Object.fromEntries(initial.map((o) => [o.item_id, o]))
@@ -180,37 +182,41 @@ function OverridesForm({
                       onChange={(v) => set(item.id, { price_minor: v })}
                     />
                   )}
-                  <Select
-                    value={
-                      o.is_sold_out === null
-                        ? 'same'
-                        : o.is_sold_out
-                          ? 'sold'
-                          : 'available'
-                    }
-                    onValueChange={(v) =>
-                      set(item.id, {
-                        is_sold_out: v === 'same' ? null : v === 'sold',
-                      })
-                    }
-                  >
-                    <SelectTrigger
-                      aria-label={t('branches.availability', {
-                        name: tr(item.name, locale),
-                      })}
+                  {soldOutOn && (
+                    <Select
+                      value={
+                        o.is_sold_out === null
+                          ? 'same'
+                          : o.is_sold_out
+                            ? 'sold'
+                            : 'available'
+                      }
+                      onValueChange={(v) =>
+                        set(item.id, {
+                          is_sold_out: v === 'same' ? null : v === 'sold',
+                        })
+                      }
                     >
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value='same'>{t('branches.same')}</SelectItem>
-                      <SelectItem value='sold'>
-                        {t('branches.sold_out')}
-                      </SelectItem>
-                      <SelectItem value='available'>
-                        {t('branches.available')}
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
+                      <SelectTrigger
+                        aria-label={t('branches.availability', {
+                          name: tr(item.name, locale),
+                        })}
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value='same'>
+                          {t('branches.same')}
+                        </SelectItem>
+                        <SelectItem value='sold'>
+                          {t('branches.sold_out')}
+                        </SelectItem>
+                        <SelectItem value='available'>
+                          {t('branches.available')}
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
                   <label className='flex min-h-11 items-center gap-2 text-sm sm:min-h-8'>
                     <Checkbox
                       checked={o.is_hidden === true}

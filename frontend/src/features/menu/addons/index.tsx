@@ -19,6 +19,7 @@ import { Switch } from '@/components/ui/switch'
 import { ConfirmDialog } from '@/components/confirm-dialog'
 import { AdminHeader } from '@/components/layout/admin-header'
 import { Main } from '@/components/layout/main'
+import { useFeature } from '@/features/auth/use-me'
 import {
   addonGroupsQuery,
   type AddonGroupInput,
@@ -126,6 +127,7 @@ function GroupCard({
   const { t, i18n } = useTranslation()
   const qc = useQueryClient()
   const name = tr(group.name, ctx.locale)
+  const soldOutOn = useFeature('sold_out')
   const soldOut = useMutation({
     mutationFn: (v: { id: number; is_sold_out: boolean }) =>
       api.patch(tenantUrl(ctx.tenantId, `addon-options/${v.id}/sold-out`), {
@@ -182,17 +184,19 @@ function GroupCard({
                   ? `+${formatMoney(o.price_minor, ctx.currency, i18n.language)}`
                   : ''}
               </span>
-              <Switch
-                checked={!o.is_sold_out}
-                disabled={!ctx.canWrite || soldOut.isPending}
-                onCheckedChange={(available) =>
-                  soldOut.mutate({ id: o.id!, is_sold_out: !available })
-                }
-                aria-label={t('menu.available_named', {
-                  name: tr(o.name, ctx.locale),
-                })}
-                className='my-2.5'
-              />
+              {soldOutOn && (
+                <Switch
+                  checked={!o.is_sold_out}
+                  disabled={!ctx.canWrite || soldOut.isPending}
+                  onCheckedChange={(available) =>
+                    soldOut.mutate({ id: o.id!, is_sold_out: !available })
+                  }
+                  aria-label={t('menu.available_named', {
+                    name: tr(o.name, ctx.locale),
+                  })}
+                  className='my-2.5'
+                />
+              )}
             </li>
           ))}
         </ul>

@@ -107,4 +107,35 @@ describe('Dashboard', () => {
       .poll(() => fake.calls.find((c) => c.method === 'PATCH')?.data)
       .toEqual({ is_sold_out: false })
   })
+
+  it('has no sold-out card while the "sold out" switch is off', async () => {
+    fake = fakeApi({
+      'GET /t/1/dashboard': {
+        data: {
+          data: {
+            today: { views: 31, scans: 9 },
+            yesterday: { views: 28, scans: 7 },
+            sold_out: [],
+          },
+        },
+      },
+      'GET /t/1/widgets/trend': {
+        data: {
+          data: {
+            days: [],
+            today: { date: '2026-11-11', views: 31, scans: 9 },
+            yesterday: { date: '2026-11-10', views: 28, scans: 7 },
+          },
+        },
+      },
+    })
+    const tenant = tenantFixture()
+    tenant.features = { ...tenant.features, sold_out: false }
+    const screen = await renderWithQuery(<Dashboard />, {
+      me: meFixture({ tenants: [tenant] }),
+    })
+
+    await expect.element(screen.getByText('31')).toBeVisible()
+    expect(screen.container.textContent).not.toMatch(/sold out/i)
+  })
 })

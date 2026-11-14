@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use App\Models\AddonGroup;
 use App\Models\AddonOption;
+use App\Support\Features;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -23,7 +24,7 @@ class AddonGroupResource extends JsonResource
                 'id' => $o->id,
                 'name' => (object) $o->name,
                 'price_minor' => $o->price_minor,
-                'is_sold_out' => $o->is_sold_out,
+                'is_sold_out' => $o->is_sold_out && Features::here('sold_out'),
                 'sort' => $o->sort,
             ])->values(),
             'items_count' => $this->whenCounted('items'),

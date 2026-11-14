@@ -68,7 +68,8 @@ let fake: ReturnType<typeof fakeApi>
 function renderEditor(
   role: Role,
   routes: Parameters<typeof fakeApi>[0] = {},
-  canEditPrices?: boolean
+  canEditPrices?: boolean,
+  features?: Record<string, boolean>
 ) {
   fake = fakeApi({
     'GET /t/1/menus': { data: { data: [menu] } },
@@ -78,6 +79,7 @@ function renderEditor(
   const tenant = tenantFixture({}, role)
   if (canEditPrices !== undefined && tenant.membership)
     tenant.membership.can_edit_prices = canEditPrices
+  if (features) tenant.features = { ...tenant.features, ...features }
   return renderWithQuery(
     <MenuEditorPage onSelectMenu={vi.fn()} onOpenItem={vi.fn()} />,
     { me: meFixture({ tenants: [tenant] }) }
@@ -166,6 +168,22 @@ describe('MenuEditorPage', () => {
         ids: [100, 101],
         action: 'sold_out',
       })
+    )
+  })
+
+  it('hides every sold-out control while the "sold out" switch is off', async () => {
+    const screen = await renderEditor('manager', {}, undefined, {
+      sold_out: false,
+    })
+
+    await expect.element(screen.getByText('Macchiato')).toBeVisible()
+    expect(screen.container.querySelector('[role="switch"]')).toBeNull()
+    await userEvent.click(screen.getByRole('button', { name: 'Select' }))
+    await userEvent.click(
+      screen.getByRole('checkbox', { name: 'Select Macchiato' })
+    )
+    expect(screen.getByRole('toolbar').element().textContent).not.toContain(
+      'Sold out'
     )
   })
 

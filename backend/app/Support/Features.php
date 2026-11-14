@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Models\Tenant;
 use App\Models\TenantAppearance;
+use App\Tenancy\CurrentTenant;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -27,6 +28,9 @@ class Features
         'style_bistro' => true,
         'style_minimal' => true, // D · Minimal, text only (owner, 2026-11-12)
         'price_periods' => true, // time-based prices: happy hour, lunch (owner, 2026-11-14; off on Free)
+        // "Sold out" marks (owner, 2026-11-14). Off: no toggles, list or widget, and the guest
+        // menu never says "sold out"; existing marks are kept but ignored.
+        'sold_out' => true,
     ];
 
     /** @var array<int, array<string, bool>> */
@@ -50,6 +54,14 @@ class Features
     public static function enabled(Tenant $tenant, string $key): bool
     {
         return self::for($tenant)[$key] ?? false;
+    }
+
+    /** For the restaurant of this request (true outside one, e.g. in a console job). */
+    public static function here(string $key): bool
+    {
+        $tenant = app(CurrentTenant::class)->get();
+
+        return $tenant === null || self::enabled($tenant, $key);
     }
 
     /**

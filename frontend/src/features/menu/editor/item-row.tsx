@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Switch } from '@/components/ui/switch'
+import { useFeature } from '@/features/auth/use-me'
 import { formatMoney } from '../money'
 import { tr } from '../text'
 import { type ItemSummary } from '../types'
@@ -32,6 +33,7 @@ export function ItemRow({
   onSoldOut,
 }: Props) {
   const { t, i18n } = useTranslation()
+  const soldOutOn = useFeature('sold_out')
   const name = tr(item.name, ctx.locale)
   const price =
     item.variants_count > 0
@@ -107,22 +109,24 @@ export function ItemRow({
           />
         )}
       </button>
-      <label className='flex min-h-11 shrink-0 cursor-pointer items-center gap-2 px-1 text-xs text-muted-foreground'>
-        <span
-          className={cn(
-            'hidden sm:inline',
-            item.is_sold_out && 'font-medium text-destructive'
-          )}
-        >
-          {item.is_sold_out ? t('menu.sold_out') : t('menu.available')}
-        </span>
-        <Switch
-          checked={!item.is_sold_out}
-          disabled={!ctx.canWrite}
-          onCheckedChange={(available) => onSoldOut(!available)}
-          aria-label={t('menu.available_named', { name })}
-        />
-      </label>
+      {soldOutOn && (
+        <label className='flex min-h-11 shrink-0 cursor-pointer items-center gap-2 px-1 text-xs text-muted-foreground'>
+          <span
+            className={cn(
+              'hidden sm:inline',
+              item.is_sold_out && 'font-medium text-destructive'
+            )}
+          >
+            {item.is_sold_out ? t('menu.sold_out') : t('menu.available')}
+          </span>
+          <Switch
+            checked={!item.is_sold_out}
+            disabled={!ctx.canWrite}
+            onCheckedChange={(available) => onSoldOut(!available)}
+            aria-label={t('menu.available_named', { name })}
+          />
+        </label>
+      )}
     </div>
   )
 }

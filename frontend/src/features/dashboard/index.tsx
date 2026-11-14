@@ -15,7 +15,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 import { AdminHeader } from '@/components/layout/admin-header'
 import { Main } from '@/components/layout/main'
-import { useCurrentTenant } from '@/features/auth/use-me'
+import { useCurrentTenant, useFeature } from '@/features/auth/use-me'
 import { dashboardQuery } from '@/features/insights/api'
 import { tr } from '@/features/menu/text'
 import { TwoFactorCard } from './two-factor-card'
@@ -28,6 +28,7 @@ const Widgets = lazy(() => import('./widgets'))
 /** Dashboard (PLAN.md screen 1): today at a glance and what is sold out. */
 export function Dashboard() {
   const { t } = useTranslation()
+  const soldOutOn = useFeature('sold_out')
   const tenant = useCurrentTenant()
   const tenantId = tenant?.id ?? 0
   const role = tenant?.membership?.role
@@ -77,44 +78,47 @@ export function Dashboard() {
             <Widgets tenantId={tenantId} locale={locale} manager={manager} />
           </Suspense>
         )}
-        <Card className='mt-4'>
-          <CardHeader>
-            <CardTitle>{t('dashboard.sold_out')}</CardTitle>
-            <CardDescription>{t('dashboard.sold_out_hint')}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {!d ? (
-              <Skeleton className='h-16' />
-            ) : d.sold_out.length === 0 ? (
-              <p className='text-sm text-muted-foreground'>
-                {t('dashboard.nothing_sold_out')}
-              </p>
-            ) : (
-              <ul className='divide-y rounded-md border'>
-                {d.sold_out.map((i) => (
-                  <li
-                    key={i.id}
-                    className='flex items-center justify-between gap-2 px-3 py-1.5 text-sm'
-                  >
-                    <span>{tr(i.name, locale)}</span>
-                    <Button
-                      size='sm'
-                      variant='outline'
-                      disabled={
-                        soldOut.isPending || !tenant?.subscription.allows_writes
-                      }
-                      onClick={() => soldOut.mutate(i.id)}
+        {soldOutOn && (
+          <Card className='mt-4'>
+            <CardHeader>
+              <CardTitle>{t('dashboard.sold_out')}</CardTitle>
+              <CardDescription>{t('dashboard.sold_out_hint')}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {!d ? (
+                <Skeleton className='h-16' />
+              ) : d.sold_out.length === 0 ? (
+                <p className='text-sm text-muted-foreground'>
+                  {t('dashboard.nothing_sold_out')}
+                </p>
+              ) : (
+                <ul className='divide-y rounded-md border'>
+                  {d.sold_out.map((i) => (
+                    <li
+                      key={i.id}
+                      className='flex items-center justify-between gap-2 px-3 py-1.5 text-sm'
                     >
-                      {t('dashboard.available_again', {
-                        name: tr(i.name, locale),
-                      })}
-                    </Button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </CardContent>
-        </Card>
+                      <span>{tr(i.name, locale)}</span>
+                      <Button
+                        size='sm'
+                        variant='outline'
+                        disabled={
+                          soldOut.isPending ||
+                          !tenant?.subscription.allows_writes
+                        }
+                        onClick={() => soldOut.mutate(i.id)}
+                      >
+                        {t('dashboard.available_again', {
+                          name: tr(i.name, locale),
+                        })}
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </CardContent>
+          </Card>
+        )}
         {manager && (
           <div className='mt-4 flex flex-wrap gap-2'>
             <Button asChild variant='secondary'>
