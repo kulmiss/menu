@@ -108,7 +108,7 @@ Merge in this order. After each merge, press **Delete branch**; the next PR then
 
 - **Certificate pinning: off**, your choice (Q2). The app uses HTTPS only with system TLS validation. A mis-issued certificate or a user-installed CA could intercept traffic. If you want pinning later, I'd pin root CAs with backup pins and a kill switch in `mobile/config`.
 - **No Play Integrity**, your choice (Q3). A modified app can talk to the API, but the server enforces every permission.
-- **"Remember me" lasts 400 days** (Laravel default). Shortening it (to 30 or 90 days) would make owners sign in more often. **Your call.**
+- **"Remember me" now lasts 90 days** (owner, 2026-11-14; was Laravel's 400). `AUTH_REMEMBER_MINUTES` can change it.
 - **Sign-up can hint that an e-mail exists** (a new account gets a session at once). This is accepted: it's limited to 3 per e-mail and 10 per IP, with optional Turnstile.
 - **CSP keeps `style-src 'unsafe-inline'`** (Radix inline styles and photo placeholders). Scripts are strict (nonce or hash), and CSS can't run code.
 - **Guest menus can be embedded** on other sites (no `frame-ancestors`), so restaurants can put their menu on their own website. The menu has no actions worth clickjacking.
