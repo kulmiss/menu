@@ -19,6 +19,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Switch } from '@/components/ui/switch'
 import { AdminHeader } from '@/components/layout/admin-header'
 import { Main } from '@/components/layout/main'
+import { useFeature } from '@/features/auth/use-me'
 import { PhotoField } from '@/features/menu/components/photo-field'
 import { type Media } from '@/features/menu/types'
 import { useMenuContext } from '@/features/menu/use-menu-context'
@@ -104,6 +105,12 @@ function valuesOf(a: Appearance): AppearanceValues {
 }
 
 function AppearanceForm({ initial }: { initial: Appearance }) {
+  // Switches for features the plan or the platform has off are not shown.
+  const featureOn: Partial<Record<(typeof FLAGS)[number], boolean>> = {
+    show_share: useFeature('share'),
+    show_pdf_link: useFeature('pdf_menu'),
+    show_order_list: useFeature('order_list'),
+  }
   const { t } = useTranslation()
   const ctx = useMenuContext()
   const save = useSaveAppearance(ctx.tenantId)
@@ -285,7 +292,7 @@ function AppearanceForm({ initial }: { initial: Appearance }) {
             />
 
             <div className='grid gap-3'>
-              {FLAGS.map((flag) => (
+              {FLAGS.filter((f) => featureOn[f] !== false).map((flag) => (
                 <div
                   key={flag}
                   className='flex items-center justify-between gap-4'

@@ -39,6 +39,7 @@ use App\Http\Controllers\Platform\BackupController;
 use App\Http\Controllers\Platform\CampaignController;
 use App\Http\Controllers\Platform\CrmController;
 use App\Http\Controllers\Platform\DashboardWidgetController as PlatformDashboardWidgetController;
+use App\Http\Controllers\Platform\FeatureSwitchController;
 use App\Http\Controllers\Platform\InsightsController as PlatformInsightsController;
 use App\Http\Controllers\Platform\InvoiceController;
 use App\Http\Controllers\Platform\PaymentController;
@@ -189,6 +190,8 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::patch('announcements/{announcement}', [PlatformController::class, 'saveAnnouncement'])->whereNumber('announcement');
             Route::delete('announcements/{announcement}', [PlatformController::class, 'deleteAnnouncement'])->whereNumber('announcement');
             Route::get('activity', [PlatformController::class, 'activity']);
+            Route::get('settings/features', [FeatureSwitchController::class, 'index']);
+            Route::put('settings/features', [FeatureSwitchController::class, 'update']);
             Route::get('settings', [PlatformController::class, 'settings']);
             Route::put('settings', [PlatformController::class, 'saveSettings']);
             Route::post('settings/legal/{page}/reset', [PlatformController::class, 'resetLegal'])->whereIn('page', ['terms', 'privacy']);
@@ -278,8 +281,8 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::post('qr-codes', [QrCodeController::class, 'store']);
             Route::patch('qr-codes/{qr}', [QrCodeController::class, 'update']);
             Route::delete('qr-codes/{qr}', [QrCodeController::class, 'destroy']);
-            Route::get('print-materials', [QrCodeController::class, 'printInfo']);
-            Route::get('print-materials.pdf', [QrCodeController::class, 'printMaterials'])->middleware('throttle:exports');
+            Route::get('print-materials', [QrCodeController::class, 'printInfo'])->middleware('feature:print_materials');
+            Route::get('print-materials.pdf', [QrCodeController::class, 'printMaterials'])->middleware(['throttle:exports', 'feature:print_materials']);
             Route::get('qr-codes/{qr}.{format}', [QrCodeController::class, 'download'])->whereIn('format', ['svg', 'png', 'pdf']);
 
             Route::get('announcements', [AnnouncementController::class, 'index']);

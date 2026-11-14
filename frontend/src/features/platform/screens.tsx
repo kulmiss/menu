@@ -59,6 +59,7 @@ import {
   usePlatformMutation,
 } from './api'
 import { EmailSettings } from './email-settings'
+import { FeatureSwitches, useGloballyOff } from './feature-switches'
 import { BillingSettings, type BillingSettingsData } from './invoices'
 import { LandingSettings, type LandingSettingsData } from './landing-settings'
 import { PageTitle } from './layout'
@@ -167,6 +168,7 @@ function PlanDialog({
   onClose: () => void
 }) {
   const { t } = useTranslation()
+  const globallyOff = useGloballyOff()
   const save = usePlatformMutation((body: object) =>
     plan ? send('patch', `plans/${plan.id}`, body) : send('post', 'plans', body)
   )
@@ -357,6 +359,11 @@ function PlanDialog({
                   }
                 />
                 {t(`platform.features.${f}`)}
+                {globallyOff.has(f) && (
+                  <span className='text-xs text-destructive'>
+                    {t('platform.switches.global_off')}
+                  </span>
+                )}
               </label>
             ))}
           </fieldset>
@@ -1033,6 +1040,7 @@ function SettingsForm({
         t={t}
         tabs={{
           general,
+          features: <FeatureSwitches />,
           signup: (
             <SignupSettings
               initial={initial as unknown as SignupSettingsData}
@@ -1136,6 +1144,7 @@ function LegalField({
 
 const SETTINGS_TABS = [
   'general',
+  'features',
   'signup',
   'landing',
   'billing',
