@@ -20,7 +20,7 @@ class DeviceController extends Controller
         /** @var Collection<int, PersonalAccessToken> $tokens */
         $tokens = PersonalAccessToken::query()->whereMorphedTo('tokenable', $user)->latest('last_used_at')->latest('id')->get();
         $devices = $tokens
-            ->filter(fn (PersonalAccessToken $t) => $t->isFresh($user))
+            ->filter(fn (PersonalAccessToken $t) => $t->isFresh($user) && ! $t->isImpersonation())
             ->values()
             ->map(fn (PersonalAccessToken $t) => [
                 'id' => $t->id,

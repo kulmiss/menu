@@ -5,16 +5,6 @@ use App\Models\User;
 use Illuminate\Support\Facades\Artisan;
 use PragmaRX\Google2FA\Google2FA;
 
-function device(array $extra = []): array
-{
-    return ['device_name' => 'Pixel 8', 'platform' => 'android', 'app_version' => '1.0.0+1', ...$extra];
-}
-
-function bearer(string $token): array
-{
-    return ['Authorization' => 'Bearer '.$token, 'Accept' => 'application/json'];
-}
-
 function twoFactorUser(): User
 {
     $g = new Google2FA;

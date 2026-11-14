@@ -374,6 +374,16 @@ class RestaurantController extends Controller
         return response()->json(['data' => ['tenant_id' => $tenant->id, 'redirect' => '/admin']]);
     }
 
+    /** "Log in as" from the mobile app: a 2-hour token for the owner (QUESTIONS #188). */
+    public function impersonateToken(Request $request, int $restaurant, ImpersonationManager $manager): JsonResponse
+    {
+        $tenant = Tenant::findOrFail($restaurant);
+        $owner = $tenant->memberships()->where('role', Role::Owner)->with('user')->first()?->user;
+        abort_if($owner === null, 422, __('platform.no_owner'));
+
+        return response()->json(['data' => $manager->startToken($request->user(), $tenant, $owner)])->header('Cache-Control', 'no-store');
+    }
+
     /** @return array<string, mixed> */
     private function row(Tenant $t): array
     {

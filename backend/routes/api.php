@@ -124,6 +124,7 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::put('restaurants/{restaurant}/features', [RestaurantController::class, 'features'])->whereNumber('restaurant');
             Route::post('restaurants/{restaurant}/payments', [PaymentController::class, 'store'])->whereNumber('restaurant');
             Route::post('restaurants/{restaurant}/impersonate', [RestaurantController::class, 'impersonate'])->whereNumber('restaurant');
+            Route::post('restaurants/{restaurant}/impersonate-token', [RestaurantController::class, 'impersonateToken'])->whereNumber('restaurant')->middleware('mobile.token');
             Route::get('payments', [PaymentController::class, 'index']);
             Route::get('payments.csv', [PaymentController::class, 'export']);
             // CRM: tags, notes, follow-ups (owner, 2026-11-13)

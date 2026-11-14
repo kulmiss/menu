@@ -36,7 +36,13 @@ class AnnouncementController extends Controller
 
     public function stopImpersonating(Request $request, ImpersonationManager $manager): JsonResponse
     {
-        abort_unless($request->session()->has('impersonation_id'), 404);
+        // The app's "log in as" token (QUESTIONS #188): delete it; the app switches back to the Super Admin's own token.
+        if (($token = $manager->token($request)) !== null) {
+            $token->delete();
+
+            return response()->json(['data' => ['redirect' => '/platform']]);
+        }
+        abort_unless($request->hasSession() && $request->session()->has('impersonation_id'), 404);
         $manager->stop($request);
 
         return response()->json(['data' => ['redirect' => '/platform']]);
