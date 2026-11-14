@@ -9,8 +9,10 @@ use App\Actions\Fortify\UpdateUserProfileInformation;
 use App\Http\Responses\GenericResetLinkResponse;
 use App\Models\User;
 use App\Notifications\SecurityNotice;
+use App\Support\LastSignIn;
 use App\Support\Security\LoginCheck;
 use App\Support\SignUp\SignUp;
+use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -62,6 +64,8 @@ class FortifyServiceProvider extends ServiceProvider
         Event::listen(TwoFactorAuthenticationConfirmed::class, fn ($e) => $e->user->notify(new SecurityNotice('two_factor_on')));
         Event::listen(TwoFactorAuthenticationDisabled::class, fn ($e) => $e->user->notify(new SecurityNotice('two_factor_off')));
         Event::listen(RecoveryCodesGenerated::class, fn ($e) => $e->user->notify(new SecurityNotice('recovery_codes')));
+        // Latest sign-in time (QUESTIONS #187). Fires after two-factor when it is on; not for "remember me" cookies.
+        Event::listen(Login::class, fn (Login $e) => LastSignIn::record($e->user));
 
         // Self sign-up: confirming the e-mail makes the restaurant live or puts it up for approval.
         Event::listen(Verified::class, fn (Verified $e) => $e->user instanceof User && app(SignUp::class)->verified($e->user));

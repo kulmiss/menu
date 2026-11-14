@@ -23,7 +23,7 @@ class ImpersonationManager
         // Only from the browser app (cookie session), never with an API token.
         abort_unless($request->hasSession(), 400);
 
-        Auth::guard('web')->login($target);
+        LastSignIn::quietly(fn () => Auth::guard('web')->login($target));
         $request->session()->regenerate();
         $request->session()->put([
             // The restaurant's id: the "Viewing as" badge, and the flag that keeps the platform area closed.
@@ -83,7 +83,7 @@ class ImpersonationManager
 
             return null;
         }
-        Auth::guard('web')->login($admin);
+        LastSignIn::quietly(fn () => Auth::guard('web')->login($admin));
         $request->session()->regenerate();
 
         return $admin;

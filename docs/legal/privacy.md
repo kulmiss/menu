@@ -24,6 +24,7 @@ Each restaurant decides what it puts on its menu. For questions about a restaura
 - **Plan and billing:** your plan, paid-until date, the payments we record (amount, method, reference) and invoices with the billing details you give us.
 - **Settings:** for example, whether you get news e-mails or the monthly report.
 - **Sign-in sessions:** while you are signed in, your session is stored with your IP address and browser type. It is removed after it expires.
+- **Last sign-in:** the date and time you last signed in to the admin. We keep only the latest one (no history, no IP address) and use it to see which restaurants are active.
 - **Activity log:** a record of changes in your restaurant (who changed what, and when). It stores a scrambled one-way code of the IP address, not the address itself.
 - **Security:** to stop abuse, we use your IP address for a short time (up to one hour) to limit repeated sign-in and sign-up attempts.
 - **Support:** e-mails you send us, and notes our team keeps about your account, such as support history.

@@ -48,7 +48,8 @@ final class LoginCheck
         // A weak password (older than the M3 list) only gets a gentle banner, never a forced reset.
         $weak = strlen($password) < 10 || NotCommonPassword::isWeak($password, $user->email);
         if ((bool) $user->password_weak !== $weak) {
-            $user->forceFill(['password_weak' => $weak])->saveQuietly();
+            // Not a change the user made: leave updated_at alone (last sign-in, QUESTIONS #187).
+            User::withoutTimestamps(fn () => $user->forceFill(['password_weak' => $weak])->saveQuietly());
         }
 
         return $user;

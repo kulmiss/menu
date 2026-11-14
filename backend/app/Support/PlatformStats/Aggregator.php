@@ -71,7 +71,7 @@ final class Aggregator
             ->selectRaw('tenant_id, SUM(created_at >= ?) AS d7, SUM(created_at >= ?) AS d30, MAX(created_at) AS last', [$d(6), $d(29)])
             ->get()->keyBy('tenant_id');
         $members = DB::table('memberships')->join('users', 'users.id', '=', 'memberships.user_id')->groupBy('memberships.tenant_id')
-            ->selectRaw('memberships.tenant_id, COUNT(*) AS n, SUM(users.two_factor_confirmed_at IS NOT NULL) AS tfa')
+            ->selectRaw('memberships.tenant_id, COUNT(*) AS n, SUM(users.two_factor_confirmed_at IS NOT NULL) AS tfa, MAX(users.last_login_at) AS signed_in')
             ->get()->keyBy('tenant_id');
         $count = fn (string $table, ?callable $where = null) => tap(DB::table($table), fn ($q) => $where ? $where($q) : null)
             ->groupBy('tenant_id')->selectRaw('tenant_id, COUNT(*) AS n')->pluck('n', 'tenant_id');
@@ -136,6 +136,7 @@ final class Aggregator
                 'edits_7d' => (int) ($edits[$id]->d7 ?? 0),
                 'edits_30d' => $edits30,
                 'last_edit_at' => $edits[$id]->last ?? null,
+                'last_sign_in_at' => $members[$id]->signed_in ?? null,
                 'last_view_on' => $lastView[$id] ?? null,
                 'members' => (int) ($members[$id]->n ?? 0),
                 'members_2fa' => (int) ($members[$id]->tfa ?? 0),
@@ -154,7 +155,7 @@ final class Aggregator
                 'first_paid_on' => isset($paid[$id]) ? CarbonImmutable::parse($paid[$id]->first)->toDateString() : null,
                 'paid_until' => isset($paid[$id]) ? CarbonImmutable::parse($paid[$id]->until)->toDateString() : null,
                 'score' => $score,
-                'band' => Health::band($score, $views30, $edits30, $state),
+                'band' => Health::band($score, $views30, $edits30, $state, isset($members[$id]->signed_in) && $members[$id]->signed_in >= $this->today->subDays(29)->toDateTimeString()),
                 'computed_at' => $now,
             ];
         }
@@ -299,14 +300,29 @@ final class Aggregator
             ->join('tenants', 'tenants.id', '=', 'memberships.tenant_id')->whereNull('tenants.deleted_at')
             ->groupBy('tenants.plan_id', 'memberships.role')
             ->selectRaw('tenants.plan_id AS plan, memberships.role AS role, COUNT(*) AS n, SUM(users.two_factor_confirmed_at IS NOT NULL) AS tfa')->get();
-        $active = fn (int $days) => DB::table('activity_log')->join('tenants', 'tenants.id', '=', 'activity_log.tenant_id')
-            ->whereNotNull('activity_log.actor_id')->where('activity_log.action', 'not like', 'platform.%')->whereNull('activity_log.impersonator_id')->where('activity_log.created_at', '>=', $this->today->subDays($days - 1))
-            ->groupBy('tenants.plan_id')->selectRaw('tenants.plan_id AS plan, COUNT(DISTINCT activity_log.actor_id) AS n')->pluck('n', 'plan');
-        $a7 = $active(7);
-        $a30 = $active(30);
-        $all = DB::table('activity_log')->whereNotNull('tenant_id')->whereNotNull('actor_id')->where('action', 'not like', 'platform.%')->whereNull('impersonator_id');
+        // Team members active in a window: signed in (last sign-in, QUESTIONS #187) or made a change.
+        $people = function (int $days): array {
+            $since = $this->today->subDays($days - 1);
+            $changed = DB::table('activity_log')->join('tenants', 'tenants.id', '=', 'activity_log.tenant_id')->whereNull('tenants.deleted_at')
+                ->whereNotNull('activity_log.actor_id')->where('activity_log.action', 'not like', 'platform.%')->whereNull('activity_log.impersonator_id')
+                ->where('activity_log.created_at', '>=', $since)->distinct()->get(['tenants.plan_id AS plan', 'activity_log.actor_id AS user']);
+            $signedIn = DB::table('memberships')->join('users', 'users.id', '=', 'memberships.user_id')->join('tenants', 'tenants.id', '=', 'memberships.tenant_id')
+                ->whereNull('tenants.deleted_at')->where('users.last_login_at', '>=', $since)->distinct()->get(['tenants.plan_id AS plan', 'users.id AS user']);
+            $sets = ['active' => [], 'signed_in' => []];
+            foreach ([['active', $changed], ['active', $signedIn], ['signed_in', $signedIn]] as [$kind, $list]) {
+                foreach ($list as $r) {
+                    $sets[$kind][(int) $r->plan][(int) $r->user] = true;
+                    $sets[$kind][0][(int) $r->user] = true;
+                }
+            }
+
+            return $sets;
+        };
+        $w7 = $people(7);
+        $w30 = $people(30);
         $value = [];
-        $blank = ['members' => 0, 'owners' => 0, 'managers' => 0, 'staff' => 0, 'with_2fa' => 0, 'owners_2fa' => 0, 'active_7d' => 0, 'active_30d' => 0];
+        $blank = ['members' => 0, 'owners' => 0, 'managers' => 0, 'staff' => 0, 'with_2fa' => 0, 'owners_2fa' => 0,
+            'active_7d' => 0, 'active_30d' => 0, 'signed_in_7d' => 0, 'signed_in_30d' => 0];
         foreach ($rows as $r) {
             foreach ([(int) $r->plan, 0] as $plan) {
                 $value[$plan] ??= $blank;
@@ -320,8 +336,10 @@ final class Aggregator
             }
         }
         foreach ($value as $plan => $_) {
-            $value[$plan]['active_7d'] = $plan === 0 ? (clone $all)->where('created_at', '>=', $this->today->subDays(6))->distinct()->count('actor_id') : (int) ($a7[$plan] ?? 0);
-            $value[$plan]['active_30d'] = $plan === 0 ? (clone $all)->where('created_at', '>=', $this->today->subDays(29))->distinct()->count('actor_id') : (int) ($a30[$plan] ?? 0);
+            $value[$plan]['active_7d'] = count($w7['active'][$plan] ?? []);
+            $value[$plan]['active_30d'] = count($w30['active'][$plan] ?? []);
+            $value[$plan]['signed_in_7d'] = count($w7['signed_in'][$plan] ?? []);
+            $value[$plan]['signed_in_30d'] = count($w30['signed_in'][$plan] ?? []);
         }
         DB::table('platform_snapshot')->upsert([['key' => 'admins', 'value' => json_encode($value ?: [0 => $blank]), 'computed_at' => now()]], ['key']);
     }

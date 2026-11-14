@@ -8,7 +8,7 @@ use App\Enums\SubscriptionState;
  * A restaurant's health score, 0–100 (QUESTIONS #186), from four things the
  * app already knows:
  *   setup completeness 30 · admin edits in 30 days 20 · menu views in 30 days 30 · plan status 20
- * Bands: inactive = no menu views and no edits in 30 days (or the menu is off);
+ * Bands: inactive = no menu views, no edits and no team sign-in in 30 days (or the menu is off);
  * healthy = 60 and up; at risk = the rest.
  */
 final class Health
@@ -30,9 +30,9 @@ final class Health
         return (int) round(min(100, $setup + $edits + $views + $plan));
     }
 
-    public static function band(int $score, int $views30, int $edits30, SubscriptionState $state): string
+    public static function band(int $score, int $views30, int $edits30, SubscriptionState $state, bool $signedIn30 = false): string
     {
-        if (($views30 === 0 && $edits30 === 0) || in_array($state, [SubscriptionState::Unavailable, SubscriptionState::Suspended], true)) {
+        if (($views30 === 0 && $edits30 === 0 && ! $signedIn30) || in_array($state, [SubscriptionState::Unavailable, SubscriptionState::Suspended], true)) {
             return 'inactive';
         }
 

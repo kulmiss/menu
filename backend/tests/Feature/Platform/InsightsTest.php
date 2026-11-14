@@ -113,7 +113,7 @@ it('answers growth, engagement, usage, top and team widgets', function () {
         ->and($top['growth'][0]['total'])->toBe(320);
 
     $t = $this->getJson(p('insights/admins'))->assertOk()->json('data');
-    expect($t['members'])->toBe(1)->and($t['active_7d'])->toBe(1)->and($t['logins_recorded'])->toBeFalse();
+    expect($t['members'])->toBe(1)->and($t['active_7d'])->toBe(1)->and($t['signed_in_7d'])->toBe(0)->and($t['logins_recorded'])->toBeTrue();
     $this->getJson(p("insights/admins?plan={$free->id}"))->assertOk()->assertJsonPath('data.active_7d', 0);
 
     $this->getJson(p('insights/overview?from=2026-01-01&to=2026-01-31'))->assertOk()->assertJsonPath('data.from', '2026-01-01');
@@ -198,3 +198,20 @@ it('stays fast with 1,500 restaurants and a year of data', function () {
     expect($total)->toBeLessThan(1000);
     fwrite(STDERR, sprintf("\n  dashboard: aggregate %.1fs (%s), all widgets %.0f ms uncached\n", $built, json_encode($steps), $total));
 })->group('slow');
+
+it('counts team sign-ins as activity (QUESTIONS #187)', function () {
+    ['c' => $c] = insightsWorld();
+    [$member] = member(Role::Manager, $c);
+    $member->forceFill(['last_login_at' => now()->subDays(3)])->save();
+    app(Aggregator::class)->run(2);
+    $this->actingAs(superAdmin());
+
+    $row = DB::table('tenant_health')->where('tenant_id', $c->id)->first();
+    expect($row->last_sign_in_at)->not->toBeNull()->and($row->band)->toBe('at_risk'); // no views or edits, but the team signed in
+    $e = $this->getJson(p('insights/engagement?days=30'))->assertOk()->json('data');
+    expect($e['signed_in_7d'])->toBe(1)->and($e['signed_in_30d'])->toBe(1)
+        ->and($e['active_7d'])->toBe(3) // a: views and edits, b: views, c: sign-in
+        ->and($e['last_sign_in_at'])->not->toBeNull();
+    $t = $this->getJson(p('insights/admins'))->assertOk()->json('data');
+    expect($t['signed_in_7d'])->toBe(1)->and($t['active_7d'])->toBe(2); // the owner of a changed things, the manager of c signed in
+});
