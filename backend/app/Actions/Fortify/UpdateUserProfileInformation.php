@@ -5,6 +5,7 @@ namespace App\Actions\Fortify;
 use App\Models\User;
 use App\Notifications\EmailChangeConfirm;
 use App\Notifications\EmailChangeNotice;
+use App\Support\Security\SecurityLog;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Validator;
@@ -57,6 +58,7 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
 
         Notification::route('mail', $input['email'])->notify(new EmailChangeConfirm($user->id, $input['email'], $user->name));
         $user->notify(new EmailChangeNotice($input['email'], $user->name));
+        SecurityLog::event('email_change.requested', $user->id);
     }
 
     /** The link from the new address: makes the change once, then the link is spent. */
@@ -72,6 +74,7 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
         }
 
         $user->forceFill(['email' => $user->pending_email, 'pending_email' => null, 'email_verified_at' => now()])->save();
+        SecurityLog::event('email_change.confirmed', $user->id);
 
         return true;
     }

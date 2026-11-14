@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Mobile;
 
 use App\Http\Controllers\Controller;
 use App\Models\PersonalAccessToken;
+use App\Support\Security\SecurityLog;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -38,6 +39,7 @@ class DeviceController extends Controller
     public function destroy(Request $request, int $device): Response
     {
         $request->user()->tokens()->whereKey($device)->firstOrFail()->delete();
+        SecurityLog::event('tokens.revoked', $request->user()->id, null, ['count' => 1, 'why' => 'device']);
 
         return response()->noContent();
     }

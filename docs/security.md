@@ -56,3 +56,13 @@ short operator view; each section names the finding it closes.
   (`.htaccess` answers 403). The Nginx example runs only `index.php` and `qr.php`.
 - File permissions (cPanel): folders `755`, files `644`, `.env` `600`, `storage/` and `bootstrap/cache/`
   writable by your user only. The document root must be `backend/public` (docs/deploy.md).
+
+## Security log (M11)
+- `storage/logs/security-YYYY-MM-DD.log`, kept 30 days (`SECURITY_LOG_DAYS`). One line per event:
+  `login.failed`, `login.locked`, `two_factor.failed`, `password.reset_requested`, `password.reset`,
+  `password.changed`, `email_change.requested`, `email_change.confirmed`, `tokens.revoked`,
+  `signup.blocked`, `upload.refused`, `outbound.refused`.
+- Each line holds only the user id (when known) and short keyed hashes of the e-mail and the IP address, so
+  repeats show up without storing personal data. It never holds passwords, codes, tokens or addresses (a test
+  checks this). "Log in as" is not recorded (owner's choice).
+- Quick look on cPanel: *File Manager → storage/logs*, or `grep login.locked storage/logs/security-*.log`.

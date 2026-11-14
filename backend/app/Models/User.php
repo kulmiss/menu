@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Notifications\VerifyEmailNotification;
 use App\Support\Security\RecoveryCodes;
+use App\Support\Security\SecurityLog;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -108,7 +109,10 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function revokeAppTokens(?int $exceptTokenId = null): int
     {
-        return $this->tokens()->when($exceptTokenId !== null, fn ($q) => $q->whereKeyNot($exceptTokenId))->delete();
+        $count = $this->tokens()->when($exceptTokenId !== null, fn ($q) => $q->whereKeyNot($exceptTokenId))->delete();
+        SecurityLog::event('tokens.revoked', $this->id, null, ['count' => $count, 'why' => 'password']);
+
+        return $count;
     }
 
     public function membershipFor(Tenant|int $tenant): ?Membership

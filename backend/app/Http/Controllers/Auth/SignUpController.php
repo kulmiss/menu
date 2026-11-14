@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Notifications\SignupNotification;
 use App\Rules\ValidSlug;
 use App\Support\PlatformSettings;
+use App\Support\Security\SecurityLog;
 use App\Support\SignUp\SignUp;
 use App\Support\SignUp\Turnstile;
 use Illuminate\Http\JsonResponse;
@@ -70,6 +71,7 @@ class SignUpController extends Controller
         // Per address and per network, on top of the route's per-minute limit.
         foreach (['signup:ip:'.$request->ip() => 10, 'signup:email:'.sha1($email) => 3] as $key => $max) {
             if (RateLimiter::tooManyAttempts($key, $max)) {
+                SecurityLog::event('signup.blocked', null, $email, ['why' => 'too_many']);
                 abort(429, __('signup.too_many'));
             }
             RateLimiter::hit($key, 3600);
@@ -92,11 +94,13 @@ class SignUpController extends Controller
         ])->validate();
 
         if (! $turnstile->passes((string) $request->input('turnstile'), $request->ip())) {
+            SecurityLog::event('signup.blocked', null, $data['email'], ['why' => 'captcha']);
             throw ValidationException::withMessages(['turnstile' => __('signup.captcha')]);
         }
 
         $domain = Str::after($data['email'], '@');
         if (in_array($domain, (array) PlatformSettings::get('disposable_domains'), true)) {
+            SecurityLog::event('signup.blocked', null, $data['email'], ['why' => 'disposable']);
             throw ValidationException::withMessages(['email' => __('signup.email_not_allowed')]);
         }
 

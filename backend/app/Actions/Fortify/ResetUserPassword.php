@@ -4,6 +4,7 @@ namespace App\Actions\Fortify;
 
 use App\Models\User;
 use App\Notifications\SecurityNotice;
+use App\Support\Security\SecurityLog;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\ResetsUserPasswords;
 
@@ -22,5 +23,6 @@ class ResetUserPassword implements ResetsUserPasswords
         // Whoever had the old password may have signed in to the app: sign every device out.
         $user->revokeAppTokens();
         $user->notify(new SecurityNotice('password_reset'));
+        SecurityLog::event('password.reset', $user->id);
     }
 }

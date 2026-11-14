@@ -2,6 +2,7 @@
 
 namespace App\Http\Responses;
 
+use App\Support\Security\SecurityLog;
 use Illuminate\Http\JsonResponse;
 use Laravel\Fortify\Contracts\FailedPasswordResetLinkRequestResponse;
 use Laravel\Fortify\Contracts\SuccessfulPasswordResetLinkRequestResponse;
@@ -17,6 +18,8 @@ class GenericResetLinkResponse implements FailedPasswordResetLinkRequestResponse
 
     public function toResponse($request): JsonResponse
     {
+        SecurityLog::event('password.reset_requested', null, (string) $request->input('email'), ['status' => basename(str_replace('.', '/', $this->status)) ?: null]);
+
         return new JsonResponse(['message' => __('security.reset_link_generic')], 200);
     }
 }

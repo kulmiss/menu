@@ -7,6 +7,7 @@ use App\Actions\Fortify\UpdateUserProfileInformation;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Notifications\SecurityNotice;
+use App\Support\Security\SecurityLog;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -46,6 +47,7 @@ class AccountController extends Controller
         // Other devices sign in again; this one stays.
         $user->revokeAppTokens($user->currentAccessToken()->getKey());
         $user->notify(new SecurityNotice('password_changed'));
+        SecurityLog::event('password.changed', $user->id);
 
         return response()->noContent();
     }
