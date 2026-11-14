@@ -7,6 +7,9 @@ _Last updated: 2026-11-12 13:00 EAT. Everything requested is merged into `develo
 > **Working mode (owner):** small PRs into `develop`, CI green, tests for each change, decisions in QUESTIONS.md. Stop only for: changes outside this project, steps that can't be undone, licence doubts, the same CI failure 3 times, or the working limit.
 
 
+## Security hardening (2026-11-14) — SECURITY_REPORT.md, SECURITY_FINAL_REPORT.md
+Audit (#96) and fixes #97–#114, stacked on #95; merge order and server to-dos are in SECURITY_FINAL_REPORT.md §2 and §5. App side: kulmiss/menu-admin-app #4–#10. Owner's decisions: Owner 2FA encouraged, plus a Super Admin switch (off); no certificate pinning; no Play Integrity (root warning only); stricter passwords for new passwords only, with a banner; nobody signed out. New: `BACKUP_KEY` (`php artisan backup:key --write`), optional `TRUSTED_PROXIES`, security log `storage/logs/security-*.log` (30 days), `security:two-factor-reminders` daily 07:10 UTC, weekly ZAP workflow. New routes must be classified in `tests/Feature/Security/AuthorizationMatrixTest.php`. CI runs jobs only for changed paths (Actions minutes). Open for the owner: the "remember me" lifetime (400 days by default). Full Pest suite: 566+ passed.
+
 ## Mobile app backend (2026-11-14) — QUESTIONS #187–#190
 For the Flutter app [kulmiss/menu-admin-app](https://github.com/kulmiss/menu-admin-app). Merge in this order (each is stacked on the one before): #92 token sign-in, devices, account → #93 "log in as" token → #94 push + inbox → #95 `mobile/config` + Privacy Policy lines. Live: `php artisan migrate --force` (4 migrations). Optional push setup: docs/deploy.md §10a (`FCM_CREDENTIALS`). New scheduled commands: `mobile:prune-tokens` 03:25, `push:plan-reminders` 09:00, `push:followups` 08:00, `push:health` every 15 min, inbox prune 03:35. API: docs/mobile-api.md. The web admin and the customer menu are unchanged; full Pest suite: 479 passed.
 
