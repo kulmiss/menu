@@ -7,8 +7,10 @@ use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\Tenant;
 use App\Support\ActivityLogger;
+use App\Support\Billing\InvoicePdf;
 use App\Support\Billing\Invoices;
 use App\Support\PlatformSettings;
+use App\Support\Push\Push;
 use App\Support\Tables\TableQuery;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -119,6 +121,11 @@ class PaymentController extends Controller
             }
         }
         $tenant->bumpCacheVersion();
+        // Push to the other Super Admins (QUESTIONS #189).
+        Push::send(collect(Push::superAdmins())->reject(fn ($u) => $u->id === $request->user()?->id), 'payment_recorded',
+            __('push.payment_recorded.title', ['restaurant' => $tenant->name]),
+            __('push.payment_recorded.body', ['amount' => InvoicePdf::money($payment->amount_minor, $payment->currency), 'by' => (string) $request->user()?->name]),
+            "/p/restaurants/{$tenant->id}/payments");
         $this->activity->log('platform.payment_recorded', $payment, ['amount' => ['to' => $payment->amount_minor], 'period_end' => ['to' => $payment->period_end->toDateString()]], null);
 
         return response()->json(['data' => self::row($payment->load(['tenant', 'plan', 'invoices']))], 201);

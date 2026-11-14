@@ -16,6 +16,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Sanctum\HasApiTokens;
 
 /**
+ * @property array<string, bool>|null $push_settings Push types switched off (QUESTIONS #189)
  * @property Carbon|null $news_unsubscribed_at News e-mails off (account e-mails still sent)
  */
 #[Fillable(['name', 'email', 'password', 'locale'])]
@@ -49,6 +50,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'two_factor_confirmed_at' => 'datetime',
             'last_login_at' => 'datetime',
             'news_unsubscribed_at' => 'datetime',
+            'push_settings' => 'array',
         ];
     }
 
@@ -56,6 +58,12 @@ class User extends Authenticatable implements MustVerifyEmail
     public function memberships(): HasMany
     {
         return $this->hasMany(Membership::class);
+    }
+
+    /** @return HasMany<PushToken, $this> */
+    public function pushTokens(): HasMany
+    {
+        return $this->hasMany(PushToken::class);
     }
 
     public function membershipFor(Tenant|int $tenant): ?Membership

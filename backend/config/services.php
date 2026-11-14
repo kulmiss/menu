@@ -14,6 +14,12 @@ return [
     |
     */
 
+    // Push notifications for the mobile app (QUESTIONS #189): path of the Firebase
+    // service-account JSON, outside the web root and never in git.
+    'fcm' => [
+        'credentials' => env('FCM_CREDENTIALS'),
+    ],
+
     'postmark' => [
         'key' => env('POSTMARK_API_KEY'),
     ],

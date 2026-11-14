@@ -34,4 +34,31 @@ Answers with secrets carry `Cache-Control: no-store`; the idempotency table then
 
 `POST /api/v1/platform/restaurants/{id}/impersonate-token` (Super Admin with two-factor, app token) → `{token, tenant_id, ends_at}`: a token for the restaurant owner that works for 2 hours, with the same blocked actions as the web (`403 impersonation.blocked`) and no platform access. `/me` shows `impersonation`. `POST /api/v1/impersonation/stop` with that token deletes it; the app then goes back to the Super Admin's own token.
 
+## Push notifications and inbox (QUESTIONS #189)
+
+| Request | Notes |
+|---|---|
+| `POST /api/v1/mobile/push-tokens` `{token, platform}` | registers this phone's FCM token (linked to this sign-in; signing out removes it). A token already known moves to the new user. |
+| `DELETE /api/v1/mobile/push-tokens` `{token}` | |
+| `GET /api/v1/mobile/notification-settings` | `[{type, label, group: restaurant\|platform, enabled}]` for the user's roles |
+| `PUT /api/v1/mobile/notification-settings` `{settings: {type: bool}}` | only switched-off types are stored |
+| `GET /api/v1/mobile/notifications?cursor=` | inbox, newest first, 30 a page, last 90 days, `meta.unread`, `meta.next_cursor` |
+| `POST /api/v1/mobile/notifications/read` `{ids: [..]}` or `{all: true}` | |
+
+Push payload `data`: `type`, `link` (an app path), `notification_id`, `tenant_id`. Links: `/r/{tenant}/billing`, `/r/{tenant}/insights`, `/r/{tenant}/team`, `/r/{tenant}/news/{id}`, `/p/restaurants/{id}`, `/p/restaurants/{id}/payments`, `/p/approvals`, `/p/backups`, `/p/dashboard`, `/p/restaurants?follow_up=due`.
+
+| Type | Who | When |
+|---|---|---|
+| `plan_expiring` / `plan_expired` | owners | `push:plan-reminders` 09:00: 7, 3, 1 days before; the day after |
+| `monthly_report` | owners, managers | with the monthly Insights e-mail |
+| `invitation_accepted` | owners | a member accepts |
+| `platform_announcement` | owners, managers of the restaurants it shows to | a new announcement that starts now |
+| `signup_new` / `signup_pending` | Super Admins | e-mail confirmed (live / waiting for approval) |
+| `payment_recorded` | the other Super Admins | payment saved |
+| `backup_failed` | Super Admins | with the daily backup alert |
+| `health_warning` | Super Admins | `push:health` every 15 min: jobs waiting > 15 min, ≥ 10 failed jobs in an hour, < 10 % disk free; each at most every 6 h |
+| `followups_due` | Super Admins | `push:followups` 08:00 |
+
+Sending: inbox row at once; the phone push is a queued job (`SendPush`, 3 tries) run by the existing cron queue worker, through FCM HTTP v1 with the service account in `FCM_CREDENTIALS` (docs/deploy.md §10a). Without it, nothing is sent and nothing fails. Tokens of removed apps (404/UNREGISTERED) are deleted.
+
 Everything else (restaurant `t/{id}/…`, Super Admin `platform/…`) works unchanged with the token.

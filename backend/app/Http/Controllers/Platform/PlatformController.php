@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Platform;
 
 use App\Enums\SubscriptionState;
 use App\Http\Controllers\Controller;
+use App\Jobs\PushAnnouncement;
 use App\Models\ActivityLog;
 use App\Models\Plan;
 use App\Models\PlatformAnnouncement;
@@ -179,6 +180,10 @@ class PlatformController extends Controller
         }
         $model->fill([...$data, 'created_by' => $model->created_by ?? $request->user()?->getAuthIdentifier()])->save();
         $this->activity->log('platform.announcement_saved', $model, null, null);
+        // A new announcement that shows now goes to the restaurants' phones too (QUESTIONS #189).
+        if ($announcement === null && ($model->starts_at === null || $model->starts_at->lte(now()))) {
+            PushAnnouncement::dispatch($model->id)->afterCommit();
+        }
 
         return response()->json(['data' => self::announcementRow($model)], $announcement ? 200 : 201);
     }

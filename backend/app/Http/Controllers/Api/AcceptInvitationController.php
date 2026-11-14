@@ -7,6 +7,7 @@ use App\Http\Resources\TenantResource;
 use App\Models\Invitation;
 use App\Models\Membership;
 use App\Support\ActivityLogger;
+use App\Support\Push\Push;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -49,6 +50,11 @@ class AcceptInvitationController extends Controller
         });
 
         $activity->log('invitation.accepted', $invitation, ['user_id' => $user->id], $invitation->tenant_id);
+        // Tell the owners on their phones (QUESTIONS #189).
+        Push::send(collect(Push::team($invitation->tenant_id))->reject(fn ($u) => $u->id === $user->id), 'invitation_accepted',
+            __('push.invitation_accepted.title', ['name' => $user->name]),
+            __('push.invitation_accepted.body', ['name' => $user->name, 'role' => $membership->role->value, 'restaurant' => $invitation->tenant->name]),
+            "/r/{$invitation->tenant_id}/team", $invitation->tenant_id);
 
         return (new TenantResource($invitation->tenant, $membership))->response();
     }

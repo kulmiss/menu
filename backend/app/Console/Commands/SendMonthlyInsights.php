@@ -7,8 +7,10 @@ use App\Models\Tenant;
 use App\Models\User;
 use App\Notifications\MonthlyInsightsNotification;
 use App\Support\Features;
+use App\Support\Push\Push;
 use Carbon\CarbonImmutable;
 use Illuminate\Console\Command;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 
@@ -41,6 +43,10 @@ class SendMonthlyInsights extends Command
                 $tenant->forceFill(['insights_report_sent' => $month])->save();
                 if ($owners->isNotEmpty()) {
                     Notification::send($owners, new MonthlyInsightsNotification($tenant->id, $month));
+                    Push::send(Push::team($tenant->id, [Role::Owner->value, Role::Manager->value]), 'monthly_report',
+                        __('push.monthly_report.title', ['month' => Carbon::parse($month.'-01')->format('F')]),
+                        __('push.monthly_report.body', ['restaurant' => $tenant->name]),
+                        "/r/{$tenant->id}/insights", $tenant->id);
                     $sent++;
                 }
             });

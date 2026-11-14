@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Notifications\SignupNotification;
 use App\Support\ActivityLogger;
 use App\Support\PlatformSettings;
+use App\Support\Push\Push;
 use App\Support\Qr\QrMap;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
@@ -146,6 +147,12 @@ class SignUp
 
     private function notifyAdmins(Tenant $tenant, User $owner, bool $approval): void
     {
+        // Phones of the Super Admins (QUESTIONS #189); each can switch these off in the app.
+        $type = $approval ? 'signup_pending' : 'signup_new';
+        Push::send(Push::superAdmins(), $type,
+            __("push.{$type}.title", ['restaurant' => $tenant->name]),
+            __("push.{$type}.body", ['owner' => $owner->name, 'email' => $owner->email]),
+            $approval ? '/p/approvals' : "/p/restaurants/{$tenant->id}");
         if (! PlatformSettings::get('signup_notify')) {
             return;
         }
