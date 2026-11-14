@@ -94,7 +94,7 @@ it('shows a friendly page instead of the menu when the restaurant is unavailable
     sampleMenu($tenant);
 
     $this->get('/'.$tenant->slug)->assertStatus(503)
-        ->assertSee('Menu unavailable')->assertDontSee('Macchiato')
+        ->assertSee('Menu unavailable')->assertSee('prefers-color-scheme:dark', false)->assertDontSee('Macchiato')
         ->assertHeader('X-Robots-Tag', 'noindex');
 })->with(['suspended', 'unavailable']);
 
