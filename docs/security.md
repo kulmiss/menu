@@ -66,3 +66,10 @@ short operator view; each section names the finding it closes.
   repeats show up without storing personal data. It never holds passwords, codes, tokens or addresses (a test
   checks this). "Log in as" is not recorded (owner's choice).
 - Quick look on cPanel: *File Manager → storage/logs*, or `grep login.locked storage/logs/security-*.log`.
+
+## Sessions (L7)
+- **Settings → Security → "Sign out of all other browsers"** (password needed): every other website
+  session and "remember me" cookie ends, this browser stays. App devices: Account → Devices in the app.
+- New installs encrypt the stored session data (`SESSION_ENCRYPT=true` in `.env.example`). **On a running
+  site, switching it on signs everyone out once**, so do it at a quiet moment (or leave it: sessions are in the
+  database, which the backups now encrypt).

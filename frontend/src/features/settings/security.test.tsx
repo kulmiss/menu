@@ -66,3 +66,32 @@ describe('Settings → one-tap two-factor setup (SECURITY_REPORT.md M17)', () =>
     await expect.element(screen.getByText(/JBSWY3DPEHPK3PXP/)).toBeVisible()
   })
 })
+
+describe('Settings → other browsers (SECURITY_REPORT.md L7)', () => {
+  afterEach(() => fake.restore())
+
+  it('signs out of all other browsers after the password', async () => {
+    fake = fakeApi({
+      'POST /me/sessions/logout-others': { data: { message: 'ok' } },
+    })
+    const screen = await renderWithQuery(<SecuritySettings />, {
+      me: meFixture(),
+    })
+
+    await screen
+      .getByRole('button', { name: 'Sign out of all other browsers' })
+      .click()
+    await screen
+      .getByRole('dialog')
+      .getByLabelText('Password')
+      .fill('correct-horse-battery')
+    await screen.getByRole('button', { name: 'Continue' }).click()
+
+    await vi.waitFor(() => {
+      const call = fake
+        .apiCalls()
+        .find((c) => c.url === '/me/sessions/logout-others')
+      expect(call?.data).toEqual({ password: 'correct-horse-battery' })
+    })
+  })
+})

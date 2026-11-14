@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'sessions_ended' => 'Signed out of all other browsers. This one stays signed in.',
     'owner_two_factor_required' => 'Turn on two-factor sign-in first: your platform requires it for restaurant owners.',
     'two_factor_reminder' => [
         'subject' => 'Protect your :app account with two-factor sign-in',

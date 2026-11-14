@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Loader2, ShieldCheck, ShieldOff } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { validationErrors } from '@/lib/api'
+import { api, validationErrors } from '@/lib/api'
 import { handleServerError } from '@/lib/handle-server-error'
 import { toast } from '@/lib/toast'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -43,6 +43,7 @@ export function SecuritySettings({
     <>
       <PasswordSection />
       <TwoFactorSection startSetup={startSetup} />
+      <OtherBrowsersSection />
     </>
   )
 }
@@ -397,14 +398,51 @@ function TwoFactorSection({ startSetup }: { startSetup: boolean }) {
   )
 }
 
+/** "Sign out of all other browsers" (SECURITY_REPORT.md L7). Hidden during "log in as". */
+function OtherBrowsersSection() {
+  const { t } = useTranslation()
+  const me = useMe()
+  const [asking, setAsking] = useState(false)
+  if (me.impersonation) return null
+
+  return (
+    <SettingsSection
+      title={t('settings.sessions_title')}
+      intro={t('settings.sessions_intro')}
+    >
+      <Button
+        variant='outline'
+        className='min-h-11 w-fit sm:min-h-9'
+        onClick={() => setAsking(true)}
+      >
+        {t('settings.sessions_logout_others')}
+      </Button>
+      <PasswordPrompt
+        open={asking}
+        onOpenChange={setAsking}
+        check={(password) =>
+          api.post('/me/sessions/logout-others', { password })
+        }
+        onConfirmed={async () => {
+          setAsking(false)
+          toast.success(t('settings.sessions_done'))
+        }}
+      />
+    </SettingsSection>
+  )
+}
+
 function PasswordPrompt({
   open,
   onOpenChange,
   onConfirmed,
+  check = confirmPassword,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   onConfirmed: () => Promise<void>
+  /** What the password is sent to; Fortify's "confirm password" by default. */
+  check?: (password: string) => Promise<unknown>
 }) {
   const { t } = useTranslation()
   const [password, setPassword] = useState('')
@@ -416,7 +454,7 @@ function PasswordPrompt({
     setBusy(true)
     setError(null)
     try {
-      await confirmPassword(password)
+      await check(password)
       setPassword('')
       await onConfirmed()
     } catch (err) {
