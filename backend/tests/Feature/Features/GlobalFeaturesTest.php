@@ -28,7 +28,7 @@ it('switches a feature off for everyone, over the plan and the restaurant, and b
     Features::forget();
     expect(Features::enabled($tenant->fresh(), 'promotions'))->toBeFalse()
         ->and($tenant->fresh()->cache_version)->toBeGreaterThan($version) // guest pages rebuild
-        ->and(PlatformSettings::get('features_global'))->toBe(['promotions' => false, 'share' => false]);
+        ->and(PlatformSettings::get('features_global'))->toEqual(['promotions' => false, 'share' => false]); // MySQL JSON keeps its own key order
     $this->assertDatabaseHas('activity_log', ['action' => 'platform.features_global_changed']);
 
     // The restaurant's own API, its /me and the guest menu follow.

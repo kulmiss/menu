@@ -34,7 +34,9 @@ describe('Settings → Features', () => {
     await expect.element(screen.getByText('3 of 4 features on')).toBeVisible()
     await expect.element(screen.getByText('Off for everyone')).toBeVisible()
     await expect.element(screen.getByText('off on 1 plan')).toBeVisible()
-    await expect.element(screen.getByRole('heading', { name: 'Platform' })).toBeVisible()
+    await expect
+      .element(screen.getByRole('heading', { name: 'Platform' }))
+      .toBeVisible()
 
     await userEvent.click(screen.getByRole('switch', { name: 'Promotions' }))
     await expect.element(screen.getByText('1 change not saved')).toBeVisible()
