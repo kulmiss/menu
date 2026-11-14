@@ -28,6 +28,9 @@ use App\Http\Controllers\Api\Restaurant\QrCodeController;
 use App\Http\Controllers\Api\TeamController;
 use App\Http\Controllers\Api\TenantController;
 use App\Http\Controllers\Auth\SignUpController;
+use App\Http\Controllers\Mobile\AccountController as MobileAccountController;
+use App\Http\Controllers\Mobile\AuthController as MobileAuthController;
+use App\Http\Controllers\Mobile\DeviceController;
 use App\Http\Controllers\NewsSubscriptionController;
 use App\Http\Controllers\Platform\BackupController;
 use App\Http\Controllers\Platform\CampaignController;
@@ -55,6 +58,13 @@ Route::post('v1/beacon', BeaconController::class)
     ->withoutMiddleware([EnsureFrontendRequestsAreStateful::class])
     ->name('beacon');
 
+// Mobile app sign-in (QUESTIONS #187). Not idempotent on purpose: a replayed
+// answer would have to store the new token in the database.
+Route::prefix('v1/mobile/auth')->controller(MobileAuthController::class)->group(function () {
+    Route::post('login', 'login')->middleware('throttle:mobile-login')->name('mobile.login');
+    Route::post('two-factor', 'twoFactor')->middleware('throttle:mobile-two-factor')->name('mobile.two-factor');
+});
+
 Route::prefix('v1')->middleware('idempotent')->group(function () {
     Route::get('invitations/{token}', [AcceptInvitationController::class, 'show'])
         ->middleware('throttle:30,1');
@@ -69,6 +79,21 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('me', MeController::class);
+
+        // Mobile app: this device, other devices, account (QUESTIONS #187).
+        Route::prefix('mobile')->middleware('mobile.token')->group(function () {
+            Route::post('auth/logout', [MobileAuthController::class, 'logout']);
+            Route::post('auth/logout-all', [MobileAuthController::class, 'logoutAll']);
+            Route::get('devices', [DeviceController::class, 'index']);
+            Route::delete('devices/{device}', [DeviceController::class, 'destroy'])->whereNumber('device');
+            Route::put('account/profile', [MobileAccountController::class, 'profile']);
+            Route::put('account/password', [MobileAccountController::class, 'password'])->middleware('throttle:6,1');
+            Route::post('account/two-factor', [MobileAccountController::class, 'enableTwoFactor'])->middleware('throttle:6,1');
+            Route::get('account/two-factor', [MobileAccountController::class, 'twoFactorSetup']);
+            Route::post('account/two-factor/confirm', [MobileAccountController::class, 'confirmTwoFactor'])->middleware('throttle:6,1');
+            Route::delete('account/two-factor', [MobileAccountController::class, 'disableTwoFactor'])->middleware('throttle:6,1');
+            Route::post('account/two-factor/recovery-codes', [MobileAccountController::class, 'recoveryCodes'])->middleware('throttle:6,1');
+        });
         Route::put('me/news', [NewsSubscriptionController::class, 'update']);
         Route::post('impersonation/stop', [AnnouncementController::class, 'stopImpersonating']);
 
