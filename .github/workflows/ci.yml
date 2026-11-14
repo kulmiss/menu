@@ -1,11 +1,14 @@
 # Checks only. CI never commits or pushes.
 name: CI
 
+# Lean on Actions minutes (private repos, owner 2026-11-14): every job runs only
+# when its files changed; docs-only changes run nothing but the secret scan.
+# Pull requests into any branch (stacked PRs) are checked.
 on:
   pull_request:
-    branches: [develop, main]
   push:
     branches: [develop]
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -15,8 +18,52 @@ permissions:
   contents: read
 
 jobs:
-  backend:
+  changes:
     runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      backend: ${{ steps.f.outputs.backend }}
+      frontend: ${{ steps.f.outputs.frontend }}
+      guest: ${{ steps.f.outputs.guest }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: f
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+              - '.github/workflows/ci.yml'
+            frontend:
+              - 'frontend/**'
+              - '.github/workflows/ci.yml'
+            guest:
+              - 'backend/resources/views/public/**'
+              - 'backend/resources/public-menu/**'
+              - 'backend/app/Support/PublicMenu/**'
+              - 'backend/app/Http/Controllers/PublicMenuController.php'
+              - 'backend/app/Http/Middleware/SecurityHeaders.php'
+              - 'backend/public/.htaccess'
+              - 'backend/public/sw.js'
+              - 'backend/database/seeders/**'
+              - 'backend/composer.lock'
+              - 'ci/lighthouse/**'
+              - '.github/workflows/ci.yml'
+      # Secret scan of the new commits only (free gitleaks binary, no licence needed).
+      - name: Secret scan (gitleaks)
+        run: |
+          curl -sSfL https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz | tar -xz gitleaks
+          if [ "${{ github.event_name }}" = pull_request ]; then range="${{ github.event.pull_request.base.sha }}..${{ github.sha }}"; else range="${{ github.event.before }}..${{ github.sha }}"; fi
+          case "$range" in 0000000*) range="-1";; esac
+          ./gitleaks git --no-banner --redact --log-opts="$range" .
+
+  backend:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
     defaults:
       run:
         working-directory: backend
@@ -48,6 +95,8 @@ jobs:
         run: composer validate --strict
       - name: Install dependencies
         run: composer install --no-interaction --no-progress --prefer-dist
+      - name: Known vulnerabilities (composer audit)
+        run: composer audit --locked --no-interaction
       - name: Prepare environment
         run: |
           cp .env.example .env
@@ -65,7 +114,10 @@ jobs:
         run: php artisan test
 
   frontend:
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
     runs-on: ubuntu-24.04
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: frontend
@@ -104,7 +156,10 @@ jobs:
   # A PR that breaks a budget fails here.
   guest-menu-speed:
     name: guest-menu-speed (${{ matrix.style }}, ${{ matrix.banner }})
+    needs: changes
+    if: needs.changes.outputs.guest == 'true'
     runs-on: ubuntu-24.04
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
