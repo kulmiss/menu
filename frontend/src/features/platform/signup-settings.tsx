@@ -30,6 +30,8 @@ export type SignupSettingsData = {
   signup_plan_id: number | null
   signup_approval: boolean
   signup_notify: boolean
+  /** Owners must set up two-factor (off: only encouraged). SECURITY_REPORT.md M17. */
+  owner_two_factor_required?: boolean
   turnstile_enabled: boolean
   turnstile_site_key: string
   turnstile_secret_set: boolean
@@ -53,6 +55,7 @@ export function SignupSettings({ initial }: { initial: SignupSettingsData }) {
       : FREE,
     signup_approval: initial.signup_approval,
     signup_notify: initial.signup_notify,
+    owner_two_factor_required: initial.owner_two_factor_required ?? false,
     turnstile_enabled: initial.turnstile_enabled,
     turnstile_site_key: initial.turnstile_site_key ?? '',
     turnstile_secret: '',
@@ -61,7 +64,12 @@ export function SignupSettings({ initial }: { initial: SignupSettingsData }) {
   })
 
   const toggle = (
-    k: 'signup_open' | 'signup_approval' | 'signup_notify' | 'turnstile_enabled'
+    k:
+      | 'signup_open'
+      | 'signup_approval'
+      | 'signup_notify'
+      | 'owner_two_factor_required'
+      | 'turnstile_enabled'
   ) => (
     <div className='flex items-start justify-between gap-4'>
       <div className='grid gap-0.5'>
@@ -90,6 +98,7 @@ export function SignupSettings({ initial }: { initial: SignupSettingsData }) {
           v.signup_plan_id === FREE ? null : Number(v.signup_plan_id),
         signup_approval: v.signup_approval,
         signup_notify: v.signup_notify,
+        owner_two_factor_required: v.owner_two_factor_required,
         turnstile_enabled: v.turnstile_enabled,
         turnstile_site_key: v.turnstile_site_key.trim(),
         // Empty keeps the stored secret.
@@ -156,6 +165,7 @@ export function SignupSettings({ initial }: { initial: SignupSettingsData }) {
           </div>
           {toggle('signup_approval')}
           {toggle('signup_notify')}
+          {toggle('owner_two_factor_required')}
 
           <fieldset className='grid gap-3 rounded-md border p-3'>
             <legend className='px-1 text-sm font-medium'>

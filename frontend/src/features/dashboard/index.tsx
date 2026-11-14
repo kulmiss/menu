@@ -18,6 +18,7 @@ import { Main } from '@/components/layout/main'
 import { useCurrentTenant } from '@/features/auth/use-me'
 import { dashboardQuery } from '@/features/insights/api'
 import { tr } from '@/features/menu/text'
+import { TwoFactorCard } from './two-factor-card'
 
 // Platform news: secondary to today's numbers, so it downloads separately.
 const Announcements = lazy(() => import('./announcements'))
@@ -63,6 +64,7 @@ export function Dashboard() {
             </Button>
           )}
         </div>
+        <TwoFactorCard manager={manager} />
         {tenant && (
           <Suspense fallback={null}>
             <Announcements tenantId={tenantId} locale={locale} />

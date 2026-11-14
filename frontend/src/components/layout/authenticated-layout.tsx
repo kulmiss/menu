@@ -13,6 +13,11 @@ import { useCurrentTenant, useMe } from '@/features/auth/use-me'
 
 // Rare screens: downloaded only when needed.
 const CheckInbox = lazy(() => import('@/features/signup/check-inbox'))
+const TwoFactorGate = lazy(() =>
+  import('@/features/settings/two-factor-gate').then((m) => ({
+    default: m.TwoFactorGate,
+  }))
+)
 const NoRestaurant = lazy(() =>
   import('@/features/errors/no-restaurant').then((m) => ({
     default: m.NoRestaurant,
@@ -33,6 +38,15 @@ export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
     return (
       <Suspense fallback={null}>
         <CheckInbox />
+      </Suspense>
+    )
+  }
+
+  // The Super Admin requires two-factor for Owners and it isn't on yet (M17).
+  if (me.two_factor_required) {
+    return (
+      <Suspense fallback={null}>
+        <TwoFactorGate />
       </Suspense>
     )
   }

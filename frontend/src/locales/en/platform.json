@@ -368,6 +368,8 @@
     "signup_approval_hint": "New restaurants wait in Restaurants → “Pending sign-up” until you approve them. Their menu is not public until then.",
     "signup_notify": "E-mail me about every new sign-up",
     "signup_notify_hint": "Sent to every Super Admin when an owner confirms their e-mail.",
+    "owner_two_factor_required": "Require two-factor sign-in for restaurant owners",
+    "owner_two_factor_required_hint": "Off: owners are strongly encouraged (dashboard card, one reminder e-mail). On: an owner without it sees only the setup screen until it is on. Managers and staff stay optional.",
     "spam": "Anti-spam",
     "turnstile_enabled": "Cloudflare Turnstile check",
     "turnstile_enabled_hint": "Off by default. Sign-up also has a hidden honeypot field and rate limits, so it works without it.",

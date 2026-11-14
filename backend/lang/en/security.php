@@ -1,6 +1,14 @@
 <?php
 
 return [
+    'owner_two_factor_required' => 'Turn on two-factor sign-in first: your platform requires it for restaurant owners.',
+    'two_factor_reminder' => [
+        'subject' => 'Protect your :app account with two-factor sign-in',
+        'intro' => 'Your restaurant\'s menu, prices and team are only as safe as your password. Two-factor sign-in adds a 6-digit code from your phone, so a stolen password alone is not enough.',
+        'how' => 'It takes about two minutes: install a free authenticator app (Google Authenticator, Microsoft Authenticator, 2FAS…), press the button and scan the code.',
+        'action' => 'Turn on two-factor sign-in',
+        'once' => 'We send this reminder only once.',
+    ],
     'password_common' => 'This password is too common or was found in data breaches. Choose a longer or less common one, for example three or four unrelated words.',
     'reset_link_generic' => 'If an account uses this e-mail address, we have sent it a link to choose a new password. Check your inbox and spam folder.',
     'email_change' => [

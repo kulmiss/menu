@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\EnsureAccessToken;
 use App\Http\Middleware\EnsureIdempotency;
+use App\Http\Middleware\EnsureOwnerTwoFactor;
 use App\Http\Middleware\EnsureSuperAdmin;
 use App\Http\Middleware\EnsureTenantWritable;
 use App\Http\Middleware\GuardImpersonation;
@@ -10,6 +11,7 @@ use App\Http\Middleware\ResolveTenant;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\ThrottlePasswordEmails;
 use App\Http\Middleware\UseWelcomeBroker;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -46,11 +48,17 @@ return Application::configure(basePath: dirname(__DIR__))
             'idempotent' => EnsureIdempotency::class,
             'mobile.token' => EnsureAccessToken::class,
             'password.throttle' => ThrottlePasswordEmails::class,
+            'owner.two_factor' => EnsureOwnerTwoFactor::class,
             'feature' => RequireFeature::class,
             'platform' => EnsureSuperAdmin::class,
             'tenant' => ResolveTenant::class,
             'tenant.writable' => EnsureTenantWritable::class,
         ]);
+    })
+    // Kept here, not in routes/console.php, so it stays clear of the schedule there.
+    ->withSchedule(function (Schedule $schedule): void {
+        // One "turn on two-factor" reminder for Owners (SECURITY_REPORT.md M17).
+        $schedule->command('security:two-factor-reminders')->dailyAt('07:10')->onOneServer();
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

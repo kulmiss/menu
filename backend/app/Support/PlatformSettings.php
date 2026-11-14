@@ -24,6 +24,8 @@ class PlatformSettings
         'share_image' => null,
         // E-mail header logo (path on the public disk; null = the platform name in text).
         'logo' => null,
+        // Two-factor sign-in for restaurant Owners: encouraged; "required" is the Super Admin's switch (owner, 2026-11-14).
+        'owner_two_factor_required' => false,
         // Self sign-up (owner, 2026-11-13).
         'signup_open' => true,
         'signup_plan_id' => null, // null = the "free" plan
