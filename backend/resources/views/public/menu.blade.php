@@ -76,6 +76,7 @@
 <html lang="{{ $locale }}">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="{!! \App\Support\Security\Csp::menu() !!}">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>{{ $tenant->name }}{{ $branch ? ' · '.$branch : '' }}</title>
 @php

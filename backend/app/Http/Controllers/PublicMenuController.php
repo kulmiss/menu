@@ -64,6 +64,7 @@ class PublicMenuController extends Controller
             MenuPageCache::write($tenant->slug, $html, $place?->slug);
         }
 
+        $request->attributes->set('guest_menu', true);
         $response = response($html, 200, [
             'Content-Type' => 'text/html; charset=UTF-8',
             'Cache-Control' => 'public, max-age=0, must-revalidate',
