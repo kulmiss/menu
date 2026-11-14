@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'password_common' => 'This password is too common or was found in data breaches. Choose a longer or less common one, for example three or four unrelated words.',
     'reset_link_generic' => 'If an account uses this e-mail address, we have sent it a link to choose a new password. Check your inbox and spam folder.',
     'email_change' => [
         'password' => 'Enter your current password to change your e-mail address.',

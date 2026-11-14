@@ -278,6 +278,8 @@
     "title": "Settings",
     "intro": "Your own account: name, language, password and sign-in security.",
     "saved": "Saved.",
+    "password_weak_banner": "Your password is on a list of common or leaked passwords, so it is easy to guess.",
+    "password_weak_action": "Choose a new one",
     "email_change_sent": "We sent a link to {{email}}. Your address changes when you click it.",
     "email_change_help": "To change your email, enter your current password. We send a link to the new address and tell the old one.",
     "email_pending": "Waiting for confirmation: {{email}}. Click the link we sent there (valid for 1 hour).",

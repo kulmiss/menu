@@ -37,11 +37,11 @@ class AccountController extends Controller
         $user = $request->user();
         $data = $request->validate([
             'current_password' => ['required', 'string'],
-            'password' => $this->passwordRules(),
+            'password' => $this->passwordRules($user->email),
         ]);
         $this->checkPassword($user, $data['current_password'], 'current_password');
 
-        $user->forceFill(['password' => $data['password']])->save();
+        $user->forceFill(['password' => $data['password'], 'password_weak' => false])->save();
         // Other devices sign in again; this one stays.
         $user->revokeAppTokens($user->currentAccessToken()->getKey());
 
