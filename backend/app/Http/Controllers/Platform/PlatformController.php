@@ -331,6 +331,7 @@ class PlatformController extends Controller
             'default_currency' => ['sometimes', 'string', 'size:3', 'alpha'],
             'terms' => ['sometimes', 'nullable', 'string', 'max:50000'],
             'privacy' => ['sometimes', 'nullable', 'string', 'max:50000'],
+            'owner_two_factor_required' => ['sometimes', 'boolean'],
             // Sign-up (owner, 2026-11-13)
             'signup_open' => ['sometimes', 'boolean'],
             'signup_plan_id' => ['sometimes', 'nullable', 'integer', Rule::exists('plans', 'id')],

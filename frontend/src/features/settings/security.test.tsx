@@ -41,3 +41,28 @@ describe('Settings → two-factor recovery codes (SECURITY_REPORT.md M5)', () =>
     expect(urls).toContain('POST /auth/user/two-factor-recovery-codes')
   })
 })
+
+describe('Settings → one-tap two-factor setup (SECURITY_REPORT.md M17)', () => {
+  afterEach(() => fake.restore())
+
+  it('asks for the password at once and then shows the QR code', async () => {
+    fake = fakeApi({
+      'POST /auth/user/confirm-password': { status: 201 },
+      'POST /auth/user/two-factor-authentication': { data: {} },
+      'GET /auth/user/two-factor-qr-code': { data: { svg: '<svg></svg>' } },
+      'GET /auth/user/two-factor-secret-key': {
+        data: { secretKey: 'JBSWY3DPEHPK3PXP' },
+      },
+    })
+    const screen = await renderWithQuery(<SecuritySettings startSetup />, {
+      me: meFixture({ two_factor_enabled: false }),
+    })
+
+    await screen
+      .getByRole('dialog')
+      .getByLabelText('Password')
+      .fill('correct-horse-battery')
+    await screen.getByRole('button', { name: 'Continue' }).click()
+    await expect.element(screen.getByText(/JBSWY3DPEHPK3PXP/)).toBeVisible()
+  })
+})

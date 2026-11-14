@@ -278,6 +278,8 @@
     "title": "Settings",
     "intro": "Your own account: name, language, password and sign-in security.",
     "saved": "Saved.",
+    "twofa_gate_title": "Turn on two-factor sign-in to continue",
+    "twofa_gate_text": "Your platform asks every restaurant owner to protect their account with a code from their phone. It takes about two minutes; then your restaurant opens as usual.",
     "password_weak_banner": "Your password is on a list of common or leaked passwords, so it is easy to guess.",
     "password_weak_action": "Choose a new one",
     "email_change_sent": "We sent a link to {{email}}. Your address changes when you click it.",
@@ -658,6 +660,9 @@
     }
   },
   "dashboard": {
+    "twofa_title": "Protect your restaurant with two-factor sign-in",
+    "twofa_text": "A 6-digit code from your phone at sign-in, so a stolen password alone can't open your menu, prices or team. Takes about two minutes.",
+    "twofa_action": "Turn it on",
     "title": "Dashboard",
     "intro": "Today at your restaurant.",
     "today_views": "Menu views today",

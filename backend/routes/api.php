@@ -200,7 +200,7 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
         });
         Route::post('invitations/{token}/accept', [AcceptInvitationController::class, 'accept']);
 
-        Route::prefix('t/{tenant}')->middleware(['tenant', 'tenant.writable'])->group(function () {
+        Route::prefix('t/{tenant}')->middleware(['tenant', 'tenant.writable', 'owner.two_factor'])->group(function () {
             Route::get('/', [TenantController::class, 'show']);
 
             Route::get('members', [TeamController::class, 'index']);

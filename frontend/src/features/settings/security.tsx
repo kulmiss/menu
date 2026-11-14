@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Loader2, ShieldCheck, ShieldOff } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -34,11 +34,15 @@ import {
 } from './api'
 import { SettingsSection } from './section'
 
-export function SecuritySettings() {
+export function SecuritySettings({
+  startSetup = false,
+}: {
+  startSetup?: boolean
+}) {
   return (
     <>
       <PasswordSection />
-      <TwoFactorSection />
+      <TwoFactorSection startSetup={startSetup} />
     </>
   )
 }
@@ -123,7 +127,7 @@ function PasswordSection() {
 type Step = 'idle' | 'setup' | 'codes'
 
 /** Two-factor sign-in: optional for restaurants, required for Super Admins (QUESTIONS #28). */
-function TwoFactorSection() {
+function TwoFactorSection({ startSetup }: { startSetup: boolean }) {
   const { t } = useTranslation()
   const me = useMe()
   const qc = useQueryClient()
@@ -153,6 +157,17 @@ function TwoFactorSection() {
   })
 
   const refreshMe = () => qc.invalidateQueries({ queryKey: ME_KEY })
+
+  // One tap from the dashboard card or the reminder e-mail: ask for the password, then show the QR code.
+  const started = useRef(false)
+  useEffect(() => {
+    if (!startSetup || started.current || me.two_factor_enabled) return
+    started.current = true
+    setAsking(() => async () => {
+      await enableTwoFactor()
+      setStep('setup')
+    })
+  }, [startSetup, me.two_factor_enabled])
 
   async function run(action: () => Promise<void>) {
     setBusy(true)
