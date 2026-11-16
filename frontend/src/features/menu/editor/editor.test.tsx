@@ -1,8 +1,9 @@
+import '@/styles/index.css'
 import { fakeApi } from '@/test-utils/fake-api'
 import { meFixture, tenantFixture } from '@/test-utils/fixtures'
 import { renderWithQuery } from '@/test-utils/render'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { userEvent } from 'vitest/browser'
+import { page, userEvent } from 'vitest/browser'
 import { useTenantStore } from '@/stores/tenant-store'
 import { type Role } from '@/features/auth/api'
 import { type Category, type ItemSummary, type Menu } from '../types'
@@ -89,6 +90,39 @@ function renderEditor(
 describe('MenuEditorPage', () => {
   beforeEach(() => useTenantStore.setState({ currentTenantId: 1 }))
   afterEach(() => fake.restore())
+
+  // Bug (2026-11-17): a long dish or category name made the whole admin page
+  // wider than the phone (794 px on a 390 px phone), so the dish editor
+  // opened half off the screen.
+  it('on a phone a long name never makes the page wider than the screen', async () => {
+    await page.viewport(390, 844)
+    try {
+      const long =
+        'Dish with a very long name that goes on and on and on and on'
+      const screen = await renderEditor('owner', {
+        'GET /t/1/menus/1/tree': {
+          data: {
+            data: {
+              menu,
+              categories: [
+                {
+                  ...coffee,
+                  name: { en: `${long} category` },
+                  items: [item(100, long)],
+                },
+              ],
+            },
+          },
+        },
+      })
+      await expect
+        .element(screen.getByText(long, { exact: true }))
+        .toBeVisible()
+      expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(390)
+    } finally {
+      await page.viewport(414, 896)
+    }
+  })
 
   it('shows categories with prices, "from" for sizes', async () => {
     const screen = await renderEditor('owner')
