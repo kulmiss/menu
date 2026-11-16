@@ -8,6 +8,7 @@ import {
   RotateCcw,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { useSetupWizard } from '@/stores/setup-wizard-store'
 import { validationErrors } from '@/lib/api'
 import { toast } from '@/lib/toast'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -1035,7 +1036,15 @@ function SettingsForm({
   )
   return (
     <>
-      <PageTitle title={t('platform.nav.settings')} />
+      <PageTitle title={t('platform.nav.settings')}>
+        <Button
+          variant='outline'
+          className='min-h-11 sm:min-h-9'
+          onClick={() => useSetupWizard.getState().setOpen(true)}
+        >
+          {t('platform.setup.reopen')}
+        </Button>
+      </PageTitle>
       <SettingsTabs
         t={t}
         tabs={{

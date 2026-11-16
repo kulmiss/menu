@@ -1034,5 +1034,94 @@
     "reset_confirm": "Go back to the text that ships with the app? Your changes are lost.",
     "delete": "Delete article",
     "delete_confirm": "Delete this article? It can't be undone."
+  },
+  "setup": {
+    "step": "Step {{n}} of {{total}}",
+    "back": "Back",
+    "next": "Next",
+    "finish": "Finish",
+    "later": "Finish later",
+    "finished": "Setup finished. The dashboard shows anything still to do.",
+    "saved": "Saved.",
+    "save_error": "That could not be saved. Check the fields and try again.",
+    "reopen": "Setup wizard",
+    "welcome": {
+      "title": "Welcome to your platform",
+      "intro": "Five short steps make the platform ready for restaurants. You can change everything later in Settings.",
+      "two_factor": "Two-factor sign-in is on for your account.",
+      "backup_on": "Backups are encrypted.",
+      "backup_save": "Keep BACKUP_KEY from the server’s .env in your password manager. Without it no backup can be restored.",
+      "backup_off": "Backups are not encrypted yet.",
+      "backup_how": "On the server, in backend/, run: php artisan backup:key --write — then php artisan config:cache. Save the key in your password manager."
+    },
+    "platform": {
+      "title": "Your platform",
+      "intro": "The name, colour, logo and contact restaurants see.",
+      "whatsapp": "WhatsApp for upgrades",
+      "colour": "Brand colour",
+      "logo": "Logo (e-mails and invoices)",
+      "logo_hint": "PNG, JPEG or WebP, up to 5 MB.",
+      "logo_done": "Logo uploaded."
+    },
+    "plans": {
+      "title": "Plans and prices",
+      "intro": "What restaurants pay, and the limits of each plan. Help articles and the sign-up page follow these numbers by themselves.",
+      "price": "Price a month",
+      "photos": "Photos",
+      "branches": "Branches",
+      "price_of": "Price of {{name}} ({{currency}})",
+      "photos_of": "Photo limit of {{name}}",
+      "branches_of": "Branch limit of {{name}}",
+      "hint": "Empty = no limit. More settings (features, yearly price, trial days) are under Plans.",
+      "save": "Save plans"
+    },
+    "email": {
+      "title": "E-mail, app and sign-up",
+      "intro": "So invitations and invoices arrive, phones get notifications, and restaurants can join.",
+      "smtp_on": "E-mail is set up.",
+      "smtp_off": "E-mail is not set up yet.",
+      "smtp_hint": "Change it in Settings → Email (SMTP). Send a test to check.",
+      "test": "Send me a test e-mail",
+      "test_sent": "Test sent to {{email}}. Check your inbox (and spam).",
+      "firebase_on": "Push notifications for the app are ready.",
+      "firebase_off": "Push notifications are not set up (optional).",
+      "firebase_hint": "FCM_CREDENTIALS in .env, see the guide: Firebase for the mobile app.",
+      "signup": "Sign-up"
+    },
+    "switches": {
+      "title": "Features and demo data",
+      "intro": "Switch off what you don’t offer at all. Plans and restaurants can still switch features on or off below that.",
+      "demo": "Demo data",
+      "no_demo": "No demo restaurants. Good.",
+      "demo_found_one": "{{count}} demo restaurant found.",
+      "demo_found_other": "{{count}} demo restaurants found.",
+      "demo_found": "{{count}} demo restaurants found.",
+      "delete_demo": "Delete the demo restaurants",
+      "delete_confirm": "Delete {{count}} demo restaurants (every team member has an @example.com address)? They can be restored for 30 days."
+    },
+    "card": {
+      "title": "Finish setting up the platform",
+      "hint": "{{count}} things still to do. Each line opens the right page.",
+      "hide": "Hide this list",
+      "open": "Open the setup wizard",
+      "guide": "Go-live checklist",
+      "done": "Done:",
+      "todo": "To do:",
+      "optional": "optional"
+    },
+    "checks": {
+      "two_factor": "Two-factor sign-in",
+      "backup_key": "Encrypted backups (backup key)",
+      "name": "Platform name",
+      "logo": "Logo",
+      "contact": "Support e-mail or WhatsApp",
+      "plans": "Plans and prices checked",
+      "email": "E-mail (SMTP)",
+      "firebase": "Push notifications (Firebase)",
+      "store_links": "App store links",
+      "legal": "Terms and Privacy reviewed",
+      "features": "Feature switches checked",
+      "demo": "No demo restaurants"
+    }
   }
 }

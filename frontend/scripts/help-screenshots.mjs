@@ -36,6 +36,21 @@ const sizes = {
   desktop: { viewport: { width: 1280, height: 860 }, deviceScaleFactor: 1, width: 1000 },
 }
 
+/** A request as the signed-in page (cookie session, XSRF header, idempotency key). */
+const call = (page, method, url, body) =>
+  page.evaluate(
+    async ([method, url, body]) => {
+      const xsrf = decodeURIComponent(document.cookie.match(/XSRF-TOKEN=([^;]+)/)?.[1] ?? '')
+      const r = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'X-XSRF-TOKEN': xsrf, 'Idempotency-Key': crypto.randomUUID() },
+        body: body ? JSON.stringify(body) : undefined,
+      })
+      return r.status
+    },
+    [method, url, body]
+  )
+
 const settle = async (page) => {
   await page.waitForLoadState('networkidle').catch(() => {})
   await page.waitForTimeout(700)
@@ -82,6 +97,18 @@ const shots = {
       await page.getByRole('button', { name: 'Help for this page' }).click()
     },
   },
+  // The welcome tour (first sign-in): shown again by resetting "seen".
+  tour: {
+    path: '/admin/help',
+    run: async (page) => {
+      await page.getByRole('button', { name: 'Take the tour' }).click()
+      await page.getByRole('button', { name: 'Next' }).click()
+    },
+  },
+  // The Super Admin setup wizard (signed in as the demo Super Admin).
+  'wizard-welcome': { path: '/platform', admin: true, wizard: 0 },
+  'wizard-plans': { path: '/platform', admin: true, wizard: 2 },
+  'wizard-switches': { path: '/platform', admin: true, wizard: 4 },
   'guest-menu': { path: '/demo', guest: true },
   'guest-my-order': {
     path: '/demo',
@@ -97,13 +124,18 @@ const shots = {
   },
 }
 
+let lastCode = ''
+
 async function signIn(page, email, password, secret) {
   await page.goto(`${base}/auth/sign-in`)
   await page.getByLabel('Email').fill(email)
   await page.getByLabel('Password', { exact: true }).fill(password)
   await page.getByRole('button', { name: 'Sign in' }).click()
   if (secret) {
-    await page.getByLabel('Authentication code').fill(totp(secret))
+    // A code works once: wait for the next one when it was just used.
+    while (totp(secret) === lastCode) await page.waitForTimeout(1000)
+    lastCode = totp(secret)
+    await page.getByLabel('Authentication code').fill(lastCode)
     await page.getByRole('button', { name: 'Verify' }).click()
   }
   await page.waitForURL(/\/(admin|platform)/)
@@ -122,15 +154,23 @@ for (const [kind, size] of Object.entries(sizes)) {
   const { width, ...options } = size
   const signedIn = await browser.newContext({ ...options, colorScheme: 'light' })
   const guest = await browser.newContext({ ...options, colorScheme: 'light' })
+  const admin = await browser.newContext({ ...options, colorScheme: 'light' })
   await signIn(await signedIn.newPage(), 'demo@example.com', 'password')
+  const adminPage = await admin.newPage()
+  await signIn(adminPage, 'admin@example.com', 'password', 'JBSWY3DPEHPK3PXP')
   for (const [name, shot] of Object.entries(shots)) {
     if (only && !only.includes(name)) continue
-    const page = await (shot.guest ? guest : signedIn).newPage()
+    const page = await (shot.guest ? guest : shot.admin ? admin : signedIn).newPage()
+    if (shot.wizard !== undefined) await call(adminPage, 'PUT', '/api/v1/platform/setup', { done: false })
     await page.goto(`${base}${shot.path}`)
     await settle(page)
-    // Close one-time notices (announcement, weak demo password).
-    for (const name of ['Got it', 'Close']) {
-      const b = page.getByRole('button', { name, exact: true }).first()
+    if (shot.wizard !== undefined) {
+      for (let n = 0; n < shot.wizard; n++) await page.getByRole('button', { name: 'Next' }).click()
+      await settle(page)
+    }
+    // Close one-time notices (announcement, weak demo password, welcome tour).
+    for (const label of shot.wizard !== undefined || name === 'tour' ? [] : ['Got it', 'Close', 'Skip tour']) {
+      const b = page.getByRole('button', { name: label, exact: true }).first()
       if (await b.isVisible().catch(() => false)) await b.click().catch(() => {})
     }
     if (shot.run) {
@@ -150,7 +190,9 @@ for (const [kind, size] of Object.entries(sizes)) {
     ])
     console.log(`${name}-${kind}.webp`)
   }
+  await call(adminPage, 'PUT', '/api/v1/platform/setup', { done: true })
   await signedIn.close()
   await guest.close()
+  await admin.close()
 }
 await browser.close()

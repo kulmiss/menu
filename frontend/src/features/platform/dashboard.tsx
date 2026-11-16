@@ -15,6 +15,7 @@ import { PageTitle } from './layout'
 // Insights and the to-do widgets are downloaded after the page (owner, 2026-11-11 / QUESTIONS #186).
 const Insights = lazy(() => import('./insights'))
 const Widgets = lazy(() => import('./widgets'))
+const SetupChecklist = lazy(() => import('./setup-checklist'))
 
 type Meta = {
   plans: { id: number; name: Record<string, string> }[]
@@ -48,6 +49,9 @@ export function PlatformDashboard() {
         title={t('platform.nav.dashboard')}
         hint={t('platform.ins.hint')}
       />
+      <Suspense fallback={null}>
+        <SetupChecklist />
+      </Suspense>
       <section
         aria-label={t('platform.ins.filters')}
         className='mb-4 flex flex-wrap items-end gap-2'

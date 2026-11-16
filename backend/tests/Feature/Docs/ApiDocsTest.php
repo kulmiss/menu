@@ -33,7 +33,7 @@ function appRoutes(): array
 {
     $keep = fn (string $uri) => str_starts_with($uri, 'mobile/')
         || str_starts_with($uri, 'platform/mobile-app')
-        || in_array($uri, ['me', 'help/public', 'help/feedback', 't/{tenant}/help', 'impersonation/stop', 'platform/dashboard', 'platform/settings', 'platform/settings/features', 'platform/restaurants/{restaurant}/impersonate-token'], true);
+        || in_array($uri, ['me', 'me/onboarding', 'help/public', 'help/feedback', 't/{tenant}/help', 'impersonation/stop', 'platform/dashboard', 'platform/settings', 'platform/settings/features', 'platform/restaurants/{restaurant}/impersonate-token'], true);
     $out = [];
     foreach (ApiReferenceCommand::rows(app(Router::class)) as $r) {
         if ($keep($r['uri'])) {

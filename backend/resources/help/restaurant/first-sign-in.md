@@ -15,6 +15,8 @@ You now see your **Dashboard**. It shows today's menu views and QR scans, and a 
 
 ![The dashboard after the first sign-in](shot:dashboard)
 
-A short tour shows you the four most important places. You can open it again from **Help → Take the tour**.
+A short tour shows you the most important places. Tap **Next**, or **Skip tour**. You can open it again from **Help → Take the tour**.
+
+![The welcome tour](shot:tour)
 
 Were you invited by someone? Open the invitation e-mail and tap the link. Make a password. Then sign in like above.

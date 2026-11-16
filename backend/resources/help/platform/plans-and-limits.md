@@ -19,6 +19,8 @@ Open **Plans**. Today's plans:
 
 Help articles, the landing page and the sign-up page read prices and limits **live** from here. You never need to change a text when you change a price.
 
+![Plans in the setup wizard](shot:wizard-plans)
+
 Lowering a limit doesn't delete anything. A restaurant over the limit just can't add more.
 
 **Old plans:** a plan can be replaced by another. Its restaurants move to the new plan when their paid time ends.

@@ -22,6 +22,7 @@ use Laravel\Sanctum\HasApiTokens;
 /**
  * @property array<string, bool>|null $push_settings Push types switched off (QUESTIONS #189)
  * @property Carbon|null $news_unsubscribed_at News e-mails off (account e-mails still sent)
+ * @property array<string, string>|null $onboarding Tours seen: web_tour / app_tour => ISO time (QUESTIONS #195)
  */
 #[Fillable(['name', 'email', 'password', 'locale'])]
 #[Hidden(['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes'])]
@@ -56,6 +57,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'last_login_at' => 'datetime',
             'news_unsubscribed_at' => 'datetime',
             'push_settings' => 'array',
+            'onboarding' => 'array',
         ];
     }
 

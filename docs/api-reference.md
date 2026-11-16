@@ -4,7 +4,7 @@
 
 Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles inside a restaurant are checked by each screen's policy). **Feature**: the feature switch it needs (`402 features.<key>` when off). **Limit**: how many requests are allowed. Create/change requests need an `Idempotency-Key` header. Request and answer examples for the app: [mobile-api.md](mobile-api.md).
 
-**254 endpoints.**
+**258 endpoints.**
 
 ## Sign-in and account (web session)
 
@@ -61,6 +61,7 @@ Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles insid
 |---|---|---|---|---|---|
 | GET | `me` | signed in |  |  | Api\MeController |
 | PUT | `me/news` | signed in |  |  | NewsSubscriptionController@update |
+| PUT | `me/onboarding` | signed in |  | 30 a minute | Api\OnboardingController |
 | POST | `me/sessions/logout-others` | signed in |  | 6 a minute | Api\SessionController@logoutOthers |
 
 ## Self sign-up
@@ -282,6 +283,9 @@ Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles insid
 | POST | `platform/settings/mail/test` | Super Admin |  | 5 a minute | Platform\PlatformController@testMail |
 | DELETE | `platform/settings/share-image` | Super Admin |  |  | Platform\PlatformController@deleteShareImage |
 | POST | `platform/settings/share-image` | Super Admin |  |  | Platform\PlatformController@saveShareImage |
+| GET | `platform/setup` | Super Admin |  |  | Platform\SetupController@show |
+| PUT | `platform/setup` | Super Admin |  |  | Platform\SetupController@update |
+| POST | `platform/setup/demo/delete` | Super Admin |  | 3 a minute | Platform\SetupController@deleteDemo |
 | GET | `platform/tags` | Super Admin |  |  | Platform\CrmController@tags |
 | POST | `platform/tags` | Super Admin |  |  | Platform\CrmController@storeTag |
 | DELETE | `platform/tags/{tag}` | Super Admin |  |  | Platform\CrmController@destroyTag |

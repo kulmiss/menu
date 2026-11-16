@@ -6,5 +6,5 @@ export const Route = createFileRoute('/admin/help')({
   validateSearch: (search: Record<string, unknown>): { a?: string } => ({
     a: optionalString(search.a),
   }),
-  component: () => <RestaurantHelpPage />,
+  component: RestaurantHelpPage,
 })

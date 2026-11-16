@@ -61,6 +61,8 @@ export type Me = {
     user_name: string
   } | null
   tenants: Tenant[]
+  /** First-time guidance (backend QUESTIONS #195). Missing on an older server. */
+  onboarding?: { web_tour: boolean; app_tour: boolean; setup_needed: boolean }
 }
 
 export const ME_KEY = ['me'] as const

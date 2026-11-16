@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\Menu\ItemController;
 use App\Http\Controllers\Api\Menu\MediaController;
 use App\Http\Controllers\Api\Menu\MenuController;
 use App\Http\Controllers\Api\Menu\TagController;
+use App\Http\Controllers\Api\OnboardingController;
 use App\Http\Controllers\Api\Restaurant\AppearanceController;
 use App\Http\Controllers\Api\Restaurant\BillingController;
 use App\Http\Controllers\Api\Restaurant\BranchController;
@@ -49,6 +50,7 @@ use App\Http\Controllers\Platform\PaymentController;
 use App\Http\Controllers\Platform\PlatformController;
 use App\Http\Controllers\Platform\RestaurantController;
 use App\Http\Controllers\Platform\SearchController;
+use App\Http\Controllers\Platform\SetupController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
@@ -93,6 +95,7 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('me', MeController::class);
         Route::post('help/feedback', [HelpController::class, 'feedback'])->middleware('throttle:30,1');
+        Route::put('me/onboarding', OnboardingController::class)->middleware('throttle:30,1');
 
         // Mobile app: this device, other devices, account (QUESTIONS #187).
         Route::prefix('mobile')->middleware('mobile.token')->group(function () {
@@ -125,6 +128,9 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::get('dashboard', [PlatformController::class, 'dashboard']);
             // Super Admin guide and the help article editor (QUESTIONS #194).
             Route::get('help', [HelpController::class, 'platform']);
+            Route::get('setup', [SetupController::class, 'show']);
+            Route::put('setup', [SetupController::class, 'update']);
+            Route::post('setup/demo/delete', [SetupController::class, 'deleteDemo'])->middleware('throttle:3,1');
             Route::get('help-articles', [HelpArticleController::class, 'index']);
             Route::post('help-articles/preview', [HelpArticleController::class, 'preview'])->middleware('throttle:60,1');
             Route::get('help-articles/{audience}/{slug}', [HelpArticleController::class, 'show']);

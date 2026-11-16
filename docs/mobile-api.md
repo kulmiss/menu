@@ -493,6 +493,20 @@ Idempotency-Key: 4e1f…
 
 `204 No Content`. Unknown article: `404`.
 
+### `PUT /api/v1/me/onboarding`
+
+The welcome tour was seen or skipped (QUESTIONS #195). `GET me` shows `onboarding: {web_tour, app_tour, setup_needed}`; the app shows its tour while `app_tour` is `false`. `seen: false` shows it again.
+
+```http
+PUT /api/v1/me/onboarding
+Authorization: Bearer 1|…
+Idempotency-Key: 2c4e…
+
+{"tour": "app_tour", "seen": true}
+```
+
+`204 No Content`.
+
 ## Super Admin: overview and emergency switches (app `/p`)
 
 The app's Super Admin screen shows numbers from `platform/dashboard` and four switches: **maintenance**, **self sign-up**, **push**, **Super Admin app sign-in**. Everything else opens the web console.

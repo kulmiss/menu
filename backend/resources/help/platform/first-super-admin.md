@@ -16,6 +16,16 @@ php artisan tinker --execute="\$u = App\Models\User::create(['name' => 'Your Nam
 3. Scan the QR code with an authenticator app. Type the code.
 4. **Save the recovery codes** in your password manager.
 
-Now the whole panel opens, and the **setup wizard** starts. It walks you through the platform name, plans, e-mail and switches. You can open it again from **Settings → Setup wizard**.
+Now the whole panel opens, and the **setup wizard** starts. Five short pages:
+
+1. **Welcome**: two-factor and the backup key.
+2. **Your platform**: name, support e-mail, WhatsApp, colour, logo.
+3. **Plans and prices**: price and limits of each plan.
+4. **E-mail, app and sign-up**: send yourself a test e-mail, Firebase status, open or closed sign-up.
+5. **Features and demo data**: switch off what you don't offer, delete demo restaurants.
+
+![The setup wizard](shot:wizard-welcome)
+
+**Finish later** is fine. The dashboard then shows a list of what is still to do. Open the wizard again from **Settings → Setup wizard**.
 
 Next: [Firebase for the app](help:firebase).
