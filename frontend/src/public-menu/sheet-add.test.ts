@@ -77,7 +77,7 @@ afterEach(() => {
   if (dl.open) dl.close()
   host.remove()
   css.remove()
-  document.querySelectorAll('#sst,.tt').forEach((e) => e.remove())
+  document.querySelectorAll('#sst,.tt,.obr').forEach((e) => e.remove())
   document.body.className = ''
   document.body.style.top = ''
 })
@@ -129,5 +129,20 @@ describe('Add to my order in the dish sheet', () => {
     expect(getComputedStyle(row.children[1]).textAlign).not.toBe('center')
     expect(price.right).toBeCloseTo(row.getBoundingClientRect().right, 0)
     expect(row.getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
+  })
+
+  it("adding a dish shows the My order bar without touching the footer's Other branches list", () => {
+    // Bug (2026-11-17): the bar and the list shared the class "ob", so once something
+    // was in My order the branch list turned into a second floating brand-colour bar.
+    const ft = host.appendChild(document.createElement('footer'))
+    ft.innerHTML =
+      '<ul class="ob"><li><a href="/demo/piassa">Piassa</a><span>Churchill Avenue</span></li></ul>'
+    btn().click()
+    const bar = document.querySelector<HTMLButtonElement>('.obr')!
+    expect(bar.hidden).toBe(false)
+    expect(getComputedStyle(bar).position).toBe('fixed')
+    const list = ft.querySelector('.ob')!
+    expect(getComputedStyle(list).position).toBe('static')
+    expect(getComputedStyle(list).backgroundColor).toBe('rgba(0, 0, 0, 0)')
   })
 })
