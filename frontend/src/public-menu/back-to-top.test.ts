@@ -1,5 +1,5 @@
 // "Back to top" on the guest page (backend/resources/public-menu/sheet.js):
-// shows after ~1.5 screens, sits above the My order bar, hides while a sheet
+// bottom-right, shows after ~1.5 screens, sits above the My order bar, hides while a sheet
 // is open, and respects reduced motion (owner, 2026-11-12).
 import source from '@public-menu/sheet.js?raw'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -40,6 +40,18 @@ describe('back to top', () => {
     expect(r.width).toBeGreaterThanOrEqual(44)
     expect(r.height).toBeGreaterThanOrEqual(44)
     expect(parseFloat(cs.borderTopLeftRadius)).toBeGreaterThanOrEqual(22)
+    // Bottom-right corner (owner, 2026-11-17; was bottom-left), 12 px from the edge.
+    expect(Math.round(document.documentElement.clientWidth - r.right)).toBe(12)
+  })
+
+  it('sits on the left in right-to-left languages', async () => {
+    document.documentElement.dir = 'rtl'
+    try {
+      await at(innerHeight * 2)
+      expect(Math.round(btn().getBoundingClientRect().left)).toBe(12)
+    } finally {
+      document.documentElement.dir = ''
+    }
   })
 
   it('moves up above the My order bar and hides while a sheet is open', async () => {

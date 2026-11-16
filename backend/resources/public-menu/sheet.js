@@ -333,7 +333,7 @@ window.mH = function (b, D) {
 // scrolling; it sits above the My order bar and hides while a sheet is open.
 (function () {
   var d = document, w = window, D = w.mD || JSON.parse(d.getElementById('d').textContent), css = d.createElement('style'), b = d.createElement('button'), on = 0;
-  css.textContent = '.tt{position:fixed;inset-inline-start:.75rem;bottom:calc(.75rem + env(safe-area-inset-bottom));z-index:3;width:2.75rem;height:2.75rem;display:flex;align-items:center;justify-content:center;padding:0;border:0;border-radius:99px;background:var(--a);color:var(--af);box-shadow:0 2px 10px #0004;cursor:pointer;visibility:hidden;opacity:0;transform:translateY(.5rem);transition:opacity .2s,transform .2s,visibility .2s,bottom .2s}.tt.on{visibility:visible;opacity:1;transform:none}.hob .tt{bottom:calc(4.75rem + env(safe-area-inset-bottom))}.lk .tt{display:none}@media (prefers-reduced-motion:reduce){.tt{transition:none}}';
+  css.textContent = '.tt{position:fixed;inset-inline-end:.75rem;bottom:calc(.75rem + env(safe-area-inset-bottom));z-index:3;width:2.75rem;height:2.75rem;display:flex;align-items:center;justify-content:center;padding:0;border:0;border-radius:99px;background:var(--a);color:var(--af);box-shadow:0 2px 10px #0004;cursor:pointer;visibility:hidden;opacity:0;transform:translateY(.5rem);transition:opacity .2s,transform .2s,visibility .2s,bottom .2s}.tt.on{visibility:visible;opacity:1;transform:none}.hob .tt{bottom:calc(4.75rem + env(safe-area-inset-bottom))}.lk .tt{display:none}@media (prefers-reduced-motion:reduce){.tt{transition:none}}';
   d.head.appendChild(css);
   b.type = 'button';
   b.className = 'tt';
