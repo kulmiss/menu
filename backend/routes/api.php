@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AccountController;
 use App\Http\Controllers\Api\ActivityController;
 use App\Http\Controllers\Api\AnnouncementController;
 use App\Http\Controllers\Api\BeaconController;
+use App\Http\Controllers\Api\HelpController;
 use App\Http\Controllers\Api\InvitationController;
 use App\Http\Controllers\Api\MeController;
 use App\Http\Controllers\Api\Menu\AddonGroupController;
@@ -40,6 +41,7 @@ use App\Http\Controllers\Platform\CampaignController;
 use App\Http\Controllers\Platform\CrmController;
 use App\Http\Controllers\Platform\DashboardWidgetController as PlatformDashboardWidgetController;
 use App\Http\Controllers\Platform\FeatureSwitchController;
+use App\Http\Controllers\Platform\HelpArticleController;
 use App\Http\Controllers\Platform\InsightsController as PlatformInsightsController;
 use App\Http\Controllers\Platform\InvoiceController;
 use App\Http\Controllers\Platform\MobileAppController;
@@ -85,8 +87,12 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
         Route::post('email', 'changeEmail')->middleware(['auth:sanctum', 'throttle:6,1']);
     });
 
+    // Help centre for signed-out people: sign-in problems (QUESTIONS #194).
+    Route::get('help/public', [HelpController::class, 'public'])->middleware('throttle:30,1');
+
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('me', MeController::class);
+        Route::post('help/feedback', [HelpController::class, 'feedback'])->middleware('throttle:30,1');
 
         // Mobile app: this device, other devices, account (QUESTIONS #187).
         Route::prefix('mobile')->middleware('mobile.token')->group(function () {
@@ -117,6 +123,13 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
         // Super Admin (PLAN.md §7.3): Super Admins with two-factor sign-in only.
         Route::prefix('platform')->middleware('platform')->group(function () {
             Route::get('dashboard', [PlatformController::class, 'dashboard']);
+            // Super Admin guide and the help article editor (QUESTIONS #194).
+            Route::get('help', [HelpController::class, 'platform']);
+            Route::get('help-articles', [HelpArticleController::class, 'index']);
+            Route::post('help-articles/preview', [HelpArticleController::class, 'preview'])->middleware('throttle:60,1');
+            Route::get('help-articles/{audience}/{slug}', [HelpArticleController::class, 'show']);
+            Route::put('help-articles/{audience}/{slug}', [HelpArticleController::class, 'update']);
+            Route::delete('help-articles/{audience}/{slug}', [HelpArticleController::class, 'destroy']);
             Route::prefix('widgets')->controller(PlatformDashboardWidgetController::class)->group(function () {
                 foreach (['expiring', 'inactive', 'signups', 'health'] as $widget) {
                     Route::get($widget, $widget);
@@ -218,6 +231,7 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
 
         Route::prefix('t/{tenant}')->middleware(['tenant', 'tenant.writable', 'owner.two_factor'])->group(function () {
             Route::get('/', [TenantController::class, 'show']);
+            Route::get('help', [HelpController::class, 'restaurant']);
 
             Route::get('members', [TeamController::class, 'index']);
             Route::patch('members/{member}', [TeamController::class, 'update'])->whereNumber('member');

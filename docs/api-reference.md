@@ -4,7 +4,7 @@
 
 Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles inside a restaurant are checked by each screen's policy). **Feature**: the feature switch it needs (`402 features.<key>` when off). **Limit**: how many requests are allowed. Create/change requests need an `Idempotency-Key` header. Request and answer examples for the app: [mobile-api.md](mobile-api.md).
 
-**245 endpoints.**
+**254 endpoints.**
 
 ## Sign-in and account (web session)
 
@@ -124,6 +124,7 @@ Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles insid
 | DELETE | `t/{tenant}/closures/{closure}` | restaurant team |  |  | Api\Restaurant\InfoController@deleteClosure |
 | GET | `t/{tenant}/dashboard` | restaurant team |  |  | Api\Restaurant\InsightsController@dashboard |
 | GET | `t/{tenant}/export` | restaurant team | `import_export` | `exports` limiter | Api\Menu\ImportController@export |
+| GET | `t/{tenant}/help` | restaurant team |  |  | Api\HelpController@restaurant |
 | GET | `t/{tenant}/hours` | restaurant team |  |  | Api\Restaurant\InfoController@hours |
 | PUT | `t/{tenant}/hours` | restaurant team |  |  | Api\Restaurant\InfoController@saveHours |
 | POST | `t/{tenant}/import/commit` | restaurant team | `import_export` |  | Api\Menu\ImportController@commit |
@@ -219,6 +220,12 @@ Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles insid
 | GET | `platform/campaigns/{campaign}` | Super Admin |  |  | Platform\CampaignController@show |
 | POST | `platform/campaigns/{campaign}/retry` | Super Admin |  |  | Platform\CampaignController@retry |
 | GET | `platform/dashboard` | Super Admin |  |  | Platform\PlatformController@dashboard |
+| GET | `platform/help` | Super Admin |  |  | Api\HelpController@platform |
+| GET | `platform/help-articles` | Super Admin |  |  | Platform\HelpArticleController@index |
+| POST | `platform/help-articles/preview` | Super Admin |  | 60 a minute | Platform\HelpArticleController@preview |
+| DELETE | `platform/help-articles/{audience}/{slug}` | Super Admin |  |  | Platform\HelpArticleController@destroy |
+| GET | `platform/help-articles/{audience}/{slug}` | Super Admin |  |  | Platform\HelpArticleController@show |
+| PUT | `platform/help-articles/{audience}/{slug}` | Super Admin |  |  | Platform\HelpArticleController@update |
 | GET | `platform/insights` | Super Admin |  |  | Platform\InsightsController@meta |
 | GET | `platform/insights/{widget}` | Super Admin |  |  | Platform\InsightsController@show |
 | GET | `platform/invoices` | Super Admin |  |  | Platform\InvoiceController@index |
@@ -295,3 +302,10 @@ Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles insid
 | Method | Path | Who | Feature | Limit | Handler |
 |---|---|---|---|---|---|
 | POST | `beacon` | anyone |  | 120 a minute | Api\BeaconController |
+
+## Other (`help`)
+
+| Method | Path | Who | Feature | Limit | Handler |
+|---|---|---|---|---|---|
+| POST | `help/feedback` | signed in |  | 30 a minute | Api\HelpController@feedback |
+| GET | `help/public` | anyone |  | 30 a minute | Api\HelpController@public |

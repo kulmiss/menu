@@ -439,6 +439,60 @@ Idempotency-Key: 7d6c…
 
 `204 No Content`.
 
+## Help centre (QUESTIONS #194)
+
+The app shows the same articles as the web admin, and keeps the last answer for offline use. Articles about switched-off features, and about jobs the person's role can't do, are left out by the server. Placeholders (plan prices and limits, contact) are already filled in. `body` is Markdown; `html` is the same, for the web. Links to other articles are `help:slug`; pictures are `/help/shots/…webp` with the title `phone`, `desktop` or `app`.
+
+### `GET /api/v1/t/{tenant}/help`
+
+Sends `ETag`; with `If-None-Match` the answer is `304` when nothing changed.
+
+```http
+GET /api/v1/t/12/help
+Authorization: Bearer 1|…
+If-None-Match: "5d41402abc4b2a76b9719d911017c592"
+```
+
+```json
+{"data": {
+  "topics": [{"key": "getting_started", "title": "Getting started"}, {"key": "menu", "title": "Your menu"}],
+  "articles": [{
+    "slug": "add-a-dish", "topic": "menu", "title": "Add a dish", "summary": "Name, price, photo and description, step by step.",
+    "pages": ["/admin/menu"], "app": ["/r/:tid/menu", "/r/:tid/dishes/new"], "keywords": ["item", "new dish"],
+    "body": "1. Open **Menu** and the category.\n…", "html": "<ol><li>Open <strong>Menu</strong> …</li></ol>", "updated_at": null
+  }],
+  "voted": {"add-a-dish": true}
+}}
+```
+
+`pages` are web admin paths and `app` are app paths (`:tid` = the restaurant): the **?** button opens the first article whose path matches the screen.
+
+### `GET /api/v1/help/public`
+
+Signed out (sign-in screen): only the articles marked public, such as "I can't sign in". Same answer shape.
+
+```http
+GET /api/v1/help/public
+```
+
+```json
+{"data": {"topics": [{"key": "problems", "title": "Problems and answers"}], "articles": [{"slug": "cant-sign-in", "topic": "problems", "title": "I can't sign in", "…": "…"}], "voted": {}}}
+```
+
+### `POST /api/v1/help/feedback`
+
+"Was this helpful?" One answer per person and article; a new answer replaces the old one. 30 a minute.
+
+```http
+POST /api/v1/help/feedback
+Authorization: Bearer 1|…
+Idempotency-Key: 4e1f…
+
+{"audience": "restaurant", "slug": "add-a-dish", "helpful": true}
+```
+
+`204 No Content`. Unknown article: `404`.
+
 ## Super Admin: overview and emergency switches (app `/p`)
 
 The app's Super Admin screen shows numbers from `platform/dashboard` and four switches: **maintenance**, **self sign-up**, **push**, **Super Admin app sign-in**. Everything else opens the web console.
