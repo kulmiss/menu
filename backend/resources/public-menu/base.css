@@ -7,7 +7,7 @@ body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.45 var(--ff,syste
 h1,h2,h3,p{margin:0}
 button{font:inherit;color:inherit}
 .w{max-width:44rem;margin:0 auto;padding:0 1rem}
-h1,h2,h3,.nm{font-family:var(--fh,inherit)}
+h1,h2,h3,.nm{font-family:var(--fh,inherit);overflow-wrap:break-word}
 .top{position:relative;max-width:44rem;margin:0 auto}
 header{padding:1.25rem 1rem .5rem;display:flex;align-items:center;gap:.75rem}
 .lg{flex:none;width:3.5rem;height:3.5rem;border-radius:.9rem;object-fit:cover;background:var(--card)}
