@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
@@ -9,6 +8,7 @@ import { useTranslation } from 'react-i18next'
 import { applyFieldErrors, errorStatus } from '@/lib/api'
 import { handleServerError } from '@/lib/handle-server-error'
 import { safeRedirect } from '@/lib/safe-redirect'
+import { z } from '@/lib/zod'
 import { Button } from '@/components/ui/button'
 import {
   Form,
