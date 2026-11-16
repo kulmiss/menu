@@ -1,0 +1,428 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Super Admin guide</title><style>body{font:14px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#0f172a;max-width:720px;margin:0 auto;padding:24px}h1.topic{page-break-before:always;font-size:24px;border-bottom:2px solid #0f172a;padding-bottom:6px}h1.cover{font-size:34px;margin-top:30vh}h2{font-size:18px;margin-top:28px}section{page-break-inside:auto}img{max-width:100%;border:1px solid #e2e8f0;border-radius:6px;margin:8px 0}pre{background:#f1f5f9;padding:10px;border-radius:6px;white-space:pre-wrap;font-size:12px}code{background:#f1f5f9;padding:1px 4px;border-radius:4px;font-size:12px}table{border-collapse:collapse;width:100%}td,th{border-bottom:1px solid #e2e8f0;padding:4px 6px;text-align:left}a{color:#1d4ed8}</style></head><body><h1 class="cover">Super Admin guide</h1><p>Setup from zero to live, daily use, problems and answers, and a cheat sheet.</p>
+<h1 class="topic">1. Setup: from zero to live</h1>
+<section id="overview"><h2>How the guide works</h2><p>This guide is for <strong>Super Admins</strong>: the people who run Menu.</p>
+<ul>
+<li><strong>Setup</strong> takes you from an empty server to a live site, step by step. Do it once.</li>
+<li><strong>Daily use</strong> has one page for each part of the Super Admin panel.</li>
+<li><strong>Problems and answers</strong> and the <strong>Cheat sheet</strong> are for later.</li>
+</ul>
+<p>Every page of the panel has a <strong>?</strong> button. It opens the matching page of this guide.</p>
+<p>The same guide is in the code (<code>docs/admin-guide/</code>) and as one PDF (<code>docs/admin-guide.pdf</code>). Technical details are in <code>docs/deploy.md</code> and <code>docs/security.md</code>.</p>
+</section>
+<section id="hosting"><h2>1. Choose hosting</h2><p>Menu runs on <strong>shared hosting with cPanel</strong> or on a <strong>VPS</strong> with Nginx. No Docker is needed.</p>
+<p>The server needs:</p>
+<ul>
+<li>PHP <strong>8.3</strong> or newer, with <code>pdo_mysql</code>, <code>mbstring</code>, <code>openssl</code>, <code>gd</code> (with WebP), <code>intl</code>, <code>zip</code>, <code>exif</code>, <code>bcmath</code>, <code>fileinfo</code>.</li>
+<li>MySQL <strong>8</strong> or MariaDB <strong>10.6+</strong>.</li>
+<li><strong>HTTPS</strong> (a free certificate is fine).</li>
+<li>PHP settings: <code>upload_max_filesize = 10M</code>, <code>post_max_size = 12M</code>, <code>memory_limit = 256M</code>, OPcache on.</li>
+</ul>
+<p>Node is <strong>not</strong> needed on the server. You build the admin on your computer.</p>
+<p><strong>Build the release on your computer:</strong></p>
+<pre><code class="language-bash">git checkout main &amp;&amp; git pull
+cd frontend &amp;&amp; pnpm install --frozen-lockfile &amp;&amp; pnpm build &amp;&amp; cd ..
+cd backend &amp;&amp; composer install --no-dev --optimize-autoloader --classmap-authoritative &amp;&amp; cd ..
+</code></pre>
+<p>Upload the whole <code>backend/</code> folder. Don't upload <code>.env</code>, <code>node_modules/</code> or <code>frontend/</code>.</p>
+<p>Next: <a href="#domain-https">Domain and HTTPS</a>.</p>
+</section>
+<section id="domain-https"><h2>2. Domain and HTTPS</h2><ol>
+<li>Upload <code>backend/</code> <strong>outside</strong> <code>public_html</code>, for example <code>/home/USER/menu/backend</code>.</li>
+<li>In cPanel → <strong>Domains</strong>, point the domain to <code>/home/USER/menu/backend/public</code>.</li>
+<li>Turn on HTTPS: cPanel → <strong>SSL/TLS Status → Run AutoSSL</strong>, or <code>certbot --nginx</code> on a VPS.</li>
+<li>Open <code>https://your-domain/up</code>. It must say &quot;Application up&quot; (after the next steps).</li>
+</ol>
+<p>The <code>public</code> folder <strong>must</strong> be the document root. The fast menu pages and QR links need its <code>.htaccess</code> file. It is a hidden file: make sure it was uploaded.</p>
+<p><strong>Cloudflare?</strong> Use SSL mode <strong>Full (strict)</strong>. Turn off <strong>Rocket Loader</strong>. Set <code>TRUSTED_PROXIES=*</code> in <code>.env</code> (next page).</p>
+<p>Next: <a href="#env-file">The .env file</a>.</p>
+</section>
+<section id="env-file"><h2>3. The .env file</h2><p>Copy <code>.env.example</code> to <code>.env</code> in <code>backend/</code>. Set at least:</p>
+<pre><code class="language-dotenv">APP_NAME=&quot;Menu&quot;
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://menu.example.com
+TRUSTED_PROXIES=          # * behind Cloudflare or a host proxy; empty otherwise
+
+DB_DATABASE=...
+DB_USERNAME=...
+DB_PASSWORD=...
+
+SESSION_SECURE_COOKIE=true
+QUEUE_CONNECTION=database
+LOG_STACK=daily
+</code></pre>
+<ul>
+<li><strong>APP_ENV=production</strong> and <strong>APP_DEBUG=false</strong> on a live site. Always.</li>
+<li><strong>APP_URL</strong> exactly as people type it: <code>https://</code>, with or without <code>www</code>.</li>
+<li><strong>TRUSTED_PROXIES</strong>: only when Cloudflare or a host proxy is in front. Then rate limits see the real visitor.</li>
+</ul>
+<p>Set the file to <code>600</code> permissions. <strong>Save a copy of <code>.env</code> in your password manager.</strong> The <code>APP_KEY</code> in it is needed to read saved passwords and two-factor secrets.</p>
+<p>Next: <a href="#migrate-and-cache">Database, migrate and cache</a>.</p>
+</section>
+<section id="migrate-and-cache"><h2>4. Database, migrate and cache</h2><ol>
+<li>In cPanel → <strong>MySQL Databases</strong>, create a database and a user with all privileges (utf8mb4).</li>
+<li>Put the names in <code>.env</code>.</li>
+<li>Open cPanel → <strong>Terminal</strong> in <code>backend/</code> and run:</li>
+</ol>
+<pre><code class="language-bash">php artisan key:generate --force
+php artisan migrate --force
+php artisan platform:aggregate
+php artisan optimize
+</code></pre>
+<p><code>migrate</code> creates the tables, the plans and the default Terms and Privacy texts. <code>optimize</code> caches the config, routes, views and events.</p>
+<ol start="4">
+<li>Make these folders writable (755): <code>storage/</code>, <code>bootstrap/cache/</code>, <code>public/media/</code>, <code>public/menu-cache/</code>, <code>public/menu-assets/</code>.</li>
+</ol>
+<p><strong>Never run the demo seeder on the live server.</strong> It makes restaurants with known passwords. It refuses when <code>APP_ENV=production</code>, but don't try.</p>
+<p><strong>After every update</strong> run <code>php artisan migrate --force</code>, <code>php artisan optimize</code> and <code>php artisan menu:refresh-pages --all</code>.</p>
+<p>Next: <a href="#backup-key">Backup key</a>.</p>
+</section>
+<section id="backup-key"><h2>5. Backup key</h2><p>Backups hold every restaurant's data. Encrypt them:</p>
+<pre><code class="language-bash">php artisan backup:key --write
+php artisan config:cache
+</code></pre>
+<p>This adds <code>BACKUP_KEY</code> to <code>.env</code>.</p>
+<p><strong>Save the key in your password manager now.</strong> Without it, no backup can be restored. If you make a new key later, old backups still need the old one.</p>
+<p>Without a key, backups are plain zips, the Backups page shows a warning, and no off-site copy is made.</p>
+<p>Next: <a href="#cron">Cron</a>.</p>
+</section>
+<section id="cron"><h2>6. Cron: the one scheduled line</h2><p>In cPanel → <strong>Cron Jobs</strong>, add this line, <strong>every minute</strong>:</p>
+<pre><code class="language-cron">* * * * * cd /home/USER/menu/backend &amp;&amp; php artisan schedule:run &gt;&gt; /dev/null 2&gt;&amp;1
+</code></pre>
+<p>It runs everything: e-mails, happy-hour menu updates, the nightly backup at 02:30, monthly reports, push notifications and clean-up.</p>
+<p>Some hosts need the full PHP path, for example <code>/opt/cpanel/ea-php83/root/usr/bin/php</code>.</p>
+<p><strong>Check it:</strong> after two minutes, run <code>php artisan schedule:list</code>. The Super Admin dashboard → <strong>System health</strong> shows &quot;cron last run&quot;.</p>
+<p>Next: <a href="#smtp">E-mail (SMTP)</a>.</p>
+</section>
+<section id="smtp"><h2>7. E-mail (SMTP)</h2><ol>
+<li>Open <strong>Settings → Email (SMTP)</strong>.</li>
+<li>Fill in the server, port (587), encryption, username, password, from address and name.</li>
+<li>Tap <strong>Save</strong>, then <strong>Send test email</strong> to your own address. You see the result, or the server's error, at once.</li>
+</ol>
+<p>The password is stored encrypted and never shown again.</p>
+<p><strong>So e-mails don't land in spam</strong>, add three DNS records for the domain of the from address: <strong>SPF</strong>, <strong>DKIM</strong> and <strong>DMARC</strong>. cPanel → <strong>Email Deliverability</strong> can add SPF and DKIM for you. Details: <code>docs/deploy.md</code> section 7.</p>
+<p>Next: <a href="#first-super-admin">The first Super Admin</a>.</p>
+</section>
+<section id="first-super-admin"><h2>8. The first Super Admin and two-factor</h2><p>Super Admins are made on the server, not in the app. In <code>backend/</code>:</p>
+<pre><code class="language-bash">php artisan tinker --execute=&quot;\$u = App\Models\User::create(['name' =&gt; 'Your Name', 'email' =&gt; 'you@example.com', 'password' =&gt; 'a-long-password']); \$u-&gt;forceFill(['is_super_admin' =&gt; true, 'email_verified_at' =&gt; now()])-&gt;save();&quot;
+</code></pre>
+<ol>
+<li>Sign in at <strong><a href="https://your-domain/auth/sign-in">https://your-domain/auth/sign-in</a></strong>.</li>
+<li>Open <strong><a href="https://your-domain/platform">https://your-domain/platform</a></strong>. You see only <strong>Set up two-factor</strong>.</li>
+<li>Scan the QR code with an authenticator app. Type the code.</li>
+<li><strong>Save the recovery codes</strong> in your password manager.</li>
+</ol>
+<p>Now the whole panel opens, and the <strong>setup wizard</strong> starts. Five short pages:</p>
+<ol>
+<li><strong>Welcome</strong>: two-factor and the backup key.</li>
+<li><strong>Your platform</strong>: name, support e-mail, WhatsApp, colour, logo.</li>
+<li><strong>Plans and prices</strong>: price and limits of each plan.</li>
+<li><strong>E-mail, app and sign-up</strong>: send yourself a test e-mail, Firebase status, open or closed sign-up.</li>
+<li><strong>Features and demo data</strong>: switch off what you don't offer, delete demo restaurants.</li>
+</ol>
+<p><img src="../../backend/public/help/shots/wizard-welcome-desktop.webp" alt="The setup wizard" /></p>
+<p><strong>Finish later</strong> is fine. The dashboard then shows a list of what is still to do. Open the wizard again from <strong>Settings → Setup wizard</strong>.</p>
+<p>Next: <a href="#firebase">Firebase for the app</a>.</p>
+</section>
+<section id="firebase"><h2>9. Firebase for the mobile app</h2><p>The app works without Firebase. Then notifications only show in the app's inbox.</p>
+<p><strong>For push notifications on phones:</strong></p>
+<ol>
+<li>In the Firebase console, open your project → <strong>Project settings → Service accounts</strong>.</li>
+<li>Tap <strong>Generate new private key</strong>. A JSON file downloads. Keep it secret.</li>
+<li>Upload it <strong>outside</strong> <code>public_html</code>, for example <code>storage/app/private/firebase.json</code>, permissions <code>600</code>.</li>
+<li>In <code>.env</code>: <code>FCM_CREDENTIALS=storage/app/private/firebase.json</code>, then <code>php artisan config:cache</code>.</li>
+</ol>
+<p>The cron line sends the pushes. Keep a copy of the file in your password manager: it is not in the backups.</p>
+<p>The app itself needs <code>google-services.json</code> when it is built: see <code>docs/firebase.md</code> in the app repository.</p>
+<p>Next: <a href="#go-live-checklist">Go-live checklist</a>.</p>
+</section>
+<section id="go-live-checklist"><h2>10. Go-live checklist</h2><p><strong>Server</strong></p>
+<ol>
+<li>PHP 8.3 with the extensions, OPcache on, upload limits set.</li>
+<li><code>backend/</code> outside <code>public_html</code>. Document root → <code>backend/public</code>. HTTPS works. <code>.htaccess</code> uploaded.</li>
+<li><code>.env</code>: <code>APP_ENV=production</code>, <code>APP_DEBUG=false</code>, <code>APP_URL=https://…</code>, database, <code>SESSION_SECURE_COOKIE=true</code>, <code>TRUSTED_PROXIES</code> if behind a proxy.</li>
+<li><code>php artisan key:generate --force</code>, <code>migrate --force</code>, <code>platform:aggregate</code>, <code>optimize</code>.</li>
+<li><strong>Never</strong> run the demo seeder.</li>
+<li>Folder permissions. <code>.env</code> (with <code>APP_KEY</code>) and <code>BACKUP_KEY</code> saved in your password manager.</li>
+<li>Cron line every minute. <code>/up</code> says &quot;Application up&quot;.</li>
+</ol>
+<p><strong>Platform</strong></p>
+<ol start="8">
+<li>First Super Admin, two-factor on, recovery codes saved.</li>
+<li>The setup wizard: name, logo, contact, plans and prices, e-mail test, sign-up mode, feature switches.</li>
+<li>Read the Terms and Privacy texts and change them for your business. Ask a lawyer.</li>
+<li><strong>Backups → Back up now</strong>, then <strong>Download</strong> it once.</li>
+</ol>
+<p><strong>Smoke test, on a phone and a computer</strong></p>
+<ol start="12">
+<li>Sign up with a real e-mail → confirm → set up 5 dishes, a logo, opening hours.</li>
+<li>Download a QR code, print it, scan it with a phone.</li>
+<li>Change a price. Open the menu again: the new price shows.</li>
+<li>Record a test payment: the invoice e-mail arrives.</li>
+<li>Delete the test restaurant.</li>
+</ol>
+</section>
+<h1 class="topic">2. Restaurants</h1>
+<section id="restaurants"><h2>Restaurants</h2><p><strong>Restaurants</strong> lists every restaurant. Search by name or address. Filter by <strong>State</strong>: trial, active, grace, read-only, unavailable, suspended, pending.</p>
+<p><strong>Create one:</strong> tap <strong>New restaurant</strong>. Type the name, menu address, owner's name and e-mail, trial plan and days. The owner gets an e-mail to choose a password.</p>
+<p><strong>Open one</strong> to see:</p>
+<ul>
+<li><strong>Subscription</strong>: plan, trial until, paid until. <strong>Payments</strong> records a payment (see <a href="#payments">Payments</a>).</li>
+<li><strong>Features</strong>: turn single features on or off for this restaurant, or leave <strong>As the plan</strong>.</li>
+<li><strong>Team</strong>: the people and their roles.</li>
+<li><strong>Log in as owner</strong>: see <a href="#log-in-as">Log in as</a>.</li>
+<li><strong>E-mail a password link</strong>: for an owner who can't sign in.</li>
+<li><strong>Suspend</strong>: the menu shows &quot;unavailable&quot; and the team can't make changes. Type a reason; the owner sees it.</li>
+<li><strong>Delete restaurant</strong>: it can be restored for 30 days, then it is removed for good.</li>
+</ul>
+<p><strong>New sign-ups waiting for approval</strong> have <strong>Approve</strong> and <strong>Reject</strong> buttons. A rejected owner gets your reason by e-mail.</p>
+</section>
+<section id="payments"><h2>Payments and invoices</h2><p>Restaurants pay you by mobile money or bank transfer. You record it:</p>
+<ol>
+<li>Open the restaurant → <strong>Payments</strong>.</li>
+<li>Type the <strong>Amount</strong>, <strong>Method</strong>, <strong>Months</strong> and a <strong>Reference</strong> (for example the transaction number).</li>
+<li>Tap <strong>Record</strong>.</li>
+</ol>
+<p>The paid period is extended. An invoice is made and e-mailed to the owner.</p>
+<p><strong>Payments</strong> shows all payments with totals. <strong>Invoices</strong> lists every invoice; you can download or void one.</p>
+</section>
+<section id="messages-and-announcements"><h2>Messages and announcements</h2><p><strong>Announcements</strong> show on restaurant dashboards (and as a push in the app).</p>
+<ol>
+<li>Open <strong>Announcements</strong>. Write a <strong>Title</strong> and <strong>Text</strong>.</li>
+<li>Choose the <strong>Type</strong>: Info or Warning.</li>
+<li>Choose <strong>Who sees it</strong>: every restaurant, or some plans or restaurants.</li>
+<li>Set <strong>Show from</strong> and <strong>Until</strong>. Tap <strong>Publish</strong>.</li>
+</ol>
+<p><strong>Messages</strong> are e-mails to restaurant owners: news, offers and reminders.</p>
+<ol>
+<li>Open <strong>Messages → New email</strong>.</li>
+<li>Write the <strong>Subject</strong> and <strong>Message</strong>. Placeholders like the restaurant name are filled in for each owner.</li>
+<li>Choose the <strong>Recipients</strong>. Check the preview and <strong>send yourself a test</strong> first.</li>
+<li>Send. They go out a few per minute (<strong>E-mails per minute</strong>, keep it below your mail provider's limit). Owners who switched off news don't get them.</li>
+</ol>
+<p>For the mobile app only, use <a href="#mobile-push">Mobile app: send a push notification</a>.</p>
+</section>
+<h1 class="topic">3. Plans and limits</h1>
+<section id="plans-and-limits"><h2>Plans and limits</h2><p>Open <strong>Plans</strong>. Today's plans:</p>
+<p><em>The live list of plans, with prices and limits, is shown here in the panel (Super Admin → Guide).</em></p>
+<p><strong>Change a plan:</strong> tap it. You can change:</p>
+<ul>
+<li><strong>Name</strong>, <strong>Price</strong>, <strong>Price for a year</strong>, <strong>Currency</strong>, <strong>Trial days</strong>.</li>
+<li><strong>Limits</strong>: empty = unlimited. Photos and branches are counted on the standard plans.</li>
+<li><strong>Features</strong>: which features this plan includes.</li>
+<li><strong>Shown at sign-up</strong> and <strong>Can be chosen</strong>.</li>
+</ul>
+<p>Help articles, the landing page and the sign-up page read prices and limits <strong>live</strong> from here. You never need to change a text when you change a price.</p>
+<p><img src="../../backend/public/help/shots/wizard-plans-desktop.webp" alt="Plans in the setup wizard" /></p>
+<p>Lowering a limit doesn't delete anything. A restaurant over the limit just can't add more.</p>
+<p><strong>Old plans:</strong> a plan can be replaced by another. Its restaurants move to the new plan when their paid time ends.</p>
+</section>
+<section id="themes"><h2>Themes</h2><p>A <strong>theme</strong> is a ready-made look: a colour, a font and a menu style. Restaurants pick one in <strong>Appearance → Themes</strong>, then change it.</p>
+<ol>
+<li>Open <strong>Themes</strong>. Tap <strong>New theme</strong>.</li>
+<li>Type a <strong>Name</strong>. Choose the <strong>Colour</strong>, <strong>Font</strong> and <strong>Menu style</strong> (A, B, C or D).</li>
+<li>Turn on <strong>Offer</strong> to show it to restaurants.</li>
+</ol>
+<p>A theme with a menu style that a plan doesn't include is shown with a lock to those restaurants.</p>
+</section>
+<h1 class="topic">4. Feature switches</h1>
+<section id="feature-switches"><h2>Feature switches: global, plan and restaurant</h2><p>A feature can be switched in three places. The strongest wins:</p>
+<ol>
+<li><strong>Global</strong> (<strong>Settings → Features</strong>): off here = off <strong>everywhere</strong>: web admin, app, guest menu and API. Use it for a feature you don't want at all, or in an emergency.</li>
+<li><strong>Restaurant</strong> (Restaurants → a restaurant → <strong>Features</strong>): on or off for this one restaurant.</li>
+<li><strong>Plan</strong> (Plans → a plan → Features): what the plan includes.</li>
+</ol>
+<p><strong>Settings → Features</strong> lists every feature with <strong>On for everyone</strong> or <strong>Off for everyone</strong>, and how many plans and restaurants have it off.</p>
+<p>When a feature is off, its buttons and its help articles are hidden. Existing data is kept. For example, sold-out marks come back when you switch &quot;Sold out&quot; on again.</p>
+<p>At least one menu style must stay on. <strong>Sign-up</strong> off closes the sign-up page.</p>
+</section>
+<h1 class="topic">5. Mobile app control</h1>
+<section id="mobile-access"><h2>Mobile app: access and maintenance</h2><p>Open <strong>Mobile app → Access</strong>.</p>
+<ul>
+<li><strong>Restaurant teams can sign in to the app</strong> and <strong>Super Admins can sign in to the app</strong>: turn off to close the app for them. They see your <strong>Message when the app is off</strong> and a link to the website.</li>
+<li><strong>Maintenance mode</strong>: everyone except Super Admins sees your <strong>Maintenance message</strong> instead of the app. Use it during server updates.</li>
+</ul>
+<p>Phones get the change within a minute or two: the app checks when it opens and when it comes back to the screen. The server also refuses app requests while it is closed.</p>
+<p>The four emergency switches (maintenance, sign-up, push, Super Admin app sign-in) are also in the app itself, on the Super Admin screen.</p>
+</section>
+<section id="mobile-versions"><h2>Mobile app: versions and forced updates</h2><p>Open <strong>Mobile app → Versions</strong>.</p>
+<ul>
+<li><strong>Latest version</strong>: the newest version in the stores.</li>
+<li><strong>Recommended update below</strong>: older apps see &quot;A new version of the app is ready&quot; once. People can close it.</li>
+<li><strong>Minimum supported version</strong>: older apps <strong>must</strong> update. They see &quot;Update required&quot; and can't do anything else.</li>
+<li><strong>Release notes</strong>: shown in both messages.</li>
+</ul>
+<p>Versions look like <code>1.4.0</code>. The minimum can't be higher than the latest.</p>
+<p><strong>Order:</strong> publish the new version in the stores first. Wait until the store shows it. Then raise the minimum.</p>
+</section>
+<section id="mobile-banner"><h2>Mobile app: the announcement banner</h2><p>Open <strong>Mobile app → Banner</strong>.</p>
+<ol>
+<li>Type the <strong>Text</strong> (up to 200 characters).</li>
+<li>Add a <strong>Link</strong> if you like: an app screen like <code>/inbox</code>, or an <code>https://</code> link.</li>
+<li>Choose <strong>Shows from</strong> and <strong>Until</strong>.</li>
+<li>Choose <strong>Who</strong>: Everyone, Restaurant teams or Super Admins.</li>
+<li>Tap <strong>Save</strong>.</li>
+</ol>
+<p>People can close the banner. Leave the text empty for no banner.</p>
+<p>For dashboards on the website, use <strong>Announcements</strong> instead.</p>
+</section>
+<section id="mobile-features"><h2>Mobile app: app features and links</h2><p><strong>App features</strong> are switches that only exist in the app:</p>
+<ul>
+<li><strong>App lock with fingerprint or face</strong>: off = the lock is not offered.</li>
+<li><strong>Push notifications</strong>: off = no push to phones. The in-app inbox still works.</li>
+<li><strong>Usage analytics</strong> and <strong>Crash reports</strong>: Firebase collection on or off for everyone.</li>
+</ul>
+<p>Restaurant features (sold out, branches, insights…) follow <strong>Settings → Features</strong> and the plans by themselves.</p>
+<p><strong>Links:</strong> the Google Play and App Store pages (for updates), Privacy, Terms and the support WhatsApp number. Empty = this site's own pages.</p>
+</section>
+<section id="mobile-push"><h2>Mobile app: send a push notification</h2><ol>
+<li>Open <strong>Mobile app → Push</strong>.</li>
+<li>Type the <strong>Title</strong> and the <strong>Message</strong>.</li>
+<li>Add what it <strong>Opens</strong> (optional): an app screen like <code>/inbox</code>, or an <code>https://</code> link.</li>
+<li>Choose <strong>Who</strong>: Everyone, Restaurant teams (by role, plan or restaurant numbers) or Super Admins.</li>
+<li>Tap <strong>Review and send</strong>. You see how many people get it, and how many get it on their phone.</li>
+<li>Tap <strong>Send now</strong>.</li>
+</ol>
+<p>It goes to the in-app inbox of everyone chosen who is signed in to the app, and as a push to phones that allow it. <strong>Sent pushes</strong> shows the history.</p>
+<p>Up to 10 a minute. Don't send too many: people turn notifications off.</p>
+</section>
+<section id="mobile-devices"><h2>Mobile app: devices and stats</h2><p><strong>Devices</strong> lists every phone signed in to the app: person, restaurants, device, Android or iOS, app version, push on or off, last seen. Search and filter by platform or kind.</p>
+<ul>
+<li><strong>Sign out</strong> next to a device: that phone is signed out at once.</li>
+<li><strong>Sign out all devices</strong>: everyone, on every phone (your own phone stays). Use it after a security problem.</li>
+</ul>
+<p><strong>Stats</strong> shows active devices (7 and 30 days), people, Android vs iOS, the versions in use, the push opt-in rate, and how many phones must update.</p>
+</section>
+<h1 class="topic">6. Sign-up</h1>
+<section id="signup-settings"><h2>Sign-up settings</h2><p>Open <strong>Settings → Sign-up</strong>.</p>
+<ul>
+<li><strong>Public sign-up</strong>: off = the sign-up page says &quot;Registration is closed&quot;.</li>
+<li><strong>Plan for new sign-ups</strong>: every new restaurant starts on it (now: <strong>(the plan for new sign-ups)</strong>).</li>
+<li><strong>Require my approval</strong>: new restaurants wait until you approve them. Their menu is not public until then.</li>
+<li><strong>E-mail me about every new sign-up</strong>.</li>
+<li><strong>Require two-factor sign-in for restaurant owners</strong>.</li>
+<li><strong>Anti-spam</strong>: Cloudflare Turnstile (optional) and <strong>Blocked e-mail domains</strong> (one per line).</li>
+</ul>
+<p>Unconfirmed sign-ups are deleted after 7 days.</p>
+</section>
+<h1 class="topic">7. Legal texts, languages and help</h1>
+<section id="legal-texts"><h2>Legal texts: Terms and Privacy</h2><p>Open <strong>Settings → General</strong>. Scroll to <strong>Terms of use</strong> and <strong>Privacy policy</strong>.</p>
+<p>The defaults are a <strong>draft</strong>. Read them and change them for your business and your country. Ask a lawyer.</p>
+<p>The texts are shown at <code>/terms</code> and <code>/privacy</code>, at sign-up and in the app. Every saved version is kept, so you can show what was valid on a date.</p>
+</section>
+<section id="languages"><h2>Languages</h2><p>The admin, the app and the guest menus are in <strong>English</strong> today. Restaurants type their dishes in their own words.</p>
+<p><strong>Default language</strong> and <strong>Default currency</strong> for new restaurants are in <strong>Settings → General</strong>.</p>
+<p>Adding a language for the screens needs a developer: the texts are in <code>backend/lang/</code>, <code>frontend/src/locales/</code> and the app's <code>lib/l10n/</code>. Every screen uses these files, so a new language is a translation job, not a code change.</p>
+</section>
+<section id="landing-and-branding"><h2>Landing page, logo and link preview</h2><p><strong>Settings → Landing page</strong> is the public home page at <a href="https://your-domain">https://your-domain</a>.</p>
+<ul>
+<li><strong>Headline</strong> and <strong>subline</strong>: leave empty for the default words.</li>
+<li><strong>Sections</strong>: turn parts on or off (how it works, features, styles, speed, pricing, testimonials, FAQ).</li>
+<li><strong>Testimonials</strong>: only real quotes from real restaurants, with their permission. The section is hidden while it is empty.</li>
+<li><strong>Social links</strong> in the footer.</li>
+</ul>
+<p>Prices on the landing page come from <strong>Plans</strong>: you never type them here.</p>
+<p><strong>Settings → Logo &amp; link preview</strong></p>
+<ul>
+<li><strong>Logo</strong>: shown at the top of e-mails and invoices. No logo = the platform name in text.</li>
+<li><strong>Link preview</strong>: the picture apps show when a restaurant without a banner shares its menu link (1200 × 630).</li>
+</ul>
+<p><strong>Settings → Billing</strong>: your company name, address and tax number on invoices, the invoice number prefix, the footer text and the VAT rate.</p>
+</section>
+<section id="help-articles"><h2>Help articles</h2><p>Open <strong>Help articles</strong>. Choose <strong>Restaurant help</strong> or <strong>Super Admin guide</strong>.</p>
+<p>The list shows each article, its topic, if it is <strong>Default</strong>, <strong>Changed</strong> or <strong>Your own</strong>, and the <strong>Was this helpful?</strong> counts. Articles with many &quot;No&quot; answers need better words.</p>
+<p><strong>Change an article:</strong> tap it. Edit the text in Markdown. The <strong>Preview</strong> shows what a restaurant sees. Choose a restaurant to check feature blocks and live numbers. Tap <strong>Save</strong>.</p>
+<p><strong>Reset to default</strong> brings back the shipped text.</p>
+<p><strong>New article:</strong> tap <strong>New article</strong>, choose a topic and write it.</p>
+<p><strong>Never type a price, a limit or a number of days.</strong> Use a placeholder: <code>{{plans}}</code>, <code>{{plan.pro.price}}</code>, <code>{{signup_plan.photos}}</code>, <code>{{trial_days}}</code>, <code>{{support}}</code>. Then the text is always right. Blocks like <code>&lt;!-- if sold_out --&gt;…&lt;!-- endif --&gt;</code> show only when the feature is on.</p>
+</section>
+<h1 class="topic">8. &quot;Log in as&quot; and support</h1>
+<section id="log-in-as"><h2>&quot;Log in as&quot; a restaurant owner</h2><ol>
+<li>Open <strong>Restaurants</strong> and the restaurant.</li>
+<li>Tap <strong>Log in as owner</strong>.</li>
+</ol>
+<p>One click, no reason needed. You see <strong>Viewing as …</strong> at the top. Tap <strong>Back to platform</strong> to stop.</p>
+<ul>
+<li>It ends by itself after <strong>2 hours</strong>.</li>
+<li>It is <strong>not recorded</strong>: no log line, and changes count as the owner's. Use it with care.</li>
+<li>Some things stay blocked: the owner's password, e-mail, two-factor, team removal, closing the account.</li>
+</ul>
+<p>It works in the app too: open the restaurant and tap <strong>Log in as</strong>.</p>
+</section>
+<section id="support-tips"><h2>Helping a restaurant</h2><ul>
+<li><strong>&quot;I can't sign in.&quot;</strong> Open the restaurant → <strong>E-mail a password link</strong>. Lost 2FA phone and codes? You can't turn it off for them; ask them to use a recovery code, or make a new owner and remove the old one.</li>
+<li><strong>&quot;My menu is offline.&quot;</strong> Check <strong>Subscription</strong>: paid until, grace, read-only. Record the payment.</li>
+<li><strong>&quot;I need a feature.&quot;</strong> Check the plan and the restaurant's <strong>Features</strong>. Upgrade the plan, or turn it on for this restaurant.</li>
+<li><strong>&quot;Something looks wrong.&quot;</strong> Use <a href="#log-in-as">Log in as</a> to see what they see.</li>
+<li>Point them to their own <strong>Help</strong> page: every screen has a <strong>?</strong> button.</li>
+</ul>
+</section>
+<h1 class="topic">9. Demo data and backups</h1>
+<section id="demo-data"><h2>Demo data</h2><p>The demo has a café with 67 dishes and real photos, three showcase restaurants (styles A, B, C), and about 30 small restaurants with a year of payments.</p>
+<p><strong>On a test computer only:</strong></p>
+<pre><code class="language-bash">php artisan migrate:fresh --seed --seeder=DemoSeeder
+php artisan demo:photos
+</code></pre>
+<p>The password for all demo accounts is <code>password</code>. The demo Super Admin is <code>admin@example.com</code>.</p>
+<p><strong>Never on the live server.</strong> It refuses when <code>APP_ENV=production</code>. The setup wizard shows if demo restaurants exist and can delete them.</p>
+</section>
+<section id="backups"><h2>Backups</h2><p>Every night at 02:30 the database and every photo are saved in one zip, outside the public folder.</p>
+<ul>
+<li><strong>Back up now</strong> makes one at once.</li>
+<li><strong>Download</strong> needs your password or a two-factor code. The link works for 5 minutes.</li>
+<li><strong>Backup settings</strong>: how many days, weeks and months to keep.</li>
+<li><strong>Off-site copy</strong>: copy each backup to S3-compatible storage (Backblaze B2, Cloudflare R2, AWS). Needs the <a href="#backup-key">backup key</a>.</li>
+</ul>
+<p>If no backup works for 26 hours, the dashboard shows a warning and every Super Admin gets one e-mail a day.</p>
+<p><strong>Restore</strong> has no button on purpose: it replaces everything. Follow &quot;Restoring a backup&quot; in <code>docs/deploy.md</code>.</p>
+<p>Test a restore once, on a copy of the site.</p>
+</section>
+<h1 class="topic">10. Security</h1>
+<section id="security-log"><h2>Security log and activity log</h2><p><strong>Activity log</strong> (in the panel) shows changes on the platform and in restaurants: who, what and when. Filter by area, action or person.</p>
+<p><strong>Security log</strong> (on the server) has one line for each security event: failed sign-ins, locked accounts, wrong two-factor codes, password resets, blocked sign-ups, refused uploads. It is in <code>storage/logs/security-YYYY-MM-DD.log</code>, kept 30 days.</p>
+<p>Each line holds only short codes for the e-mail and the address, never passwords or codes.</p>
+<p>Quick check: <code>grep login.locked storage/logs/security-*.log</code>.</p>
+<p><strong>Good habits:</strong> two-factor for every Super Admin, a password manager, and fewer Super Admins.</p>
+</section>
+<h1 class="topic">11. Problems and answers</h1>
+<section id="problems"><h2>Problems and answers</h2><ul>
+<li><strong>Menu pages are slow.</strong> The document root must be <code>backend/public</code>, and <code>.htaccess</code> must be uploaded.</li>
+<li><strong>&quot;Page expired&quot; (419) in the admin.</strong> <code>APP_URL</code> must match the address in the browser (https, www).</li>
+<li><strong>E-mails don't arrive.</strong> <strong>Settings → Email → Send test email</strong> shows the error. The cron line must run. Check SPF and DKIM.</li>
+<li><strong>Photos don't upload.</strong> <code>upload_max_filesize</code>, <code>post_max_size</code>, <code>memory_limit</code>, GD with WebP, <code>public/media/</code> writable.</li>
+<li><strong>The menu shows old content.</strong> Run <code>php artisan menu:refresh-pages --all</code>. No &quot;Cache Everything&quot; rule for HTML.</li>
+<li><strong>QR links don't open.</strong> <code>/q/CODE</code> needs the <code>.htaccess</code> rule and <code>public/qr.php</code>.</li>
+<li><strong>Backups fail.</strong> Free disk space; a valid <code>BACKUP_KEY</code>. The Backups page shows the error.</li>
+<li><strong>The app says &quot;Update required&quot; for everyone.</strong> The minimum version is higher than the store version. Lower it in <strong>Mobile app → Versions</strong>.</li>
+<li><strong>No push notifications.</strong> <code>FCM_CREDENTIALS</code> in <code>.env</code>, cron running, <strong>Push notifications</strong> on in Mobile app → App features.</li>
+<li><strong>A restaurant can't see a feature.</strong> Check Settings → Features (global), the restaurant's Features, then the plan.</li>
+</ul>
+</section>
+<h1 class="topic">12. Cheat sheet</h1>
+<section id="cheat-sheet"><h2>Cheat sheet: daily, weekly, monthly</h2><p><strong>Every day (5 minutes)</strong></p>
+<ul>
+<li>Dashboard: <strong>System health</strong> green? New sign-ups to approve? Plans ending soon?</li>
+<li>Record payments that came in.</li>
+<li>Answer support messages.</li>
+</ul>
+<p><strong>Every week</strong></p>
+<ul>
+<li><strong>Backups</strong>: the last backups are OK. Download one now and then.</li>
+<li><strong>Restaurants → follow-ups</strong> due.</li>
+<li><strong>Mobile app → Stats</strong>: how many phones must update?</li>
+<li><strong>Help articles</strong>: any article with many &quot;No&quot; answers?</li>
+</ul>
+<p><strong>Every month</strong></p>
+<ul>
+<li>Check invoices and payments for the month.</li>
+<li>Look at the security log for many failed sign-ins.</li>
+<li>Update the server and the app when a new version is ready (<code>docs/deploy.md</code> section 9).</li>
+<li>Check free disk space.</li>
+</ul>
+<p><strong>Every year</strong></p>
+<ul>
+<li>Renew <code>/.well-known/security.txt</code> (a test reminds you).</li>
+<li>Read the Terms and Privacy texts again.</li>
+</ul>
+</section>
+</body></html>

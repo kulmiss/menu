@@ -16,4 +16,6 @@ public: true
 
 ![Help on a phone and a computer](shot:help-centre)
 
+![Help in the app](appshot:app-help)
+
 Still stuck? See [Contact support](help:contact-support).

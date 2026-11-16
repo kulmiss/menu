@@ -25,3 +25,7 @@ keywords: home, quick actions, shortcuts
 At the bottom: **Home**, **Menu**<!-- if order_list -->, **Orders**<!-- endif --> and **More**. **More** has everything else: All dishes, branches, QR codes, appearance, team, billing and Help.
 
 Pull down on a screen to load the newest data.
+
+The first time, a short tour shows you around. Open it again from **More → Help → Take the tour**. The **?** at the top of every screen opens the help for that screen.
+
+![The welcome tour in the app](appshot:app-tour)

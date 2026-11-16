@@ -3,7 +3,7 @@ title: Legal texts: Terms and Privacy
 topic: content
 summary: Change the Terms of use and the Privacy policy.
 order: 10
-pages: /platform/settings#general
+pages: /platform/settings#general, /platform/settings
 ---
 
 Open **Settings → General**. Scroll to **Terms of use** and **Privacy policy**.

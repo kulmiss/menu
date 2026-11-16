@@ -3,7 +3,7 @@ title: Payments and invoices
 topic: restaurants
 summary: Record a payment by hand. The invoice is made by itself.
 order: 20
-pages: /platform/payments, /platform/invoices
+pages: /platform/payments, /platform/invoices, /platform/settings#billing
 ---
 
 Restaurants pay you by mobile money or bank transfer. You record it:

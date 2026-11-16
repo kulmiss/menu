@@ -27,7 +27,11 @@ class HelpRenderer
     /** @var array<string, string>|null */
     private ?array $values = null;
 
-    public function __construct(private readonly ?Tenant $tenant = null, private readonly ?string $role = null) {}
+    /**
+     * @param  bool  $forDocs  for docs/admin-guide: every block kept, generic words for live values,
+     *                         pictures and links as relative files (php artisan docs:admin-guide)
+     */
+    public function __construct(private readonly ?Tenant $tenant = null, private readonly ?string $role = null, private readonly bool $forDocs = false) {}
 
     public function markdown(string $body): string
     {
@@ -40,8 +44,15 @@ class HelpRenderer
         }, $body) ?? $body;
         $body = $this->conditions($body);
         $body = preg_replace_callback('/\{\{\s*([a-z0-9_.\-]+)\s*\}\}/', fn ($m) => $this->value($m[1]) ?? $m[0], $body) ?? $body;
-        $body = preg_replace_callback('/!\[([^\]]*)\]\(shot:([a-z0-9\-]+)\)/', fn ($m) => self::shot($m[2], $m[1]), $body) ?? $body;
-        $body = preg_replace('/!\[([^\]]*)\]\(appshot:([a-z0-9\-]+)\)/', '![$1](/help/shots/$2.webp "app")', $body) ?? $body;
+        if ($this->forDocs) {
+            $shots = '../../backend/public/help/shots/';
+            $body = preg_replace('/!\[([^\]]*)\]\(shot:([a-z0-9\-]+)\)/', '![$1]('.$shots.'$2-desktop.webp)', $body) ?? $body;
+            $body = preg_replace('/!\[([^\]]*)\]\(appshot:([a-z0-9\-]+)\)/', '![$1]('.$shots.'$2.webp)', $body) ?? $body;
+            $body = preg_replace('/\]\(help:([a-z0-9\-]+)\)/', ']($1.md)', $body) ?? $body;
+        } else {
+            $body = preg_replace_callback('/!\[([^\]]*)\]\(shot:([a-z0-9\-]+)\)/', fn ($m) => self::shot($m[2], $m[1]), $body) ?? $body;
+            $body = preg_replace('/!\[([^\]]*)\]\(appshot:([a-z0-9\-]+)\)/', '![$1](/help/shots/$2.webp "app")', $body) ?? $body;
+        }
 
         $body = preg_replace("/\n{3,}/", "\n\n", $body) ?? $body;
 
@@ -102,6 +113,9 @@ class HelpRenderer
 
     private function holds(string $condition): bool
     {
+        if ($this->forDocs) {
+            return ! str_contains($condition, '!');
+        }
         foreach (preg_split('/\s+/', trim($condition)) ?: [] as $token) {
             if (str_starts_with($token, 'role:')) {
                 if ($this->role !== null && ! in_array($this->role, explode(',', substr($token, 5)), true)) {
@@ -125,6 +139,9 @@ class HelpRenderer
     /** @return array<string, string> */
     private function values(): array
     {
+        if ($this->forDocs) {
+            return $this->docValues();
+        }
         $s = PlatformSettings::all();
         $contact = UpgradeContact::payload();
         $signup = SignUp::plan();
@@ -165,6 +182,44 @@ class HelpRenderer
         } else {
             $v['restaurant_name'] = __('help.your_restaurant');
             $v['menu_url'] = rtrim((string) config('app.url'), '/').'/your-restaurant';
+        }
+
+        return $v;
+    }
+
+    /**
+     * Words for the static guide in docs/: the panel shows the live values.
+     *
+     * @return array<string, string>
+     */
+    private function docValues(): array
+    {
+        $v = [
+            'site_name' => 'Menu',
+            'site_url' => 'https://your-domain',
+            'admin_url' => 'https://your-domain/admin',
+            'support_whatsapp' => '(your WhatsApp number)',
+            'support_email' => '(your support e-mail)',
+            'support' => '- (your support WhatsApp and e-mail, from Settings)',
+            'trial_days' => (string) config('menu.trial_days'),
+            'grace_days' => (string) config('menu.grace_days'),
+            'read_only_days' => (string) config('menu.read_only_days'),
+            'invitation_days' => (string) config('menu.invitation_days'),
+            'photos_per_dish' => (string) ItemController::MAX_PHOTOS,
+            'photo_max_mb' => '8',
+            'import_max_mb' => '5',
+            'signup_plan' => '(the plan for new sign-ups)',
+            'plans' => '*The live list of plans, with prices and limits, is shown here in the panel (Super Admin → Guide).*',
+            'restaurant_name' => 'your restaurant',
+            'menu_url' => 'https://your-domain/your-restaurant',
+        ];
+        foreach (['free', 'plus', 'pro', 'business', 'signup_plan'] as $plan) {
+            $p = $plan === 'signup_plan' ? 'signup_plan' : 'plan.'.$plan;
+            $v["$p.name"] = ucfirst($plan);
+            $v["$p.price"] = '(price from Plans)';
+            foreach (config('menu.limit_keys') as $limit) {
+                $v["$p.$limit"] = '(limit from Plans)';
+            }
         }
 
         return $v;

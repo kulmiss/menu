@@ -3,7 +3,7 @@ title: Help articles
 topic: content
 summary: Change the Help centre, add articles, see what helps.
 order: 30
-pages: /platform/help-articles
+pages: /platform/help-articles, /platform/help
 ---
 
 Open **Help articles**. Choose **Restaurant help** or **Super Admin guide**.
