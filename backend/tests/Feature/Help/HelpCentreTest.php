@@ -113,6 +113,7 @@ it('reads plan prices and limits live, never typed', function () {
     $help = helpOf($tenant);
     expect($help['plans-compared']['body'])->toContain('77 photos')->toContain('1,234');
     expect($help['dish-photos']['body'])->toContain('77 photos in total');
+    expect($help['dish-photos']['summary'])->toBe('Up to 5 photos for each dish. How to take good ones.');
     expect($help['faq']['body'])->toContain('77 on the Free plan');
 
     // The numbers in the defaults are never typed: no article names a plan price or photo limit itself.

@@ -72,7 +72,7 @@ class HelpController extends Controller
                 'slug' => $a['slug'],
                 'topic' => $a['topic'],
                 'title' => $a['title'],
-                'summary' => $a['summary'],
+                'summary' => trim($render->markdown((string) $a['summary'])),
                 'pages' => $a['pages'],
                 'app' => $a['app'],
                 'keywords' => $a['keywords'],

@@ -13,7 +13,7 @@ A sold-out dish stays on the menu with the label **Sold out**. Guests know it ex
 
 **Mark a dish sold out**
 
-1. Open **Menu** or **All dishes**.
+1. Open **Menu editor** or **All dishes** (in the app: **Menu**).
 2. Turn on the **Sold out** switch next to the dish.
 
 **In the app:** tap **Mark sold out** on Home and tap the dishes.

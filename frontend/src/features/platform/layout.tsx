@@ -8,6 +8,7 @@ import { PasswordBanner } from '@/components/layout/password-banner'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { signOut } from '@/features/auth/api'
 import { useMe } from '@/features/auth/use-me'
+import { HelpButton } from '@/features/help/help-button'
 
 const NAV = [
   'restaurants',
@@ -21,6 +22,8 @@ const NAV = [
   'announcements',
   'activity',
   'settings',
+  'help',
+  'help-articles',
 ] as const
 
 const NAV_LINK =
@@ -86,6 +89,7 @@ export function PlatformLayout() {
                 <Link to='/admin'>{t('platform.to_admin')}</Link>
               </Button>
             )}
+            <HelpButton source={{ audience: 'platform' }} />
             <ThemeSwitch />
             <Button
               variant='ghost'

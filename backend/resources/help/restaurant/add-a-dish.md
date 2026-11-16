@@ -9,7 +9,7 @@ roles: owner, manager
 keywords: item, new dish, food, drink
 ---
 
-1. Open **Menu** and the category.
+1. Open **Menu editor** (in the app: **Menu**) and the category.
 2. Tap **Add item**.
 3. Type the **Name**, for example "Macchiato".
 4. Type the **Price**, for example 120 or 120.50.

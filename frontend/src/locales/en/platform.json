@@ -22,7 +22,9 @@
     "messages": "Messages",
     "backups": "Backups",
     "mobile_app": "Mobile app",
-    "mobile-app": "Mobile app"
+    "mobile-app": "Mobile app",
+    "help": "Guide",
+    "help-articles": "Help articles"
   },
   "dash": {
     "restaurants": "Restaurants",
@@ -992,5 +994,45 @@
       "last_30": "Devices used in the last 30 days",
       "unknown": "Unknown"
     }
+  },
+  "help": {
+    "hint": "How to set up and run the platform. Every page has a ? button that opens its part of this guide.",
+    "articles_hint": "The Help centre for restaurants and this guide. Change any article, add your own, and see which ones help.",
+    "new": "New article",
+    "restaurant": "Restaurant help",
+    "platform": "Super Admin guide",
+    "col": {
+      "title": "Title",
+      "topic": "Topic",
+      "source": "Text",
+      "helpful": "Was it helpful?"
+    },
+    "source": {
+      "default": "Default",
+      "changed": "Changed",
+      "custom": "Your own"
+    },
+    "hidden": "Hidden",
+    "only_when": "Only when on: {{features}}",
+    "yes_no": "{{yes}} yes, {{no}} no",
+    "editor_hint": "Markdown. Never type a price or a limit: use a placeholder like {{plans}} or {{signup_plan.photos}}, so the text stays right.",
+    "slug": "Address (small letters and hyphens)",
+    "features": "Only when these features are on",
+    "features_hint": "Comma-separated, e.g. sold_out. !sold_out = only when off.",
+    "summary": "One line for the list and the search",
+    "body": "Text",
+    "body_hint": "Placeholders: {{plans}}, {{plan.pro.price}}, {{signup_plan.photos}}, {{trial_days}}, {{support}}. Feature blocks: <!-- if sold_out --> … <!-- endif -->. Links: [text](help:slug).",
+    "pages": "Opens from these pages (? button)",
+    "pages_hint": "Comma-separated, e.g. /admin/menu, /platform/settings#features",
+    "roles": "Only for these roles",
+    "roles_hint": "owner, manager, staff — empty = everyone",
+    "hide": "Hide this article",
+    "preview": "Preview (as a restaurant with every feature on)",
+    "unknown": "Unknown placeholder: {{names}}",
+    "saved": "Article saved. Readers see it now.",
+    "reset": "Reset to default",
+    "reset_confirm": "Go back to the text that ships with the app? Your changes are lost.",
+    "delete": "Delete article",
+    "delete_confirm": "Delete this article? It can't be undone."
   }
 }

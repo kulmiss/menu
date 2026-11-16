@@ -9,7 +9,7 @@ roles: owner, manager
 keywords: pdf, print menu, a4, paper menu
 ---
 
-1. Open **Menu**.
+1. Open **Menu editor**.
 2. Tap **Download PDF menu**.
 3. Choose the **Menu** (or All menus)<!-- if branches -->, the **Branch**<!-- endif -->, **With photos** or not, and the **Layout** (1 or 2 columns).
 4. Tap **Download PDF**.

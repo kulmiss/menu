@@ -75,6 +75,13 @@ const shots = {
   team: { path: '/admin/team' },
   security: { path: '/admin/settings/security' },
   billing: { path: '/admin/settings/billing' },
+  'help-centre': { path: '/admin/help' },
+  'help-button': {
+    path: '/admin/menu',
+    run: async (page) => {
+      await page.getByRole('button', { name: 'Help for this page' }).click()
+    },
+  },
   'guest-menu': { path: '/demo', guest: true },
   'guest-my-order': {
     path: '/demo',

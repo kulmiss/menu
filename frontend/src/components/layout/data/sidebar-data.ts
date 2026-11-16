@@ -3,6 +3,7 @@ import {
   BookOpen,
   FileSpreadsheet,
   LayoutDashboard,
+  LifeBuoy,
   BarChart3,
   Megaphone,
   Info,
@@ -116,6 +117,10 @@ export const sidebarData: SidebarData = {
           ],
         },
       ],
+    },
+    {
+      title: 'nav.support',
+      items: [{ title: 'nav.help', url: '/admin/help', icon: LifeBuoy }],
     },
   ],
 }

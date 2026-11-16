@@ -17,7 +17,7 @@ Your menu has three levels:
 
 **Add a menu**
 
-1. Open **Menu**.
+1. Open **Menu editor**.
 2. Tap **New menu**. Type a name. Tap **Save**.
 
 **Add a category**

@@ -883,5 +883,27 @@
       "delete": "{{count}} dishes deleted.",
       "price": "Prices of {{count}} dishes changed."
     }
+  },
+  "help": {
+    "title": "Help",
+    "intro": "Short how-tos for every part of your menu. Search, or pick a topic.",
+    "search": "Search help",
+    "results_one": "{{count}} article found",
+    "results_other": "{{count}} articles found",
+    "results": "{{count}} articles found",
+    "nothing": "Nothing found. Try other words.",
+    "contact": "Contact support",
+    "all_articles": "All articles",
+    "not_found": "This article is not available.",
+    "load_error": "Help could not be loaded.",
+    "helpful": "Was this helpful?",
+    "thanks": "Thank you! You can change your answer.",
+    "yes": "Yes",
+    "no": "No",
+    "this_page": "Help for this page",
+    "no_article": "Pick an article.",
+    "back": "Back",
+    "open_centre": "Open the Help centre",
+    "try_again": "Try again"
   }
 }

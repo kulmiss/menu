@@ -19,6 +19,12 @@ const SCREENS = {
   backups: lazy(() =>
     import('./backups').then((m) => ({ default: m.BackupsPage }))
   ),
+  help: lazy(() =>
+    import('./help-guide').then((m) => ({ default: m.HelpGuidePage }))
+  ),
+  'help-articles': lazy(() =>
+    import('./help-articles').then((m) => ({ default: m.HelpArticlesPage }))
+  ),
   'mobile-app': lazy(() =>
     import('./mobile-app').then((m) => ({ default: m.MobileAppPage }))
   ),
