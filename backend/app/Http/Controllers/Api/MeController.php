@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\TenantResource;
 use App\Support\ImpersonationManager;
 use App\Support\Security\OwnerTwoFactor;
+use App\Support\Setup\SetupStatus;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -34,6 +35,12 @@ class MeController extends Controller
                 // The Super Admin's switch is on and this Owner has no two-factor yet (M17).
                 'two_factor_required' => ! $impersonation->active($request) && OwnerTwoFactor::required($user),
                 'is_super_admin' => $user->is_super_admin,
+                // First-time guidance (QUESTIONS #195): tours seen, and a new install's setup wizard.
+                'onboarding' => [
+                    'web_tour' => ! empty($user->onboarding['web_tour'] ?? null),
+                    'app_tour' => ! empty($user->onboarding['app_tour'] ?? null),
+                    'setup_needed' => $user->is_super_admin && ! SetupStatus::done(),
+                ],
                 // Set while a Super Admin is "logged in as" this user (red banner).
                 'impersonation' => $impersonation->current($request),
                 'tenants' => $memberships->values()->map(

@@ -883,5 +883,59 @@
       "delete": "{{count}} dishes deleted.",
       "price": "Prices of {{count}} dishes changed."
     }
+  },
+  "help": {
+    "title": "Help",
+    "intro": "Short how-tos for every part of your menu. Search, or pick a topic.",
+    "search": "Search help",
+    "results_one": "{{count}} article found",
+    "results_other": "{{count}} articles found",
+    "results": "{{count}} articles found",
+    "nothing": "Nothing found. Try other words.",
+    "contact": "Contact support",
+    "all_articles": "All articles",
+    "not_found": "This article is not available.",
+    "load_error": "Help could not be loaded.",
+    "helpful": "Was this helpful?",
+    "thanks": "Thank you! You can change your answer.",
+    "yes": "Yes",
+    "no": "No",
+    "this_page": "Help for this page",
+    "no_article": "Pick an article.",
+    "back": "Back",
+    "open_centre": "Open the Help centre",
+    "try_again": "Try again"
+  },
+  "tour": {
+    "step": "{{n}} of {{total}}",
+    "skip": "Skip tour",
+    "next": "Next",
+    "back": "Back",
+    "open": "Take the tour",
+    "dashboard": {
+      "title": "This is your dashboard",
+      "text": "Today’s menu views and QR scans, and a short list of what to set up next.",
+      "go": "Done"
+    },
+    "dish": {
+      "title": "Add your first dish",
+      "text": "Open the Menu editor, tap Add item, type the name and price, and add a photo.",
+      "go": "Add a dish"
+    },
+    "sold_out": {
+      "title": "Mark dishes sold out",
+      "text": "Finished for today? Switch on Sold out. Switch it off when the dish is back.",
+      "go": "Open the dishes"
+    },
+    "look": {
+      "title": "Choose your menu look",
+      "text": "Pick a style, your colour, your logo and a banner photo. The preview shows it at once.",
+      "go": "Choose a look"
+    },
+    "qr": {
+      "title": "Share your QR code",
+      "text": "Download your QR code, print it for the tables, and share your menu link.",
+      "go": "Get my QR code"
+    }
   }
 }

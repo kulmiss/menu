@@ -46,6 +46,8 @@ class PlatformSettings
         'app_flags' => [],
         'mobile' => [], // Super Admin → Mobile app, see App\Support\MobileApp (QUESTIONS #193)
         'features_global' => [], // feature key => false to switch it off for everyone (Settings → Features)
+        // Setup wizard (QUESTIONS #195): done_at = finished; card_hidden = the dashboard checklist closed.
+        'setup' => ['done_at' => null, 'card_hidden' => false],
         // Public landing page (owner, 2026-11-13). Empty texts use the translated defaults.
         'brand_color' => '#c2410c',
         'landing_headline' => '',

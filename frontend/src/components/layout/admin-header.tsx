@@ -7,6 +7,8 @@ import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { meQueryOptions } from '@/features/auth/api'
+import { useCurrentTenant } from '@/features/auth/use-me'
+import { HelpButton } from '@/features/help/help-button'
 
 // Rare: only while a Super Admin is "logged in as" a restaurant.
 const ViewingAs = lazy(() =>
@@ -18,6 +20,7 @@ const ViewingAs = lazy(() =>
 /** The top bar shared by every /admin page. */
 export function AdminHeader({ fixed }: { fixed?: boolean }) {
   const viewing = useQuery(meQueryOptions).data?.impersonation
+  const tenant = useCurrentTenant()
   return (
     <Header fixed={fixed}>
       <Search className='me-auto' />
@@ -26,6 +29,9 @@ export function AdminHeader({ fixed }: { fixed?: boolean }) {
           <ViewingAs info={viewing} />
         </Suspense>
       )}
+      <HelpButton
+        source={tenant ? { audience: 'restaurant', tenantId: tenant.id } : null}
+      />
       <LanguageSwitch />
       <ThemeSwitch />
       <LazyConfigDrawer />

@@ -31,7 +31,9 @@
     "insights": "Insights",
     "platform": "Platform",
     "upgrade": "Upgrade",
-    "dishes": "All dishes"
+    "dishes": "All dishes",
+    "support": "Support",
+    "help": "Help"
   },
   "language": {
     "label": "Language",

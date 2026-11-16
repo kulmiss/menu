@@ -18,6 +18,8 @@ const SECTIONS = [
   'activity',
   'settings',
   'security',
+  'help',
+  'help-articles',
 ]
 
 // One route for every platform screen (the admin's first download carries
@@ -36,8 +38,10 @@ export const Route = createFileRoute('/platform/$section')({
     from?: string
     to?: string
     sort?: string
+    a?: string
   } => ({
     state: optionalString(search.state),
+    a: optionalString(search.a),
     open: optionalId(search.open),
     tag: optionalId(search.tag),
     // Messages: e-mail the restaurants picked in the restaurants table.

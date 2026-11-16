@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { BarChart3, ExternalLink, QrCode } from 'lucide-react'
@@ -15,7 +15,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 import { AdminHeader } from '@/components/layout/admin-header'
 import { Main } from '@/components/layout/main'
-import { useCurrentTenant, useFeature } from '@/features/auth/use-me'
+import { useCurrentTenant, useFeature, useMe } from '@/features/auth/use-me'
 import { dashboardQuery } from '@/features/insights/api'
 import { tr } from '@/features/menu/text'
 import { TwoFactorCard } from './two-factor-card'
@@ -24,6 +24,8 @@ import { TwoFactorCard } from './two-factor-card'
 const Announcements = lazy(() => import('./announcements'))
 // Widgets (checklist, trend chart, plan, order stats, missing photos): on demand.
 const Widgets = lazy(() => import('./widgets'))
+// The welcome tour: only on the first sign-in.
+const WelcomeTour = lazy(() => import('@/features/help/tour'))
 
 /** Dashboard (PLAN.md screen 1): today at a glance and what is sold out. */
 export function Dashboard() {
@@ -45,6 +47,13 @@ export function Dashboard() {
   })
   const d = data.data
   const locale = tenant?.default_locale ?? 'en'
+  const me = useMe()
+  const [tourClosed, setTourClosed] = useState(false)
+  const showTour =
+    !!tenant &&
+    !tourClosed &&
+    !me?.impersonation &&
+    me?.onboarding?.web_tour === false
 
   return (
     <>
@@ -66,6 +75,15 @@ export function Dashboard() {
           )}
         </div>
         <TwoFactorCard manager={manager} />
+        {showTour && (
+          <Suspense fallback={null}>
+            <WelcomeTour
+              role={role ?? null}
+              soldOut={soldOutOn}
+              onClose={() => setTourClosed(true)}
+            />
+          </Suspense>
+        )}
         {tenant && (
           <Suspense fallback={null}>
             <Announcements tenantId={tenantId} locale={locale} />
