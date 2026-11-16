@@ -1,10 +1,21 @@
 # Handover
 
-_Last updated: 2026-11-12 13:00 EAT. Everything requested is merged into `develop` (#1–#47; #31 was a temporary test PR, closed). Speed work is finished (owner, 2026-11-12): CI limits stay as they are. Next: the release PR `develop` → `main` (owner merges), then go-live with `docs/deploy.md` and `docs/final-report.md`._
+_Last updated: 2026-11-16 21:40 EAT. `develop` has everything up to #121 (feature switches, Super Admin → Mobile app). Open, waiting for the owner: #123 (guest menu CSP fix — merge first) and the docs work #122 → #124 → #125 → #126 → #127, then #128 (start here, contributing). App: menu-admin-app #23._
 
-> **Speed:** PLAN.md §15 still applies, but no more LCP optimising (owner, 2026-11-12). CI checks every style with and without a banner, plus style A without banner and specials; limits LCP 1.3 s / TBT 200 ms (median of 5), targets 1.2 s / 100 ms.
+> **Speed:** PLAN.md §15 still applies, but no more LCP optimising (owner, 2026-11-12). CI checks every style with and without a banner, plus style A without banner and specials; limits LCP 1.3 s / TBT 200 ms (median of 5), targets 1.2 s / 100 ms. Admin first load now 232.0 KB (budget 240).
 > **English only for now (owner, 2026-11-10):** texts stay in `t()` / `__()`; the database keeps per-language fields; language switches stay hidden while one language is on.
-> **Working mode (owner):** small PRs into `develop`, CI green, tests for each change, decisions in QUESTIONS.md. Stop only for: changes outside this project, steps that can't be undone, licence doubts, the same CI failure 3 times, or the working limit.
+> **Working mode (owner):** small PRs into `develop`, CI green, tests for each change, decisions in QUESTIONS.md, docs updated in the same PR (CONTRIBUTING.md). Stop only for: changes outside this project, steps that can't be undone, licence doubts, the same CI failure 3 times, or the working limit.
+
+## Help, guides and first-time guidance (2026-11-16) — QUESTIONS #194, #195
+- **Help centre** (#124 backend + content, #125 web): 52 restaurant articles in `backend/resources/help/restaurant/`, 38 Super Admin guide pages in `…/platform/`. Hidden for switched-off features and other roles; prices and limits are live placeholders; Super Admin → Help articles edits any article (rows in `help_articles`, "Reset to default"); "Was this helpful?" counts (`help_feedback`). Web: Help in the sidebar, **?** in every top bar. App: menu-admin-app #23 (offline from the cache, **?** on every screen).
+- **Super Admin guide** (#127): `docs/admin-guide/` + `docs/admin-guide.pdf`, written by `php artisan docs:admin-guide` + `node frontend/scripts/admin-guide-pdf.mjs` from the same pages.
+- **First-time guidance** (#126): restaurant welcome tour (web + app, once per surface, `users.onboarding`), Super Admin setup wizard on a new install (5 pages) and a dashboard checklist (`platform_settings.setup`).
+- **API docs** (#122): `docs/api-reference.md` generated from the routes (`php artisan docs:api-reference`), `docs/mobile-api.md` with an example for every app endpoint; tests fail when they fall behind.
+- **Screenshots**: real, from the demo data: `frontend/scripts/help-screenshots.mjs` and the app's `test/store/help_shots_test.dart` (docs/help-screenshots.md).
+- **Live after merge:** `php artisan migrate --force` (help tables, `users.onboarding`, setup flag), `php artisan optimize`, `php artisan menu:refresh-pages --all` (for #123).
+
+## Feature switches and Mobile app control (2026-11-14, merged #119–#121) — QUESTIONS #191–#193
+"Sold out" switch per plan/restaurant; global switches in Settings → Features (override plan and restaurant everywhere); Super Admin → Mobile app (access, maintenance, versions/forced update, banner, app features, push, devices, stats). App: menu-admin-app #12–#13.
 
 
 ## Security hardening (2026-11-14) — SECURITY_REPORT.md, SECURITY_FINAL_REPORT.md
