@@ -68,7 +68,8 @@ export function BranchesPage() {
             {branches.data?.map((b) => (
               <Card key={b.id} className='py-4'>
                 <CardContent className='flex flex-wrap items-center gap-3'>
-                  <div className='min-w-0 flex-1'>
+                  {/* At least 14rem wide: when the buttons don't fit beside it they move to the next line. */}
+                  <div className='min-w-0 flex-[1_1_14rem]'>
                     <div className='flex flex-wrap items-center gap-2'>
                       <h2 className='font-semibold'>{name(b)}</h2>
                       {b.is_default && <Badge>{t('branches.main')}</Badge>}
@@ -82,7 +83,7 @@ export function BranchesPage() {
                       href={b.url}
                       target='_blank'
                       rel='noreferrer'
-                      className='inline-flex items-center gap-1 text-sm break-all text-muted-foreground hover:underline'
+                      className='inline-flex min-h-11 items-center gap-1 text-sm break-all text-muted-foreground hover:underline sm:min-h-0'
                     >
                       {b.url.replace(/^https?:\/\//, '')}{' '}
                       <ExternalLink className='size-3' />
