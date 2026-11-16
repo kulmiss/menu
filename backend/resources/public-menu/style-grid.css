@@ -23,10 +23,10 @@ li>.it .tg{grid-row:4;padding:0 .75rem}
 .spc .sp{border:0;border-radius:1.25rem}
 .an{border:0;background:var(--card)}
 /* A dish without a photo: name and price on one row, description below. */
-li>.it.np{grid-template-columns:minmax(0,1fr) auto;column-gap:.75rem;padding:.9rem 1rem}
+li>.it.np{padding:.9rem 1rem}
 li>.it.np .nm,li>.it.np .sm,li>.it.np .tg{grid-column:1/-1;padding:0}
-li>.it.np .nm{grid-row:1;grid-column:1}
-li>.it.np .pr{grid-row:1;grid-column:2;margin:0;padding:0;background:none;color:var(--a);font-size:.95rem}
+li>.it.np .nm{grid-row:1}
+li>.it.np .pr{grid-row:2;align-self:start;margin:.15rem 0 0;padding:0;background:none;color:var(--a);font-size:.95rem}
 /* No photos on the whole menu: one card per row on phones. */
 .NP ul{grid-template-columns:1fr}
 @media (min-width:40rem){.NP ul{grid-template-columns:1fr 1fr}}
