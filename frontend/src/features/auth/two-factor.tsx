@@ -152,7 +152,10 @@ export function TwoFactorPage({ redirect }: { redirect?: string }) {
       title={t('auth.two_factor_title')}
       description={t('auth.two_factor_intro')}
       footer={
-        <Link to='/auth/sign-in' className={`text-sm ${authLinkClass}`}>
+        <Link
+          to='/auth/sign-in'
+          className={`inline-flex min-h-11 items-center text-sm sm:min-h-0 ${authLinkClass}`}
+        >
           {t('auth.back_to_sign_in')}
         </Link>
       }

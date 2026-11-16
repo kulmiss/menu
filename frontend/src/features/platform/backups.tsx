@@ -433,7 +433,7 @@ function BackupSettings({ initial }: { initial: Settings }) {
             }
           }}
         >
-          <div className='flex items-center justify-between gap-4'>
+          <div className='flex min-h-11 items-center justify-between gap-4 sm:min-h-0'>
             <Label htmlFor='bk-enabled'>{t('platform.backups.enabled')}</Label>
             <Switch
               id='bk-enabled'
@@ -450,7 +450,7 @@ function BackupSettings({ initial }: { initial: Settings }) {
             <legend className='px-1 text-sm font-medium'>
               {t('platform.backups.offsite_title')}
             </legend>
-            <div className='flex items-center justify-between gap-4'>
+            <div className='flex min-h-11 items-center justify-between gap-4 sm:min-h-0'>
               <Label htmlFor='bk-s3'>
                 {t('platform.backups.backup_s3_enabled')}
               </Label>
