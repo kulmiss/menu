@@ -127,6 +127,21 @@ it('exports the menu in the import format, and the export imports back unchanged
     $this->get(t($tenant, 'import/template?format=csv'))->assertOk();
 });
 
+// Bug (2026-11-17): a dish named like a spreadsheet formula went into the CSV
+// as is, so opening the export could run it.
+it('exports formula-like text as plain text, and imports it back unchanged', function () {
+    [$owner, $tenant] = member(Role::Owner);
+    [, , $item] = sampleMenu($tenant);
+    asTenant($tenant, fn () => $item->update(['name' => ['en' => '=HYPERLINK("http://evil.example","x")'], 'summary' => ['en' => '- served with salad']]));
+
+    $csv = $this->actingAs($owner)->get(t($tenant, 'export?format=csv'))->assertOk()->streamedContent();
+    expect($csv)->toContain('"\'=HYPERLINK(""http://evil.example"",""x"")"')->toContain("'- served with salad")
+        ->not->toContain(',"=HYPERLINK');
+
+    $res = $this->post(t($tenant, 'import/preview'), ['file' => csvFile($csv)], idem())->assertOk();
+    expect($res->json('data.summary'))->toMatchArray(['create' => 0, 'update' => 0, 'unchanged' => 1, 'errors' => 0]);
+});
+
 it('is for owners and managers, within the plan', function () {
     [$staff, $tenant] = member(Role::Staff);
     $this->actingAs($staff)->get(t($tenant, 'export'))->assertForbidden();

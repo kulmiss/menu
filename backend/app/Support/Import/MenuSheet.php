@@ -2,6 +2,7 @@
 
 namespace App\Support\Import;
 
+use App\Support\Csv;
 use OpenSpout\Common\Entity\Row;
 use OpenSpout\Reader\XLSX\Reader as XlsxReader;
 use OpenSpout\Writer\XLSX\Writer as XlsxWriter;
@@ -46,7 +47,7 @@ class MenuSheet
             $row = [];
             foreach ($header as $col => $name) {
                 if (in_array($name, self::COLUMNS, true)) {
-                    $row[$name] = trim((string) ($cells[$col] ?? ''));
+                    $row[$name] = Csv::uncell(trim((string) ($cells[$col] ?? '')));
                 }
             }
             if (implode('', $row) === '') {
@@ -89,7 +90,7 @@ class MenuSheet
         fwrite($out, "\xEF\xBB\xBF");
         fputcsv($out, self::COLUMNS, ',', '"', '');
         foreach ($rows as $row) {
-            fputcsv($out, array_map(fn ($c) => (string) ($row[$c] ?? ''), self::COLUMNS), ',', '"', '');
+            fputcsv($out, array_map(fn ($c) => Csv::cell((string) ($row[$c] ?? '')), self::COLUMNS), ',', '"', '');
         }
         fclose($out);
     }
