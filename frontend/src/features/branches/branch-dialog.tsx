@@ -183,7 +183,7 @@ function BranchForm({
       </div>
       {!branch?.is_default && (
         <>
-          <div className='flex items-center justify-between gap-4'>
+          <div className='flex min-h-11 items-center justify-between gap-4 sm:min-h-0'>
             <Label htmlFor='b-active'>{t('branches.active')}</Label>
             <Switch
               id='b-active'
@@ -192,7 +192,7 @@ function BranchForm({
             />
           </div>
           {branch && (
-            <div className='flex items-center justify-between gap-4'>
+            <div className='flex min-h-11 items-center justify-between gap-4 sm:min-h-0'>
               <Label htmlFor='b-default'>{t('branches.make_main')}</Label>
               <Switch
                 id='b-default'

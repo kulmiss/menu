@@ -187,7 +187,7 @@ export function NewsSetting() {
       title={t('settings.news_title')}
       intro={t('settings.news_intro')}
     >
-      <div className='flex items-center justify-between gap-4'>
+      <div className='flex min-h-11 items-center justify-between gap-4 sm:min-h-0'>
         <Label htmlFor='news-switch'>{t('settings.news_label')}</Label>
         <Switch
           id='news-switch'

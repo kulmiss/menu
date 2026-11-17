@@ -682,7 +682,7 @@ function PeriodDialog({
               <p className='text-sm text-destructive'>{firstError}</p>
             )}
           </fieldset>
-          <div className='flex items-center justify-between gap-4'>
+          <div className='flex min-h-11 items-center justify-between gap-4 sm:min-h-0'>
             <Label htmlFor='pp-active'>{t('promotions.periods.active')}</Label>
             <Switch
               id='pp-active'

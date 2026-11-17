@@ -115,7 +115,7 @@ function NameForm({
           error={errors.description}
         />
       )}
-      <div className='flex items-center justify-between gap-4'>
+      <div className='flex min-h-11 items-center justify-between gap-4 sm:min-h-0'>
         <Label htmlFor='name-dialog-visible'>
           {t('menu.visible_to_guests')}
         </Label>

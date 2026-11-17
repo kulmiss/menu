@@ -295,7 +295,7 @@ function AppearanceForm({ initial }: { initial: Appearance }) {
               {FLAGS.filter((f) => featureOn[f] !== false).map((flag) => (
                 <div
                   key={flag}
-                  className='flex items-center justify-between gap-4'
+                  className='flex min-h-11 items-center justify-between gap-4 sm:min-h-0'
                 >
                   <Label htmlFor={flag}>{t(`appearance.flags.${flag}`)}</Label>
                   <Switch
