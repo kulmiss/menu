@@ -73,9 +73,13 @@ class MobileAppController extends Controller
                 $data[$k] = (string) ($data[$k] ?? '');
             }
         }
-        foreach (['links'] as $k) {
-            if (isset($data[$k])) {
-                $data[$k] = $nulls($data[$k]);
+        // Empty fields arrive as null (ConvertEmptyStringsToNull); store them as "" like the defaults.
+        if (isset($data['links'])) {
+            $data['links'] = $nulls($data['links']);
+        }
+        foreach (['text', 'link'] as $k) {
+            if (isset($data['banner']) && array_key_exists($k, $data['banner'])) {
+                $data['banner'][$k] = (string) ($data['banner'][$k] ?? '');
             }
         }
         $before = MobileApp::settings();
