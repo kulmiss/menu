@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Mobile;
 
 use App\Http\Controllers\Controller;
+use App\Support\Auth\GoogleLogin;
 use App\Support\Features;
 use App\Support\MobileApp;
 use App\Support\PlatformSettings;
@@ -42,6 +43,11 @@ class ConfigController extends Controller
                 'message' => $m['sign_in_message'] ?: null,
             ],
             'maintenance' => ['on' => (bool) $m['maintenance'], 'message' => $m['maintenance_message'] ?: null],
+            // "Continue with Google" (owner, 2026-11-17): the app asks Google for an ID token for this web client.
+            'google' => [
+                'enabled' => GoogleLogin::enabled(),
+                'client_id' => GoogleLogin::enabled() ? (string) config('services.google.client_id') : null,
+            ],
             'banner' => MobileApp::activeBanner(),
             'features' => (object) Features::global(),
             'app_features' => (object) $m['app_features'],

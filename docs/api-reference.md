@@ -4,7 +4,7 @@
 
 Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles inside a restaurant are checked by each screen's policy). **Feature**: the feature switch it needs (`402 features.<key>` when off). **Limit**: how many requests are allowed. Create/change requests need an `Idempotency-Key` header. Request and answer examples for the app: [mobile-api.md](mobile-api.md).
 
-**267 endpoints.**
+**269 endpoints.**
 
 ## Sign-in and account (web session)
 
@@ -43,6 +43,8 @@ Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles insid
 | POST | `mobile/account/two-factor` | signed in, app token |  | 6 a minute | Mobile\AccountController@enableTwoFactor |
 | POST | `mobile/account/two-factor/confirm` | signed in, app token |  | 6 a minute | Mobile\AccountController@confirmTwoFactor |
 | POST | `mobile/account/two-factor/recovery-codes` | signed in, app token |  | 6 a minute | Mobile\AccountController@recoveryCodes |
+| POST | `mobile/auth/google` | anyone |  | `mobile-google` limiter | Mobile\AuthController@google |
+| POST | `mobile/auth/google/finish` | anyone |  | `mobile-google` limiter | Mobile\AuthController@googleFinish |
 | POST | `mobile/auth/login` | anyone |  | `mobile-login` limiter | Mobile\AuthController@login |
 | POST | `mobile/auth/logout` | signed in, app token |  |  | Mobile\AuthController@logout |
 | POST | `mobile/auth/logout-all` | signed in, app token |  |  | Mobile\AuthController@logoutAll |

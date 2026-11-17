@@ -86,6 +86,9 @@ Route::get('v1/mobile/config', ConfigController::class)->middleware('throttle:60
 Route::prefix('v1/mobile/auth')->controller(MobileAuthController::class)->group(function () {
     Route::post('login', 'login')->middleware('throttle:mobile-login')->name('mobile.login');
     Route::post('two-factor', 'twoFactor')->middleware('throttle:mobile-two-factor')->name('mobile.two-factor');
+    // "Continue with Google" (owner, 2026-11-17): Google's ID token in, the app token out.
+    Route::post('google', 'google')->middleware('throttle:mobile-google')->name('mobile.google');
+    Route::post('google/finish', 'googleFinish')->middleware('throttle:mobile-google')->name('mobile.google.finish');
 });
 
 Route::prefix('v1')->middleware('idempotent')->group(function () {

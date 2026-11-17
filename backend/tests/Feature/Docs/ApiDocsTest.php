@@ -76,7 +76,7 @@ it('documents only endpoints that exist', function () {
 });
 
 it('lists every error code the app reacts to', function () {
-    foreach (['mobile.update_required', 'mobile.maintenance', 'mobile.app_off', 'features.', 'mobile.token_required', 'mobile.challenge_expired', 'impersonation.blocked'] as $code) {
+    foreach (['mobile.update_required', 'mobile.maintenance', 'mobile.app_off', 'features.', 'mobile.token_required', 'mobile.challenge_expired', 'impersonation.blocked', 'google.off', 'google.invalid', 'google.unverified', 'google.super_admin', 'google.signup_closed', 'google.expired', 'google.exists'] as $code) {
         expect(mobileApiDoc())->toContain($code);
     }
 });
