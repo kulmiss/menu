@@ -52,8 +52,10 @@ class PlatformSettings
         'brand_color' => '#c2410c',
         'landing_headline' => '',
         'landing_subline' => '',
-        'landing_sections' => ['how' => true, 'features' => true, 'styles' => true, 'speed' => true, 'pricing' => true, 'testimonials' => true, 'faq' => true, 'cta' => true],
-        // Real quotes only, added by the Super Admin: [{quote, name, role}]. Hidden while empty.
+        // Sections between the hero and the footer (owner, 2026-11-17). "Customers say" starts hidden.
+        'landing_sections' => ['problem' => true, 'demo' => true, 'how' => true, 'features' => true, 'compare' => true, 'pricing' => true, 'testimonials' => false, 'faq' => true, 'cta' => true],
+        'landing_order' => ['problem', 'demo', 'how', 'features', 'compare', 'pricing', 'testimonials', 'faq', 'cta'],
+        // Real quotes only, added by the Super Admin: [{quote, name, role, real}]. Only ticked "real" ones show.
         'landing_testimonials' => [],
         // Footer links: network => URL (empty = hidden).
         // Billing (owner, 2026-11-13): shown on every invoice, copied into it when issued.

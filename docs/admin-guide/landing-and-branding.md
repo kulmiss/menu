@@ -7,8 +7,9 @@
 **Settings → Landing page** is the public home page at https://your-domain.
 
 - **Headline** and **subline**: leave empty for the default words.
-- **Sections**: turn parts on or off (how it works, features, styles, speed, pricing, testimonials, FAQ).
-- **Testimonials**: only real quotes from real restaurants, with their permission. The section is hidden while it is empty.
+- **Sections**: turn parts on or off (problem → solution, see it on your phone, how it works, what you get, paper vs QR menu, prices, customers say, questions, final band).
+- **Customers say**: only real quotes from real restaurants, with their permission. Tick **This is a real customer** on each one. The section starts switched off; it shows only when it is on and has at least one ticked quote.
+- **WhatsApp number**: shows **Questions? Chat with us**. When sign-up is off, every sign-up button becomes **Contact us on WhatsApp** (or the support e-mail).
 - **Social links** in the footer.
 
 Prices on the landing page come from **Plans**: you never type them here.

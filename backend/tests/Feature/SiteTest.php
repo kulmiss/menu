@@ -6,53 +6,109 @@ use App\Models\Tenant;
 use App\Support\BrandColor;
 use App\Support\PlatformSettings;
 
-it('shows the landing page with the platform name, sign-up and sign-in', function () {
+it('shows the landing page in simple English: hero, sections in order, sign-up and sign-in', function () {
     PlatformSettings::save(['name' => 'Buna Menus']);
 
     $html = $this->get('/')->assertOk()
-        ->assertSee('<title>Buna Menus — QR code menus for restaurants</title>', false)
-        ->assertSee('Your restaurant menu on every phone, in seconds')
-        ->assertSee('href="/auth/sign-up"', false)
+        ->assertSee('<title>Buna Menus — Free QR code menu for your restaurant</title>', false)
+        ->assertSee('Your menu on every phone. Free to start.')
+        ->assertSee('Free plan forever')
+        ->assertSee('No card needed')
+        ->assertSee('href="/auth/sign-up" data-track="signup"', false)
         ->assertSee('href="/auth/sign-in"', false)
         ->assertSee('href="/terms"', false)
         ->assertSee('href="#pricing"', false)
         ->assertSee('property="og:image" content="'.url('/landing/og.jpg').'"', false)
+        ->assertSee('type="image/avif"', false)
+        ->assertSeeInOrder(['Paper menus cost you time and money', 'Ready in 3 easy steps', 'Everything you need in one place', 'Paper menu or QR menu?', 'Simple prices', 'Questions and answers', 'Start your free menu today'])
         ->assertDontSee('>Menu<', false)
         ->getContent();
-    // No live demo link when the demo restaurant doesn't exist.
-    expect($html)->not->toContain('See a live demo')->and($html)->not->toContain('View live');
+    // The speed test section is gone; no demo section or link while the demo restaurant doesn't exist.
+    expect($html)->not->toContain('slow mobile data')->not->toContain('1.3 s')
+        ->not->toContain('See a demo menu')->not->toContain('id="demo"')
+        // Hidden until the Super Admin switches it on with real quotes.
+        ->not->toContain('Customers say');
+    // Every section ends with one button.
+    expect(substr_count($html, 'data-track="signup"'))->toBeGreaterThanOrEqual(7);
 });
 
-it('links the live demo and the style showcases only when they exist', function () {
+it('shows "See it on your phone" with the demo menu: a QR code on desktop, a button on phones, the other looks', function () {
     Tenant::factory()->create(['slug' => 'demo']);
     Tenant::factory()->create(['slug' => 'demo-fine']);
 
-    $this->get('/')->assertOk()
-        ->assertSee('See a live demo')
-        ->assertSee('href="'.url('/demo').'" target="_blank"', false)
+    $html = $this->get('/')->assertOk()
+        ->assertSee('See a demo menu')
+        ->assertSee('href="#demo"', false)
+        ->assertSee('Try a real menu right now')
+        ->assertSee('Scan with your phone')
+        ->assertSee('Open the demo menu')
+        ->assertSee('href="'.url('/demo').'" target="_blank" rel="noopener" data-track="demo"', false)
         ->assertSee('href="'.url('/demo-fine').'"', false)
-        ->assertDontSee('href="'.url('/demo-pizza').'"', false);
+        ->assertDontSee('href="'.url('/demo-pizza').'"', false)
+        ->getContent();
+    expect(substr_count($html, '<div class="scan">'))->toBe(1)
+        ->and(substr_count($html, '<div class="open-demo">'))->toBe(1);
 });
 
-it('hides "Create a free account" when sign-up is closed', function () {
-    PlatformSettings::save(['signup_open' => false]);
+it('turns every sign-up button into "Contact us on WhatsApp" when sign-up is off', function () {
+    PlatformSettings::save(['signup_open' => false, 'upgrade_whatsapp' => '+251 911 000 000']);
 
-    $this->get('/')->assertOk()
+    $html = $this->get('/')->assertOk()
         ->assertDontSee('href="/auth/sign-up"', false)
-        ->assertSee('href="/auth/sign-in"', false);
+        ->assertDontSee('Create my free menu')
+        ->assertSee('href="/auth/sign-in"', false)
+        ->assertSee('Contact us on WhatsApp')
+        ->assertSee('Message us, and we will help you start.')
+        ->getContent();
+    expect(substr_count($html, 'href="https://wa.me/251911000000?text=Hello%2C%20I%20would%20like%20a%20menu%20on%20Menu."'))->toBeGreaterThanOrEqual(7);
+
+    // No WhatsApp number: the support e-mail; neither: only "Sign in".
+    PlatformSettings::save(['upgrade_whatsapp' => null, 'support_email' => 'help@example.com']);
+    $this->get('/')->assertSee('Contact us by email')->assertSee('href="mailto:help@example.com?subject=', false);
+    PlatformSettings::save(['support_email' => null]);
+    $this->get('/')->assertOk()->assertDontSee('Contact us by email')->assertDontSee('Contact us on WhatsApp')->assertSee('href="/auth/sign-in"', false)
+        // No demo and no sign-up: no QR code pointing at a closed page.
+        ->assertDontSee('class="qr-card', false);
 });
 
-it('shows the plan ladder from the database: Free first, then what each plan adds', function () {
+it('shows "Questions? Chat with us" only when a WhatsApp number is set', function () {
+    $this->get('/')->assertDontSee('Questions? Chat with us');
+
+    PlatformSettings::save(['upgrade_whatsapp' => '+251 911 000 000']);
+    $this->get('/')
+        ->assertSee('Questions? Chat with us')
+        ->assertSee('Chat with us on WhatsApp')
+        ->assertSee('href="https://wa.me/251911000000?text=Hello%2C%20I%20have%20a%20question%20about%20Menu."', false);
+});
+
+it('never promises more than the Free plan gives', function () {
+    $html = $this->get('/')->getContent();
+    // The seeded Free plan has no promotions, happy hour or insights.
+    expect($html)->toMatch('#Promotions and happy hour <span class="tag">Paid plans</span>#')
+        ->toMatch('#See how many people looked <span class="tag">Paid plans</span>#')
+        ->not->toMatch('#PDF menu <span class="tag">#');
+
+    // Without a free sign-up plan: no "Free to start", "Free plan forever" or "No card needed" in the final band.
+    Plan::where('slug', 'free')->update(['price_minor' => 1000]);
+    $this->get('/')->assertOk()
+        ->assertSee('Your menu on every phone.')
+        ->assertDontSee('Free to start')
+        ->assertDontSee('Free plan forever')
+        ->assertDontSee('Free to start')
+        ->assertSee('It takes about 5 minutes. We are here to help.');
+});
+
+it('shows the plan ladder from the database: Free first ("Start here"), then what each plan adds, a sign-up button on each', function () {
     PlatformSettings::save(['upgrade_whatsapp' => '+251 911 000 000']);
     Plan::create(['name' => ['en' => 'Trial'], 'slug' => 'trial', 'price_minor' => 0, 'currency' => 'ETB', 'interval' => 'month', 'limits' => [], 'is_public' => true, 'is_active' => true, 'sort' => 1]);
     Plan::create(['name' => ['en' => 'Secret'], 'slug' => 'secret', 'price_minor' => 9900, 'currency' => 'ETB', 'interval' => 'month', 'limits' => [], 'is_public' => false, 'is_active' => true, 'sort' => 3]);
 
     $html = $this->get('/')->assertOk()
         ->assertSeeInOrder([
-            'Free · No card needed', 'Free', 'Unlimited dishes, menus and QR codes', 'Up to 100 photos', '1 branch', '2 menu styles', 'PDF menu', 'Posters, table tents and stickers', 'Import and export (spreadsheet)', 'Create a free account',
-            'Plus', 'Br 490', '/ month', 'or Br 4,900 / year (2 months free)', 'Everything in Free, plus:', 'Up to 500 photos', 'All 4 menu styles', 'Specials and announcements', 'Insights and monthly report', 'Contact us on WhatsApp',
-            'Pro', 'Br 990', 'Everything in Plus, plus:', 'Up to 2,000 photos', 'Up to 3 branches', 'Happy hour and lunch prices', 'No “Menu by Menu” line',
-            'Business', 'Br 2,490', 'Everything in Pro, plus:', 'Unlimited photos', 'Unlimited branches',
+            'Start here', 'Free', 'Unlimited dishes, menus and QR codes', 'Up to 100 photos', '1 branch', '2 menu styles', 'PDF menu', 'Posters, table tents and stickers', 'Import and export (spreadsheet)', 'Create my free menu',
+            'Plus', 'Br 490', '/ month', 'or Br 4,900 / year (2 months free)', 'Everything in Free, plus:', 'Up to 500 photos', 'All 4 menu styles', 'Specials and announcements', 'Insights and monthly report', 'Start free', 'Contact us on WhatsApp',
+            'Pro', 'Br 990', 'Everything in Plus, plus:', 'Up to 2,000 photos', 'Up to 3 branches', 'Happy hour and lunch prices', 'No “Menu by Menu” line', 'Start free',
+            'Business', 'Br 2,490', 'Everything in Pro, plus:', 'Unlimited photos', 'Unlimited branches', 'Start free',
         ])
         ->assertSee('https://wa.me/251911000000?text=', false)
         ->assertDontSee('Secret')
@@ -62,30 +118,41 @@ it('shows the plan ladder from the database: Free first, then what each plan add
     $plus = substr($html, strpos($html, '>Plus</h3>'), 1500);
     expect($plus)->not->toContain('PDF menu')->not->toContain('Unlimited dishes')->not->toContain('1 branch');
 
-    // Structured data with the same offers.
+    // Structured data with the same offers, and the questions and answers.
     preg_match('#<script type="application/ld\+json">(.+?)</script>#s', $html, $m);
     $ld = json_decode($m[1], true);
     $app = collect($ld['@graph'])->firstWhere('@type', 'SoftwareApplication');
     expect($app['offers'])->toHaveCount(4)->and($app['offers'][1])->toMatchArray(['price' => '490', 'priceCurrency' => 'ETB']);
+    $faq = collect($ld['@graph'])->firstWhere('@type', 'FAQPage');
+    expect($faq['mainEntity'])->toHaveCount(8)
+        ->and($faq['mainEntity'][0])->toMatchArray(['@type' => 'Question', 'name' => 'Is it really free?'])
+        ->and($faq['mainEntity'][0]['acceptedAnswer']['text'])->toBe('Yes. The Free plan has no time limit. You never need a card.');
 });
 
-it('lets the Super Admin edit the texts and switch sections off; testimonials only when real ones exist', function () {
-    $this->get('/')->assertDontSee('What restaurants say');
-
+it('lets the Super Admin edit the texts, switch sections off and reorder them; "Customers say" only with real, ticked quotes', function () {
     PlatformSettings::save([
         'landing_headline' => 'QR menus for Addis',
-        'landing_sections' => [...PlatformSettings::DEFAULTS['landing_sections'], 'faq' => false, 'speed' => false],
-        'landing_testimonials' => [['quote' => 'Guests order faster.', 'name' => 'Hana', 'role' => 'Kaldi Corner']],
+        'landing_sections' => [...PlatformSettings::DEFAULTS['landing_sections'], 'faq' => false, 'speed' => true],
+        'landing_order' => ['pricing', 'nonsense', 'how'],
+        'landing_testimonials' => [
+            ['quote' => 'Guests order faster.', 'name' => 'Hana', 'role' => 'Kaldi Corner', 'real' => true],
+            ['quote' => 'Made-up praise.', 'name' => 'Nobody', 'role' => '', 'real' => false],
+        ],
         'socials' => [...PlatformSettings::DEFAULTS['socials'], 'telegram' => 'https://t.me/menu_et', 'facebook' => 'javascript:alert(1)'],
     ]);
 
+    // Switched off by default, even with a real quote.
+    $this->get('/')->assertDontSee('Customers say');
+
+    PlatformSettings::save(['landing_sections' => [...PlatformSettings::DEFAULTS['landing_sections'], 'faq' => false, 'testimonials' => true]]);
     $this->get('/')->assertOk()
         ->assertSee('QR menus for Addis')
         ->assertDontSee('Questions and answers')
         ->assertDontSee('href="#faq"', false)
-        ->assertDontSee('Opens fast, even on slow mobile data')
-        ->assertSee('What restaurants say')
+        // Saved order first, the rest after it in their usual order; unknown keys ignored.
+        ->assertSeeInOrder(['id="pricing"', 'id="how"', 'id="problem"', 'id="features"', 'id="compare"', 'id="testimonials"', 'cta-title'], false)
         ->assertSee('Guests order faster.')
+        ->assertDontSee('Made-up praise.')
         ->assertSee('href="https://t.me/menu_et"', false)
         ->assertDontSee('javascript:alert', false);
 });

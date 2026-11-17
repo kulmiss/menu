@@ -367,6 +367,7 @@ class PlatformController extends Controller
             'landing_testimonials.*.quote' => ['required', 'string', 'max:400'],
             'landing_testimonials.*.name' => ['required', 'string', 'max:80'],
             'landing_testimonials.*.role' => ['nullable', 'string', 'max:80'],
+            'landing_testimonials.*.real' => ['sometimes', 'boolean'],
             'socials' => ['sometimes', 'array'],
             'socials.*' => ['nullable', 'string', 'max:255', 'url:https,http'],
         ]);
@@ -377,7 +378,7 @@ class PlatformController extends Controller
             $data['socials'] = array_map(fn ($u) => (string) $u, array_intersect_key($data['socials'], PlatformSettings::DEFAULTS['socials']) + array_map(fn () => '', PlatformSettings::DEFAULTS['socials']));
         }
         if (isset($data['landing_testimonials'])) {
-            $data['landing_testimonials'] = array_values(array_map(fn (array $t) => ['quote' => trim($t['quote']), 'name' => trim($t['name']), 'role' => trim((string) ($t['role'] ?? ''))], $data['landing_testimonials']));
+            $data['landing_testimonials'] = array_values(array_map(fn (array $t) => ['quote' => trim($t['quote']), 'name' => trim($t['name']), 'role' => trim((string) ($t['role'] ?? '')), 'real' => (bool) ($t['real'] ?? false)], $data['landing_testimonials']));
         }
         if (isset($data['invoice_prefix'])) {
             $data['invoice_prefix'] = strtoupper($data['invoice_prefix']);

@@ -18,15 +18,28 @@ import { Textarea } from '@/components/ui/textarea'
 import { send, usePlatformMutation } from './api'
 
 const LANDING_SECTIONS = [
+  'problem',
+  'demo',
   'how',
   'features',
-  'styles',
-  'speed',
+  'compare',
   'pricing',
   'testimonials',
   'faq',
   'cta',
 ] as const
+/** Same as the server's defaults: "Customers say" starts hidden. */
+const SECTION_DEFAULT: Record<(typeof LANDING_SECTIONS)[number], boolean> = {
+  problem: true,
+  demo: true,
+  how: true,
+  features: true,
+  compare: true,
+  pricing: true,
+  testimonials: false,
+  faq: true,
+  cta: true,
+}
 const SOCIALS = [
   'telegram',
   'facebook',
@@ -37,7 +50,7 @@ const SOCIALS = [
   'linkedin',
 ] as const
 
-type Testimonial = { quote: string; name: string; role: string }
+type Testimonial = { quote: string; name: string; role: string; real: boolean }
 
 /** The landing-page part of GET /platform/settings (owner, 2026-11-13). */
 export type LandingSettingsData = {
@@ -45,7 +58,7 @@ export type LandingSettingsData = {
   landing_headline: string
   landing_subline: string
   landing_sections: Partial<Record<(typeof LANDING_SECTIONS)[number], boolean>>
-  landing_testimonials: Testimonial[]
+  landing_testimonials: Partial<Testimonial>[]
   socials: Partial<Record<(typeof SOCIALS)[number], string>>
   upgrade_whatsapp: string | null
 }
@@ -63,7 +76,10 @@ export function LandingSettings({ initial }: { initial: LandingSettingsData }) {
     brand_color: initial.brand_color || '#c2410c',
     upgrade_whatsapp: initial.upgrade_whatsapp ?? '',
     landing_sections: Object.fromEntries(
-      LANDING_SECTIONS.map((k) => [k, initial.landing_sections?.[k] ?? true])
+      LANDING_SECTIONS.map((k) => [
+        k,
+        initial.landing_sections?.[k] ?? SECTION_DEFAULT[k],
+      ])
     ) as Record<(typeof LANDING_SECTIONS)[number], boolean>,
     socials: Object.fromEntries(
       SOCIALS.map((k) => [k, initial.socials?.[k] ?? ''])
@@ -74,6 +90,7 @@ export function LandingSettings({ initial }: { initial: LandingSettingsData }) {
       quote: q.quote ?? '',
       name: q.name ?? '',
       role: q.role ?? '',
+      real: q.real === true,
     }))
   )
   const error = (k: string) =>
@@ -284,6 +301,19 @@ export function LandingSettings({ initial }: { initial: LandingSettingsData }) {
                     />
                   </div>
                 </div>
+                <label className='flex min-h-11 items-center gap-3 text-sm sm:min-h-9'>
+                  <Checkbox
+                    checked={q.real}
+                    onCheckedChange={(on) =>
+                      setQuotes(
+                        quotes.map((x, j) =>
+                          j === i ? { ...x, real: on === true } : x
+                        )
+                      )
+                    }
+                  />
+                  {t('platform.landing.quote_real')}
+                </label>
                 <Button
                   type='button'
                   variant='ghost'
@@ -301,7 +331,10 @@ export function LandingSettings({ initial }: { initial: LandingSettingsData }) {
                 variant='outline'
                 className='min-h-11 justify-self-start sm:min-h-9'
                 onClick={() =>
-                  setQuotes([...quotes, { quote: '', name: '', role: '' }])
+                  setQuotes([
+                    ...quotes,
+                    { quote: '', name: '', role: '', real: false },
+                  ])
                 }
               >
                 <Plus /> {t('platform.landing.add_quote')}
