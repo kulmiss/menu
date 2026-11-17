@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Restaurant;
 use App\Http\Controllers\Controller;
 use App\Models\Tenant;
 use App\Support\ActivityLogger;
+use App\Support\Csv;
 use App\Support\Insights\InsightsReport;
 use App\Support\Insights\ReportPdf;
 use App\Tenancy\CurrentTenant;
@@ -52,7 +53,7 @@ class InsightsExportController extends Controller
         fputcsv($out, $head, escape: '');
         foreach ($rows as $row) {
             // Text starting with = + - @ is shown as text, never run as a formula.
-            fputcsv($out, array_map(fn ($v) => is_string($v) && preg_match('/^[=+\-@\t\r]/', $v) ? "'".$v : $v, $row), escape: '');
+            fputcsv($out, array_map(Csv::cell(...), $row), escape: '');
         }
         rewind($out);
         $name = Str::slug($tenant->name.' insights '.$table.' '.$report['from'].' '.$report['to']).'.csv';

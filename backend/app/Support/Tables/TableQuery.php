@@ -2,6 +2,7 @@
 
 namespace App\Support\Tables;
 
+use App\Support\Csv;
 use Closure;
 use Illuminate\Contracts\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Builder;
@@ -123,12 +124,7 @@ final class TableQuery
             fwrite($out, "\xEF\xBB\xBF"); // Excel reads UTF-8
             fputcsv($out, array_keys($csv['columns']), escape: '');
             foreach ($query->lazy(500) as $model) {
-                fputcsv($out, array_map(function (Closure $get) use ($model) {
-                    $v = $get($model);
-
-                    // Text starting with = + - @ is shown as text, never run as a formula.
-                    return is_string($v) && preg_match('/^[=+\-@\t\r]/', $v) ? "'".$v : $v;
-                }, array_values($csv['columns'])), escape: '');
+                fputcsv($out, array_map(fn (Closure $get) => Csv::cell($get($model)), array_values($csv['columns'])), escape: '');
             }
             fclose($out);
         }, $name, ['Content-Type' => 'text/csv; charset=UTF-8', 'Cache-Control' => 'private, no-store']);
