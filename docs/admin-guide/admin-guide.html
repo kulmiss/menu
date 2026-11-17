@@ -301,6 +301,7 @@ php artisan config:cache
 <li><strong>Require my approval</strong>: new restaurants wait until you approve them. Their menu is not public until then.</li>
 <li><strong>E-mail me about every new sign-up</strong>.</li>
 <li><strong>Require two-factor sign-in for restaurant owners</strong>.</li>
+<li><strong>Continue with Google</strong>: restaurant people sign up and sign in with Google. It needs the Google keys in <code>.env</code> first (the page says when they are missing). Setup: <code>docs/google-login.md</code>. Super Admins always use password + two-factor.</li>
 <li><strong>Anti-spam</strong>: Cloudflare Turnstile (optional) and <strong>Blocked e-mail domains</strong> (one per line).</li>
 </ul>
 <p>Unconfirmed sign-ups are deleted after 7 days.</p>
@@ -314,12 +315,14 @@ php artisan config:cache
 <p><strong>Default language</strong> and <strong>Default currency</strong> for new restaurants are in <strong>Settings → General</strong>.</p>
 <p>Adding a language for the screens needs a developer: the texts are in <code>backend/lang/</code>, <code>frontend/src/locales/</code> and the app's <code>lib/l10n/</code>. Every screen uses these files, so a new language is a translation job, not a code change.</p>
 </section>
-<section id="landing-and-branding"><h2>Landing page, logo and link preview</h2><p><strong>Settings → Landing page</strong> is the public home page at <a href="https://your-domain">https://your-domain</a>.</p>
+<section id="landing-and-branding"><h2>Landing page, logo and link preview</h2><p><strong>Landing page</strong> (top menu) is the public home page at <a href="https://your-domain">https://your-domain</a>.</p>
 <ul>
-<li><strong>Headline</strong> and <strong>subline</strong>: leave empty for the default words.</li>
-<li><strong>Sections</strong>: turn parts on or off (how it works, features, styles, speed, pricing, testimonials, FAQ).</li>
-<li><strong>Testimonials</strong>: only real quotes from real restaurants, with their permission. The section is hidden while it is empty.</li>
-<li><strong>Social links</strong> in the footer.</li>
+<li><strong>Button clicks</strong>: how often visitors clicked <strong>Create my free menu</strong>, <strong>Continue with Google</strong> and <strong>See a demo menu</strong> (last 30 days and in total). No cookies and no IP addresses: only a number per button and day.</li>
+<li><strong>Texts and sections</strong>: open a section to change its words. Leave a field empty for the default text (shown in grey). Switch a section off, or move it up or down. Click <strong>Save texts and sections</strong>.</li>
+<li><strong>Pictures</strong>: the phone screenshots (light and dark mode) and the link preview. <strong>Upload</strong> your own, or <strong>Use the built-in one</strong>.</li>
+<li><strong>Colour, WhatsApp, customers and links</strong>: the brand colour; the WhatsApp number shows <strong>Questions? Chat with us</strong>, and when sign-up is off every sign-up button becomes <strong>Contact us on WhatsApp</strong> (or the support e-mail).</li>
+<li><strong>Customers say</strong>: only real quotes from real restaurants, with their permission. Tick <strong>This is a real customer</strong> on each one. The section starts switched off; it shows only when it is on and has at least one ticked quote.</li>
+<li><strong>Footer links</strong> to your social pages.</li>
 </ul>
 <p>Prices on the landing page come from <strong>Plans</strong>: you never type them here.</p>
 <p><strong>Settings → Logo &amp; link preview</strong></p>

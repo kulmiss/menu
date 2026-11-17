@@ -53,6 +53,10 @@ export type Me = {
   /** Platform news e-mails on (account e-mails are always sent). */
   news_subscribed?: boolean
   two_factor_enabled: boolean
+  /** False for an account made with Google that never set a password. */
+  has_password?: boolean
+  /** "Continue with Google" (owner, 2026-11-17). Missing on an older server. */
+  google?: { available: boolean; linked: boolean; email: string | null }
   is_super_admin: boolean
   /** Set while a Super Admin is "logged in as" this user. */
   impersonation?: {

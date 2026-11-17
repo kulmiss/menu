@@ -15,6 +15,7 @@ const SECTIONS = [
   'mobile-app',
   'themes',
   'announcements',
+  'landing',
   'activity',
   'settings',
   'security',

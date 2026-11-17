@@ -20,6 +20,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { PasswordInput } from '@/components/password-input'
 import { ME_KEY } from '@/features/auth/api'
+import { GoogleButton } from '@/features/auth/google-button'
 import { useMe } from '@/features/auth/use-me'
 import {
   confirmPassword,
@@ -43,6 +44,7 @@ export function SecuritySettings({
     <>
       <PasswordSection />
       <TwoFactorSection startSetup={startSetup} />
+      <GoogleSection />
       <OtherBrowsersSection />
     </>
   )
@@ -399,6 +401,101 @@ function TwoFactorSection({ startSetup }: { startSetup: boolean }) {
 }
 
 /** "Sign out of all other browsers" (SECURITY_REPORT.md L7). Hidden during "log in as". */
+/** Link or unlink "Continue with Google" (owner, 2026-11-17). */
+function GoogleSection() {
+  const { t } = useTranslation()
+  const me = useMe()
+  const qc = useQueryClient()
+  const [busy, setBusy] = useState(false)
+  // A failed Google round trip comes back as ?google=taken | unverified | cancelled | failed
+  // ("linked" is announced by the layout, on every page).
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const outcome = params.get('google')
+    if (!outcome || outcome === 'linked') return
+    toast.error(
+      t(`auth.google.error.${outcome}`, {
+        defaultValue: t('auth.google.error.failed'),
+      })
+    )
+    params.delete('google')
+    const query = params.toString()
+    window.history.replaceState(
+      window.history.state,
+      '',
+      window.location.pathname + (query ? `?${query}` : '')
+    )
+  }, [t])
+  const google = me.google
+  if (!google?.available || me.impersonation) return null
+
+  async function unlink() {
+    setBusy(true)
+    try {
+      await api.delete('/me/google')
+      await qc.invalidateQueries({ queryKey: ME_KEY })
+      toast.success(t('auth.google.security.unlinked'))
+    } catch (error) {
+      const fields = validationErrors(error)
+      if (fields?.google) toast.error(fields.google)
+      else handleServerError(error)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function sendLink() {
+    setBusy(true)
+    try {
+      await api.post('/me/password-link')
+      toast.success(t('auth.google.security.link_sent', { email: me.email }))
+    } catch (error) {
+      handleServerError(error)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <SettingsSection
+      title={t('auth.google.security.title')}
+      intro={
+        google.linked
+          ? t('auth.google.security.linked', { email: google.email ?? '' })
+          : t('auth.google.security.not_linked')
+      }
+    >
+      {!google.linked ? (
+        <GoogleButton href='/auth/google?link=1' className='w-fit' />
+      ) : me.has_password === false ? (
+        <div className='grid gap-3'>
+          <p className='text-sm text-muted-foreground'>
+            {t('auth.google.security.no_password')}
+          </p>
+          <Button
+            variant='outline'
+            className='min-h-11 w-fit sm:min-h-9'
+            disabled={busy}
+            onClick={sendLink}
+          >
+            {t('auth.google.security.set_password')}
+          </Button>
+        </div>
+      ) : (
+        <Button
+          variant='outline'
+          className='min-h-11 w-fit sm:min-h-9'
+          disabled={busy}
+          onClick={unlink}
+        >
+          {busy && <Loader2 className='animate-spin' />}
+          {t('auth.google.security.unlink')}
+        </Button>
+      )}
+    </SettingsSection>
+  )
+}
+
 function OtherBrowsersSection() {
   const { t } = useTranslation()
   const me = useMe()

@@ -4,9 +4,11 @@ namespace App\Providers;
 
 use App\Support\MailSettings;
 use App\Tenancy\CurrentTenant;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -23,6 +25,9 @@ class AppServiceProvider extends ServiceProvider
 
         // Catch lazy loading, silently discarded attributes and missing attributes early.
         Model::shouldBeStrict(! $this->app->isProduction());
+
+        // Landing page clicks: one shared limit, never per visitor (owner, 2026-11-17).
+        RateLimiter::for('landing-click', fn () => Limit::perMinute(600)->by('landing-click'));
 
         // Every e-mail uses the SMTP server saved by the Super Admin, if any (else .env).
         $this->app->afterResolving('mail.manager', fn () => MailSettings::apply());

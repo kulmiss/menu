@@ -81,6 +81,7 @@ X-App-Version: 1.2.0
     "versions": {"latest": "1.4.0", "min": "1.0.0", "recommended": "1.3.0", "notes": "Faster menu"},
     "sign_in": {"restaurant": true, "super_admin": true, "message": null},
     "maintenance": {"on": false, "message": null},
+    "google": {"enabled": true, "client_id": "123-web.apps.googleusercontent.com"},
     "banner": {"text": "New: happy hour", "link": "/r/1/promotions", "audience": "restaurant", "ends_at": "2026-11-20T21:00:00+03:00"},
     "features": {"branches": true, "promotions": true, "insights": true, "import_export": true, "remove_branding": true, "pdf_menu": true, "order_list": true, "style_editorial": true, "style_grid": true, "style_bistro": true, "style_minimal": true, "price_periods": true, "sold_out": true, "share": true, "print_materials": true, "signup": true},
     "app_features": {"biometric_lock": true, "push": true, "analytics": true, "crash_reports": true},
@@ -106,6 +107,7 @@ X-App-Version: 1.2.0
 | `versions.notes` | release notes, shown in both |
 | `sign_in.restaurant` / `.super_admin` | app sign-in allowed; `message` is shown when not |
 | `maintenance` | `on` + `message`; Super Admins keep working |
+| `google` | "Continue with Google" (owner, 2026-11-17): `enabled` shows the button; `client_id` is the **web** client the app asks Google for an ID token for (`serverClientId`). `null` while off |
 | `banner` | `null` outside its dates. `audience`: `all`, `restaurant`, `super_admin` (the app filters). `link`: an app path (`/inbox`) or `https://…` |
 | `features` | global switches (Settings → Features) |
 | `app_features` | app-only switches: `biometric_lock`, `push`, `analytics`, `crash_reports` |
@@ -147,6 +149,45 @@ X-App-Version: 1.2.0
 ```
 
 `recovery_code` instead of `code` also works. Wrong code `422 errors.code`; challenge older than 5 minutes, used, or 5 wrong codes → `410 mobile.challenge_expired`.
+
+### `POST /api/v1/mobile/auth/google`
+
+"Continue with Google" (owner, 2026-11-17; setup: `docs/google-login.md`). The app gets an ID token from Google for the web client in `config.google.client_id` and sends it. The server checks Google's signature, the issuer, the audience (that web client), the Android client (`azp`, when `GOOGLE_ANDROID_CLIENT_IDS` is set) and the expiry. Same rules as the website. 10 a minute per address.
+
+```http
+POST /api/v1/mobile/auth/google
+Content-Type: application/json
+
+{"id_token": "eyJhbGciOiJSUzI1NiIs…", "device_name": "Pixel 8", "platform": "android", "app_version": "1.4.0+12"}
+```
+
+```json
+{"token": "12|aBcD…", "user": {"id": 7, "name": "Selam Tesfaye", "email": "selam@example.com", "is_super_admin": false}, "google_linked": true}
+```
+
+| Answer | When |
+|---|---|
+| `200 {"token": "…", "user": {…}}` (+ `"google_linked": true` the first time) | linked account, or an existing account with the same verified e-mail (linked now) |
+| `200 {"two_factor": true, "challenge": "…"}` | two-factor account: then `POST mobile/auth/two-factor` as after a password |
+| `200 {"google_signup": true, "ticket": "…", "email": "…", "name": "…"}` | new e-mail while sign-up is open: ask the restaurant name and the Terms, then `google/finish` (15 minutes) |
+| `403 code: google.off` | switched off or no keys on the server |
+| `422 code: google.invalid` | the token is not a valid Google token for this app |
+| `403 code: google.unverified` | Google has not verified the e-mail |
+| `403 code: google.super_admin` | Super Admins use password + two-factor |
+| `403 code: google.signup_closed` | new e-mail while sign-up is off |
+| `403 mobile.app_off` / `503 mobile.maintenance` | the app gate, as for a password |
+
+### `POST /api/v1/mobile/auth/google/finish`
+
+```http
+POST /api/v1/mobile/auth/google/finish
+
+{"ticket": "…", "restaurant_name": "Buna & Bread", "terms": true, "locale": "en"}
+```
+
+Answer: `200 {"token", "user"}` as after a sign-in (restaurant on the sign-up plan; with approval on it waits). `422 errors.restaurant_name / errors.terms`. `410 code: google.expired` (ticket used or older than 15 minutes). `409 code: google.exists` (someone signed up with this e-mail meanwhile: sign in instead). `403 code: google.signup_closed`.
+
+On sign-out the app also signs out of Google on the phone (so the next "Continue with Google" lets the person pick an account).
 
 ### `POST /api/v1/mobile/auth/logout` · `POST /api/v1/mobile/auth/logout-all`
 

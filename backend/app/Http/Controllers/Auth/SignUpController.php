@@ -7,9 +7,11 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Notifications\SignupNotification;
 use App\Rules\ValidSlug;
+use App\Support\Auth\GoogleLogin;
 use App\Support\PlatformSettings;
 use App\Support\Security\SecurityLog;
 use App\Support\SignUp\SignUp;
+use App\Support\SignUp\SlugMaker;
 use App\Support\SignUp\Turnstile;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -39,10 +41,12 @@ class SignUpController extends Controller
             'open' => (bool) $s['signup_open'],
             'turnstile_site_key' => $s['turnstile_enabled'] ? $s['turnstile_site_key'] : null,
             'currencies' => config('menu.currencies'),
-            'default_currency' => $s['default_currency'] ?: 'ETB',
+            'default_currency' => SignUp::currency(),
             'terms' => trim((string) $s['terms']) !== '',
             'privacy' => trim((string) $s['privacy']) !== '',
             'platform' => $s['name'],
+            // "Continue with Google" on the sign-up and sign-in pages (owner, 2026-11-17).
+            'google' => GoogleLogin::enabled(),
         ]]);
     }
 
@@ -82,13 +86,18 @@ class SignUpController extends Controller
             return $this->checkInbox();
         }
 
+        // Shortest form (owner, 2026-11-17): name, restaurant, e-mail, password and the
+        // terms. The menu address and currency are optional: made from the name / the
+        // platform's default, both changeable later. Older forms still send them.
         $data = Validator::make($request->all(), [
             'restaurant_name' => ['required', 'string', 'min:2', 'max:120'],
-            'slug' => ['required', new ValidSlug],
+            'slug' => ['nullable', new ValidSlug],
             'name' => ['required', 'string', 'min:2', 'max:120'],
             'email' => ['required', 'string', 'email:rfc', 'max:255'],
-            'password' => $this->passwordRules((string) $request->input('email')),
-            'currency' => ['required', Rule::in(config('menu.currencies'))],
+            'password' => $request->has('password_confirmation')
+                ? $this->passwordRules((string) $request->input('email'))
+                : array_values(array_filter($this->passwordRules((string) $request->input('email')), fn ($rule) => $rule !== 'confirmed')),
+            'currency' => ['nullable', Rule::in(config('menu.currencies'))],
             'terms' => ['accepted'],
             'locale' => ['nullable', Rule::in(config('menu.locales'))],
         ])->validate();
@@ -111,6 +120,8 @@ class SignUpController extends Controller
             return $this->checkInbox();
         }
 
+        $data['slug'] = ($data['slug'] ?? '') !== '' ? $data['slug'] : SlugMaker::from($data['restaurant_name']);
+        $data['currency'] = ($data['currency'] ?? '') !== '' ? $data['currency'] : SignUp::currency();
         $user = $signUp->create($data);
         $user->sendEmailVerificationNotification();
 

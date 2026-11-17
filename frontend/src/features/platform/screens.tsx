@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { useNavigate } from '@tanstack/react-router'
 import {
   AlertTriangle,
   ExternalLink,
@@ -62,7 +63,6 @@ import {
 import { EmailSettings } from './email-settings'
 import { FeatureSwitches, useGloballyOff } from './feature-switches'
 import { BillingSettings, type BillingSettingsData } from './invoices'
-import { LandingSettings, type LandingSettingsData } from './landing-settings'
 import { PageTitle } from './layout'
 import { ShareImageCard } from './share-image'
 import {
@@ -940,6 +940,16 @@ export function ActivityPage() {
 export function SettingsPage() {
   const { t } = useTranslation()
   const settings = useQuery(settingsQ())
+  const navigate = useNavigate()
+  // Settings → Landing page moved to its own page (owner, 2026-11-17); old links still work.
+  useEffect(() => {
+    if (window.location.hash === '#landing')
+      void navigate({
+        to: '/platform/$section',
+        params: { section: 'landing' },
+        replace: true,
+      })
+  }, [navigate])
   if (!settings.data) return <Skeleton className='h-64' />
   return <SettingsForm initial={settings.data} t={t} />
 }
@@ -1055,11 +1065,6 @@ function SettingsForm({
               initial={initial as unknown as SignupSettingsData}
             />
           ),
-          landing: (
-            <LandingSettings
-              initial={initial as unknown as LandingSettingsData}
-            />
-          ),
           billing: (
             <BillingSettings
               initial={initial as unknown as BillingSettingsData}
@@ -1155,7 +1160,6 @@ const SETTINGS_TABS = [
   'general',
   'features',
   'signup',
-  'landing',
   'billing',
   'branding',
   'email',

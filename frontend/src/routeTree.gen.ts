@@ -38,6 +38,7 @@ import { Route as AdminMenuIndexRouteImport } from './routes/admin/menu/index'
 import { Route as AdminSettingsIndexRouteImport } from './routes/admin/settings/index'
 import { Route as AdminSettingsBillingRouteImport } from './routes/admin/settings/billing'
 import { Route as AdminSettingsSecurityRouteImport } from './routes/admin/settings/security'
+import { Route as AuthGoogleFinishRouteImport } from './routes/auth/google/finish'
 import { Route as AuthInviteTokenRouteImport } from './routes/auth/invite/$token'
 
 const IndexRoute = IndexRouteImport.update({
@@ -185,6 +186,11 @@ const AdminSettingsSecurityRoute = AdminSettingsSecurityRouteImport.update({
   path: '/security',
   getParentRoute: () => AdminSettingsRouteRoute,
 } as any)
+const AuthGoogleFinishRoute = AuthGoogleFinishRouteImport.update({
+  id: '/auth/google/finish',
+  path: '/auth/google/finish',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthInviteTokenRoute = AuthInviteTokenRouteImport.update({
   id: '/auth/invite/$token',
   path: '/auth/invite/$token',
@@ -219,6 +225,7 @@ export interface FileRoutesByFullPath {
   '/platform/': typeof PlatformIndexRoute
   '/admin/settings/billing': typeof AdminSettingsBillingRoute
   '/admin/settings/security': typeof AdminSettingsSecurityRoute
+  '/auth/google/finish': typeof AuthGoogleFinishRoute
   '/auth/invite/$token': typeof AuthInviteTokenRoute
   '/admin/menu/': typeof AdminMenuIndexRoute
   '/admin/settings/': typeof AdminSettingsIndexRoute
@@ -248,6 +255,7 @@ export interface FileRoutesByTo {
   '/platform': typeof PlatformIndexRoute
   '/admin/settings/billing': typeof AdminSettingsBillingRoute
   '/admin/settings/security': typeof AdminSettingsSecurityRoute
+  '/auth/google/finish': typeof AuthGoogleFinishRoute
   '/auth/invite/$token': typeof AuthInviteTokenRoute
   '/admin/menu': typeof AdminMenuIndexRoute
   '/admin/settings': typeof AdminSettingsIndexRoute
@@ -281,6 +289,7 @@ export interface FileRoutesById {
   '/platform/': typeof PlatformIndexRoute
   '/admin/settings/billing': typeof AdminSettingsBillingRoute
   '/admin/settings/security': typeof AdminSettingsSecurityRoute
+  '/auth/google/finish': typeof AuthGoogleFinishRoute
   '/auth/invite/$token': typeof AuthInviteTokenRoute
   '/admin/menu/': typeof AdminMenuIndexRoute
   '/admin/settings/': typeof AdminSettingsIndexRoute
@@ -315,6 +324,7 @@ export interface FileRouteTypes {
     | '/platform/'
     | '/admin/settings/billing'
     | '/admin/settings/security'
+    | '/auth/google/finish'
     | '/auth/invite/$token'
     | '/admin/menu/'
     | '/admin/settings/'
@@ -344,6 +354,7 @@ export interface FileRouteTypes {
     | '/platform'
     | '/admin/settings/billing'
     | '/admin/settings/security'
+    | '/auth/google/finish'
     | '/auth/invite/$token'
     | '/admin/menu'
     | '/admin/settings'
@@ -376,6 +387,7 @@ export interface FileRouteTypes {
     | '/platform/'
     | '/admin/settings/billing'
     | '/admin/settings/security'
+    | '/auth/google/finish'
     | '/auth/invite/$token'
     | '/admin/menu/'
     | '/admin/settings/'
@@ -390,6 +402,7 @@ export interface RootRouteChildren {
   AuthSignInRoute: typeof AuthSignInRoute
   AuthSignUpRoute: typeof AuthSignUpRoute
   AuthTwoFactorRoute: typeof AuthTwoFactorRoute
+  AuthGoogleFinishRoute: typeof AuthGoogleFinishRoute
   AuthInviteTokenRoute: typeof AuthInviteTokenRoute
 }
 
@@ -598,6 +611,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSettingsSecurityRouteImport
       parentRoute: typeof AdminSettingsRouteRoute
     }
+    '/auth/google/finish': {
+      id: '/auth/google/finish'
+      path: '/auth/google/finish'
+      fullPath: '/auth/google/finish'
+      preLoaderRoute: typeof AuthGoogleFinishRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth/invite/$token': {
       id: '/auth/invite/$token'
       path: '/auth/invite/$token'
@@ -688,6 +708,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthSignInRoute: AuthSignInRoute,
   AuthSignUpRoute: AuthSignUpRoute,
   AuthTwoFactorRoute: AuthTwoFactorRoute,
+  AuthGoogleFinishRoute: AuthGoogleFinishRoute,
   AuthInviteTokenRoute: AuthInviteTokenRoute,
 }
 export const routeTree = rootRouteImport

@@ -11,6 +11,8 @@ export type SignUpConfig = {
   terms: boolean
   privacy: boolean
   platform: string
+  /** "Continue with Google" is on (owner, 2026-11-17). */
+  google?: boolean
 }
 
 export const signUpConfigQuery = queryOptions({
@@ -20,34 +22,11 @@ export const signUpConfigQuery = queryOptions({
   staleTime: 5 * 60_000,
 })
 
-export type SlugCheck = {
-  slug: string
-  available: boolean
-  reason: 'taken' | 'reserved' | 'invalid' | null
-}
-
-export function slugCheckQuery(slug: string) {
-  return queryOptions({
-    queryKey: ['signup', 'slug', slug],
-    queryFn: async () =>
-      (
-        await api.get<{ data: SlugCheck }>(
-          `/signup/slug?slug=${encodeURIComponent(slug)}`
-        )
-      ).data.data,
-    staleTime: 30_000,
-    retry: false,
-  })
-}
-
 export type OwnerSignUpInput = {
   restaurant_name: string
-  slug: string
   name: string
   email: string
   password: string
-  password_confirmation: string
-  currency: string
   terms: boolean
   locale: string
   /** Honeypot: people never see it, so it stays empty. */

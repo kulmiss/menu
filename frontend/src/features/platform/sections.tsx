@@ -34,6 +34,9 @@ const SCREENS = {
   announcements: lazy(() =>
     import('./screens').then((m) => ({ default: m.AnnouncementsPage }))
   ),
+  landing: lazy(() =>
+    import('./landing-editor').then((m) => ({ default: m.LandingEditorPage }))
+  ),
   activity: lazy(() =>
     import('./screens').then((m) => ({ default: m.ActivityPage }))
   ),

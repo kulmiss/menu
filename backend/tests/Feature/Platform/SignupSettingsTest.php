@@ -77,3 +77,17 @@ it('saves the landing page settings (owner, 2026-11-13)', function () {
     $this->actingAs($admin)->putJson(p('settings'), ['socials' => ['telegram' => 'javascript:alert(1)']], idem())->assertUnprocessable();
     $this->actingAs($admin)->putJson(p('settings'), ['landing_testimonials' => [['quote' => 'No name']]], idem())->assertUnprocessable();
 });
+
+it('keeps the "real customer" tick of each testimonial; unticked by default (owner, 2026-11-17)', function () {
+    $this->actingAs(superAdmin())->putJson(p('settings'), [
+        'landing_testimonials' => [['quote' => 'Great.', 'name' => 'Hana', 'real' => true], ['quote' => 'Ok.', 'name' => 'Abel']],
+    ], idem())->assertOk()
+        ->assertJsonPath('data.landing_testimonials.0.real', true)
+        ->assertJsonPath('data.landing_testimonials.1.real', false);
+
+    // MySQL's JSON column may store the keys in another order.
+    expect(PlatformSettings::get('landing_testimonials'))->toEqual([
+        ['quote' => 'Great.', 'name' => 'Hana', 'role' => '', 'real' => true],
+        ['quote' => 'Ok.', 'name' => 'Abel', 'role' => '', 'real' => false],
+    ]);
+});

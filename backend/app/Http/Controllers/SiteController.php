@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Plan;
 use App\Models\Tenant;
+use App\Support\Auth\GoogleLogin;
 use App\Support\BrandColor;
 use App\Support\EmailLogo;
 use App\Support\Features;
+use App\Support\Landing\LandingImages;
+use App\Support\Landing\LandingTexts;
 use App\Support\Legal\LegalText;
 use App\Support\PlatformSettings;
 use App\Support\PublicMenu\MenuPageData;
@@ -39,37 +42,115 @@ class SiteController extends Controller
     {
         $s = PlatformSettings::all();
         $name = (string) $s['name'];
+        // Every text: the Super Admin's version, else lang/en/landing.php (owner, 2026-11-17).
+        $t = LandingTexts::resolver();
         $sections = array_map('boolval', [...PlatformSettings::DEFAULTS['landing_sections'], ...array_intersect_key((array) $s['landing_sections'], PlatformSettings::DEFAULTS['landing_sections'])]);
         $live = Tenant::whereIn('slug', [self::DEMO, ...array_values(self::STYLE_DEMOS)])->whereNull('suspended_at')->pluck('slug')->flip();
         $demoUrl = isset($live[self::DEMO]) ? url('/'.self::DEMO) : null;
         $contact = UpgradeContact::payload();
-        $testimonials = array_values(array_filter((array) $s['landing_testimonials'], fn ($t) => is_array($t) && trim((string) ($t['quote'] ?? '')) !== '' && trim((string) ($t['name'] ?? '')) !== ''));
+        $signupOpen = (bool) $s['signup_open'];
+        // Only quotes the Super Admin ticked as from a real customer (owner, 2026-11-17).
+        $testimonials = array_values(array_filter((array) $s['landing_testimonials'], fn ($t) => is_array($t) && ($t['real'] ?? false) === true && trim((string) ($t['quote'] ?? '')) !== '' && trim((string) ($t['name'] ?? '')) !== ''));
         $sections['testimonials'] = $sections['testimonials'] && $testimonials !== [];
         $plans = $this->plans($name, $contact);
         // The Free (sign-up) plan is promoted across the page (owner, 2026-11-13).
         $free = collect($plans)->first(fn (array $p) => $p['free'] && $p['highlight']);
         $sections['pricing'] = $sections['pricing'] && $plans !== [];
+        $sections['demo'] = $sections['demo'] && $demoUrl !== null;
         $socials = array_filter((array) $s['socials'], fn ($u) => is_string($u) && preg_match('#^https?://#', $u) === 1);
+        $chat = $contact['whatsapp'] !== null ? $contact['whatsapp'].'?text='.rawurlencode($t('chat.text', ['name' => $name])) : null;
 
         return view('site.landing', [
             'platform' => $name,
             'logo' => EmailLogo::url(),
             'colors' => BrandColor::palette($s['brand_color'] ?? null),
-            'headline' => trim((string) $s['landing_headline']) ?: __('landing.hero.headline'),
-            'subline' => trim((string) $s['landing_subline']) ?: __('landing.hero.subline'),
-            'signupOpen' => (bool) $s['signup_open'],
+            't' => $t,
+            'headline' => $t($free ? 'hero.headline' : 'hero.headline_paid'),
+            'subline' => $t('hero.subline'),
+            'signupOpen' => $signupOpen,
+            // "Continue with Google" next to the main button, while sign-up is open (owner, 2026-11-17).
+            'google' => $signupOpen && GoogleLogin::enabled(),
+            // The main button of every section: sign up, or (sign-up off) contact us.
+            'cta' => $this->cta($signupOpen, $contact, $name, $t),
             'sections' => $sections,
+            'order' => $this->order((array) $s['landing_order'], $sections),
             'demoUrl' => $demoUrl,
-            'qr' => $this->qrPath($demoUrl ?? url('/auth/sign-up')),
-            'styles' => collect(self::STYLE_DEMOS)->map(fn ($slug) => isset($live[$slug]) ? url('/'.$slug) : null)->all(),
+            // The demo menu, else the sign-up page; none while both are unavailable.
+            'qr' => $demoUrl !== null || $signupOpen ? $this->qrPath($demoUrl ?? url('/auth/sign-up')) : null,
+            'styles' => collect(self::STYLE_DEMOS)->map(fn ($slug) => isset($live[$slug]) ? url('/'.$slug) : null)->filter()->all(),
             'plans' => $sections['pricing'] ? $plans : [],
             'free' => $free,
+            'paidOnly' => $this->paidOnly($free),
             'contact' => $contact,
+            'chat' => $chat,
             'testimonials' => $testimonials,
             'socials' => $socials,
             'supportEmail' => $contact['email'],
-            'jsonLd' => $this->jsonLd($name, $socials, $plans),
+            'description' => $t($free ? 'meta_description' : 'meta_description_paid'),
+            'shots' => array_combine(['hero', 'hero_dark', 'demo', 'demo_dark'], array_map(LandingImages::phone(...), ['hero', 'hero_dark', 'demo', 'demo_dark'])),
+            'ogImage' => LandingImages::og()['url'],
+            'jsonLd' => $this->jsonLd($name, $socials, $plans, $sections['faq'], $free !== null, $t),
         ]);
+    }
+
+    /**
+     * @param  array{whatsapp: string|null, email: string|null}  $contact
+     * @param  \Closure(string, array<string, string>=): string  $t
+     * @return array{href: string, label: string, external: bool, track: string|null}|null
+     */
+    private function cta(bool $signupOpen, array $contact, string $name, \Closure $t): ?array
+    {
+        if ($signupOpen) {
+            return ['href' => '/auth/sign-up', 'label' => $t('create_account'), 'external' => false, 'track' => 'signup'];
+        }
+        $text = $t('contact_text', ['name' => $name]);
+        if ($contact['whatsapp'] !== null) {
+            return ['href' => $contact['whatsapp'].'?text='.rawurlencode($text), 'label' => $t('contact_whatsapp'), 'external' => true, 'track' => null];
+        }
+        if ($contact['email'] !== null) {
+            return ['href' => 'mailto:'.$contact['email'].'?subject='.rawurlencode($text), 'label' => $t('contact_email'), 'external' => false, 'track' => null];
+        }
+
+        return null;
+    }
+
+    /**
+     * Sections in the Super Admin's order; unknown keys dropped, missing ones
+     * added at the end. Only sections that are switched on.
+     *
+     * @param  array<int, mixed>  $saved
+     * @param  array<string, bool>  $on
+     * @return list<string>
+     */
+    private function order(array $saved, array $on): array
+    {
+        $known = PlatformSettings::DEFAULTS['landing_order'];
+        $order = array_values(array_unique(array_filter($saved, fn ($k) => is_string($k) && in_array($k, $known, true))));
+        $order = [...$order, ...array_diff($known, $order)];
+
+        return array_values(array_filter($order, fn (string $k) => $on[$k] ?? false));
+    }
+
+    /**
+     * "What you get" cards whose feature the Free plan does not include get a
+     * "Paid plans" tag, so the page never promises more than Free gives.
+     *
+     * @param  array<string, mixed>|null  $free
+     * @return array<string, bool>
+     */
+    private function paidOnly(?array $free): array
+    {
+        $on = $free['on'] ?? null;
+        if ($on === null) {
+            return [];
+        }
+
+        return [
+            'styles' => ($free['style_count'] ?? 0) < 2,
+            'promotions' => ! ($on['promotions'] ?? false) && ! ($on['price_periods'] ?? false),
+            'pdf' => ! ($on['pdf_menu'] ?? false),
+            'insights' => ! ($on['insights'] ?? false),
+        ];
     }
 
     public function legal(string $page): View
@@ -160,6 +241,8 @@ class SiteController extends Controller
                 'currency' => $p->currency,
                 'per' => $isFree ? __('landing.pricing.no_expiry') : __('landing.pricing.per.'.($p->interval === 'year' ? 'year' : 'month')),
                 'year' => $year,
+                'on' => $on,
+                'style_count' => $styles,
                 'everything' => $previous === null ? null : __('landing.pricing.everything', ['plan' => $previous['name']]),
                 'limits' => $previous === null ? $lines : array_values(array_diff($lines, $previous['lines'])),
                 'features' => array_values($included),
@@ -196,8 +279,9 @@ class SiteController extends Controller
     /**
      * @param  array<string, string>  $socials
      * @param  list<array<string, mixed>>  $plans
+     * @param  \Closure(string, array<string, string>=): string  $t
      */
-    private function jsonLd(string $name, array $socials, array $plans): string
+    private function jsonLd(string $name, array $socials, array $plans, bool $faq, bool $free, \Closure $t): string
     {
         $org = array_filter([
             '@type' => 'Organization',
@@ -212,10 +296,17 @@ class SiteController extends Controller
             'applicationCategory' => 'BusinessApplication',
             'operatingSystem' => 'Web',
             'url' => url('/'),
-            'description' => __('landing.meta_description'),
+            'description' => $t($free ? 'meta_description' : 'meta_description_paid'),
             'offers' => array_map(fn (array $p) => ['@type' => 'Offer', 'name' => $p['name'], 'price' => (string) $p['price_value'], 'priceCurrency' => $p['currency']], $plans) ?: null,
         ];
 
-        return (string) json_encode(['@context' => 'https://schema.org', '@graph' => [$org, array_filter($app)]], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG);
+        $graph = [$org, array_filter($app)];
+        if ($faq) {
+            $graph[] = ['@type' => 'FAQPage', 'mainEntity' => array_map(fn (string $k) => [
+                '@type' => 'Question', 'name' => $t("faq.items.{$k}.q"), 'acceptedAnswer' => ['@type' => 'Answer', 'text' => $t("faq.items.{$k}.a")],
+            ], array_keys((array) __('landing.faq.items')))];
+        }
+
+        return (string) json_encode(['@context' => 'https://schema.org', '@graph' => $graph], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG);
     }
 }

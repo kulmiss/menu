@@ -10,6 +10,7 @@ import { PasswordBanner } from '@/components/layout/password-banner'
 import { canOpen } from '@/components/layout/role-access'
 import { SubscriptionBanner } from '@/components/layout/subscription-banner'
 import { SkipToMain } from '@/components/skip-to-main'
+import { useGoogleLinkedNotice } from '@/features/auth/google-linked'
 import { useCurrentTenant, useMe } from '@/features/auth/use-me'
 
 // Rare screens: downloaded only when needed.
@@ -41,6 +42,7 @@ export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
   const tenant = useCurrentTenant()
   const path = useRouterState({ select: (s) => s.location.pathname })
   const defaultOpen = getCookie('sidebar_state') !== 'false'
+  useGoogleLinkedNotice()
 
   // Until the address is confirmed, only "Check your inbox" (owner, 2026-11-13).
   if (!me.email_verified && !me.impersonation) {

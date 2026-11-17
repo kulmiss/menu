@@ -6,7 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\PersonalAccessToken;
 use App\Models\User;
 use App\Notifications\SecurityNotice;
+use App\Support\Auth\GoogleIdToken;
+use App\Support\Auth\GoogleLogin;
 use App\Support\MobileApp;
+use App\Support\PlatformSettings;
 use App\Support\Security\LoginCheck;
 use App\Support\Security\RecoveryCodes;
 use App\Support\Security\SecurityLog;
@@ -47,15 +50,91 @@ class AuthController extends Controller
         }
 
         if ($user->two_factor_secret !== null && $user->two_factor_confirmed_at !== null) {
-            $challenge = Str::random(48);
-            Cache::put($this->challengeKey($challenge), [
-                'user' => $user->id, 'tries' => 0, 'device' => $this->device($data),
-            ], now()->addMinutes(self::CHALLENGE_MINUTES));
-
-            return response()->json(['two_factor' => true, 'challenge' => $challenge]);
+            return $this->challenge($user, $this->device($data));
         }
 
         return $this->issue($user, $this->device($data));
+    }
+
+    /**
+     * "Continue with Google" in the app (owner, 2026-11-17): the app sends the
+     * ID token Google gave it; the same rules as the website (GoogleLogin).
+     * New e-mail → {google_signup: true, ticket}: the app asks the restaurant
+     * name and the Terms, then calls googleFinish.
+     */
+    public function google(Request $request, GoogleLogin $google): JsonResponse
+    {
+        $data = $request->validate([
+            'id_token' => ['required', 'string', 'max:4096'],
+            ...$this->deviceRules(),
+        ]);
+        if (! GoogleLogin::enabled()) {
+            return response()->json(['message' => __('mobile.google_off'), 'code' => 'google.off'], 403);
+        }
+        $profile = GoogleIdToken::verify($data['id_token']);
+        if ($profile === null) {
+            SecurityLog::event('google.refused', null, null, ['why' => 'invalid_token']);
+
+            return response()->json(['message' => __('mobile.google_invalid'), 'code' => 'google.invalid'], 422);
+        }
+
+        $outcome = $google->resolve($profile);
+        if ($outcome['result'] === 'refused') {
+            return response()->json(['message' => __('mobile.google_'.$outcome['why']), 'code' => 'google.'.$outcome['why']], 403);
+        }
+        if ($outcome['result'] === 'new') {
+            if (! (bool) PlatformSettings::get('signup_open')) {
+                return response()->json(['message' => __('signup.closed'), 'code' => 'google.signup_closed'], 403);
+            }
+            $ticket = Str::random(48);
+            Cache::put($this->ticketKey($ticket), ['profile' => $profile, 'device' => $this->device($data)], now()->addMinutes(GoogleLogin::PENDING_MINUTES));
+
+            return response()->json(['google_signup' => true, 'ticket' => $ticket, 'email' => $profile['email'], 'name' => $profile['name']]);
+        }
+
+        $user = $outcome['user'];
+        if ($closed = $this->closed($user)) {
+            return $closed;
+        }
+        if ($user->two_factor_secret !== null && $user->two_factor_confirmed_at !== null) {
+            return $this->challenge($user, $this->device($data), $outcome['linked']);
+        }
+        GoogleLogin::signedIn($user, true);
+
+        return $this->issue($user, $this->device($data), $outcome['linked']);
+    }
+
+    /** The new owner's restaurant name and the Terms → account, restaurant and app token. */
+    public function googleFinish(Request $request, GoogleLogin $google): JsonResponse
+    {
+        $data = $request->validate([
+            'ticket' => ['required', 'string', 'size:48'],
+            'restaurant_name' => ['required', 'string', 'min:2', 'max:120'],
+            'terms' => ['accepted'],
+            'locale' => ['nullable', Rule::in(config('menu.locales'))],
+        ]);
+        if (! GoogleLogin::enabled()) {
+            return response()->json(['message' => __('mobile.google_off'), 'code' => 'google.off'], 403);
+        }
+        if (! (bool) PlatformSettings::get('signup_open')) {
+            return response()->json(['message' => __('signup.closed'), 'code' => 'google.signup_closed'], 403);
+        }
+        $pending = Cache::pull($this->ticketKey($data['ticket']));
+        if (! is_array($pending)) {
+            return response()->json(['message' => __('google.expired'), 'code' => 'google.expired'], 410);
+        }
+        $profile = $pending['profile'];
+        if (User::where('email', Str::lower($profile['email']))->orWhere('google_id', $profile['sub'])->exists()) {
+            return response()->json(['message' => __('google.exists'), 'code' => 'google.exists'], 409);
+        }
+
+        $user = $google->createOwner($profile, trim($data['restaurant_name']), $data['locale'] ?? 'en');
+        if ($closed = $this->closed($user)) {
+            return $closed;
+        }
+        GoogleLogin::signedIn($user, true);
+
+        return $this->issue($user, $pending['device']);
     }
 
     public function twoFactor(Request $request, TwoFactorAuthenticationProvider $provider): JsonResponse
@@ -132,7 +211,18 @@ class AuthController extends Controller
     }
 
     /** @param  array{name: string, platform: string, app_version: string|null}  $device */
-    private function issue(User $user, array $device): JsonResponse
+    private function challenge(User $user, array $device, bool $linked = false): JsonResponse
+    {
+        $challenge = Str::random(48);
+        Cache::put($this->challengeKey($challenge), [
+            'user' => $user->id, 'tries' => 0, 'device' => $device,
+        ], now()->addMinutes(self::CHALLENGE_MINUTES));
+
+        return response()->json(['two_factor' => true, 'challenge' => $challenge, ...($linked ? ['google_linked' => true] : [])]);
+    }
+
+    /** @param  array{name: string, platform: string, app_version: string|null}  $device */
+    private function issue(User $user, array $device, bool $linked = false): JsonResponse
     {
         $new = $user->createToken($device['name'], ['mobile'], now()->addDays(PersonalAccessToken::MAX_DAYS));
         $new->accessToken->forceFill(['platform' => $device['platform'], 'app_version' => $device['app_version']])->save();
@@ -142,6 +232,8 @@ class AuthController extends Controller
         return response()->json([
             'token' => $new->plainTextToken,
             'user' => ['id' => $user->id, 'name' => $user->name, 'email' => $user->email, 'is_super_admin' => $user->is_super_admin],
+            // "Google is now linked" (only after "Continue with Google" linked an existing account).
+            ...($linked ? ['google_linked' => true] : []),
         ]);
     }
 
@@ -162,5 +254,10 @@ class AuthController extends Controller
     private function challengeKey(string $challenge): string
     {
         return 'mobile:2fa:'.hash('sha256', $challenge);
+    }
+
+    private function ticketKey(string $ticket): string
+    {
+        return 'mobile:google:'.hash('sha256', $ticket);
     }
 }

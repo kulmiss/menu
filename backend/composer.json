@@ -11,6 +11,7 @@
         "laravel/fortify": "^1.41",
         "laravel/framework": "^13.17",
         "laravel/sanctum": "^4.0",
+        "laravel/socialite": "^5.32",
         "laravel/tinker": "^3.0",
         "openspout/openspout": "^5.3",
         "setasign/tfpdf": "^1.34"

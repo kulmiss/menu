@@ -4,7 +4,7 @@
 
 Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles inside a restaurant are checked by each screen's policy). **Feature**: the feature switch it needs (`402 features.<key>` when off). **Limit**: how many requests are allowed. Create/change requests need an `Idempotency-Key` header. Request and answer examples for the app: [mobile-api.md](mobile-api.md).
 
-**258 endpoints.**
+**269 endpoints.**
 
 ## Sign-in and account (web session)
 
@@ -13,6 +13,8 @@ Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles insid
 | POST | `auth/email/verification-notification` | signed in |  | 6 a minute | Fortify\EmailVerificationNotificationController@store |
 | GET | `auth/email/verify/{id}/{hash}` | signed in |  | 6 a minute | Fortify\VerifyEmailController@__invoke |
 | POST | `auth/forgot-password` | signed out |  |  | Fortify\PasswordResetLinkController@store |
+| POST | `auth/google/finish` | signed out |  | 10 a minute | Auth\GoogleController@finish |
+| GET | `auth/google/pending` | anyone |  | 30 a minute | Auth\GoogleController@pending |
 | POST | `auth/login` | signed out |  | `login` limiter | Fortify\AuthenticatedSessionController@store |
 | POST | `auth/logout` | signed in |  |  | Fortify\AuthenticatedSessionController@destroy |
 | POST | `auth/register` | signed out |  |  | Fortify\RegisteredUserController@store |
@@ -41,6 +43,8 @@ Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles insid
 | POST | `mobile/account/two-factor` | signed in, app token |  | 6 a minute | Mobile\AccountController@enableTwoFactor |
 | POST | `mobile/account/two-factor/confirm` | signed in, app token |  | 6 a minute | Mobile\AccountController@confirmTwoFactor |
 | POST | `mobile/account/two-factor/recovery-codes` | signed in, app token |  | 6 a minute | Mobile\AccountController@recoveryCodes |
+| POST | `mobile/auth/google` | anyone |  | `mobile-google` limiter | Mobile\AuthController@google |
+| POST | `mobile/auth/google/finish` | anyone |  | `mobile-google` limiter | Mobile\AuthController@googleFinish |
 | POST | `mobile/auth/login` | anyone |  | `mobile-login` limiter | Mobile\AuthController@login |
 | POST | `mobile/auth/logout` | signed in, app token |  |  | Mobile\AuthController@logout |
 | POST | `mobile/auth/logout-all` | signed in, app token |  |  | Mobile\AuthController@logoutAll |
@@ -60,8 +64,10 @@ Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles insid
 | Method | Path | Who | Feature | Limit | Handler |
 |---|---|---|---|---|---|
 | GET | `me` | signed in |  |  | Api\MeController |
+| DELETE | `me/google` | signed in |  | 6 a minute | Auth\GoogleController@unlink |
 | PUT | `me/news` | signed in |  |  | NewsSubscriptionController@update |
 | PUT | `me/onboarding` | signed in |  | 30 a minute | Api\OnboardingController |
+| POST | `me/password-link` | signed in |  | 3 per 10 minutes | Auth\GoogleController@passwordLink |
 | POST | `me/sessions/logout-others` | signed in |  | 6 a minute | Api\SessionController@logoutOthers |
 
 ## Self sign-up
@@ -234,6 +240,10 @@ Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles insid
 | GET | `platform/invoices/{invoice}/pdf` | Super Admin |  | `exports` limiter | Platform\InvoiceController@pdf |
 | POST | `platform/invoices/{invoice}/resend` | Super Admin |  | 10 a minute | Platform\InvoiceController@resend |
 | POST | `platform/invoices/{invoice}/void` | Super Admin |  |  | Platform\InvoiceController@void |
+| GET | `platform/landing` | Super Admin |  |  | Platform\LandingController@show |
+| PUT | `platform/landing` | Super Admin |  |  | Platform\LandingController@update |
+| DELETE | `platform/landing/images/{slot}` | Super Admin |  |  | Platform\LandingController@deleteImage |
+| POST | `platform/landing/images/{slot}` | Super Admin |  | 20 a minute | Platform\LandingController@saveImage |
 | GET | `platform/mobile-app` | Super Admin |  |  | Platform\MobileAppController@show |
 | PUT | `platform/mobile-app` | Super Admin |  |  | Platform\MobileAppController@update |
 | GET | `platform/mobile-app/devices` | Super Admin |  |  | Platform\MobileAppController@devices |
@@ -313,3 +323,9 @@ Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles insid
 |---|---|---|---|---|---|
 | POST | `help/feedback` | signed in |  | 30 a minute | Api\HelpController@feedback |
 | GET | `help/public` | anyone |  | 30 a minute | Api\HelpController@public |
+
+## Other (`landing`)
+
+| Method | Path | Who | Feature | Limit | Handler |
+|---|---|---|---|---|---|
+| POST | `landing/click` | anyone |  | `landing-click` limiter | LandingClickController |

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\TenantResource;
+use App\Support\Auth\GoogleLogin;
 use App\Support\ImpersonationManager;
 use App\Support\Security\OwnerTwoFactor;
 use App\Support\Setup\SetupStatus;
@@ -32,6 +33,13 @@ class MeController extends Controller
                 'email_verified' => $user->hasVerifiedEmail(),
                 'news_subscribed' => $user->news_unsubscribed_at === null,
                 'two_factor_enabled' => $user->two_factor_confirmed_at !== null,
+                // "Continue with Google" (owner, 2026-11-17): Account → Security shows link / unlink.
+                'has_password' => $user->password !== null,
+                'google' => [
+                    'available' => GoogleLogin::enabled() && ! $user->is_super_admin,
+                    'linked' => $user->google_id !== null,
+                    'email' => $user->google_email,
+                ],
                 // The Super Admin's switch is on and this Owner has no two-factor yet (M17).
                 'two_factor_required' => ! $impersonation->active($request) && OwnerTwoFactor::required($user),
                 'is_super_admin' => $user->is_super_admin,

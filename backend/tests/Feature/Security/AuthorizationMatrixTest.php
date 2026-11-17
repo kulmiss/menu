@@ -15,9 +15,12 @@ use Illuminate\Support\Facades\Route;
 const PUBLIC_ROUTES = [
     'GET /', 'GET Q/{code}', 'GET q/{code}', 'GET robots.txt', 'GET sitemap.xml', 'GET up', 'GET {page}', 'GET {area}/{path?}',
     'GET {slug}/{branch?}', 'GET {slug}/menu.pdf', 'GET {slug}/{branch}/menu.pdf',
-    'POST api/v1/beacon', 'GET api/v1/invitations/{token}', 'GET api/v1/signup/config', 'GET api/v1/signup/slug', 'POST api/v1/signup',
+    'POST api/v1/beacon', 'POST api/v1/landing/click', 'GET api/v1/invitations/{token}', 'GET api/v1/signup/config', 'GET api/v1/signup/slug', 'POST api/v1/signup',
     'POST api/v1/mobile/auth/login', 'POST api/v1/mobile/auth/two-factor', 'GET api/v1/mobile/config',
+    'POST api/v1/mobile/auth/google', 'POST api/v1/mobile/auth/google/finish',
     'GET api/v1/help/public', // sign-in help for signed-out people (QUESTIONS #194)
+    // "Continue with Google" (owner, 2026-11-17): Google's round trip and the new owner's restaurant name.
+    'GET auth/google', 'GET auth/google/callback', 'GET api/v1/auth/google/pending', 'POST api/v1/auth/google/finish',
     'GET email/verify/{id}/{hash}', 'GET email/change/{user}/{hash}',
     'GET news/{user}/unsubscribe', 'POST news/{user}/unsubscribe', 'POST news/{user}/resubscribe',
     // Fortify: sign-in, sign-up from an invitation, password reset, e-mail verification link.

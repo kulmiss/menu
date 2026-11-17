@@ -48,13 +48,21 @@ class PlatformSettings
         'features_global' => [], // feature key => false to switch it off for everyone (Settings → Features)
         // Setup wizard (QUESTIONS #195): done_at = finished; card_hidden = the dashboard checklist closed.
         'setup' => ['done_at' => null, 'card_hidden' => false],
+        // "Continue with Google" (owner, 2026-11-17): needs GOOGLE_CLIENT_ID/SECRET in .env too.
+        'google_login' => false,
         // Public landing page (owner, 2026-11-13). Empty texts use the translated defaults.
         'brand_color' => '#c2410c',
         'landing_headline' => '',
         'landing_subline' => '',
-        'landing_sections' => ['how' => true, 'features' => true, 'styles' => true, 'speed' => true, 'pricing' => true, 'testimonials' => true, 'faq' => true, 'cta' => true],
-        // Real quotes only, added by the Super Admin: [{quote, name, role}]. Hidden while empty.
+        // Sections between the hero and the footer (owner, 2026-11-17). "Customers say" starts hidden.
+        'landing_sections' => ['problem' => true, 'demo' => true, 'how' => true, 'features' => true, 'compare' => true, 'pricing' => true, 'testimonials' => false, 'faq' => true, 'cta' => true],
+        'landing_order' => ['problem', 'demo', 'how', 'features', 'compare', 'pricing', 'testimonials', 'faq', 'cta'],
+        // Real quotes only, added by the Super Admin: [{quote, name, role, real}]. Only ticked "real" ones show.
         'landing_testimonials' => [],
+        // Super Admin → Landing page (owner, 2026-11-17): changed texts (key => text; others use
+        // lang/en/landing.php) and uploaded pictures (see App\Support\Landing\LandingImages).
+        'landing_texts' => [],
+        'landing_images' => [],
         // Footer links: network => URL (empty = hidden).
         // Billing (owner, 2026-11-13): shown on every invoice, copied into it when issued.
         'billing_company' => '',

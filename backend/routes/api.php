@@ -30,7 +30,9 @@ use App\Http\Controllers\Api\Restaurant\QrCodeController;
 use App\Http\Controllers\Api\SessionController;
 use App\Http\Controllers\Api\TeamController;
 use App\Http\Controllers\Api\TenantController;
+use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\SignUpController;
+use App\Http\Controllers\LandingClickController;
 use App\Http\Controllers\Mobile\AccountController as MobileAccountController;
 use App\Http\Controllers\Mobile\AuthController as MobileAuthController;
 use App\Http\Controllers\Mobile\ConfigController;
@@ -45,12 +47,14 @@ use App\Http\Controllers\Platform\FeatureSwitchController;
 use App\Http\Controllers\Platform\HelpArticleController;
 use App\Http\Controllers\Platform\InsightsController as PlatformInsightsController;
 use App\Http\Controllers\Platform\InvoiceController;
+use App\Http\Controllers\Platform\LandingController;
 use App\Http\Controllers\Platform\MobileAppController;
 use App\Http\Controllers\Platform\PaymentController;
 use App\Http\Controllers\Platform\PlatformController;
 use App\Http\Controllers\Platform\RestaurantController;
 use App\Http\Controllers\Platform\SearchController;
 use App\Http\Controllers\Platform\SetupController;
+use App\Support\Landing\LandingImages;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
@@ -67,6 +71,13 @@ Route::post('v1/beacon', BeaconController::class)
     ->withoutMiddleware([EnsureFrontendRequestsAreStateful::class])
     ->name('beacon');
 
+// Landing page button clicks (owner, 2026-11-17): no cookie, no session, no
+// address stored. One limit for everyone together, so no visitor is told apart.
+Route::post('v1/landing/click', LandingClickController::class)
+    ->middleware('throttle:landing-click')
+    ->withoutMiddleware([EnsureFrontendRequestsAreStateful::class])
+    ->name('landing.click');
+
 // Mobile app sign-in (QUESTIONS #187). Not idempotent on purpose: a replayed
 // answer would have to store the new token in the database.
 // App start-up settings: public, cached 5 minutes (QUESTIONS #190).
@@ -75,6 +86,9 @@ Route::get('v1/mobile/config', ConfigController::class)->middleware('throttle:60
 Route::prefix('v1/mobile/auth')->controller(MobileAuthController::class)->group(function () {
     Route::post('login', 'login')->middleware('throttle:mobile-login')->name('mobile.login');
     Route::post('two-factor', 'twoFactor')->middleware('throttle:mobile-two-factor')->name('mobile.two-factor');
+    // "Continue with Google" (owner, 2026-11-17): Google's ID token in, the app token out.
+    Route::post('google', 'google')->middleware('throttle:mobile-google')->name('mobile.google');
+    Route::post('google/finish', 'googleFinish')->middleware('throttle:mobile-google')->name('mobile.google.finish');
 });
 
 Route::prefix('v1')->middleware('idempotent')->group(function () {
@@ -89,11 +103,19 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
         Route::post('email', 'changeEmail')->middleware(['auth:sanctum', 'throttle:6,1']);
     });
 
+    // "Continue with Google": the new owner's restaurant name (owner, 2026-11-17).
+    Route::prefix('auth/google')->controller(GoogleController::class)->group(function () {
+        Route::get('pending', 'pending')->middleware('throttle:30,1');
+        Route::post('finish', 'finish')->middleware(['guest', 'throttle:10,1']);
+    });
+
     // Help centre for signed-out people: sign-in problems (QUESTIONS #194).
     Route::get('help/public', [HelpController::class, 'public'])->middleware('throttle:30,1');
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('me', MeController::class);
+        Route::delete('me/google', [GoogleController::class, 'unlink'])->middleware('throttle:6,1');
+        Route::post('me/password-link', [GoogleController::class, 'passwordLink'])->middleware('throttle:3,10');
         Route::post('help/feedback', [HelpController::class, 'feedback'])->middleware('throttle:30,1');
         Route::put('me/onboarding', OnboardingController::class)->middleware('throttle:30,1');
 
@@ -224,6 +246,11 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::get('settings', [PlatformController::class, 'settings']);
             Route::put('settings', [PlatformController::class, 'saveSettings']);
             Route::post('settings/legal/{page}/reset', [PlatformController::class, 'resetLegal'])->whereIn('page', ['terms', 'privacy']);
+            // Super Admin → Landing page (owner, 2026-11-17).
+            Route::get('landing', [LandingController::class, 'show']);
+            Route::put('landing', [LandingController::class, 'update']);
+            Route::post('landing/images/{slot}', [LandingController::class, 'saveImage'])->whereIn('slot', array_keys(LandingImages::SLOTS))->middleware('throttle:20,1');
+            Route::delete('landing/images/{slot}', [LandingController::class, 'deleteImage'])->whereIn('slot', array_keys(LandingImages::SLOTS));
             Route::post('settings/share-image', [PlatformController::class, 'saveShareImage']);
             Route::delete('settings/share-image', [PlatformController::class, 'deleteShareImage']);
             Route::post('settings/logo', [PlatformController::class, 'saveLogo']);

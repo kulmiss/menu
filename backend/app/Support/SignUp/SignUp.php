@@ -32,8 +32,17 @@ class SignUp
         return ($id ? Plan::find($id) : null) ?? Plan::where('slug', 'free')->first();
     }
 
+    /** The currency of a new restaurant: the platform's default when it is offered (Settings), else the first one. */
+    public static function currency(): string
+    {
+        $currencies = (array) config('menu.currencies');
+        $default = (string) PlatformSettings::get('default_currency');
+
+        return in_array($default, $currencies, true) ? $default : (string) ($currencies[0] ?? 'ETB');
+    }
+
     /**
-     * @param  array{name: string, email: string, password: string, restaurant_name: string, slug: string, currency: string, locale?: string}  $data
+     * @param  array{name: string, email: string, password: string|null, restaurant_name: string, slug: string, currency: string, locale?: string}  $data
      */
     public function create(array $data): User
     {
