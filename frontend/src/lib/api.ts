@@ -171,7 +171,8 @@ async function send<T>(request: SentRequest): Promise<ApiResponse<T>> {
   }
   // "Log in as" ended after 2 hours: the server already switched back.
   if ((response.data as { code?: unknown })?.code === 'impersonation.expired') {
-    location.assign('/platform')
+    // /admin sends the Super Admin back to their own area (the server knows where).
+    location.assign('/admin')
   }
   throw new ApiError(
     `Request failed with status code ${response.status}`,

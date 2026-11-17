@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
+import { signInUrl } from '@/lib/area'
 import { ConfirmDialog } from '@/components/confirm-dialog'
 import { signOut } from '@/features/auth/api'
 
@@ -11,7 +11,6 @@ interface SignOutDialogProps {
 
 export function SignOutDialog({ open, onOpenChange }: SignOutDialogProps) {
   const { t } = useTranslation()
-  const navigate = useNavigate()
   const queryClient = useQueryClient()
 
   const handleSignOut = async () => {
@@ -20,7 +19,7 @@ export function SignOutDialog({ open, onOpenChange }: SignOutDialogProps) {
     } catch {
       // Signed out on this device even if the request failed (offline).
     }
-    await navigate({ to: '/auth/sign-in', replace: true })
+    window.location.assign(signInUrl())
   }
 
   return (

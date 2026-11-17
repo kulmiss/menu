@@ -113,7 +113,7 @@ describe('api helpers', () => {
     await expect(api.get('/restaurant/1/menus')).rejects.toBeInstanceOf(
       ApiError
     )
-    expect(assign).toHaveBeenCalledWith('/platform')
+    expect(assign).toHaveBeenCalledWith('/admin')
     // Any other 409 (a save still running) stays on the page.
     await expect(api.post('/restaurant/1/menus', {})).rejects.toBeInstanceOf(
       ApiError

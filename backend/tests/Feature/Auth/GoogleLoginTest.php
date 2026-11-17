@@ -86,7 +86,7 @@ it('refuses a callback whose state does not match', function () {
     googleOn();
     Socialite::shouldReceive('driver->user')->andThrow(new InvalidStateException);
 
-    callback()->assertRedirect('/auth/sign-in?google=failed');
+    callback()->assertRedirect('/signin?google=failed');
     $this->assertGuest();
 });
 
@@ -179,7 +179,7 @@ it('never links or signs in with an e-mail Google has not verified', function ()
     [$owner] = member(Role::Owner);
     googleReturns(['email' => $owner->email, 'email_verified' => false]);
 
-    callback()->assertRedirect('/auth/sign-in?google=unverified');
+    callback()->assertRedirect('/signin?google=unverified');
     $this->assertGuest();
     expect($owner->fresh()->google_id)->toBeNull();
 });
@@ -191,7 +191,7 @@ it('still asks two-factor users for their code', function () {
     $owner->forceFill(['two_factor_secret' => encrypt($secret), 'two_factor_confirmed_at' => now(), 'google_id' => 'g-123'])->save();
     googleReturns([]);
 
-    callback()->assertRedirect('/auth/two-factor?redirect=%2Fadmin');
+    callback()->assertRedirect('/signin/two-factor')->assertSessionHas('url.intended', '/admin');
     $this->assertGuest();
     expect(session('login.id'))->toBe($owner->id);
 
@@ -205,7 +205,7 @@ it('never lets a Super Admin use Google', function () {
     $admin = superAdmin();
     googleReturns(['email' => $admin->email]);
 
-    callback()->assertRedirect('/auth/sign-in?google=super_admin');
+    callback()->assertRedirect('/signin?google=super_admin');
     $this->assertGuest();
     expect($admin->fresh()->google_id)->toBeNull();
     $this->actingAs($admin)->getJson('/api/v1/me')->assertJsonPath('data.google.available', false);

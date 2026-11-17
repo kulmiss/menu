@@ -41,7 +41,7 @@ describe('InvitationPage', () => {
       .toHaveAttribute('href', '/auth/sign-up?invite=tok')
     await expect
       .element(screen.getByRole('link', { name: 'Sign in' }))
-      .toHaveAttribute('href', '/auth/sign-in?redirect=%2Fauth%2Finvite%2Ftok')
+      .toHaveAttribute('href', '/signin?redirect=%2Fauth%2Finvite%2Ftok')
   })
 
   it('accepts for the invited account and opens that restaurant', async () => {

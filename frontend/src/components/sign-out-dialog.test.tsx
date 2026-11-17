@@ -1,5 +1,6 @@
 import { fakeApi } from '@/test-utils/fake-api'
 import { meFixture } from '@/test-utils/fixtures'
+import { catchNavigation } from '@/test-utils/navigation'
 import { renderWithQuery } from '@/test-utils/render'
 import { navigate } from '@/test-utils/router-mock'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -12,12 +13,19 @@ vi.mock('@tanstack/react-router', async (orig) =>
 )
 
 let fake: ReturnType<typeof fakeApi>
+let away: ReturnType<typeof catchNavigation>
 
 describe('SignOutDialog', () => {
-  beforeEach(() => navigate.mockClear())
-  afterEach(() => fake.restore())
+  beforeEach(() => {
+    navigate.mockClear()
+    away = catchNavigation()
+  })
+  afterEach(() => {
+    fake.restore()
+    away.restore()
+  })
 
-  it('signs out on the server, forgets cached data and opens sign-in', async () => {
+  it('signs out on the server, forgets cached data and opens the sign-in page', async () => {
     fake = fakeApi({ 'POST /auth/logout': { status: 204 } })
     const screen = await renderWithQuery(
       <SignOutDialog open onOpenChange={vi.fn()} />,
@@ -28,12 +36,8 @@ describe('SignOutDialog', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Sign out' }))
 
-    await vi.waitFor(() =>
-      expect(navigate).toHaveBeenCalledWith({
-        to: '/auth/sign-in',
-        replace: true,
-      })
-    )
+    // The sign-in page is a server page (QUESTIONS #222): a full page load.
+    await vi.waitFor(() => expect(away.urls).toEqual(['/signin']))
     expect(fake.apiCalls().map((c) => `${c.method} ${c.url}`)).toEqual([
       'POST /auth/logout',
     ])
@@ -51,7 +55,7 @@ describe('SignOutDialog', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Sign out' }))
 
-    await vi.waitFor(() => expect(navigate).toHaveBeenCalled())
+    await vi.waitFor(() => expect(away.urls).toEqual(['/signin']))
     expect(screen.client.getQueryData(ME_KEY)).toBeUndefined()
   })
 
@@ -64,6 +68,6 @@ describe('SignOutDialog', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Cancel' }))
 
     expect(fake.calls).toEqual([])
-    expect(navigate).not.toHaveBeenCalled()
+    expect(away.urls).toEqual([])
   })
 })

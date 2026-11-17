@@ -189,7 +189,7 @@ it('logs in as the owner in one click, records nothing and keeps the safety bloc
     $this->patchJson(t($tenant, "members/{$staff->id}"), ['role' => 'manager'], idem())->assertForbidden();
     expect($staff->fresh()->role)->toBe(Role::Staff);
 
-    $this->postJson('/api/v1/impersonation/stop', [], idem())->assertOk()->assertJsonPath('data.redirect', '/platform')->assertSessionMissing('impersonation_id');
+    $this->postJson('/api/v1/impersonation/stop', [], idem())->assertOk()->assertJsonPath('data.redirect', '/super')->assertSessionMissing('impersonation_id');
     expect(Impersonation::count())->toBe(0)->and(ActivityLog::where('actor_id', $admin->id)->count())->toBe(0);
 });
 

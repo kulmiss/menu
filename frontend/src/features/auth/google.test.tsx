@@ -8,7 +8,6 @@ import { SignupSettings } from '@/features/platform/signup-settings'
 import { SecuritySettings } from '@/features/settings/security'
 import { OwnerSignUpPage } from '@/features/signup/owner-sign-up'
 import { GoogleFinishPage } from './google-finish'
-import { SignInPage } from './sign-in'
 
 vi.mock('@tanstack/react-router', async (orig) =>
   (await import('@/test-utils/router-mock')).routerMock(await orig())
@@ -36,14 +35,6 @@ describe('Continue with Google', () => {
   beforeEach(() => navigate.mockClear())
   afterEach(() => fake?.restore())
 
-  it('shows the button on the sign-in page while it is switched on', async () => {
-    fake = fakeApi({ 'GET /signup/config': config(true) })
-    const screen = await renderWithQuery(<SignInPage />)
-    await expect
-      .element(screen.getByRole('link', { name: 'Continue with Google' }))
-      .toHaveAttribute('href', '/auth/google')
-  })
-
   it('shows it on the sign-up page too, above the e-mail form', async () => {
     fake = fakeApi({ 'GET /signup/config': config(true) })
     const screen = await renderWithQuery(<OwnerSignUpPage />)
@@ -57,23 +48,13 @@ describe('Continue with Google', () => {
 
   it('hides it while it is switched off', async () => {
     fake = fakeApi({ 'GET /signup/config': config(false) })
-    const screen = await renderWithQuery(<SignInPage />)
+    const screen = await renderWithQuery(<OwnerSignUpPage />)
     await expect
-      .element(screen.getByRole('button', { name: 'Sign in' }))
+      .element(screen.getByRole('button', { name: 'Create my free menu' }))
       .toBeVisible()
     expect(
       screen.getByRole('link', { name: 'Continue with Google' }).elements()
     ).toHaveLength(0)
-  })
-
-  it('says why Google could not sign in', async () => {
-    fake = fakeApi({ 'GET /signup/config': config(true) })
-    const screen = await renderWithQuery(<SignInPage google='super_admin' />)
-    await expect
-      .element(screen.getByRole('alert'))
-      .toHaveTextContent(
-        'Super Admin accounts sign in with their password and two-factor code only.'
-      )
   })
 
   it('asks a new Google user only for the restaurant name and the Terms', async () => {

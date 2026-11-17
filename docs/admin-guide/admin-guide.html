@@ -107,8 +107,8 @@ php artisan config:cache
 <pre><code class="language-bash">php artisan tinker --execute=&quot;\$u = App\Models\User::create(['name' =&gt; 'Your Name', 'email' =&gt; 'you@example.com', 'password' =&gt; 'a-long-password']); \$u-&gt;forceFill(['is_super_admin' =&gt; true, 'email_verified_at' =&gt; now()])-&gt;save();&quot;
 </code></pre>
 <ol>
-<li>Sign in at <strong><a href="https://your-domain/auth/sign-in">https://your-domain/auth/sign-in</a></strong>.</li>
-<li>Open <strong><a href="https://your-domain/platform">https://your-domain/platform</a></strong>. You see only <strong>Set up two-factor</strong>.</li>
+<li>Sign in at <strong><a href="https://your-domain/">https://your-domain/</a>&lt;SUPER_ADMIN_PATH&gt;/sign-in</strong>. This address is yours only: it is set by <code>SUPER_ADMIN_PATH</code> in <code>.env</code> (default <code>super</code>; choose something hard to guess). Restaurant teams sign in at <a href="https://your-domain/signin">https://your-domain/signin</a>, which doesn't let Super Admins in.</li>
+<li>You see only <strong>Set up two-factor</strong>.</li>
 <li>Scan the QR code with an authenticator app. Type the code.</li>
 <li><strong>Save the recovery codes</strong> in your password manager.</li>
 </ol>

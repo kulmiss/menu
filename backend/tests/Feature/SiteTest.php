@@ -15,7 +15,7 @@ it('shows the landing page in simple English: hero, sections in order, sign-up a
         ->assertSee('Free plan forever')
         ->assertSee('No card needed')
         ->assertSee('href="/auth/sign-up" data-track="signup"', false)
-        ->assertSee('href="/auth/sign-in"', false)
+        ->assertSee('href="/signin"', false)
         ->assertSee('href="/terms"', false)
         ->assertSee('href="#pricing"', false)
         ->assertSee('property="og:image" content="'.url('/landing/og.jpg').'"', false)
@@ -76,7 +76,7 @@ it('turns every sign-up button into "Contact us on WhatsApp" when sign-up is off
     $html = $this->get('/')->assertOk()
         ->assertDontSee('href="/auth/sign-up"', false)
         ->assertDontSee('Create my free menu')
-        ->assertSee('href="/auth/sign-in"', false)
+        ->assertSee('href="/signin"', false)
         ->assertSee('Contact us on WhatsApp')
         ->assertSee('Message us, and we will help you start.')
         ->getContent();
@@ -86,7 +86,7 @@ it('turns every sign-up button into "Contact us on WhatsApp" when sign-up is off
     PlatformSettings::save(['upgrade_whatsapp' => null, 'support_email' => 'help@example.com']);
     $this->get('/')->assertSee('Contact us by email')->assertSee('href="mailto:help@example.com?subject=', false);
     PlatformSettings::save(['support_email' => null]);
-    $this->get('/')->assertOk()->assertDontSee('Contact us by email')->assertDontSee('Contact us on WhatsApp')->assertSee('href="/auth/sign-in"', false)
+    $this->get('/')->assertOk()->assertDontSee('Contact us by email')->assertDontSee('Contact us on WhatsApp')->assertSee('href="/signin"', false)
         // No demo and no sign-up: no QR code pointing at a closed page.
         ->assertDontSee('class="qr-card', false);
 });
@@ -180,7 +180,10 @@ it('lets the Super Admin edit the texts, switch sections off and reorder them; "
 it('serves robots.txt and the sitemap', function () {
     $this->get('/robots.txt')->assertOk()
         ->assertSee('Disallow: /admin')
-        ->assertSee('Disallow: /platform')
+        ->assertSee('Disallow: /signin')
+        // The Super Admin's own address is never listed (QUESTIONS #217).
+        ->assertDontSee(config('menu.super_admin.path'))
+        ->assertDontSee('platform')
         ->assertSee('Sitemap: '.url('/sitemap.xml'));
     $this->get('/sitemap.xml')->assertOk()
         ->assertHeader('Content-Type', 'application/xml; charset=UTF-8')

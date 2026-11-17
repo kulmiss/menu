@@ -2,10 +2,11 @@ import { lazy, Suspense, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Link, useNavigate } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
 import { Loader2, UserPlus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { applyFieldErrors } from '@/lib/api'
+import { signInUrl } from '@/lib/area'
 import { handleServerError } from '@/lib/handle-server-error'
 import { safeRedirect } from '@/lib/safe-redirect'
 import { z } from '@/lib/zod'
@@ -192,9 +193,9 @@ function InvitedSignUpPage({ invite }: { invite: string }) {
         <Alert variant='destructive' role='alert' className='mb-4'>
           <AlertDescription>{t('invite.invalid')}</AlertDescription>
         </Alert>
-        <Link to='/auth/sign-in' className={authLinkClass}>
+        <a href={signInUrl()} className={authLinkClass}>
           {t('auth.sign_in')}
-        </Link>
+        </a>
       </AuthCard>
     )
   }
@@ -205,13 +206,12 @@ function InvitedSignUpPage({ invite }: { invite: string }) {
       description={
         <>
           {t('invite.sign_up_intro')}{' '}
-          <Link
-            to='/auth/sign-in'
-            search={{ redirect: `/auth/invite/${invite}` }}
+          <a
+            href={signInUrl(`/auth/invite/${invite}`)}
             className={authLinkClass}
           >
             {t('auth.sign_in')}
-          </Link>
+          </a>
         </>
       }
       footer={<LegalNote />}

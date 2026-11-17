@@ -29,9 +29,7 @@ import { Route as AdminTagsRouteImport } from './routes/admin/tags'
 import { Route as AdminTeamRouteImport } from './routes/admin/team'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth/reset-password'
-import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
 import { Route as AuthSignUpRouteImport } from './routes/auth/sign-up'
-import { Route as AuthTwoFactorRouteImport } from './routes/auth/two-factor'
 import { Route as PlatformIndexRouteImport } from './routes/platform/index'
 import { Route as PlatformSectionRouteImport } from './routes/platform/$section'
 import { Route as AdminMenuIndexRouteImport } from './routes/admin/menu/index'
@@ -141,19 +139,9 @@ const AuthResetPasswordRoute = AuthResetPasswordRouteImport.update({
   path: '/auth/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthSignInRoute = AuthSignInRouteImport.update({
-  id: '/auth/sign-in',
-  path: '/auth/sign-in',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthSignUpRoute = AuthSignUpRouteImport.update({
   id: '/auth/sign-up',
   path: '/auth/sign-up',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthTwoFactorRoute = AuthTwoFactorRouteImport.update({
-  id: '/auth/two-factor',
-  path: '/auth/two-factor',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlatformIndexRoute = PlatformIndexRouteImport.update({
@@ -217,9 +205,7 @@ export interface FileRoutesByFullPath {
   '/admin/team': typeof AdminTeamRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
-  '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
-  '/auth/two-factor': typeof AuthTwoFactorRoute
   '/platform/$section': typeof PlatformSectionRoute
   '/admin/': typeof AdminIndexRoute
   '/platform/': typeof PlatformIndexRoute
@@ -247,9 +233,7 @@ export interface FileRoutesByTo {
   '/admin/team': typeof AdminTeamRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
-  '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
-  '/auth/two-factor': typeof AuthTwoFactorRoute
   '/platform/$section': typeof PlatformSectionRoute
   '/admin': typeof AdminIndexRoute
   '/platform': typeof PlatformIndexRoute
@@ -281,9 +265,7 @@ export interface FileRoutesById {
   '/admin/team': typeof AdminTeamRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
-  '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
-  '/auth/two-factor': typeof AuthTwoFactorRoute
   '/platform/$section': typeof PlatformSectionRoute
   '/admin/': typeof AdminIndexRoute
   '/platform/': typeof PlatformIndexRoute
@@ -316,9 +298,7 @@ export interface FileRouteTypes {
     | '/admin/team'
     | '/auth/forgot-password'
     | '/auth/reset-password'
-    | '/auth/sign-in'
     | '/auth/sign-up'
-    | '/auth/two-factor'
     | '/platform/$section'
     | '/admin/'
     | '/platform/'
@@ -346,9 +326,7 @@ export interface FileRouteTypes {
     | '/admin/team'
     | '/auth/forgot-password'
     | '/auth/reset-password'
-    | '/auth/sign-in'
     | '/auth/sign-up'
-    | '/auth/two-factor'
     | '/platform/$section'
     | '/admin'
     | '/platform'
@@ -379,9 +357,7 @@ export interface FileRouteTypes {
     | '/admin/team'
     | '/auth/forgot-password'
     | '/auth/reset-password'
-    | '/auth/sign-in'
     | '/auth/sign-up'
-    | '/auth/two-factor'
     | '/platform/$section'
     | '/admin/'
     | '/platform/'
@@ -399,9 +375,7 @@ export interface RootRouteChildren {
   PlatformRouteRoute: typeof PlatformRouteRouteWithChildren
   AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
   AuthResetPasswordRoute: typeof AuthResetPasswordRoute
-  AuthSignInRoute: typeof AuthSignInRoute
   AuthSignUpRoute: typeof AuthSignUpRoute
-  AuthTwoFactorRoute: typeof AuthTwoFactorRoute
   AuthGoogleFinishRoute: typeof AuthGoogleFinishRoute
   AuthInviteTokenRoute: typeof AuthInviteTokenRoute
 }
@@ -548,25 +522,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/auth/sign-in': {
-      id: '/auth/sign-in'
-      path: '/auth/sign-in'
-      fullPath: '/auth/sign-in'
-      preLoaderRoute: typeof AuthSignInRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/auth/sign-up': {
       id: '/auth/sign-up'
       path: '/auth/sign-up'
       fullPath: '/auth/sign-up'
       preLoaderRoute: typeof AuthSignUpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/two-factor': {
-      id: '/auth/two-factor'
-      path: '/auth/two-factor'
-      fullPath: '/auth/two-factor'
-      preLoaderRoute: typeof AuthTwoFactorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/platform/': {
@@ -705,9 +665,7 @@ const rootRouteChildren: RootRouteChildren = {
   PlatformRouteRoute: PlatformRouteRouteWithChildren,
   AuthForgotPasswordRoute: AuthForgotPasswordRoute,
   AuthResetPasswordRoute: AuthResetPasswordRoute,
-  AuthSignInRoute: AuthSignInRoute,
   AuthSignUpRoute: AuthSignUpRoute,
-  AuthTwoFactorRoute: AuthTwoFactorRoute,
   AuthGoogleFinishRoute: AuthGoogleFinishRoute,
   AuthInviteTokenRoute: AuthInviteTokenRoute,
 }

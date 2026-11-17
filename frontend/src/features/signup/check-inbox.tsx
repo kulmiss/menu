@@ -1,10 +1,10 @@
 import { use, useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from '@tanstack/react-router'
 import { loadPageTexts } from '@/i18n'
 import { Loader2, LogOut, MailCheck, RefreshCw, Send } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { validationErrors } from '@/lib/api'
+import { signInUrl } from '@/lib/area'
 import { handleServerError } from '@/lib/handle-server-error'
 import { toast } from '@/lib/toast'
 import { Button } from '@/components/ui/button'
@@ -32,7 +32,6 @@ export default function CheckInbox() {
   use(texts)
   const { t } = useTranslation()
   const qc = useQueryClient()
-  const navigate = useNavigate()
   const me = useQuery(meQueryOptions).data
   const email = me?.email ?? ''
 
@@ -82,7 +81,7 @@ export default function CheckInbox() {
 
   const out = useMutation({
     mutationFn: () => signOut(qc),
-    onSettled: () => navigate({ to: '/auth/sign-in', replace: true }),
+    onSettled: () => window.location.assign(signInUrl()),
   })
 
   return (

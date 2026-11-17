@@ -1,4 +1,5 @@
 import { fakeApi, invalid } from '@/test-utils/fake-api'
+import { catchNavigation } from '@/test-utils/navigation'
 import { renderWithQuery } from '@/test-utils/render'
 import { navigate } from '@/test-utils/router-mock'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -14,10 +15,17 @@ vi.mock('@tanstack/react-router', async (orig) =>
 )
 
 let fake: ReturnType<typeof fakeApi>
+let away: ReturnType<typeof catchNavigation>
 
 describe('password reset', () => {
-  beforeEach(() => navigate.mockClear())
-  afterEach(() => fake.restore())
+  beforeEach(() => {
+    navigate.mockClear()
+    away = catchNavigation()
+  })
+  afterEach(() => {
+    fake.restore()
+    away.restore()
+  })
 
   it('asks for a link without revealing whether the account exists', async () => {
     fake = fakeApi({
@@ -54,10 +62,7 @@ describe('password reset', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Save password' }))
 
     await vi.waitFor(() =>
-      expect(navigate).toHaveBeenCalledWith({
-        to: '/auth/sign-in',
-        replace: true,
-      })
+      expect(away.urls).toEqual(['/signin?password=changed'])
     )
     expect(fake.apiCalls()[0].data).toEqual({
       token: 'tok',

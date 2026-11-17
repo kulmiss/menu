@@ -5,6 +5,7 @@ import { Check, Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useTenantStore } from '@/stores/tenant-store'
 import { errorStatus } from '@/lib/api'
+import { signInUrl } from '@/lib/area'
 import { handleServerError } from '@/lib/handle-server-error'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -46,7 +47,7 @@ export function InvitationPage({ token }: { token: string }) {
 
   async function switchAccount() {
     await signOut(queryClient)
-    await navigate({ to: '/auth/sign-in', search: { redirect: here } })
+    window.location.assign(signInUrl(here))
   }
 
   const loading = invitation.isPending || me.isPending
@@ -122,13 +123,9 @@ export function InvitationPage({ token }: { token: string }) {
           </Button>
           <p className='text-center text-sm text-muted-foreground'>
             {t('invite.have_account')}{' '}
-            <Link
-              to='/auth/sign-in'
-              search={{ redirect: here }}
-              className={authLinkClass}
-            >
+            <a href={signInUrl(here)} className={authLinkClass}>
               {t('auth.sign_in')}
-            </Link>
+            </a>
           </p>
         </div>
       )}

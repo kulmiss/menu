@@ -27,6 +27,10 @@ const PUBLIC_ROUTES = [
     'POST api/v1/auth/login', 'POST api/v1/auth/logout', 'POST api/v1/auth/register', 'POST api/v1/auth/forgot-password',
     'POST api/v1/auth/reset-password', 'POST api/v1/auth/two-factor-challenge', 'GET api/v1/auth/email/verify/{id}/{hash}',
     'GET sanctum/csrf-cookie', 'GET storage/{path}', 'PUT storage/{path}',
+    // The two areas (QUESTIONS #215–#222): the pages check who is signed in themselves
+    // (SpaController / SignInController, tested in Auth/AreaPagesTest), the forms post to Fortify.
+    'GET admin/{path?}', 'GET super/{path?}', 'GET auth/{path}',
+    'GET signin', 'POST signin', 'GET signin/two-factor', 'POST signin/two-factor', 'GET super/sign-in', 'POST super/sign-in',
 ];
 
 /** Staff (any member) may do these writes; every other tenant write needs Manager or Owner. */

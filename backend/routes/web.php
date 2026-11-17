@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\ConfirmEmailChangeController;
 use App\Http\Controllers\Auth\GoogleController;
+use App\Http\Controllers\Auth\SignInController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\NewsSubscriptionController;
 use App\Http\Controllers\PublicMenuController;
@@ -9,11 +10,14 @@ use App\Http\Controllers\SiteController;
 use App\Http\Controllers\SpaController;
 use App\Http\Middleware\GuardImpersonation;
 use App\Http\Middleware\UseWelcomeBroker;
+use App\Support\Security\SuperAdminAccess;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
+use Laravel\Fortify\Http\Controllers\TwoFactorAuthenticatedSessionController;
 
 // Public pages for guests and visitors set no cookies at all (no session, no
 // CSRF cookie), also when PHP renders them instead of the web server serving
@@ -43,11 +47,27 @@ Route::middleware('throttle:20,1')->group(function () {
     Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->name('google.callback');
 });
 
-// Admin + Super Admin SPA: every URL below these prefixes loads the same page.
-Route::get('/{area}/{path?}', SpaController::class)
-    ->where('area', 'admin|platform|auth')
-    ->where('path', '.*')
-    ->name('spa');
+// The two areas (QUESTIONS #215–#222). Restaurant teams: /signin, then /admin.
+// Each sign-in form posts to Fortify's own sign-in, so the checks, limits and the
+// two-factor step stay the same; SignInArea decides which accounts may sign in there.
+Route::get('/signin', [SignInController::class, 'restaurant'])->name('login');
+Route::post('/signin', [AuthenticatedSessionController::class, 'store'])
+    ->middleware(['guest:web', 'signin.area:restaurant', 'throttle:login'])->name('signin.store');
+Route::get('/signin/two-factor', [SignInController::class, 'twoFactor'])->middleware(['guest:web', 'signin.challenge'])->name('two-factor.login');
+Route::post('/signin/two-factor', [TwoFactorAuthenticatedSessionController::class, 'store'])
+    ->middleware(['guest:web', 'signin.challenge', 'throttle:two-factor'])->name('signin.two-factor');
+Route::get('/admin/{path?}', [SpaController::class, 'restaurant'])->where('path', '.*')->name('spa.admin');
+// Signed-out pages still in the admin app (sign-up, password reset, invitations, Google).
+Route::get('/auth/{path}', [SpaController::class, 'auth'])->where('path', '(sign-up|forgot-password|reset-password|invite/.+|google/finish)')->name('spa.auth');
+
+// Super Admin: its own address (SUPER_ADMIN_PATH) and plain sign-in page; outside
+// SUPER_ADMIN_IPS it doesn't exist (404).
+Route::prefix(SuperAdminAccess::path())->middleware('super.web')->group(function () {
+    Route::get('sign-in', [SignInController::class, 'super'])->name('super.signin');
+    Route::post('sign-in', [AuthenticatedSessionController::class, 'store'])
+        ->middleware(['guest:web', 'signin.area:super', 'throttle:login'])->name('super.signin.store');
+    Route::get('{path?}', [SpaController::class, 'super'])->where('path', '.*')->name('spa.super');
+});
 
 // Link in "Confirm your e-mail" (owner, 2026-11-13).
 Route::get('/email/verify/{id}/{hash}', VerifyEmailController::class)->whereNumber('id')->middleware('throttle:30,1')->name('signup.verify');

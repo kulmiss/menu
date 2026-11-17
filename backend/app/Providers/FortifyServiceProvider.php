@@ -7,8 +7,10 @@ use App\Actions\Fortify\ResetUserPassword;
 use App\Actions\Fortify\UpdateUserPassword;
 use App\Actions\Fortify\UpdateUserProfileInformation;
 use App\Http\Controllers\Auth\RecoveryCodeController;
+use App\Http\Middleware\SignInArea;
 use App\Http\Requests\HashedTwoFactorLoginRequest;
 use App\Http\Responses\GenericResetLinkResponse;
+use App\Http\Responses\SignedInResponse;
 use App\Models\User;
 use App\Notifications\SecurityNotice;
 use App\Support\LastSignIn;
@@ -25,7 +27,9 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Contracts\FailedPasswordResetLinkRequestResponse;
+use Laravel\Fortify\Contracts\LoginResponse;
 use Laravel\Fortify\Contracts\SuccessfulPasswordResetLinkRequestResponse;
+use Laravel\Fortify\Contracts\TwoFactorLoginResponse;
 use Laravel\Fortify\Events\RecoveryCodesGenerated;
 use Laravel\Fortify\Events\TwoFactorAuthenticationConfirmed;
 use Laravel\Fortify\Events\TwoFactorAuthenticationDisabled;
@@ -50,7 +54,19 @@ class FortifyServiceProvider extends ServiceProvider
         ])));
 
         // Same answer time whether or not the e-mail has an account (SECURITY_REPORT.md M1).
-        Fortify::authenticateUsing(fn (Request $request) => LoginCheck::user((string) $request->input(Fortify::username()), (string) $request->input('password')));
+        // Each sign-in page only signs in its own kind of account (QUESTIONS #216): a
+        // Super Admin on the restaurant page (or the JSON endpoint) and a restaurant
+        // account on the Super Admin page get the same answer as a wrong password.
+        Fortify::authenticateUsing(function (Request $request) {
+            $user = LoginCheck::user((string) $request->input(Fortify::username()), (string) $request->input('password'));
+            if ($user !== null && $user->is_super_admin !== (SignInArea::of($request) === 'super')) {
+                SecurityLog::event('login.wrong_area', $user->id, $user->email);
+
+                return null;
+            }
+
+            return $user;
+        });
 
         // 5 a minute per e-mail and address; 30 wrong passwords an hour per account in LoginCheck (M2).
         RateLimiter::for('login', fn (Request $request) => LoginCheck::limits((string) $request->input(Fortify::username()), (string) $request->ip()));
@@ -63,6 +79,9 @@ class FortifyServiceProvider extends ServiceProvider
         ]);
         // CSV / PDF / export downloads are heavy for shared hosting: 30 a minute per user (M2).
         RateLimiter::for('exports', fn (Request $request) => Limit::perMinute(30)->by('exp:'.($request->user()?->getAuthIdentifier() ?? $request->ip())));
+        // After signing in: the page asked for, else the person's own area (QUESTIONS #215).
+        $this->app->bind(LoginResponse::class, fn () => new SignedInResponse);
+        $this->app->bind(TwoFactorLoginResponse::class, fn () => new SignedInResponse(afterCode: true));
         $this->app->bind(FailedPasswordResetLinkRequestResponse::class, GenericResetLinkResponse::class);
         $this->app->bind(SuccessfulPasswordResetLinkRequestResponse::class, GenericResetLinkResponse::class);
 

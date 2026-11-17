@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Link, useNavigate } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 import { KeyRound, Loader2, Mail } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { applyFieldErrors } from '@/lib/api'
+import { signInUrl } from '@/lib/area'
 import { handleServerError } from '@/lib/handle-server-error'
-import { toast } from '@/lib/toast'
 import { z } from '@/lib/zod'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -97,12 +97,12 @@ export function ForgotPasswordPage() {
       title={t('auth.forgot_title')}
       description={t('auth.forgot_intro')}
       footer={
-        <Link
-          to='/auth/sign-in'
+        <a
+          href={signInUrl()}
           className={`inline-flex min-h-11 items-center text-sm sm:min-h-0 ${authLinkClass}`}
         >
           {t('auth.back_to_sign_in')}
-        </Link>
+        </a>
       }
     >
       <ForgotPasswordForm />
@@ -124,7 +124,6 @@ type ResetProps = { token: string; email: string; welcome?: boolean }
 
 export function ResetPasswordForm({ token, email, welcome }: ResetProps) {
   const { t } = useTranslation()
-  const navigate = useNavigate()
   const [pending, setPending] = useState(false)
   const [linkError, setLinkError] = useState<string | null>(null)
 
@@ -143,10 +142,10 @@ export function ResetPasswordForm({ token, email, welcome }: ResetProps) {
         ...values,
         ...(welcome ? { welcome } : {}),
       })
-      toast.success(
-        t(welcome ? 'auth.welcome_password_set' : 'auth.password_changed')
+      // The sign-in page (a server page) says the password is saved.
+      window.location.assign(
+        `/signin?password=${welcome ? 'welcome' : 'changed'}`
       )
-      await navigate({ to: '/auth/sign-in', replace: true })
     } catch (error) {
       if (
         !applyFieldErrors(error, form.setError, [

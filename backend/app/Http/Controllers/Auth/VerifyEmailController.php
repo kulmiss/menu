@@ -18,21 +18,21 @@ class VerifyEmailController extends Controller
     public function __invoke(Request $request, int $id, string $hash): RedirectResponse
     {
         if (! $request->hasValidSignature()) {
-            return redirect('/auth/sign-in?verify=expired');
+            return redirect('/signin?verify=expired');
         }
         $user = User::find($id);
         if ($user === null || ! hash_equals(sha1($user->getEmailForVerification()), $hash)) {
-            return redirect('/auth/sign-in?verify=invalid');
+            return redirect('/signin?verify=invalid');
         }
         $signedIn = $request->user()?->is($user) ?? false;
 
         if ($user->hasVerifiedEmail()) {
-            return redirect($signedIn ? '/admin' : '/auth/sign-in?verify=already');
+            return redirect($signedIn ? '/admin' : '/signin?verify=already');
         }
 
         $user->markEmailAsVerified();
         event(new Verified($user));
 
-        return redirect($signedIn ? '/admin?welcome=1' : '/auth/sign-in?verify=done');
+        return redirect($signedIn ? '/admin?welcome=1' : '/signin?verify=done');
     }
 }

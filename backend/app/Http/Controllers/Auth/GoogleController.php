@@ -42,7 +42,7 @@ class GoogleController extends Controller
         abort_unless(GoogleLogin::enabled(), 404);
         $link = $request->boolean('link');
         if ($link && (Auth::guard('web')->guest() || Auth::guard('web')->user()?->is_super_admin)) {
-            return redirect('/auth/sign-in');
+            return redirect('/signin');
         }
         $request->session()->put(self::INTENT, $link ? 'link' : 'signin');
 
@@ -58,7 +58,7 @@ class GoogleController extends Controller
     {
         abort_unless(GoogleLogin::enabled(), 404);
         $link = $request->session()->pull(self::INTENT) === 'link';
-        $fail = fn (string $code) => redirect($link ? '/admin/settings/security?google='.$code : '/auth/sign-in?google='.$code);
+        $fail = fn (string $code) => redirect($link ? '/admin/settings/security?google='.$code : '/signin?google='.$code);
 
         if ($request->filled('error')) {
             return $fail('cancelled');
@@ -99,7 +99,9 @@ class GoogleController extends Controller
             // The same two-factor step as a password sign-in (Fortify reads login.id).
             $request->session()->put(['login.id' => $user->getKey(), 'login.remember' => true]);
 
-            return redirect('/auth/two-factor?redirect='.rawurlencode($next));
+            $request->session()->put('url.intended', $next);
+
+            return redirect('/signin/two-factor');
         }
         Auth::guard('web')->login($user, true);
         $request->session()->regenerate();
@@ -188,7 +190,7 @@ class GoogleController extends Controller
         $user = Auth::guard('web')->user();
         $back = fn (string $code) => redirect('/admin/settings/security?google='.$code);
         if (! $user instanceof User || $user->is_super_admin) {
-            return redirect('/auth/sign-in');
+            return redirect('/signin');
         }
         if (! $profile['email_verified']) {
             SecurityLog::event('google.refused', $user->id, $profile['email'], ['why' => 'unverified']);

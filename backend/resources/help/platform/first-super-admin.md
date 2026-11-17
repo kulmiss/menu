@@ -12,8 +12,8 @@ Super Admins are made on the server, not in the app. In `backend/`:
 php artisan tinker --execute="\$u = App\Models\User::create(['name' => 'Your Name', 'email' => 'you@example.com', 'password' => 'a-long-password']); \$u->forceFill(['is_super_admin' => true, 'email_verified_at' => now()])->save();"
 ```
 
-1. Sign in at **{{site_url}}/auth/sign-in**.
-2. Open **{{site_url}}/platform**. You see only **Set up two-factor**.
+1. Sign in at **{{super_url}}/sign-in**. This address is yours only: it is set by `SUPER_ADMIN_PATH` in `.env` (default `super`; choose something hard to guess). Restaurant teams sign in at {{site_url}}/signin, which doesn't let Super Admins in.
+2. You see only **Set up two-factor**.
 3. Scan the QR code with an authenticator app. Type the code.
 4. **Save the recovery codes** in your password manager.
 

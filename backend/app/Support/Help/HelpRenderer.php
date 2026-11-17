@@ -8,6 +8,7 @@ use App\Models\Tenant;
 use App\Support\Features;
 use App\Support\PlatformSettings;
 use App\Support\PublicMenu\MenuPageData;
+use App\Support\Security\SuperAdminAccess;
 use App\Support\SignUp\SignUp;
 use App\Support\UpgradeContact;
 use Illuminate\Support\Facades\DB;
@@ -149,6 +150,8 @@ class HelpRenderer
             'site_name' => (string) $s['name'],
             'site_url' => rtrim((string) config('app.url'), '/'),
             'admin_url' => rtrim((string) config('app.url'), '/').'/admin',
+            // The Super Admin's own address: only ever filled in for a Super Admin reading (QUESTIONS #215).
+            'super_url' => request()->user()?->is_super_admin ? rtrim((string) config('app.url'), '/').SuperAdminAccess::url() : '—',
             'support_whatsapp' => $contact['whatsapp'] ?? '—',
             'support_email' => $contact['email'] ?? '—',
             'support' => $this->support($contact),
@@ -198,6 +201,7 @@ class HelpRenderer
             'site_name' => 'Menu',
             'site_url' => 'https://your-domain',
             'admin_url' => 'https://your-domain/admin',
+            'super_url' => 'https://your-domain/<SUPER_ADMIN_PATH>',
             'support_whatsapp' => '(your WhatsApp number)',
             'support_email' => '(your support e-mail)',
             'support' => '- (your support WhatsApp and e-mail, from Settings)',

@@ -54,9 +54,9 @@ about 30 small restaurants in every state with 12 months of payments for the Sup
 All people, e-mails and phone numbers are fictional.
 
 Logins (password `password`):
-- Café: `demo@example.com` (owner), `manager@example.com`, `staff@example.com` → `/admin`
+- Café: `demo@example.com` (owner), `manager@example.com`, `staff@example.com` → sign in at `/signin`, then `/admin`
 - Showcases: `fine@example.com`, `pizza@example.com`, `bakery@example.com`
-- Super Admin: `admin@example.com`, two-factor secret `JBSWY3DPEHPK3PXP` (add it to an authenticator app) → `/platform`
+- Super Admin: `admin@example.com`, two-factor secret `JBSWY3DPEHPK3PXP` (add it to an authenticator app) → sign in at `/super/sign-in` (the address is `SUPER_ADMIN_PATH` in `.env`, default `super`)
 
 ## Deploying
 Shared hosting (cPanel) or a VPS: see [docs/deploy.md](docs/deploy.md) — build, `.env`, cron, OPcache, Cloudflare, e-mail (SMTP, SPF, DKIM), the first Super Admin, updates and backups.

@@ -2,11 +2,12 @@ import { use, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Link, useNavigate } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
 import { loadPageTexts } from '@/i18n'
 import { Loader2, MailCheck, UserPlus } from 'lucide-react'
 import { Trans, useTranslation } from 'react-i18next'
 import { applyFieldErrors, errorStatus } from '@/lib/api'
+import { signInUrl } from '@/lib/area'
 import { handleServerError } from '@/lib/handle-server-error'
 import { previewSlug } from '@/lib/slug'
 import { cn } from '@/lib/utils'
@@ -76,9 +77,9 @@ export function OwnerSignUpPage({ redirect }: { redirect?: string }) {
   const [sentTo, setSentTo] = useState<string | null>(null)
 
   const signInLink = (
-    <Link to='/auth/sign-in' search={{ redirect }} className={authLinkClass}>
+    <a href={signInUrl(redirect)} className={authLinkClass}>
       {t('auth.sign_in')}
-    </Link>
+    </a>
   )
 
   if (sentTo) {
