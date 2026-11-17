@@ -3,8 +3,10 @@
 use App\Enums\Role;
 use App\Models\User;
 use App\Support\PlatformSettings;
+use Illuminate\Routing\RouteCollection;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Route;
 use PragmaRX\Google2FA\Google2FA;
 
 /**
@@ -189,16 +191,15 @@ it('sends the Super Admin back to their area after "Log in as"', function () {
 });
 
 it('can live at another address, and the old one is gone', function () {
-    putenv('SUPER_ADMIN_PATH=office-7k2q');
-    try {
-        $this->refreshApplication();
-        $this->get('/office-7k2q/sign-in')->assertOk();
-        $this->get('/super/sign-in')->assertNotFound();
-        expect(route('spa.super', ['path' => 'plans']))->toEndWith('/office-7k2q/plans');
-    } finally {
-        putenv('SUPER_ADMIN_PATH');
-        $this->refreshApplication();
-    }
+    // As if .env said SUPER_ADMIN_PATH=office-7k2q: the routes are read again with it.
+    config(['menu.super_admin.path' => 'office-7k2q']);
+    Route::setRoutes(new RouteCollection);
+    Route::middleware('web')->group(base_path('routes/web.php'));
+    Route::getRoutes()->refreshNameLookups();
+
+    $this->get('/office-7k2q/sign-in')->assertOk()->assertSee('action="/office-7k2q/sign-in"', false);
+    $this->get('/super/sign-in')->assertNotFound();
+    expect(route('spa.super', ['path' => 'plans']))->toEndWith('/office-7k2q/plans');
 });
 
 it('shows where the area is, and turns the allow-list off from the server', function () {
