@@ -9,6 +9,7 @@ use App\Models\Tenant;
 use App\Models\User;
 use App\Tenancy\CurrentTenant;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -124,4 +125,19 @@ function matrixUrl(string $uri, int $tenantId, array $wheres = []): string
 
         return '999999';
     }, $uri);
+}
+
+/** A stand-in for the built admin app (frontend/ → public/app). */
+function withBuiltSpa(callable $test): void
+{
+    $index = public_path('app/index.html');
+    $existed = is_file($index);
+    $original = $existed ? File::get($index) : null;
+    File::ensureDirectoryExists(dirname($index));
+    File::put($index, '<!doctype html><html><head><title>Menu</title></head><body><div id="root"></div></body></html>');
+    try {
+        $test();
+    } finally {
+        $existed ? File::put($index, $original) : File::delete($index);
+    }
 }

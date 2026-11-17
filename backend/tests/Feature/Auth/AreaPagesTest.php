@@ -231,9 +231,11 @@ it('sends the Super Admin back to their area when "Log in as" ends on a page loa
     $this->actingAs($admin)->postJson(p("restaurants/{$tenant->id}/impersonate"), [], idem())->assertOk();
     $session = ['impersonation_id' => session('impersonation_id'), 'impersonator_id' => $admin->id, 'impersonation_ends_at' => session('impersonation_ends_at')];
     $this->actingAs($owner)->withSession($session);
-    $this->get('/admin/dishes')->assertOk();
+    withBuiltSpa(function () {
+        $this->get('/admin/dishes')->assertOk();
 
-    $this->travel(121)->minutes();
-    // A page, not an API call: back to the Super Admin area, not a JSON error.
-    $this->get('/admin/dishes')->assertRedirect('/super')->assertSessionMissing('impersonation_id');
+        $this->travel(121)->minutes();
+        // A page, not an API call: back to the Super Admin area, not a JSON error.
+        $this->get('/admin/dishes')->assertRedirect('/super')->assertSessionMissing('impersonation_id');
+    });
 });

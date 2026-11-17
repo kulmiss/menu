@@ -1,22 +1,6 @@
 <?php
 
 use App\Enums\Role;
-use Illuminate\Support\Facades\File;
-
-/** A stand-in for the built admin app (frontend/ → public/app). */
-function withBuiltSpa(callable $test): void
-{
-    $index = public_path('app/index.html');
-    $existed = is_file($index);
-    $original = $existed ? File::get($index) : null;
-    File::ensureDirectoryExists(dirname($index));
-    File::put($index, '<!doctype html><html><head><title>Menu</title></head><body><div id="root"></div></body></html>');
-    try {
-        $test();
-    } finally {
-        $existed ? File::put($index, $original) : File::delete($index);
-    }
-}
 
 it('serves the admin app to restaurant teams at /admin, deep links included', function (string $url) {
     [$owner] = member(Role::Owner);
