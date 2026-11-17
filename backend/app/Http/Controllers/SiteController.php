@@ -7,6 +7,8 @@ use App\Models\Tenant;
 use App\Support\BrandColor;
 use App\Support\EmailLogo;
 use App\Support\Features;
+use App\Support\Landing\LandingImages;
+use App\Support\Landing\LandingTexts;
 use App\Support\Legal\LegalText;
 use App\Support\PlatformSettings;
 use App\Support\PublicMenu\MenuPageData;
@@ -39,6 +41,8 @@ class SiteController extends Controller
     {
         $s = PlatformSettings::all();
         $name = (string) $s['name'];
+        // Every text: the Super Admin's version, else lang/en/landing.php (owner, 2026-11-17).
+        $t = LandingTexts::resolver();
         $sections = array_map('boolval', [...PlatformSettings::DEFAULTS['landing_sections'], ...array_intersect_key((array) $s['landing_sections'], PlatformSettings::DEFAULTS['landing_sections'])]);
         $live = Tenant::whereIn('slug', [self::DEMO, ...array_values(self::STYLE_DEMOS)])->whereNull('suspended_at')->pluck('slug')->flip();
         $demoUrl = isset($live[self::DEMO]) ? url('/'.self::DEMO) : null;
@@ -53,17 +57,18 @@ class SiteController extends Controller
         $sections['pricing'] = $sections['pricing'] && $plans !== [];
         $sections['demo'] = $sections['demo'] && $demoUrl !== null;
         $socials = array_filter((array) $s['socials'], fn ($u) => is_string($u) && preg_match('#^https?://#', $u) === 1);
-        $chat = $contact['whatsapp'] !== null ? $contact['whatsapp'].'?text='.rawurlencode(__('landing.chat.text', ['name' => $name])) : null;
+        $chat = $contact['whatsapp'] !== null ? $contact['whatsapp'].'?text='.rawurlencode($t('chat.text', ['name' => $name])) : null;
 
         return view('site.landing', [
             'platform' => $name,
             'logo' => EmailLogo::url(),
             'colors' => BrandColor::palette($s['brand_color'] ?? null),
-            'headline' => trim((string) $s['landing_headline']) ?: __($free ? 'landing.hero.headline' : 'landing.hero.headline_paid'),
-            'subline' => trim((string) $s['landing_subline']) ?: __('landing.hero.subline'),
+            't' => $t,
+            'headline' => $t($free ? 'hero.headline' : 'hero.headline_paid'),
+            'subline' => $t('hero.subline'),
             'signupOpen' => $signupOpen,
             // The main button of every section: sign up, or (sign-up off) contact us.
-            'cta' => $this->cta($signupOpen, $contact, $name),
+            'cta' => $this->cta($signupOpen, $contact, $name, $t),
             'sections' => $sections,
             'order' => $this->order((array) $s['landing_order'], $sections),
             'demoUrl' => $demoUrl,
@@ -78,41 +83,29 @@ class SiteController extends Controller
             'testimonials' => $testimonials,
             'socials' => $socials,
             'supportEmail' => $contact['email'],
-            'description' => __($free ? 'landing.meta_description' : 'landing.meta_description_paid'),
-            'shots' => array_combine(['hero', 'hero_dark', 'demo', 'demo_dark'], array_map(self::shot(...), ['hero', 'hero-dark', 'demo', 'demo-dark'])),
-            'jsonLd' => $this->jsonLd($name, $socials, $plans, $sections['faq'], $free !== null),
+            'description' => $t($free ? 'meta_description' : 'meta_description_paid'),
+            'shots' => array_combine(['hero', 'hero_dark', 'demo', 'demo_dark'], array_map(LandingImages::phone(...), ['hero', 'hero_dark', 'demo', 'demo_dark'])),
+            'ogImage' => LandingImages::og()['url'],
+            'jsonLd' => $this->jsonLd($name, $socials, $plans, $sections['faq'], $free !== null, $t),
         ]);
     }
 
     /**
-     * A phone screenshot in public/landing as srcset strings; AVIF only when
-     * those files exist (frontend/scripts/landing-screenshots.mjs writes them
-     * when the server's GD can).
-     *
-     * @return array{webp: string, avif: string|null, src: string}
-     */
-    private static function shot(string $name): array
-    {
-        $set = fn (string $ext) => implode(', ', array_map(fn (int $w) => asset("landing/{$name}-{$w}.{$ext}")." {$w}w", [300, 450, 600]));
-
-        return ['webp' => $set('webp'), 'avif' => is_file(public_path("landing/{$name}-600.avif")) ? $set('avif') : null, 'src' => asset("landing/{$name}-600.webp")];
-    }
-
-    /**
      * @param  array{whatsapp: string|null, email: string|null}  $contact
+     * @param  \Closure(string, array<string, string>=): string  $t
      * @return array{href: string, label: string, external: bool, track: string|null}|null
      */
-    private function cta(bool $signupOpen, array $contact, string $name): ?array
+    private function cta(bool $signupOpen, array $contact, string $name, \Closure $t): ?array
     {
         if ($signupOpen) {
-            return ['href' => '/auth/sign-up', 'label' => __('landing.create_account'), 'external' => false, 'track' => 'signup'];
+            return ['href' => '/auth/sign-up', 'label' => $t('create_account'), 'external' => false, 'track' => 'signup'];
         }
-        $text = __('landing.contact_text', ['name' => $name]);
+        $text = $t('contact_text', ['name' => $name]);
         if ($contact['whatsapp'] !== null) {
-            return ['href' => $contact['whatsapp'].'?text='.rawurlencode($text), 'label' => __('landing.contact_whatsapp'), 'external' => true, 'track' => null];
+            return ['href' => $contact['whatsapp'].'?text='.rawurlencode($text), 'label' => $t('contact_whatsapp'), 'external' => true, 'track' => null];
         }
         if ($contact['email'] !== null) {
-            return ['href' => 'mailto:'.$contact['email'].'?subject='.rawurlencode($text), 'label' => __('landing.contact_email'), 'external' => false, 'track' => null];
+            return ['href' => 'mailto:'.$contact['email'].'?subject='.rawurlencode($text), 'label' => $t('contact_email'), 'external' => false, 'track' => null];
         }
 
         return null;
@@ -283,8 +276,9 @@ class SiteController extends Controller
     /**
      * @param  array<string, string>  $socials
      * @param  list<array<string, mixed>>  $plans
+     * @param  \Closure(string, array<string, string>=): string  $t
      */
-    private function jsonLd(string $name, array $socials, array $plans, bool $faq, bool $free): string
+    private function jsonLd(string $name, array $socials, array $plans, bool $faq, bool $free, \Closure $t): string
     {
         $org = array_filter([
             '@type' => 'Organization',
@@ -299,15 +293,15 @@ class SiteController extends Controller
             'applicationCategory' => 'BusinessApplication',
             'operatingSystem' => 'Web',
             'url' => url('/'),
-            'description' => __($free ? 'landing.meta_description' : 'landing.meta_description_paid'),
+            'description' => $t($free ? 'meta_description' : 'meta_description_paid'),
             'offers' => array_map(fn (array $p) => ['@type' => 'Offer', 'name' => $p['name'], 'price' => (string) $p['price_value'], 'priceCurrency' => $p['currency']], $plans) ?: null,
         ];
 
         $graph = [$org, array_filter($app)];
         if ($faq) {
-            $graph[] = ['@type' => 'FAQPage', 'mainEntity' => array_values(array_map(fn (array $i) => [
-                '@type' => 'Question', 'name' => $i['q'], 'acceptedAnswer' => ['@type' => 'Answer', 'text' => $i['a']],
-            ], (array) __('landing.faq.items')))];
+            $graph[] = ['@type' => 'FAQPage', 'mainEntity' => array_map(fn (string $k) => [
+                '@type' => 'Question', 'name' => $t("faq.items.{$k}.q"), 'acceptedAnswer' => ['@type' => 'Answer', 'text' => $t("faq.items.{$k}.a")],
+            ], array_keys((array) __('landing.faq.items')))];
         }
 
         return (string) json_encode(['@context' => 'https://schema.org', '@graph' => $graph], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG);

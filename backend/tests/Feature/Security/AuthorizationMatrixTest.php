@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 const PUBLIC_ROUTES = [
     'GET /', 'GET Q/{code}', 'GET q/{code}', 'GET robots.txt', 'GET sitemap.xml', 'GET up', 'GET {page}', 'GET {area}/{path?}',
     'GET {slug}/{branch?}', 'GET {slug}/menu.pdf', 'GET {slug}/{branch}/menu.pdf',
-    'POST api/v1/beacon', 'GET api/v1/invitations/{token}', 'GET api/v1/signup/config', 'GET api/v1/signup/slug', 'POST api/v1/signup',
+    'POST api/v1/beacon', 'POST api/v1/landing/click', 'GET api/v1/invitations/{token}', 'GET api/v1/signup/config', 'GET api/v1/signup/slug', 'POST api/v1/signup',
     'POST api/v1/mobile/auth/login', 'POST api/v1/mobile/auth/two-factor', 'GET api/v1/mobile/config',
     'GET api/v1/help/public', // sign-in help for signed-out people (QUESTIONS #194)
     'GET email/verify/{id}/{hash}', 'GET email/change/{user}/{hash}',

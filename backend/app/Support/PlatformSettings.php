@@ -57,6 +57,10 @@ class PlatformSettings
         'landing_order' => ['problem', 'demo', 'how', 'features', 'compare', 'pricing', 'testimonials', 'faq', 'cta'],
         // Real quotes only, added by the Super Admin: [{quote, name, role, real}]. Only ticked "real" ones show.
         'landing_testimonials' => [],
+        // Super Admin → Landing page (owner, 2026-11-17): changed texts (key => text; others use
+        // lang/en/landing.php) and uploaded pictures (see App\Support\Landing\LandingImages).
+        'landing_texts' => [],
+        'landing_images' => [],
         // Footer links: network => URL (empty = hidden).
         // Billing (owner, 2026-11-13): shown on every invoice, copied into it when issued.
         'billing_company' => '',

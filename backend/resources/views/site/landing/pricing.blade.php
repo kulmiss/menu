@@ -1,10 +1,10 @@
 <section class="{{ $soft ? 'soft' : '' }}" id="pricing" aria-labelledby="pricing-title">
     <div class="wrap">
-        <div class="head reveal"><h2 id="pricing-title">{{ __('landing.pricing.title') }}</h2><p>{{ __('landing.pricing.subtitle') }}</p></div>
+        <div class="head reveal"><h2 id="pricing-title">{{ $t('pricing.title') }}</h2><p>{{ $t('pricing.subtitle') }}</p></div>
         <div class="plans">
             @foreach ($plans as $plan)
                 <article class="card plan reveal {{ $plan['highlight'] ? 'hl' : '' }}" aria-labelledby="plan-{{ $loop->index }}">
-                    @if ($plan['highlight'])<span class="badge">{{ __('landing.pricing.popular') }}</span>@endif
+                    @if ($plan['highlight'])<span class="badge">{{ $t('pricing.popular') }}</span>@endif
                     <h3 id="plan-{{ $loop->index }}">{{ $plan['name'] }}</h3>
                     <p class="price">{{ $plan['price'] }} <small>{{ $plan['per'] }}</small></p>
                     @if ($plan['year'])<p class="year">{{ $plan['year'] }}</p>@endif
@@ -20,7 +20,7 @@
                     <div class="actions">
                         @if ($signupOpen)
                             {{-- Paid plans start free too; the owner upgrades later (payments are manual). --}}
-                            <a class="btn {{ $plan['highlight'] ? 'btn-primary' : 'btn-ghost' }}" href="/auth/sign-up" data-track="signup">{{ $plan['free'] ? __('landing.create_account') : __('landing.pricing.start_paid') }}</a>
+                            <a class="btn {{ $plan['highlight'] ? 'btn-primary' : 'btn-ghost' }}" href="/auth/sign-up" data-track="signup">{{ $plan['free'] ? $t('create_account') : $t('pricing.start_paid') }}</a>
                             @if (! $plan['free'] && $plan['contact'])
                                 <a class="link" href="{{ $plan['contact']['href'] }}" @if ($plan['contact']['whatsapp']) target="_blank" rel="noopener" @endif>{!! $icon('message') !!} {{ $plan['contact']['label'] }}</a>
                             @endif
@@ -33,6 +33,6 @@
                 </article>
             @endforeach
         </div>
-        <p class="note">{{ __('landing.pricing.upgrade_note') }}</p>
+        <p class="note">{{ $t('pricing.upgrade_note') }}</p>
     </div>
 </section>

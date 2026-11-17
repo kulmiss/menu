@@ -43,9 +43,8 @@
         'pricing' => $sections['pricing'],
         'faq' => $sections['faq'],
     ]);
-    $title = __('landing.meta_title', ['name' => $platform]);
-    $ogImage = asset('landing/og.jpg');
-    // A phone screenshot, light and dark, AVIF when there is one.
+    $title = $t('meta_title', ['name' => $platform]);
+    // A phone screenshot (built-in or uploaded in Super Admin), light and dark, AVIF when there is one.
     $picture = function (string $slot, string $alt, bool $lazy) use ($shots): string {
         $sources = '';
         foreach ([[$shots[$slot.'_dark'], ' media="(prefers-color-scheme: dark)"'], [$shots[$slot], '']] as [$shot, $media]) {
@@ -80,7 +79,7 @@
     <meta property="og:image" content="{{ $ogImage }}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="{{ __('landing.hero.phone_alt') }}">
+    <meta property="og:image:alt" content="{{ $t('hero.phone_alt') }}">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{{ $title }}">
     <meta name="twitter:description" content="{{ $description }}">
@@ -283,7 +282,7 @@
     </style>
 </head>
 <body>
-<a class="skip" href="#content">{{ __('landing.skip') }}</a>
+<a class="skip" href="#content">{{ $t('skip') }}</a>
 
 <header class="site-header" id="top">
     <div class="wrap bar">
@@ -295,24 +294,24 @@
             @endif
             <span>{{ $platform }}</span>
         </a>
-        <nav class="nav-links" aria-label="{{ __('landing.nav.label') }}">
+        <nav class="nav-links" aria-label="{{ $t('nav.label') }}">
             @foreach ($nav as $key => $on)
-                <a href="#{{ $key }}">{{ __("landing.nav.{$key}") }}</a>
+                <a href="#{{ $key }}">{{ $t("nav.{$key}") }}</a>
             @endforeach
         </nav>
         <div class="actions">
-            <a class="btn btn-ghost" href="/auth/sign-in">{{ __('landing.sign_in') }}</a>
+            <a class="btn btn-ghost" href="/auth/sign-in">{{ $t('sign_in') }}</a>
             {!! $ctaButton('btn btn-primary', false) !!}
         </div>
-        <button class="menu-btn" type="button" aria-expanded="false" aria-controls="mobile-nav" data-open="{{ __('landing.nav.menu') }}" data-close="{{ __('landing.nav.close') }}" aria-label="{{ __('landing.nav.menu') }}">
+        <button class="menu-btn" type="button" aria-expanded="false" aria-controls="mobile-nav" data-open="{{ $t('nav.menu') }}" data-close="{{ $t('nav.close') }}" aria-label="{{ $t('nav.menu') }}">
             <span data-icon="open">{!! $icon('menu') !!}</span><span data-icon="close" hidden>{!! $icon('x') !!}</span>
         </button>
     </div>
-    <nav class="wrap mobile-nav" id="mobile-nav" aria-label="{{ __('landing.nav.label') }}" hidden>
+    <nav class="wrap mobile-nav" id="mobile-nav" aria-label="{{ $t('nav.label') }}" hidden>
         @foreach ($nav as $key => $on)
-            <a href="#{{ $key }}">{{ __("landing.nav.{$key}") }}</a>
+            <a href="#{{ $key }}">{{ $t("nav.{$key}") }}</a>
         @endforeach
-        <a href="/auth/sign-in">{{ __('landing.sign_in') }}</a>
+        <a href="/auth/sign-in">{{ $t('sign_in') }}</a>
         {!! $ctaButton('btn btn-primary', false) !!}
     </nav>
 </header>
@@ -321,36 +320,36 @@
     <div class="hero">
         <div class="wrap hero-grid">
             <div>
-                <span class="eyebrow">{{ __('landing.hero.eyebrow') }}</span>
+                <span class="eyebrow">{{ $t('hero.eyebrow') }}</span>
                 <h1>{{ $headline }}</h1>
                 <p class="lead">{{ $subline }}</p>
                 <div class="cta-row">
                     @if ($cta)
                         {!! $ctaButton() !!}
                     @else
-                        <a class="btn btn-primary btn-lg" href="/auth/sign-in">{{ __('landing.sign_in') }}</a>
+                        <a class="btn btn-primary btn-lg" href="/auth/sign-in">{{ $t('sign_in') }}</a>
                     @endif
                     @if ($demoUrl)
-                        <a class="link" href="{{ $demoUrl }}" target="_blank" rel="noopener" data-track="demo">{{ __('landing.hero.demo') }} {!! $icon('arrow') !!}<span class="sr-only"> {{ __('landing.new_tab') }}</span></a>
+                        <a class="link" href="{{ $demoUrl }}" target="_blank" rel="noopener" data-track="demo">{{ $t('hero.demo') }} {!! $icon('arrow') !!}<span class="sr-only"> {{ $t('new_tab') }}</span></a>
                     @endif
                 </div>
                 <ul class="trust">
-                    @foreach (__('landing.hero.trust') as $key => $point)
+                    @foreach (array_keys(__('landing.hero.trust')) as $key)
                         {{-- "Free plan forever" only while a free sign-up plan exists. --}}
                         @continue($key === 'free' && ! $free)
-                        <li>{!! $icon('check') !!} {{ $point }}</li>
+                        <li>{!! $icon('check') !!} {{ $t("hero.trust.{$key}") }}</li>
                     @endforeach
                 </ul>
             </div>
             <div class="stage">
                 <div class="glow" aria-hidden="true"></div>
                 <div class="phone">
-                    {!! $picture('hero', __('landing.hero.phone_alt'), false) !!}
+                    {!! $picture('hero', $t('hero.phone_alt'), false) !!}
                 </div>
                 @if ($qr)
                     <div class="qr-card float">
-                        <svg viewBox="0 0 {{ $qr['size'] }} {{ $qr['size'] }}" role="img" aria-label="{{ __('landing.hero.qr_alt') }}" shape-rendering="crispEdges"><path fill="#0b0f19" d="{{ $qr['path'] }}"/></svg>
-                        <div><strong>{{ __('landing.hero.qr_title') }}</strong><span>{{ $demoUrl ? __('landing.hero.qr_demo') : __('landing.hero.qr_signup') }}</span></div>
+                        <svg viewBox="0 0 {{ $qr['size'] }} {{ $qr['size'] }}" role="img" aria-label="{{ $t('hero.qr_alt') }}" shape-rendering="crispEdges"><path fill="#0b0f19" d="{{ $qr['path'] }}"/></svg>
+                        <div><strong>{{ $t('hero.qr_title') }}</strong><span>{{ $demoUrl ? $t('hero.qr_demo') : $t('hero.qr_signup') }}</span></div>
                     </div>
                 @endif
             </div>
@@ -366,12 +365,12 @@
     <div class="sticky-cta" id="sticky-cta" hidden>
         {!! $ctaButton('btn btn-primary', false) !!}
         @if ($chat && $cta['track'])
-            <a class="btn btn-ghost chat-icon" href="{{ $chat }}" target="_blank" rel="noopener" aria-label="{{ __('landing.chat.label') }} {{ __('landing.new_tab') }}">{!! $icon('message') !!}</a>
+            <a class="btn btn-ghost chat-icon" href="{{ $chat }}" target="_blank" rel="noopener" aria-label="{{ $t('chat.label') }} {{ $t('new_tab') }}">{!! $icon('message') !!}</a>
         @endif
     </div>
 @endif
 @if ($chat)
-    <a class="btn btn-ghost chat" href="{{ $chat }}" target="_blank" rel="noopener">{!! $icon('message') !!} {{ __('landing.chat.label') }}<span class="sr-only"> {{ __('landing.new_tab') }}</span></a>
+    <a class="btn btn-ghost chat" href="{{ $chat }}" target="_blank" rel="noopener">{!! $icon('message') !!} {{ $t('chat.label') }}<span class="sr-only"> {{ $t('new_tab') }}</span></a>
 @endif
 
 <footer class="site-footer">
@@ -386,34 +385,34 @@
                     @endif
                     <span>{{ $platform }}</span>
                 </a>
-                <p class="about">{{ __('landing.footer.about') }}</p>
+                <p class="about">{{ $t('footer.about') }}</p>
             </div>
             <nav aria-labelledby="foot-links">
-                <h2 id="foot-links">{{ __('landing.footer.links') }}</h2>
+                <h2 id="foot-links">{{ $t('footer.links') }}</h2>
                 <ul>
-                    <li><a href="/terms">{{ __('landing.footer.terms') }}</a></li>
-                    <li><a href="/privacy">{{ __('landing.footer.privacy') }}</a></li>
-                    <li><a href="/auth/sign-in">{{ __('landing.sign_in') }}</a></li>
+                    <li><a href="/terms">{{ $t('footer.terms') }}</a></li>
+                    <li><a href="/privacy">{{ $t('footer.privacy') }}</a></li>
+                    <li><a href="/auth/sign-in">{{ $t('sign_in') }}</a></li>
                     @if ($supportEmail)
-                        <li><a href="mailto:{{ $supportEmail }}">{{ __('landing.footer.contact') }}</a></li>
+                        <li><a href="mailto:{{ $supportEmail }}">{{ $t('footer.contact') }}</a></li>
                     @endif
                 </ul>
             </nav>
             @if ($contact['whatsapp'] || $socials)
                 <nav aria-labelledby="foot-follow">
-                    <h2 id="foot-follow">{{ __('landing.footer.follow') }}</h2>
+                    <h2 id="foot-follow">{{ $t('footer.follow') }}</h2>
                     <ul>
                         @if ($contact['whatsapp'])
-                            <li><a href="{{ $contact['whatsapp'] }}" target="_blank" rel="noopener">{{ __('landing.social.whatsapp') }}</a></li>
+                            <li><a href="{{ $contact['whatsapp'] }}" target="_blank" rel="noopener">{{ $t('social.whatsapp') }}</a></li>
                         @endif
                         @foreach ($socials as $network => $href)
-                            <li><a href="{{ $href }}" target="_blank" rel="noopener me">{{ __("landing.social.{$network}") }}</a></li>
+                            <li><a href="{{ $href }}" target="_blank" rel="noopener me">{{ $t("social.{$network}") }}</a></li>
                         @endforeach
                     </ul>
                 </nav>
             @endif
         </div>
-        <p class="copy">{{ __('landing.footer.rights', ['year' => date('Y'), 'name' => $platform]) }}</p>
+        <p class="copy">{{ $t('footer.rights', ['year' => date('Y'), 'name' => $platform]) }}</p>
     </div>
 </footer>
 
@@ -435,6 +434,13 @@
     btn.addEventListener('click', function () { set(panel.hidden); });
     panel.addEventListener('click', function (e) { if (e.target.closest('a')) set(false); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !panel.hidden) { set(false); btn.focus(); } });
+
+    // Counts clicks on the main buttons for Super Admin → Landing page: only the
+    // button's name is sent. No cookie, nothing about the visitor.
+    document.addEventListener('click', function (e) {
+        var a = e.target.closest && e.target.closest('[data-track]');
+        if (a && navigator.sendBeacon) { navigator.sendBeacon('/api/v1/landing/click', new URLSearchParams({ k: a.dataset.track })); }
+    });
 
     if (!('IntersectionObserver' in window)) {
         document.querySelectorAll('.reveal').forEach(function (el) { el.classList.add('in'); });

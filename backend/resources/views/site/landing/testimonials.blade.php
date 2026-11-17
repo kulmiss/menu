@@ -1,6 +1,6 @@
 <section class="{{ $soft ? 'soft' : '' }}" id="testimonials" aria-labelledby="testimonials-title">
     <div class="wrap">
-        <div class="head reveal"><h2 id="testimonials-title">{{ __('landing.testimonials.title') }}</h2></div>
+        <div class="head reveal"><h2 id="testimonials-title">{{ $t('testimonials.title') }}</h2></div>
         <div class="quotes">
             @foreach ($testimonials as $quote)
                 <figure class="card reveal" style="margin:0">

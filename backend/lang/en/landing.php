@@ -171,7 +171,6 @@ return [
         'text_paid' => 'It takes about 5 minutes. We are here to help.',
         'closed' => 'Message us, and we will help you start.',
     ],
-    'sticky' => 'Create my free menu',
     'chat' => [
         'label' => 'Questions? Chat with us',
         'text' => 'Hello, I have a question about :name.',

@@ -21,6 +21,7 @@ const NAV = [
   'mobile-app',
   'themes',
   'announcements',
+  'landing',
   'activity',
   'settings',
   'help',

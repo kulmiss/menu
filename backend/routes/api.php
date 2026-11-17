@@ -31,6 +31,7 @@ use App\Http\Controllers\Api\SessionController;
 use App\Http\Controllers\Api\TeamController;
 use App\Http\Controllers\Api\TenantController;
 use App\Http\Controllers\Auth\SignUpController;
+use App\Http\Controllers\LandingClickController;
 use App\Http\Controllers\Mobile\AccountController as MobileAccountController;
 use App\Http\Controllers\Mobile\AuthController as MobileAuthController;
 use App\Http\Controllers\Mobile\ConfigController;
@@ -45,12 +46,14 @@ use App\Http\Controllers\Platform\FeatureSwitchController;
 use App\Http\Controllers\Platform\HelpArticleController;
 use App\Http\Controllers\Platform\InsightsController as PlatformInsightsController;
 use App\Http\Controllers\Platform\InvoiceController;
+use App\Http\Controllers\Platform\LandingController;
 use App\Http\Controllers\Platform\MobileAppController;
 use App\Http\Controllers\Platform\PaymentController;
 use App\Http\Controllers\Platform\PlatformController;
 use App\Http\Controllers\Platform\RestaurantController;
 use App\Http\Controllers\Platform\SearchController;
 use App\Http\Controllers\Platform\SetupController;
+use App\Support\Landing\LandingImages;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
@@ -66,6 +69,13 @@ Route::post('v1/beacon', BeaconController::class)
     // Same-site guest pages must not start a session or need a CSRF token.
     ->withoutMiddleware([EnsureFrontendRequestsAreStateful::class])
     ->name('beacon');
+
+// Landing page button clicks (owner, 2026-11-17): no cookie, no session, no
+// address stored. One limit for everyone together, so no visitor is told apart.
+Route::post('v1/landing/click', LandingClickController::class)
+    ->middleware('throttle:landing-click')
+    ->withoutMiddleware([EnsureFrontendRequestsAreStateful::class])
+    ->name('landing.click');
 
 // Mobile app sign-in (QUESTIONS #187). Not idempotent on purpose: a replayed
 // answer would have to store the new token in the database.
@@ -224,6 +234,11 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::get('settings', [PlatformController::class, 'settings']);
             Route::put('settings', [PlatformController::class, 'saveSettings']);
             Route::post('settings/legal/{page}/reset', [PlatformController::class, 'resetLegal'])->whereIn('page', ['terms', 'privacy']);
+            // Super Admin → Landing page (owner, 2026-11-17).
+            Route::get('landing', [LandingController::class, 'show']);
+            Route::put('landing', [LandingController::class, 'update']);
+            Route::post('landing/images/{slot}', [LandingController::class, 'saveImage'])->whereIn('slot', array_keys(LandingImages::SLOTS))->middleware('throttle:20,1');
+            Route::delete('landing/images/{slot}', [LandingController::class, 'deleteImage'])->whereIn('slot', array_keys(LandingImages::SLOTS));
             Route::post('settings/share-image', [PlatformController::class, 'saveShareImage']);
             Route::delete('settings/share-image', [PlatformController::class, 'deleteShareImage']);
             Route::post('settings/logo', [PlatformController::class, 'saveLogo']);

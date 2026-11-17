@@ -4,7 +4,7 @@
 
 Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles inside a restaurant are checked by each screen's policy). **Feature**: the feature switch it needs (`402 features.<key>` when off). **Limit**: how many requests are allowed. Create/change requests need an `Idempotency-Key` header. Request and answer examples for the app: [mobile-api.md](mobile-api.md).
 
-**258 endpoints.**
+**263 endpoints.**
 
 ## Sign-in and account (web session)
 
@@ -234,6 +234,10 @@ Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles insid
 | GET | `platform/invoices/{invoice}/pdf` | Super Admin |  | `exports` limiter | Platform\InvoiceController@pdf |
 | POST | `platform/invoices/{invoice}/resend` | Super Admin |  | 10 a minute | Platform\InvoiceController@resend |
 | POST | `platform/invoices/{invoice}/void` | Super Admin |  |  | Platform\InvoiceController@void |
+| GET | `platform/landing` | Super Admin |  |  | Platform\LandingController@show |
+| PUT | `platform/landing` | Super Admin |  |  | Platform\LandingController@update |
+| DELETE | `platform/landing/images/{slot}` | Super Admin |  |  | Platform\LandingController@deleteImage |
+| POST | `platform/landing/images/{slot}` | Super Admin |  | 20 a minute | Platform\LandingController@saveImage |
 | GET | `platform/mobile-app` | Super Admin |  |  | Platform\MobileAppController@show |
 | PUT | `platform/mobile-app` | Super Admin |  |  | Platform\MobileAppController@update |
 | GET | `platform/mobile-app/devices` | Super Admin |  |  | Platform\MobileAppController@devices |
@@ -313,3 +317,9 @@ Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles insid
 |---|---|---|---|---|---|
 | POST | `help/feedback` | signed in |  | 30 a minute | Api\HelpController@feedback |
 | GET | `help/public` | anyone |  | 30 a minute | Api\HelpController@public |
+
+## Other (`landing`)
+
+| Method | Path | Who | Feature | Limit | Handler |
+|---|---|---|---|---|---|
+| POST | `landing/click` | anyone |  | `landing-click` limiter | LandingClickController |

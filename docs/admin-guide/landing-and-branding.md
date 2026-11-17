@@ -4,13 +4,14 @@
 
 *The public home page, the e-mail logo and the picture for shared links.*
 
-**Settings → Landing page** is the public home page at https://your-domain.
+**Landing page** (top menu) is the public home page at https://your-domain.
 
-- **Headline** and **subline**: leave empty for the default words.
-- **Sections**: turn parts on or off (problem → solution, see it on your phone, how it works, what you get, paper vs QR menu, prices, customers say, questions, final band).
+- **Button clicks**: how often visitors clicked **Create my free menu**, **Continue with Google** and **See a demo menu** (last 30 days and in total). No cookies and no IP addresses: only a number per button and day.
+- **Texts and sections**: open a section to change its words. Leave a field empty for the default text (shown in grey). Switch a section off, or move it up or down. Click **Save texts and sections**.
+- **Pictures**: the phone screenshots (light and dark mode) and the link preview. **Upload** your own, or **Use the built-in one**.
+- **Colour, WhatsApp, customers and links**: the brand colour; the WhatsApp number shows **Questions? Chat with us**, and when sign-up is off every sign-up button becomes **Contact us on WhatsApp** (or the support e-mail).
 - **Customers say**: only real quotes from real restaurants, with their permission. Tick **This is a real customer** on each one. The section starts switched off; it shows only when it is on and has at least one ticked quote.
-- **WhatsApp number**: shows **Questions? Chat with us**. When sign-up is off, every sign-up button becomes **Contact us on WhatsApp** (or the support e-mail).
-- **Social links** in the footer.
+- **Footer links** to your social pages.
 
 Prices on the landing page come from **Plans**: you never type them here.
 

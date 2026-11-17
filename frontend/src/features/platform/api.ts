@@ -155,7 +155,7 @@ export const fetchPage = async <T>(path: string, params: URLSearchParams) =>
   ).data
 const get = async <T>(path: string) =>
   (await api.get<{ data: T }>(`/platform/${path}`)).data.data
-const q = <T>(path: string) =>
+export const q = <T>(path: string) =>
   queryOptions({
     queryKey: [...pkeys.all, path] as const,
     queryFn: () => get<T>(path),
