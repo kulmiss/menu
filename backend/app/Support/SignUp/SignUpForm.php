@@ -32,6 +32,7 @@ class SignUpForm
      * when nothing was created (address already known, or a bot).
      *
      * @throws ValidationException
+     * @throws TooManySignUps
      */
     public function submit(Request $request): ?User
     {
@@ -42,7 +43,7 @@ class SignUpForm
         foreach (['signup:ip:'.$request->ip() => 10, 'signup:email:'.sha1($email) => 3] as $key => $max) {
             if (RateLimiter::tooManyAttempts($key, $max)) {
                 SecurityLog::event('signup.blocked', null, $email, ['why' => 'too_many']);
-                abort(429, __('signup.too_many'));
+                throw new TooManySignUps;
             }
             RateLimiter::hit($key, 3600);
         }

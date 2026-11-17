@@ -10,6 +10,7 @@ use App\Support\ActivityLogger;
 use App\Support\PlatformSettings;
 use App\Support\Security\SuperAdminAccess;
 use App\Support\SignUp\SignUpForm;
+use App\Support\SignUp\TooManySignUps;
 use App\Support\Site\AccountPage;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Contracts\View\View;
@@ -18,7 +19,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
  * The account pages in the landing page's style (QUESTIONS #222): sign-up
@@ -56,10 +56,8 @@ class AccountController extends Controller
         $request->merge(['turnstile' => (string) $request->input('cf-turnstile-response', $request->input('turnstile', ''))]);
         try {
             $user = $form->submit($request);
-        } catch (HttpException $e) {
+        } catch (TooManySignUps) {
             // Too many sign-ups from this network or for this address: say so on the form.
-            throw_unless($e->getStatusCode() === 429, $e);
-
             return back()->withInput($request->except('password'))->withErrors(['email' => __('account.signup.too_many')]);
         }
         if ($user !== null) {
