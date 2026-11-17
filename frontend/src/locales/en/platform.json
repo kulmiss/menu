@@ -1151,8 +1151,6 @@
     "show": "Show “{{section}}”",
     "up": "Move “{{section}}” up",
     "down": "Move “{{section}}” down",
-    "changed_one": "{{count}} changed",
-    "changed_other": "{{count}} changed",
     "default": "Default",
     "save_hint": "Pictures and the card below save on their own.",
     "fix_errors": "Some texts are too long. Look for the red notes.",
@@ -1224,6 +1222,7 @@
     "image_saved": "Picture saved.",
     "image_reset": "Back to the built-in picture.",
     "image_failed": "The picture could not be saved.",
-    "save": "Save texts and sections"
+    "save": "Save texts and sections",
+    "changed": "{{count}} changed"
   }
 }

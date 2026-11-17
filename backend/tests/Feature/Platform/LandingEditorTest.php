@@ -33,7 +33,7 @@ it('saves changed texts, sections and order; the landing page shows them everywh
     $admin = superAdmin();
     PlatformSettings::save(['landing_headline' => 'Old headline']);
 
-    $this->actingAs($admin)->putJson(p('landing'), [
+    $res = $this->actingAs($admin)->putJson(p('landing'), [
         'texts' => [
             'hero.headline' => '  Menus for Addis  ',
             'hero.subline' => '',
@@ -47,16 +47,17 @@ it('saves changed texts, sections and order; the landing page shows them everywh
         'sections' => ['compare' => false, 'unknown' => true],
         'order' => ['faq', 'pricing'],
     ], idem())->assertOk()
-        ->assertJsonPath('data.texts', [
-            'hero.headline' => 'Menus for Addis',
-            'problem.items.old.title' => 'Prices change every week',
-            'faq.items.app.q' => 'Do guests need an app?',
-            'compare.rows.0.1' => 'New price in one tap.',
-            'meta_title' => ':name — menus for Addis',
-        ])
         ->assertJsonPath('data.sections.compare', false)
         ->assertJsonPath('data.order.0', 'faq')
         ->assertJsonPath('data.order.2', 'problem');
+    // MySQL's JSON column may keep the keys in another order.
+    expect($res->json('data.texts'))->toEqual([
+        'hero.headline' => 'Menus for Addis',
+        'problem.items.old.title' => 'Prices change every week',
+        'faq.items.app.q' => 'Do guests need an app?',
+        'compare.rows.0.1' => 'New price in one tap.',
+        'meta_title' => ':name — menus for Addis',
+    ]);
     // The first version's headline moved into the texts.
     expect(PlatformSettings::get('landing_headline'))->toBe('');
 
