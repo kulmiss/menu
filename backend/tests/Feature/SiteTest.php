@@ -32,6 +32,26 @@ it('shows the landing page in simple English: hero, sections in order, sign-up a
     expect(substr_count($html, 'data-track="signup"'))->toBeGreaterThanOrEqual(7);
 });
 
+it('uses only WebP for a screenshot whose AVIF copies are missing (GD without AVIF)', function () {
+    $moved = [];
+    foreach ([300, 450, 600] as $w) {
+        $file = public_path("landing/hero-{$w}.avif");
+        rename($file, $file.'.off');
+        $moved[] = $file;
+    }
+    try {
+        $html = $this->get('/')->assertOk()->getContent();
+        expect($html)->not->toContain('landing/hero-300.avif')
+            ->toContain('<link rel="preload" as="image" type="image/webp" imagesrcset="'.asset('landing/hero-300.webp').' 300w')
+            // The dark one still has AVIF.
+            ->toContain(asset('landing/hero-dark-300.avif').' 300w');
+    } finally {
+        foreach ($moved as $file) {
+            rename($file.'.off', $file);
+        }
+    }
+});
+
 it('shows "See it on your phone" with the demo menu: a QR code on desktop, a button on phones, the other looks', function () {
     Tenant::factory()->create(['slug' => 'demo']);
     Tenant::factory()->create(['slug' => 'demo-fine']);

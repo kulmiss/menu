@@ -45,7 +45,22 @@
     ]);
     $title = __('landing.meta_title', ['name' => $platform]);
     $ogImage = asset('landing/og.jpg');
-    $set = fn (string $name, string $ext) => implode(', ', array_map(fn ($w) => asset("landing/{$name}-{$w}.{$ext}")." {$w}w", [300, 450, 600]));
+    // A phone screenshot, light and dark, AVIF when there is one.
+    $picture = function (string $slot, string $alt, bool $lazy) use ($shots): string {
+        $sources = '';
+        foreach ([[$shots[$slot.'_dark'], ' media="(prefers-color-scheme: dark)"'], [$shots[$slot], '']] as [$shot, $media]) {
+            if ($shot['avif']) {
+                $sources .= '<source type="image/avif"'.$media.' srcset="'.e($shot['avif']).'" sizes="240px">';
+            }
+            if ($media !== '') {
+                $sources .= '<source type="image/webp"'.$media.' srcset="'.e($shot['webp']).'" sizes="240px">';
+            }
+        }
+
+        return '<picture>'.$sources.'<img src="'.e($shots[$slot]['src']).'" srcset="'.e($shots[$slot]['webp']).'" sizes="240px" width="300" height="608" alt="'.e($alt).'"'
+            .($lazy ? ' loading="lazy" decoding="async"' : ' fetchpriority="high"').'></picture>';
+    };
+    $preload = fn (array $shot, string $scheme) => '<link rel="preload" as="image" type="image/'.($shot['avif'] ? 'avif' : 'webp').'" imagesrcset="'.e($shot['avif'] ?? $shot['webp']).'" imagesizes="240px" media="(prefers-color-scheme: '.$scheme.')" fetchpriority="high">';
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
@@ -70,8 +85,8 @@
     <meta name="twitter:title" content="{{ $title }}">
     <meta name="twitter:description" content="{{ $description }}">
     <meta name="twitter:image" content="{{ $ogImage }}">
-    <link rel="preload" as="image" type="image/avif" imagesrcset="{{ $set('hero', 'avif') }}" imagesizes="240px" media="(prefers-color-scheme: light)" fetchpriority="high">
-    <link rel="preload" as="image" type="image/avif" imagesrcset="{{ $set('hero-dark', 'avif') }}" imagesizes="240px" media="(prefers-color-scheme: dark)" fetchpriority="high">
+    {!! $preload($shots['hero'], 'light') !!}
+    {!! $preload($shots['hero_dark'], 'dark') !!}
     <script type="application/ld+json">{!! $jsonLd !!}</script>
     <script nonce="{{ \App\Support\Security\Csp::nonce() }}">document.documentElement.classList.add('js')</script>
     <style>
@@ -330,12 +345,7 @@
             <div class="stage">
                 <div class="glow" aria-hidden="true"></div>
                 <div class="phone">
-                    <picture>
-                        <source type="image/avif" media="(prefers-color-scheme: dark)" srcset="{{ $set('hero-dark', 'avif') }}" sizes="240px">
-                        <source type="image/webp" media="(prefers-color-scheme: dark)" srcset="{{ $set('hero-dark', 'webp') }}" sizes="240px">
-                        <source type="image/avif" srcset="{{ $set('hero', 'avif') }}" sizes="240px">
-                        <img src="{{ asset('landing/hero-600.webp') }}" srcset="{{ $set('hero', 'webp') }}" sizes="240px" width="300" height="608" alt="{{ __('landing.hero.phone_alt') }}" fetchpriority="high">
-                    </picture>
+                    {!! $picture('hero', __('landing.hero.phone_alt'), false) !!}
                 </div>
                 @if ($qr)
                     <div class="qr-card float">

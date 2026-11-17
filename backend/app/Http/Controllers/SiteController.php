@@ -79,8 +79,23 @@ class SiteController extends Controller
             'socials' => $socials,
             'supportEmail' => $contact['email'],
             'description' => __($free ? 'landing.meta_description' : 'landing.meta_description_paid'),
+            'shots' => array_combine(['hero', 'hero_dark', 'demo', 'demo_dark'], array_map(self::shot(...), ['hero', 'hero-dark', 'demo', 'demo-dark'])),
             'jsonLd' => $this->jsonLd($name, $socials, $plans, $sections['faq'], $free !== null),
         ]);
+    }
+
+    /**
+     * A phone screenshot in public/landing as srcset strings; AVIF only when
+     * those files exist (frontend/scripts/landing-screenshots.mjs writes them
+     * when the server's GD can).
+     *
+     * @return array{webp: string, avif: string|null, src: string}
+     */
+    private static function shot(string $name): array
+    {
+        $set = fn (string $ext) => implode(', ', array_map(fn (int $w) => asset("landing/{$name}-{$w}.{$ext}")." {$w}w", [300, 450, 600]));
+
+        return ['webp' => $set('webp'), 'avif' => is_file(public_path("landing/{$name}-600.avif")) ? $set('avif') : null, 'src' => asset("landing/{$name}-600.webp")];
     }
 
     /**

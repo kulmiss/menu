@@ -28,12 +28,7 @@
         <a class="demo-phone reveal" href="{{ $demoUrl }}" target="_blank" rel="noopener" data-track="demo" tabindex="-1" aria-hidden="true">
             <div class="glow"></div>
             <div class="phone">
-                <picture>
-                    <source type="image/avif" media="(prefers-color-scheme: dark)" srcset="{{ $set('demo-dark', 'avif') }}" sizes="240px">
-                    <source type="image/webp" media="(prefers-color-scheme: dark)" srcset="{{ $set('demo-dark', 'webp') }}" sizes="240px">
-                    <source type="image/avif" srcset="{{ $set('demo', 'avif') }}" sizes="240px">
-                    <img src="{{ asset('landing/demo-600.webp') }}" srcset="{{ $set('demo', 'webp') }}" sizes="240px" width="300" height="608" alt="" loading="lazy" decoding="async">
-                </picture>
+                {!! $picture('demo', '', true) !!}
             </div>
         </a>
     </div>
