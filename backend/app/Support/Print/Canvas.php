@@ -2,14 +2,14 @@
 
 namespace App\Support\Print;
 
-use FPDF;
+use App\Support\Pdf\Document;
 
 /**
- * FPDF with the few drawing extras print materials need: rotation (the top
+ * Document (the app's PDF writer) with the few drawing extras print materials need: rotation (the top
  * face of a table tent is printed upside down), circles (round stickers),
  * rounded rectangles and dashed lines. All vector, so it stays sharp.
  */
-class Canvas extends FPDF
+class Canvas extends Document
 {
     private float $angle = 0.0;
 

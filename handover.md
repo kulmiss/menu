@@ -256,7 +256,7 @@ Measured locally with Nginx serving the static copy (same setup as CI). Note: wi
 | react-easy-crop | 6.2.5 | MIT | admin, photo crop |
 | chillerlan/php-qrcode | 6.0.1 | MIT / Apache-2.0 | backend, QR codes |
 | chillerlan/php-settings-container | 3.3.0 | MIT | dependency of php-qrcode |
-| setasign/fpdf | 1.9.0 | MIT | backend, table-card PDFs |
+| setasign/tfpdf | 1.34 | LGPL-2.1 | backend, every PDF (FPDF with UTF-8 TrueType fonts; replaced setasign/fpdf 2026-11-17, QUESTIONS #205) |
 | @lhci/cli | 0.16.0 | Apache-2.0 | CI only, `ci/lighthouse/package.json` + lockfile (puppeteer-core held at 25.16.0) |
 Removed: axios. Composer constraints are `~6.0.1` / `~1.9.0` (patch updates only; `composer validate --strict` rejects exact constraints) and the lockfile pins the exact versions. They were added to `composer.lock` from the GitHub tags (Packagist is blocked in Claude's workspace). `package.json` uses caret ranges for the dnd-kit packages; the exact versions are pinned in `pnpm-lock.yaml` (`--frozen-lockfile` in CI).
 

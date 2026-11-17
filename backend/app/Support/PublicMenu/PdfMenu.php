@@ -2,14 +2,14 @@
 
 namespace App\Support\PublicMenu;
 
-use FPDF;
+use App\Support\Pdf\Document;
 
 /**
  * A printable A4 menu made from the same data as the guest page
  * (MenuPageData::build): logo, name, categories, dishes, prices, sizes,
  * short descriptions and dietary tags. Sold-out dishes are left out; hidden
- * ones are never in the data. FPDF core fonts only (no files to install):
- * text is converted to Windows-1252, which covers the English menu.
+ * ones are never in the data. Any language: see App\Support\Pdf\Document
+ * (built-in fonts for Western text, the bundled MenuPdfSans for the rest).
  */
 class PdfMenu
 {
@@ -21,7 +21,7 @@ class PdfMenu
 
     private const WIDTH = 180.0;
 
-    private FPDF $pdf;
+    private Document $pdf;
 
     /** @var array{0: int, 1: int, 2: int} */
     private array $brand;
@@ -50,7 +50,7 @@ class PdfMenu
         $photos = (bool) ($options['photos'] ?? false);
         $footer = self::text($page['tenant']->name);
 
-        $this->pdf = new class('P', 'mm', 'A4') extends FPDF
+        $this->pdf = new class('P', 'mm', 'A4') extends Document
         {
             public string $footerText = '';
 
@@ -59,7 +59,7 @@ class PdfMenu
                 $this->SetY(-12);
                 $this->SetFont('Helvetica', '', 7.5);
                 $this->SetTextColor(110, 110, 110);
-                $this->Cell(0, 5, $this->footerText."   \xB7   ".$this->PageNo().' / {nb}', 0, 0, 'C'); // \xB7 = "·" in Windows-1252
+                $this->Cell(0, 5, $this->footerText.'   ·   '.$this->PageNo().' / {nb}', 0, 0, 'C');
             }
         };
         $this->pdf->footerText = $footer;
@@ -244,6 +244,8 @@ class PdfMenu
     private function lines(string $text, float $size, float $width, string $style = ''): int
     {
         $this->pdf->SetFont('Helvetica', $style, $size);
+        // Measured in the font MultiCell will use for the whole text.
+        $this->pdf->holdFont($text);
         $count = 0;
         foreach (explode("\n", self::text($text)) as $paragraph) {
             $line = '';
@@ -258,6 +260,7 @@ class PdfMenu
                 }
             }
         }
+        $this->pdf->releaseFont();
 
         return $count;
     }
@@ -269,12 +272,10 @@ class PdfMenu
         $this->pdf->SetTextColor(...$color);
     }
 
-    /** FPDF's core fonts use Windows-1252. */
+    /** Line breaks as typed; Document does the rest (fonts, emoji, right to left). */
     private static function text(string $value): string
     {
-        $value = str_replace(["\u{2013}", "\u{2014}", "\u{2019}", "\u{2026}"], ['-', '-', "'", '...'], $value);
-
-        return (string) (@iconv('UTF-8', 'windows-1252//TRANSLIT//IGNORE', $value) ?: '');
+        return str_replace(["\r\n", "\r"], "\n", $value);
     }
 
     /** @return array{0: int, 1: int, 2: int} */
