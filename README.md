@@ -33,6 +33,8 @@ Digital menu SaaS for restaurants and cafés: a fast public QR menu, a phone-fri
 1. Start Laragon (**Start All**, so MySQL runs).
 2. In a terminal at the repository root: `.\setup-local.bat`
 3. Read `setup-log.txt` for the result of every step.
+4. E-mails (optional): run `docker compose up -d mail`, set `MAIL_MAILER=smtp`, `MAIL_HOST=127.0.0.1`, `MAIL_PORT=1025`
+   in `backend/.env`, keep `php artisan queue:work` running (e-mails are queued), and read them at http://localhost:8026.
 
 ### Docker Desktop (any OS)
 1. Start Docker Desktop.
