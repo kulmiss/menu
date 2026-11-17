@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Support\ImpersonationManager;
+use App\Support\Security\SuperAdminAccess;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -53,7 +54,10 @@ class GuardImpersonation
         if ($this->manager->expired($request)) {
             $this->manager->stop($request);
 
-            return response()->json(['message' => __('platform.impersonation_expired'), 'code' => 'impersonation.expired'], 409);
+            // A page load goes back to the Super Admin area; the admin app's API calls get 409 and do the same.
+            return $request->expectsJson() || $request->is('api/*')
+                ? response()->json(['message' => __('platform.impersonation_expired'), 'code' => 'impersonation.expired'], 409)
+                : redirect(SuperAdminAccess::url());
         }
 
         return $this->blocked($request) ?? $next($request);

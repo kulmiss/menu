@@ -103,7 +103,7 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
         Route::get('config', 'config')->middleware('throttle:60,1');
         Route::get('slug', 'slug')->middleware('throttle:30,1');
         Route::post('/', 'store')->middleware(['guest', 'throttle:10,1']);
-        Route::post('email', 'changeEmail')->middleware(['auth:sanctum', 'throttle:6,1']);
+        Route::post('email', 'changeEmail')->middleware(['auth:sanctum', 'throttle:6,1,verify-mail']);
     });
 
     // "Continue with Google": the new owner's restaurant name (owner, 2026-11-17).
@@ -149,7 +149,7 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
         Route::post('impersonation/stop', [AnnouncementController::class, 'stopImpersonating']);
 
         // Super Admin (QUESTIONS #215–#220): Super Admins with two-factor sign-in, from an allowed address.
-        Route::prefix('super')->middleware(['super', 'throttle:super', 'super.audit'])->group(function () {
+        Route::prefix('super')->middleware(['super.ips', 'super', 'throttle:super', 'super.audit'])->group(function () {
             Route::get('dashboard', [PlatformController::class, 'dashboard']);
             // Super Admin guide and the help article editor (QUESTIONS #194).
             Route::get('help', [HelpController::class, 'platform']);

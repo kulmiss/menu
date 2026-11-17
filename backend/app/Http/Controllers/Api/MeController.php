@@ -7,6 +7,7 @@ use App\Http\Resources\TenantResource;
 use App\Support\Auth\GoogleLogin;
 use App\Support\ImpersonationManager;
 use App\Support\Security\OwnerTwoFactor;
+use App\Support\Security\SuperAdminAccess;
 use App\Support\Setup\SetupStatus;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -43,6 +44,8 @@ class MeController extends Controller
                 // The Super Admin's switch is on and this Owner has no two-factor yet (M17).
                 'two_factor_required' => ! $impersonation->active($request) && OwnerTwoFactor::required($user),
                 'is_super_admin' => $user->is_super_admin,
+                // Where the Super Admin's web area is (secret path), for the app's "Open on the web"; never for anyone else.
+                'super_admin_url' => $user->is_super_admin ? SuperAdminAccess::url() : null,
                 // First-time guidance (QUESTIONS #195): tours seen, and a new install's setup wizard.
                 'onboarding' => [
                     'web_tour' => ! empty($user->onboarding['web_tour'] ?? null),

@@ -165,7 +165,10 @@ it('sends the same "check your inbox" for any address on "Forgot password"', fun
     foreach (range(1, 3) as $i) {
         $this->post('/forgot-password', ['email' => "a{$i}@example.com"]);
     }
-    $this->post('/forgot-password', ['email' => 'a9@example.com'])->assertStatus(429);
+    // Too many: said on the form, not an error page.
+    $this->from('/forgot-password')->post('/forgot-password', ['email' => 'a9@example.com'])
+        ->assertRedirect('/forgot-password')->assertSessionHasErrors('email');
+    expect(session('errors')->first('email'))->toStartWith('Too many tries. Please wait');
 });
 
 it('saves a new password from the e-mail link and says so on the sign-in page', function () {
@@ -180,7 +183,7 @@ it('saves a new password from the e-mail link and says so on the sign-in page', 
 
     $this->from('/reset-password?token=old&email=known%40example.com')
         ->post('/reset-password', ['token' => 'old', 'email' => 'known@example.com', 'password' => 'yet-another-secret'])
-        ->assertSessionHasErrors('email');
+        ->assertSessionHasErrors(['email' => 'This link is too old or not right. Ask for a new one below.']);
     $this->get('/reset-password')->assertOk()->assertSee('This link is not complete or too old.');
 });
 
@@ -253,4 +256,26 @@ it('signs out from the account pages back to the sign-in page', function () {
     $this->assertGuest();
     // A Super Admin goes back to their own sign-in page.
     $this->actingAs(superAdmin())->post('/signout')->assertRedirect('/super/sign-in');
+});
+
+it('says "too many tries" on every account form instead of an error page', function (string $from, string $to, array $fields, string $field, int $limit) {
+    openSignUp();
+    for ($i = 0; $i < $limit; $i++) {
+        $this->from($from)->post($to, $fields);
+    }
+    $this->from($from)->post($to, $fields)->assertRedirect($from)->assertSessionHasErrors($field);
+})->with([
+    'sign-up' => ['/signup', '/signup', ['website' => 'bot'], 'email', 10],
+    'reset password' => ['/reset-password?token=x&email=a%40example.com', '/reset-password', ['token' => 'x', 'email' => 'a@example.com', 'password' => 'another-long-secret'], 'password', 5],
+    'invitation' => ['/invite/nope', '/invite/nope/join', ['name' => 'X', 'password' => 'another-long-secret'], 'name', 10],
+]);
+
+it('says "too many tries" on the "check your inbox" page too', function () {
+    Notification::fake();
+    openSignUp();
+    $this->post('/signup', signUpFields());
+    for ($i = 0; $i < 6; $i++) {
+        $this->from('/verify-email')->post('/verify-email/resend');
+    }
+    $this->from('/verify-email')->post('/verify-email/resend')->assertRedirect('/verify-email')->assertSessionHas('warning');
 });

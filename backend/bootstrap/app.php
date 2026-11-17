@@ -15,10 +15,13 @@ use App\Http\Middleware\ResolveTenant;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SignInArea;
 use App\Http\Middleware\SinglePasswordField;
+use App\Http\Middleware\SuperAdminIps;
 use App\Http\Middleware\SuperAdminWeb;
 use App\Http\Middleware\ThrottlePasswordEmails;
+use App\Http\Middleware\ThrottlePerRoute;
 use App\Http\Middleware\UseWelcomeBroker;
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -59,13 +62,23 @@ return Application::configure(basePath: dirname(__DIR__))
         // Signed in already (e.g. the sign-in form again): the admin, which sends a Super Admin on to their area.
         $middleware->redirectUsersTo('/admin');
 
+        // The Super Admin allow-list answers 404 even before sign-in (#217), and the wrong
+        // area answers 404 before any rate limit (Laravel runs limits right after sign-in),
+        // so a restaurant account never sees a 429 from a Super Admin route (QA, 2026-11-17).
+        $middleware->prependToPriorityList(AuthenticatesRequests::class, SuperAdminIps::class);
+        $middleware->appendToPriorityList(AuthenticatesRequests::class, EnsureSuperAdmin::class);
+        $middleware->appendToPriorityList(AuthenticatesRequests::class, EnsureRestaurantArea::class);
+
+        // One counter per route for plain "throttle:N,M" (QA, 2026-11-17).
         $middleware->alias([
+            'throttle' => ThrottlePerRoute::class,
             'idempotent' => EnsureIdempotency::class,
             'mobile.token' => EnsureAccessToken::class,
             'password.throttle' => ThrottlePasswordEmails::class,
             'owner.two_factor' => EnsureOwnerTwoFactor::class,
             'feature' => RequireFeature::class,
             'super' => EnsureSuperAdmin::class,
+            'super.ips' => SuperAdminIps::class,
             'super.audit' => AuditSuperAdmin::class,
             'restaurant' => EnsureRestaurantArea::class,
             'tenant' => ResolveTenant::class,
@@ -85,15 +98,22 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
-        // The sign-in pages are forms: "too many tries" goes back to the form with the
-        // wait time under the e-mail field, not to an error page (QUESTIONS #222).
+        // The account pages are forms (QUESTIONS #222): "too many tries" goes back to the
+        // form with the wait time under the right field, never to an error page.
         $exceptions->render(function (ThrottleRequestsException $e, Request $request) {
-            if ($request->expectsJson() || ! $request->routeIs('signin.store', 'super.signin.store', 'signin.two-factor')) {
+            $fields = [
+                'signin.store' => 'email', 'super.signin.store' => 'email', 'signin.two-factor' => 'code',
+                'signup.store' => 'email', 'google.finish.store' => 'restaurant_name',
+                'password.email.web' => 'email', 'password.update.web' => 'password', 'invite.join' => 'name',
+                'verify.resend' => null, 'verify.change' => null, 'verify.check' => null, 'invite.accept' => null,
+            ];
+            $name = $request->route()?->getName();
+            if ($request->expectsJson() || $name === null || ! array_key_exists($name, $fields)) {
                 return null;
             }
-            $seconds = (int) ($e->getHeaders()['Retry-After'] ?? 60);
-            $field = $request->routeIs('signin.two-factor') ? 'code' : 'email';
+            $text = __('auth.throttle', ['seconds' => (int) ($e->getHeaders()['Retry-After'] ?? 60)]);
+            $back = back()->withInput($request->except('password', 'password_confirmation', 'token', 'code', 'recovery_code'));
 
-            return back()->withInput($request->only('email', 'remember'))->withErrors([$field => __('auth.throttle', ['seconds' => $seconds])]);
+            return $fields[$name] === null ? $back->with('warning', $text) : $back->withErrors([$fields[$name] => $text]);
         });
     })->create();

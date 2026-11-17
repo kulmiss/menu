@@ -227,7 +227,7 @@ X-App-Version: 1.2.0
   "data": {
     "id": 1, "name": "Sara Bekele", "email": "sara@cafe.example", "pending_email": null, "password_weak": false,
     "locale": "en", "email_verified": true, "news_subscribed": true, "two_factor_enabled": false, "two_factor_required": false,
-    "is_super_admin": false, "impersonation": null,
+    "is_super_admin": false, "super_admin_url": null, "impersonation": null,
     "tenants": [{
       "id": 1, "slug": "abebe-cafe", "name": "Abebe Café", "timezone": "Africa/Addis_Ababa", "default_locale": "en", "currency_code": "ETB",
       "subscription": {"state": "trial", "allows_writes": true, "shows_banner": false, "stage_ends_at": "2026-11-30T17:10:41+00:00"},
@@ -239,7 +239,7 @@ X-App-Version: 1.2.0
 }
 ```
 
-`tenants[].features` is already combined (global + plan + restaurant). When "Sold out" is off, `is_sold_out` in dish answers is always `false` (marks are kept and come back when it is on again).
+`super_admin_url` is the Super Admin's web area (`/super` or the secret `SUPER_ADMIN_PATH`), sent only to Super Admins (`null` for everyone else); the app's "Open Super Admin on the web" uses it. `tenants[].features` is already combined (global + plan + restaurant). When "Sold out" is off, `is_sold_out` in dish answers is always `false` (marks are kept and come back when it is on again).
 
 ## Account and devices (token only)
 

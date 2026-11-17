@@ -22,6 +22,7 @@
         @endphp
         <h1>{{ __('account.invite.title', ['restaurant' => $restaurant]) }}</h1>
         <p class="intro">{{ __('account.invite.intro', ['restaurant' => $restaurant, 'email' => $invitation->email, 'role' => $role]) }}</p>
+        @include('account.partials.status')
         @if ($user && $mine)
             <p class="intro">{{ __('account.invite.signed_in_as', ['email' => $user->email]) }}</p>
             <form method="POST" action="/invite/{{ $token }}/accept" class="stack">

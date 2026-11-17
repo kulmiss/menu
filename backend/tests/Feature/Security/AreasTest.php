@@ -134,6 +134,10 @@ it('lets only listed addresses reach the Super Admin area when the allow-list is
     $admin = superAdmin();
     config(['menu.super_admin.ips' => ['203.0.113.0/24', '2001:db8::1']]);
 
+    // Signed out from another address: 404 too, not "sign in first" (401), so the API is not revealed.
+    $this->withServerVariables(['REMOTE_ADDR' => '198.51.100.7'])->getJson(p('dashboard'))->assertNotFound();
+    $this->withServerVariables(['REMOTE_ADDR' => '203.0.113.42'])->getJson(p('dashboard'))->assertUnauthorized();
+
     $this->actingAs($admin)->withServerVariables(['REMOTE_ADDR' => '198.51.100.7'])->getJson(p('dashboard'))->assertNotFound();
     $this->withServerVariables(['REMOTE_ADDR' => '203.0.113.42'])->getJson(p('dashboard'))->assertOk();
     $this->withServerVariables(['REMOTE_ADDR' => '2001:db8::1'])->getJson(p('dashboard'))->assertOk();
@@ -201,4 +205,17 @@ it('never gives a menu the Super Admin address', function () {
     $this->actingAs($owner)->patchJson(t($tenant, 'account/slug'), ['slug' => 'office-7k2q'], idem())
         ->assertUnprocessable()->assertJsonValidationErrors('slug');
     $this->patchJson(t($tenant, 'account/slug'), ['slug' => 'super'], idem())->assertUnprocessable();
+});
+
+// The app's "Open Super Admin on the web" opened the old /platform (a 404) (QA, 2026-11-17).
+it('tells a Super Admin (only) where their web area is', function () {
+    config(['menu.super_admin.path' => 'office-7k2q']);
+    $admin = superAdmin();
+    $token = $admin->createToken('Phone', PersonalAccessToken::abilitiesFor($admin))->plainTextToken;
+    $this->getJson('/api/v1/me', bearer($token))->assertOk()->assertJsonPath('data.super_admin_url', '/office-7k2q');
+
+    [$owner] = member(Role::Owner);
+    $token = $owner->createToken('Phone', PersonalAccessToken::abilitiesFor($owner))->plainTextToken;
+    $this->app['auth']->forgetGuards();
+    $this->getJson('/api/v1/me', bearer($token))->assertOk()->assertJsonPath('data.super_admin_url', null);
 });

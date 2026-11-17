@@ -30,14 +30,14 @@ class ApiReferenceCommand extends Command
         'beacon' => 'Guest menu (public)',
     ];
 
-    /** `60,1` → `60 a minute`; a named limiter → its name. */
+    /** `60,1` → `60 a minute` (per route); `6,1,verify-mail` → shared by the routes naming it; a named limiter → its name. */
     private static function limit(string $throttle): string
     {
         if ($throttle === '') {
             return '';
         }
-        if (preg_match('/^(\d+),(\d+)$/', $throttle, $m)) {
-            return $m[1].($m[2] === '1' ? ' a minute' : ' per '.$m[2].' minutes');
+        if (preg_match('/^(\d+),(\d+)(?:,([\w.-]+))?$/', $throttle, $m)) {
+            return $m[1].($m[2] === '1' ? ' a minute' : ' per '.$m[2].' minutes').(isset($m[3]) ? ' (shared: `'.$m[3].'`)' : '');
         }
 
         return '`'.$throttle.'` limiter';

@@ -68,8 +68,8 @@ Route::get('/signup/google', [GoogleController::class, 'finishPage'])->name('goo
 Route::post('/signup/google', [GoogleController::class, 'finishForm'])->middleware(['guest:web', 'throttle:10,1'])->name('google.finish.store');
 Route::get('/verify-email', [AccountController::class, 'verifyEmail'])->name('verification.notice');
 Route::middleware('auth:web')->group(function () {
-    Route::post('/verify-email/resend', [AccountController::class, 'resendVerification'])->middleware('throttle:6,1')->name('verify.resend');
-    Route::post('/verify-email/change', [AccountController::class, 'changeEmail'])->middleware('throttle:6,1')->name('verify.change');
+    Route::post('/verify-email/resend', [AccountController::class, 'resendVerification'])->middleware('throttle:6,1,verify-mail')->name('verify.resend');
+    Route::post('/verify-email/change', [AccountController::class, 'changeEmail'])->middleware('throttle:6,1,verify-mail')->name('verify.change');
     Route::post('/verify-email/check', [AccountController::class, 'checkVerified'])->middleware('throttle:30,1')->name('verify.check');
     Route::get('/waiting', [AccountController::class, 'waiting'])->name('waiting');
     Route::post('/invite/{token}/accept', [AccountController::class, 'acceptInvitation'])->middleware('throttle:10,1')->name('invite.accept');

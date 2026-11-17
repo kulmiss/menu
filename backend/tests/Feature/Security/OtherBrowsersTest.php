@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Hash;
 it('signs out every other browser session but keeps this one, after the password', function () {
     $user = User::factory()->create(['email' => 'o@example.com', 'password' => 'correct-horse-battery']);
     // The admin SPA: a browser on this site, so Sanctum uses the session.
-    $this->withHeader('Referer', 'http://localhost/admin');
+    $this->withHeader('Referer', config('app.url').'/admin');
 
     // Two browsers sign in.
     $this->postJson('/api/v1/auth/login', ['email' => 'o@example.com', 'password' => 'correct-horse-battery'], idem())->assertOk();

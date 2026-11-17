@@ -10,8 +10,8 @@ Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles insid
 
 | Method | Path | Who | Feature | Limit | Handler |
 |---|---|---|---|---|---|
-| POST | `auth/email/verification-notification` | signed in |  | 6 a minute | Fortify\EmailVerificationNotificationController@store |
-| GET | `auth/email/verify/{id}/{hash}` | signed in |  | 6 a minute | Fortify\VerifyEmailController@__invoke |
+| POST | `auth/email/verification-notification` | signed in |  | 6 a minute (shared: `verify-mail`) | Fortify\EmailVerificationNotificationController@store |
+| GET | `auth/email/verify/{id}/{hash}` | signed in |  | 6 a minute (shared: `verify-mail`) | Fortify\VerifyEmailController@__invoke |
 | POST | `auth/forgot-password` | signed out |  |  | Fortify\PasswordResetLinkController@store |
 | POST | `auth/google/finish` | signed out |  | 10 a minute | Auth\GoogleController@finish |
 | GET | `auth/google/pending` | anyone |  | 30 a minute | Auth\GoogleController@pending |
@@ -76,7 +76,7 @@ Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles insid
 |---|---|---|---|---|---|
 | POST | `signup` | signed out |  | 10 a minute | Auth\SignUpController@store |
 | GET | `signup/config` | anyone |  | 60 a minute | Auth\SignUpController@config |
-| POST | `signup/email` | signed in |  | 6 a minute | Auth\SignUpController@changeEmail |
+| POST | `signup/email` | signed in |  | 6 a minute (shared: `verify-mail`) | Auth\SignUpController@changeEmail |
 | GET | `signup/slug` | anyone |  | 30 a minute | Auth\SignUpController@slug |
 
 ## Team invitations

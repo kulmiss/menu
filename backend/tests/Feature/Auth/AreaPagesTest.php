@@ -223,3 +223,17 @@ it('shows where the area is, and turns the allow-list off from the server', func
         Artisan::call('config:clear');
     }
 });
+
+it('sends the Super Admin back to their area when "Log in as" ends on a page load (2 hours)', function () {
+    [$owner, $tenant] = member(Role::Owner);
+    $admin = superAdmin();
+    browser();
+    $this->actingAs($admin)->postJson(p("restaurants/{$tenant->id}/impersonate"), [], idem())->assertOk();
+    $session = ['impersonation_id' => session('impersonation_id'), 'impersonator_id' => $admin->id, 'impersonation_ends_at' => session('impersonation_ends_at')];
+    $this->actingAs($owner)->withSession($session);
+    $this->get('/admin/dishes')->assertOk();
+
+    $this->travel(121)->minutes();
+    // A page, not an API call: back to the Super Admin area, not a JSON error.
+    $this->get('/admin/dishes')->assertRedirect('/super')->assertSessionMissing('impersonation_id');
+});
