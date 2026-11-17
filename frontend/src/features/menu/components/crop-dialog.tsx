@@ -65,6 +65,9 @@ function CropBody({
   const [crop, setCrop] = useState({ x: 0, y: 0 })
   const [zoom, setZoom] = useState(1)
   const [area, setArea] = useState<Area | null>(null)
+  // A file the browser can't open as a picture (damaged, not really a photo,
+  // or too many pixels): say so instead of showing an empty black frame.
+  const [broken, setBroken] = useState(false)
 
   return (
     <>
@@ -78,9 +81,15 @@ function CropBody({
             onCropChange={setCrop}
             onZoomChange={setZoom}
             onCropComplete={(_, pixels) => setArea(pixels)}
+            mediaProps={{ onError: () => setBroken(true) }}
           />
         )}
       </div>
+      {broken && (
+        <p role='alert' className='text-sm text-destructive'>
+          {t('photo.unreadable')}
+        </p>
+      )}
       <label className='grid gap-1 text-sm'>
         {t('photo.zoom')}
         <input
@@ -97,7 +106,7 @@ function CropBody({
         <Button
           type='button'
           className='min-h-11 sm:min-h-9'
-          disabled={!area || busy}
+          disabled={!area || busy || broken}
           onClick={() => area && onConfirm(area)}
         >
           {busy && <Loader2 className='animate-spin' />}
