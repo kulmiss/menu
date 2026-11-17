@@ -40,6 +40,9 @@ final class MobileApp
         foreach (['banner', 'app_features', 'links'] as $nested) {
             $out[$nested] = array_replace(self::DEFAULTS[$nested], array_intersect_key(is_array($stored[$nested] ?? null) ? $stored[$nested] : [], self::DEFAULTS[$nested]));
         }
+        // An emptied banner was once stored as null text/link; the Super Admin screen needs strings.
+        $out['banner']['text'] = (string) ($out['banner']['text'] ?? '');
+        $out['banner']['link'] = (string) ($out['banner']['link'] ?? '');
 
         return $out;
     }
