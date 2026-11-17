@@ -1,8 +1,9 @@
+import '@/styles/index.css'
 import { fakeApi } from '@/test-utils/fake-api'
 import { meFixture, tenantFixture } from '@/test-utils/fixtures'
 import { renderWithQuery } from '@/test-utils/render'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { userEvent } from 'vitest/browser'
+import { page, userEvent } from 'vitest/browser'
 import { useTenantStore } from '@/stores/tenant-store'
 import { QrCodesPage } from '@/features/qr'
 import { type Branch, type QrCodeRow } from './api'
@@ -179,6 +180,27 @@ describe('BranchesPage', () => {
         slug: 'bole-atlas',
         is_active: true,
       })
+  })
+
+  // Bug (2026-11-17): on a phone the branch's details were squeezed into a
+  // ~30 px column next to its buttons, one or two letters per line.
+  it('on a phone the address keeps its width and the buttons go below it', async () => {
+    await page.viewport(390, 844)
+    try {
+      const screen = await render(<BranchesPage />)
+      const link = screen.getByText('localhost/buna-bread/piassa')
+      await expect.element(link).toBeVisible()
+      const a = link.element().closest('a')!.getBoundingClientRect()
+      expect(a.width).toBeGreaterThan(180)
+      expect(a.height).toBeGreaterThanOrEqual(44) // a 44 px tap target
+      const tables = screen
+        .getByRole('button', { name: '0 tables' })
+        .element()
+        .getBoundingClientRect()
+      expect(tables.top).toBeGreaterThanOrEqual(a.bottom)
+    } finally {
+      await page.viewport(414, 896)
+    }
   })
 })
 
