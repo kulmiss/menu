@@ -6,7 +6,7 @@ use App\Support\Qr\TableCards;
 
 /**
  * Printable posters, table tents, stickers and window signs (owner,
- * 2026-11-14, QUESTIONS #179). Vector PDF (FPDF core fonts, QR as squares),
+ * 2026-11-14, QUESTIONS #179). Vector PDF (Document fonts, QR as squares),
  * exact paper sizes; posters and the window sign can add 3 mm bleed on every
  * side for a print shop. Three designs × light/dark; the QR code itself is
  * always black on white so every phone can read it.
@@ -307,6 +307,8 @@ class PrintMaterials
     private function lines(float $x, float $y, float $w, string $text, string $style, float $max, float $min, int $lines, array $colour, string $align = 'C'): float
     {
         $words = preg_split('/\s+/', trim(TableCards::text($text))) ?: [];
+        // Every row in the font the whole text needs.
+        $this->pdf->holdFont($text);
         for ($size = $max; ; $size -= 0.5) {
             $this->pdf->SetFont('Helvetica', $style, $size);
             $rows = [''];
@@ -330,6 +332,7 @@ class PrintMaterials
             $this->pdf->SetXY($x, $y + $i * $height);
             $this->pdf->Cell($w, $height, $this->pdf->GetStringWidth($row) > $w ? TableCards::fit($this->pdf, $row, $w) : $row, 0, 0, $align);
         }
+        $this->pdf->releaseFont();
 
         return $y + count($rows) * $height;
     }

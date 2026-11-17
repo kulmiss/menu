@@ -3,13 +3,13 @@
 namespace App\Support\Billing;
 
 use App\Models\Invoice;
+use App\Support\Pdf\Document;
 use App\Support\PublicMenu\MenuPageData;
-use FPDF;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * Invoice as an A4 PDF (FPDF, core fonts). Everything printed comes from the
+ * Invoice as an A4 PDF (App\Support\Pdf\Document: any language). Everything printed comes from the
  * invoice row itself, so a re-download looks exactly like the original.
  */
 class InvoicePdf
@@ -22,7 +22,7 @@ class InvoicePdf
 
     public static function render(Invoice $invoice): string
     {
-        $pdf = new FPDF('P', 'mm', 'A4');
+        $pdf = new Document('P', 'mm', 'A4');
         $pdf->SetMargins(18, 18, 18);
         // Uncompressed: a one-page text invoice stays small, and its text can be searched and checked.
         $pdf->SetCompression(false);
@@ -164,7 +164,7 @@ class InvoicePdf
     }
 
     /** @param  array<int, string>  $lines */
-    private static function block(FPDF $pdf, float $x, float $y, string $title, array $lines): void
+    private static function block(Document $pdf, float $x, float $y, string $title, array $lines): void
     {
         $pdf->SetXY($x, $y);
         $pdf->SetFont('Helvetica', 'B', 8.5);
@@ -178,7 +178,7 @@ class InvoicePdf
         }
     }
 
-    private static function heading(FPDF $pdf, string $text): void
+    private static function heading(Document $pdf, string $text): void
     {
         $pdf->SetFont('Helvetica', 'B', 8.5);
         self::muted($pdf);
@@ -211,20 +211,19 @@ class InvoicePdf
         return $date ? $date->format('j M Y') : '';
     }
 
-    private static function ink(FPDF $pdf): void
+    private static function ink(Document $pdf): void
     {
         $pdf->SetTextColor(...self::INK);
     }
 
-    private static function muted(FPDF $pdf): void
+    private static function muted(Document $pdf): void
     {
         $pdf->SetTextColor(...self::MUTED);
     }
 
+    /** Text as typed (UTF-8); Document picks the font. */
     private static function t(string $s): string
     {
-        $converted = @iconv('UTF-8', 'windows-1252//TRANSLIT//IGNORE', $s);
-
-        return $converted === false ? '' : $converted;
+        return $s;
     }
 }

@@ -4,12 +4,12 @@ namespace App\Support\Insights;
 
 use App\Models\Tenant;
 use App\Models\TenantAppearance;
+use App\Support\Pdf\Document;
 use App\Support\PlatformSettings;
 use App\Support\Print\PrintMaterials;
 use App\Support\PublicMenu\PageTheme;
 use App\Support\Qr\TableCards;
 use Carbon\CarbonImmutable;
-use FPDF;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -17,7 +17,7 @@ use Illuminate\Support\Str;
  * The Insights report as a one- or two-page A4 PDF (owner, 2026-11-14,
  * QUESTIONS #180): summary numbers with the change against the previous
  * period, a chart of views and scans per day, top dishes and top QR codes.
- * Vector only (FPDF core fonts), uncompressed so it can be searched and tested.
+ * Vector only (App\Support\Pdf\Document: any language), uncompressed so it can be searched and tested.
  */
 class ReportPdf
 {
@@ -25,7 +25,7 @@ class ReportPdf
 
     private const WIDTH = 182.0;
 
-    private FPDF $pdf;
+    private Document $pdf;
 
     private float $y = 0;
 
@@ -38,7 +38,7 @@ class ReportPdf
      */
     public function __construct(private array $report, private array $o)
     {
-        $this->pdf = new FPDF('P', 'mm', 'A4');
+        $this->pdf = new Document('P', 'mm', 'A4');
         $this->pdf->SetCompression(false);
         $this->pdf->SetAutoPageBreak(false);
         $this->pdf->SetMargins(self::LEFT, 14, self::LEFT);
