@@ -19,3 +19,12 @@ export const SLUG_PATTERN = /^[a-z0-9](?:[a-z0-9-]{1,48})[a-z0-9]$/
 export function isValidSlug(slug: string): boolean {
   return SLUG_PATTERN.test(slug) && !slug.includes('--')
 }
+
+/**
+ * The address the server tries first for a new sign-up (App\Support\SignUp\SlugMaker):
+ * at most 44 characters, "menu" for names in other scripts or too short.
+ */
+export function previewSlug(name: string): string {
+  const base = slugify(name).slice(0, 44).replace(/-+$/g, '')
+  return base.length >= 3 ? base : base ? `menu-${base}` : 'menu'
+}

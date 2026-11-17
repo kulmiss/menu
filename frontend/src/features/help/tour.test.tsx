@@ -39,7 +39,9 @@ describe('Welcome tour', () => {
       { me: meFixture() }
     )
     await expect
-      .element(screen.getByRole('heading', { name: 'This is your dashboard' }))
+      .element(
+        screen.getByRole('heading', { name: 'Welcome! This is your dashboard' })
+      )
       .toBeVisible()
     for (const title of [
       'Add your first dish',
