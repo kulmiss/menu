@@ -1,5 +1,4 @@
 import { lazy, Suspense, useState } from 'react'
-import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -9,6 +8,7 @@ import { useTranslation } from 'react-i18next'
 import { applyFieldErrors } from '@/lib/api'
 import { handleServerError } from '@/lib/handle-server-error'
 import { safeRedirect } from '@/lib/safe-redirect'
+import { z } from '@/lib/zod'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import {
