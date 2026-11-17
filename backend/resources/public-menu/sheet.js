@@ -38,7 +38,7 @@ window.mS = function (li, D) {
   if (pr) add(el('div', 'pr', pr.textContent));
   if (x.d) add(el('p', '', x.d));
   // "My order": with the list on, sizes and add-ons become choices and an Add button follows.
-  var o = D.o && D.o[li.dataset.i], can = o && li.querySelector('.ad'), pick = { v: 0, a: {} }, upd = function () {};
+  var o = D.o && D.o[li.dataset.i], can = o && w.mC && li.querySelector('.ad'), pick = { v: 0, a: {} }, upd = function () {};
   var choice = function (type, name, text, price, on, f, off) {
     var r = el('label', 'ro oc'), i = el('input');
     i.type = type; i.name = name; i.checked = on; i.disabled = !!off; i.onchange = f;
@@ -137,6 +137,8 @@ window.mH = function (b, D) {
 
 (function () {
   var d = document, w = window, D = w.mD || JSON.parse(d.getElementById('d').textContent);
+  // The admin's live preview keeps no list: there a "+" opens the dish (without an Add button).
+  if (D.o && D.p) w.mA = function (a) { w.mS(a.closest('li'), D); };
   if (!D.o || D.p) return;
   var T = D.t.o, key = 'mo:' + D.id + ':' + D.b, ls, L, flags = {}, status = d.createElement('p');
   try { ls = w.localStorage; L = JSON.parse(ls.getItem(key)) || { i: [] }; } catch (e) { L = { i: [] }; }
