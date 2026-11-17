@@ -85,7 +85,8 @@ it('keeps the "real customer" tick of each testimonial; unticked by default (own
         ->assertJsonPath('data.landing_testimonials.0.real', true)
         ->assertJsonPath('data.landing_testimonials.1.real', false);
 
-    expect(PlatformSettings::get('landing_testimonials'))->toBe([
+    // MySQL's JSON column may store the keys in another order.
+    expect(PlatformSettings::get('landing_testimonials'))->toEqual([
         ['quote' => 'Great.', 'name' => 'Hana', 'role' => '', 'real' => true],
         ['quote' => 'Ok.', 'name' => 'Abel', 'role' => '', 'real' => false],
     ]);

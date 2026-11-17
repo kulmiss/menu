@@ -205,7 +205,9 @@ describe('Super Admin landing page settings', () => {
       screen.getByLabelText('WhatsApp number', { exact: true }),
       '+251 911 000 000'
     )
-    await userEvent.click(screen.getByRole('checkbox', { name: 'Speed' }))
+    await userEvent.click(
+      screen.getByRole('checkbox', { name: 'Paper menu vs QR menu' })
+    )
     await userEvent.click(
       screen.getByRole('button', { name: 'Add a testimonial' })
     )
@@ -226,12 +228,18 @@ describe('Super Admin landing page settings', () => {
         landing_headline: 'QR menus for Addis restaurants',
         upgrade_whatsapp: '+251 911 000 000',
         brand_color: '#c2410c',
-        landing_sections: { speed: false, pricing: true, faq: true },
+        landing_sections: {
+          compare: false,
+          pricing: true,
+          faq: true,
+          testimonials: false,
+        },
         landing_testimonials: [
           {
             quote: 'Guests find the menu on their own now.',
             name: 'Hana',
             role: '',
+            real: false,
           },
         ],
         socials: { telegram: 'https://t.me/menu_et', facebook: '' },
