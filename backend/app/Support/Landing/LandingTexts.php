@@ -17,7 +17,7 @@ class LandingTexts
     private const EDITABLE = [
         'meta_title', 'meta_description', 'meta_description_paid',
         'nav.demo', 'nav.how', 'nav.features', 'nav.pricing', 'nav.faq',
-        'sign_in', 'create_account', 'contact_whatsapp', 'contact_email', 'contact_text',
+        'sign_in', 'create_account', 'google', 'contact_whatsapp', 'contact_email', 'contact_text',
         'hero', 'problem', 'demo', 'how', 'features', 'compare',
         'pricing.title', 'pricing.subtitle', 'pricing.popular', 'pricing.start_paid', 'pricing.upgrade_note',
         'testimonials.title', 'faq', 'cta', 'chat', 'footer.about',

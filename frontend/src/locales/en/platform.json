@@ -389,7 +389,10 @@
     "secret_clear": "Remove the saved secret key",
     "turnstile_help": "Create a free widget at dash.cloudflare.com → Turnstile and paste both keys. The secret is stored encrypted and never shown again.",
     "domains": "Blocked e-mail domains",
-    "domains_hint": "Disposable e-mail services, one domain per line. Sign-ups and e-mail changes with these domains are refused."
+    "domains_hint": "Disposable e-mail services, one domain per line. Sign-ups and e-mail changes with these domains are refused.",
+    "google_login": "Continue with Google",
+    "google_login_hint": "Restaurant people can sign up and sign in with their Google account. Super Admins always use their password and two-factor code. Off: no Google buttons anywhere.",
+    "google_keys_missing": "Google keys are missing: add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET to the .env file (see docs/google-login.md). Until then the buttons stay hidden."
   },
   "logo": {
     "title": "E-mail logo",
@@ -1203,7 +1206,8 @@
       "how": "Menu: How it works",
       "features": "Menu: What you get",
       "pricing": "Menu: Prices",
-      "faq": "Menu: Questions"
+      "faq": "Menu: Questions",
+      "google": "“Continue with Google” button"
     },
     "images": "Pictures",
     "images_hint": "Screenshots of a real menu for the phone frames (tall phone shape, at least 300 × 500 px; light and dark mode) and the picture apps show when the landing page link is shared (1200 × 630). JPG, PNG or WebP.",

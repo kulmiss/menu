@@ -42,6 +42,7 @@ const PREFIXES: Record<Fixed | Section, string[]> = {
   hero: ['hero.'],
   buttons: [
     'create_account',
+    'google',
     'sign_in',
     'contact_',
     'nav.',

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\ConfirmEmailChangeController;
+use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\NewsSubscriptionController;
 use App\Http\Controllers\PublicMenuController;
@@ -33,6 +34,13 @@ Route::withoutMiddleware($cookieFree)->middleware(['signed', 'throttle:30,1'])->
     Route::get('unsubscribe', [NewsSubscriptionController::class, 'show'])->name('news.unsubscribe');
     Route::post('unsubscribe', [NewsSubscriptionController::class, 'unsubscribe'])->name('news.unsubscribe.do');
     Route::post('resubscribe', [NewsSubscriptionController::class, 'resubscribe'])->name('news.resubscribe');
+});
+
+// "Continue with Google" (owner, 2026-11-17): before the SPA's /auth/* pages.
+// Socialite keeps a one-time state in the session (CSRF check of the callback).
+Route::middleware('throttle:20,1')->group(function () {
+    Route::get('/auth/google', [GoogleController::class, 'redirect'])->name('google.redirect');
+    Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->name('google.callback');
 });
 
 // Admin + Super Admin SPA: every URL below these prefixes loads the same page.

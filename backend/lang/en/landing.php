@@ -20,6 +20,7 @@ return [
     ],
     'sign_in' => 'Sign in',
     'create_account' => 'Create my free menu',
+    'google' => 'Continue with Google',
     // Sign-up switched off (Settings → Sign-up): every sign-up button becomes this.
     'contact_whatsapp' => 'Contact us on WhatsApp',
     'contact_email' => 'Contact us by email',

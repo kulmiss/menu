@@ -301,6 +301,7 @@ php artisan config:cache
 <li><strong>Require my approval</strong>: new restaurants wait until you approve them. Their menu is not public until then.</li>
 <li><strong>E-mail me about every new sign-up</strong>.</li>
 <li><strong>Require two-factor sign-in for restaurant owners</strong>.</li>
+<li><strong>Continue with Google</strong>: restaurant people sign up and sign in with Google. It needs the Google keys in <code>.env</code> first (the page says when they are missing). Setup: <code>docs/google-login.md</code>. Super Admins always use password + two-factor.</li>
 <li><strong>Anti-spam</strong>: Cloudflare Turnstile (optional) and <strong>Blocked e-mail domains</strong> (one per line).</li>
 </ul>
 <p>Unconfirmed sign-ups are deleted after 7 days.</p>

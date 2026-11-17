@@ -25,6 +25,7 @@ import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/password-input'
 import { ME_KEY, signIn } from './api'
 import { AuthCard, authLinkClass, LegalNote } from './auth-layout'
+import { GoogleOption } from './google-button'
 
 const schema = z.object({
   email: z.email('validation.email'),
@@ -147,9 +148,12 @@ const OUTCOMES = [
   'change_invalid',
 ]
 
-type SignInPageProps = { redirect?: string; verify?: string }
+type SignInPageProps = { redirect?: string; verify?: string; google?: string }
 
-export function SignInPage({ redirect, verify: raw }: SignInPageProps) {
+/** Why "Continue with Google" didn't sign in (GoogleController). */
+const GOOGLE_ERRORS = ['cancelled', 'failed', 'unverified', 'super_admin']
+
+export function SignInPage({ redirect, verify: raw, google }: SignInPageProps) {
   use(texts)
   const { t } = useTranslation()
   const verify = raw && OUTCOMES.includes(raw) ? raw : undefined
@@ -181,6 +185,14 @@ export function SignInPage({ redirect, verify: raw }: SignInPageProps) {
           <AlertDescription>{t(`signup.verify.${verify}`)}</AlertDescription>
         </Alert>
       )}
+      {google && GOOGLE_ERRORS.includes(google) && (
+        <Alert variant='destructive' role='alert' className='mb-4'>
+          <AlertDescription>
+            {t(`auth.google.error.${google}`)}
+          </AlertDescription>
+        </Alert>
+      )}
+      <GoogleOption label={t('auth.google.or')} />
       <SignInForm redirectTo={redirect} />
     </AuthCard>
   )

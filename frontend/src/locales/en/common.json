@@ -83,7 +83,40 @@
     "sign_out": "Sign out",
     "sign_out_confirm": "Sign out of your account on this device?",
     "session_expired": "Your session has ended. Please sign in again.",
-    "legal": "By continuing you agree to the <terms>Terms of Service</terms> and the <privacy>Privacy Policy</privacy>."
+    "legal": "By continuing you agree to the <terms>Terms of Service</terms> and the <privacy>Privacy Policy</privacy>.",
+    "google": {
+      "continue": "Continue with Google",
+      "or": "or",
+      "or_email": "or sign up with e-mail",
+      "error": {
+        "cancelled": "Google sign-in was cancelled. Try again, or use your e-mail and password.",
+        "failed": "Google sign-in did not work. Please try again.",
+        "unverified": "Google has not confirmed the e-mail of this Google account, so we can't use it. Use another account, or your e-mail and password.",
+        "super_admin": "Super Admin accounts sign in with their password and two-factor code only.",
+        "taken": "This Google account belongs to another account here.",
+        "closed": "New accounts can't be created right now."
+      },
+      "linked": "Google is now linked. Next time, tap “Continue with Google”.",
+      "finish": {
+        "title": "Almost done",
+        "intro": "You are signing up with Google as {{email}}.",
+        "restaurant": "Restaurant name",
+        "submit": "Create my free menu",
+        "expired": "That took too long. Please start again.",
+        "again": "Continue with Google again"
+      },
+      "security": {
+        "title": "Google",
+        "linked": "Linked to {{email}}. You can sign in with “Continue with Google”.",
+        "not_linked": "Link your Google account to sign in with one tap.",
+        "link": "Link Google",
+        "unlink": "Unlink Google",
+        "unlinked": "Google is no longer linked.",
+        "no_password": "You signed up with Google and have no password yet. Set one first, so you can still sign in after you unlink Google.",
+        "set_password": "E-mail me a link to set a password",
+        "link_sent": "We sent a link to {{email}}."
+      }
+    }
   },
   "validation": {
     "email": "Enter a valid email address.",

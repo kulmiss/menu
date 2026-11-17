@@ -42,7 +42,7 @@ class SignUp
     }
 
     /**
-     * @param  array{name: string, email: string, password: string, restaurant_name: string, slug: string, currency: string, locale?: string}  $data
+     * @param  array{name: string, email: string, password: string|null, restaurant_name: string, slug: string, currency: string, locale?: string}  $data
      */
     public function create(array $data): User
     {

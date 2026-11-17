@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Notifications\SignupNotification;
 use App\Rules\ValidSlug;
+use App\Support\Auth\GoogleLogin;
 use App\Support\PlatformSettings;
 use App\Support\Security\SecurityLog;
 use App\Support\SignUp\SignUp;
@@ -44,6 +45,8 @@ class SignUpController extends Controller
             'terms' => trim((string) $s['terms']) !== '',
             'privacy' => trim((string) $s['privacy']) !== '',
             'platform' => $s['name'],
+            // "Continue with Google" on the sign-up and sign-in pages (owner, 2026-11-17).
+            'google' => GoogleLogin::enabled(),
         ]]);
     }
 

@@ -4,7 +4,7 @@
 
 Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles inside a restaurant are checked by each screen's policy). **Feature**: the feature switch it needs (`402 features.<key>` when off). **Limit**: how many requests are allowed. Create/change requests need an `Idempotency-Key` header. Request and answer examples for the app: [mobile-api.md](mobile-api.md).
 
-**263 endpoints.**
+**267 endpoints.**
 
 ## Sign-in and account (web session)
 
@@ -13,6 +13,8 @@ Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles insid
 | POST | `auth/email/verification-notification` | signed in |  | 6 a minute | Fortify\EmailVerificationNotificationController@store |
 | GET | `auth/email/verify/{id}/{hash}` | signed in |  | 6 a minute | Fortify\VerifyEmailController@__invoke |
 | POST | `auth/forgot-password` | signed out |  |  | Fortify\PasswordResetLinkController@store |
+| POST | `auth/google/finish` | signed out |  | 10 a minute | Auth\GoogleController@finish |
+| GET | `auth/google/pending` | anyone |  | 30 a minute | Auth\GoogleController@pending |
 | POST | `auth/login` | signed out |  | `login` limiter | Fortify\AuthenticatedSessionController@store |
 | POST | `auth/logout` | signed in |  |  | Fortify\AuthenticatedSessionController@destroy |
 | POST | `auth/register` | signed out |  |  | Fortify\RegisteredUserController@store |
@@ -60,8 +62,10 @@ Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles insid
 | Method | Path | Who | Feature | Limit | Handler |
 |---|---|---|---|---|---|
 | GET | `me` | signed in |  |  | Api\MeController |
+| DELETE | `me/google` | signed in |  | 6 a minute | Auth\GoogleController@unlink |
 | PUT | `me/news` | signed in |  |  | NewsSubscriptionController@update |
 | PUT | `me/onboarding` | signed in |  | 30 a minute | Api\OnboardingController |
+| POST | `me/password-link` | signed in |  | 3 per 10 minutes | Auth\GoogleController@passwordLink |
 | POST | `me/sessions/logout-others` | signed in |  | 6 a minute | Api\SessionController@logoutOthers |
 
 ## Self sign-up

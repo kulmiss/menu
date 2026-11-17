@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Plan;
 use App\Models\Tenant;
+use App\Support\Auth\GoogleLogin;
 use App\Support\BrandColor;
 use App\Support\EmailLogo;
 use App\Support\Features;
@@ -67,6 +68,8 @@ class SiteController extends Controller
             'headline' => $t($free ? 'hero.headline' : 'hero.headline_paid'),
             'subline' => $t('hero.subline'),
             'signupOpen' => $signupOpen,
+            // "Continue with Google" next to the main button, while sign-up is open (owner, 2026-11-17).
+            'google' => $signupOpen && GoogleLogin::enabled(),
             // The main button of every section: sign up, or (sign-up off) contact us.
             'cta' => $this->cta($signupOpen, $contact, $name, $t),
             'sections' => $sections,

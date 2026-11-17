@@ -33,6 +33,9 @@ export type SignupSettingsData = {
   /** Owners must set up two-factor (off: only encouraged). SECURITY_REPORT.md M17. */
   owner_two_factor_required?: boolean
   turnstile_enabled: boolean
+  /** "Continue with Google" (owner, 2026-11-17); works only with the keys in .env. */
+  google_login?: boolean
+  google_configured?: boolean
   turnstile_site_key: string
   turnstile_secret_set: boolean
   disposable_domains: string[]
@@ -57,6 +60,7 @@ export function SignupSettings({ initial }: { initial: SignupSettingsData }) {
     signup_notify: initial.signup_notify,
     owner_two_factor_required: initial.owner_two_factor_required ?? false,
     turnstile_enabled: initial.turnstile_enabled,
+    google_login: initial.google_login ?? false,
     turnstile_site_key: initial.turnstile_site_key ?? '',
     turnstile_secret: '',
     clear_turnstile_secret: false,
@@ -70,6 +74,7 @@ export function SignupSettings({ initial }: { initial: SignupSettingsData }) {
       | 'signup_notify'
       | 'owner_two_factor_required'
       | 'turnstile_enabled'
+      | 'google_login'
   ) => (
     <div className='flex items-start justify-between gap-4'>
       <div className='grid gap-0.5'>
@@ -100,6 +105,7 @@ export function SignupSettings({ initial }: { initial: SignupSettingsData }) {
         signup_notify: v.signup_notify,
         owner_two_factor_required: v.owner_two_factor_required,
         turnstile_enabled: v.turnstile_enabled,
+        google_login: v.google_login,
         turnstile_site_key: v.turnstile_site_key.trim(),
         // Empty keeps the stored secret.
         turnstile_secret: v.turnstile_secret.trim(),
@@ -166,6 +172,12 @@ export function SignupSettings({ initial }: { initial: SignupSettingsData }) {
           {toggle('signup_approval')}
           {toggle('signup_notify')}
           {toggle('owner_two_factor_required')}
+          {toggle('google_login')}
+          {v.google_login && !initial.google_configured && (
+            <p className='-mt-3 text-sm text-destructive' role='status'>
+              {t('platform.signup.google_keys_missing')}
+            </p>
+          )}
 
           <fieldset className='grid gap-3 rounded-md border p-3'>
             <legend className='px-1 text-sm font-medium'>

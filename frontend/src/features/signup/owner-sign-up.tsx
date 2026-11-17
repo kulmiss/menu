@@ -28,6 +28,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { PasswordInput } from '@/components/password-input'
 import { meQueryOptions, ME_KEY } from '@/features/auth/api'
 import { AuthCard, authLinkClass } from '@/features/auth/auth-layout'
+import { GoogleOption } from '@/features/auth/google-button'
 import {
   passwordStrength,
   registerOwner,
@@ -131,6 +132,7 @@ export function OwnerSignUpPage({ redirect }: { redirect?: string }) {
         </>
       }
     >
+      <GoogleOption label={t('auth.google.or_email')} />
       <OwnerSignUpForm config={config.data} onCheckInbox={setSentTo} />
     </AuthCard>
   )

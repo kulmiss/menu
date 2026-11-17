@@ -11,6 +11,8 @@ export type SignUpConfig = {
   terms: boolean
   privacy: boolean
   platform: string
+  /** "Continue with Google" is on (owner, 2026-11-17). */
+  google?: boolean
 }
 
 export const signUpConfigQuery = queryOptions({

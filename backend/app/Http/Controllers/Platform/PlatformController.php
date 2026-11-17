@@ -13,6 +13,7 @@ use App\Models\TenantAppearance;
 use App\Models\Theme;
 use App\Rules\Translations;
 use App\Support\ActivityLogger;
+use App\Support\Auth\GoogleLogin;
 use App\Support\EmailLogo;
 use App\Support\Features;
 use App\Support\ImageProcessor;
@@ -277,7 +278,7 @@ class PlatformController extends Controller
 
     public function settings(): JsonResponse
     {
-        return response()->json(['data' => [...PlatformSettings::forScreen(), 'share_image_url' => ShareImage::for(null)['url'], 'logo_url' => EmailLogo::url(), 'plans' => Plan::orderBy('sort')->get(['id', 'name', 'slug'])->map(fn (Plan $p) => ['id' => $p->id, 'name' => $p->name['en'] ?? $p->slug, 'slug' => $p->slug])]]);
+        return response()->json(['data' => [...PlatformSettings::forScreen(), 'google_configured' => GoogleLogin::configured(), 'share_image_url' => ShareImage::for(null)['url'], 'logo_url' => EmailLogo::url(), 'plans' => Plan::orderBy('sort')->get(['id', 'name', 'slug'])->map(fn (Plan $p) => ['id' => $p->id, 'name' => $p->name['en'] ?? $p->slug, 'slug' => $p->slug])]]);
     }
 
     /** The default link preview for menus without a banner (owner, 2026-11-12). */
@@ -337,6 +338,7 @@ class PlatformController extends Controller
             'signup_open' => ['sometimes', 'boolean'],
             'signup_plan_id' => ['sometimes', 'nullable', 'integer', Rule::exists('plans', 'id')],
             'signup_approval' => ['sometimes', 'boolean'],
+            'google_login' => ['sometimes', 'boolean'],
             'signup_notify' => ['sometimes', 'boolean'],
             'turnstile_enabled' => ['sometimes', 'boolean'],
             'turnstile_site_key' => ['sometimes', 'nullable', 'string', 'max:100'],

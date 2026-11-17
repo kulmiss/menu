@@ -30,6 +30,7 @@ use App\Http\Controllers\Api\Restaurant\QrCodeController;
 use App\Http\Controllers\Api\SessionController;
 use App\Http\Controllers\Api\TeamController;
 use App\Http\Controllers\Api\TenantController;
+use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\SignUpController;
 use App\Http\Controllers\LandingClickController;
 use App\Http\Controllers\Mobile\AccountController as MobileAccountController;
@@ -99,11 +100,19 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
         Route::post('email', 'changeEmail')->middleware(['auth:sanctum', 'throttle:6,1']);
     });
 
+    // "Continue with Google": the new owner's restaurant name (owner, 2026-11-17).
+    Route::prefix('auth/google')->controller(GoogleController::class)->group(function () {
+        Route::get('pending', 'pending')->middleware('throttle:30,1');
+        Route::post('finish', 'finish')->middleware(['guest', 'throttle:10,1']);
+    });
+
     // Help centre for signed-out people: sign-in problems (QUESTIONS #194).
     Route::get('help/public', [HelpController::class, 'public'])->middleware('throttle:30,1');
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('me', MeController::class);
+        Route::delete('me/google', [GoogleController::class, 'unlink'])->middleware('throttle:6,1');
+        Route::post('me/password-link', [GoogleController::class, 'passwordLink'])->middleware('throttle:3,10');
         Route::post('help/feedback', [HelpController::class, 'feedback'])->middleware('throttle:30,1');
         Route::put('me/onboarding', OnboardingController::class)->middleware('throttle:30,1');
 

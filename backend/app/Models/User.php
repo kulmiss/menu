@@ -25,7 +25,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property array<string, string>|null $onboarding Tours seen: web_tour / app_tour => ISO time (QUESTIONS #195)
  */
 #[Fillable(['name', 'email', 'password', 'locale'])]
-#[Hidden(['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes'])]
+#[Hidden(['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes', 'google_id'])]
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
