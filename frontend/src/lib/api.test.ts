@@ -6,8 +6,10 @@ import {
   applyFieldErrors,
   errorStatus,
   IDEMPOTENCY_HEADER,
+  networkFailure,
   tenantUrl,
   withIdempotencyKey,
+  type SentRequest,
 } from './api'
 
 let fake: ReturnType<typeof fakeApi>
@@ -186,5 +188,24 @@ describe('api helpers', () => {
     api.defaults.adapter = original
 
     expect(errorStatus(error)).toBe(0)
+  })
+})
+
+describe('leaving the page', () => {
+  it('does not report requests cut off because the page is going away', async () => {
+    const request = { method: 'GET', fullUrl: '/api/v1/me' } as SentRequest
+    const settled = (p: Promise<unknown>) =>
+      Promise.race([
+        p.then(
+          () => 'resolved',
+          () => 'rejected'
+        ),
+        new Promise((r) => setTimeout(() => r('pending'), 50)),
+      ])
+    expect(await settled(networkFailure(request))).toBe('rejected')
+    window.dispatchEvent(new PageTransitionEvent('pagehide'))
+    expect(await settled(networkFailure(request))).toBe('pending')
+    window.dispatchEvent(new PageTransitionEvent('pageshow'))
+    expect(await settled(networkFailure(request))).toBe('rejected')
   })
 })

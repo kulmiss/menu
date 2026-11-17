@@ -111,7 +111,7 @@ export function PlatformLayout() {
         </div>
         <nav
           aria-label={t('platform.title')}
-          className='flex gap-1 overflow-x-auto px-2 pb-2'
+          className='flex gap-1 overflow-x-auto px-2 pb-2 lg:flex-wrap'
         >
           <Link
             to='/platform'

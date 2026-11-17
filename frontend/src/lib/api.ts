@@ -86,6 +86,21 @@ function readCookie(name: string): string | null {
   return match ? decodeURIComponent(match.slice(name.length + 1)) : null
 }
 
+// The page is being left (a link to a server page, sign-out, reload): requests
+// cut off by that are not errors worth reporting.
+let leaving = false
+if (typeof window !== 'undefined') {
+  window.addEventListener('pagehide', () => (leaving = true))
+  window.addEventListener('pageshow', () => (leaving = false))
+}
+
+/** A request that got no answer: an error, unless the page is going away (then it never settles). */
+export function networkFailure(request: SentRequest): Promise<never> {
+  return leaving
+    ? new Promise<never>(() => {})
+    : Promise.reject(new ApiError('Network Error', request))
+}
+
 /** The browser `fetch` adapter (tests swap in their own). */
 const fetchAdapter: Adapter = async (request) => {
   let response: Response
@@ -97,7 +112,7 @@ const fetchAdapter: Adapter = async (request) => {
       credentials: 'include',
     })
   } catch {
-    throw new ApiError('Network Error', request)
+    return networkFailure(request)
   }
   const headers: Record<string, string> = {}
   response.headers.forEach((value, key) => {

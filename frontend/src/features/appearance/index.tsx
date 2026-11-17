@@ -424,7 +424,6 @@ function AppearanceForm({ initial }: { initial: Appearance }) {
             src={src}
             onLoad={() => setLoading(false)}
             className='relative size-full'
-            sandbox='allow-scripts allow-same-origin'
           />
         </div>
         <p className='mt-2 text-center text-xs text-muted-foreground'>

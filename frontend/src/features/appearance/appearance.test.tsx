@@ -131,6 +131,17 @@ describe('AppearancePage', () => {
       .not.toBeInTheDocument()
   })
 
+  // Chrome warns in the console about a sandbox with both allow-scripts and
+  // allow-same-origin (it can remove itself), and allow-scripts alone breaks the
+  // menu (no service worker, no storage). The preview is our own page: no sandbox.
+  it('shows the preview without a sandbox that makes a console warning', async () => {
+    const screen = await render()
+    await expect
+      .element(screen.getByRole('button', { name: 'Bistro' }))
+      .toBeVisible()
+    expect(frame(screen).hasAttribute('sandbox')).toBe(false)
+  })
+
   it('warns when the colour is hard to read on white', async () => {
     const screen = await render()
     const input = screen.getByRole('textbox', { name: 'Brand colour' })
