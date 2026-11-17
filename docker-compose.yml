@@ -1,5 +1,5 @@
 # Local development only. Production does not use Docker on shared hosting.
-# Start: docker compose up -d   ·   App: http://localhost:8080   ·   Mail: http://localhost:8025
+# Start: docker compose up -d   ·   App: http://localhost:8080   ·   Mail: http://localhost:8026
 services:
   app:
     build: docker/php
@@ -45,7 +45,10 @@ services:
   mail:
     image: axllent/mailpit:v1
     ports:
-      - "8026:8025"
+      - "8026:8025" # inbox in the browser
+      # SMTP for an app running outside Docker (Laragon, php artisan serve):
+      # MAIL_MAILER=smtp, MAIL_HOST=127.0.0.1, MAIL_PORT=1025 in backend/.env.
+      - "1025:1025"
 
   vite:
     image: node:22-bookworm
