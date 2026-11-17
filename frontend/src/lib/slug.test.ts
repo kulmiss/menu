@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isValidSlug, slugify } from './slug'
+import { isValidSlug, previewSlug, slugify } from './slug'
 
 describe('slugify', () => {
   it('turns a name into a menu address', () => {
@@ -25,5 +25,14 @@ describe('isValidSlug', () => {
     expect(isValidSlug('-buna')).toBe(false)
     expect(isValidSlug('buna--bread')).toBe(false)
     expect(isValidSlug('Buna')).toBe(false)
+  })
+})
+
+describe('previewSlug', () => {
+  it('matches the address the server tries first for a new sign-up', () => {
+    expect(previewSlug('Buna & Bread Café')).toBe('buna-bread-cafe')
+    expect(previewSlug('ቡና ቤት')).toBe('menu')
+    expect(previewSlug('Jo')).toBe('menu-jo')
+    expect(previewSlug('a'.repeat(60))).toHaveLength(44)
   })
 })

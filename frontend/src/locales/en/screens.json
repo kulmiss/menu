@@ -913,8 +913,8 @@
     "back": "Back",
     "open": "Take the tour",
     "dashboard": {
-      "title": "This is your dashboard",
-      "text": "Today’s menu views and QR scans, and a short list of what to set up next.",
+      "title": "Welcome! This is your dashboard",
+      "text": "See your menu views and QR scans here, and a short list of what to do next. Your first step: add your first dish.",
       "go": "Done"
     },
     "dish": {

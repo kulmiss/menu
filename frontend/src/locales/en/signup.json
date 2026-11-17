@@ -25,7 +25,7 @@
   "terms_plain": "I accept the Terms of Service and the Privacy Policy.",
   "terms_required": "Please accept the terms to continue.",
   "website": "Leave this field empty",
-  "submit": "Create free account",
+  "submit": "Create my free menu",
   "closed_title": "Registration is closed",
   "closed_text": "New accounts cannot be created right now. Please contact us if you would like a menu.",
   "captcha_loading": "Loading the security check…",
@@ -54,5 +54,7 @@
     "change_done": "Your new email address is confirmed. Sign in with it from now on.",
     "change_expired": "This link has expired. Sign in with your current address and change it again in Settings.",
     "change_invalid": "This link is not valid any more. Sign in with your current address and change it again in Settings."
-  }
+  },
+  "address_preview": "Your menu will be at {{url}} (a free one close to it if that is taken).",
+  "currency_note": "Prices are shown in {{currency}}. Need another currency? Tell us after you sign up."
 }

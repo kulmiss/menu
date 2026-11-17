@@ -27,20 +27,16 @@ const config = (over: Record<string, unknown> = {}) => ({
   },
 })
 
-const slugFree = (slug: string) => ({
-  data: { data: { slug, available: true, reason: null } },
-})
-
 type Screen = Awaited<ReturnType<typeof renderWithQuery>>
 
 async function fill(screen: Screen) {
   await userEvent.fill(
-    screen.getByRole('textbox', { name: 'Restaurant name' }),
-    'Buna & Bread'
-  )
-  await userEvent.fill(
     screen.getByRole('textbox', { name: 'Your name' }),
     'Selam Tesfaye'
+  )
+  await userEvent.fill(
+    screen.getByRole('textbox', { name: 'Restaurant name' }),
+    'Buna & Bread'
   )
   await userEvent.fill(
     screen.getByRole('textbox', { name: 'Email' }),
@@ -50,50 +46,42 @@ async function fill(screen: Screen) {
     screen.getByLabelText('Password', { exact: true }),
     'correct-horse-battery'
   )
-  await userEvent.fill(
-    screen.getByLabelText('Confirm password'),
-    'correct-horse-battery'
-  )
 }
 
 const submit = (screen: Screen) =>
-  userEvent.click(screen.getByRole('button', { name: 'Create free account' }))
+  userEvent.click(screen.getByRole('button', { name: 'Create my free menu' }))
 
 describe('OwnerSignUpPage', () => {
   beforeEach(() => navigate.mockClear())
   afterEach(() => fake?.restore())
 
-  it('suggests the address from the name and says whether it is free', async () => {
+  it('asks only for name, restaurant, e-mail and password, and shows the address it will get', async () => {
     fake = fakeApi({
-      'GET /signup/config': config(),
-      'GET /signup/slug?slug=buna-bread': slugFree('buna-bread'),
-      'GET /signup/slug?slug=admin': {
-        data: { data: { slug: 'admin', available: false, reason: 'reserved' } },
-      },
+      'GET /signup/config': config({ default_currency: 'KES' }),
     })
     const screen = await renderWithQuery(<OwnerSignUpPage />)
-    const name = screen.getByRole('textbox', { name: 'Restaurant name' })
-    const slug = screen.getByRole('textbox', { name: 'Menu address' })
+    await userEvent.fill(
+      screen.getByRole('textbox', { name: 'Restaurant name' }),
+      'Buna & Bread'
+    )
 
-    await userEvent.fill(name, 'Buna & Bread')
-    await expect.element(slug).toHaveValue('buna-bread')
     await expect
-      .element(screen.getByText('This address is available.'))
+      .element(screen.getByText(/Your menu will be at .+\/buna-bread/))
       .toBeVisible()
-
-    await userEvent.fill(slug, 'admin')
-    await userEvent.fill(name, 'Something Else')
-    await expect.element(slug).toHaveValue('admin')
     await expect
-      .element(screen.getByText('This address is reserved. Try another one.'))
+      .element(screen.getByText(/Prices are shown in KES/))
       .toBeVisible()
+    expect(
+      screen.getByRole('textbox', { name: 'Menu address' }).elements()
+    ).toHaveLength(0)
+    expect(screen.getByLabelText('Confirm password').elements()).toHaveLength(0)
+    expect(screen.getByRole('combobox').elements()).toHaveLength(0)
   })
 
   it('creates the account and opens the admin "check your inbox" screen', async () => {
     let signedIn = false
     fake = fakeApi({
       'GET /signup/config': config(),
-      'GET /signup/slug?slug=buna-bread': slugFree('buna-bread'),
       'POST /signup': () => {
         signedIn = true
         return { status: 201, data: { data: { status: 'check_inbox' } } }
@@ -113,13 +101,10 @@ describe('OwnerSignUpPage', () => {
     )
     const post = fake.apiCalls().find((c) => c.url === '/signup')
     expect(post?.data).toEqual({
-      restaurant_name: 'Buna & Bread',
-      slug: 'buna-bread',
       name: 'Selam Tesfaye',
+      restaurant_name: 'Buna & Bread',
       email: 'selam@example.com',
       password: 'correct-horse-battery',
-      password_confirmation: 'correct-horse-battery',
-      currency: 'ETB',
       terms: true,
       website: '',
       locale: 'en',
@@ -130,7 +115,6 @@ describe('OwnerSignUpPage', () => {
   it('shows the same "check your inbox" when nobody was signed in', async () => {
     fake = fakeApi({
       'GET /signup/config': config(),
-      'GET /signup/slug?slug=buna-bread': slugFree('buna-bread'),
       'POST /signup': {
         status: 201,
         data: { data: { status: 'check_inbox' } },
@@ -149,7 +133,6 @@ describe('OwnerSignUpPage', () => {
   it('needs the terms accepted and shows server errors under the fields', async () => {
     fake = fakeApi({
       'GET /signup/config': config(),
-      'GET /signup/slug?slug=buna-bread': slugFree('buna-bread'),
       'POST /signup': invalid({
         email: 'This email address cannot be used.',
       }),
