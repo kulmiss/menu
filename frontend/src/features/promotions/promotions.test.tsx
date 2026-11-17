@@ -19,10 +19,10 @@ describe('PromotionsPage', () => {
 
   it('creates a dated announcement', async () => {
     fake = fakeApi({
-      'GET /t/1/promotions': { data: { data: [] } },
-      'POST /t/1/promotions': { status: 201, data: { data: {} } },
-      'GET /t/1/branches': { data: { data: [] } },
-      'GET /t/1/menus': { data: { data: [] } },
+      'GET /restaurant/1/promotions': { data: { data: [] } },
+      'POST /restaurant/1/promotions': { status: 201, data: { data: {} } },
+      'GET /restaurant/1/branches': { data: { data: [] } },
+      'GET /restaurant/1/menus': { data: { data: [] } },
     })
     const screen = await renderWithQuery(<PromotionsPage />, {
       me: meFixture({ tenants: [tenantFixture()] }),

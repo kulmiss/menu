@@ -22,9 +22,9 @@ class GuardImpersonation
         'v1/auth/user/two-factor-authentication',
         'v1/auth/user/confirmed-two-factor-authentication',
         'v1/auth/user/two-factor-recovery-codes',
-        'v1/t/{tenant}/account/slug',
-        'v1/t/{tenant}/members/{member}',
-        'v1/t/{tenant}/account',
+        'v1/restaurant/{tenant}/account/slug',
+        'v1/restaurant/{tenant}/members/{member}',
+        'v1/restaurant/{tenant}/account',
         'v1/me/sessions/logout-others',
         // The app's own account routes (QUESTIONS #188).
         'v1/mobile/account/profile',

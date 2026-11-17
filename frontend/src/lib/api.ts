@@ -219,10 +219,10 @@ export function withIdempotencyKey(
   return { ...config, headers }
 }
 
-/** URL of a restaurant API route: `tenantUrl(3, 'members')` → `/t/3/members`. */
+/** URL of a restaurant API route: `tenantUrl(3, 'members')` → `/restaurant/3/members`. */
 export function tenantUrl(tenantId: number, path = ''): string {
   const tail = path.replace(/^\/+/, '')
-  return tail ? `/t/${tenantId}/${tail}` : `/t/${tenantId}`
+  return tail ? `/restaurant/${tenantId}/${tail}` : `/restaurant/${tenantId}`
 }
 
 /** Status code of a failed request (0 for network errors). */

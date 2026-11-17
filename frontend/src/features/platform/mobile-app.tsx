@@ -139,7 +139,7 @@ export function MobileAppPage() {
   const s = useQuery({
     queryKey: settingsKey,
     queryFn: async () =>
-      (await api.get<{ data: Settings }>('/platform/mobile-app')).data.data,
+      (await api.get<{ data: Settings }>('/super/mobile-app')).data.data,
   })
   return (
     <>
@@ -600,7 +600,7 @@ function PushPanel() {
   const history = useQuery({
     queryKey: [...pkeys.all, 'mobile-pushes'],
     queryFn: async () =>
-      (await api.get<{ data: PushRow[] }>('/platform/mobile-app/pushes')).data
+      (await api.get<{ data: PushRow[] }>('/super/mobile-app/pushes')).data
         .data,
   })
   const [f, setF] = useState({
@@ -621,7 +621,7 @@ function PushPanel() {
     async (body: object) =>
       (
         await api.post<{ data: { recipients: number; with_app: number } }>(
-          '/platform/mobile-app/pushes',
+          '/super/mobile-app/pushes',
           body
         )
       ).data.data
@@ -1080,7 +1080,7 @@ function StatsPanel() {
   const s = useQuery({
     queryKey: [...pkeys.all, 'mobile-stats'],
     queryFn: async () =>
-      (await api.get<{ data: Stats }>('/platform/mobile-app/stats')).data.data,
+      (await api.get<{ data: Stats }>('/super/mobile-app/stats')).data.data,
   })
   if (!s.data) return <Skeleton className='h-48 w-full' />
   const d = s.data

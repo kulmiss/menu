@@ -45,8 +45,8 @@ describe('Super Admin → Mobile app', () => {
 
   it('turns on maintenance and saves only the access fields', async () => {
     fake = fakeApi({
-      'GET /platform/mobile-app': { data: { data: settings } },
-      'PUT /platform/mobile-app': { data: { data: settings } },
+      'GET /super/mobile-app': { data: { data: settings } },
+      'PUT /super/mobile-app': { data: { data: settings } },
     })
     const screen = await renderWithQuery(<MobileAppPage />)
 
@@ -74,8 +74,8 @@ describe('Super Admin → Mobile app', () => {
 
   it('saves the minimum version for forced updates', async () => {
     fake = fakeApi({
-      'GET /platform/mobile-app': { data: { data: settings } },
-      'PUT /platform/mobile-app': { data: { data: settings } },
+      'GET /super/mobile-app': { data: { data: settings } },
+      'PUT /super/mobile-app': { data: { data: settings } },
     })
     const screen = await renderWithQuery(<MobileAppPage />)
     await userEvent.click(screen.getByRole('tab', { name: 'Versions' }))
@@ -91,10 +91,10 @@ describe('Super Admin → Mobile app', () => {
 
   it('counts recipients before sending a push', async () => {
     fake = fakeApi({
-      'GET /platform/mobile-app': { data: { data: settings } },
-      'GET /platform/plans': { data: { data: [] } },
-      'GET /platform/mobile-app/pushes': { data: { data: [] } },
-      'POST /platform/mobile-app/pushes': {
+      'GET /super/mobile-app': { data: { data: settings } },
+      'GET /super/plans': { data: { data: [] } },
+      'GET /super/mobile-app/pushes': { data: { data: [] } },
+      'POST /super/mobile-app/pushes': {
         data: { data: { recipients: 4, with_app: 3 } },
       },
     })

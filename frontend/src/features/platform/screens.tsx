@@ -471,7 +471,7 @@ export function PaymentsPage() {
         id='platform-payments'
         queryKey={[...pkeys.all, 'payments', 'table']}
         fetch={(params) => fetchPage<PaymentRow>('payments', params)}
-        csvUrl={(params) => `/api/v1/platform/payments?format=csv&${params}`}
+        csvUrl={(params) => `/api/v1/super/payments?format=csv&${params}`}
         columns={columns}
         rowId={(p) => p.id}
         searchPlaceholder={t('platform.payments.search')}
@@ -904,7 +904,7 @@ export function ActivityPage() {
         id='platform-activity'
         queryKey={[...pkeys.all, 'activity', 'table']}
         fetch={(params) => fetchPage<ActivityRow>('activity', params)}
-        csvUrl={(params) => `/api/v1/platform/activity?format=csv&${params}`}
+        csvUrl={(params) => `/api/v1/super/activity?format=csv&${params}`}
         columns={columns}
         rowId={(l) => l.id}
         searchPlaceholder={t('platform.activity.search')}

@@ -161,7 +161,7 @@ for (const [kind, size] of Object.entries(sizes)) {
   for (const [name, shot] of Object.entries(shots)) {
     if (only && !only.includes(name)) continue
     const page = await (shot.guest ? guest : shot.admin ? admin : signedIn).newPage()
-    if (shot.wizard !== undefined) await call(adminPage, 'PUT', '/api/v1/platform/setup', { done: false })
+    if (shot.wizard !== undefined) await call(adminPage, 'PUT', '/api/v1/super/setup', { done: false })
     await page.goto(`${base}${shot.path}`)
     await settle(page)
     if (shot.wizard !== undefined) {
@@ -190,7 +190,7 @@ for (const [kind, size] of Object.entries(sizes)) {
     ])
     console.log(`${name}-${kind}.webp`)
   }
-  await call(adminPage, 'PUT', '/api/v1/platform/setup', { done: true })
+  await call(adminPage, 'PUT', '/api/v1/super/setup', { done: true })
   await signedIn.close()
   await guest.close()
   await admin.close()

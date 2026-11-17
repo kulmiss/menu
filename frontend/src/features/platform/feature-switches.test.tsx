@@ -26,8 +26,8 @@ describe('Settings → Features', () => {
 
   it('lists what is on and off, and saves only the changes', async () => {
     fake = fakeApi({
-      'GET /platform/settings/features': { data: { data: rows } },
-      'PUT /platform/settings/features': { data: { data: rows } },
+      'GET /super/settings/features': { data: { data: rows } },
+      'PUT /super/settings/features': { data: { data: rows } },
     })
     const screen = await renderWithQuery(<FeatureSwitches />)
 

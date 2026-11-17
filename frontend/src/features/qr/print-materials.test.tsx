@@ -31,7 +31,7 @@ const code = (
 
 function setup() {
   fake = fakeApi({
-    'GET /t/1/qr-codes': {
+    'GET /restaurant/1/qr-codes': {
       data: {
         data: [
           code(1, 'restaurant', 'Whole restaurant'),
@@ -40,7 +40,7 @@ function setup() {
         ],
       },
     },
-    'GET /t/1/print-materials': {
+    'GET /restaurant/1/print-materials': {
       data: {
         data: {
           name: 'Buna Café',
@@ -75,7 +75,7 @@ describe('Print materials', () => {
     const screen = await setup()
     await expect.element(screen.getByText('Scan for our menu')).toBeVisible()
     let url = pdfLink(screen)
-    expect(url.pathname).toBe('/api/v1/t/1/print-materials.pdf')
+    expect(url.pathname).toBe('/api/v1/restaurant/1/print-materials.pdf')
     expect(Object.fromEntries(url.searchParams)).toEqual({
       material: 'tent',
       design: 'classic',

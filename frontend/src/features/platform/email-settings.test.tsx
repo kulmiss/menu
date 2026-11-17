@@ -25,7 +25,7 @@ describe('Settings → Email', () => {
 
   it('says when the .env settings are used', async () => {
     fake = fakeApi({
-      'GET /platform/settings/mail': {
+      'GET /super/settings/mail': {
         data: {
           data: { ...saved, source: 'env', host: '', has_password: false },
         },
@@ -40,8 +40,8 @@ describe('Settings → Email', () => {
 
   it('never shows the saved password and keeps it when the field stays empty', async () => {
     fake = fakeApi({
-      'GET /platform/settings/mail': { data: { data: saved } },
-      'PUT /platform/settings/mail': (req) => ({
+      'GET /super/settings/mail': { data: { data: saved } },
+      'PUT /super/settings/mail': (req) => ({
         data: { data: { ...saved, ...JSON.parse(String(req.body)) } },
       }),
     })
@@ -64,8 +64,8 @@ describe('Settings → Email', () => {
   it('sends the test to the address typed, and shows where it went or the full error', async () => {
     let fail = false
     fake = fakeApi({
-      'GET /platform/settings/mail': { data: { data: saved } },
-      'POST /platform/settings/mail/test': (req) =>
+      'GET /super/settings/mail': { data: { data: saved } },
+      'POST /super/settings/mail/test': (req) =>
         fail
           ? {
               status: 422,
@@ -135,8 +135,8 @@ describe('Settings → Email', () => {
 
   it('says when the limit of 5 tests a minute is reached', async () => {
     fake = fakeApi({
-      'GET /platform/settings/mail': { data: { data: saved } },
-      'POST /platform/settings/mail/test': {
+      'GET /super/settings/mail': { data: { data: saved } },
+      'POST /super/settings/mail/test': {
         status: 429,
         data: { message: 'Too Many Attempts.' },
       },

@@ -36,16 +36,16 @@ describe('All dishes', () => {
 
   it('lists dishes from the server and marks the selected ones sold out', async () => {
     fake = fakeApi({
-      'GET /t/1/menus': {
+      'GET /restaurant/1/menus': {
         data: { data: [{ id: 1, name: { en: 'All day' } }] },
       },
-      'GET /t/1/items': {
+      'GET /restaurant/1/items': {
         data: {
           data: [dish(7, 'Macchiato'), dish(8, 'Espresso', true)],
           meta: { total: 2, page: 1, per_page: 25, pages: 1 },
         },
       },
-      'POST /t/1/items/bulk': { status: 204 },
+      'POST /restaurant/1/items/bulk': { status: 204 },
     })
     const screen = await renderWithQuery(<DishesPage />, {
       me: meFixture({ tenants: [tenantFixture()] }),
@@ -53,8 +53,8 @@ describe('All dishes', () => {
     await expect.element(screen.getByText('Macchiato')).toBeVisible()
     await expect.element(screen.getByText('Br 120').first()).toBeVisible()
     await expect.element(screen.getByText('Sold out')).toBeVisible()
-    expect(fake.calls.find((c) => c.url.startsWith('/t/1/items?'))?.url).toBe(
-      '/t/1/items?page=1&per=25'
+    expect(fake.calls.find((c) => c.url.startsWith('/restaurant/1/items?'))?.url).toBe(
+      '/restaurant/1/items?page=1&per=25'
     )
 
     await userEvent.click(

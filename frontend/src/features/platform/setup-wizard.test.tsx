@@ -68,9 +68,9 @@ describe('Super Admin setup wizard', () => {
 
   it('goes through 5 steps, saves plans, deletes the demo data and finishes', async () => {
     fake = fakeApi({
-      'GET /platform/setup': { data: { data: state() } },
-      'PUT /platform/setup': { data: { data: state({ done: true }) } },
-      'GET /platform/settings': {
+      'GET /super/setup': { data: { data: state() } },
+      'PUT /super/setup': { data: { data: state({ done: true }) } },
+      'GET /super/settings': {
         data: {
           data: {
             name: 'Menu',
@@ -82,11 +82,11 @@ describe('Super Admin setup wizard', () => {
           },
         },
       },
-      'PUT /platform/settings': { data: { data: {} } },
-      'GET /platform/plans': { data: { data: plans } },
-      'PATCH /platform/plans/2': { data: { data: plans[1] } },
-      'GET /platform/settings/features': { data: { data: [] } },
-      'POST /platform/setup/demo/delete': {
+      'PUT /super/settings': { data: { data: {} } },
+      'GET /super/plans': { data: { data: plans } },
+      'PATCH /super/plans/2': { data: { data: plans[1] } },
+      'GET /super/settings/features': { data: { data: [] } },
+      'POST /super/setup/demo/delete': {
         data: { data: state({ demo_restaurants: 0, deleted: 3 }) },
       },
       'GET /me': { data: { data: meFixture({ is_super_admin: true }) } },
@@ -109,7 +109,7 @@ describe('Super Admin setup wizard', () => {
       .poll(
         () =>
           fake.calls.find(
-            (c) => c.method === 'PUT' && c.url === '/platform/settings'
+            (c) => c.method === 'PUT' && c.url === '/super/settings'
           )?.data
       )
       .toMatchObject({ support_email: 'hello@menu.example' })
@@ -122,11 +122,11 @@ describe('Super Admin setup wizard', () => {
       .toEqual({ price_minor: 120000, limits: { photos: 2000, branches: 3 } })
     expect(
       fake.calls.some(
-        (c) => c.url === '/platform/plans/1' && c.method === 'PATCH'
+        (c) => c.url === '/super/plans/1' && c.method === 'PATCH'
       )
     ).toBe(false)
     expect(
-      fake.calls.find((c) => c.method === 'PUT' && c.url === '/platform/setup')
+      fake.calls.find((c) => c.method === 'PUT' && c.url === '/super/setup')
         ?.data
     ).toEqual({ checked: 'plans' })
 
@@ -148,7 +148,7 @@ describe('Super Admin setup wizard', () => {
     )
     await expect
       .poll(() =>
-        fake.calls.some((c) => c.url === '/platform/setup/demo/delete')
+        fake.calls.some((c) => c.url === '/super/setup/demo/delete')
       )
       .toBe(true)
 
@@ -159,7 +159,7 @@ describe('Super Admin setup wizard', () => {
       .poll(
         () =>
           fake.calls
-            .filter((c) => c.method === 'PUT' && c.url === '/platform/setup')
+            .filter((c) => c.method === 'PUT' && c.url === '/super/setup')
             .slice(-1)[0]?.data
       )
       .toEqual({ done: true })
@@ -168,8 +168,8 @@ describe('Super Admin setup wizard', () => {
 
   it('shows a dashboard checklist of what is not done, which opens the wizard', async () => {
     fake = fakeApi({
-      'GET /platform/setup': { data: { data: state({ done: true }) } },
-      'PUT /platform/setup': {
+      'GET /super/setup': { data: { data: state({ done: true }) } },
+      'PUT /super/setup': {
         data: { data: state({ done: true, card_hidden: true }) },
       },
     })

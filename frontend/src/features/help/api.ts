@@ -44,7 +44,7 @@ export const helpQuery = (s: HelpSource) =>
         await api.get<{ data: HelpLibrary }>(
           s.audience === 'restaurant'
             ? tenantUrl(s.tenantId, 'help')
-            : '/platform/help'
+            : '/super/help'
         )
       ).data.data,
     staleTime: 5 * 60_000,

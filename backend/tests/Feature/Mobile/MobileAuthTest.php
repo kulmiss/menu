@@ -83,9 +83,9 @@ it('accepts a recovery code once and drops the challenge after five wrong codes'
 
 it('signs out this device or every device', function () {
     $user = User::factory()->create();
-    $a = $user->createToken('A', ['mobile'])->plainTextToken;
-    $b = $user->createToken('B', ['mobile'])->plainTextToken;
-    $c = $user->createToken('C', ['mobile'])->plainTextToken;
+    $a = $user->createToken('A', PersonalAccessToken::abilitiesFor($user))->plainTextToken;
+    $b = $user->createToken('B', PersonalAccessToken::abilitiesFor($user))->plainTextToken;
+    $c = $user->createToken('C', PersonalAccessToken::abilitiesFor($user))->plainTextToken;
 
     $this->withHeaders(bearer($a))->postJson('/api/v1/mobile/auth/logout', [], idem())->assertNoContent();
     expect($user->tokens()->count())->toBe(2);
@@ -100,18 +100,18 @@ it('signs out this device or every device', function () {
 
 it('stops a token that was not used for too long (60 days, Super Admin 14)', function () {
     $owner = User::factory()->create();
-    $token = $owner->createToken('Old phone', ['mobile']);
+    $token = $owner->createToken('Old phone', PersonalAccessToken::abilitiesFor($owner));
     $token->accessToken->forceFill(['last_used_at' => now()->subDays(61)])->save();
     $this->withHeaders(bearer($token->plainTextToken))->getJson('/api/v1/me')->assertUnauthorized();
 
     $this->app['auth']->forgetGuards();
     $admin = superAdmin();
-    $t2 = $admin->createToken('Tablet', ['mobile']);
+    $t2 = $admin->createToken('Tablet', PersonalAccessToken::abilitiesFor($admin));
     $t2->accessToken->forceFill(['last_used_at' => now()->subDays(15)])->save();
     $this->withHeaders(bearer($t2->plainTextToken))->getJson('/api/v1/me')->assertUnauthorized();
 
     $this->app['auth']->forgetGuards();
-    $t3 = $owner->createToken('New phone', ['mobile']);
+    $t3 = $owner->createToken('New phone', PersonalAccessToken::abilitiesFor($owner));
     $t3->accessToken->forceFill(['last_used_at' => now()->subDays(59)])->save();
     $this->withHeaders(bearer($t3->plainTextToken))->getJson('/api/v1/me')->assertOk();
 
@@ -121,9 +121,9 @@ it('stops a token that was not used for too long (60 days, Super Admin 14)', fun
 
 it('lists my devices and revokes one, never someone else\'s', function () {
     $user = User::factory()->create();
-    $mine = $user->createToken('Pixel 8', ['mobile']);
-    $other = $user->createToken('Galaxy Tab', ['mobile']);
-    $stranger = User::factory()->create()->createToken('Not mine', ['mobile']);
+    $mine = $user->createToken('Pixel 8', PersonalAccessToken::abilitiesFor($user));
+    $other = $user->createToken('Galaxy Tab', PersonalAccessToken::abilitiesFor($user));
+    $stranger = User::factory()->create()->createToken('Not mine', ['mobile', 'restaurant']);
 
     $list = $this->withHeaders(bearer($mine->plainTextToken))->getJson('/api/v1/mobile/devices')->assertOk()->json('data');
     expect(collect($list)->pluck('name')->sort()->values()->all())->toBe(['Galaxy Tab', 'Pixel 8'])
@@ -140,8 +140,8 @@ it('keeps the mobile-only routes away from the web session', function () {
 
 it('changes the password with the current one and signs out the other devices', function () {
     $user = User::factory()->create(['password' => 'correct-horse-battery']);
-    $mine = $user->createToken('Phone', ['mobile'])->plainTextToken;
-    $user->createToken('Tablet', ['mobile']);
+    $mine = $user->createToken('Phone', PersonalAccessToken::abilitiesFor($user))->plainTextToken;
+    $user->createToken('Tablet', PersonalAccessToken::abilitiesFor($user));
 
     $this->withHeaders(bearer($mine))->putJson('/api/v1/mobile/account/password', ['current_password' => 'wrong', 'password' => 'another-long-secret', 'password_confirmation' => 'another-long-secret'], idem())
         ->assertUnprocessable()->assertJsonValidationErrors('current_password');
@@ -154,7 +154,7 @@ it('changes the password with the current one and signs out the other devices', 
 it('updates the profile like the web does: a new e-mail needs the password and waits for its link', function () {
     Notification::fake();
     $user = User::factory()->create(['email' => 'old@example.com', 'password' => 'correct-horse-battery']);
-    $token = $user->createToken('Phone', ['mobile'])->plainTextToken;
+    $token = $user->createToken('Phone', PersonalAccessToken::abilitiesFor($user))->plainTextToken;
 
     $this->withHeaders(bearer($token))->putJson('/api/v1/mobile/account/profile', ['name' => 'Selam T.', 'email' => 'new@example.com'], idem())
         ->assertUnprocessable()->assertJsonValidationErrors('current_password');
@@ -165,7 +165,7 @@ it('updates the profile like the web does: a new e-mail needs the password and w
 
 it('sets up two-factor with the password, a code, and never stores the recovery codes for replay', function () {
     $user = User::factory()->create(['password' => 'correct-horse-battery']);
-    $token = $user->createToken('Phone', ['mobile'])->plainTextToken;
+    $token = $user->createToken('Phone', PersonalAccessToken::abilitiesFor($user))->plainTextToken;
     $this->withHeaders(bearer($token));
 
     $this->postJson('/api/v1/mobile/account/two-factor', ['password' => 'wrong'], idem())->assertUnprocessable();

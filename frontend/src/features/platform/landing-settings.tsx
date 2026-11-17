@@ -29,7 +29,7 @@ const SOCIALS = [
 
 type Testimonial = { quote: string; name: string; role: string; real: boolean }
 
-/** The landing-page part of GET /platform/settings (owner, 2026-11-13). */
+/** The landing-page part of GET /super/settings (owner, 2026-11-13). */
 export type LandingSettingsData = {
   brand_color: string
   landing_testimonials: Partial<Testimonial>[]

@@ -26,6 +26,17 @@ class PersonalAccessToken extends SanctumToken
 
     protected $fillable = ['name', 'token', 'abilities', 'expires_at', 'platform', 'app_version'];
 
+    /**
+     * An app sign-in's scopes (QUESTIONS #220): 'super' for a Super Admin,
+     * 'restaurant' for everyone else. "Log in as" tokens add 'impersonation'.
+     *
+     * @return list<string>
+     */
+    public static function abilitiesFor(User $user): array
+    {
+        return ['mobile', $user->is_super_admin ? 'super' : 'restaurant'];
+    }
+
     public function isImpersonation(): bool
     {
         return $this->impersonator_id !== null;

@@ -104,23 +104,23 @@ describe('api helpers', () => {
     }
     nav.addEventListener('navigate', stop)
     fake = fakeApi({
-      'GET /t/1/menus': {
+      'GET /restaurant/1/menus': {
         status: 409,
         data: { message: 'Ended.', code: 'impersonation.expired' },
       },
-      'POST /t/1/menus': { status: 409, data: { message: 'Busy.' } },
+      'POST /restaurant/1/menus': { status: 409, data: { message: 'Busy.' } },
     })
-    await expect(api.get('/t/1/menus')).rejects.toBeInstanceOf(ApiError)
+    await expect(api.get('/restaurant/1/menus')).rejects.toBeInstanceOf(ApiError)
     expect(assign).toHaveBeenCalledWith('/platform')
     // Any other 409 (a save still running) stays on the page.
-    await expect(api.post('/t/1/menus', {})).rejects.toBeInstanceOf(ApiError)
+    await expect(api.post('/restaurant/1/menus', {})).rejects.toBeInstanceOf(ApiError)
     expect(assign).toHaveBeenCalledTimes(1)
     nav.removeEventListener('navigate', stop)
   })
 
   it('builds restaurant URLs', () => {
-    expect(tenantUrl(3)).toBe('/t/3')
-    expect(tenantUrl(3, '/members/9')).toBe('/t/3/members/9')
+    expect(tenantUrl(3)).toBe('/restaurant/3')
+    expect(tenantUrl(3, '/members/9')).toBe('/restaurant/3/members/9')
   })
 
   it('puts Laravel 422 messages on matching form fields only', async () => {

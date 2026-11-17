@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Queue;
 /** Super Admin → Mobile app (owner, 2026-11-14, QUESTIONS #193). */
 function appToken(User $user, string $version = '1.0.0'): string
 {
-    $new = $user->createToken('Pixel 8', ['mobile']);
+    $new = $user->createToken('Pixel 8', PersonalAccessToken::abilitiesFor($user));
     $new->accessToken->forceFill(['platform' => 'android', 'app_version' => $version])->save();
 
     return $new->plainTextToken;

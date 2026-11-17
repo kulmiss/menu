@@ -30,7 +30,7 @@ function sentInvitationToken(string $email): string
 
 function invite(User $by, int $tenantId, array $data): TestResponse
 {
-    return test()->actingAs($by)->postJson("/api/v1/t/{$tenantId}/invitations", $data, idem());
+    return test()->actingAs($by)->postJson("/api/v1/restaurant/{$tenantId}/invitations", $data, idem());
 }
 
 it('emails an invitation with a link and stores only the token hash', function () {

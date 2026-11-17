@@ -28,7 +28,7 @@ it('returns 404 for every restaurant route of a restaurant you do not belong to'
     $victim = Tenant::factory()->create();
 
     $this->actingAs($intruder)
-        ->json($method, "/api/v1/t/{$victim->id}{$path}", ['email' => 'x@example.com', 'role' => 'staff', 'slug' => 'stolen-slug'], idem())
+        ->json($method, "/api/v1/restaurant/{$victim->id}{$path}", ['email' => 'x@example.com', 'role' => 'staff', 'slug' => 'stolen-slug'], idem())
         ->assertNotFound();
 })->with([
     ['GET', ''],
@@ -47,9 +47,9 @@ it('cannot reach another restaurant\'s members or invitations through its own re
         'email' => 'x@example.com', 'role' => Role::Staff, 'token_hash' => str_repeat('a', 64), 'expires_at' => now()->addDay(),
     ]));
 
-    $this->actingAs($owner)->patchJson("/api/v1/t/{$tenant->id}/members/{$foreignMember->id}", ['role' => 'manager'], idem())->assertNotFound();
-    $this->actingAs($owner)->deleteJson("/api/v1/t/{$tenant->id}/members/{$foreignMember->id}", [], idem())->assertNotFound();
-    $this->actingAs($owner)->deleteJson("/api/v1/t/{$tenant->id}/invitations/{$foreignInvitation->id}", [], idem())->assertNotFound();
+    $this->actingAs($owner)->patchJson("/api/v1/restaurant/{$tenant->id}/members/{$foreignMember->id}", ['role' => 'manager'], idem())->assertNotFound();
+    $this->actingAs($owner)->deleteJson("/api/v1/restaurant/{$tenant->id}/members/{$foreignMember->id}", [], idem())->assertNotFound();
+    $this->actingAs($owner)->deleteJson("/api/v1/restaurant/{$tenant->id}/invitations/{$foreignInvitation->id}", [], idem())->assertNotFound();
 
     expect($foreignMember->fresh()->role)->toBe(Role::Staff)
         ->and(Invitation::withoutTenancy()->find($foreignInvitation->id))->not->toBeNull();
@@ -60,7 +60,7 @@ it('lists only the current restaurant\'s members', function () {
     member(Role::Staff, $tenant);
     member(Role::Manager); // another restaurant
 
-    $this->actingAs($owner)->getJson("/api/v1/t/{$tenant->id}/members")->assertOk()->assertJsonCount(2, 'data');
+    $this->actingAs($owner)->getJson("/api/v1/restaurant/{$tenant->id}/members")->assertOk()->assertJsonCount(2, 'data');
 });
 
 it('fails closed when tenant-owned data is read without a current tenant', function () {

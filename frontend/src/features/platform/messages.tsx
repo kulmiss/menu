@@ -383,7 +383,7 @@ function Composer({
     mutationFn: async (f: Filters) =>
       (
         await api.post<{ data: { count: number } }>(
-          '/platform/campaigns/count',
+          '/super/campaigns/count',
           {
             subject: 'x',
             body: 'x',
@@ -402,7 +402,7 @@ function Composer({
       (
         await api.post<{
           data: { subject: string; html: string; sample: string | null }
-        }>('/platform/campaigns/preview', payload())
+        }>('/super/campaigns/preview', payload())
       ).data.data,
     onSuccess: setPreview,
     onError: (err) => setErrors(validationErrors(err) ?? {}),
@@ -411,7 +411,7 @@ function Composer({
     mutationFn: async () =>
       (
         await api.post<{ data: { sent_to: string } }>(
-          '/platform/campaigns/test',
+          '/super/campaigns/test',
           payload()
         )
       ).data.data.sent_to,

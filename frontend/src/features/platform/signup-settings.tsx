@@ -24,7 +24,7 @@ import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { send, usePlatformMutation } from './api'
 
-/** The sign-up part of GET /platform/settings (owner, 2026-11-13). */
+/** The sign-up part of GET /super/settings (owner, 2026-11-13). */
 export type SignupSettingsData = {
   signup_open: boolean
   signup_plan_id: number | null

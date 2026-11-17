@@ -261,7 +261,7 @@ export function InvoicesPage() {
         id='platform-invoices'
         queryKey={[...pkeys.all, 'invoices', 'table']}
         fetch={(params) => fetchPage<InvoiceRow>('invoices', params)}
-        csvUrl={(params) => `/api/v1/platform/invoices?format=csv&${params}`}
+        csvUrl={(params) => `/api/v1/super/invoices?format=csv&${params}`}
         columns={columns}
         rowId={(i) => i.id}
         searchPlaceholder={t('platform.invoices.search_hint')}

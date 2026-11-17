@@ -294,7 +294,7 @@ function DownloadDialog({
             setError(null)
             try {
               const res = await api.post<{ data: { url: string } }>(
-                `/platform/backups/${backup.id}/link`,
+                `/super/backups/${backup.id}/link`,
                 { [mode]: value }
               )
               window.location.assign(res.data.data.url)

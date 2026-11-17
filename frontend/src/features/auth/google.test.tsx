@@ -223,7 +223,7 @@ describe('Super Admin → Settings → Sign-up → Continue with Google', () => 
   afterEach(() => fake?.restore())
 
   it('switches it on and warns while the keys are missing', async () => {
-    fake = fakeApi({ 'PUT /platform/settings': { data: { data: {} } } })
+    fake = fakeApi({ 'PUT /super/settings': { data: { data: {} } } })
     const screen = await renderWithQuery(
       <SignupSettings
         initial={{

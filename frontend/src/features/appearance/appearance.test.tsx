@@ -69,8 +69,8 @@ let fake: ReturnType<typeof fakeApi>
 
 function render(writable = true) {
   fake = fakeApi({
-    'GET /t/1/appearance': { data: { data: APPEARANCE } },
-    'PUT /t/1/appearance': (req) => ({
+    'GET /restaurant/1/appearance': { data: { data: APPEARANCE } },
+    'PUT /restaurant/1/appearance': (req) => ({
       data: {
         data: {
           ...APPEARANCE,

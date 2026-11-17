@@ -18,7 +18,7 @@ describe('Landing page → colour, WhatsApp, customers and links', () => {
   afterEach(() => fake.restore())
 
   it('saves the real-customer tick, and never the texts or sections (they have their own editor)', async () => {
-    fake = fakeApi({ 'PUT /platform/settings': { data: { data: {} } } })
+    fake = fakeApi({ 'PUT /super/settings': { data: { data: {} } } })
     const screen = await renderWithQuery(<LandingSettings initial={initial} />)
 
     const real = screen.getByRole('checkbox', {

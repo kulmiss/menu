@@ -82,7 +82,7 @@ export function HelpArticlesPage() {
     queryFn: async () =>
       (
         await api.get<{ data: Row[]; meta: Meta }>(
-          `/platform/help-articles?audience=${audience}`
+          `/super/help-articles?audience=${audience}`
         )
       ).data,
   })
@@ -217,7 +217,7 @@ function Editor({
     queryFn: async () =>
       (
         await api.get<{ data: Article & { default: Article | null } }>(
-          `/platform/help-articles/${audience}/${slug}`
+          `/super/help-articles/${audience}/${slug}`
         )
       ).data.data,
   })
@@ -487,7 +487,7 @@ function usePreview(body: string) {
     const id = window.setTimeout(async () => {
       try {
         const r = await api.post<{ data: { html: string; unknown: string[] } }>(
-          '/platform/help-articles/preview',
+          '/super/help-articles/preview',
           { body: text }
         )
         setState(r.data.data)

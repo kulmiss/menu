@@ -64,8 +64,8 @@ let fake: ReturnType<typeof fakeApi>
 
 function render(ui: React.ReactNode) {
   fake = fakeApi({
-    'GET /t/1/branches': { data: { data: BRANCHES } },
-    'GET /t/1/menus': {
+    'GET /restaurant/1/branches': { data: { data: BRANCHES } },
+    'GET /restaurant/1/menus': {
       data: {
         data: [
           {
@@ -79,13 +79,13 @@ function render(ui: React.ReactNode) {
         ],
       },
     },
-    'GET /t/1/branches/1/tables': { data: { data: [] } },
-    'POST /t/1/branches/1/tables': { status: 201, data: { data: [] } },
-    'POST /t/1/branches': { status: 201, data: { data: branch(3, 'Bole') } },
-    'GET /t/1/qr-codes': { data: { data: CODES } },
-    'GET /t/1/branches/2/overrides': { data: { data: [] } },
-    'PUT /t/1/branches/2/overrides': { data: { data: [] } },
-    'GET /t/1/menus/5/tree': {
+    'GET /restaurant/1/branches/1/tables': { data: { data: [] } },
+    'POST /restaurant/1/branches/1/tables': { status: 201, data: { data: [] } },
+    'POST /restaurant/1/branches': { status: 201, data: { data: branch(3, 'Bole') } },
+    'GET /restaurant/1/qr-codes': { data: { data: CODES } },
+    'GET /restaurant/1/branches/2/overrides': { data: { data: [] } },
+    'PUT /restaurant/1/branches/2/overrides': { data: { data: [] } },
+    'GET /restaurant/1/menus/5/tree': {
       data: {
         data: {
           menu: {
@@ -172,7 +172,7 @@ describe('BranchesPage', () => {
       .poll(
         () =>
           fake.calls.find(
-            (c) => c.url === '/t/1/branches' && c.method === 'POST'
+            (c) => c.url === '/restaurant/1/branches' && c.method === 'POST'
           )?.data
       )
       .toMatchObject({
@@ -247,9 +247,9 @@ describe('QrCodesPage', () => {
     // One table for every code, tables included, each with its downloads.
     await expect
       .element(screen.getByRole('link', { name: 'PDF · Whole restaurant' }))
-      .toHaveAttribute('href', '/api/v1/t/1/qr-codes/7.pdf')
+      .toHaveAttribute('href', '/api/v1/restaurant/1/qr-codes/7.pdf')
     await expect
       .element(screen.getByRole('link', { name: 'Print table cards' }))
-      .toHaveAttribute('href', '/api/v1/t/1/branches/1/table-cards.pdf')
+      .toHaveAttribute('href', '/api/v1/restaurant/1/branches/1/table-cards.pdf')
   })
 })

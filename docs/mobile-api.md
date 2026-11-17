@@ -6,6 +6,16 @@ The Flutter app [`kulmiss/menu-admin-app`](https://github.com/kulmiss/menu-admin
 - This page has a request and answer example for every endpoint that only the app uses, and for the Super Admin screens that control the app.
 - `tests/Feature/Docs/ApiDocsTest.php` fails when one of those routes has no section here, or a section has no example.
 
+## Two areas (QUESTIONS #215–#220)
+
+| Area | Prefix | Who | Token scope |
+|---|---|---|---|
+| Restaurant | `/api/v1/restaurant/{tenant}/…` | restaurant teams (Owner, Manager, Staff), and a Super Admin only through "Log in as" | `restaurant` |
+| Super Admin | `/api/v1/super/…` | Super Admins with two-factor sign-in, from an allowed address (`SUPER_ADMIN_IPS`) | `super` |
+| Shared | `auth/…`, `me`, `mobile/…`, `signup/…`, `invitations/…`, `help/public`, `impersonation/stop` | as listed in [api-reference.md](api-reference.md) | any |
+
+The app's sign-in returns a token scoped to the person's area: `["mobile", "restaurant"]` or `["mobile", "super"]`. A "Log in as" token is `["mobile", "restaurant", "impersonation"]` and ends after 2 hours. A token, person or address that doesn't belong in an area gets **`404`** there (the area is not revealed), never `403`. Super Admin requests are limited to 240 a minute per person (restaurant ones to 600), and every Super Admin change or download is written to the activity log.
+
 ## Rules for every request
 
 | Header | When | Example |
@@ -22,6 +32,7 @@ Error answers:
 | `401` | `{message}` | token missing, expired or idle too long → sign in again |
 | `402` | `{message, code: "features.<key>", upgrade: {whatsapp, email}}` | the feature is off (plan, restaurant or Super Admin switch) |
 | `403` | `{message, code}` | not allowed (role, `impersonation.blocked`, `mobile.app_off`) |
+| `404` | `{message}` | not found, or not your area (a restaurant you don't belong to, the Super Admin area for anyone else) |
 | `409` | `{message, code}` | conflict, e.g. `idempotency.not_replayable` |
 | `410` | `{message, code: "mobile.challenge_expired"}` | two-factor challenge gone |
 | `422` | `{message, errors: {field: [..]}}` | validation |
@@ -454,12 +465,12 @@ Sending: inbox row at once; the phone push is a queued job (`SendPush`, 3 tries)
 
 ## "Log in as" (QUESTIONS #188)
 
-### `POST /api/v1/platform/restaurants/{restaurant}/impersonate-token`
+### `POST /api/v1/super/restaurants/{restaurant}/impersonate-token`
 
 Super Admin with two-factor, app token. The token works for 2 hours, has the same blocked actions as the web (`403 impersonation.blocked`) and no platform access. `GET me` shows `impersonation`.
 
 ```http
-POST /api/v1/platform/restaurants/12/impersonate-token
+POST /api/v1/super/restaurants/12/impersonate-token
 Authorization: Bearer 3|…
 Idempotency-Key: 9f8e…
 ```
@@ -484,12 +495,12 @@ Idempotency-Key: 7d6c…
 
 The app shows the same articles as the web admin, and keeps the last answer for offline use. Articles about switched-off features, and about jobs the person's role can't do, are left out by the server. Placeholders (plan prices and limits, contact) are already filled in. `body` is Markdown; `html` is the same, for the web. Links to other articles are `help:slug`; pictures are `/help/shots/…webp` with the title `phone`, `desktop` or `app`.
 
-### `GET /api/v1/t/{tenant}/help`
+### `GET /api/v1/restaurant/{tenant}/help`
 
 Sends `ETag`; with `If-None-Match` the answer is `304` when nothing changed.
 
 ```http
-GET /api/v1/t/12/help
+GET /api/v1/restaurant/12/help
 Authorization: Bearer 1|…
 If-None-Match: "5d41402abc4b2a76b9719d911017c592"
 ```
@@ -550,12 +561,12 @@ Idempotency-Key: 2c4e…
 
 ## Super Admin: overview and emergency switches (app `/p`)
 
-The app's Super Admin screen shows numbers from `platform/dashboard` and four switches: **maintenance**, **self sign-up**, **push**, **Super Admin app sign-in**. Everything else opens the web console.
+The app's Super Admin screen shows numbers from `super/dashboard` and four switches: **maintenance**, **self sign-up**, **push**, **Super Admin app sign-in**. Everything else opens the web console.
 
-### `GET /api/v1/platform/dashboard`
+### `GET /api/v1/super/dashboard`
 
 ```http
-GET /api/v1/platform/dashboard
+GET /api/v1/super/dashboard
 Authorization: Bearer 3|…
 ```
 
@@ -563,10 +574,10 @@ Authorization: Bearer 3|…
 {"data": {"states": {"trial": 4, "active": 21, "grace": 1, "read_only": 0, "unavailable": 0, "suspended": 0, "pending": 2}, "restaurants": 28, "signups_30d": 6, "views_30d": 18420, "scans_30d": 3311, "per_plan": {"Free": 9, "Pro": 19}, "expiring": [], "revenue_30d": []}}
 ```
 
-### `GET /api/v1/platform/settings`
+### `GET /api/v1/super/settings`
 
 ```http
-GET /api/v1/platform/settings
+GET /api/v1/super/settings
 Authorization: Bearer 3|…
 ```
 
@@ -576,12 +587,12 @@ Authorization: Bearer 3|…
 
 (Shortened: the answer has every platform setting.)
 
-### `PUT /api/v1/platform/settings`
+### `PUT /api/v1/super/settings`
 
 Send only what changes. The app's "self sign-up" switch:
 
 ```http
-PUT /api/v1/platform/settings
+PUT /api/v1/super/settings
 Authorization: Bearer 3|…
 Idempotency-Key: 3e2d…
 
@@ -594,12 +605,12 @@ Idempotency-Key: 3e2d…
 
 ## Super Admin: feature switches (QUESTIONS #192)
 
-### `GET /api/v1/platform/settings/features`
+### `GET /api/v1/super/settings/features`
 
 One row per feature: is it on for everyone, and how many plans / restaurants have it off.
 
 ```http
-GET /api/v1/platform/settings/features
+GET /api/v1/super/settings/features
 Authorization: Bearer 3|…
 ```
 
@@ -611,12 +622,12 @@ Authorization: Bearer 3|…
 ]}
 ```
 
-### `PUT /api/v1/platform/settings/features`
+### `PUT /api/v1/super/settings/features`
 
 Only OFF keys are stored. Guest menus are rebuilt when a restaurant feature changes. At least one menu style must stay on.
 
 ```http
-PUT /api/v1/platform/settings/features
+PUT /api/v1/super/settings/features
 Authorization: Bearer 3|…
 Idempotency-Key: 6a5b…
 
@@ -627,10 +638,10 @@ Answer: the same rows as `GET`. All four styles off: `422 {"errors": {"features"
 
 ## Super Admin: Mobile app control (QUESTIONS #193)
 
-### `GET /api/v1/platform/mobile-app`
+### `GET /api/v1/super/mobile-app`
 
 ```http
-GET /api/v1/platform/mobile-app
+GET /api/v1/super/mobile-app
 Authorization: Bearer 3|…
 ```
 
@@ -645,12 +656,12 @@ Authorization: Bearer 3|…
 }}
 ```
 
-### `PUT /api/v1/platform/mobile-app`
+### `PUT /api/v1/super/mobile-app`
 
 Send only what changes. Versions are `x.y.z`; `min_version` must not be above `latest_version`. Links must be `https://`; the banner link may also be an app path (`/inbox`).
 
 ```http
-PUT /api/v1/platform/mobile-app
+PUT /api/v1/super/mobile-app
 Authorization: Bearer 3|…
 Idempotency-Key: b7c8…
 
@@ -659,14 +670,14 @@ Idempotency-Key: b7c8…
 
 Answer: the full settings, like `GET`. `{"min_version": "2.0.0"}` above latest → `422 errors.min_version`.
 
-### `POST /api/v1/platform/mobile-app/pushes`
+### `POST /api/v1/super/mobile-app/pushes`
 
 Sends to everyone chosen who is signed in to the app (inbox + phone). `dry_run: true` only counts. 10 a minute.
 
 `audience.to`: `all`, `restaurant`, `super_admin`. With `restaurant`, optional `roles` (`owner`, `manager`, `staff`), `plan_ids`, `tenant_ids`.
 
 ```http
-POST /api/v1/platform/mobile-app/pushes
+POST /api/v1/super/mobile-app/pushes
 Authorization: Bearer 3|…
 Idempotency-Key: d9e0…
 
@@ -679,12 +690,12 @@ Idempotency-Key: d9e0…
 
 Without `dry_run`: `201 {"data": {"id": 3, "recipients": 14, "with_app": 9}}`. Nobody matches: `422 errors.audience`.
 
-### `GET /api/v1/platform/mobile-app/pushes`
+### `GET /api/v1/super/mobile-app/pushes`
 
 The last 100 sent.
 
 ```http
-GET /api/v1/platform/mobile-app/pushes
+GET /api/v1/super/mobile-app/pushes
 Authorization: Bearer 3|…
 ```
 
@@ -692,12 +703,12 @@ Authorization: Bearer 3|…
 {"data": [{"id": 3, "title": "New styles", "body": "Try style D", "link": "/inbox", "audience": {"to": "restaurant", "roles": ["owner"]}, "recipients": 14, "with_app": 9, "sent_by": "Hana Tesfaye", "created_at": "2026-11-16T17:10:24+00:00"}]}
 ```
 
-### `GET /api/v1/platform/mobile-app/devices`
+### `GET /api/v1/super/mobile-app/devices`
 
 Server table: `page`, `per_page`, `q` (name, e-mail, device), `sort` (`user`, `app_version`, `last_used_at`, `-` for newest first), `platform` (`android`, `ios`), `version`, `kind` (`restaurant`, `super_admin`), `from`/`to` (last seen).
 
 ```http
-GET /api/v1/platform/mobile-app/devices?page=1&platform=android&sort=-last_used_at
+GET /api/v1/super/mobile-app/devices?page=1&platform=android&sort=-last_used_at
 Authorization: Bearer 3|…
 ```
 
@@ -705,24 +716,24 @@ Authorization: Bearer 3|…
 {"data": [{"id": 1, "device": "Pixel 8", "platform": "android", "app_version": "1.2.0", "user": {"id": 1, "name": "Sara Bekele", "email": "sara@cafe.example", "is_super_admin": false}, "restaurants": "Abebe Café", "push_on": true, "last_used_at": "2026-11-16T17:10:24+00:00", "created_at": "2026-11-10T09:00:00+00:00"}], "meta": {"total": 1, "page": 1, "per_page": 25, "pages": 1}}
 ```
 
-### `DELETE /api/v1/platform/mobile-app/devices/{device}`
+### `DELETE /api/v1/super/mobile-app/devices/{device}`
 
 Signs that device out (its token and push address are deleted).
 
 ```http
-DELETE /api/v1/platform/mobile-app/devices/1
+DELETE /api/v1/super/mobile-app/devices/1
 Authorization: Bearer 3|…
 Idempotency-Key: f1a2…
 ```
 
 `204 No Content`.
 
-### `POST /api/v1/platform/mobile-app/devices/sign-out-all`
+### `POST /api/v1/super/mobile-app/devices/sign-out-all`
 
 Every app device of every person, except the Super Admin's own current one. 3 a minute.
 
 ```http
-POST /api/v1/platform/mobile-app/devices/sign-out-all
+POST /api/v1/super/mobile-app/devices/sign-out-all
 Authorization: Bearer 3|…
 Idempotency-Key: a3b4…
 
@@ -733,10 +744,10 @@ Idempotency-Key: a3b4…
 {"data": {"signed_out": 41}}
 ```
 
-### `GET /api/v1/platform/mobile-app/stats`
+### `GET /api/v1/super/mobile-app/stats`
 
 ```http
-GET /api/v1/platform/mobile-app/stats
+GET /api/v1/super/mobile-app/stats
 Authorization: Bearer 3|…
 ```
 
@@ -746,4 +757,4 @@ Authorization: Bearer 3|…
 
 `push_opt_in` is a percentage of devices (`null` with no devices); `below_min` counts devices older than `versions.min`.
 
-Everything else (restaurant `t/{tenant}/…`, Super Admin `platform/…`) works the same with the token: see [api-reference.md](api-reference.md).
+Everything else (restaurant `restaurant/{tenant}/…`, Super Admin `super/…`) works the same with the token: see [api-reference.md](api-reference.md).

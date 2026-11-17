@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Middleware\AuditSuperAdmin;
 use App\Http\Middleware\EnsureAccessToken;
 use App\Http\Middleware\EnsureIdempotency;
 use App\Http\Middleware\EnsureOwnerTwoFactor;
+use App\Http\Middleware\EnsureRestaurantArea;
 use App\Http\Middleware\EnsureSuperAdmin;
 use App\Http\Middleware\EnsureTenantWritable;
 use App\Http\Middleware\GuardImpersonation;
@@ -56,7 +58,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'password.throttle' => ThrottlePasswordEmails::class,
             'owner.two_factor' => EnsureOwnerTwoFactor::class,
             'feature' => RequireFeature::class,
-            'platform' => EnsureSuperAdmin::class,
+            'super' => EnsureSuperAdmin::class,
+            'super.audit' => AuditSuperAdmin::class,
+            'restaurant' => EnsureRestaurantArea::class,
             'tenant' => ResolveTenant::class,
             'tenant.writable' => EnsureTenantWritable::class,
         ]);

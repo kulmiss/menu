@@ -31,12 +31,12 @@ let fake: ReturnType<typeof fakeApi>
 
 async function render() {
   fake = fakeApi({
-    'GET /t/1/profile': { data: { data: PROFILE } },
-    'PUT /t/1/profile': { data: { data: PROFILE } },
-    'GET /t/1/branches': { data: { data: [] } },
-    'GET /t/1/hours': { data: { data: [] } },
-    'PUT /t/1/hours': { data: { data: [] } },
-    'GET /t/1/closures': { data: { data: [] } },
+    'GET /restaurant/1/profile': { data: { data: PROFILE } },
+    'PUT /restaurant/1/profile': { data: { data: PROFILE } },
+    'GET /restaurant/1/branches': { data: { data: [] } },
+    'GET /restaurant/1/hours': { data: { data: [] } },
+    'PUT /restaurant/1/hours': { data: { data: [] } },
+    'GET /restaurant/1/closures': { data: { data: [] } },
   })
   return renderWithQuery(<InfoPage />, {
     me: meFixture({ tenants: [tenantFixture()] }),
@@ -60,7 +60,7 @@ describe('InfoPage', () => {
     await expect
       .poll(
         () =>
-          fake.calls.find((c) => c.method === 'PUT' && c.url === '/t/1/hours')
+          fake.calls.find((c) => c.method === 'PUT' && c.url === '/restaurant/1/hours')
             ?.data
       )
       .toEqual({
@@ -92,7 +92,7 @@ describe('InfoPage', () => {
     await expect
       .poll(
         () =>
-          fake.calls.find((c) => c.method === 'PUT' && c.url === '/t/1/profile')
+          fake.calls.find((c) => c.method === 'PUT' && c.url === '/restaurant/1/profile')
             ?.data
       )
       .toMatchObject({ phone: '+251 11 555 0100', email: null, socials: {} })

@@ -6,6 +6,7 @@ use App\Support\MailSettings;
 use App\Tenancy\CurrentTenant;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
@@ -28,6 +29,10 @@ class AppServiceProvider extends ServiceProvider
 
         // Landing page clicks: one shared limit, never per visitor (owner, 2026-11-17).
         RateLimiter::for('landing-click', fn () => Limit::perMinute(600)->by('landing-click'));
+
+        // The two signed-in areas (QUESTIONS #220), per person: the Super Admin's is stricter.
+        RateLimiter::for('super', fn (Request $request) => Limit::perMinute(240)->by('super:'.($request->user()?->getAuthIdentifier() ?? $request->ip())));
+        RateLimiter::for('restaurant', fn (Request $request) => Limit::perMinute(600)->by('restaurant:'.($request->user()?->getAuthIdentifier() ?? $request->ip())));
 
         // Every e-mail uses the SMTP server saved by the Super Admin, if any (else .env).
         $this->app->afterResolving('mail.manager', fn () => MailSettings::apply());

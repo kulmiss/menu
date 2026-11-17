@@ -50,12 +50,12 @@ describe('ImportExportPage', () => {
 
   it('shows a preview and imports after confirming', async () => {
     fake = fakeApi({
-      'POST /t/1/import/preview': {
+      'POST /restaurant/1/import/preview': {
         data: {
           data: { token: 'x'.repeat(32), summary, rows, expires_at: '' },
         },
       },
-      'POST /t/1/import/commit': { data: { data: { summary } } },
+      'POST /restaurant/1/import/commit': { data: { data: { summary } } },
     })
     const screen = await renderWithQuery(<ImportExportPage />, {
       me: meFixture(),
@@ -71,7 +71,7 @@ describe('ImportExportPage', () => {
 
     await vi.waitFor(() =>
       expect(
-        fake.apiCalls().find((c) => c.url === '/t/1/import/commit')?.data
+        fake.apiCalls().find((c) => c.url === '/restaurant/1/import/commit')?.data
       ).toEqual({ token: 'x'.repeat(32) })
     )
     await expect
@@ -81,7 +81,7 @@ describe('ImportExportPage', () => {
 
   it('blocks the import while rows have errors and shows them first', async () => {
     fake = fakeApi({
-      'POST /t/1/import/preview': {
+      'POST /restaurant/1/import/preview': {
         data: {
           data: {
             token: 'y'.repeat(32),
@@ -120,7 +120,7 @@ describe('ImportExportPage', () => {
 
   it("shows why a file can't be used", async () => {
     fake = fakeApi({
-      'POST /t/1/import/preview': invalid({
+      'POST /restaurant/1/import/preview': invalid({
         file: 'The first row needs these column names: menu.',
       }),
     })

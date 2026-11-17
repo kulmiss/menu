@@ -36,7 +36,7 @@ export function PlatformDashboard() {
   const meta = useQuery({
     queryKey: ['platform', 'insights', 'meta'],
     queryFn: async () =>
-      (await api.get<{ data: Meta }>('/platform/insights')).data.data,
+      (await api.get<{ data: Meta }>('/super/insights')).data.data,
     staleTime: 60_000,
   })
   const set = (next: InsightFilters) =>

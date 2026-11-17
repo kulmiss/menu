@@ -150,11 +150,11 @@ export const pkeys = { all: ['platform'] as const }
 export const fetchPage = async <T>(path: string, params: URLSearchParams) =>
   (
     await api.get<{ data: T[]; meta: Page<T>['meta'] }>(
-      `/platform/${path}?${params}`
+      `/super/${path}?${params}`
     )
   ).data
 const get = async <T>(path: string) =>
-  (await api.get<{ data: T }>(`/platform/${path}`)).data.data
+  (await api.get<{ data: T }>(`/super/${path}`)).data.data
 export const q = <T>(path: string) =>
   queryOptions({
     queryKey: [...pkeys.all, path] as const,
@@ -264,7 +264,7 @@ export const invoicesQ = (params: string) =>
   q<InvoiceRow[]>(`invoices${params ? `?${params}` : ''}`)
 /** Opened in a new tab; the session cookie authorises it. */
 export const invoicePdfUrl = (id: number) =>
-  `${api.defaults.baseURL}/platform/invoices/${id}/pdf`
+  `${api.defaults.baseURL}/super/invoices/${id}/pdf`
 export const themesQ = () =>
   q<
     {
@@ -338,7 +338,7 @@ export const send = (
 ) =>
   api.request({
     method: method.toUpperCase() as 'POST',
-    url: `/platform/${path}`,
+    url: `/super/${path}`,
     data: body,
   })
 

@@ -31,13 +31,13 @@ const PUBLIC_ROUTES = [
 
 /** Staff (any member) may do these writes; every other tenant write needs Manager or Owner. */
 const STAFF_WRITES = [
-    'PATCH api/v1/t/{tenant}/items/{item}/sold-out', 'PATCH api/v1/t/{tenant}/variants/{variant}/sold-out',
-    'PATCH api/v1/t/{tenant}/addon-options/{option}/sold-out', 'POST api/v1/t/{tenant}/announcements/{announcement}/read',
+    'PATCH api/v1/restaurant/{tenant}/items/{item}/sold-out', 'PATCH api/v1/restaurant/{tenant}/variants/{variant}/sold-out',
+    'PATCH api/v1/restaurant/{tenant}/addon-options/{option}/sold-out', 'POST api/v1/restaurant/{tenant}/announcements/{announcement}/read',
 ];
 
 /** Owner only (Managers get 403). */
 const OWNER_ONLY = [
-    'GET api/v1/t/{tenant}/billing', 'GET api/v1/t/{tenant}/billing/invoices/{invoice}/pdf', 'PATCH api/v1/t/{tenant}/account/slug',
+    'GET api/v1/restaurant/{tenant}/billing', 'GET api/v1/restaurant/{tenant}/billing/invoices/{invoice}/pdf', 'PATCH api/v1/restaurant/{tenant}/account/slug',
 ];
 
 function matrixRoutes(): array
@@ -53,24 +53,9 @@ function matrixRoutes(): array
     return $out;
 }
 
-/** A URL that matches the route: made-up ids, or the first allowed value of a constrained part. */
-function matrixUrl(string $uri, int $tenantId, array $wheres = []): string
-{
-    $uri = str_replace('{tenant}', (string) $tenantId, $uri);
-
-    return '/'.preg_replace_callback('/\{([^}?]+)\??\}/', function ($m) use ($wheres) {
-        $where = $wheres[$m[1]] ?? null;
-        if (is_string($where) && preg_match('/^\(?([a-z][a-z0-9_-]*)(\||\)|$)/i', $where, $first) === 1) {
-            return $first[1];
-        }
-
-        return '999999';
-    }, $uri);
-}
-
 function isProtected(array $mw): bool
 {
-    return collect($mw)->contains(fn ($m) => is_string($m) && (str_starts_with($m, 'auth') || $m === 'platform' || str_contains($m, 'Authenticate:')));
+    return collect($mw)->contains(fn ($m) => is_string($m) && (str_starts_with($m, 'auth') || $m === 'super' || str_contains($m, 'Authenticate:')));
 }
 
 it('classifies every route: only the public list is open to guests', function () {
@@ -99,7 +84,7 @@ it('never lets another restaurant\'s Owner into a restaurant', function () {
     $this->actingAs($stranger);
     $wrong = [];
     foreach (matrixRoutes() as $r) {
-        if (! str_starts_with($r['uri'], 'api/v1/t/{tenant}')) {
+        if (! str_starts_with($r['uri'], 'api/v1/restaurant/{tenant}')) {
             continue;
         }
         $status = $this->json($r['method'], matrixUrl($r['uri'], $tenant->id, $r['wheres']), [], idem())->status();
@@ -115,7 +100,7 @@ it('keeps restaurant users out of the platform', function () {
     $this->actingAs($owner);
     $wrong = [];
     foreach (matrixRoutes() as $r) {
-        if (! str_starts_with($r['uri'], 'api/v1/platform')) {
+        if (! str_starts_with($r['uri'], 'api/v1/super')) {
             continue;
         }
         $status = $this->json($r['method'], matrixUrl($r['uri'], 1, $r['wheres']), [], idem())->status();
@@ -133,11 +118,11 @@ it('lets Staff change nothing but the sold-out switches', function () {
     $this->actingAs($staff);
     $wrong = [];
     foreach (matrixRoutes() as $r) {
-        if (! str_starts_with($r['uri'], 'api/v1/t/{tenant}') || $r['method'] === 'GET' || in_array($r['key'], STAFF_WRITES, true)) {
+        if (! str_starts_with($r['uri'], 'api/v1/restaurant/{tenant}') || $r['method'] === 'GET' || in_array($r['key'], STAFF_WRITES, true)) {
             continue;
         }
         // These decide the permission from the request (which role to invite, which bulk action).
-        $body = ['POST api/v1/t/{tenant}/invitations' => ['email' => 'new@example.com', 'role' => 'staff'], 'POST api/v1/t/{tenant}/items/bulk' => ['ids' => [1], 'action' => 'delete']][$r['key']] ?? [];
+        $body = ['POST api/v1/restaurant/{tenant}/invitations' => ['email' => 'new@example.com', 'role' => 'staff'], 'POST api/v1/restaurant/{tenant}/items/bulk' => ['ids' => [1], 'action' => 'delete']][$r['key']] ?? [];
         $status = $this->json($r['method'], matrixUrl($r['uri'], $tenant->id, $r['wheres']), $body, idem())->status();
         // 403 from the Gate, or 404 when the (made-up) record is looked up first; never accepted or validated.
         if (! in_array($status, [403, 404], true)) {
@@ -148,9 +133,9 @@ it('lets Staff change nothing but the sold-out switches', function () {
 
     // L13: reading the menu (needed for the sold-out switches) is intended for Staff.
     foreach (['items', 'menus', 'tags', 'addon-groups'] as $read) {
-        $this->getJson(matrixUrl("api/v1/t/{tenant}/{$read}", $tenant->id))->assertOk();
+        $this->getJson(matrixUrl("api/v1/restaurant/{tenant}/{$read}", $tenant->id))->assertOk();
     }
-    $this->getJson(matrixUrl('api/v1/t/{tenant}/members', $tenant->id))->assertForbidden();
+    $this->getJson(matrixUrl('api/v1/restaurant/{tenant}/members', $tenant->id))->assertForbidden();
 });
 
 it('keeps billing and the account address for the Owner', function () {
@@ -161,5 +146,5 @@ it('keeps billing and the account address for the Owner', function () {
         [$method, $uri] = explode(' ', $key, 2);
         expect($this->json($method, matrixUrl($uri, $tenant->id), [], idem())->status())->toBeIn([403, 404], $key);
     }
-    expect($this->getJson(matrixUrl('api/v1/t/{tenant}/billing', $tenant->id))->status())->toBe(403);
+    expect($this->getJson(matrixUrl('api/v1/restaurant/{tenant}/billing', $tenant->id))->status())->toBe(403);
 });

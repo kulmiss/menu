@@ -25,8 +25,8 @@ class ApiReferenceCommand extends Command
         'signup' => 'Self sign-up',
         'invitations' => 'Team invitations',
         'impersonation' => '"Log in as"',
-        't' => 'Restaurant (`t/{tenant}/…`)',
-        'platform' => 'Super Admin (`platform/…`)',
+        'restaurant' => 'Restaurant (`restaurant/{tenant}/…`)',
+        'super' => 'Super Admin (`super/…`)',
         'beacon' => 'Guest menu (public)',
     ];
 
@@ -80,7 +80,7 @@ class ApiReferenceCommand extends Command
                 array_values(array_filter($mw, fn ($m) => is_string($m) && str_starts_with($m, $name.':'))),
             ));
             $who = match (true) {
-                $has('platform') => 'Super Admin',
+                $has('super') => 'Super Admin',
                 $has('tenant') => 'restaurant team',
                 $has('auth') => 'signed in',
                 $has('guest') => 'signed out',

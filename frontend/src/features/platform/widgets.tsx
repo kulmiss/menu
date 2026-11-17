@@ -72,7 +72,7 @@ type PlanMix = {
 const w = <T,>(name: string) => ({
   queryKey: ['platform', 'widgets', name],
   queryFn: async () =>
-    (await api.get<{ data: T }>(`/platform/widgets/${name}`)).data.data,
+    (await api.get<{ data: T }>(`/super/widgets/${name}`)).data.data,
   staleTime: 60_000,
 })
 const nameOf = (n: Names) => (n ? (n.en ?? Object.values(n)[0] ?? '') : '')
@@ -519,7 +519,7 @@ function EmailDialog({
   )
   const send = useMutation({
     mutationFn: () =>
-      api.post<{ message: string }>(`/platform/widgets/email/${target.id}`, {
+      api.post<{ message: string }>(`/super/widgets/email/${target.id}`, {
         subject,
         message,
         reason: target.reason,

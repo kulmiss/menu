@@ -172,7 +172,7 @@ export function DishesPage() {
           csvUrl={
             ctx.canManage
               ? (params) =>
-                  `/api/v1/t/${ctx.tenantId}/items?format=csv&${params}`
+                  `/api/v1/restaurant/${ctx.tenantId}/items?format=csv&${params}`
               : undefined
           }
           columns={columns}

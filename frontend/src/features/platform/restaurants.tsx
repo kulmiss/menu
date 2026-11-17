@@ -254,7 +254,7 @@ export function RestaurantsPage({ open }: Props) {
         id='platform-restaurants'
         queryKey={[...pkeys.all, 'restaurants', 'table']}
         fetch={(params) => fetchPage<Restaurant>('restaurants', params)}
-        csvUrl={(params) => `/api/v1/platform/restaurants?format=csv&${params}`}
+        csvUrl={(params) => `/api/v1/super/restaurants?format=csv&${params}`}
         columns={columns}
         filters={filters}
         dateLabel={t('platform.restaurants.created_on')}

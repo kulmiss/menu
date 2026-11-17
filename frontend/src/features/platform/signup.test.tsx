@@ -54,10 +54,10 @@ describe('Super Admin sign-up controls', () => {
 
   it('lists pending sign-ups and approves one', async () => {
     fake = fakeApi({
-      'GET /platform/restaurants': { data: { data: [pending] } },
-      'GET /platform/plans': { data: { data: [] } },
-      'GET /platform/restaurants/9': detail,
-      'POST /platform/restaurants/9/approve': { data: { data: pending } },
+      'GET /super/restaurants': { data: { data: [pending] } },
+      'GET /super/plans': { data: { data: [] } },
+      'GET /super/restaurants/9': detail,
+      'POST /super/restaurants/9/approve': { data: { data: pending } },
     })
     const screen = await renderWithQuery(<RestaurantsPage />, { me: admin })
     await expect
@@ -70,15 +70,15 @@ describe('Super Admin sign-up controls', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Approve' }))
     await expect
       .poll(() => fake.calls.find((c) => c.method === 'POST')?.url)
-      .toBe('/platform/restaurants/9/approve')
+      .toBe('/super/restaurants/9/approve')
   })
 
   it('rejects a sign-up with a reason', async () => {
     fake = fakeApi({
-      'GET /platform/restaurants': { data: { data: [pending] } },
-      'GET /platform/plans': { data: { data: [] } },
-      'GET /platform/restaurants/9': detail,
-      'POST /platform/restaurants/9/reject': {
+      'GET /super/restaurants': { data: { data: [pending] } },
+      'GET /super/plans': { data: { data: [] } },
+      'GET /super/restaurants/9': detail,
+      'POST /super/restaurants/9/reject': {
         data: { data: { removed: true } },
       },
     })
@@ -94,13 +94,13 @@ describe('Super Admin sign-up controls', () => {
       .poll(() => fake.calls.find((c) => c.method === 'POST')?.data)
       .toEqual({ reason: 'Not a restaurant, please contact us.' })
     expect(fake.calls.find((c) => c.method === 'POST')?.url).toBe(
-      '/platform/restaurants/9/reject'
+      '/super/restaurants/9/reject'
     )
   })
 
   it('saves the sign-up settings without sending the stored secret', async () => {
     fake = fakeApi({
-      'GET /platform/settings': {
+      'GET /super/settings': {
         data: {
           data: {
             name: 'Menu',
@@ -128,8 +128,8 @@ describe('Super Admin sign-up controls', () => {
           },
         },
       },
-      'GET /platform/settings/mail': { status: 404 },
-      'PUT /platform/settings': { data: { data: {} } },
+      'GET /super/settings/mail': { status: 404 },
+      'PUT /super/settings': { data: { data: {} } },
     })
     const screen = await renderWithQuery(<SettingsPage />, { me: admin })
 
@@ -169,7 +169,7 @@ describe('Super Admin landing page settings', () => {
     window.history.replaceState(null, '', '#landing')
     navigate.mockClear()
     fake = fakeApi({
-      'GET /platform/settings': {
+      'GET /super/settings': {
         data: {
           data: {
             name: 'Menu',
@@ -187,7 +187,7 @@ describe('Super Admin landing page settings', () => {
           },
         },
       },
-      'GET /platform/settings/mail': { status: 404 },
+      'GET /super/settings/mail': { status: 404 },
     })
     const screen = await renderWithQuery(<SettingsPage />, { me: admin })
 
@@ -207,7 +207,7 @@ describe('Super Admin landing page settings', () => {
   it('splits settings into tabs, keeps unsaved edits and remembers the tab in the address', async () => {
     window.history.replaceState(null, '', '#email')
     fake = fakeApi({
-      'GET /platform/settings': {
+      'GET /super/settings': {
         data: {
           data: {
             name: 'Menu Hub',
@@ -226,7 +226,7 @@ describe('Super Admin landing page settings', () => {
           },
         },
       },
-      'GET /platform/settings/mail': { status: 404 },
+      'GET /super/settings/mail': { status: 404 },
     })
     const screen = await renderWithQuery(<SettingsPage />, { me: admin })
 
@@ -254,7 +254,7 @@ describe('Super Admin landing page settings', () => {
   it('shows the draft note and resets the Terms to the default text after confirming', async () => {
     window.history.replaceState(null, '', '#general')
     fake = fakeApi({
-      'GET /platform/settings': {
+      'GET /super/settings': {
         data: {
           data: {
             name: 'Menu',
@@ -275,8 +275,8 @@ describe('Super Admin landing page settings', () => {
           },
         },
       },
-      'GET /platform/settings/mail': { status: 404 },
-      'POST /platform/settings/legal/terms/reset': {
+      'GET /super/settings/mail': { status: 404 },
+      'POST /super/settings/legal/terms/reset': {
         data: {
           data: { terms: 'Last updated: 13 November 2026\n\nDefault terms' },
         },
@@ -318,7 +318,7 @@ describe('Super Admin landing page settings', () => {
       .toHaveValue('Last updated: 13 November 2026\n\nDefault terms')
     expect(
       fake.calls.filter((c) => c.method === 'POST').map((c) => c.url)
-    ).toEqual(['/platform/settings/legal/terms/reset'])
+    ).toEqual(['/super/settings/legal/terms/reset'])
     await expect
       .element(screen.getByLabelText('Privacy policy'))
       .toHaveValue('My own privacy text')

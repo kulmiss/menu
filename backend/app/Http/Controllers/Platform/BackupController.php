@@ -75,7 +75,7 @@ class BackupController extends Controller
         abort_unless($backup->status === 'ok' && $backup->path() && is_file((string) $backup->path()), 404, __('backups.not_ready'));
         $this->activity->log('platform.backup_downloaded', $backup, [], null);
 
-        return response()->json(['data' => ['url' => URL::temporarySignedRoute('platform.backups.file', now()->addMinutes(5), ['backup' => $backup->id])]]);
+        return response()->json(['data' => ['url' => URL::temporarySignedRoute('super.backups.file', now()->addMinutes(5), ['backup' => $backup->id])]]);
     }
 
     public function file(Backup $backup): BinaryFileResponse

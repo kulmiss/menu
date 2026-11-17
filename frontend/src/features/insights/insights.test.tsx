@@ -45,9 +45,9 @@ describe('InsightsPage', () => {
       },
     })
     fake = fakeApi({
-      'GET /t/1/branches': { data: { data: [] } },
-      'GET /t/1/insights?days=30': data(30),
-      'GET /t/1/insights?days=7': data(7),
+      'GET /restaurant/1/branches': { data: { data: [] } },
+      'GET /restaurant/1/insights?days=30': data(30),
+      'GET /restaurant/1/insights?days=7': data(7),
     })
     const screen = await renderWithQuery(<InsightsPage />, {
       me: meFixture({ tenants: [tenantFixture()] }),
@@ -63,7 +63,7 @@ describe('InsightsPage', () => {
     await userEvent.click(screen.getByRole('combobox', { name: 'Period' }))
     await userEvent.click(screen.getByRole('option', { name: 'Last 7 days' }))
     await expect
-      .poll(() => fake.calls.some((c) => c.url === '/t/1/insights?days=7'))
+      .poll(() => fake.calls.some((c) => c.url === '/restaurant/1/insights?days=7'))
       .toBe(true)
   })
 })
@@ -74,7 +74,7 @@ describe('Dashboard', () => {
 
   it('shows today and puts a sold-out dish back on sale', async () => {
     fake = fakeApi({
-      'GET /t/1/dashboard': {
+      'GET /restaurant/1/dashboard': {
         data: {
           data: {
             today: { views: 31, scans: 9 },
@@ -83,8 +83,8 @@ describe('Dashboard', () => {
           },
         },
       },
-      'PATCH /t/1/items/5/sold-out': { data: { data: {} } },
-      'GET /t/1/widgets/trend': {
+      'PATCH /restaurant/1/items/5/sold-out': { data: { data: {} } },
+      'GET /restaurant/1/widgets/trend': {
         data: {
           data: {
             days: [],
@@ -110,7 +110,7 @@ describe('Dashboard', () => {
 
   it('has no sold-out card while the "sold out" switch is off', async () => {
     fake = fakeApi({
-      'GET /t/1/dashboard': {
+      'GET /restaurant/1/dashboard': {
         data: {
           data: {
             today: { views: 31, scans: 9 },
@@ -119,7 +119,7 @@ describe('Dashboard', () => {
           },
         },
       },
-      'GET /t/1/widgets/trend': {
+      'GET /restaurant/1/widgets/trend': {
         data: {
           data: {
             days: [],
