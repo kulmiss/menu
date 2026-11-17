@@ -48,7 +48,9 @@ describe('Insights export', () => {
       'GET /restaurant/1/insights/settings': {
         data: { data: { monthly_email: false } },
       },
-      'PUT /restaurant/1/insights/settings': { data: { data: { monthly_email: true } } },
+      'PUT /restaurant/1/insights/settings': {
+        data: { data: { monthly_email: true } },
+      },
     })
     const screen = await renderWithQuery(
       <MonthlyReportCard tenantId={1} canEdit />
@@ -66,7 +68,9 @@ describe('Insights export', () => {
 
   it('is read-only when the restaurant can only read', async () => {
     fake = fakeApi({
-      'GET /restaurant/1/insights/settings': { data: { data: { monthly_email: true } } },
+      'GET /restaurant/1/insights/settings': {
+        data: { data: { monthly_email: true } },
+      },
     })
     const screen = await renderWithQuery(
       <MonthlyReportCard tenantId={1} canEdit={false} />

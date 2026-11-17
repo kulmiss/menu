@@ -53,9 +53,9 @@ describe('All dishes', () => {
     await expect.element(screen.getByText('Macchiato')).toBeVisible()
     await expect.element(screen.getByText('Br 120').first()).toBeVisible()
     await expect.element(screen.getByText('Sold out')).toBeVisible()
-    expect(fake.calls.find((c) => c.url.startsWith('/restaurant/1/items?'))?.url).toBe(
-      '/restaurant/1/items?page=1&per=25'
-    )
+    expect(
+      fake.calls.find((c) => c.url.startsWith('/restaurant/1/items?'))?.url
+    ).toBe('/restaurant/1/items?page=1&per=25')
 
     await userEvent.click(
       screen.getByRole('checkbox', { name: 'Select all rows on this page' })

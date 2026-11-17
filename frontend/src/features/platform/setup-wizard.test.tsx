@@ -121,9 +121,7 @@ describe('Super Admin setup wizard', () => {
       .poll(() => fake.calls.find((c) => c.method === 'PATCH')?.data)
       .toEqual({ price_minor: 120000, limits: { photos: 2000, branches: 3 } })
     expect(
-      fake.calls.some(
-        (c) => c.url === '/super/plans/1' && c.method === 'PATCH'
-      )
+      fake.calls.some((c) => c.url === '/super/plans/1' && c.method === 'PATCH')
     ).toBe(false)
     expect(
       fake.calls.find((c) => c.method === 'PUT' && c.url === '/super/setup')
@@ -147,9 +145,7 @@ describe('Super Admin setup wizard', () => {
       screen.getByRole('alertdialog').getByRole('button', { name: 'Continue' })
     )
     await expect
-      .poll(() =>
-        fake.calls.some((c) => c.url === '/super/setup/demo/delete')
-      )
+      .poll(() => fake.calls.some((c) => c.url === '/super/setup/demo/delete'))
       .toBe(true)
 
     await userEvent.click(

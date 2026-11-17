@@ -110,10 +110,14 @@ describe('api helpers', () => {
       },
       'POST /restaurant/1/menus': { status: 409, data: { message: 'Busy.' } },
     })
-    await expect(api.get('/restaurant/1/menus')).rejects.toBeInstanceOf(ApiError)
+    await expect(api.get('/restaurant/1/menus')).rejects.toBeInstanceOf(
+      ApiError
+    )
     expect(assign).toHaveBeenCalledWith('/platform')
     // Any other 409 (a save still running) stays on the page.
-    await expect(api.post('/restaurant/1/menus', {})).rejects.toBeInstanceOf(ApiError)
+    await expect(api.post('/restaurant/1/menus', {})).rejects.toBeInstanceOf(
+      ApiError
+    )
     expect(assign).toHaveBeenCalledTimes(1)
     nav.removeEventListener('navigate', stop)
   })

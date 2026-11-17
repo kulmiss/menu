@@ -81,7 +81,10 @@ function render(ui: React.ReactNode) {
     },
     'GET /restaurant/1/branches/1/tables': { data: { data: [] } },
     'POST /restaurant/1/branches/1/tables': { status: 201, data: { data: [] } },
-    'POST /restaurant/1/branches': { status: 201, data: { data: branch(3, 'Bole') } },
+    'POST /restaurant/1/branches': {
+      status: 201,
+      data: { data: branch(3, 'Bole') },
+    },
     'GET /restaurant/1/qr-codes': { data: { data: CODES } },
     'GET /restaurant/1/branches/2/overrides': { data: { data: [] } },
     'PUT /restaurant/1/branches/2/overrides': { data: { data: [] } },
@@ -250,6 +253,9 @@ describe('QrCodesPage', () => {
       .toHaveAttribute('href', '/api/v1/restaurant/1/qr-codes/7.pdf')
     await expect
       .element(screen.getByRole('link', { name: 'Print table cards' }))
-      .toHaveAttribute('href', '/api/v1/restaurant/1/branches/1/table-cards.pdf')
+      .toHaveAttribute(
+        'href',
+        '/api/v1/restaurant/1/branches/1/table-cards.pdf'
+      )
   })
 })

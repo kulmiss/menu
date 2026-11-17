@@ -71,7 +71,8 @@ describe('ImportExportPage', () => {
 
     await vi.waitFor(() =>
       expect(
-        fake.apiCalls().find((c) => c.url === '/restaurant/1/import/commit')?.data
+        fake.apiCalls().find((c) => c.url === '/restaurant/1/import/commit')
+          ?.data
       ).toEqual({ token: 'x'.repeat(32) })
     )
     await expect

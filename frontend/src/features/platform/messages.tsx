@@ -382,14 +382,11 @@ function Composer({
   const count = useMutation({
     mutationFn: async (f: Filters) =>
       (
-        await api.post<{ data: { count: number } }>(
-          '/super/campaigns/count',
-          {
-            subject: 'x',
-            body: 'x',
-            filters: f,
-          }
-        )
+        await api.post<{ data: { count: number } }>('/super/campaigns/count', {
+          subject: 'x',
+          body: 'x',
+          filters: f,
+        })
       ).data.data.count,
   })
   const countMutate = count.mutate

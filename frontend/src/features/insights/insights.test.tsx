@@ -63,7 +63,9 @@ describe('InsightsPage', () => {
     await userEvent.click(screen.getByRole('combobox', { name: 'Period' }))
     await userEvent.click(screen.getByRole('option', { name: 'Last 7 days' }))
     await expect
-      .poll(() => fake.calls.some((c) => c.url === '/restaurant/1/insights?days=7'))
+      .poll(() =>
+        fake.calls.some((c) => c.url === '/restaurant/1/insights?days=7')
+      )
       .toBe(true)
   })
 })

@@ -60,8 +60,9 @@ describe('InfoPage', () => {
     await expect
       .poll(
         () =>
-          fake.calls.find((c) => c.method === 'PUT' && c.url === '/restaurant/1/hours')
-            ?.data
+          fake.calls.find(
+            (c) => c.method === 'PUT' && c.url === '/restaurant/1/hours'
+          )?.data
       )
       .toEqual({
         hours: [1, 2, 3, 4, 5].map((weekday) => ({
@@ -92,8 +93,9 @@ describe('InfoPage', () => {
     await expect
       .poll(
         () =>
-          fake.calls.find((c) => c.method === 'PUT' && c.url === '/restaurant/1/profile')
-            ?.data
+          fake.calls.find(
+            (c) => c.method === 'PUT' && c.url === '/restaurant/1/profile'
+          )?.data
       )
       .toMatchObject({ phone: '+251 11 555 0100', email: null, socials: {} })
   })

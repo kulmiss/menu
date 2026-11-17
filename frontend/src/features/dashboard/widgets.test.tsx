@@ -82,7 +82,9 @@ describe('Dashboard widgets', () => {
   it('shows every widget for owners and managers', async () => {
     fake = fakeApi({
       ...all,
-      'POST /restaurant/1/widgets/setup/hide': { data: { data: { hidden: true } } },
+      'POST /restaurant/1/widgets/setup/hide': {
+        data: { data: { hidden: true } },
+      },
     })
     const screen = await renderWithQuery(
       <DashboardWidgets tenantId={1} locale='en' manager />
@@ -140,7 +142,9 @@ describe('Dashboard widgets', () => {
     )
 
     await expect.element(screen.getByText('Views and scans')).toBeVisible()
-    expect(fake.calls.map((c) => c.url)).toEqual(['/restaurant/1/widgets/trend'])
+    expect(fake.calls.map((c) => c.url)).toEqual([
+      '/restaurant/1/widgets/trend',
+    ])
     expect(screen.container.textContent).not.toContain('Plan and usage')
   })
 

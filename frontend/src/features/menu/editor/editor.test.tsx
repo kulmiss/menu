@@ -74,7 +74,9 @@ function renderEditor(
 ) {
   fake = fakeApi({
     'GET /restaurant/1/menus': { data: { data: [menu] } },
-    'GET /restaurant/1/menus/1/tree': { data: { data: { menu, categories: [coffee] } } },
+    'GET /restaurant/1/menus/1/tree': {
+      data: { data: { menu, categories: [coffee] } },
+    },
     ...routes,
   })
   const tenant = tenantFixture({}, role)
