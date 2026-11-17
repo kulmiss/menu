@@ -29,7 +29,10 @@ const PUBLIC_ROUTES = [
     'GET sanctum/csrf-cookie', 'GET storage/{path}', 'PUT storage/{path}',
     // The two areas (QUESTIONS #215–#222): the pages check who is signed in themselves
     // (SpaController / SignInController, tested in Auth/AreaPagesTest), the forms post to Fortify.
-    'GET admin/{path?}', 'GET super/{path?}', 'GET auth/{path}',
+    'GET admin/{path?}', 'GET super/{path?}',
+    'GET signup', 'POST signup', 'GET signup/google', 'POST signup/google', 'GET verify-email', 'POST signout',
+    'GET forgot-password', 'POST forgot-password', 'GET reset-password', 'POST reset-password',
+    'GET invite/{token}', 'POST invite/{token}/join',
     'GET signin', 'POST signin', 'GET signin/two-factor', 'POST signin/two-factor', 'GET super/sign-in', 'POST super/sign-in',
 ];
 

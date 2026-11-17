@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\AccountController;
 use App\Http\Controllers\Auth\ConfirmEmailChangeController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\SignInController;
@@ -17,6 +18,8 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
+use Laravel\Fortify\Http\Controllers\NewPasswordController;
+use Laravel\Fortify\Http\Controllers\PasswordResetLinkController;
 use Laravel\Fortify\Http\Controllers\TwoFactorAuthenticatedSessionController;
 
 // Public pages for guests and visitors set no cookies at all (no session, no
@@ -40,7 +43,7 @@ Route::withoutMiddleware($cookieFree)->middleware(['signed', 'throttle:30,1'])->
     Route::post('resubscribe', [NewsSubscriptionController::class, 'resubscribe'])->name('news.resubscribe');
 });
 
-// "Continue with Google" (owner, 2026-11-17): before the SPA's /auth/* pages.
+// "Continue with Google" (owner, 2026-11-17).
 // Socialite keeps a one-time state in the session (CSRF check of the callback).
 Route::middleware('throttle:20,1')->group(function () {
     Route::get('/auth/google', [GoogleController::class, 'redirect'])->name('google.redirect');
@@ -57,8 +60,27 @@ Route::get('/signin/two-factor', [SignInController::class, 'twoFactor'])->middle
 Route::post('/signin/two-factor', [TwoFactorAuthenticatedSessionController::class, 'store'])
     ->middleware(['guest:web', 'signin.challenge', 'throttle:two-factor'])->name('signin.two-factor');
 Route::get('/admin/{path?}', [SpaController::class, 'restaurant'])->where('path', '.*')->name('spa.admin');
-// Signed-out pages still in the admin app (sign-up, password reset, invitations, Google).
-Route::get('/auth/{path}', [SpaController::class, 'auth'])->where('path', '(sign-up|forgot-password|reset-password|invite/.+|google/finish)')->name('spa.auth');
+
+// The other account pages, in the landing page's style (QUESTIONS #222).
+Route::get('/signup', [AccountController::class, 'signUp'])->name('signup');
+Route::post('/signup', [AccountController::class, 'signUpForm'])->middleware(['guest:web', 'throttle:10,1'])->name('signup.store');
+Route::get('/signup/google', [GoogleController::class, 'finishPage'])->name('google.finish');
+Route::post('/signup/google', [GoogleController::class, 'finishForm'])->middleware(['guest:web', 'throttle:10,1'])->name('google.finish.store');
+Route::get('/verify-email', [AccountController::class, 'verifyEmail'])->name('verification.notice');
+Route::middleware('auth:web')->group(function () {
+    Route::post('/verify-email/resend', [AccountController::class, 'resendVerification'])->middleware('throttle:6,1')->name('verify.resend');
+    Route::post('/verify-email/change', [AccountController::class, 'changeEmail'])->middleware('throttle:6,1')->name('verify.change');
+    Route::post('/verify-email/check', [AccountController::class, 'checkVerified'])->middleware('throttle:30,1')->name('verify.check');
+    Route::get('/waiting', [AccountController::class, 'waiting'])->name('waiting');
+    Route::post('/invite/{token}/accept', [AccountController::class, 'acceptInvitation'])->middleware('throttle:10,1')->name('invite.accept');
+});
+Route::post('/signout', [AccountController::class, 'signOut'])->name('signout');
+Route::get('/forgot-password', [AccountController::class, 'forgotPassword'])->name('password.request');
+Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])->middleware(['guest:web', 'password.throttle'])->name('password.email.web');
+Route::get('/reset-password', [AccountController::class, 'resetPassword'])->name('password.reset.web');
+Route::post('/reset-password', [NewPasswordController::class, 'store'])->middleware(['guest:web', 'password.throttle', 'password.single'])->name('password.update.web');
+Route::get('/invite/{token}', [AccountController::class, 'invitation'])->middleware('throttle:30,1')->name('invite');
+Route::post('/invite/{token}/join', [AccountController::class, 'joinInvitation'])->middleware(['guest:web', 'throttle:10,1'])->name('invite.join');
 
 // Super Admin: its own address (SUPER_ADMIN_PATH) and plain sign-in page; outside
 // SUPER_ADMIN_IPS it doesn't exist (404).

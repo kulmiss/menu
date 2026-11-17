@@ -23,8 +23,13 @@ class SpaController extends Controller
         if ($user === null) {
             return redirect('/signin?'.http_build_query(['redirect' => $request->getRequestUri()]));
         }
-        if ($user->is_super_admin && ! app(ImpersonationManager::class)->active($request)) {
+        $impersonating = app(ImpersonationManager::class)->active($request);
+        if ($user->is_super_admin && ! $impersonating) {
             return redirect(SuperAdminAccess::url());
+        }
+        // Until the address is confirmed, only "Check your inbox" (owner, 2026-11-13).
+        if (! $user->hasVerifiedEmail() && ! $impersonating) {
+            return redirect('/verify-email');
         }
 
         return $this->page();
@@ -44,12 +49,6 @@ class SpaController extends Controller
         abort_unless($user->is_super_admin, 404);
 
         return $this->page('<meta name="super-path" content="'.e(SuperAdminAccess::url()).'">');
-    }
-
-    /** /auth/…: the remaining signed-out pages of the app (sign-up, password reset, invitations). */
-    public function auth(): Response
-    {
-        return $this->page();
     }
 
     private function page(string $head = ''): Response

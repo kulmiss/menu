@@ -94,7 +94,7 @@ it('creates a new owner after the restaurant name and the Terms: Free plan, e-ma
     googleOn();
     googleReturns([]);
 
-    callback()->assertRedirect('/auth/google/finish');
+    callback()->assertRedirect('/signup/google');
     $this->assertGuest();
     expect(User::where('email', 'selam@example.com')->exists())->toBeFalse();
 
@@ -131,7 +131,7 @@ it('does not create accounts while sign-up is off', function () {
     PlatformSettings::save(['signup_open' => false]);
     googleReturns([]);
 
-    callback()->assertRedirect('/auth/sign-up?google=closed');
+    callback()->assertRedirect('/signup?google=closed');
     $this->postJson('/api/v1/auth/google/finish', ['restaurant_name' => 'Kaldi', 'terms' => true], idem())->assertForbidden();
     expect(User::where('email', 'selam@example.com')->exists())->toBeFalse();
 });

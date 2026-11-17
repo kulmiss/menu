@@ -54,7 +54,12 @@ jobs:
               - '.github/workflows/ci.yml'
             landing:
               - 'backend/resources/views/site/**'
+              - 'backend/resources/views/account/**'
               - 'backend/lang/en/landing.php'
+              - 'backend/lang/en/account.php'
+              - 'backend/app/Http/Controllers/Auth/AccountController.php'
+              - 'backend/app/Http/Controllers/Auth/SignInController.php'
+              - 'backend/app/Support/Site/**'
               - 'backend/public/landing/**'
               - 'backend/app/Http/Controllers/SiteController.php'
               - 'backend/app/Http/Middleware/SecurityHeaders.php'
@@ -341,6 +346,8 @@ jobs:
           nginx -e /tmp/lh-landing-nginx-error.log -c /tmp/lh-landing.conf
           curl -sf -o /dev/null http://localhost:8125/
           curl -sf http://localhost:8125/ | grep -q 'id="demo"'
+          curl -sf http://localhost:8125/signin | grep -q 'action="/signin"'
+          curl -sf http://localhost:8125/signup | grep -q 'action="/signup"'
       - name: Lighthouse CI
         working-directory: ci/lighthouse
         run: |
@@ -354,17 +361,20 @@ jobs:
           runs = [json.load(open(f)) for f in glob.glob('../ci/lighthouse/.lighthouseci/lhr-*.json')]
           if not runs:
               raise SystemExit('No Lighthouse results.')
-          med = lambda f: statistics.median(f(r) for r in runs)
-          print('### Landing page (median of %d runs, simulated slow phone)' % len(runs))
-          print('| Measure | Median | Target |')
-          print('|---|---|---|')
-          for cat in ('performance', 'accessibility', 'best-practices', 'seo'):
-              v = med(lambda r: r['categories'][cat]['score'] * 100)
-              print(f"| {cat} | {v:.0f} {'✅' if v >= 95 else '❌'} | 95+ |")
-          lcp = med(lambda r: r['audits']['largest-contentful-paint']['numericValue'])
-          cls = med(lambda r: r['audits']['cumulative-layout-shift']['numericValue'])
-          print(f"| LCP | {lcp:.0f} ms {'✅' if lcp <= 1500 else '❌'} | ≤ 1500 ms |")
-          print(f"| CLS | {cls:.3f} {'✅' if cls <= 0.02 else '❌'} | ≈ 0 |")
+          # Landing page and the account pages (QUESTIONS #222), each on its own.
+          for path in sorted({r['requestedUrl'].split('8125', 1)[1] for r in runs}):
+              page = [r for r in runs if r['requestedUrl'].endswith(path)]
+              med = lambda f: statistics.median(f(r) for r in page)
+              print('### %s (median of %d runs, simulated slow phone)' % (path, len(page)))
+              print('| Measure | Median | Target |')
+              print('|---|---|---|')
+              for cat in ('performance', 'accessibility', 'best-practices', 'seo'):
+                  v = med(lambda r: r['categories'][cat]['score'] * 100)
+                  print(f"| {cat} | {v:.0f} {'✅' if v >= 95 else '❌'} | 95+ |")
+              lcp = med(lambda r: r['audits']['largest-contentful-paint']['numericValue'])
+              cls = med(lambda r: r['audits']['cumulative-layout-shift']['numericValue'])
+              print(f"| LCP | {lcp:.0f} ms {'✅' if lcp <= 1500 else '❌'} | ≤ 1500 ms |")
+              print(f"| CLS | {cls:.3f} {'✅' if cls <= 0.02 else '❌'} | ≈ 0 |")
           PY
       - name: Lighthouse reports
         if: always()

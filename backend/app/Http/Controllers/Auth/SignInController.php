@@ -22,7 +22,7 @@ class SignInController extends Controller
     /** Notices the e-mail links and "Continue with Google" send people here with. */
     private const VERIFY = ['done', 'already', 'expired', 'invalid', 'change_done', 'change_expired', 'change_invalid'];
 
-    private const GOOGLE = ['cancelled', 'failed', 'unverified', 'super_admin'];
+    private const GOOGLE = ['cancelled', 'failed', 'unverified', 'super_admin', 'expired'];
 
     public function restaurant(Request $request): View|RedirectResponse
     {
@@ -31,7 +31,7 @@ class SignInController extends Controller
         }
         // Back to the admin page, or the invitation, they came from.
         $redirect = $request->query('redirect');
-        $request->session()->put('url.intended', AccountPage::safeRedirect($redirect, '/admin') ?? AccountPage::safeRedirect($redirect, '/auth/invite') ?? '/admin');
+        $request->session()->put('url.intended', AccountPage::safeRedirect($redirect, '/admin') ?? AccountPage::safeRedirect($redirect, '/invite') ?? '/admin');
 
         return view('account.sign-in', [
             ...AccountPage::data(),

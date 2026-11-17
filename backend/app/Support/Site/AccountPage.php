@@ -7,6 +7,7 @@ use App\Support\BrandColor;
 use App\Support\EmailLogo;
 use App\Support\Landing\LandingImages;
 use App\Support\PlatformSettings;
+use App\Support\SignUp\SignUp;
 use App\Support\UpgradeContact;
 
 /**
@@ -27,6 +28,8 @@ final class AccountPage
             'colors' => BrandColor::palette($s['brand_color'] ?? null),
             'signupOpen' => (bool) $s['signup_open'],
             'google' => GoogleLogin::enabled(),
+            // "Free" only while the sign-up plan is free, like the landing page (QUESTIONS #206).
+            'freePlan' => SignUp::plan()?->price_minor === 0,
             'contact' => UpgradeContact::payload(),
             'shots' => ['hero' => LandingImages::phone('hero'), 'hero_dark' => LandingImages::phone('hero_dark')],
         ];

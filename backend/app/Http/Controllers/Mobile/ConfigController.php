@@ -54,8 +54,8 @@ class ConfigController extends Controller
             'links' => [
                 'privacy' => $m['links']['privacy'] ?: url('/privacy'),
                 'terms' => $m['links']['terms'] ?: url('/terms'),
-                'forgot_password' => url('/auth/forgot-password'),
-                'signup' => url('/auth/sign-up'),
+                'forgot_password' => url('/forgot-password'),
+                'signup' => url('/signup'),
                 'web_admin' => $web,
                 'play_store' => $m['links']['play_store'] ?: null,
                 'app_store' => $m['links']['app_store'] ?: null,

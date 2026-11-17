@@ -7,6 +7,8 @@ use App\Models\User;
 use App\Support\Auth\GoogleLogin;
 use App\Support\PlatformSettings;
 use App\Support\Security\SecurityLog;
+use App\Support\Site\AccountPage;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -86,11 +88,11 @@ class GoogleController extends Controller
         }
         if ($outcome['result'] === 'new') {
             if (! (bool) PlatformSettings::get('signup_open')) {
-                return redirect('/auth/sign-up?google=closed');
+                return redirect('/signup?google=closed');
             }
             $request->session()->put(self::PENDING, [...$profile, 'at' => now()->timestamp]);
 
-            return redirect('/auth/google/finish');
+            return redirect('/signup/google');
         }
 
         $user = $outcome['user'];
@@ -131,10 +133,45 @@ class GoogleController extends Controller
     {
         abort_unless(GoogleLogin::enabled(), 404);
         abort_unless((bool) PlatformSettings::get('signup_open'), 403, __('signup.closed'));
-        $pending = $this->pendingProfile($request);
-        if ($pending === null) {
+        if ($this->pendingProfile($request) === null) {
             return response()->json(['message' => __('google.expired'), 'code' => 'google.expired'], 410);
         }
+        $this->createOwner($request);
+
+        return response()->json(['data' => ['redirect' => '/admin']], 201);
+    }
+
+    /** The "Almost done" page (QUESTIONS #222): restaurant name and Terms for a new Google user. */
+    public function finishPage(Request $request): View|RedirectResponse
+    {
+        abort_unless(GoogleLogin::enabled(), 404);
+        if (! (bool) PlatformSettings::get('signup_open')) {
+            return redirect('/signup');
+        }
+        $pending = $this->pendingProfile($request);
+        if ($pending === null) {
+            return redirect('/signin?google=expired');
+        }
+
+        return view('account.google-finish', [...AccountPage::data(), 'pending' => $pending]);
+    }
+
+    public function finishForm(Request $request): RedirectResponse
+    {
+        abort_unless(GoogleLogin::enabled(), 404);
+        abort_unless((bool) PlatformSettings::get('signup_open'), 403, __('signup.closed'));
+        if ($this->pendingProfile($request) === null) {
+            return redirect('/signin?google=expired');
+        }
+        $this->createOwner($request);
+
+        return redirect('/admin');
+    }
+
+    /** @throws ValidationException */
+    private function createOwner(Request $request): User
+    {
+        $pending = (array) $this->pendingProfile($request);
         $data = $request->validate([
             'restaurant_name' => ['required', 'string', 'min:2', 'max:120'],
             'terms' => ['accepted'],
@@ -152,7 +189,7 @@ class GoogleController extends Controller
         $request->session()->regenerate();
         GoogleLogin::signedIn($user, false);
 
-        return response()->json(['data' => ['redirect' => '/admin']], 201);
+        return $user;
     }
 
     /** Account → Security → "Unlink Google". Only with a password, or the account could not sign in. */

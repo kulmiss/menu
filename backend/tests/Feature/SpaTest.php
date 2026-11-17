@@ -35,10 +35,6 @@ it('serves the Super Admin app at its own address, which only its page names', f
         ->assertHeader('X-Robots-Tag', 'noindex'));
 });
 
-it('still serves the signed-out pages left in the app', function (string $url) {
-    withBuiltSpa(fn () => $this->get($url)->assertOk()->assertSee('<div id="root"></div>', false));
-})->with(['/auth/sign-up', '/auth/forgot-password', '/auth/reset-password', '/auth/invite/abc', '/auth/google/finish']);
-
 it('does not catch other paths, nor the old addresses', function (string $url) {
     withBuiltSpa(fn () => $this->actingAs(superAdmin())->get($url)->assertNotFound());
-})->with(['/somewhere-else/admin', '/platform', '/platform/restaurants', '/auth/sign-in', '/auth/two-factor']);
+})->with(['/somewhere-else/admin', '/platform', '/platform/restaurants', '/auth/sign-in', '/auth/two-factor', '/auth/sign-up', '/auth/forgot-password', '/auth/reset-password', '/auth/invite/abc', '/auth/google/finish']);

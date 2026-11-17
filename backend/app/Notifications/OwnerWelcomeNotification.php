@@ -35,7 +35,7 @@ class OwnerWelcomeNotification extends Notification implements ShouldQueue
     {
         $app = (string) PlatformSettings::get('name');
         $replace = ['app' => $app, 'restaurant' => $this->tenant->name, 'name' => $notifiable->name ?? ''];
-        $url = url('/auth/reset-password?'.http_build_query([
+        $url = url('/reset-password?'.http_build_query([
             'token' => $this->token,
             'email' => $notifiable->getEmailForPasswordReset(),
             'welcome' => 1,

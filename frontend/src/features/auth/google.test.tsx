@@ -6,8 +6,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { userEvent } from 'vitest/browser'
 import { SignupSettings } from '@/features/platform/signup-settings'
 import { SecuritySettings } from '@/features/settings/security'
-import { OwnerSignUpPage } from '@/features/signup/owner-sign-up'
-import { GoogleFinishPage } from './google-finish'
 
 vi.mock('@tanstack/react-router', async (orig) =>
   (await import('@/test-utils/router-mock')).routerMock(await orig())
@@ -15,116 +13,9 @@ vi.mock('@tanstack/react-router', async (orig) =>
 
 let fake: ReturnType<typeof fakeApi>
 
-const config = (google: boolean) => ({
-  data: {
-    data: {
-      open: true,
-      turnstile_site_key: null,
-      currencies: ['ETB'],
-      default_currency: 'ETB',
-      terms: true,
-      privacy: true,
-      platform: 'Menu',
-      google,
-    },
-  },
-})
-
 // "Continue with Google" (owner, 2026-11-17).
 describe('Continue with Google', () => {
   beforeEach(() => navigate.mockClear())
-  afterEach(() => fake?.restore())
-
-  it('shows it on the sign-up page too, above the e-mail form', async () => {
-    fake = fakeApi({ 'GET /signup/config': config(true) })
-    const screen = await renderWithQuery(<OwnerSignUpPage />)
-    await expect
-      .element(screen.getByRole('link', { name: 'Continue with Google' }))
-      .toBeVisible()
-    await expect
-      .element(screen.getByText('or sign up with e-mail'))
-      .toBeVisible()
-  })
-
-  it('hides it while it is switched off', async () => {
-    fake = fakeApi({ 'GET /signup/config': config(false) })
-    const screen = await renderWithQuery(<OwnerSignUpPage />)
-    await expect
-      .element(screen.getByRole('button', { name: 'Create my free menu' }))
-      .toBeVisible()
-    expect(
-      screen.getByRole('link', { name: 'Continue with Google' }).elements()
-    ).toHaveLength(0)
-  })
-
-  it('asks a new Google user only for the restaurant name and the Terms', async () => {
-    fake = fakeApi({
-      'GET /auth/google/pending': {
-        data: {
-          data: {
-            email: 'selam@gmail.com',
-            name: 'Selam',
-            terms: true,
-            privacy: true,
-          },
-        },
-      },
-      'GET /sanctum/csrf-cookie': { status: 204 },
-      'POST /auth/google/finish': {
-        status: 201,
-        data: { data: { redirect: '/admin' } },
-      },
-    })
-    const screen = await renderWithQuery(<GoogleFinishPage />)
-    await expect
-      .element(
-        screen.getByText('You are signing up with Google as selam@gmail.com.')
-      )
-      .toBeVisible()
-
-    await userEvent.click(
-      screen.getByRole('button', { name: 'Create my free menu' })
-    )
-    await expect
-      .element(screen.getByText("Enter the restaurant's name."))
-      .toBeVisible()
-    await expect
-      .element(screen.getByText('Please accept the terms to continue.'))
-      .toBeVisible()
-
-    await userEvent.fill(
-      screen.getByRole('textbox', { name: 'Restaurant name' }),
-      'Buna & Bread'
-    )
-    await expect
-      .element(screen.getByText(/Your menu will be at .+\/buna-bread/))
-      .toBeVisible()
-    await userEvent.click(screen.getByRole('checkbox'))
-    await userEvent.click(
-      screen.getByRole('button', { name: 'Create my free menu' })
-    )
-
-    await vi.waitFor(() =>
-      expect(navigate).toHaveBeenCalledWith({ to: '/admin', replace: true })
-    )
-    expect(
-      fake.apiCalls().find((c) => c.url === '/auth/google/finish')?.data
-    ).toEqual({ restaurant_name: 'Buna & Bread', terms: true, locale: 'en' })
-  })
-
-  it('offers "Continue with Google" again when the wait is over', async () => {
-    fake = fakeApi({ 'GET /auth/google/pending': { status: 404 } })
-    const screen = await renderWithQuery(<GoogleFinishPage />)
-    await expect
-      .element(screen.getByText('That took too long. Please start again.'))
-      .toBeVisible()
-    await expect
-      .element(screen.getByRole('link', { name: 'Continue with Google' }))
-      .toBeVisible()
-  })
-})
-
-describe('Account → Security → Google', () => {
   afterEach(() => fake?.restore())
 
   it('links Google', async () => {

@@ -14,7 +14,7 @@ it('shows the landing page in simple English: hero, sections in order, sign-up a
         ->assertSee('Your menu on every phone. Free to start.')
         ->assertSee('Free plan forever')
         ->assertSee('No card needed')
-        ->assertSee('href="/auth/sign-up" data-track="signup"', false)
+        ->assertSee('href="/signup" data-track="signup"', false)
         ->assertSee('href="/signin"', false)
         ->assertSee('href="/terms"', false)
         ->assertSee('href="#pricing"', false)
@@ -74,7 +74,7 @@ it('turns every sign-up button into "Contact us on WhatsApp" when sign-up is off
     PlatformSettings::save(['signup_open' => false, 'upgrade_whatsapp' => '+251 911 000 000']);
 
     $html = $this->get('/')->assertOk()
-        ->assertDontSee('href="/auth/sign-up"', false)
+        ->assertDontSee('href="/signup"', false)
         ->assertDontSee('Create my free menu')
         ->assertSee('href="/signin"', false)
         ->assertSee('Contact us on WhatsApp')
@@ -180,7 +180,6 @@ it('lets the Super Admin edit the texts, switch sections off and reorder them; "
 it('serves robots.txt and the sitemap', function () {
     $this->get('/robots.txt')->assertOk()
         ->assertSee('Disallow: /admin')
-        ->assertSee('Disallow: /signin')
         // The Super Admin's own address is never listed (QUESTIONS #217).
         ->assertDontSee(config('menu.super_admin.path'))
         ->assertDontSee('platform')

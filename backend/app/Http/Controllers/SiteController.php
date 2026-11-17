@@ -76,7 +76,7 @@ class SiteController extends Controller
             'order' => $this->order((array) $s['landing_order'], $sections),
             'demoUrl' => $demoUrl,
             // The demo menu, else the sign-up page; none while both are unavailable.
-            'qr' => $demoUrl !== null || $signupOpen ? $this->qrPath($demoUrl ?? url('/auth/sign-up')) : null,
+            'qr' => $demoUrl !== null || $signupOpen ? $this->qrPath($demoUrl ?? url('/signup')) : null,
             'styles' => collect(self::STYLE_DEMOS)->map(fn ($slug) => isset($live[$slug]) ? url('/'.$slug) : null)->filter()->all(),
             'plans' => $sections['pricing'] ? $plans : [],
             'free' => $free,
@@ -101,7 +101,7 @@ class SiteController extends Controller
     private function cta(bool $signupOpen, array $contact, string $name, \Closure $t): ?array
     {
         if ($signupOpen) {
-            return ['href' => '/auth/sign-up', 'label' => $t('create_account'), 'external' => false, 'track' => 'signup'];
+            return ['href' => '/signup', 'label' => $t('create_account'), 'external' => false, 'track' => 'signup'];
         }
         $text = $t('contact_text', ['name' => $name]);
         if ($contact['whatsapp'] !== null) {
@@ -165,7 +165,7 @@ class SiteController extends Controller
 
     public function robots(): Response
     {
-        $lines = ['User-agent: *', 'Disallow: /admin', 'Disallow: /signin', 'Disallow: /auth', 'Disallow: /api', '', 'Sitemap: '.url('/sitemap.xml')];
+        $lines = ['User-agent: *', 'Disallow: /admin', 'Disallow: /auth', 'Disallow: /api', '', 'Sitemap: '.url('/sitemap.xml')];
 
         return response(implode("\n", $lines)."\n", 200, ['Content-Type' => 'text/plain; charset=UTF-8']);
     }

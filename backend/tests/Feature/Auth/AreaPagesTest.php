@@ -38,7 +38,9 @@ function superAccount(): User
 it('shows the restaurant sign-in page in the landing page style, with Google when it is on', function () {
     PlatformSettings::save(['name' => 'Buna Menus', 'signup_open' => true]);
     $this->get('/signin')->assertOk()
-        ->assertSee('<meta name="robots" content="noindex">', false)
+        // Findable in search, like the landing page (Lighthouse SEO 95+); the Super Admin page is not.
+        ->assertDontSee('noindex')
+        ->assertSee('<meta name="description"', false)
         ->assertSee('Buna Menus')
         ->assertSee('Your menu, on every phone')
         ->assertSee('action="/signin"', false)
@@ -86,6 +88,8 @@ it('signs the Super Admin in only on their own plain page, after the code', func
     restaurantAccount();
 
     $this->get('/super/sign-in')->assertOk()
+        ->assertSee('<meta name="robots" content="noindex">', false)
+        ->assertDontSee('<meta name="description"', false)
         ->assertSee('Staff only.')
         ->assertSee('action="/super/sign-in"', false)
         ->assertDontSee('Your menu, on every phone')

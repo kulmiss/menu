@@ -14,6 +14,7 @@ use App\Http\Middleware\RequireFeature;
 use App\Http\Middleware\ResolveTenant;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SignInArea;
+use App\Http\Middleware\SinglePasswordField;
 use App\Http\Middleware\SuperAdminWeb;
 use App\Http\Middleware\ThrottlePasswordEmails;
 use App\Http\Middleware\UseWelcomeBroker;
@@ -72,6 +73,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'super.web' => SuperAdminWeb::class,
             'signin.area' => SignInArea::class,
             'signin.challenge' => GuardSignInChallenge::class,
+            'password.single' => SinglePasswordField::class,
         ]);
     })
     // Kept here, not in routes/console.php, so it stays clear of the schedule there.

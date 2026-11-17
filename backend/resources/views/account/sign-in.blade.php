@@ -1,11 +1,11 @@
-@extends('account.layout')
+@extends('account.layout', ['indexable' => true])
 
 @section('title', $plain ? __('account.super.title') : __('account.signin.title'))
 
 @section('header')
     @if ($signupOpen)
         <span class="hint">{{ __('account.no_account') }}</span>
-        <a class="btn btn-ghost" href="/auth/sign-up">{{ __('account.sign_up_link') }}</a>
+        <a class="btn btn-ghost" href="/signup">{{ __('account.sign_up_link') }}</a>
     @endif
 @endsection
 
@@ -32,7 +32,7 @@
             <div class="field">
                 <div class="label-row">
                     <label for="password">{{ __('account.signin.password') }}</label>
-                    <a href="/auth/forgot-password">{{ __('account.signin.forgot') }}</a>
+                    <a href="/forgot-password">{{ __('account.signin.forgot') }}</a>
                 </div>
                 @include('account.partials.password', ['name' => 'password', 'autocomplete' => 'current-password'])
             </div>
@@ -47,6 +47,6 @@
 
 @section('after')
     @if (! $plain && $signupOpen)
-        <p class="after">{{ __('account.no_account') }} <a href="/auth/sign-up">{{ __('account.sign_up_link') }}</a></p>
+        <p class="after">{{ __('account.no_account') }} <a href="/signup">{{ __('account.sign_up_link') }}</a></p>
     @endif
 @endsection

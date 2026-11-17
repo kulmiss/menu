@@ -99,8 +99,8 @@ X-App-Version: 1.2.0
     "links": {
       "privacy": "https://menu.example/privacy",
       "terms": "https://menu.example/terms",
-      "forgot_password": "https://menu.example/auth/forgot-password",
-      "signup": "https://menu.example/auth/sign-up",
+      "forgot_password": "https://menu.example/forgot-password",
+      "signup": "https://menu.example/signup",
       "web_admin": "https://menu.example/admin",
       "play_store": "https://play.google.com/store/apps/details?id=com.kulmiss.menuadmin",
       "app_store": null,

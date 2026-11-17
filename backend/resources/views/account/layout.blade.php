@@ -16,7 +16,13 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $plain ? $title : $title.' · '.$platform }}</title>
-    <meta name="robots" content="noindex">
+    {{-- Sign-in and sign-up may be found in search; every other account page, and the Super Admin's, may not. --}}
+    @if (($indexable ?? false) && ! $plain)
+        <meta name="description" content="{{ __('account.meta_description', ['name' => $platform]) }}">
+        <link rel="canonical" href="{{ url()->current() }}">
+    @else
+        <meta name="robots" content="noindex">
+    @endif
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="{{ \App\Support\BrandColor::DARK_BG }}" media="(prefers-color-scheme: dark)">
     @unless ($plain)
@@ -81,6 +87,26 @@
         input:focus-visible{outline:3px solid color-mix(in srgb,var(--ink) 55%,transparent);outline-offset:1px;border-color:var(--ink)}
         input[aria-invalid=true]{border-color:var(--bad)}
         .error{color:var(--bad);font-size:.95rem;font-weight:550}
+        .hint{color:var(--muted);font-size:.95rem}
+        .flush{margin-top:0}
+        .trap{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden}
+        .strength{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:.95rem}
+        .strength[hidden]{display:none}
+        .strength .bar{display:block;flex:0 0 96px;height:6px;border-radius:99px;background:var(--line);overflow:hidden}
+        .strength i{display:block;height:100%;width:25%;background:var(--bad);transition:width .2s}
+        .strength[data-level=fair] i{width:50%;background:#b54708}
+        .strength[data-level=good] i{width:75%;background:var(--good)}
+        .strength[data-level=strong] i{width:100%;background:var(--good)}
+        @media (prefers-color-scheme:dark){.strength[data-level=fair] i{background:#fdb022}}
+        .ok-box{display:grid;gap:12px;margin-top:20px}
+        .big-icon{width:48px;height:48px;padding:10px;border-radius:14px;background:var(--tint);color:var(--ink);margin-bottom:16px}
+        .card .intro+.intro{margin-top:12px}
+        .sub{font-size:1.15rem;font-weight:750}
+        .text-btn{background:none;border:0;padding:0 8px;min-height:44px;font:inherit;color:var(--ink);font-weight:650;text-decoration:underline;text-underline-offset:4px;cursor:pointer}
+        .muted{color:var(--muted)}
+        .row{display:flex;flex-wrap:wrap;gap:12px}
+        .row form{flex:1 1 180px}
+        .row .btn{width:100%}
         .pw{position:relative}
         .pw input{padding-right:56px}
         .pw button{position:absolute;right:2px;top:2px;width:44px;height:44px;display:none;place-items:center;border:0;border-radius:10px;background:transparent;color:var(--muted);cursor:pointer}
@@ -126,7 +152,7 @@
 @unless ($plain)
     <header class="site-header">
         <div class="wrap bar">
-            <a class="brand" href="/" aria-label="{{ __('account.brand_home', ['name' => $platform]) }}">
+            <a class="brand" href="/">
                 @if ($logo)
                     <img src="{{ $logo }}" alt="" height="32">
                 @else
@@ -183,6 +209,20 @@
     </footer>
 @endunless
 <script nonce="{{ $nonce }}">
+document.querySelectorAll('[data-strength]').forEach(function (i) {
+    var out = document.getElementById(i.dataset.strength);
+    i.addEventListener('input', function () {
+        var v = i.value, score = 0;
+        if (v.length >= 10) score++;
+        if (v.length >= 14) score++;
+        if (/[a-z]/.test(v) && /[A-Z0-9]/.test(v)) score++;
+        if (/[^A-Za-z0-9]/.test(v) || /\s/.test(v.trim())) score++;
+        var level = ['weak', 'weak', 'fair', 'good', 'strong'][score];
+        out.hidden = v === '';
+        out.dataset.level = level;
+        out.querySelector('.text').textContent = out.dataset.label + ' ' + out.dataset[level];
+    });
+});
 document.querySelectorAll('.pw button').forEach(function (b) {
     b.addEventListener('click', function () {
         var i = b.parentNode.querySelector('input'), show = i.type === 'password';
@@ -192,5 +232,6 @@ document.querySelectorAll('.pw button').forEach(function (b) {
     });
 });
 </script>
+@yield('scripts')
 </body>
 </html>

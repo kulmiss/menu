@@ -40,7 +40,7 @@ class InvitationNotification extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject(__('menu.invitation.mail_subject', $replace, $this->mailLocale))
             ->line(__('menu.invitation.mail_line', $replace, $this->mailLocale))
-            ->action(__('menu.invitation.mail_action', [], $this->mailLocale), url('/auth/invite/'.$this->token))
+            ->action(__('menu.invitation.mail_action', [], $this->mailLocale), url('/invite/'.$this->token))
             ->line(__('menu.invitation.mail_expiry', $replace, $this->mailLocale))
             ->salutation(__('invoice.mail.salutation', ['platform' => PlatformSettings::get('name')], $this->mailLocale));
     }

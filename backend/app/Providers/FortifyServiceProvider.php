@@ -10,6 +10,7 @@ use App\Http\Controllers\Auth\RecoveryCodeController;
 use App\Http\Middleware\SignInArea;
 use App\Http\Requests\HashedTwoFactorLoginRequest;
 use App\Http\Responses\GenericResetLinkResponse;
+use App\Http\Responses\PasswordChangedResponse;
 use App\Http\Responses\SignedInResponse;
 use App\Models\User;
 use App\Notifications\SecurityNotice;
@@ -28,6 +29,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Contracts\FailedPasswordResetLinkRequestResponse;
 use Laravel\Fortify\Contracts\LoginResponse;
+use Laravel\Fortify\Contracts\PasswordResetResponse;
 use Laravel\Fortify\Contracts\SuccessfulPasswordResetLinkRequestResponse;
 use Laravel\Fortify\Contracts\TwoFactorLoginResponse;
 use Laravel\Fortify\Events\RecoveryCodesGenerated;
@@ -47,8 +49,8 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::updateUserPasswordsUsing(UpdateUserPassword::class);
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
 
-        // Password reset links open the SPA, not a Blade view.
-        ResetPassword::createUrlUsing(fn ($user, string $token) => url('/auth/reset-password?'.http_build_query([
+        // Password reset links open the reset page (QUESTIONS #222).
+        ResetPassword::createUrlUsing(fn ($user, string $token) => url('/reset-password?'.http_build_query([
             'token' => $token,
             'email' => $user->getEmailForPasswordReset(),
         ])));
@@ -82,6 +84,8 @@ class FortifyServiceProvider extends ServiceProvider
         // After signing in: the page asked for, else the person's own area (QUESTIONS #215).
         $this->app->bind(LoginResponse::class, fn () => new SignedInResponse);
         $this->app->bind(TwoFactorLoginResponse::class, fn () => new SignedInResponse(afterCode: true));
+        // New password saved on the reset page: the sign-in page says so (QUESTIONS #222).
+        $this->app->bind(PasswordResetResponse::class, PasswordChangedResponse::class);
         $this->app->bind(FailedPasswordResetLinkRequestResponse::class, GenericResetLinkResponse::class);
         $this->app->bind(SuccessfulPasswordResetLinkRequestResponse::class, GenericResetLinkResponse::class);
 

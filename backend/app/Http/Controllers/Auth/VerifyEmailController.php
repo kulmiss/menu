@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\RedirectResponse;
@@ -33,6 +34,12 @@ class VerifyEmailController extends Controller
         $user->markEmailAsVerified();
         event(new Verified($user));
 
-        return redirect($signedIn ? '/admin?welcome=1' : '/signin?verify=done');
+        if (! $signedIn) {
+            return redirect('/signin?verify=done');
+        }
+        // Sign-up with approval (QUESTIONS #222): "we are checking your restaurant" first.
+        $pending = $user->memberships()->whereHas('tenant', fn ($q) => $q->where('signup_state', Tenant::SIGNUP_PENDING))->exists();
+
+        return redirect($pending ? '/waiting' : '/admin?welcome=1');
     }
 }
