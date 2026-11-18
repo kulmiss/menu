@@ -3,7 +3,6 @@
    ornaments. Works left-to-right and right-to-left: logical properties only.
    Surfaces must match PageTheme::STYLES['arabic']. --g is a decoration colour only (never text). */
 @font-face{font-family:"Menu Kufi";font-weight:700;font-display:optional;src:url(font:kufi-arabic-700) format("woff2");unicode-range:U+0600-06FF,U+200C-200F,U+FE70-FEFF}
-@font-face{font-family:"Menu Kufi";font-weight:700;font-display:optional;src:url(font:kufi-latin-700) format("woff2");unicode-range:U+0020-007E,U+00A0-00FF,U+2013-2014,U+2018-201D,U+2022}
 :root{--br:1.1rem;--bg:#f6efe2;--fg:#1f2a24;--mu:#5c5646;--ln:#e3d6bb;--card:#fffaf0;--g:#b8892e}
 @media (prefers-color-scheme:dark){:root{--bg:#0e1a17;--fg:#f3ece0;--mu:#bdb5a2;--ln:#2d4039;--card:#172723;--g:#d4a84f}}
 /* Mixed Arabic and English: each text runs in its own direction (punctuation and numbers stay in place),
