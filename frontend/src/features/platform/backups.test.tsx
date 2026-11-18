@@ -213,7 +213,7 @@ describe('Backups', () => {
       screen.getByRole('button', { name: 'Send a test alert' })
     )
     await expect
-      .poll(() => success.mock.calls.at(-1)?.[0])
+      .poll(() => success.mock.calls[success.mock.calls.length - 1]?.[0])
       .toBe('Test sent by e-mail to 2 Super Admins and to Telegram.')
   })
 })
