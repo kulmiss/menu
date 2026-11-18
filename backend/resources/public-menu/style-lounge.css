@@ -22,8 +22,8 @@ h1{font-size:2rem;font-weight:800;line-height:1.1;letter-spacing:-.02em;text-sha
 section{padding-top:2rem}
 section h2{font-size:.8rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--mu)}
 section h2:after{content:"";display:block;height:1px;margin-top:.55rem;background:linear-gradient(90deg,var(--a),transparent 80%)}
-ul{display:grid;gap:.55rem;margin-top:.8rem}
-li{border:1px solid var(--ln);border-radius:var(--br);background:var(--card)}
+section ul{display:grid;gap:.55rem;margin-top:.8rem}
+section li{border:1px solid var(--ln);border-radius:var(--br);background:var(--card)}
 /* A dish: photo, name and description, the price on the right on ONE line. */
 li>.it{padding:.75rem;grid-template-columns:4.25rem minmax(0,1fr) auto;grid-template-areas:"im nm pr" "im sm sm" "im tg tg";grid-template-rows:auto auto 1fr;column-gap:.85rem}
 li>.it .im{grid-area:im;width:4.25rem;height:4.25rem;border-radius:.75rem;box-shadow:0 0 1rem color-mix(in srgb,var(--a) 30%,transparent)}

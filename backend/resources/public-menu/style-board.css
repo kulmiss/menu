@@ -18,8 +18,8 @@ h1{font-size:2.2rem;font-weight:800;line-height:1.05;letter-spacing:.03em;text-t
 /* One board per category. */
 section{margin-top:1.25rem;padding:1rem 1rem .25rem;border:2px dashed var(--ln);border-radius:var(--br)}
 section h2{font-size:1.5rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--a);overflow-wrap:anywhere}
-li{border-bottom:1px dashed var(--ln)}
-li:last-child{border-bottom:0}
+section li{border-bottom:1px dashed var(--ln)}
+section li:last-child{border-bottom:0}
 /* A dish: name, then its price tag; a pinned photo on the right. */
 li>.it{padding:.9rem 0;grid-template-columns:minmax(0,1fr) 4.5rem;grid-template-rows:auto auto auto 1fr;grid-template-areas:"nm im" "sm im" "pr im" "tg im"}
 li>.it .im{grid-area:im;width:4.5rem;height:4.5rem;border:3px solid var(--fg);border-radius:.25rem;transform:rotate(2.5deg);box-shadow:3px 4px 0 #0005}

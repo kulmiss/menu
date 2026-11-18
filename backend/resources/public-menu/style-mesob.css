@@ -19,8 +19,8 @@ section{padding-top:1.75rem}
 section h2{display:flex;align-items:center;gap:.75rem;font-size:1.3rem;font-weight:700;text-align:center;overflow-wrap:anywhere}
 section h2:before,section h2:after{content:"";flex:1 0 1.5rem;height:.45rem;background:repeating-linear-gradient(90deg,var(--o) 0 .3rem,transparent .3rem .5rem,var(--a) .5rem .8rem,transparent .8rem 1rem)}
 .cd{text-align:center}
-ul{display:grid;gap:.6rem;margin-top:.9rem}
-li{border:1px solid var(--ln);border-radius:var(--br);background:var(--card)}
+section ul{display:grid;gap:.6rem;margin-top:.9rem}
+section li{border:1px solid var(--ln);border-radius:var(--br);background:var(--card)}
 /* A dish: round photo on the left, "+" on the right, never over the text. */
 /* The text sits in the middle of the photo's height (empty rows above and below take the rest). */
 li>.it{padding:.75rem .9rem;grid-template-columns:4.75rem minmax(0,1fr);grid-template-areas:"im ." "im nm" "im sm" "im pr" "im tg" "im .";grid-template-rows:1fr auto auto auto auto 1fr}
