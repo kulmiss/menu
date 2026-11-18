@@ -130,8 +130,11 @@ it('makes L\'s colours from the brand colour, with readable text on every one, l
 
 it('loads H\'s own font from /menu-assets, only in style H, allowed by the CSP and cached by name', function () {
     $css = InlineAssets::css('arabic');
-    preg_match_all('#url\((/menu-assets/(kufi-(?:arabic|latin)-700)\.([0-9a-f]{10})\.woff2)\)#', $css, $m, PREG_SET_ORDER);
-    expect($m)->toHaveCount(2)->and($css)->toContain('font-display:optional');
+    preg_match_all('#url\((/menu-assets/(kufi-arabic-700)\.([0-9a-f]{10})\.woff2)\)#', $css, $m, PREG_SET_ORDER);
+    expect($m)->toHaveCount(1)->and($css)->toContain('font-display:optional');
+    // Only Arabic letters use it: a menu in Latin letters downloads no font (CI speed, #231).
+    expect(substr_count($css, '@font-face'))->toBe(1)
+        ->and($css)->toMatch('/unicode-range:U\+0600-06FF[^;}]*/')->not->toContain('U+0020-007E')->not->toContain('kufi-latin');
     foreach ($m as [, $url, $name, $hash]) {
         $source = (string) file_get_contents(resource_path("public-menu/fonts/{$name}.woff2"));
         expect(substr(md5($source), 0, 10))->toBe($hash)
