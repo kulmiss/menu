@@ -1,8 +1,8 @@
 # Progress — menu styles E, F, G (round of 18 Nov 2026)
 
-📍 Now: Step 10 of 10 — PR and report (done; waiting for the last CI job)
+📍 Now: Step 10 of 10 — PR and report (done; CI green)
 📊 Progress: ▓▓▓▓▓▓▓▓▓▓ 100% done
-✅ Just finished: clean re-run of everything (A–G, Chrome + Firefox); 3 bugs fixed with tests (Night Lounge contrast, Mesob long name under +, My order list frame); PRs #157 (website) and #38 (app)
+✅ Just finished: clean re-run of everything (A–G, Chrome + Firefox); 4 bugs fixed with tests (Night Lounge contrast, Mesob long name under +, My order list frame, search-row layout shift); PRs #157 (website) and #38 (app)
 ⏭️ Next: owner merges #157, then app #38
 ⚠️ Waiting for the owner: merge; check on a real iPhone (Safari) and Samsung Internet
 ⏱️ Time left (estimate): none
