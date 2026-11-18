@@ -46,6 +46,8 @@ li>.it .nm{grid-area:nm;font-size:1.05rem;line-height:1.5}
 li>.it .sm{grid-area:sm}
 li>.it .pr{grid-area:pr;justify-self:start;margin-top:.4rem;padding:.05rem .65rem;border:1px solid var(--g);border-radius:99px;white-space:nowrap;font-variant-numeric:tabular-nums}
 li>.it .tg{grid-area:tg}
+/* Small phones (320 px): a long "from" price still fits on one line beside the photo. */
+@media (max-width:22.5rem){li>.it{grid-template-columns:4rem minmax(0,1fr);column-gap:.7rem}li>.it .im{width:4rem;height:4rem}li>.it .pr{padding-inline:.5rem}}
 li>.it.np{grid-template-columns:minmax(0,1fr);grid-template-areas:"nm" "sm" "pr" "tg";grid-template-rows:auto}
 li>.it.ao.np{padding-inline-end:3.25rem}
 .bd{background:none;border-color:var(--ln)}
