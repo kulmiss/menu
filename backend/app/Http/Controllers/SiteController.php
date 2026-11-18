@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Plan;
 use App\Models\Tenant;
+use App\Models\TenantAppearance;
 use App\Support\Auth\GoogleLogin;
 use App\Support\BrandColor;
 use App\Support\EmailLogo;
@@ -34,6 +35,9 @@ class SiteController extends Controller
         'grid' => 'demo-pizza',
         'bistro' => 'demo-bakery',
         'minimal' => 'demo-nine-wells-coffee',
+        'mesob' => 'demo-mesob',
+        'lounge' => 'demo-lounge',
+        'board' => 'demo-street',
     ];
 
     public const DEMO = 'demo';
@@ -212,7 +216,7 @@ class SiteController extends Controller
                 $n = $limits[$key] ?? null;
                 $lines[] = $n === null ? __("landing.pricing.unlimited.{$key}") : trans_choice("landing.pricing.limit.{$key}", (int) $n, ['n' => number_format((int) $n)]);
             }
-            $styles = count(array_filter(['editorial', 'grid', 'bistro', 'minimal'], fn ($st) => $on['style_'.$st]));
+            $styles = count(array_filter(TenantAppearance::STYLES, fn ($st) => $on['style_'.$st]));
             $have = [];
             if ($styles > 0) {
                 $have['styles:'.$styles] = trans_choice('landing.pricing.feature.styles', $styles, ['n' => $styles]);

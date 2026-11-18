@@ -5,6 +5,7 @@ namespace App\Support\Help;
 use App\Http\Controllers\Api\Menu\ItemController;
 use App\Models\Plan;
 use App\Models\Tenant;
+use App\Models\TenantAppearance;
 use App\Support\Features;
 use App\Support\PlatformSettings;
 use App\Support\PublicMenu\MenuPageData;
@@ -271,7 +272,7 @@ class HelpRenderer
                     $has[$k] = __('help.plan_features.'.$k);
                 }
             }
-            $styles = count(array_filter(['editorial', 'grid', 'bistro', 'minimal'], fn ($st) => ($on['style_'.$st] ?? true) && ($global['style_'.$st] ?? true)));
+            $styles = count(array_filter(TenantAppearance::STYLES, fn ($st) => ($on['style_'.$st] ?? true) && ($global['style_'.$st] ?? true)));
             $limitText = [];
             foreach (['items', 'photos', 'branches', 'members'] as $k) {
                 $n = $limits[$k] ?? null;

@@ -1,0 +1,53 @@
+/* Style F · Night Lounge: always dark, a soft glow in the brand colour, thin rows.
+   Prices never wrap onto two lines (owner, 2026-11-18). One palette for light and
+   dark phones: surfaces must match PageTheme::STYLES['lounge'] (light = dark). */
+:root{color-scheme:dark;--br:1rem;--bg:#0c0a13;--fg:#f2eeff;--mu:#aaa2c8;--ln:#2a2540;--card:#17131f}
+/* Soft light from above in the brand colour (decoration; the text never sits on it alone). */
+.top{background:radial-gradient(110% 80% at 15% 0,color-mix(in srgb,var(--a) 28%,transparent),transparent 65%),radial-gradient(90% 70% at 100% 0,color-mix(in srgb,var(--a) 14%,transparent),transparent 60%)}
+.cv{aspect-ratio:2/1}
+@media (min-width:44rem){.cv{border-radius:0 0 1.25rem 1.25rem}}
+.ov header{background:linear-gradient(#0000,#0c0a13e6)}
+header{padding:1.5rem 1rem .75rem}
+.lg{border-radius:1rem;box-shadow:0 0 1.25rem color-mix(in srgb,var(--a) 45%,transparent)}
+h1{font-size:2rem;font-weight:800;line-height:1.1;letter-spacing:-.02em;text-shadow:0 0 1.5rem color-mix(in srgb,var(--a) 70%,transparent)}
+/* Opening hours on a dark page (the shared pill switches colours only for dark phones). */
+.st.op{color:#7ee2a8;border-color:#12a15c66;background:#12a15c1f}
+.st:before{background:#f97066;box-shadow:0 0 .5rem #f97066}
+.st.op:before{background:#3ddc97;box-shadow:0 0 .5rem #3ddc97}
+.bar{background:#0c0a13f2;border-bottom-color:var(--ln)}
+.sr input,.ib{background:var(--card);border-color:var(--ln)}
+.cn{gap:.5rem}
+.cn a{border:0;border-radius:0;padding:0 .55rem;color:var(--mu);box-shadow:inset 0 -2px transparent}
+.cn a.on{background:none;color:var(--fg);box-shadow:inset 0 -2px var(--a);text-shadow:0 0 .75rem var(--a)}
+section{padding-top:2rem}
+section h2{font-size:.8rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--mu)}
+section h2:after{content:"";display:block;height:1px;margin-top:.55rem;background:linear-gradient(90deg,var(--a),transparent 80%)}
+ul{display:grid;gap:.55rem;margin-top:.8rem}
+li{border:1px solid var(--ln);border-radius:var(--br);background:var(--card)}
+/* A dish: photo, name and description, the price on the right on ONE line. */
+li>.it{padding:.75rem;grid-template-columns:4.25rem minmax(0,1fr) auto;grid-template-areas:"im nm pr" "im sm sm" "im tg tg";grid-template-rows:auto auto 1fr;column-gap:.85rem}
+li>.it .im{grid-area:im;width:4.25rem;height:4.25rem;border-radius:.75rem;box-shadow:0 0 1rem color-mix(in srgb,var(--a) 30%,transparent)}
+li>.it .nm{grid-area:nm;font-size:1rem;line-height:1.3}
+li>.it .sm{grid-area:sm}
+li>.it .pr{grid-area:pr;margin:0;white-space:nowrap;text-align:end;font-size:1rem;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.3}
+li>.it .pr s{display:block;font-size:.75rem;font-weight:500}
+li>.it .tg{grid-area:tg}
+/* "+" on the photo's corner; rows without a photo keep room for it at the end. */
+li>.it .ad{top:calc(.75rem + 4.25rem - 2.1rem);inset-inline-end:auto;inset-inline-start:calc(.75rem + 4.25rem - 2.1rem)}
+li>.it.np{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"nm pr" "sm sm" "tg tg"}
+li>.it.np .ad{inset-inline-start:auto;inset-inline-end:0;top:.15rem;margin-top:0}
+li>.it.np .pr{font-size:1.1rem}
+.so .im img{filter:grayscale(1) brightness(.6)}
+.bd{background:none;border-color:var(--ln)}
+.bd.hl{box-shadow:0 0 .6rem color-mix(in srgb,var(--a) 45%,transparent)}
+/* Specials and happy hour: a lit sign. */
+.spc .sp,.an{border:1px solid color-mix(in srgb,var(--a) 50%,var(--ln));border-radius:var(--br);background:linear-gradient(100deg,color-mix(in srgb,var(--a) 20%,var(--card)),var(--card) 70%)}
+.spc .sp{box-shadow:0 0 1.5rem color-mix(in srgb,var(--a) 18%,transparent)}
+/* On the lit background the brand colour may fall under 4.5:1: the special's price is white there. */
+.sp .pr{color:var(--fg)}
+dialog{border:1px solid var(--ln);border-bottom:0}
+@media (min-width:48rem){dialog{border-bottom:1px solid var(--ln)}}
+.x{background:var(--card);color:var(--fg)}
+/* Footer: same night, groups on dark cards. */
+.ft{background:var(--bg)}.fg>div{background:var(--card);border:1px solid var(--ln);border-radius:1rem;padding:1rem}
+.fc svg,.fso a,.fbt,.pdl a{background:var(--card)}

@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\Role;
+use App\Models\TenantAppearance;
 use App\Support\Features;
 use App\Support\PlatformSettings;
 use Illuminate\Support\Facades\DB;
@@ -64,8 +65,12 @@ it('opens and closes sign-up from the same list', function () {
 
 it('keeps at least one menu style, refuses unknown keys, and is for Super Admins only', function () {
     [$owner] = member(Role::Owner);
-    $this->actingAs(superAdmin())->putJson(p('settings/features'), ['features' => ['style_editorial' => false, 'style_grid' => false, 'style_bistro' => false, 'style_minimal' => false]], idem())
+    $allOff = collect(TenantAppearance::STYLES)->mapWithKeys(fn (string $s) => ['style_'.$s => false])->all();
+    $this->actingAs(superAdmin())->putJson(p('settings/features'), ['features' => $allOff], idem())
         ->assertUnprocessable()->assertJsonValidationErrors('features');
+    // One left on (the newest, G) is enough.
+    $this->putJson(p('settings/features'), ['features' => [...$allOff, 'style_board' => true]], idem())->assertOk();
+    $this->putJson(p('settings/features'), ['features' => array_map(fn () => true, $allOff)], idem())->assertOk();
     $this->putJson(p('settings/features'), ['features' => ['nope' => false]], idem())->assertUnprocessable();
     $this->actingAs($owner)->getJson(p('settings/features'))->assertNotFound();
 });

@@ -1,20 +1,22 @@
 @php
     use App\Support\PublicMenu\InlineAssets;
+    use App\Support\PublicMenu\PageTheme;
     $preview ??= false;
     $cover = $theme['cover'];
     $style = $theme['style'];
     // Photo widths per menu style, so the browser picks the right file (§15.2.4).
-    $sizes = ['minimal' => '1px', 'bistro' => '104px', 'grid' => '(min-width:40rem) 220px, 50vw', 'editorial' => '(min-width:44rem) 672px, 100vw'][$style];
+    $styleDef = PageTheme::STYLES[$style];
+    $sizes = $styleDef['photo'];
     // Only photos likely on the first screen load at once; the rest lazily
     // (PLAN.md §15.2.4). How many dishes fit depends on the style and the banner.
     // With a banner, A and B show no dish photo on the first screen (the banner is the LCP).
-    $fold = ['editorial' => [2, 0], 'grid' => [4, 0], 'bistro' => [5, 0], 'minimal' => [0, 0]][$style][$cover ? 1 : 0];
+    $fold = $styleDef['fold'][$cover ? 1 : 0];
     // Without a banner the first photo on screen is the largest paint (LCP, owner 2026-11-12): the first
     // special's photo, else the first dish photo. It is preloaded with high priority.
     $lcp = null;
     // A's first dish photo is full width: on a phone it takes the 320 px file, one size below B/C's pick
     // logic would give (owner, 2026-11-12: same quality, only this photo, only without banner and specials).
-    $lcpSizes = ['minimal' => '1px', 'bistro' => '104px', 'grid' => '(min-width:40rem) 220px, 40vw', 'editorial' => '(min-width:44rem) 672px, 44vw'][$style];
+    $lcpSizes = $styleDef['lcp'];
     if (! $cover) {
         foreach ($promotions as $p) {
             if ($p['type'] !== 'announcement' && ! $p['hidden'] && $p['image']) {
