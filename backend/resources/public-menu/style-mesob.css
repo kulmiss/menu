@@ -24,7 +24,7 @@ li{border:1px solid var(--ln);border-radius:var(--br);background:var(--card)}
 /* A dish: round photo on the left, "+" on the right, never over the text. */
 /* The text sits in the middle of the photo's height (empty rows above and below take the rest). */
 li>.it{padding:.75rem .9rem;grid-template-columns:4.75rem minmax(0,1fr);grid-template-areas:"im ." "im nm" "im sm" "im pr" "im tg" "im .";grid-template-rows:1fr auto auto auto auto 1fr}
-li>.it.ao{padding-inline-end:3.25rem}
+li>.it.ao,li>.it.ao.np{padding-inline-end:3.25rem}
 li>.it .ad,li>.np>.ad{top:50%;margin-top:-1.375rem;inset-inline-end:.3rem}
 li>.it .im{grid-area:im;align-self:start;width:4.75rem;height:4.75rem;border-radius:50%;box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--o)}
 li>.it .nm{grid-area:nm;font-size:1.05rem;line-height:1.3}

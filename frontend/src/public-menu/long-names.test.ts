@@ -52,6 +52,12 @@ describe('very long names on the guest page', () => {
       for (const li of main.querySelectorAll('li')) {
         const box = li.getBoundingClientRect()
         const ad = li.querySelector('.ad')!.getBoundingClientRect()
+        // The name's whole column stays clear of the "+", whatever the font
+        // (CI, 2026-11-18: in style E a row without a photo had 2.75 rem for a + at 3.05 rem).
+        expect(
+          overlap(li.querySelector('.nm')!.getBoundingClientRect(), ad),
+          'name column/+'
+        ).toBe(false)
         for (const a of textBoxes(li.querySelector('.nm')!)) {
           expect(a.right, 'name inside the card').toBeLessThanOrEqual(
             box.right + 0.5
