@@ -37,7 +37,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read Media|null $logo
  * @property-read Media|null $cover
  */
-#[Fillable(['logo_media_id', 'cover_media_id', 'primary_color', 'font', 'style', 'banner_text', 'show_prices', 'show_photos', 'show_descriptions', 'show_calories', 'show_share', 'show_pdf_link', 'show_order_list', 'show_other_branches', 'show_logo', 'show_banner', 'menu_direction', 'show_halal', 'ramadan_mode', 'photos_greyscale', 'mono_accent', 'theme_id'])]
+#[Fillable(['logo_media_id', 'cover_media_id', 'primary_color', 'font', 'style', 'banner_text', 'show_prices', 'show_photos', 'show_descriptions', 'show_calories', 'show_share', 'show_pdf_link', 'show_order_list', 'show_other_branches', 'show_logo', 'show_banner', 'menu_direction', 'show_halal', 'ramadan_mode', 'photos_greyscale', 'mono_accent', 'show_decoration', 'theme_id'])]
 class TenantAppearance extends Model
 {
     use BelongsToTenant;
@@ -47,7 +47,7 @@ class TenantAppearance extends Model
     public const FONTS = ['system', 'serif', 'rounded'];
 
     /** Guest-menu styles; the order is the order of the admin picker. */
-    public const STYLES = ['editorial', 'grid', 'bistro', 'minimal', 'mesob', 'lounge', 'board', 'arabic', 'islamic', 'somali', 'mono', 'colour'];
+    public const STYLES = ['editorial', 'grid', 'bistro', 'minimal', 'mesob', 'lounge', 'board', 'arabic', 'islamic', 'somali', 'mono', 'colour', 'coffee', 'grill', 'garden', 'coastal', 'luxe'];
 
     /** Menu direction (style H): auto follows the menu's script. */
     public const DIRECTIONS = ['auto', 'ltr', 'rtl'];
@@ -57,8 +57,14 @@ class TenantAppearance extends Model
     /** Guest-page extras switched in Appearance (optional in API requests; added 2026-11-11). */
     public const EXTRA_FLAGS = ['show_share', 'show_pdf_link', 'show_order_list', 'show_other_branches', 'show_logo', 'show_banner', ...self::STYLE_FLAGS];
 
-    /** Options of one style each (added 2026-11-19): Halal and Ramadan mode (I), greyscale photos and accent (K). */
-    public const STYLE_FLAGS = ['show_halal', 'ramadan_mode', 'photos_greyscale', 'mono_accent'];
+    /**
+     * Options of one style each (added 2026-11-19): Halal and Ramadan mode (I), greyscale photos and
+     * accent (K); the artwork of M–Q (header picture, textures, category icons) on or off (QUESTIONS #232).
+     */
+    public const STYLE_FLAGS = ['show_halal', 'ramadan_mode', 'photos_greyscale', 'mono_accent', 'show_decoration'];
+
+    /** M–Q: styles with their own artwork, replaceable by the restaurant's banner and category photos. */
+    public const ART_STYLES = ['coffee', 'grill', 'garden', 'coastal', 'luxe'];
 
     /** Values for a restaurant that never opened the Appearance screen. */
     public const DEFAULTS = [
@@ -83,6 +89,7 @@ class TenantAppearance extends Model
         'ramadan_mode' => false,
         'photos_greyscale' => false,
         'mono_accent' => false,
+        'show_decoration' => true,
         'theme_id' => null,
     ];
 
@@ -103,6 +110,7 @@ class TenantAppearance extends Model
             'ramadan_mode' => 'boolean',
             'photos_greyscale' => 'boolean',
             'mono_accent' => 'boolean',
+            'show_decoration' => 'boolean',
         ];
     }
 

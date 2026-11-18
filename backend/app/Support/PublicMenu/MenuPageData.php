@@ -128,8 +128,11 @@ class MenuPageData
             $calories = $theme['show_calories'];
             $prices = $theme['show_prices'];
             $sizesLine = $theme['style'] === 'minimal';
+            // M–Q: a category's own photo in its heading, else (with decoration on) an icon that fits its name.
+            // (An object: the closures below share its count of categories.)
+            $art = ($theme['art'] ?? false) ? (object) ['photos' => $photos, 'icons' => $theme['decoration'], 'style' => $theme['style'], 'n' => 0] : null;
 
-            $menuRows = $menus->map(function (Menu $menu) use ($text, $money, $describe, $photos, $calories, $prices, $sizesLine, $deals, $soldOut, &$tagsUsed) {
+            $menuRows = $menus->map(function (Menu $menu) use ($text, $money, $describe, $photos, $calories, $prices, $sizesLine, $deals, $soldOut, &$tagsUsed, $art) {
                 return [
                     'id' => $menu->id,
                     'name' => $text($menu->name),
@@ -138,6 +141,8 @@ class MenuPageData
                     'categories' => $menu->categories->filter(fn (Category $c) => $c->items->isNotEmpty())->map(fn (Category $c) => [
                         'id' => $c->id,
                         'name' => $text($c->name),
+                        'image' => $art !== null && $art->photos && $c->media ? self::image($c->media) : null,
+                        'icon' => $art !== null && $art->icons ? CategoryIcons::pick($art->style, array_values(array_filter((array) $c->name, 'is_string')), $art->n++, $c->icon) : null,
                         'description' => $describe($c->description),
                         'items' => $c->items->map(function (Item $item) use ($text, $money, $describe, $photos, $calories, $prices, $sizesLine, $deals, $soldOut, &$tagsUsed) {
                             $deal = $deals[$item->id] ?? null;

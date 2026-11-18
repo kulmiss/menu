@@ -14,9 +14,9 @@ use App\Support\PublicMenu\PageTheme;
 
 /*
  * Styles E · Mesob, F · Night Lounge and G · Street Board, and H · Arabic to
- * L · Colourful (owner, 2026-11-18): every guest-menu feature of A–D, the
- * style's own CSS only, the right photo sizes, one dark palette for F and G,
- * and Night Lounge prices on one line. Style options of H–L: StylesHlTest.
+ * L · Colourful (owner, 2026-11-18), and M · Coffee House to Q · Luxe (2026-11-19): every guest-menu feature of A–D, the
+ * style's own CSS only, the right photo sizes, one dark palette for F, G and N,
+ * and Night Lounge prices on one line. Style options of H–L: StylesHlTest; art and icons of M–Q: StylesMqTest.
  */
 function efgPage(string $style, array $appearance = [], ?callable $extra = null): string
 {
@@ -44,12 +44,12 @@ function efgPage(string $style, array $appearance = [], ?callable $extra = null)
     return (string) test()->get('/'.$tenant->slug)->assertOk()->getContent();
 }
 
-dataset('efg', ['mesob', 'lounge', 'board', 'arabic', 'islamic', 'somali', 'mono', 'colour']);
+dataset('efg', ['mesob', 'lounge', 'board', 'arabic', 'islamic', 'somali', 'mono', 'colour', 'coffee', 'grill', 'garden', 'coastal', 'luxe']);
 
 it('shows every menu feature in the style, with its own CSS only', function (string $style) {
     $html = efgPage($style);
 
-    expect($html)->toContain('class="S-'.$style.'"')
+    expect($html)->toMatch('/class="S-'.$style.'( dc)?"/')                // dc: decoration (M–Q)
         ->toContain('Macchiato')->toContain('Shai · ሻይ')            // other scripts in dish names
         ->toContain('class="pr"')->toContain('Sold out')->toContain('Vegan')
         ->toContain('class="spc"')->toContain('Sunset set')          // special
@@ -76,7 +76,7 @@ it('gives the banner its shape in the style and keeps the page photo-free when p
     expect(efgPage($style))->toContain('height="'.(int) round(1280 * $h / $w).'"');
 
     $plain = efgPage($style, ['show_photos' => false]);
-    expect($plain)->toContain('class="S-'.$style.' NP"')->not->toContain('class="im"');
+    expect($plain)->toMatch('/class="S-'.$style.' NP( dc)?"/')->not->toContain('class="im"');   // dc: decoration (M–Q)
 })->with('efg');
 
 it('keeps one dark palette in F and G and both light and dark in E', function (string $style, bool $darkOnly) {
@@ -86,7 +86,8 @@ it('keeps one dark palette in F and G and both light and dark in E', function (s
     // (The shared CSS keeps its own small dark-phone rules, e.g. the hours pill; the palette is what counts.)
     expect(str_contains($css[1], '@media (prefers-color-scheme:dark){:root{'))->toBe(! $darkOnly)
         ->and(str_contains($css[1], 'color-scheme:dark;'))->toBe($darkOnly);
-})->with([['mesob', false], ['lounge', true], ['board', true], ['arabic', false], ['islamic', false], ['somali', false], ['mono', false], ['colour', false]]);
+})->with([['mesob', false], ['lounge', true], ['board', true], ['arabic', false], ['islamic', false], ['somali', false], ['mono', false], ['colour', false],
+    ['coffee', false], ['grill', true], ['garden', false], ['coastal', false], ['luxe', false]]);
 
 it('keeps Night Lounge prices on one line, old price included (happy hour)', function () {
     $css = InlineAssets::css('lounge');

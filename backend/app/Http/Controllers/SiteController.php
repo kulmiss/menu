@@ -48,6 +48,11 @@ class SiteController extends Controller
         'somali' => 'demo-xamar',
         'mono' => 'demo-atelier',
         'colour' => 'demo-juicy',
+        'coffee' => 'demo-jebena',
+        'grill' => 'demo-firewood',
+        'garden' => 'demo-green-spoon',
+        'coastal' => 'demo-dhow',
+        'luxe' => 'demo-maison',
     ];
 
     public const DEMO = 'demo';

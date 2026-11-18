@@ -37,6 +37,12 @@ class Features
         'style_somali' => true,
         'style_mono' => true,
         'style_colour' => true,
+        // M · Coffee House, N · Grill & BBQ, O · Garden Fresh, P · Coastal, Q · Fine Dining (owner, 2026-11-19; Plus and up, off on Free: QUESTIONS #232).
+        'style_coffee' => true,
+        'style_grill' => true,
+        'style_garden' => true,
+        'style_coastal' => true,
+        'style_luxe' => true,
         'price_periods' => true, // time-based prices: happy hour, lunch (owner, 2026-11-14; off on Free)
         // "Sold out" marks (owner, 2026-11-14). Off: no toggles, list or widget, and the guest
         // menu never says "sold out"; existing marks are kept but ignored.

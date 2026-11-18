@@ -72,6 +72,10 @@ li>.it.ao.np{padding-inline-end:2.75rem}
 
 .st.ld{visibility:hidden}
 .pw{user-select:all}
+/* M–Q: the sheet of category icons, never shown itself. */
+.sx{position:absolute;width:0;height:0;overflow:hidden}
+/* An icon drawn from that sheet takes its line style here (a <use> copy inherits from where it is placed). */
+svg.ci{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 
 .an{margin:1rem 0 0;padding:.6rem .8rem;border-radius:.75rem;background:var(--card);border:1px solid var(--ln);font-size:.9rem}
 .an[hidden],.spc[hidden]{display:none}

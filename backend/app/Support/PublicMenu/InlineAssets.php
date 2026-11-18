@@ -42,6 +42,20 @@ class InlineAssets
         );
     }
 
+    /**
+     * The header picture of a style with artwork (M–Q, resources/public-menu/art/{style}.svg):
+     * original drawings, inlined (no request), shown when the restaurant has no banner and
+     * keeps the decoration on (QUESTIONS #232). Empty for the other styles.
+     */
+    public static function art(string $style): string
+    {
+        if (! in_array($style, TenantAppearance::ART_STYLES, true)) {
+            return '';
+        }
+
+        return self::$memo['art.'.$style] ??= trim((string) preg_replace('/\s*\n\s*/', '', (string) file_get_contents(resource_path('public-menu/art/'.$style.'.svg'))));
+    }
+
     /** Writes a file under public/menu-assets with its content hash in the name (atomic, once). */
     private static function publish(string $content, string $name, string $extension): string
     {
