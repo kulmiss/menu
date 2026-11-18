@@ -37,6 +37,9 @@ const SCREENS = {
   landing: lazy(() =>
     import('./landing-editor').then((m) => ({ default: m.LandingEditorPage }))
   ),
+  footer: lazy(() =>
+    import('./footer-editor').then((m) => ({ default: m.FooterEditorPage }))
+  ),
   activity: lazy(() =>
     import('./screens').then((m) => ({ default: m.ActivityPage }))
   ),

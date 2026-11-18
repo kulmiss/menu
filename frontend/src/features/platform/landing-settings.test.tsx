@@ -9,7 +9,6 @@ const initial: LandingSettingsData = {
   landing_testimonials: [
     { quote: 'Guests order faster.', name: 'Sara', role: 'Café', real: false },
   ],
-  socials: {},
   upgrade_whatsapp: null,
 }
 let fake: ReturnType<typeof fakeApi>
@@ -43,5 +42,10 @@ describe('Landing page → colour, WhatsApp, customers and links', () => {
     const body = fake.calls.find((c) => c.method === 'PUT')?.data as object
     expect(body).not.toHaveProperty('landing_sections')
     expect(body).not.toHaveProperty('landing_headline')
+    // Social links live in Super Admin → Footer now (#230).
+    expect(body).not.toHaveProperty('socials')
+    await expect
+      .element(screen.getByText('Social links and the rest of the footer'))
+      .toBeVisible()
   })
 })

@@ -973,6 +973,9 @@ function SettingsForm({
     default_currency: initial.default_currency ?? 'ETB',
     terms: initial.terms ?? '',
     privacy: initial.privacy ?? '',
+    about: initial.about ?? '',
+    contact: initial.contact ?? '',
+    cookies: initial.cookies ?? '',
   })
   const input = (
     k: keyof typeof v,
@@ -1025,7 +1028,7 @@ function SettingsForm({
             </AlertTitle>
             <AlertDescription>{t('platform.legal.format')}</AlertDescription>
           </Alert>
-          {(['terms', 'privacy'] as const).map((k) => (
+          {LEGAL_PAGES.map((k) => (
             <LegalField
               key={k}
               page={k}
@@ -1087,14 +1090,17 @@ function SettingsForm({
   )
 }
 
-/** Terms / Privacy text with "View page" and "Reset to default text" (QUESTIONS #181). */
+/** Terms and Privacy (#181), and About us, Contact us and Cookie info, linked from the footer (#230). */
+const LEGAL_PAGES = ['terms', 'privacy', 'about', 'contact', 'cookies'] as const
+
+/** One page's text with "View page" and "Reset to default text". */
 function LegalField({
   page,
   value,
   onChange,
   t,
 }: {
-  page: 'terms' | 'privacy'
+  page: (typeof LEGAL_PAGES)[number]
   value: string
   onChange: (text: string) => void
   t: (k: string) => string

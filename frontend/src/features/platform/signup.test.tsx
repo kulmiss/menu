@@ -260,6 +260,9 @@ describe('Super Admin landing page settings', () => {
             name: 'Menu',
             terms: 'My own terms',
             privacy: 'My own privacy text',
+            about: 'About text',
+            contact: 'Contact text',
+            cookies: 'Cookie text',
             share_image_url: '/img/share.jpg',
             logo_url: null,
             signup_open: true,
@@ -322,5 +325,21 @@ describe('Super Admin landing page settings', () => {
     await expect
       .element(screen.getByLabelText('Privacy policy'))
       .toHaveValue('My own privacy text')
+
+    // The footer's About us, Contact us and Cookie info pages (#230).
+    await expect
+      .element(screen.getByLabelText('About us page'))
+      .toHaveValue('About text')
+    await expect
+      .element(screen.getByLabelText('Cookie info page'))
+      .toHaveValue('Cookie text')
+    const views = screen.getByRole('link', { name: 'View page' })
+    expect(views.elements().map((a) => a.getAttribute('href'))).toEqual([
+      '/terms',
+      '/privacy',
+      '/about',
+      '/contact',
+      '/cookies',
+    ])
   })
 })
