@@ -220,6 +220,8 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::post('backups/{backup}/link', [BackupController::class, 'link'])->whereNumber('backup')->middleware('throttle:6,1');
             Route::get('backups/{backup}/file', [BackupController::class, 'file'])->whereNumber('backup')->middleware('signed')->name('super.backups.file');
             Route::delete('backups/{backup}', [BackupController::class, 'destroy'])->whereNumber('backup');
+            Route::put('alerts', [BackupController::class, 'alerts']);
+            Route::post('alerts/test', [BackupController::class, 'testAlert'])->middleware('throttle:5,1');
             // Invoices (owner, 2026-11-13)
             Route::get('invoices', [InvoiceController::class, 'index']);
             Route::get('invoices.csv', [InvoiceController::class, 'export'])->middleware('throttle:exports');

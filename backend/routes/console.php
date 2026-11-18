@@ -4,6 +4,8 @@ use App\Jobs\SendCampaignBatch;
 use App\Models\AppNotification;
 use App\Models\Tenant;
 use App\Support\Backups\Backups;
+use App\Support\Ops\Alerts;
+use App\Support\Ops\Doctor;
 use App\Support\PlatformSettings;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -35,6 +37,16 @@ Schedule::call(fn () => SendCampaignBatch::dispatch())->everyMinute()->name('cam
 Schedule::command('backup:run --scheduled')->dailyAt('23:30')->withoutOverlapping(120);
 Schedule::call(fn () => app(Backups::class)->check())->hourlyAt(17)->name('backup:check')
     ->when(fn () => (bool) PlatformSettings::get('backup_enabled'));
+
+// Go-live checks every hour on a live server (QUESTIONS #233): something broken (menu:doctor red)
+// reaches the Super Admins by e-mail / Telegram, at most once a day.
+Schedule::call(function () {
+    $checks = app(Doctor::class)->run(quick: true);
+    if (Doctor::overall($checks) === 'down' && Cache::add('alerts:doctor', true, now()->addDay())) {
+        $red = array_map(fn (array $c) => '✗ '.$c['message'].' — '.$c['fix'], array_values(array_filter($checks, fn (array $c) => $c['status'] === 'fail')));
+        Alerts::send((string) __('alerts.doctor_subject', ['platform' => PlatformSettings::get('name')]), implode("\n", $red));
+    }
+})->hourlyAt(23)->name('doctor:check')->environments(['production']);
 
 // Time-based prices: rebuild pages when a period starts or ends (owner, 2026-11-14).
 Schedule::command('menu:price-periods')->everyMinute()->withoutOverlapping();

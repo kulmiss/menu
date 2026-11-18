@@ -92,6 +92,12 @@ class PlatformSettings
         'backup_s3_prefix' => 'menu-backups',
         'backup_s3_key' => '',
         'backup_s3_secret' => '', // encrypted (Crypt), never sent to the browser
+        // Alerts (owner, 2026-11-19, QUESTIONS #233): server errors and failed go-live checks
+        // e-mailed to every Super Admin and, optionally, sent to a Telegram chat.
+        'alerts_email' => true,
+        'alerts_telegram_enabled' => false,
+        'alerts_telegram_chat' => '',
+        'alerts_telegram_token' => '', // encrypted (Crypt), never sent to the browser
         'socials' => ['telegram' => '', 'facebook' => '', 'instagram' => '', 'tiktok' => '', 'x' => '', 'youtube' => '', 'linkedin' => ''],
     ];
 
@@ -126,7 +132,8 @@ class PlatformSettings
         $all = self::all();
         $all['turnstile_secret_set'] = ($all['turnstile_secret'] ?? '') !== '';
         $all['backup_s3_secret_set'] = ($all['backup_s3_secret'] ?? '') !== '';
-        unset($all['turnstile_secret'], $all['backup_s3_secret']);
+        $all['alerts_telegram_token_set'] = ($all['alerts_telegram_token'] ?? '') !== '';
+        unset($all['turnstile_secret'], $all['backup_s3_secret'], $all['alerts_telegram_token']);
 
         return $all;
     }

@@ -6,7 +6,7 @@ Contents: [1 Requirements](#1-requirements) · [2 Build a release](#2-build-a-re
 
 ## 1. Requirements
 
-- PHP **8.3+** with: `pdo_mysql`, `mbstring`, `openssl`, `tokenizer`, `xml`, `ctype`, `json`, `fileinfo`, `gd` (WebP support), `intl`, `zip`, `exif`, `bcmath`. AVIF photos are made automatically when GD supports AVIF; otherwise WebP only.
+- PHP **8.3+** with: `pdo_mysql`, `mbstring`, `openssl`, `tokenizer`, `xml`, `ctype`, `json`, `fileinfo`, `gd` (WebP support), `intl`, `zip`, `exif`, `curl`. `php artisan menu:doctor` checks them. AVIF photos are made automatically when GD supports AVIF; otherwise WebP only.
 - MySQL **8** or MariaDB **10.6+**, `utf8mb4`.
 - Apache with `mod_rewrite` (shared hosting) or Nginx + PHP-FPM (VPS).
 - HTTPS.

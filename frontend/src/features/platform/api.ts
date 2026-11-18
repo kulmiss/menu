@@ -258,6 +258,10 @@ export const backupsQ = () =>
       backup_s3_prefix: string
       backup_s3_key: string
       backup_s3_secret_set: boolean
+      alerts_email: boolean
+      alerts_telegram_enabled: boolean
+      alerts_telegram_chat: string
+      alerts_telegram_token_set: boolean
     }
   }>('backups')
 export const tagsQ = () => q<TagRef[]>('tags')

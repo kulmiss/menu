@@ -1350,5 +1350,20 @@
     "desktop": "Computer",
     "light": "Light",
     "dark": "Dark"
+  },
+  "alerts": {
+    "title": "Alerts",
+    "hint": "Server errors and failed go-live checks (the same as \"php artisan menu:doctor\"). Errors are grouped: at most one alert every 30 minutes.",
+    "email": "E-mail every Super Admin",
+    "telegram_title": "Telegram (optional)",
+    "telegram": "Also send alerts to a Telegram chat",
+    "token": "Bot token",
+    "chat": "Chat ID",
+    "telegram_hint": "In Telegram, ask @BotFather for a new bot and copy its token. Add the bot to your group (or start a chat with it), then put the group's or your chat ID here. The token is stored encrypted and never shown again.",
+    "test": "Send a test alert",
+    "test_sent_one": "Test sent by e-mail to {{count}} Super Admin{{telegram}}.",
+    "test_sent_other": "Test sent by e-mail to {{count}} Super Admins{{telegram}}.",
+    "test_telegram": " and to Telegram",
+    "test_none": "Nothing was sent: switch on e-mail or Telegram first (and check Settings → Email)."
   }
 }

@@ -3,11 +3,14 @@
 namespace App\Providers;
 
 use App\Support\MailSettings;
+use App\Support\Ops\Alerts;
 use App\Tenancy\CurrentTenant;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Log\Events\MessageLogged;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
@@ -23,6 +26,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         self::guardDebug($this->app->isProduction());
+
+        // Server errors reach the Super Admins by e-mail / Telegram, grouped (QUESTIONS #233).
+        Event::listen(MessageLogged::class, [Alerts::class, 'onLog']);
 
         // Catch lazy loading, silently discarded attributes and missing attributes early.
         Model::shouldBeStrict(! $this->app->isProduction());
