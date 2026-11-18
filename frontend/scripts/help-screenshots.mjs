@@ -119,6 +119,11 @@ const shots = {
   'style-somali': { path: '/demo-xamar', guest: true },
   'style-mono': { path: '/demo-atelier', guest: true },
   'style-colourful': { path: '/demo-juicy', guest: true },
+  'style-coffee': { path: '/demo-jebena', guest: true },
+  'style-grill': { path: '/demo-firewood', guest: true },
+  'style-garden': { path: '/demo-green-spoon', guest: true },
+  'style-coastal': { path: '/demo-dhow', guest: true },
+  'style-fine-dining': { path: '/demo-maison', guest: true },
   'guest-my-order': {
     path: '/demo',
     guest: true,

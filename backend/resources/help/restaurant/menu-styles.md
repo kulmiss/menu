@@ -1,12 +1,12 @@
 ---
-title: Menu styles A to L
+title: Menu styles A to Q
 topic: look
 summary: Choose how your menu looks to guests.
 order: 10
 pages: /admin/appearance
 app: /r/:tid/appearance
 roles: owner, manager
-keywords: style, design, theme, layout, editorial, grid, bistro, minimal, mesob, lounge, night, dark, board, chalkboard, street food, arabic, right to left, rtl, islamic, halal, ramadan, somali, black and white, monochrome, colourful, colorful, juice
+keywords: style, design, theme, layout, editorial, grid, bistro, minimal, mesob, lounge, night, dark, board, chalkboard, street food, arabic, right to left, rtl, islamic, halal, ramadan, somali, black and white, monochrome, colourful, colorful, juice, coffee, jebena, grill, bbq, garden, fresh, coastal, seafood, fish, fine dining, luxe, hotel
 public: true
 ---
 
@@ -48,6 +48,23 @@ Open **Appearance → Menu style**. The preview shows the change at once. Guests
 <!-- if style_colour -->
 - **L · Colourful**: a bright colour for each category and rounded cards. For juice bars, ice cream and family places. [More about L](help:style-colourful)
 <!-- endif -->
+<!-- if style_coffee -->
+- **M · Coffee House**: a dark-roast band with a jebena and cups, round photos. For coffee houses and cafés. [More about M](help:style-coffee)
+<!-- endif -->
+<!-- if style_grill -->
+- **N · Grill & BBQ**: always dark, with embers, flames and price tags. For tibs, grill and burger places. [More about N](help:style-grill)
+<!-- endif -->
+<!-- if style_garden -->
+- **O · Garden Fresh**: leaves, soft greens and white cards. For juice houses, salad bars and fasting menus. [More about O](help:style-garden)
+<!-- endif -->
+<!-- if style_coastal -->
+- **P · Coastal**: a deep-sea band with a dhow, sand and coral. For fish and seafood places. [More about P](help:style-coastal)
+<!-- endif -->
+<!-- if style_luxe -->
+- **Q · Fine Dining**: marble, thin gold lines and an elegant serif. For hotels and fine dining. [More about Q](help:style-fine-dining)
+<!-- endif -->
+
+Styles M to Q come with their own pictures: a drawing at the top and an icon for each category. Your banner and your category photos replace them, and **Show the style's pictures and icons** turns them off.
 
 A style with a lock is not in your plan. See [plans](help:plans-compared).
 

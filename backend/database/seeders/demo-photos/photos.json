@@ -482,6 +482,26 @@
       "banner": false
     },
     {
+      "key": "fish-mullet",
+      "source": "pexels",
+      "id": "10917524",
+      "page": "https://www.pexels.com/photo/fresh-fishes-on-top-of-a-griller-10917524/",
+      "photographer": "alexeydemidov",
+      "profile": "https://www.pexels.com/@alexeydemidov",
+      "licence": "Pexels License",
+      "banner": false
+    },
+    {
+      "key": "fish-tilapia",
+      "source": "pexels",
+      "id": "8352777",
+      "page": "https://www.pexels.com/photo/fresh-fishes-on-the-grill-8352777/",
+      "photographer": "kindelmedia",
+      "profile": "https://www.pexels.com/@kindelmedia",
+      "licence": "Pexels License",
+      "banner": false
+    },
+    {
       "key": "flaky-pastries",
       "source": "pexels",
       "id": "30632253",
