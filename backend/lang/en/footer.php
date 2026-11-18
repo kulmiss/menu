@@ -1,0 +1,60 @@
+<?php
+
+// The website footer (owner, 2026-11-18, QUESTIONS #230): default texts. The
+// Super Admin changes every one of them in Content → Footer.
+return [
+    'columns' => [
+        'product' => 'Product',
+        'restaurants' => 'For restaurants',
+        'company' => 'Company',
+        'legal' => 'Legal',
+    ],
+    // Pages a link can point to (the Super Admin picks one from this list, or types a web address).
+    'pages' => [
+        'home' => 'Home page',
+        'features' => 'Features',
+        'pricing' => 'Plans & prices',
+        'demo' => 'See a demo menu',
+        'styles' => 'Menu styles',
+        'app' => 'Mobile app',
+        'how' => 'How it works',
+        'faq' => 'Questions',
+        'signup' => 'Sign up free',
+        'signin' => 'Sign in',
+        'help' => 'Help centre',
+        'qr_guide' => 'Print QR codes guide',
+        'about' => 'About us',
+        'contact' => 'Contact us',
+        'terms' => 'Terms',
+        'privacy' => 'Privacy',
+        'cookies' => 'Cookie info',
+        'delete_account' => 'Delete my account',
+    ],
+    'partners' => 'Partners and resellers',
+    'contact' => [
+        'title' => 'Talk to us',
+        'whatsapp' => 'Chat on WhatsApp',
+        'phone' => 'Call us',
+        'email' => 'E-mail us',
+        'address' => 'Address',
+        'hours' => 'Hours',
+        'whatsapp_text' => 'Hello :name, I have a question.',
+    ],
+    'socials' => [
+        'facebook' => 'Facebook',
+        'instagram' => 'Instagram',
+        'tiktok' => 'TikTok',
+        'youtube' => 'YouTube',
+        'telegram' => 'Telegram',
+        'x' => 'X',
+        'linkedin' => 'LinkedIn',
+    ],
+    'follow' => 'Follow us',
+    'trust' => 'Free plan forever · No card needed',
+    'app_badge' => 'Get it on Google Play',
+    'app_title' => 'Admin app for your phone',
+    'back_to_top' => 'Back to top',
+    'copyright' => '© :year :name',
+    'label' => 'Website footer',
+    'new_tab' => '(opens in a new tab)',
+];

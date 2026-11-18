@@ -30,7 +30,11 @@ $cookieFree = [AddQueuedCookiesToResponse::class, StartSession::class, ShareErro
 // The platform's own pages (owner, 2026-11-13). "terms" and "privacy" are reserved menu addresses.
 Route::withoutMiddleware($cookieFree)->group(function () {
     Route::get('/', [SiteController::class, 'home']);
-    Route::get('/{page}', [SiteController::class, 'legal'])->whereIn('page', ['terms', 'privacy']);
+    Route::get('/{page}', [SiteController::class, 'legal'])->whereIn('page', ['terms', 'privacy', 'about', 'contact', 'cookies']);
+    // Help centre for everyone: the public help articles (footer, owner 2026-11-18). Not /help: that is the
+    // screenshots' folder (public/help/shots), which Apache and `php artisan serve` would serve instead.
+    Route::get('/support', [SiteController::class, 'help']);
+    Route::get('/support/{slug}', [SiteController::class, 'helpArticle'])->where('slug', '[a-z0-9-]+');
     Route::get('/robots.txt', [SiteController::class, 'robots']);
     Route::get('/sitemap.xml', [SiteController::class, 'sitemap']);
 });

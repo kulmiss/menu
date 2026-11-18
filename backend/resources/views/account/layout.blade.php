@@ -135,9 +135,6 @@
         .phone::before{content:"";position:absolute;top:16px;left:50%;width:66px;height:18px;margin-left:-33px;background:#0b0f19;border-radius:999px;z-index:2}
         .phone img{width:100%;height:auto;border-radius:31px;background:var(--soft)}
         @media (min-width:960px){.phone{display:block}}
-        .site-footer{border-top:1px solid var(--line);padding:20px 0;color:var(--muted);font-size:.95rem}
-        .site-footer .wrap{display:flex;flex-wrap:wrap;gap:4px 20px;align-items:center}
-        .site-footer a{min-height:44px;display:inline-flex;align-items:center;text-underline-offset:4px}
         /* The Super Admin's plain page */
         .plain main::before{display:none}
         .plain .grid{grid-template-columns:minmax(0,420px);grid-template-areas:none;justify-content:center;padding-top:10vh}
@@ -146,6 +143,9 @@
         .plain .brand-line{color:var(--muted);font-weight:650;margin-bottom:12px}
         .plain .btn-primary{background:var(--fg);color:var(--bg);box-shadow:none}
     </style>
+    @unless ($plain)
+        @include('site.partials.footer-style')
+    @endunless
 </head>
 <body @class(['plain' => $plain])>
 <a class="skip" href="#form">{{ __('account.skip') }}</a>
@@ -200,13 +200,7 @@
     </div>
 </main>
 @unless ($plain)
-    <footer class="site-footer">
-        <div class="wrap">
-            <span>© {{ date('Y') }} {{ $platform }}</span>
-            <a href="/terms">{{ __('account.terms') }}</a>
-            <a href="/privacy">{{ __('account.privacy') }}</a>
-        </div>
-    </footer>
+    @include('site.partials.footer')
 @endunless
 <script nonce="{{ $nonce }}">
 document.querySelectorAll('[data-strength]').forEach(function (i) {

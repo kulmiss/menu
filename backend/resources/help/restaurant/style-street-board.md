@@ -6,6 +6,7 @@ order: 13
 features: style_board
 roles: owner, manager
 keywords: board, chalkboard, street food, fast food, burger, juice, price tag
+public: true
 ---
 
 Style **G · Street Board** looks like the board above a food counter: dark green, tall capital headings, and each category in its own dashed frame. It stays easy to read, with no hand-drawn letters.

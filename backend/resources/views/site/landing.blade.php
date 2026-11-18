@@ -261,15 +261,6 @@
         .band p{margin:14px auto 30px;max-width:32rem;font-size:1.15rem;opacity:.95}
         .band .btn{background:var(--on-brand);color:var(--brand);box-shadow:none}
         @media (min-width:768px){.band{padding:80px 40px}}
-        .site-footer{border-top:1px solid var(--line);padding:48px 0 32px;font-size:.95rem}
-        .foot{display:grid;gap:32px}
-        @media (min-width:768px){.foot{grid-template-columns:2fr 1fr 1fr}}
-        .foot h2{font-size:.85rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:10px}
-        .foot ul{list-style:none;margin:0;padding:0}
-        .foot li a{display:inline-flex;align-items:center;min-height:44px;text-decoration:none}
-        .foot li a:hover{text-decoration:underline}
-        .foot .about{color:var(--muted);margin-top:12px;max-width:26rem}
-        .copy{margin-top:32px;color:var(--muted)}
         .reveal{transition:opacity .7s ease,transform .7s ease}
         .js .reveal{opacity:0;transform:translateY(20px)}
         .js .reveal.in{opacity:1;transform:none}
@@ -280,11 +271,12 @@
         .sticky-cta .chat-icon{flex:none;width:48px;min-height:48px;padding:0;border-radius:999px}
         .sticky-cta[hidden]{display:none}
         @media (min-width:960px){.sticky-cta{display:none!important}}
-        .has-sticky .site-footer{padding-bottom:104px}
+        @media (max-width:959px){.has-sticky .sf{padding-bottom:84px}}
         .chat{position:fixed;right:24px;bottom:24px;z-index:40;display:none;box-shadow:var(--shadow)}
         @media (min-width:960px){.chat{display:inline-flex}}
         .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
     </style>
+    @include('site.partials.footer-style')
 </head>
 <body>
 <a class="skip" href="#content">{{ $t('skip') }}</a>
@@ -381,48 +373,7 @@
     <a class="btn btn-ghost chat" href="{{ $chat }}" target="_blank" rel="noopener">{!! $icon('message') !!} {{ $t('chat.label') }}<span class="sr-only"> {{ $t('new_tab') }}</span></a>
 @endif
 
-<footer class="site-footer">
-    <div class="wrap">
-        <div class="foot">
-            <div>
-                <a class="brand" href="/">
-                    @if ($logo)
-                        <img src="{{ $logo }}" alt="" height="32" loading="lazy">
-                    @else
-                        <span class="brand-mark" aria-hidden="true">{{ mb_strtoupper(mb_substr($platform, 0, 1)) }}</span>
-                    @endif
-                    <span>{{ $platform }}</span>
-                </a>
-                <p class="about">{{ $t('footer.about') }}</p>
-            </div>
-            <nav aria-labelledby="foot-links">
-                <h2 id="foot-links">{{ $t('footer.links') }}</h2>
-                <ul>
-                    <li><a href="/terms">{{ $t('footer.terms') }}</a></li>
-                    <li><a href="/privacy">{{ $t('footer.privacy') }}</a></li>
-                    <li><a href="/signin">{{ $t('sign_in') }}</a></li>
-                    @if ($supportEmail)
-                        <li><a href="mailto:{{ $supportEmail }}">{{ $t('footer.contact') }}</a></li>
-                    @endif
-                </ul>
-            </nav>
-            @if ($contact['whatsapp'] || $socials)
-                <nav aria-labelledby="foot-follow">
-                    <h2 id="foot-follow">{{ $t('footer.follow') }}</h2>
-                    <ul>
-                        @if ($contact['whatsapp'])
-                            <li><a href="{{ $contact['whatsapp'] }}" target="_blank" rel="noopener">{{ $t('social.whatsapp') }}</a></li>
-                        @endif
-                        @foreach ($socials as $network => $href)
-                            <li><a href="{{ $href }}" target="_blank" rel="noopener me">{{ $t("social.{$network}") }}</a></li>
-                        @endforeach
-                    </ul>
-                </nav>
-            @endif
-        </div>
-        <p class="copy">{{ $t('footer.rights', ['year' => date('Y'), 'name' => $platform]) }}</p>
-    </div>
-</footer>
+@include('site.partials.footer')
 
 <script nonce="{{ \App\Support\Security\Csp::nonce() }}">
 (function () {
@@ -458,7 +409,7 @@
     // Phone bar: shown once the hero has scrolled away, hidden again at the final band and the footer.
     var sticky = document.getElementById('sticky-cta');
     if (sticky) {
-        var watched = [document.querySelector('.hero'), document.querySelector('.band'), document.querySelector('.site-footer')].filter(Boolean);
+        var watched = [document.querySelector('.hero'), document.querySelector('.band'), document.querySelector('.sf')].filter(Boolean);
         var seen = new Map();
         document.body.classList.add('has-sticky');
         var io2 = new IntersectionObserver(function (es) {

@@ -87,7 +87,7 @@ return [
     | Slugs a restaurant can never take: they collide with platform routes.
     */
     'reserved_slugs' => [
-        'admin', 'api', 'app', 'assets', 'auth', 'build', 'css', 'dashboard', 'docs', 'email',
+        'about', 'admin', 'api', 'app', 'assets', 'auth', 'build', 'contact', 'cookies', 'css', 'dashboard', 'docs', 'email',
         'favicon.ico', 'forgot-password', 'help', 'invite', 'img', 'images', 'js', 'login', 'logout', 'media',
         'menu', 'menu-cache', 'platform', 'privacy', 'q', 'register', 'reset-password', 'robots.txt', 'sanctum',
         'settings', 'signin', 'signout', 'signup', 'sitemap.xml', 'static', 'sw.js', 'status', 'storage', 'super', 'support',

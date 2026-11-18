@@ -7,6 +7,7 @@ pages: /admin/qr-codes
 app: /r/:tid/qr
 roles: owner, manager
 keywords: qr, scan, print, download, poster, sticker
+public: true
 ---
 
 Open **QR codes**. You see a code for your restaurant<!-- if branches -->, each branch<!-- endif --> and each table.

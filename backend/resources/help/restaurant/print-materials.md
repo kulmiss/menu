@@ -8,6 +8,7 @@ pages: /admin/print-materials
 app: /r/:tid/print
 roles: owner, manager
 keywords: poster, tent, sticker, window, flyer, print shop
+public: true
 ---
 
 1. Open **QR codes → Print materials**.

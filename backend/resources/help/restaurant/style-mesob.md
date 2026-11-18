@@ -6,6 +6,7 @@ order: 11
 features: style_mesob
 roles: owner, manager
 keywords: mesob, ethiopian, somali, habesha, injera, traditional, warm, woven
+public: true
 ---
 
 Style **E · Mesob** looks like a family table: warm cream colours, woven bands at the top and around each category, and round photos like plates on a mesob.

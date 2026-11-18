@@ -9,6 +9,8 @@ use App\Support\Auth\GoogleLogin;
 use App\Support\BrandColor;
 use App\Support\EmailLogo;
 use App\Support\Features;
+use App\Support\Help\HelpLibrary;
+use App\Support\Help\HelpRenderer;
 use App\Support\Landing\LandingImages;
 use App\Support\Landing\LandingTexts;
 use App\Support\Legal\LegalText;
@@ -16,10 +18,13 @@ use App\Support\PlatformSettings;
 use App\Support\PublicMenu\MenuPageData;
 use App\Support\Qr\QrImages;
 use App\Support\SignUp\SignUp;
+use App\Support\Site\Footer;
 use App\Support\UpgradeContact;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 /**
  * The platform's own public pages: the landing page (owner, 2026-11-13), the
@@ -66,7 +71,8 @@ class SiteController extends Controller
         $free = collect($plans)->first(fn (array $p) => $p['free'] && $p['highlight']);
         $sections['pricing'] = $sections['pricing'] && $plans !== [];
         $sections['demo'] = $sections['demo'] && $demoUrl !== null;
-        $socials = array_filter((array) $s['socials'], fn ($u) => is_string($u) && preg_match('#^https?://#', $u) === 1);
+        // Social profiles for search engines (JSON-LD sameAs): the ones in the live footer (#230).
+        $socials = array_filter(Footer::published()['socials']);
         $chat = $contact['whatsapp'] !== null ? $contact['whatsapp'].'?text='.rawurlencode($t('chat.text', ['name' => $name])) : null;
 
         return view('site.landing', [
@@ -93,7 +99,6 @@ class SiteController extends Controller
             'contact' => $contact,
             'chat' => $chat,
             'testimonials' => $testimonials,
-            'socials' => $socials,
             'supportEmail' => $contact['email'],
             'description' => $t($free ? 'meta_description' : 'meta_description_paid'),
             'shots' => array_combine(['hero', 'hero_dark', 'demo', 'demo_dark'], array_map(LandingImages::phone(...), ['hero', 'hero_dark', 'demo', 'demo_dark'])),
@@ -162,13 +167,67 @@ class SiteController extends Controller
         ];
     }
 
-    public function legal(string $page): View
+    /** Pages linked from the footer that show their default text until the Super Admin writes one (#230). */
+    private const SITE_PAGES = ['about', 'contact', 'cookies'];
+
+    public function legal(string $page): View|SymfonyResponse
     {
+        // A restaurant that took this address before it was reserved keeps it (its menu is shown).
+        if (in_array($page, self::SITE_PAGES, true) && Tenant::where('slug', $page)->exists()) {
+            return app()->call([app(PublicMenuController::class), 'show'], ['slug' => $page]);
+        }
+        $text = (string) PlatformSettings::get($page);
+        if ($text === '' && in_array($page, self::SITE_PAGES, true)) {
+            $text = LegalText::default($page);
+        }
+
         return view('site.legal', [
+            'page' => $page,
             'platform' => (string) PlatformSettings::get('name'),
             'title' => __("site.{$page}"),
             // Headings, lists and paragraphs as data; the view escapes every piece (no HTML from the setting).
-            'doc' => LegalText::parse((string) PlatformSettings::get($page)),
+            'doc' => LegalText::parse($text),
+            // Short pages: every section open.
+            'open' => in_array($page, self::SITE_PAGES, true),
+            // Contact us: the footer's contact details under the text.
+            'contactCard' => $page === 'contact' ? Footer::view(Footer::published())['contact'] : null,
+            'canonical' => url('/'.$page),
+        ]);
+    }
+
+    /** Help centre for everyone (#230): the help articles marked `public`, grouped by topic. */
+    public function help(): View
+    {
+        $articles = HelpLibrary::visible('restaurant', null, null, publicOnly: true);
+        $topics = (array) __('help.topics.restaurant');
+        $groups = [];
+        foreach ($articles as $a) {
+            $groups[$a['topic']][] = ['slug' => $a['slug'], 'title' => $a['title'], 'summary' => trim(strip_tags((new HelpRenderer)->html((new HelpRenderer)->markdown((string) $a['summary']))))];
+        }
+        uksort($groups, fn ($x, $y) => array_search($x, array_keys($topics), true) <=> array_search($y, array_keys($topics), true));
+
+        return view('site.help', [
+            'platform' => (string) PlatformSettings::get('name'),
+            'groups' => array_map(fn ($items, $topic) => ['title' => $topics[$topic] ?? Str::headline($topic), 'items' => $items], $groups, array_keys($groups)),
+        ]);
+    }
+
+    public function helpArticle(string $slug): View
+    {
+        $public = HelpLibrary::visible('restaurant', null, null, publicOnly: true);
+        $article = collect($public)->firstWhere('slug', $slug);
+        abort_if($article === null, 404);
+        $render = new HelpRenderer;
+        $html = $render->html($render->markdown((string) $article['body']));
+        // Links to other help articles: to their public page, or plain text when that one is only in the admin.
+        $slugs = array_column($public, 'slug');
+        $html = (string) preg_replace_callback('#<a data-help href="help:([a-z0-9\-]+)">(.*?)</a>#s', fn ($m) => in_array($m[1], $slugs, true)
+            ? '<a href="/support/'.$m[1].'">'.$m[2].'</a>'
+            : '<span>'.$m[2].'</span>', $html);
+
+        return view('site.help-article', [
+            'platform' => (string) PlatformSettings::get('name'),
+            'article' => ['title' => $article['title'], 'summary' => trim(strip_tags($render->html($render->markdown((string) $article['summary'])))), 'html' => $html, 'slug' => $slug],
         ]);
     }
 
@@ -181,7 +240,8 @@ class SiteController extends Controller
 
     public function sitemap(): Response
     {
-        $urls = array_map(fn (string $path) => '<url><loc>'.e(url($path)).'</loc></url>', ['/', '/terms', '/privacy']);
+        $help = array_map(fn (array $a) => '/support/'.$a['slug'], array_values(HelpLibrary::visible('restaurant', null, null, publicOnly: true)));
+        $urls = array_map(fn (string $path) => '<url><loc>'.e(url($path)).'</loc></url>', ['/', '/terms', '/privacy', '/about', '/contact', '/cookies', '/support', ...$help]);
         $xml = '<?xml version="1.0" encoding="UTF-8"?>'."\n".'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'.implode('', $urls).'</urlset>'."\n";
 
         return response($xml, 200, ['Content-Type' => 'application/xml; charset=UTF-8']);

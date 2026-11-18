@@ -44,6 +44,7 @@ use App\Http\Controllers\Platform\CampaignController;
 use App\Http\Controllers\Platform\CrmController;
 use App\Http\Controllers\Platform\DashboardWidgetController as PlatformDashboardWidgetController;
 use App\Http\Controllers\Platform\FeatureSwitchController;
+use App\Http\Controllers\Platform\FooterController;
 use App\Http\Controllers\Platform\HelpArticleController;
 use App\Http\Controllers\Platform\InsightsController as PlatformInsightsController;
 use App\Http\Controllers\Platform\InvoiceController;
@@ -55,6 +56,7 @@ use App\Http\Controllers\Platform\RestaurantController;
 use App\Http\Controllers\Platform\SearchController;
 use App\Http\Controllers\Platform\SetupController;
 use App\Support\Landing\LandingImages;
+use App\Support\Legal\LegalText;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
@@ -248,8 +250,15 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::put('settings/features', [FeatureSwitchController::class, 'update']);
             Route::get('settings', [PlatformController::class, 'settings']);
             Route::put('settings', [PlatformController::class, 'saveSettings']);
-            Route::post('settings/legal/{page}/reset', [PlatformController::class, 'resetLegal'])->whereIn('page', ['terms', 'privacy']);
+            Route::post('settings/legal/{page}/reset', [PlatformController::class, 'resetLegal'])->whereIn('page', LegalText::PAGES);
             // Super Admin → Landing page (owner, 2026-11-17).
+            // Website footer (QUESTIONS #230): draft, preview, publish, history.
+            Route::get('footer', [FooterController::class, 'show']);
+            Route::put('footer', [FooterController::class, 'update'])->middleware('throttle:60,1');
+            Route::post('footer/publish', [FooterController::class, 'publish'])->middleware('throttle:20,1');
+            Route::delete('footer/draft', [FooterController::class, 'discard']);
+            Route::post('footer/versions/{version}/restore', [FooterController::class, 'restore'])->whereNumber('version')->middleware('throttle:20,1');
+            Route::get('footer/preview', [FooterController::class, 'preview'])->middleware('throttle:120,1');
             Route::get('landing', [LandingController::class, 'show']);
             Route::put('landing', [LandingController::class, 'update']);
             Route::post('landing/images/{slot}', [LandingController::class, 'saveImage'])->whereIn('slot', array_keys(LandingImages::SLOTS))->middleware('throttle:20,1');

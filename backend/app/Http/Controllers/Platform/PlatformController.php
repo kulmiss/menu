@@ -278,7 +278,15 @@ class PlatformController extends Controller
 
     public function settings(): JsonResponse
     {
-        return response()->json(['data' => [...PlatformSettings::forScreen(), 'google_configured' => GoogleLogin::configured(), 'share_image_url' => ShareImage::for(null)['url'], 'logo_url' => EmailLogo::url(), 'plans' => Plan::orderBy('sort')->get(['id', 'name', 'slug'])->map(fn (Plan $p) => ['id' => $p->id, 'name' => $p->name['en'] ?? $p->slug, 'slug' => $p->slug])]]);
+        $settings = PlatformSettings::forScreen();
+        // A page never edited shows its default text (the page itself does the same).
+        foreach (LegalText::PAGES as $page) {
+            if (trim((string) ($settings[$page] ?? '')) === '') {
+                $settings[$page] = LegalText::default($page);
+            }
+        }
+
+        return response()->json(['data' => [...$settings, 'google_configured' => GoogleLogin::configured(), 'share_image_url' => ShareImage::for(null)['url'], 'logo_url' => EmailLogo::url(), 'plans' => Plan::orderBy('sort')->get(['id', 'name', 'slug'])->map(fn (Plan $p) => ['id' => $p->id, 'name' => $p->name['en'] ?? $p->slug, 'slug' => $p->slug])]]);
     }
 
     /** The default link preview for menus without a banner (owner, 2026-11-12). */
@@ -333,6 +341,10 @@ class PlatformController extends Controller
             'default_currency' => ['sometimes', 'string', 'size:3', 'alpha'],
             'terms' => ['sometimes', 'nullable', 'string', 'max:50000'],
             'privacy' => ['sometimes', 'nullable', 'string', 'max:50000'],
+            // About us, Contact us and Cookie info, linked from the footer (#230).
+            'about' => ['sometimes', 'nullable', 'string', 'max:50000'],
+            'contact' => ['sometimes', 'nullable', 'string', 'max:50000'],
+            'cookies' => ['sometimes', 'nullable', 'string', 'max:50000'],
             'owner_two_factor_required' => ['sometimes', 'boolean'],
             // Sign-up (owner, 2026-11-13)
             'signup_open' => ['sometimes', 'boolean'],

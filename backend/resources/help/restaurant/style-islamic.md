@@ -6,6 +6,7 @@ order: 14
 features: style_islamic
 roles: owner, manager
 keywords: islamic, halal, ramadan, iftar, family, arch, star pattern, lantern, crescent
+public: true
 ---
 
 Style **I · Islamic** has a star pattern at the top, an arch around your name, a small lantern and arched photo cards, two per row. The colours are calm: deep teal, cream and soft gold. It has no pictures of people or animals and no religious text.

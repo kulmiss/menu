@@ -6,6 +6,7 @@ order: 13
 features: style_arabic
 roles: owner, manager
 keywords: arabic, arab, right to left, rtl, yemeni, mandi, shawarma, middle eastern, kufi, direction
+public: true
 ---
 
 Style **H · Arabic** has a warm sand page, your colour as a band at the top with a scalloped edge, gold ornaments between the categories and Kufi headings. Arabic, English and mixed dish names all look right.

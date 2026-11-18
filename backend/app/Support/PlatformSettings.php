@@ -20,6 +20,12 @@ class PlatformSettings
         'default_currency' => 'ETB',
         'terms' => '',
         'privacy' => '',
+        // Site pages linked from the footer (owner, 2026-11-18): empty = the default text (resources/legal).
+        'about' => '',
+        'contact' => '',
+        'cookies' => '',
+        // Super Admin → Footer: the unpublished draft (null = none; the live footer is the newest FooterVersion).
+        'footer_draft' => null,
         // Default link preview when a restaurant has no banner (path on the public disk; null = built-in).
         'share_image' => null,
         // E-mail header logo (path on the public disk; null = the platform name in text).

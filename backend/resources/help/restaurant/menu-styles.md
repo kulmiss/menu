@@ -7,6 +7,7 @@ pages: /admin/appearance
 app: /r/:tid/appearance
 roles: owner, manager
 keywords: style, design, theme, layout, editorial, grid, bistro, minimal, mesob, lounge, night, dark, board, chalkboard, street food, arabic, right to left, rtl, islamic, halal, ramadan, somali, black and white, monochrome, colourful, colorful, juice
+public: true
 ---
 
 Open **Appearance → Menu style**. The preview shows the change at once. Guests see it after you tap **Save**.

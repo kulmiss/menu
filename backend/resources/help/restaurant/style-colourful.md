@@ -6,6 +6,7 @@ order: 17
 features: style_colour
 roles: owner, manager
 keywords: colourful, colorful, bright, juice, ice cream, kids, family, playful, fun, snacks
+public: true
 ---
 
 Style **L · Colourful** gives each category its own bright colour: its name, its dishes' cards and its prices. The first colour is your brand colour; the others are made from it, so they always go together. Text on every colour stays easy to read.

@@ -6,6 +6,7 @@ order: 16
 features: style_mono
 roles: owner, manager
 keywords: black and white, monochrome, mono, minimal, fine dining, modern, cafe, greyscale, grayscale
+public: true
 ---
 
 Style **K · Black & White** uses only black, white and greys. It has big serif headings, numbered categories (01, 02 …), fine lines and dotted lines from each dish to its price. It is white on phones in light mode and black on phones in dark mode.

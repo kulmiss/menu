@@ -6,6 +6,7 @@ order: 15
 features: style_somali
 roles: owner, manager
 keywords: somali, somalia, bariis, canjeero, sambuusa, ocean, blue, woven, basket, aqal
+public: true
 ---
 
 Style **J · Somali** has an ocean-blue band at the top with a woven-basket stripe and a wave at its edge. Each category starts with a small aqal (the Somali dome house). The colours are ocean and sky blue, white, sand and warm orange. It doesn't use the flag.

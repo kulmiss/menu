@@ -55,4 +55,15 @@ return [
         'welcome_sent' => 'Set-password e-mail sent to :email.',
         'reset_sent' => 'The owner has signed in before, so :email got a "reset your password" e-mail.',
     ],
+    // Super Admin → Footer (QUESTIONS #230).
+    'footer' => [
+        'nothing_to_publish' => 'There are no changes to publish.',
+        'unsafe_link' => 'Use a web address that starts with https://, a page of this site that starts with /, mailto: or tel:.',
+        'social_link' => 'Use the full address of the page, starting with https://.',
+        'play_link' => 'Use the app\'s Google Play address. It starts with https://play.google.com/.',
+        'link_needed' => 'Pick a page or type a web address.',
+        'phone_format' => 'Use digits only, with the country code, e.g. +251 91 234 5678.',
+        'too_many_columns' => 'The footer can have up to :max columns.',
+        'too_many_links' => 'A column can have up to :max links.',
+    ],
 ];
