@@ -277,3 +277,9 @@ it('gives every site page a description for search engines', function () {
         $this->get('/'.$page)->assertOk()->assertSee('<meta name="description" content="', false)->assertSee('Buna Menus', false);
     }
 });
+
+it('styles only the QR code as a white tile, not the small link icon next to it', function () {
+    // Bug (owner screenshot, 2026-11-18): ".scan svg" turned the "opens in a new tab" icon into a white dot.
+    $html = (string) $this->get('/')->getContent();
+    expect($html)->toContain('.scan>svg{width:132px')->not->toContain('.scan svg{');
+});
