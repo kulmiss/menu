@@ -82,6 +82,7 @@ class Cafe
             'ramadan_mode' => in_array('ramadan', config('menu.demo_options'), true),
             'photos_greyscale' => in_array('greyscale', config('menu.demo_options'), true),
             'mono_accent' => in_array('accent', config('menu.demo_options'), true),
+            'show_decoration' => ! in_array('no-decoration', config('menu.demo_options'), true),
             'cover_media_id' => $this->photos->media($tenant, 'cafe-rustic', true)?->id,
             'logo_media_id' => $this->photos->logo($tenant, '#9a3b1f', 'bean')?->id,
         ]);

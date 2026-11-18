@@ -32,6 +32,32 @@ it('shows the landing page in simple English: hero, sections in order, sign-up a
     expect(substr_count($html, 'data-track="signup"'))->toBeGreaterThanOrEqual(7);
 });
 
+it('shows "More menu styles": a phone picture of each live style demo, lazy, and the name alone without a picture', function () {
+    Tenant::factory()->create(['slug' => 'demo']);
+    Tenant::factory()->create(['slug' => 'demo-jebena']);
+    Tenant::factory()->create(['slug' => 'demo-maison', 'suspended_at' => now()]);   // not live: left out
+    $shot = public_path('landing/styles/coffee-360.webp');
+    $kept = is_file($shot) ? (string) file_get_contents($shot) : null;   // the real screenshot, put back after
+    @mkdir(dirname($shot), 0777, true);
+    file_put_contents($shot, 'x');
+    try {
+        $html = $this->get('/')->assertOk()->assertSee('More menu styles — tap one to open its demo')->getContent();
+        expect($html)->toContain('aria-label="Open the Coffee House demo menu (opens in a new tab)"')
+            ->toContain('srcset="'.asset('landing/styles/coffee-180.webp').' 180w, '.asset('landing/styles/coffee-360.webp').' 360w" sizes="150px" width="150" height="304" alt="" loading="lazy"')
+            ->not->toContain(url('/demo-maison'));
+
+        unlink($shot);
+        $html = $this->get('/')->assertOk()->getContent();
+        expect($html)->toContain(url('/demo-jebena'))->not->toContain('landing/styles/coffee-');
+    } finally {
+        if ($kept !== null) {
+            file_put_contents($shot, $kept);
+        } elseif (is_file($shot)) {
+            unlink($shot);
+        }
+    }
+});
+
 it('uses only WebP for a screenshot whose AVIF copies are missing (GD without AVIF)', function () {
     $moved = [];
     foreach ([300, 450, 600] as $w) {

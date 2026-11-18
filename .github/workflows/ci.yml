@@ -188,7 +188,7 @@ jobs:
       fail-fast: false
       matrix:
         # Every menu style must meet every speed budget (owner, 2026-11-11).
-        style: [editorial, grid, bistro, minimal, mesob, lounge, board, arabic, islamic, somali, mono, colour]
+        style: [editorial, grid, bistro, minimal, mesob, lounge, board, arabic, islamic, somali, mono, colour, coffee, grill, garden, coastal, luxe]
         # …with the banner and without it: then the first photo is the largest paint (owner, 2026-11-12).
         banner: [banner, no-banner]
         # …and A without banner and specials: its full-width first dish photo is then the largest paint.
@@ -212,6 +212,14 @@ jobs:
           - style: mono
             banner: greyscale
             options: greyscale,accent
+          # …and M–Q right-to-left with the header drawing, and with the style's pictures and icons
+          # switched off (owner, 2026-11-19).
+          - style: coastal
+            banner: rtl
+            options: rtl
+          - style: coffee
+            banner: no-decoration
+            options: no-decoration
     defaults:
       run:
         working-directory: backend
@@ -234,7 +242,7 @@ jobs:
       DB_PASSWORD: root
       APP_URL: http://localhost:8124
       DEMO_MENU_STYLE: ${{ matrix.style }}
-      DEMO_MENU_BANNER: ${{ (matrix.banner != 'no-banner' && matrix.banner != 'no-banner-no-specials') && '1' || '0' }}
+      DEMO_MENU_BANNER: ${{ (matrix.banner != 'no-banner' && matrix.banner != 'no-banner-no-specials' && matrix.banner != 'no-decoration') && '1' || '0' }}
       DEMO_MENU_OPTIONS: ${{ matrix.options || '' }}
       DEMO_MENU_PRICE_PERIOD: ${{ matrix.banner == 'price-period' && '1' || '0' }}
       DEMO_MENU_SPECIALS: ${{ matrix.banner == 'no-banner-no-specials' && '0' || '1' }}
@@ -267,6 +275,11 @@ jobs:
           if [ "${{ matrix.banner }}" = rtl ]; then grep -q '<html lang="en" dir="rtl">' public/menu-cache/demo/index.html; fi
           if [ "${{ matrix.banner }}" = ramadan ]; then grep -q 'class="hb"' public/menu-cache/demo/index.html && grep -q ' rm"' public/menu-cache/demo/index.html; fi
           if [ "${{ matrix.banner }}" = greyscale ]; then grep -q ' gs"' public/menu-cache/demo/index.html; fi
+          case "${{ matrix.style }}" in coffee|grill|garden|coastal|luxe)
+            if [ "${{ matrix.banner }}" = no-decoration ]; then ! grep -q 'class="ci"' public/menu-cache/demo/index.html && ! grep -q ' dc"' public/menu-cache/demo/index.html;
+            else grep -q 'class="ci"' public/menu-cache/demo/index.html; fi
+            if [ "$DEMO_MENU_BANNER" = 0 ] && [ "${{ matrix.banner }}" != no-decoration ]; then grep -q '<svg class="ha"' public/menu-cache/demo/index.html; fi;;
+          esac
           if [ "${{ matrix.banner }}" = price-period ]; then grep -q 'Happy hour until' public/menu-cache/demo/index.html && grep -q '<s>' public/menu-cache/demo/index.html; fi
           if [ "${{ matrix.banner }}" = no-banner-no-specials ]; then ! grep -q '<div class="spc' public/menu-cache/demo/index.html; else grep -q '<div class="spc' public/menu-cache/demo/index.html; fi
           echo "Guest page: $(stat -c %s public/menu-cache/demo/index.html) bytes, $(stat -c %s public/menu-cache/demo/index.html.gz) gzip"

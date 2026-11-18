@@ -51,6 +51,26 @@ class LandingImages
         return ['webp' => $set('webp'), 'avif' => $avif ? $set('avif') : null, 'src' => asset("landing/{$name}-600.webp"), 'custom' => false];
     }
 
+    /**
+     * The phone screenshot of a menu style's demo for the "Menu styles" strip
+     * (frontend/scripts/landing-screenshots.mjs), or null while there is none.
+     *
+     * @return array{webp: string, avif: string|null, src: string}|null
+     */
+    public static function style(string $style): ?array
+    {
+        if (preg_match('/^[a-z]+$/', $style) !== 1 || ! is_file(public_path("landing/styles/{$style}-360.webp"))) {
+            return null;
+        }
+        $set = fn (string $ext) => asset("landing/styles/{$style}-180.{$ext}").' 180w, '.asset("landing/styles/{$style}-360.{$ext}").' 360w';
+
+        return [
+            'webp' => $set('webp'),
+            'avif' => is_file(public_path("landing/styles/{$style}-360.avif")) ? $set('avif') : null,
+            'src' => asset("landing/styles/{$style}-180.webp"),
+        ];
+    }
+
     /** @return array{url: string, custom: bool} */
     public static function og(): array
     {

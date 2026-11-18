@@ -204,8 +204,14 @@
         .open-demo{margin-top:28px}
         .open-demo .btn{width:100%}
         @media (min-width:960px){.scan{display:flex}.open-demo{display:none}}
-        .looks{display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px;margin-top:20px;color:var(--muted)}
-        .looks .link{font-weight:600}
+        .styles{margin-top:56px}
+        .styles h3{font-size:1.35rem;font-weight:800}
+        .style-row{display:flex;gap:16px;margin:16px 0 0;padding:4px 2px 16px;list-style:none;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:thin}
+        .style-row li{flex:none;scroll-snap-align:start}
+        .style-row a{display:flex;flex-direction:column;gap:10px;width:150px;min-height:44px;color:var(--fg);text-decoration:none;font-weight:650;font-size:.95rem}
+        .style-row img{display:block;width:150px;height:304px;object-fit:cover;object-position:top;border-radius:20px;border:4px solid #0b0f19;background:var(--card);box-shadow:var(--shadow)}
+        .style-row a:hover span{text-decoration:underline}
+        .style-row a:focus-visible{outline:3px solid var(--ink);outline-offset:4px;border-radius:20px}
         .demo-phone{justify-self:center;position:relative;text-decoration:none}
         /* How */
         .steps{display:grid;gap:40px;margin:0;padding:0;list-style:none;position:relative}

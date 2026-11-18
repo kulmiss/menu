@@ -97,7 +97,9 @@ class SiteController extends Controller
             'demoUrl' => $demoUrl,
             // The demo menu, else the sign-up page; none while both are unavailable.
             'qr' => $demoUrl !== null || $signupOpen ? $this->qrPath($demoUrl ?? url('/signup')) : null,
-            'styles' => collect(self::STYLE_DEMOS)->map(fn ($slug) => isset($live[$slug]) ? url('/'.$slug) : null)->filter()->all(),
+            // "Menu styles" under the demo: each style with a live demo, with its phone screenshot when there is one.
+            'styles' => collect(self::STYLE_DEMOS)->filter(fn ($slug) => isset($live[$slug]))
+                ->map(fn ($slug, $style) => ['href' => url('/'.$slug), 'shot' => LandingImages::style($style)])->all(),
             'plans' => $sections['pricing'] ? $plans : [],
             'free' => $free,
             'paidOnly' => $this->paidOnly($free),
