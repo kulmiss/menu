@@ -23,7 +23,7 @@ roles: owner, manager            # who sees it; empty = everyone
 pages: /admin/menu, /admin/dishes   # web pages whose "?" button opens it (first match wins)
 app: /r/:tid/menu                # app screens whose "?" button opens it
 keywords: price, photo           # extra words for the search
-public: true                     # also shown signed out (sign-in problems)
+public: true                     # also shown signed out (sign-in problems) and in the Help centre at /support
 ---
 ```
 

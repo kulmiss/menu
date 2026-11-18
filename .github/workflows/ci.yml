@@ -56,6 +56,11 @@ jobs:
               - 'backend/resources/views/site/**'
               - 'backend/resources/views/account/**'
               - 'backend/lang/en/landing.php'
+              - 'backend/lang/en/footer.php'
+              - 'backend/lang/en/site.php'
+              - 'backend/resources/legal/**'
+              - 'backend/resources/views/legal.blade.php'
+              - 'ci/lighthouse/lighthouserc.landing.json'
               - 'backend/lang/en/account.php'
               - 'backend/app/Http/Controllers/Auth/AccountController.php'
               - 'backend/app/Http/Controllers/Auth/SignInController.php'
@@ -313,7 +318,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.landing == 'true'
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 25
     defaults:
       run:
         working-directory: backend
