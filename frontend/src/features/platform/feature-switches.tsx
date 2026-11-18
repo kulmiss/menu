@@ -43,6 +43,9 @@ const GROUPS: { id: string; keys: string[] }[] = [
       'style_grid',
       'style_bistro',
       'style_minimal',
+      'style_mesob',
+      'style_lounge',
+      'style_board',
     ],
   },
   {

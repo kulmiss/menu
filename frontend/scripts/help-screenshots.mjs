@@ -58,7 +58,7 @@ const settle = async (page) => {
 
 /** Each shot: where to go, and what to do before the picture. */
 const shots = {
-  signup: { path: '/auth/sign-up', guest: true },
+  signup: { path: '/signup', guest: true },
   dashboard: { path: '/admin' },
   'menu-editor': { path: '/admin/menu' },
   'dish-editor': {
@@ -106,10 +106,14 @@ const shots = {
     },
   },
   // The Super Admin setup wizard (signed in as the demo Super Admin).
-  'wizard-welcome': { path: '/platform', admin: true, wizard: 0 },
-  'wizard-plans': { path: '/platform', admin: true, wizard: 2 },
-  'wizard-switches': { path: '/platform', admin: true, wizard: 4 },
+  'wizard-welcome': { path: '/super', admin: true, wizard: 0 },
+  'wizard-plans': { path: '/super', admin: true, wizard: 2 },
+  'wizard-switches': { path: '/super', admin: true, wizard: 4 },
   'guest-menu': { path: '/demo', guest: true },
+  // One demo restaurant per new style (DemoSeeder showcases).
+  'style-mesob': { path: '/demo-mesob', guest: true },
+  'style-lounge': { path: '/demo-lounge', guest: true },
+  'style-board': { path: '/demo-street', guest: true },
   'guest-my-order': {
     path: '/demo',
     guest: true,
@@ -126,19 +130,20 @@ const shots = {
 
 let lastCode = ''
 
+/** Restaurant teams sign in at /signin, the Super Admin at /super/sign-in (website QUESTIONS #216). */
 async function signIn(page, email, password, secret) {
-  await page.goto(`${base}/auth/sign-in`)
-  await page.getByLabel('Email').fill(email)
-  await page.getByLabel('Password', { exact: true }).fill(password)
+  await page.goto(`${base}${secret ? '/super/sign-in' : '/signin'}`)
+  await page.locator('#email').fill(email)
+  await page.locator('#password').fill(password)
   await page.getByRole('button', { name: 'Sign in' }).click()
   if (secret) {
     // A code works once: wait for the next one when it was just used.
     while (totp(secret) === lastCode) await page.waitForTimeout(1000)
     lastCode = totp(secret)
-    await page.getByLabel('Authentication code').fill(lastCode)
-    await page.getByRole('button', { name: 'Verify' }).click()
+    await page.locator('#code').fill(lastCode)
+    await page.getByRole('button', { name: 'Continue' }).first().click()
   }
-  await page.waitForURL(/\/(admin|platform)/)
+  await page.waitForURL(/\/(admin|super)(\/|$)/)
   // No welcome tour or setup wizard in the pictures.
   await page.evaluate(() => {
     try {

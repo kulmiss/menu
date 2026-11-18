@@ -32,6 +32,7 @@ import {
   useSaveAppearance,
 } from './api'
 import { isHex, tooLightOnWhite } from './contrast'
+import { DesktopPreview } from './desktop-preview'
 import { StylePicker } from './style-picker'
 
 const FONTS: Font[] = ['system', 'serif', 'rounded']
@@ -429,6 +430,7 @@ function AppearanceForm({ initial }: { initial: Appearance }) {
         <p className='mt-2 text-center text-xs text-muted-foreground'>
           {t('appearance.preview_hint')}
         </p>
+        <DesktopPreview src={src} />
       </div>
     </div>
   )

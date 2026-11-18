@@ -45,6 +45,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
 import { ConfirmDialog } from '@/components/confirm-dialog'
 import { type Col, DataTable } from '@/components/data-table'
+import { MENU_STYLES } from '@/features/appearance/api'
 import {
   FEATURES,
   LIMITS,
@@ -610,7 +611,7 @@ export function ThemesPage() {
                   <SelectContent>
                     {(k === 'font'
                       ? ['system', 'serif', 'rounded']
-                      : ['editorial', 'grid', 'bistro', 'minimal']
+                      : MENU_STYLES
                     ).map((o) => (
                       <SelectItem key={o} value={o}>
                         {t(

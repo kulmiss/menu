@@ -4,14 +4,11 @@
 // photo had its name and price side by side; on phones a name like "Chechebsa"
 // or "Berbere chicken" ran under the price ("ChechebBr 160").
 import base from '@public-menu/base.css?raw'
-import bistro from '@public-menu/style-bistro.css?raw'
-import editorial from '@public-menu/style-editorial.css?raw'
-import grid from '@public-menu/style-grid.css?raw'
-import minimal from '@public-menu/style-minimal.css?raw'
 import { afterEach, describe, expect, it } from 'vitest'
 import { page } from 'vitest/browser'
+import { GUEST_STYLES } from './guest-styles'
 
-const styles = { grid, editorial, bistro, minimal }
+const styles = GUEST_STYLES
 const card = (name: string, price: string, photo: boolean) =>
   `<li data-i="1" data-t=""><button type="button" class="it ao${photo ? '' : ' np'}"><span class="tx"><span class="nm">${name}</span>
   <span class="sm">Flatbread with niter kibbeh, berbere and honey</span><span class="pr">${price}</span>

@@ -23,6 +23,9 @@ export const FEATURES = [
   'style_grid',
   'style_bistro',
   'style_minimal',
+  'style_mesob',
+  'style_lounge',
+  'style_board',
 ] as const
 export const LIMITS = [
   'menus',

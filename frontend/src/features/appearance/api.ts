@@ -7,7 +7,17 @@ import { api, tenantUrl } from '@/lib/api'
 import { type Media } from '@/features/menu/types'
 
 /** Guest-menu styles: A · Warm editorial, B · Fresh grid, C · Quiet bistro, D · Minimal. */
-export type MenuStyle = 'editorial' | 'grid' | 'bistro' | 'minimal'
+/** Guest-menu styles A–G, in picker order (backend TenantAppearance::STYLES). */
+export const MENU_STYLES = [
+  'editorial',
+  'grid',
+  'bistro',
+  'minimal',
+  'mesob',
+  'lounge',
+  'board',
+] as const
+export type MenuStyle = (typeof MENU_STYLES)[number]
 export type Font = 'system' | 'serif' | 'rounded'
 export type BannerText = 'over' | 'under'
 

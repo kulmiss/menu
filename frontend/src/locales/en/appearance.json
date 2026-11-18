@@ -30,6 +30,18 @@
       "name": "D · Minimal",
       "hint": "Text only: names, short descriptions and prices. No dish photos. Fastest."
     },
+    "mesob": {
+      "name": "E · Mesob",
+      "hint": "Warm colours, woven bands and round photos. Made for Ethiopian and Somali food."
+    },
+    "lounge": {
+      "name": "F · Night Lounge",
+      "hint": "Always dark, with a soft glow in your colour. For bars, lounges and late nights."
+    },
+    "board": {
+      "name": "G · Street Board",
+      "hint": "A clean chalkboard with price tags. For fast food, burgers and juice bars."
+    },
     "locked": "Not included in your plan."
   },
   "flags": {
@@ -54,6 +66,8 @@
   "saved": "Appearance saved. Guests see it now.",
   "preview": "Preview",
   "preview_hint": "Preview of your menu on a phone (not saved yet).",
+  "preview_desktop": "Preview on a computer",
+  "preview_desktop_hint": "Your menu as a computer shows it, with the changes you haven't saved yet.",
   "pick_colour": "Pick a colour",
   "banner_size": "Recommended: {{width}} × {{height}} px or larger.",
   "banner_text": "Logo and name",
