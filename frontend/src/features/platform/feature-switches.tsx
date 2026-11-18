@@ -43,6 +43,9 @@ const GROUPS: { id: string; keys: string[] }[] = [
       'style_grid',
       'style_bistro',
       'style_minimal',
+      'style_mesob',
+      'style_lounge',
+      'style_board',
     ],
   },
   {
@@ -62,7 +65,7 @@ const GROUPS: { id: string; keys: string[] }[] = [
 const globalQ = {
   queryKey: [...pkeys.all, 'features-global'],
   queryFn: async () =>
-    (await api.get<{ data: Row[] }>('/platform/settings/features')).data.data,
+    (await api.get<{ data: Row[] }>('/super/settings/features')).data.data,
 }
 
 /** Keys switched off for the whole platform (for the plan and restaurant screens). */

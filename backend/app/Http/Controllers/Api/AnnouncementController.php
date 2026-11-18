@@ -7,6 +7,7 @@ use App\Http\Controllers\Platform\PlatformController;
 use App\Models\PlatformAnnouncement;
 use App\Models\Tenant;
 use App\Support\ImpersonationManager;
+use App\Support\Security\SuperAdminAccess;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -40,11 +41,11 @@ class AnnouncementController extends Controller
         if (($token = $manager->token($request)) !== null) {
             $token->delete();
 
-            return response()->json(['data' => ['redirect' => '/platform']]);
+            return response()->json(['data' => ['redirect' => SuperAdminAccess::url()]]);
         }
         abort_unless($request->hasSession() && $request->session()->has('impersonation_id'), 404);
         $manager->stop($request);
 
-        return response()->json(['data' => ['redirect' => '/platform']]);
+        return response()->json(['data' => ['redirect' => SuperAdminAccess::url()]]);
     }
 }

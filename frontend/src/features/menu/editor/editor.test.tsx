@@ -1,8 +1,9 @@
+import '@/styles/index.css'
 import { fakeApi } from '@/test-utils/fake-api'
 import { meFixture, tenantFixture } from '@/test-utils/fixtures'
 import { renderWithQuery } from '@/test-utils/render'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { userEvent } from 'vitest/browser'
+import { page, userEvent } from 'vitest/browser'
 import { useTenantStore } from '@/stores/tenant-store'
 import { type Role } from '@/features/auth/api'
 import { type Category, type ItemSummary, type Menu } from '../types'
@@ -72,8 +73,10 @@ function renderEditor(
   features?: Record<string, boolean>
 ) {
   fake = fakeApi({
-    'GET /t/1/menus': { data: { data: [menu] } },
-    'GET /t/1/menus/1/tree': { data: { data: { menu, categories: [coffee] } } },
+    'GET /restaurant/1/menus': { data: { data: [menu] } },
+    'GET /restaurant/1/menus/1/tree': {
+      data: { data: { menu, categories: [coffee] } },
+    },
     ...routes,
   })
   const tenant = tenantFixture({}, role)
@@ -90,6 +93,39 @@ describe('MenuEditorPage', () => {
   beforeEach(() => useTenantStore.setState({ currentTenantId: 1 }))
   afterEach(() => fake.restore())
 
+  // Bug (2026-11-17): a long dish or category name made the whole admin page
+  // wider than the phone (794 px on a 390 px phone), so the dish editor
+  // opened half off the screen.
+  it('on a phone a long name never makes the page wider than the screen', async () => {
+    await page.viewport(390, 844)
+    try {
+      const long =
+        'Dish with a very long name that goes on and on and on and on'
+      const screen = await renderEditor('owner', {
+        'GET /restaurant/1/menus/1/tree': {
+          data: {
+            data: {
+              menu,
+              categories: [
+                {
+                  ...coffee,
+                  name: { en: `${long} category` },
+                  items: [item(100, long)],
+                },
+              ],
+            },
+          },
+        },
+      })
+      await expect
+        .element(screen.getByText(long, { exact: true }))
+        .toBeVisible()
+      expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(390)
+    } finally {
+      await page.viewport(414, 896)
+    }
+  })
+
   it('shows categories with prices, "from" for sizes', async () => {
     const screen = await renderEditor('owner')
 
@@ -105,7 +141,7 @@ describe('MenuEditorPage', () => {
 
   it('lets staff mark sold out in one tap, but not edit the menu', async () => {
     const screen = await renderEditor('staff', {
-      'PATCH /t/1/items/100/sold-out': { status: 200 },
+      'PATCH /restaurant/1/items/100/sold-out': { status: 200 },
     })
 
     await userEvent.click(
@@ -126,7 +162,7 @@ describe('MenuEditorPage', () => {
 
   it('undoes the switch when saving fails', async () => {
     const screen = await renderEditor('staff', {
-      'PATCH /t/1/items/100/sold-out': { status: 500 },
+      'PATCH /restaurant/1/items/100/sold-out': { status: 500 },
     })
     const toggle = screen.getByRole('switch', { name: 'Macchiato available' })
 
@@ -149,7 +185,7 @@ describe('MenuEditorPage', () => {
 
   it('marks many items sold out at once', async () => {
     const screen = await renderEditor('manager', {
-      'POST /t/1/items/bulk': { status: 204 },
+      'POST /restaurant/1/items/bulk': { status: 204 },
     })
 
     await userEvent.click(screen.getByRole('button', { name: 'Select' }))
@@ -189,7 +225,7 @@ describe('MenuEditorPage', () => {
 
   it("adds a category in the restaurant's language", async () => {
     const screen = await renderEditor('owner', {
-      'POST /t/1/categories': {
+      'POST /restaurant/1/categories': {
         status: 201,
         data: { data: { ...coffee, id: 11 } },
       },
@@ -216,7 +252,7 @@ describe('MenuEditorPage', () => {
   })
 
   it('offers to create the first menu when there is none', async () => {
-    fake = fakeApi({ 'GET /t/1/menus': { data: { data: [] } } })
+    fake = fakeApi({ 'GET /restaurant/1/menus': { data: { data: [] } } })
     const screen = await renderWithQuery(
       <MenuEditorPage onSelectMenu={vi.fn()} onOpenItem={vi.fn()} />,
       { me: meFixture() }
@@ -243,9 +279,9 @@ describe('ItemSheet', () => {
 
   it('creates an item with sizes', async () => {
     fake = fakeApi({
-      'GET /t/1/addon-groups': { data: { data: [] } },
-      'GET /t/1/tags': { data: { data: [] } },
-      'POST /t/1/items': { status: 201, data: { data: { id: 5 } } },
+      'GET /restaurant/1/addon-groups': { data: { data: [] } },
+      'GET /restaurant/1/tags': { data: { data: [] } },
+      'POST /restaurant/1/items': { status: 201, data: { data: { id: 5 } } },
     })
     const onCreated = vi.fn()
     const screen = await renderWithQuery(
@@ -289,7 +325,7 @@ describe('ItemSheet', () => {
 
   it('lets staff with price rights change only the price', async () => {
     fake = fakeApi({
-      'GET /t/1/items/100': {
+      'GET /restaurant/1/items/100': {
         data: {
           data: {
             ...item(100, 'Macchiato'),
@@ -305,7 +341,7 @@ describe('ItemSheet', () => {
           },
         },
       },
-      'PATCH /t/1/items/100/price': { data: { data: {} } },
+      'PATCH /restaurant/1/items/100/price': { data: { data: {} } },
     })
     const screen = await renderWithQuery(
       <ItemSheet
@@ -327,7 +363,7 @@ describe('ItemSheet', () => {
 
     await vi.waitFor(() =>
       expect(fake.apiCalls().find((c) => c.method === 'PATCH')).toMatchObject({
-        url: '/t/1/items/100/price',
+        url: '/restaurant/1/items/100/price',
         data: { price_minor: 13050 },
       })
     )
@@ -343,9 +379,9 @@ describe('ItemSheet', () => {
       urls: { '320': '/media/1/7/320.webp' },
     }
     fake = fakeApi({
-      'GET /t/1/addon-groups': { data: { data: [] } },
-      'GET /t/1/tags': { data: { data: [] } },
-      'GET /t/1/items/100': {
+      'GET /restaurant/1/addon-groups': { data: { data: [] } },
+      'GET /restaurant/1/tags': { data: { data: [] } },
+      'GET /restaurant/1/items/100': {
         data: {
           data: {
             ...item(100, 'Macchiato'),
@@ -364,7 +400,7 @@ describe('ItemSheet', () => {
           },
         },
       },
-      'PATCH /t/1/items/100': { data: { data: { id: 100 } } },
+      'PATCH /restaurant/1/items/100': { data: { data: { id: 100 } } },
     })
     const screen = await renderWithQuery(
       <ItemSheet

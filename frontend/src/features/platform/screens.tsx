@@ -45,6 +45,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
 import { ConfirmDialog } from '@/components/confirm-dialog'
 import { type Col, DataTable } from '@/components/data-table'
+import { MENU_STYLES } from '@/features/appearance/api'
 import {
   FEATURES,
   LIMITS,
@@ -471,7 +472,7 @@ export function PaymentsPage() {
         id='platform-payments'
         queryKey={[...pkeys.all, 'payments', 'table']}
         fetch={(params) => fetchPage<PaymentRow>('payments', params)}
-        csvUrl={(params) => `/api/v1/platform/payments?format=csv&${params}`}
+        csvUrl={(params) => `/api/v1/super/payments?format=csv&${params}`}
         columns={columns}
         rowId={(p) => p.id}
         searchPlaceholder={t('platform.payments.search')}
@@ -610,7 +611,7 @@ export function ThemesPage() {
                   <SelectContent>
                     {(k === 'font'
                       ? ['system', 'serif', 'rounded']
-                      : ['editorial', 'grid', 'bistro', 'minimal']
+                      : MENU_STYLES
                     ).map((o) => (
                       <SelectItem key={o} value={o}>
                         {t(
@@ -904,7 +905,7 @@ export function ActivityPage() {
         id='platform-activity'
         queryKey={[...pkeys.all, 'activity', 'table']}
         fetch={(params) => fetchPage<ActivityRow>('activity', params)}
-        csvUrl={(params) => `/api/v1/platform/activity?format=csv&${params}`}
+        csvUrl={(params) => `/api/v1/super/activity?format=csv&${params}`}
         columns={columns}
         rowId={(l) => l.id}
         searchPlaceholder={t('platform.activity.search')}

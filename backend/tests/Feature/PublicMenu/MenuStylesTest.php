@@ -21,6 +21,9 @@ const STYLE_MARKERS = [
     'grid' => 'grid-template-columns:1fr 1fr',
     'bistro' => 'section h2{font-size:1.45rem',
     'minimal' => '.lg{width:3rem',
+    'mesob' => '--o:#c98a1b',
+    'lounge' => '--card:#17131f',
+    'board' => '--card:#253530',
 ];
 
 function pageWithStyle(string $style): string
@@ -41,12 +44,21 @@ it('inlines only the CSS of the chosen style', function (string $style) {
     }
 })->with(TenantAppearance::STYLES);
 
-it('has a light and a dark palette in every style, and the brand colour stays readable in both', function (string $style, string $brand) {
+it('has a light and a dark palette in every style (or one dark one), and the brand colour stays readable in both', function (string $style, string $brand) {
     $html = pageWithStyle($style);
-    expect(substr_count($html, '@media (prefers-color-scheme:dark){:root{--bg:'))->toBe(1);
+    $darkOnly = PageTheme::STYLES[$style]['dark_only'] ?? false;
+    expect(substr_count($html, '@media (prefers-color-scheme:dark){:root{--bg:'))->toBe($darkOnly ? 0 : 1);
+    if ($darkOnly) {
+        // F and G are night styles: the browser draws its own parts (scroll bars, inputs) dark too.
+        expect($html)->toContain('color-scheme:dark')
+            ->and(PageTheme::STYLES[$style]['light'])->toBe(PageTheme::STYLES[$style]['dark']);
+    }
 
     $a = new TenantAppearance([...TenantAppearance::DEFAULTS, 'style' => $style, 'primary_color' => $brand]);
-    preg_match('/--a:(#[0-9a-f]{6}).*prefers-color-scheme:dark\){:root\{--a:(#[0-9a-f]{6})/', PageTheme::from($a)['css'], $m);
+    $css = PageTheme::from($a)['css'];
+    preg_match($darkOnly ? '/--a:(#[0-9a-f]{6})/' : '/--a:(#[0-9a-f]{6}).*prefers-color-scheme:dark\){:root\{--a:(#[0-9a-f]{6})/', $css, $m);
+    $m[2] ??= $m[1];
+    expect(str_contains($css, 'prefers-color-scheme'))->toBe(! $darkOnly);
     expect(Contrast::ratio($m[1], PageTheme::STYLES[$style]['light']))->toBeGreaterThanOrEqual(4.5)
         ->and(Contrast::ratio($m[2], PageTheme::STYLES[$style]['dark']))->toBeGreaterThanOrEqual(4.5);
 })->with(TenantAppearance::STYLES)->with(['#b4432a', '#fde047', '#0b1f3a', '#5cc9a7']);
@@ -55,10 +67,16 @@ it('keeps PageTheme surfaces in step with the style stylesheets', function (stri
     $css = (string) file_get_contents(resource_path("public-menu/style-{$style}.css"));
     preg_match_all('/--(bg|card):(#[0-9a-f]{3,6})/', $css, $m);
     $light = array_slice($m[2], 0, 2);
-    $dark = array_slice($m[2], 2, 2);
+    // A night style (F, G) has one palette, for light and dark phones alike.
+    $dark = (PageTheme::STYLES[$style]['dark_only'] ?? false) ? $light : array_slice($m[2], 2, 2);
+    expect($m[2])->toHaveCount((PageTheme::STYLES[$style]['dark_only'] ?? false) ? 2 : 4);
     // The surface used for the contrast check is the least contrasting of bg and card.
     $worstLight = collect($light)->sortBy(fn ($c) => Contrast::luminance(strlen($c) === 4 ? '#'.str_repeat($c[1], 2).str_repeat($c[2], 2).str_repeat($c[3], 2) : $c))->first();
     $worstDark = collect($dark)->sortByDesc(fn ($c) => Contrast::luminance($c))->first();
+    if (PageTheme::STYLES[$style]['dark_only'] ?? false) {
+        // Light text on a dark page: the lighter surface is the least contrasting.
+        $worstLight = $worstDark;
+    }
     expect(PageTheme::STYLES[$style]['light'])->toBe($worstLight)->and(PageTheme::STYLES[$style]['dark'])->toBe($worstDark);
 })->with(TenantAppearance::STYLES);
 
@@ -99,7 +117,7 @@ it('offers only the styles the plan allows, and a restaurant override wins', fun
     $tenant->forceFill(['plan_id' => $plan->id])->save();
     Features::forget();
 
-    $this->actingAs($owner)->getJson(t($tenant, 'appearance'))->assertJsonPath('data.styles', ['grid', 'bistro', 'minimal']);
+    $this->actingAs($owner)->getJson(t($tenant, 'appearance'))->assertJsonPath('data.styles', ['grid', 'bistro', 'minimal', 'mesob', 'lounge', 'board']);
     $this->actingAs($owner)->putJson(t($tenant, 'appearance'), [
         'primary_color' => '#b4432a', 'font' => 'system', 'style' => 'editorial',
         'show_prices' => true, 'show_photos' => true, 'show_descriptions' => true, 'show_calories' => true,
@@ -107,7 +125,7 @@ it('offers only the styles the plan allows, and a restaurant override wins', fun
 
     DB::table('tenant_feature_overrides')->insert(['tenant_id' => $tenant->id, 'feature_key' => 'style_editorial', 'enabled' => true]);
     Features::forget();
-    $this->actingAs($owner)->getJson(t($tenant, 'appearance'))->assertJsonPath('data.styles', ['editorial', 'grid', 'bistro', 'minimal']);
+    $this->actingAs($owner)->getJson(t($tenant, 'appearance'))->assertJsonPath('data.styles', TenantAppearance::STYLES);
 });
 
 it('falls back to an allowed style when the saved one is switched off', function () {
@@ -330,3 +348,22 @@ it('lays out dishes without photos as text rows in every style', function (strin
     // Each style has rules for dishes or pages without photos, so no empty photo box is drawn.
     expect($css)->toMatch('/\.(np|NP)\b/');
 })->with(TenantAppearance::STYLES);
+
+it('offers E, F and G on Plus and up, not on Free, and the Super Admin can change that per plan', function () {
+    $free = Plan::where('slug', 'free')->sole();
+    $plus = Plan::where('slug', 'plus')->sole();
+    [$owner, $tenant] = member(Role::Owner);
+    $tenant->forceFill(['plan_id' => $free->id])->save();
+    Features::forget();
+    $this->actingAs($owner)->getJson(t($tenant, 'appearance'))->assertJsonPath('data.styles', ['grid', 'minimal']);
+
+    $tenant->forceFill(['plan_id' => $plus->id])->save();
+    Features::forget();
+    $this->getJson(t($tenant, 'appearance'))->assertJsonPath('data.styles', TenantAppearance::STYLES);
+
+    // Plan settings (Super Admin): G on Free too.
+    DB::table('plan_features')->where(['plan_id' => $free->id, 'feature_key' => 'style_board'])->update(['enabled' => true]);
+    $tenant->forceFill(['plan_id' => $free->id])->save();
+    Features::forget();
+    $this->getJson(t($tenant, 'appearance'))->assertJsonPath('data.styles', ['grid', 'minimal', 'board']);
+});

@@ -54,8 +54,8 @@ describe('Super Admin → Landing page', () => {
 
   it('shows the button clicks of the last 30 days', async () => {
     fake = fakeApi({
-      'GET /platform/landing': { data: { data } },
-      'GET /platform/settings': { data: { data: {} } },
+      'GET /super/landing': { data: { data } },
+      'GET /super/settings': { data: { data: {} } },
     })
     const screen = await renderWithQuery(<LandingEditorPage />)
 
@@ -72,9 +72,9 @@ describe('Super Admin → Landing page', () => {
 
   it('changes a text, switches a section off, moves one and saves them together', async () => {
     fake = fakeApi({
-      'GET /platform/landing': { data: { data } },
-      'GET /platform/settings': { data: { data: {} } },
-      'PUT /platform/landing': { data: { data } },
+      'GET /super/landing': { data: { data } },
+      'GET /super/settings': { data: { data: {} } },
+      'PUT /super/landing': { data: { data } },
     })
     const screen = await renderWithQuery(<LandingEditorPage />)
 
@@ -124,8 +124,8 @@ describe('Super Admin → Landing page', () => {
 
   it('shows each picture, built-in or uploaded, with "Use the built-in one" only for uploaded ones', async () => {
     fake = fakeApi({
-      'GET /platform/landing': { data: { data } },
-      'GET /platform/settings': { data: { data: {} } },
+      'GET /super/landing': { data: { data } },
+      'GET /super/settings': { data: { data: {} } },
     })
     const screen = await renderWithQuery(<LandingEditorPage />)
 

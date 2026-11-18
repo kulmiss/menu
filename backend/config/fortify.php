@@ -23,6 +23,8 @@ return [
     'limiters' => [
         'login' => 'login',
         'two-factor' => 'two-factor',
+        // One budget for every "send the confirmation e-mail again" (with the address change).
+        'verification' => '6,1,verify-mail',
     ],
 
     'views' => false,

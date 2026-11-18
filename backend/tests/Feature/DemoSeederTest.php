@@ -2,6 +2,7 @@
 
 use App\Console\Commands\DownloadDemoPhotos;
 use App\Enums\Role;
+use App\Http\Controllers\SiteController;
 use App\Models\Branch;
 use App\Models\BranchItemOverride;
 use App\Models\Category;
@@ -12,6 +13,7 @@ use App\Models\Menu;
 use App\Models\OpeningHour;
 use App\Models\Payment;
 use App\Models\PlatformAnnouncement;
+use App\Models\PricePeriod;
 use App\Models\Promotion;
 use App\Models\QrCode;
 use App\Models\Tenant;
@@ -86,6 +88,19 @@ it('seeds the complete sales demo: café, three showcases, small restaurants and
         asTenant($tenant, fn () => expect(TenantAppearance::sole()->style)->toBe($style)->and(Item::count())->toBeGreaterThan(12)->and(Item::whereNotNull('media_id')->count())->toBeGreaterThan(7));
         $this->get('/'.$slug)->assertOk();
     }
+    // E, F and G: smaller menus that still mix dishes with and without photos (owner, 2026-11-18).
+    foreach (array_intersect_key(SiteController::STYLE_DEMOS, array_flip(['mesob', 'lounge', 'board'])) as $style => $slug) {
+        $tenant = Tenant::where('slug', $slug)->sole();
+        asTenant($tenant, fn () => expect(TenantAppearance::sole()->style)->toBe($style)
+            ->and(Item::count())->toBeGreaterThanOrEqual(10)
+            ->and(Item::whereNotNull('media_id')->count())->toBeGreaterThanOrEqual(5)
+            ->and(Item::whereNull('media_id')->count())->toBeGreaterThan(0));
+        $this->get('/'.$slug)->assertOk()->assertSee('S-'.$style, false);
+    }
+    // Night Lounge's demo has a happy hour every evening, Mesob's shows Amharic dish names.
+    asTenant(Tenant::where('slug', 'demo-lounge')->sole(), fn () => expect(PricePeriod::sole())->starts_at->toStartWith('18:00')->weekdays->toHaveCount(7));
+    $this->get('/demo-mesob')->assertSee('ዶሮ ወጥ');
+
     // Style D · Minimal on one demo restaurant, with banner and logo.
     $nine = Tenant::where('slug', 'demo-nine-wells-coffee')->sole();
     asTenant($nine, fn () => expect(TenantAppearance::sole())->style->toBe('minimal')->logo_media_id->not->toBeNull()->cover_media_id->not->toBeNull());

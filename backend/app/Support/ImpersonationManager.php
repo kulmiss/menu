@@ -42,7 +42,7 @@ class ImpersonationManager
     public function startToken(User $admin, Tenant $tenant, User $target): array
     {
         $ends = now()->addMinutes(Impersonation::MINUTES);
-        $new = $target->createToken('Log in as', ['mobile'], $ends);
+        $new = $target->createToken('Log in as', ['mobile', 'restaurant', 'impersonation'], $ends);
         $new->accessToken->forceFill(['impersonator_id' => $admin->id, 'impersonation_tenant_id' => $tenant->id, 'platform' => 'support'])->save();
 
         return ['token' => $new->plainTextToken, 'tenant_id' => $tenant->id, 'ends_at' => $ends->toAtomString()];

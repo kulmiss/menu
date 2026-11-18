@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\RedirectResponse;
@@ -18,21 +19,27 @@ class VerifyEmailController extends Controller
     public function __invoke(Request $request, int $id, string $hash): RedirectResponse
     {
         if (! $request->hasValidSignature()) {
-            return redirect('/auth/sign-in?verify=expired');
+            return redirect('/signin?verify=expired');
         }
         $user = User::find($id);
         if ($user === null || ! hash_equals(sha1($user->getEmailForVerification()), $hash)) {
-            return redirect('/auth/sign-in?verify=invalid');
+            return redirect('/signin?verify=invalid');
         }
         $signedIn = $request->user()?->is($user) ?? false;
 
         if ($user->hasVerifiedEmail()) {
-            return redirect($signedIn ? '/admin' : '/auth/sign-in?verify=already');
+            return redirect($signedIn ? '/admin' : '/signin?verify=already');
         }
 
         $user->markEmailAsVerified();
         event(new Verified($user));
 
-        return redirect($signedIn ? '/admin?welcome=1' : '/auth/sign-in?verify=done');
+        if (! $signedIn) {
+            return redirect('/signin?verify=done');
+        }
+        // Sign-up with approval (QUESTIONS #222): "we are checking your restaurant" first.
+        $pending = $user->memberships()->whereHas('tenant', fn ($q) => $q->where('signup_state', Tenant::SIGNUP_PENDING))->exists();
+
+        return redirect($pending ? '/waiting' : '/admin?welcome=1');
     }
 }

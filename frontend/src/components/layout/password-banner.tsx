@@ -49,7 +49,7 @@ export function PasswordBanner({ platform = false }: { platform?: boolean }) {
       </span>
       <button
         type='button'
-        className='-m-1 rounded p-1 hover:bg-amber-100 dark:hover:bg-amber-900'
+        className='-m-2.5 inline-flex size-11 shrink-0 items-center justify-center rounded hover:bg-amber-100 sm:-m-1 sm:size-auto sm:p-1 dark:hover:bg-amber-900'
         aria-label={t('common.close')}
         onClick={() => {
           try {

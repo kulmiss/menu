@@ -23,6 +23,14 @@
     overflow: unset !important;
   }
 
+  /* A grid with no column template stacks its children in one column that
+     is never wider than the grid: a long name in a list can't push the page
+     wider than a phone. (The browser default is a column as wide as the
+     widest child.) */
+  .grid {
+    grid-auto-columns: minmax(0, 1fr);
+  }
+
   /* Cursor pointer for buttons */
   button:not(:disabled),
   [role='button']:not(:disabled) {

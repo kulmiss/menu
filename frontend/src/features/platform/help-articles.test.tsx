@@ -37,7 +37,7 @@ describe('Super Admin → Help articles', () => {
 
   it('shows the "Was this helpful?" counts, edits with a live preview and saves', async () => {
     fake = fakeApi({
-      'GET /platform/help-articles?audience=restaurant': {
+      'GET /super/help-articles?audience=restaurant': {
         data: {
           data: [
             {
@@ -56,10 +56,10 @@ describe('Super Admin → Help articles', () => {
           meta,
         },
       },
-      'GET /platform/help-articles/restaurant/sold-out': {
+      'GET /super/help-articles/restaurant/sold-out': {
         data: { data: { ...article, default: article } },
       },
-      'POST /platform/help-articles/preview': {
+      'POST /super/help-articles/preview': {
         data: {
           data: {
             body: 'Up to 5 photos.',
@@ -68,7 +68,7 @@ describe('Super Admin → Help articles', () => {
           },
         },
       },
-      'PUT /platform/help-articles/restaurant/sold-out': {
+      'PUT /super/help-articles/restaurant/sold-out': {
         data: { data: article },
       },
     })

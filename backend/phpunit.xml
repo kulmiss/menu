@@ -22,6 +22,9 @@
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="MENU_STATIC_PAGES" value="false"/>
+        <!-- The tests expect the default Super Admin address, whatever the local .env says. -->
+        <env name="SUPER_ADMIN_PATH" value="super"/>
+        <env name="SUPER_ADMIN_IPS" value=""/>
         <env name="BROADCAST_CONNECTION" value="null"/>
         <env name="CACHE_STORE" value="array"/>
         <env name="DB_CONNECTION" value="mysql"/>

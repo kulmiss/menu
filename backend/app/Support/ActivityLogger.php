@@ -12,6 +12,9 @@ use Illuminate\Database\Eloquent\Model;
  */
 class ActivityLogger
 {
+    /** Request attribute set once this request wrote an entry (see AuditSuperAdmin). */
+    public const LOGGED = 'activity.logged';
+
     /** Attribute names whose values are never written to the log. */
     private const MASKED = ['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes', 'token_hash', 'wifi_password'];
 
@@ -23,6 +26,7 @@ class ActivityLogger
     public function log(string $action, ?Model $subject = null, ?array $changes = null, ?int $tenantId = null): ActivityLog
     {
         $request = request();
+        $request->attributes->set(self::LOGGED, true);
 
         return ActivityLog::create([
             'tenant_id' => $tenantId ?? $this->tenant->id(),

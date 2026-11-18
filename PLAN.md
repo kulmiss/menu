@@ -115,7 +115,7 @@ Conventions: `id` BIGINT unsigned; money in **minor units** (`price_minor`, ETB 
 
 ### 4.3 Isolation mechanics
 - `BelongsToTenant` trait: global scope `where tenant_id = current()`, sets `tenant_id` on create, throws if no tenant is bound (fail closed).
-- Current tenant is bound by middleware from the URL (`/api/v1/t/{tenant}/…`) **after** checking the user's membership; public routes bind it from the slug.
+- Current tenant is bound by middleware from the URL (`/api/v1/restaurant/{tenant}/…`, was `t/{tenant}` until QUESTIONS #220) **after** checking the user's membership; public routes bind it from the slug.
 - **Composite foreign keys:** each tenant table has `UNIQUE(tenant_id, id)`, and child FKs reference `(tenant_id, parent_id)`. The database itself refuses an item that points at another tenant's category.
 - Super Admin code reads across tenants only through explicit `Tenant::withoutScope()` calls in the `Platform` namespace (an architecture test forbids it elsewhere).
 
@@ -196,7 +196,7 @@ Plan limits are checked on create (and on import) server-side; over the limit af
 ## 6. API
 
 ### 6.1 Shape
-- `/api/v1/auth/*` (Fortify), `/api/v1/me`, `/api/v1/t/{tenant}/…` (restaurant), `/api/v1/platform/…` (Super Admin), `/api/v1/beacon` (public, rate-limited).
+- `/api/v1/auth/*` (Fortify), `/api/v1/me`, `/api/v1/restaurant/{tenant}/…` (restaurant), `/api/v1/super/…` (Super Admin; renamed by QUESTIONS #220), `/api/v1/beacon` (public, rate-limited).
 - JSON resources, cursor/page pagination, validation errors in a standard shape with i18n message keys.
 - Rate limits: auth 5/min, beacon 60/min per IP hash, API 120/min per user.
 

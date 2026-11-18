@@ -67,13 +67,26 @@ return [
     'max_price_minor' => 100_000_000,
 
     /*
+    | The Super Admin area (QUESTIONS #215–#217). `path`: its web address,
+    | /{path} (letters, digits, - and _; never a menu address). `ips`: when not
+    | empty, only these addresses (comma-separated, IPv4/IPv6, CIDR allowed)
+    | reach the Super Admin pages, its sign-in and its API; others get a 404.
+    | Both live in .env, not the database, so cached routes keep working and a
+    | database change can't move or open the area. `php artisan super:access`.
+    */
+    'super_admin' => [
+        'path' => strtolower(trim((string) env('SUPER_ADMIN_PATH', 'super'), '/ ')) ?: 'super',
+        'ips' => array_values(array_filter(array_map('trim', explode(',', (string) env('SUPER_ADMIN_IPS', ''))))),
+    ],
+
+    /*
     | Slugs a restaurant can never take: they collide with platform routes.
     */
     'reserved_slugs' => [
         'admin', 'api', 'app', 'assets', 'auth', 'build', 'css', 'dashboard', 'docs', 'email',
-        'favicon.ico', 'help', 'img', 'images', 'js', 'login', 'logout', 'media',
-        'menu', 'menu-cache', 'platform', 'privacy', 'q', 'register', 'robots.txt', 'sanctum',
-        'settings', 'signup', 'sitemap.xml', 'static', 'sw.js', 'status', 'storage', 'support',
-        'terms', 'up', 'www',
+        'favicon.ico', 'forgot-password', 'help', 'invite', 'img', 'images', 'js', 'login', 'logout', 'media',
+        'menu', 'menu-cache', 'platform', 'privacy', 'q', 'register', 'reset-password', 'robots.txt', 'sanctum',
+        'settings', 'signin', 'signout', 'signup', 'sitemap.xml', 'static', 'sw.js', 'status', 'storage', 'super', 'support',
+        'terms', 'up', 'verify-email', 'waiting', 'www',
     ],
 ];

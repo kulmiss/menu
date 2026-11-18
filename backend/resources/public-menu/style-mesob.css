@@ -1,0 +1,45 @@
+/* Style E · Mesob: warm and traditional. Woven bands (original shapes, after the
+   colours of a mesob basket), round "platter" photos, serif headings.
+   Surfaces must match PageTheme::STYLES['mesob']. --o is a decoration colour only (never text). */
+:root{--br:1.25rem;--bg:#f8f0e4;--fg:#2b1a12;--mu:#664b3a;--ln:#e6d4bc;--card:#fffaf3;--o:#c98a1b}
+@media (prefers-color-scheme:dark){:root{--bg:#17110d;--fg:#f6ebdd;--mu:#c6ae97;--ln:#3a2b20;--card:#231a14;--o:#d6a03e}}
+/* The woven band: brand colour and ochre, separated by the page colour. */
+body:before,.ft:before{content:"";display:block;height:.5rem;background:repeating-linear-gradient(135deg,var(--a) 0 .4rem,var(--bg) .4rem .55rem,var(--o) .55rem .95rem,var(--bg) .95rem 1.1rem)}
+.ft:before{margin:-2rem 0 2rem}
+.cv{aspect-ratio:5/2}
+@media (min-width:44rem){.cv{border-radius:0 0 1.25rem 1.25rem}}
+header{flex-direction:column;text-align:center;gap:.35rem;padding:1.25rem 1rem .75rem}
+.lg{width:4rem;height:4rem;border-radius:50%;box-shadow:0 0 0 3px var(--bg),0 0 0 5px var(--o)}
+h1{font-size:1.9rem;font-weight:700;line-height:1.15}
+.bar{border-top:1px solid var(--ln)}
+.sr input,.ib{background:var(--card)}
+.cn a{border-color:var(--a);color:var(--a);font-weight:600}
+/* A category: its name between two short woven bands. */
+section{padding-top:1.75rem}
+section h2{display:flex;align-items:center;gap:.75rem;font-size:1.3rem;font-weight:700;text-align:center;overflow-wrap:anywhere}
+section h2:before,section h2:after{content:"";flex:1 0 1.5rem;height:.45rem;background:repeating-linear-gradient(90deg,var(--o) 0 .3rem,transparent .3rem .5rem,var(--a) .5rem .8rem,transparent .8rem 1rem)}
+.cd{text-align:center}
+section ul{display:grid;gap:.6rem;margin-top:.9rem}
+section li{border:1px solid var(--ln);border-radius:var(--br);background:var(--card)}
+/* A dish: round photo on the left, "+" on the right, never over the text. */
+/* The text sits in the middle of the photo's height (empty rows above and below take the rest). */
+li>.it{padding:.75rem .9rem;grid-template-columns:4.75rem minmax(0,1fr);grid-template-areas:"im ." "im nm" "im sm" "im pr" "im tg" "im .";grid-template-rows:1fr auto auto auto auto 1fr}
+li>.it.ao,li>.it.ao.np{padding-inline-end:3.25rem}
+li>.it .ad,li>.np>.ad{top:50%;margin-top:-1.375rem;inset-inline-end:.3rem}
+li>.it .im{grid-area:im;align-self:start;width:4.75rem;height:4.75rem;border-radius:50%;box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--o)}
+li>.it .nm{grid-area:nm;font-size:1.05rem;line-height:1.3}
+li>.it .sm{grid-area:sm}
+li>.it .pr{grid-area:pr;font-weight:700}
+li>.it .tg{grid-area:tg}
+/* Without a photo: a small woven diamond in its place. */
+li>.it.np{grid-template-columns:.9rem minmax(0,1fr)}
+li>.it.np:before{content:"";grid-area:im;align-self:start;width:.5rem;height:.5rem;margin-top:.45rem;transform:rotate(45deg);background:var(--a);box-shadow:3px 3px 0 var(--o)}
+.bd{background:none;border-color:var(--ln)}
+.spc .sp{border-color:var(--ln);border-radius:var(--br);background:repeating-linear-gradient(90deg,var(--a) 0 .5rem,var(--o) .5rem 1rem) top/100% .3rem no-repeat,var(--card)}
+.an{border-radius:var(--br)}
+.sh h3,.sh h4{font-family:var(--fh)}
+dialog{border-radius:1.25rem 1.25rem 0 0}
+@media (min-width:48rem){dialog{border-radius:1.25rem}}
+/* Footer: the band again, centred name, groups on cards. */
+.fh{flex-direction:column;text-align:center}.fn{font-family:var(--fh);font-size:1.5rem}.ft .ab{margin-inline:auto;text-align:center}.fso{justify-content:center}.pdl{text-align:center}
+.fg>div{background:var(--bg);border-radius:1rem;padding:1rem}

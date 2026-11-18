@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Invoice;
 use App\Support\Billing\InvoicePdf;
 use App\Support\Billing\Invoices;
+use App\Support\Csv;
 use App\Support\Tables\TableQuery;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -68,11 +69,11 @@ class InvoiceController extends Controller
         fputcsv($out, ['Number', 'Issued', 'Status', 'Restaurant', 'Owner e-mail', 'Plan', 'Period start', 'Period end', 'Subtotal', 'VAT %', 'VAT', 'Total', 'Currency', 'Method', 'Reference', 'Paid on', 'Void reason', 'Replaces'], escape: '');
         foreach ($this->filtered($request)->with('replaces')->get() as $i) {
             $money = fn (int $m) => number_format($m / 100, 2, '.', '');
-            fputcsv($out, [
+            fputcsv($out, array_map(Csv::cell(...), [
                 $i->number, $i->issued_at->toDateString(), $i->status, $i->customer['name'] ?? '', $i->customer['email'] ?? '', $i->plan_name,
                 $i->period_start->toDateString(), $i->period_end->toDateString(), $money($i->subtotal_minor), $i->tax_rate, $money($i->tax_minor),
                 $money($i->total_minor), $i->currency, $i->method, $i->reference, $i->paid_at->toDateString(), $i->void_reason, $i->replaces?->number,
-            ], escape: '');
+            ]), escape: '');
         }
         rewind($out);
 

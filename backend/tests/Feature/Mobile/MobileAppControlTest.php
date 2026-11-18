@@ -5,13 +5,14 @@ use App\Jobs\SendPush;
 use App\Models\PersonalAccessToken;
 use App\Models\User;
 use App\Support\MobileApp;
+use App\Support\PlatformSettings;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
 
 /** Super Admin → Mobile app (owner, 2026-11-14, QUESTIONS #193). */
 function appToken(User $user, string $version = '1.0.0'): string
 {
-    $new = $user->createToken('Pixel 8', ['mobile']);
+    $new = $user->createToken('Pixel 8', PersonalAccessToken::abilitiesFor($user));
     $new->accessToken->forceFill(['platform' => 'android', 'app_version' => $version])->save();
 
     return $new->plainTextToken;
@@ -31,6 +32,22 @@ it('serves the full app config, with safe defaults', function () {
         ->assertJsonPath('data.app_features.push', true)
         ->assertJsonPath('data.features.sold_out', true)
         ->assertJsonPath('data.links.web_admin', url('/admin'));
+});
+
+// Bug (2026-11-17): clearing the banner text (how a banner is removed) stored
+// null, and the Super Admin's Mobile app screen then crashed on every load.
+it('keeps an emptied banner as empty text, and repairs one stored as null', function () {
+    $this->actingAs(superAdmin());
+    $this->putJson(p('mobile-app'), ['banner' => ['text' => 'Server update tonight', 'link' => '/inbox']], idem())->assertOk();
+    $this->putJson(p('mobile-app'), ['banner' => ['text' => '', 'link' => '']], idem())->assertOk()
+        ->assertJsonPath('data.banner.text', '')->assertJsonPath('data.banner.link', '');
+    $this->getJson(p('mobile-app'))->assertOk()->assertJsonPath('data.banner.text', '')->assertJsonPath('data.banner.link', '');
+    $this->getJson('/api/v1/mobile/config')->assertOk()->assertJsonPath('data.banner', null);
+
+    // Saved by the old code: null text and link.
+    PlatformSettings::save(['mobile' => [...MobileApp::settings(), 'banner' => ['text' => null, 'link' => null, 'starts_at' => null, 'ends_at' => null, 'audience' => 'all']]]);
+    $this->getJson(p('mobile-app'))->assertOk()->assertJsonPath('data.banner.text', '')->assertJsonPath('data.banner.link', '');
+    $this->getJson('/api/v1/mobile/config')->assertOk()->assertJsonPath('data.banner', null);
 });
 
 it('lets the Super Admin set everything, and validates it', function () {

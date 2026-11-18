@@ -8,6 +8,7 @@ use App\Models\DiningTable;
 use App\Models\Membership;
 use App\Models\OpeningHour;
 use App\Models\Plan;
+use App\Models\PricePeriod;
 use App\Models\Promotion;
 use App\Models\QrCode;
 use App\Models\Tenant;
@@ -17,9 +18,10 @@ use App\Models\User;
 use App\Tenancy\CurrentTenant;
 
 /**
- * Three more complete restaurants with real photos, one per menu style, to
- * show restaurants what each style looks like:
- * A editorial (fine dining), B grid (pizza & burgers), C bistro (bakery & juice bar).
+ * More complete restaurants with real photos, one per menu style, to show
+ * restaurants what each style looks like: A editorial (fine dining), B grid
+ * (pizza & burgers), C bistro (bakery & juice bar), E mesob (Ethiopian and
+ * Somali), F lounge (cocktail bar, happy hour), G board (street food).
  */
 class Showcase
 {
@@ -79,6 +81,14 @@ class Showcase
             [$title, $body, $dish, $photo] = $def['special'];
             Promotion::create(['type' => 'special', 'title' => ['en' => $title], 'body' => ['en' => $body], 'item_id' => $items[$dish]->id ?? null, 'media_id' => $photo ? $this->photos->media($tenant, $photo)?->id : null, 'sort' => 0]);
             Promotion::create(['type' => 'announcement', 'title' => ['en' => $def['news'][0]], 'body' => ['en' => $def['news'][1]], 'sort' => 1]);
+            // Happy hour: [weekdays, from, to, [[dish, percent], …]] (style F's demo).
+            if (isset($def['happy'])) {
+                [$days, $from, $to, $deals] = $def['happy'];
+                $period = PricePeriod::create(['name' => ['en' => 'Happy hour'], 'weekdays' => $days, 'starts_at' => $from, 'ends_at' => $to]);
+                foreach ($deals as [$dish, $percent]) {
+                    $period->items()->create(['item_id' => $items[$dish]->id, 'mode' => 'percent', 'value' => $percent]);
+                }
+            }
         });
 
         return $tenant;
@@ -213,6 +223,113 @@ class Showcase
                                 ['Matcha latte', 'Ceremonial matcha, oat milk', 13000, ['vegan'], ['al' => ['gluten'], 'k' => 140, 'ph' => ['matcha']]],
                                 ['Flat white', null, 10000, [], ['al' => ['milk']]],
                                 ['Macchiato', null, 7500, [], ['al' => ['milk']]],
+                            ]],
+                        ]],
+                    ],
+                ],
+            ],
+            [
+                'slug' => 'demo-mesob', 'name' => 'Lalibela House', 'email' => 'mesob@example.com', 'plan' => 'plus', 'age' => 6,
+                'style' => 'mesob', 'color' => '#a3361f', 'logo' => 'ring', 'banner' => 'injera-dishes', 'banner_text' => 'under',
+                'about' => "Ethiopian and Somali home cooking, served on one big injera to share.\nCoffee ceremony every afternoon from 15:00.",
+                'address' => 'Bole Medhanialem, Addis Ababa', 'phone' => '+251 11 000 0544', 'hours' => [['07:00', '22:30']],
+                'special' => ['Beyaynetu for two', 'Six fasting stews on one injera — Br 520 every Wednesday and Friday.', 'Beyaynetu · በያይነቱ', 'injera-platter'],
+                'news' => ['Every afternoon:', 'Coffee ceremony with fresh popcorn from 15:00.'],
+                'catalogue' => [
+                    'groups' => [
+                        'spice' => ['How spicy?', 1, 1, [['Mild', 0], ['Medium', 0], ['Hot (with mitmita)', 0]]],
+                        'side' => ['Add to your plate', 0, 3, [['Extra injera', 2500], ['Ayib (fresh cheese)', 3500], ['Gomen (greens)', 4000], ['Boiled egg', 2000]]],
+                    ],
+                    'menus' => [
+                        ['name' => 'Menu', 'slug' => 'menu', 'categories' => [
+                            ['Wot · ወጥ', 'Stews, served on injera.', [
+                                ['Doro wot · ዶሮ ወጥ', 'Chicken, berbere, niter kibbeh, boiled egg', 42000, ['spicy', 'popular'], ['d' => 'Slow-cooked chicken in a deep red berbere sauce with spiced butter and a boiled egg, on injera.', 'al' => ['eggs', 'milk'], 'k' => 780, 'pm' => 25, 'ph' => ['injera-dishes'], 'g' => ['spice', 'side']]],
+                                ['Beyaynetu · በያይነቱ', 'Six fasting stews on one injera', 28000, ['vegan', 'popular'], ['k' => 640, 'pm' => 15, 'ph' => ['injera-platter'], 'g' => ['side'], 'sz' => [['For one', 28000], ['For two', 52000]]]],
+                                ['Shiro tegabino', 'Chickpea stew, bubbling in a clay pot', 22000, ['vegan'], ['k' => 520, 'pm' => 15, 'g' => ['spice', 'side']]],
+                                ['Misir wot', 'Red lentils, berbere, garlic', 20000, ['vegan', 'spicy'], ['k' => 480, 'pm' => 15, 'g' => ['spice']]],
+                                ['Kitfo', 'Minced beef, mitmita, ayib, gomen', 46000, [], ['al' => ['milk'], 'k' => 820, 'pm' => 15, 'g' => ['spice'], 'so' => true]],
+                            ]],
+                            ['Tibs · ጥብስ', null, [
+                                ['Shekla tibs', 'Sizzling beef on a clay dish, rosemary, onion', 48000, ['popular'], ['k' => 860, 'pm' => 20, 'ph' => ['tibs'], 'g' => ['spice', 'side']]],
+                                ['Suqaar', 'Somali beef cubes, peppers, cumin, with canjeero', 40000, ['new'], ['al' => ['gluten'], 'k' => 740, 'pm' => 20]],
+                                ['Bariis iskukaris', 'Somali spiced rice, goat, banana on the side', 44000, [], ['k' => 900, 'pm' => 25]],
+                            ]],
+                            ['Coffee & tea', 'Our coffee is roasted every morning.', [
+                                ['Coffee ceremony · ቡና', 'Three rounds from the jebena, with popcorn', 18000, ['vegan', 'popular'], ['ph' => ['ceremony-2', 'jebena'], 'sz' => [['For one', 18000], ['For the table', 45000]]]],
+                                ['Spiced tea', 'Black tea, cinnamon, clove, cardamom', 6000, ['vegan'], ['ph' => ['spiced-tea']]],
+                                ['Macchiato', null, 7000, ['vegetarian'], ['al' => ['milk']]],
+                            ]],
+                        ]],
+                    ],
+                ],
+            ],
+            [
+                'slug' => 'demo-lounge', 'name' => 'Amber Room', 'email' => 'lounge@example.com', 'plan' => 'pro', 'age' => 4,
+                'style' => 'lounge', 'color' => '#c58bff', 'logo' => 'drop', 'banner' => 'cafe-tables', 'banner_text' => 'over',
+                'about' => "Cocktails, mocktails and small plates under low light.\nLive DJ on Fridays and Saturdays from 21:00.",
+                'address' => 'Kazanchis, Addis Ababa', 'phone' => '+251 11 000 0655', 'hours' => [['17:00', '02:00']],
+                'special' => ['Sunset set', 'Two signature drinks and a sharing plate for Br 1,150 before 20:00.', 'Sunset spritz', 'berry-mint'],
+                'news' => ['Tonight:', 'DJ from 21:00 · no entry fee.'],
+                // Happy hour every day, 18:00–20:00 (owner, 2026-11-18: before / during / after must work).
+                'happy' => [[0, 1, 2, 3, 4, 5, 6], '18:00', '20:00', [['Sunset spritz', 20], ['Blue Nile', 20], ['Mint & lime cooler', 20]]],
+                'catalogue' => [
+                    'groups' => [
+                        'ice' => ['Ice', 1, 1, [['Normal ice', 0], ['Little ice', 0], ['No ice', 0]]],
+                        'dip' => ['Dip', 0, 2, [['Garlic mayo', 1500], ['Mitmita mayo', 1500], ['Sweet chili', 1500]]],
+                    ],
+                    'menus' => [
+                        ['name' => 'Drinks & bites', 'slug' => 'menu', 'categories' => [
+                            ['Signature drinks', 'Made at the bar, alcohol-free on request.', [
+                                ['Sunset spritz', 'Orange, berries, soda, fresh mint', 45000, ['popular'], ['k' => 160, 'ph' => ['berry-mint'], 'g' => ['ice']]],
+                                ['Blue Nile', 'Butterfly pea, lime, tonic', 48000, ['new'], ['k' => 140, 'ph' => ['iced-lemon-tea'], 'g' => ['ice']]],
+                                ['Mint & lime cooler', 'Lime, mint, cane sugar, sparkling water', 32000, ['vegan'], ['k' => 110, 'ph' => ['iced-mint-tea'], 'g' => ['ice']]],
+                                ['Espresso tonic', 'Cold espresso over tonic and orange', 34000, ['vegan'], ['k' => 60, 'ph' => ['cold-brew'], 'g' => ['ice']]],
+                                ['Kiwi smash', 'Kiwi, lime, ginger, soda', 36000, ['vegan'], ['k' => 130, 'ph' => ['kiwi-juice'], 'g' => ['ice'], 'so' => true]],
+                            ]],
+                            ['Sharing plates', null, [
+                                ['Spiced wings', 'Eight wings, mitmita glaze', 39000, ['spicy', 'popular'], ['al' => ['gluten'], 'k' => 780, 'pm' => 15, 'ph' => ['wings'], 'g' => ['dip'], 'sz' => [['8 pieces', 39000], ['16 pieces', 69000]]]],
+                                ['Loaded fries', 'Cheese, jalapeños, spring onion', 26000, ['vegetarian'], ['al' => ['milk'], 'k' => 690, 'pm' => 10, 'ph' => ['fries-bowl'], 'g' => ['dip']]],
+                                ['Slider trio', 'Three mini burgers, cheddar, pickles', 52000, [], ['al' => ['gluten', 'milk'], 'k' => 940, 'pm' => 15, 'ph' => ['burger-half']]],
+                                ['Hummus & bread', 'Olive oil, paprika, warm flatbread', 22000, ['vegan'], ['al' => ['gluten', 'sesame'], 'k' => 520]],
+                            ]],
+                            ['Soft drinks', null, [
+                                ['Sparkling water', null, 9000, ['vegan'], []],
+                                ['Cola', null, 9000, ['vegan'], ['sz' => [['Glass', 9000], ['Bottle', 14000]]]],
+                            ]],
+                        ]],
+                    ],
+                ],
+            ],
+            [
+                'slug' => 'demo-street', 'name' => 'Piassa Street Kitchen', 'email' => 'street@example.com', 'plan' => 'plus', 'age' => 3,
+                'style' => 'board', 'color' => '#ffd23f', 'logo' => 'slice', 'banner' => 'pizzas-plates', 'banner_text' => 'under',
+                'about' => "Burgers, sambusa and fresh juice, made fast.\nOrder at the counter — we call your number.",
+                'address' => 'Piassa, Addis Ababa', 'phone' => '+251 11 000 0766', 'hours' => [['10:00', '23:00']],
+                'special' => ['Combo of the day', 'Any burger, fries and a juice for Br 450.', 'Classic smash', 'burger-tray'],
+                'news' => ['New:', 'Avocado spris is back.'],
+                'catalogue' => [
+                    'groups' => [
+                        'extras' => ['Extras', 0, 3, [['Cheddar', 3000], ['Bacon', 5000], ['Fried egg', 2500], ['Jalapeños', 1500]]],
+                        'sauce' => ['Sauce', 0, 2, [['Ketchup', 0], ['Mitmita mayo', 1000], ['BBQ', 1000]]],
+                    ],
+                    'menus' => [
+                        ['name' => 'Menu', 'slug' => 'menu', 'categories' => [
+                            ['Burgers', 'Smashed to order, potato bun.', [
+                                ['Classic smash', 'Beef, cheddar, pickles, house sauce', 32000, ['popular'], ['al' => ['gluten', 'milk'], 'k' => 820, 'pm' => 8, 'ph' => ['burger-tray'], 'g' => ['extras', 'sauce']]],
+                                ['Berbere chicken', 'Crispy chicken, spicy mayo, slaw', 29000, ['spicy'], ['al' => ['gluten', 'eggs'], 'k' => 760, 'pm' => 8, 'ph' => ['burger-bacon'], 'g' => ['extras', 'sauce']]],
+                                ['Double trouble', 'Two patties, two cheeses, bacon', 41000, [], ['al' => ['gluten', 'milk'], 'k' => 1150, 'pm' => 10, 'ph' => ['cheeseburger'], 'g' => ['extras', 'sauce'], 'so' => true]],
+                                ['Veggie stack', 'Lentil patty, avocado, tomato', 27000, ['vegetarian', 'new'], ['al' => ['gluten'], 'k' => 640, 'pm' => 8]],
+                            ]],
+                            ['Sides & snacks', null, [
+                                ['Fries', 'Salted, with ketchup', 12000, ['vegan'], ['k' => 420, 'ph' => ['fries-ketchup'], 'g' => ['sauce'], 'sz' => [['Regular', 12000], ['Large', 16000]]]],
+                                ['Sambusa', 'Three crispy lentil sambusa', 9000, ['vegan', 'popular'], ['al' => ['gluten'], 'k' => 360]],
+                                ['Grilled cheese', 'Toasted, with tomato soup', 18000, ['vegetarian'], ['al' => ['gluten', 'milk'], 'k' => 560, 'ph' => ['grilled-cheese']]],
+                                ['Wings', 'Six wings, hot sauce', 24000, ['spicy'], ['k' => 610, 'ph' => ['chicken-fries'], 'g' => ['sauce']]],
+                            ]],
+                            ['Juice', 'Pressed fresh, no sugar added.', [
+                                ['Avocado spris', 'Avocado, mango, papaya', 12000, ['vegan', 'popular'], ['k' => 280, 'ph' => ['avocado-smoothie']]],
+                                ['Mango juice', null, 10000, ['vegan'], ['k' => 190, 'ph' => ['mango-juice']]],
+                                ['Orange juice', null, 9500, ['vegan'], ['k' => 150]],
                             ]],
                         ]],
                     ],

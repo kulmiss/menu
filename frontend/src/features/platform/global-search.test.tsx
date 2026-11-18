@@ -22,7 +22,7 @@ describe('Global search', () => {
 
   it('shows grouped results and opens the restaurant with the keyboard', async () => {
     fake = fakeApi({
-      'GET /platform/search?q=kaldi': {
+      'GET /super/search?q=kaldi': {
         data: {
           data: {
             restaurants: [

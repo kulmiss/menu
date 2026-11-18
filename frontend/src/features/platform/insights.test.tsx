@@ -11,7 +11,7 @@ vi.mock('@tanstack/react-router', async (orig) =>
 const kpi = (value: number, previous: number) => ({ value, previous })
 const range = { from: '2026-10-15', to: '2026-11-13' }
 const all = {
-  'GET /platform/insights/overview': {
+  'GET /super/insights/overview': {
     data: {
       data: {
         ...range,
@@ -46,7 +46,7 @@ const all = {
       },
     },
   },
-  'GET /platform/insights/growth': {
+  'GET /super/insights/growth': {
     data: {
       data: {
         ...range,
@@ -61,7 +61,7 @@ const all = {
       },
     },
   },
-  'GET /platform/insights/engagement': {
+  'GET /super/insights/engagement': {
     data: {
       data: {
         total: 1500,
@@ -107,7 +107,7 @@ const all = {
       },
     },
   },
-  'GET /platform/insights/usage': {
+  'GET /super/insights/usage': {
     data: {
       data: {
         total: 1500,
@@ -117,7 +117,7 @@ const all = {
       },
     },
   },
-  'GET /platform/insights/top': {
+  'GET /super/insights/top': {
     data: {
       data: {
         currency: 'ETB',
@@ -129,7 +129,7 @@ const all = {
       },
     },
   },
-  'GET /platform/insights/admins': {
+  'GET /super/insights/admins': {
     data: {
       data: {
         members: 1800,
@@ -176,7 +176,7 @@ describe('Super Admin insights', () => {
       .toBeVisible()
     // The dashboard's plan and range go to every widget.
     expect(fake.calls.map((c) => c.url)).toContain(
-      '/platform/insights/overview?days=30&plan=2'
+      '/super/insights/overview?days=30&plan=2'
     )
   })
 
@@ -221,14 +221,14 @@ describe('Super Admin insights', () => {
         '/platform/$section?from=2026-10-01&to=2026-10-31'
       )
     expect(fake.calls.map((c) => c.url)).toContain(
-      '/platform/insights/growth?from=2026-10-15&to=2026-11-13'
+      '/super/insights/growth?from=2026-10-15&to=2026-11-13'
     )
   })
 
   it('lets one widget fail without breaking the others', async () => {
     fake = fakeApi({
       ...all,
-      'GET /platform/insights/usage': { status: 500, data: {} },
+      'GET /super/insights/usage': { status: 500, data: {} },
     })
     const screen = await renderWithQuery(<PlatformInsights f={{}} />)
 

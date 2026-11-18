@@ -11,7 +11,7 @@ describe('Settings → Link preview', () => {
 
   it('shows the built-in picture and uploads a new one', async () => {
     fake = fakeApi({
-      'POST /platform/settings/share-image': { data: { data: {} } },
+      'POST /super/settings/share-image': { data: { data: {} } },
     })
     const screen = await renderWithQuery(
       <ShareImageCard
@@ -37,12 +37,12 @@ describe('Settings → Link preview', () => {
     await userEvent.upload(screen.getByLabelText('Choose a picture'), file)
     await expect
       .poll(() => fake.calls.find((c) => c.method === 'POST')?.url)
-      .toBe('/platform/settings/share-image')
+      .toBe('/super/settings/share-image')
   })
 
   it('goes back to the built-in picture', async () => {
     fake = fakeApi({
-      'DELETE /platform/settings/share-image': { data: { data: {} } },
+      'DELETE /super/settings/share-image': { data: { data: {} } },
     })
     const screen = await renderWithQuery(
       <ShareImageCard

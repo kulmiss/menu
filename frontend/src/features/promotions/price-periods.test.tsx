@@ -37,8 +37,8 @@ describe('Price periods', () => {
 
   it('creates a happy hour with % off and a new price, and shows what guests see now', async () => {
     fake = fakeApi({
-      'GET /t/1/price-periods': { data: { data: [] } },
-      'GET /t/1/price-periods/preview': {
+      'GET /restaurant/1/price-periods': { data: { data: [] } },
+      'GET /restaurant/1/price-periods/preview': {
         data: {
           data: {
             now: 'Fri 16:30',
@@ -54,12 +54,12 @@ describe('Price periods', () => {
           },
         },
       },
-      'GET /t/1/branches': { data: { data: [] } },
-      'GET /t/1/menus': {
+      'GET /restaurant/1/branches': { data: { data: [] } },
+      'GET /restaurant/1/menus': {
         data: { data: [{ id: 1, name: { en: 'All day' } }] },
       },
-      'GET /t/1/menus/1/tree': { data: { data: tree } },
-      'POST /t/1/price-periods': { status: 201, data: { data: {} } },
+      'GET /restaurant/1/menus/1/tree': { data: { data: tree } },
+      'POST /restaurant/1/price-periods': { status: 201, data: { data: {} } },
     })
     const screen = await renderWithQuery(
       <PricePeriodsSection

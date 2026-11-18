@@ -2,11 +2,8 @@
 // (backend/resources/public-menu/base.css + each style): readable in light
 // and dark (contrast ≥ 4.5:1), with room above and below (owner, 2026-11-12).
 import base from '@public-menu/base.css?raw'
-import bistro from '@public-menu/style-bistro.css?raw'
-import editorial from '@public-menu/style-editorial.css?raw'
-import grid from '@public-menu/style-grid.css?raw'
-import minimal from '@public-menu/style-minimal.css?raw'
 import { afterEach, describe, expect, it } from 'vitest'
+import { GUEST_STYLES } from './guest-styles'
 
 type Rgba = [number, number, number, number]
 const rgba = (c: string): Rgba => {
@@ -56,13 +53,14 @@ afterEach(() => {
   root?.remove()
 })
 
-const STYLES = { editorial, grid, bistro, minimal }
+const STYLES = GUEST_STYLES
 
 describe('opening-hours pill', () => {
   for (const [name, css] of Object.entries(STYLES))
     for (const dark of [false, true])
       it(`is a readable, spaced pill with a dot in ${name} ${dark ? 'dark' : 'light'}`, () => {
-        page(css + base, dark)
+        // The page's order: the shared CSS first, then the style's.
+        page(base + css, dark)
         const bg = rgba(getComputedStyle(document.body).backgroundColor)
         for (const sel of ['#open', '#shut']) {
           const el = document.querySelector<HTMLElement>(sel)!
@@ -97,7 +95,7 @@ describe('opening-hours pill', () => {
       })
 
   it('stays hidden when the restaurant has no opening hours', () => {
-    page(grid + base, false)
+    page(base + STYLES.grid, false)
     const el = document.getElementById('open')!
     el.hidden = true
     expect(getComputedStyle(el).display).toBe('none')

@@ -29,7 +29,7 @@ describe('Download PDF menu', () => {
 
   it('builds the download with the chosen menu, branch, photos and columns', async () => {
     fake = fakeApi({
-      'GET /t/1/branches': {
+      'GET /restaurant/1/branches': {
         data: {
           data: [
             {
@@ -63,7 +63,7 @@ describe('Download PDF menu', () => {
       .element(link)
       .toHaveAttribute(
         'href',
-        expect.stringContaining('/t/1/menu-pdf?photos=0&columns=2')
+        expect.stringContaining('/restaurant/1/menu-pdf?photos=0&columns=2')
       )
 
     await userEvent.selectOptions(

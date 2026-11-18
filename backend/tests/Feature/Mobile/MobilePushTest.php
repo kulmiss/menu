@@ -3,6 +3,7 @@
 use App\Enums\Role;
 use App\Jobs\SendPush;
 use App\Models\AppNotification;
+use App\Models\PersonalAccessToken;
 use App\Models\PushToken;
 use App\Models\Tenant;
 use App\Models\User;
@@ -24,13 +25,13 @@ function fcmCredentials(): string
 
 it('registers and removes this phone\'s push token, and moves a reused token to the new user', function () {
     $user = User::factory()->create();
-    $token = $user->createToken('Phone', ['mobile']);
+    $token = $user->createToken('Phone', PersonalAccessToken::abilitiesFor($user));
     $this->withHeaders(bearer($token->plainTextToken))->postJson('/api/v1/mobile/push-tokens', ['token' => 'fcm-abc', 'platform' => 'android'], idem())->assertNoContent();
     expect(PushToken::sole())->user_id->toBe($user->id)->personal_access_token_id->toBe($token->accessToken->id);
 
     $other = User::factory()->create();
     $this->app['auth']->forgetGuards();
-    $this->withHeaders(bearer($other->createToken('Phone', ['mobile'])->plainTextToken))->postJson('/api/v1/mobile/push-tokens', ['token' => 'fcm-abc', 'platform' => 'android'], idem())->assertNoContent();
+    $this->withHeaders(bearer($other->createToken('Phone', PersonalAccessToken::abilitiesFor($other))->plainTextToken))->postJson('/api/v1/mobile/push-tokens', ['token' => 'fcm-abc', 'platform' => 'android'], idem())->assertNoContent();
     expect(PushToken::sole()->user_id)->toBe($other->id);
 
     $this->deleteJson('/api/v1/mobile/push-tokens', ['token' => 'fcm-abc'], idem())->assertNoContent();
@@ -39,7 +40,7 @@ it('registers and removes this phone\'s push token, and moves a reused token to 
 
 it('removes the push token when the phone signs out', function () {
     $user = User::factory()->create();
-    $token = $user->createToken('Phone', ['mobile']);
+    $token = $user->createToken('Phone', PersonalAccessToken::abilitiesFor($user));
     $this->withHeaders(bearer($token->plainTextToken))->postJson('/api/v1/mobile/push-tokens', ['token' => 'fcm-abc', 'platform' => 'android'], idem());
     $this->postJson('/api/v1/mobile/auth/logout', [], idem())->assertNoContent();
     expect(PushToken::count())->toBe(0);
@@ -47,7 +48,7 @@ it('removes the push token when the phone signs out', function () {
 
 it('shows the switches for my role and saves only what is off', function () {
     [$owner] = member(Role::Owner);
-    $this->withHeaders(bearer($owner->createToken('Phone', ['mobile'])->plainTextToken));
+    $this->withHeaders(bearer($owner->createToken('Phone', PersonalAccessToken::abilitiesFor($owner))->plainTextToken));
 
     $types = collect($this->getJson('/api/v1/mobile/notification-settings')->assertOk()->json('data'))->pluck('type')->all();
     expect($types)->toContain('monthly_report')->not->toContain('signup_new');
@@ -62,7 +63,7 @@ it('keeps an inbox and marks notes read', function () {
     $user = User::factory()->create();
     Push::send($user, 'monthly_report', 'One', 'Body', '/r/1/insights', 1);
     Push::send($user, 'plan_expiring', 'Two', 'Body', '/r/1/billing', 1);
-    $this->withHeaders(bearer($user->createToken('Phone', ['mobile'])->plainTextToken));
+    $this->withHeaders(bearer($user->createToken('Phone', PersonalAccessToken::abilitiesFor($user))->plainTextToken));
 
     $res = $this->getJson('/api/v1/mobile/notifications')->assertOk();
     expect($res->json('data.0.title'))->toBe('Two')->and($res->json('meta.unread'))->toBe(2);

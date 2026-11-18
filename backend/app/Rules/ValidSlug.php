@@ -24,7 +24,7 @@ class ValidSlug implements ValidationRule
             return;
         }
 
-        if (in_array($value, config('menu.reserved_slugs'), true)) {
+        if (in_array($value, [...config('menu.reserved_slugs'), config('menu.super_admin.path')], true)) {
             $fail('menu.slug.reserved')->translate();
 
             return;

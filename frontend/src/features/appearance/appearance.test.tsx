@@ -40,12 +40,23 @@ const APPEARANCE: Appearance = {
   logo: null,
   cover: null,
   warnings: [],
-  styles: ['editorial', 'grid', 'bistro', 'minimal'],
+  styles: [
+    'editorial',
+    'grid',
+    'bistro',
+    'minimal',
+    'mesob',
+    'lounge',
+    'board',
+  ],
   banner: {
     editorial: { ratio: [16, 9], text: 'under' },
     grid: { ratio: [2, 1], text: 'over' },
     bistro: { ratio: [5, 2], text: 'under' },
     minimal: { ratio: [5, 2], text: 'under' },
+    mesob: { ratio: [5, 2], text: 'under' },
+    lounge: { ratio: [2, 1], text: 'over' },
+    board: { ratio: [2, 1], text: 'under' },
   },
   themes: [
     {
@@ -69,8 +80,8 @@ let fake: ReturnType<typeof fakeApi>
 
 function render(writable = true) {
   fake = fakeApi({
-    'GET /t/1/appearance': { data: { data: APPEARANCE } },
-    'PUT /t/1/appearance': (req) => ({
+    'GET /restaurant/1/appearance': { data: { data: APPEARANCE } },
+    'PUT /restaurant/1/appearance': (req) => ({
       data: {
         data: {
           ...APPEARANCE,
@@ -131,6 +142,17 @@ describe('AppearancePage', () => {
       .not.toBeInTheDocument()
   })
 
+  // Chrome warns in the console about a sandbox with both allow-scripts and
+  // allow-same-origin (it can remove itself), and allow-scripts alone breaks the
+  // menu (no service worker, no storage). The preview is our own page: no sandbox.
+  it('shows the preview without a sandbox that makes a console warning', async () => {
+    const screen = await render()
+    await expect
+      .element(screen.getByRole('button', { name: 'Bistro' }))
+      .toBeVisible()
+    expect(frame(screen).hasAttribute('sandbox')).toBe(false)
+  })
+
   it('warns when the colour is hard to read on white', async () => {
     const screen = await render()
     const input = screen.getByRole('textbox', { name: 'Brand colour' })
@@ -154,6 +176,21 @@ describe('AppearancePage', () => {
     await expect
       .element(screen.getByRole('radio', { name: /C · Quiet bistro/ }))
       .toBeChecked()
+  })
+
+  it('offers E · Mesob, F · Night Lounge and G · Street Board, and each changes the preview', async () => {
+    const screen = await render()
+    for (const [name, style, hint] of [
+      ['E · Mesob', 'mesob', /woven bands and round photos/],
+      ['F · Night Lounge', 'lounge', /Always dark, with a soft glow/],
+      ['G · Street Board', 'board', /A clean chalkboard with price tags/],
+    ] as const) {
+      await userEvent.click(
+        screen.getByRole('radio', { name: new RegExp(name) })
+      )
+      await expect.poll(() => frame(screen).src).toContain(`style=${style}`)
+      await expect.element(screen.getByText(hint)).toBeVisible()
+    }
   })
 
   it('offers D · Minimal next to A, B and C, with logo and banner switches', async () => {

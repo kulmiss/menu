@@ -163,15 +163,15 @@ it('handles the verification link: signed out, reused, expired, tampered', funct
     $this->flushSession();
 
     // Opened on another device: confirmed, then sign in.
-    $this->get($link)->assertRedirect('/auth/sign-in?verify=done');
+    $this->get($link)->assertRedirect('/signin?verify=done');
     // Used again: nothing changes.
-    $this->get($link)->assertRedirect('/auth/sign-in?verify=already');
+    $this->get($link)->assertRedirect('/signin?verify=already');
 
     $other = User::factory()->unverified()->create();
     $expired = VerifyEmailNotification::url($other);
     $this->travel(25)->hours();
-    $this->get($expired)->assertRedirect('/auth/sign-in?verify=expired');
-    $this->get(str_replace(sha1($other->email), sha1('x@example.com'), VerifyEmailNotification::url($other)))->assertRedirect('/auth/sign-in?verify=expired');
+    $this->get($expired)->assertRedirect('/signin?verify=expired');
+    $this->get(str_replace(sha1($other->email), sha1('x@example.com'), VerifyEmailNotification::url($other)))->assertRedirect('/signin?verify=expired');
     expect($other->fresh()->hasVerifiedEmail())->toBeFalse();
 });
 

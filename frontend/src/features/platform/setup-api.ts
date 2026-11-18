@@ -22,7 +22,7 @@ export const setupQ = () =>
   queryOptions({
     queryKey: ['platform', 'setup'] as const,
     queryFn: async () =>
-      (await api.get<{ data: SetupState }>('/platform/setup')).data.data,
+      (await api.get<{ data: SetupState }>('/super/setup')).data.data,
   })
 
 /** Where each check is fixed. */

@@ -9,7 +9,7 @@ vi.mock('@tanstack/react-router', async (orig) =>
 )
 
 const all = {
-  'GET /platform/widgets/expiring': {
+  'GET /super/widgets/expiring': {
     data: {
       data: [
         {
@@ -29,14 +29,14 @@ const all = {
       ],
     },
   },
-  'GET /platform/widgets/inactive': {
+  'GET /super/widgets/inactive': {
     data: {
       data: [
         { id: 5, name: 'Quiet Place', slug: 'q', last_activity: '2026-10-01' },
       ],
     },
   },
-  'GET /platform/widgets/signups': {
+  'GET /super/widgets/signups': {
     data: {
       data: [
         {
@@ -57,7 +57,7 @@ const all = {
       ],
     },
   },
-  'GET /platform/widgets/follow-ups': {
+  'GET /super/widgets/follow-ups': {
     data: {
       data: [
         {
@@ -71,7 +71,7 @@ const all = {
       ],
     },
   },
-  'GET /platform/widgets/health': {
+  'GET /super/widgets/health': {
     data: {
       data: {
         disk_free: 5 * 1024 ** 3,
@@ -89,7 +89,7 @@ const all = {
       },
     },
   },
-  'GET /platform/widgets/plan-mix': {
+  'GET /super/widgets/plan-mix': {
     data: {
       data: {
         plans: [
@@ -145,7 +145,7 @@ describe('Super Admin dashboard widgets', () => {
   it('sends an edited reminder to the owner', async () => {
     fake = fakeApi({
       ...all,
-      'POST /platform/widgets/email/1': { data: { message: 'Email sent.' } },
+      'POST /super/widgets/email/1': { data: { message: 'Email sent.' } },
     })
     const screen = await renderWithQuery(<PlatformWidgets />)
 
@@ -175,7 +175,7 @@ describe('Super Admin dashboard widgets', () => {
   it('lets one widget fail without breaking the others', async () => {
     fake = fakeApi({
       ...all,
-      'GET /platform/widgets/plan-mix': { status: 500, data: {} },
+      'GET /super/widgets/plan-mix': { status: 500, data: {} },
     })
     const screen = await renderWithQuery(<PlatformWidgets />)
 

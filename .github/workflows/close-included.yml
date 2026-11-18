@@ -1,0 +1,52 @@
+# After a pull request is merged into develop, closes every other open pull
+# request whose commits are already included, with the comment "Included in #X"
+# (owner, 2026-11-18: merge only the top PR of a stack). It never deletes a
+# branch and never touches develop or main. Logic and tests: .github/scripts/.
+name: Close included PRs
+
+on:
+  # Runs from develop's own copy of this file, with a token that may close PRs.
+  # It only reads the merged PR's numbers from GitHub; no PR code is checked out or run.
+  pull_request_target:
+    types: [closed]
+    branches: [develop]
+  # The script's tests, when the script changes.
+  pull_request:
+    paths: ['.github/scripts/**', '.github/workflows/close-included.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  close:
+    if: github.event_name == 'pull_request_target' && github.event.pull_request.merged == true
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: develop
+          sparse-checkout: .github/scripts
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const closeIncluded = require('./.github/scripts/close-included.cjs');
+            const closed = await closeIncluded({ github, context, core });
+            core.info(closed.length ? `Closed: #${closed.join(', #')}` : 'Nothing else to close.');
+
+  test:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/scripts
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test .github/scripts/close-included.test.cjs

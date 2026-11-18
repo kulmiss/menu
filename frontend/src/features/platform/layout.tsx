@@ -1,9 +1,10 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { Link, Outlet, useLocation, useNavigate } from '@tanstack/react-router'
+import { Link, Outlet, useLocation } from '@tanstack/react-router'
 import { LogOut, Search, Shield } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useSetupWizard } from '@/stores/setup-wizard-store'
+import { signInUrl } from '@/lib/area'
 import { Button } from '@/components/ui/button'
 import { PasswordBanner } from '@/components/layout/password-banner'
 import { ThemeSwitch } from '@/components/theme-switch'
@@ -40,7 +41,6 @@ const SetupWizard = lazy(() => import('./setup-wizard'))
 export function PlatformLayout() {
   const { t } = useTranslation()
   const me = useMe()
-  const navigate = useNavigate()
   const qc = useQueryClient()
   const path = useLocation({ select: (l) => l.pathname })
   const needs2fa = !me.two_factor_enabled && path !== '/platform/security'
@@ -91,11 +91,6 @@ export function PlatformLayout() {
                 </kbd>
               </Button>
             )}
-            {me.tenants.length > 0 && (
-              <Button asChild variant='ghost' size='sm'>
-                <Link to='/admin'>{t('platform.to_admin')}</Link>
-              </Button>
-            )}
             <HelpButton source={{ audience: 'platform' }} />
             <ThemeSwitch />
             <Button
@@ -106,7 +101,7 @@ export function PlatformLayout() {
                 try {
                   await signOut(qc)
                 } finally {
-                  await navigate({ to: '/auth/sign-in', replace: true })
+                  window.location.assign(signInUrl())
                 }
               }}
             >
@@ -116,7 +111,7 @@ export function PlatformLayout() {
         </div>
         <nav
           aria-label={t('platform.title')}
-          className='flex gap-1 overflow-x-auto px-2 pb-2'
+          className='flex gap-1 overflow-x-auto px-2 pb-2 lg:flex-wrap'
         >
           <Link
             to='/platform'

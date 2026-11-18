@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\PersonalAccessToken;
 use App\Models\User;
 use App\Rules\NotCommonPassword;
 
@@ -28,7 +29,7 @@ it('refuses a common password when choosing or changing one, everywhere', functi
         'current_password' => 'correct-horse-battery', 'password' => 'Password123!', 'password_confirmation' => 'Password123!',
     ], idem())->assertUnprocessable()->assertJsonValidationErrors('password');
 
-    $token = $user->createToken('Phone', ['mobile'])->plainTextToken;
+    $token = $user->createToken('Phone', PersonalAccessToken::abilitiesFor($user))->plainTextToken;
     $this->app['auth']->forgetGuards();
     $this->withToken($token)->putJson('/api/v1/mobile/account/password', [
         'current_password' => 'correct-horse-battery', 'password' => 'qwertyuiop', 'password_confirmation' => 'qwertyuiop',

@@ -9,6 +9,7 @@ use App\Models\Tenant;
 use App\Models\User;
 use App\Tenancy\CurrentTenant;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -74,7 +75,7 @@ function t(Tenant|int $tenant, string $path = ''): string
 {
     $id = $tenant instanceof Tenant ? $tenant->id : $tenant;
 
-    return "/api/v1/t/{$id}".($path === '' ? '' : '/'.ltrim($path, '/'));
+    return "/api/v1/restaurant/{$id}".($path === '' ? '' : '/'.ltrim($path, '/'));
 }
 
 // Platform (Super Admin) helpers.
@@ -96,7 +97,7 @@ function browser(): void
 
 function p(string $path = ''): string
 {
-    return '/api/v1/platform/'.ltrim($path, '/');
+    return '/api/v1/super/'.ltrim($path, '/');
 }
 
 /** Mobile app sign-in fields (QUESTIONS #187). */
@@ -109,4 +110,34 @@ function device(array $extra = []): array
 function bearer(string $token): array
 {
     return ['Authorization' => 'Bearer '.$token, 'Accept' => 'application/json'];
+}
+
+/** A URL that matches the route: made-up ids, or the first allowed value of a constrained part. */
+function matrixUrl(string $uri, int $tenantId, array $wheres = []): string
+{
+    $uri = str_replace('{tenant}', (string) $tenantId, $uri);
+
+    return '/'.preg_replace_callback('/\{([^}?]+)\??\}/', function ($m) use ($wheres) {
+        $where = $wheres[$m[1]] ?? null;
+        if (is_string($where) && preg_match('/^\(?([a-z][a-z0-9_-]*)(\||\)|$)/i', $where, $first) === 1) {
+            return $first[1];
+        }
+
+        return '999999';
+    }, $uri);
+}
+
+/** A stand-in for the built admin app (frontend/ → public/app). */
+function withBuiltSpa(callable $test): void
+{
+    $index = public_path('app/index.html');
+    $existed = is_file($index);
+    $original = $existed ? File::get($index) : null;
+    File::ensureDirectoryExists(dirname($index));
+    File::put($index, '<!doctype html><html><head><title>Menu</title></head><body><div id="root"></div></body></html>');
+    try {
+        $test();
+    } finally {
+        $existed ? File::put($index, $original) : File::delete($index);
+    }
 }

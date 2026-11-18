@@ -1,12 +1,11 @@
-import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
-import { signUpConfigQuery } from '@/features/signup/api'
 
 /**
  * "Continue with Google" (owner, 2026-11-17): a plain link to /auth/google,
  * which sends the browser to Google. Google's own look (white, the four-
- * colour G). Hidden while the Super Admin's switch is off.
+ * colour G). Used by Account → Security ("Link Google"); the sign-in and
+ * sign-up pages are server pages with their own button (QUESTIONS #222).
  */
 export function GoogleButton({
   href = '/auth/google',
@@ -55,21 +54,5 @@ export function GoogleLogo({
         d='M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z'
       />
     </svg>
-  )
-}
-
-/** The button and an "or" line under it, when Google sign-in is on. */
-export function GoogleOption({ label }: { label: string }) {
-  const config = useQuery(signUpConfigQuery)
-  if (!config.data?.google) return null
-  return (
-    <div className='mb-4 grid gap-4'>
-      <GoogleButton />
-      <div className='flex items-center gap-3 text-xs text-muted-foreground uppercase'>
-        <span className='h-px flex-1 bg-border' />
-        {label}
-        <span className='h-px flex-1 bg-border' />
-      </div>
-    </div>
   )
 }

@@ -1,11 +1,9 @@
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
-import { type MenuStyle } from './api'
-
-const MENU_STYLES: MenuStyle[] = ['editorial', 'grid', 'bistro', 'minimal']
+import { MENU_STYLES, type MenuStyle } from './api'
 
 /**
- * "Menu style" picker: four cards with a small drawing of each style.
+ * "Menu style" picker: one card per style (A–G) with a small drawing of it.
  * Styles the plan doesn't include stay visible but can't be picked.
  */
 export function StylePicker({
@@ -26,7 +24,7 @@ export function StylePicker({
       <legend className='mb-2 text-sm font-medium'>
         {t('appearance.menu_style')}
       </legend>
-      <div className='grid grid-cols-2 gap-2 lg:grid-cols-4'>
+      <div className='grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4'>
         {MENU_STYLES.map((style) => {
           const locked = !allowed.includes(style)
           const checked = value === style
@@ -141,6 +139,112 @@ function StyleThumb({ style }: { style: MenuStyle }) {
             </g>
           ))}
           <rect x='8' y='83' width='12' height='2.5' rx='1' {...accent} />
+        </>
+      )}
+      {style === 'mesob' && (
+        <>
+          <defs>
+            <pattern
+              id='mesob-band'
+              width='8'
+              height='4'
+              patternUnits='userSpaceOnUse'
+            >
+              <rect width='3' height='4' {...accent} />
+              <rect x='4' width='3' height='4' fill='#c98a1b' />
+            </pattern>
+          </defs>
+          <rect width='120' height='4' fill='url(#mesob-band)' />
+          <circle cx='60' cy='15' r='6' {...accent} />
+          <rect x='40' y='24' width='40' height='5' rx='2' {...ink} />
+          <rect x='8' y='35' width='38' height='3' fill='url(#mesob-band)' />
+          <rect x='74' y='35' width='38' height='3' fill='url(#mesob-band)' />
+          {[43, 66].map((y) => (
+            <g key={y}>
+              <rect x='6' y={y} width='108' height='20' rx='5' {...bg} />
+              <circle cx='17' cy={y + 10} r='7' {...photo} />
+              <rect x='30' y={y + 5} width='40' height='4' rx='2' {...ink} />
+              <rect
+                x='30'
+                y={y + 12}
+                width='18'
+                height='3'
+                rx='1.5'
+                {...accent}
+              />
+            </g>
+          ))}
+        </>
+      )}
+      {style === 'lounge' && (
+        <>
+          <rect width='120' height='90' fill='#0c0a13' />
+          <rect x='8' y='8' width='50' height='7' rx='2' {...accent} />
+          <rect x='8' y='19' width='30' height='3' rx='1.5' fill='#aaa2c8' />
+          {[30, 50, 70].map((y) => (
+            <g key={y}>
+              <rect x='6' y={y} width='108' height='16' rx='4' fill='#17131f' />
+              <rect x='9' y={y + 2} width='12' height='12' rx='3' {...photo} />
+              <rect
+                x='25'
+                y={y + 4}
+                width='40'
+                height='4'
+                rx='2'
+                fill='#f2eeff'
+              />
+              <rect
+                x='25'
+                y={y + 10}
+                width='28'
+                height='2.5'
+                rx='1'
+                fill='#aaa2c8'
+              />
+              <rect x='92' y={y + 4} width='18' height='4' rx='2' {...accent} />
+            </g>
+          ))}
+        </>
+      )}
+      {style === 'board' && (
+        <>
+          <rect width='120' height='90' fill='#1d2a25' />
+          <rect x='34' y='7' width='52' height='7' rx='1' fill='#f5f2e9' />
+          <rect
+            x='6'
+            y='22'
+            width='108'
+            height='63'
+            rx='5'
+            fill='none'
+            stroke='#3f524a'
+            strokeWidth='1.5'
+            strokeDasharray='4 3'
+          />
+          <rect x='12' y='28' width='40' height='5' rx='1' {...accent} />
+          {[40, 55, 70].map((y) => (
+            <g key={y}>
+              <rect x='12' y={y} width='46' height='4' rx='2' fill='#f5f2e9' />
+              <rect
+                x='12'
+                y={y + 7}
+                width='16'
+                height='5'
+                rx='1'
+                transform={`rotate(-4 20 ${y + 9})`}
+                {...accent}
+              />
+              <rect
+                x='90'
+                y={y - 1}
+                width='16'
+                height='13'
+                fill='#f5f2e9'
+                transform={`rotate(4 98 ${y + 5})`}
+              />
+              <rect x='92' y={y + 1} width='12' height='9' {...photo} />
+            </g>
+          ))}
         </>
       )}
     </svg>

@@ -32,6 +32,7 @@ import {
   useSaveAppearance,
 } from './api'
 import { isHex, tooLightOnWhite } from './contrast'
+import { DesktopPreview } from './desktop-preview'
 import { StylePicker } from './style-picker'
 
 const FONTS: Font[] = ['system', 'serif', 'rounded']
@@ -295,7 +296,7 @@ function AppearanceForm({ initial }: { initial: Appearance }) {
               {FLAGS.filter((f) => featureOn[f] !== false).map((flag) => (
                 <div
                   key={flag}
-                  className='flex items-center justify-between gap-4'
+                  className='flex min-h-11 items-center justify-between gap-4 sm:min-h-0'
                 >
                   <Label htmlFor={flag}>{t(`appearance.flags.${flag}`)}</Label>
                   <Switch
@@ -424,12 +425,12 @@ function AppearanceForm({ initial }: { initial: Appearance }) {
             src={src}
             onLoad={() => setLoading(false)}
             className='relative size-full'
-            sandbox='allow-scripts allow-same-origin'
           />
         </div>
         <p className='mt-2 text-center text-xs text-muted-foreground'>
           {t('appearance.preview_hint')}
         </p>
+        <DesktopPreview src={src} />
       </div>
     </div>
   )

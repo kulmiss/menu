@@ -27,19 +27,12 @@ import { Route as AdminQrCodesRouteImport } from './routes/admin/qr-codes'
 import { Route as AdminSettingsRouteRouteImport } from './routes/admin/settings/route'
 import { Route as AdminTagsRouteImport } from './routes/admin/tags'
 import { Route as AdminTeamRouteImport } from './routes/admin/team'
-import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
-import { Route as AuthResetPasswordRouteImport } from './routes/auth/reset-password'
-import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
-import { Route as AuthSignUpRouteImport } from './routes/auth/sign-up'
-import { Route as AuthTwoFactorRouteImport } from './routes/auth/two-factor'
 import { Route as PlatformIndexRouteImport } from './routes/platform/index'
 import { Route as PlatformSectionRouteImport } from './routes/platform/$section'
 import { Route as AdminMenuIndexRouteImport } from './routes/admin/menu/index'
 import { Route as AdminSettingsIndexRouteImport } from './routes/admin/settings/index'
 import { Route as AdminSettingsBillingRouteImport } from './routes/admin/settings/billing'
 import { Route as AdminSettingsSecurityRouteImport } from './routes/admin/settings/security'
-import { Route as AuthGoogleFinishRouteImport } from './routes/auth/google/finish'
-import { Route as AuthInviteTokenRouteImport } from './routes/auth/invite/$token'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -131,31 +124,6 @@ const AdminTeamRoute = AdminTeamRouteImport.update({
   path: '/team',
   getParentRoute: () => AdminRouteRoute,
 } as any)
-const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
-  id: '/auth/forgot-password',
-  path: '/auth/forgot-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthResetPasswordRoute = AuthResetPasswordRouteImport.update({
-  id: '/auth/reset-password',
-  path: '/auth/reset-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthSignInRoute = AuthSignInRouteImport.update({
-  id: '/auth/sign-in',
-  path: '/auth/sign-in',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthSignUpRoute = AuthSignUpRouteImport.update({
-  id: '/auth/sign-up',
-  path: '/auth/sign-up',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthTwoFactorRoute = AuthTwoFactorRouteImport.update({
-  id: '/auth/two-factor',
-  path: '/auth/two-factor',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const PlatformIndexRoute = PlatformIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -186,16 +154,6 @@ const AdminSettingsSecurityRoute = AdminSettingsSecurityRouteImport.update({
   path: '/security',
   getParentRoute: () => AdminSettingsRouteRoute,
 } as any)
-const AuthGoogleFinishRoute = AuthGoogleFinishRouteImport.update({
-  id: '/auth/google/finish',
-  path: '/auth/google/finish',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthInviteTokenRoute = AuthInviteTokenRouteImport.update({
-  id: '/auth/invite/$token',
-  path: '/auth/invite/$token',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -215,18 +173,11 @@ export interface FileRoutesByFullPath {
   '/admin/qr-codes': typeof AdminQrCodesRoute
   '/admin/tags': typeof AdminTagsRoute
   '/admin/team': typeof AdminTeamRoute
-  '/auth/forgot-password': typeof AuthForgotPasswordRoute
-  '/auth/reset-password': typeof AuthResetPasswordRoute
-  '/auth/sign-in': typeof AuthSignInRoute
-  '/auth/sign-up': typeof AuthSignUpRoute
-  '/auth/two-factor': typeof AuthTwoFactorRoute
   '/platform/$section': typeof PlatformSectionRoute
   '/admin/': typeof AdminIndexRoute
   '/platform/': typeof PlatformIndexRoute
   '/admin/settings/billing': typeof AdminSettingsBillingRoute
   '/admin/settings/security': typeof AdminSettingsSecurityRoute
-  '/auth/google/finish': typeof AuthGoogleFinishRoute
-  '/auth/invite/$token': typeof AuthInviteTokenRoute
   '/admin/menu/': typeof AdminMenuIndexRoute
   '/admin/settings/': typeof AdminSettingsIndexRoute
 }
@@ -245,18 +196,11 @@ export interface FileRoutesByTo {
   '/admin/qr-codes': typeof AdminQrCodesRoute
   '/admin/tags': typeof AdminTagsRoute
   '/admin/team': typeof AdminTeamRoute
-  '/auth/forgot-password': typeof AuthForgotPasswordRoute
-  '/auth/reset-password': typeof AuthResetPasswordRoute
-  '/auth/sign-in': typeof AuthSignInRoute
-  '/auth/sign-up': typeof AuthSignUpRoute
-  '/auth/two-factor': typeof AuthTwoFactorRoute
   '/platform/$section': typeof PlatformSectionRoute
   '/admin': typeof AdminIndexRoute
   '/platform': typeof PlatformIndexRoute
   '/admin/settings/billing': typeof AdminSettingsBillingRoute
   '/admin/settings/security': typeof AdminSettingsSecurityRoute
-  '/auth/google/finish': typeof AuthGoogleFinishRoute
-  '/auth/invite/$token': typeof AuthInviteTokenRoute
   '/admin/menu': typeof AdminMenuIndexRoute
   '/admin/settings': typeof AdminSettingsIndexRoute
 }
@@ -279,18 +223,11 @@ export interface FileRoutesById {
   '/admin/qr-codes': typeof AdminQrCodesRoute
   '/admin/tags': typeof AdminTagsRoute
   '/admin/team': typeof AdminTeamRoute
-  '/auth/forgot-password': typeof AuthForgotPasswordRoute
-  '/auth/reset-password': typeof AuthResetPasswordRoute
-  '/auth/sign-in': typeof AuthSignInRoute
-  '/auth/sign-up': typeof AuthSignUpRoute
-  '/auth/two-factor': typeof AuthTwoFactorRoute
   '/platform/$section': typeof PlatformSectionRoute
   '/admin/': typeof AdminIndexRoute
   '/platform/': typeof PlatformIndexRoute
   '/admin/settings/billing': typeof AdminSettingsBillingRoute
   '/admin/settings/security': typeof AdminSettingsSecurityRoute
-  '/auth/google/finish': typeof AuthGoogleFinishRoute
-  '/auth/invite/$token': typeof AuthInviteTokenRoute
   '/admin/menu/': typeof AdminMenuIndexRoute
   '/admin/settings/': typeof AdminSettingsIndexRoute
 }
@@ -314,18 +251,11 @@ export interface FileRouteTypes {
     | '/admin/qr-codes'
     | '/admin/tags'
     | '/admin/team'
-    | '/auth/forgot-password'
-    | '/auth/reset-password'
-    | '/auth/sign-in'
-    | '/auth/sign-up'
-    | '/auth/two-factor'
     | '/platform/$section'
     | '/admin/'
     | '/platform/'
     | '/admin/settings/billing'
     | '/admin/settings/security'
-    | '/auth/google/finish'
-    | '/auth/invite/$token'
     | '/admin/menu/'
     | '/admin/settings/'
   fileRoutesByTo: FileRoutesByTo
@@ -344,18 +274,11 @@ export interface FileRouteTypes {
     | '/admin/qr-codes'
     | '/admin/tags'
     | '/admin/team'
-    | '/auth/forgot-password'
-    | '/auth/reset-password'
-    | '/auth/sign-in'
-    | '/auth/sign-up'
-    | '/auth/two-factor'
     | '/platform/$section'
     | '/admin'
     | '/platform'
     | '/admin/settings/billing'
     | '/admin/settings/security'
-    | '/auth/google/finish'
-    | '/auth/invite/$token'
     | '/admin/menu'
     | '/admin/settings'
   id:
@@ -377,18 +300,11 @@ export interface FileRouteTypes {
     | '/admin/qr-codes'
     | '/admin/tags'
     | '/admin/team'
-    | '/auth/forgot-password'
-    | '/auth/reset-password'
-    | '/auth/sign-in'
-    | '/auth/sign-up'
-    | '/auth/two-factor'
     | '/platform/$section'
     | '/admin/'
     | '/platform/'
     | '/admin/settings/billing'
     | '/admin/settings/security'
-    | '/auth/google/finish'
-    | '/auth/invite/$token'
     | '/admin/menu/'
     | '/admin/settings/'
   fileRoutesById: FileRoutesById
@@ -397,13 +313,6 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRouteRoute: typeof AdminRouteRouteWithChildren
   PlatformRouteRoute: typeof PlatformRouteRouteWithChildren
-  AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
-  AuthResetPasswordRoute: typeof AuthResetPasswordRoute
-  AuthSignInRoute: typeof AuthSignInRoute
-  AuthSignUpRoute: typeof AuthSignUpRoute
-  AuthTwoFactorRoute: typeof AuthTwoFactorRoute
-  AuthGoogleFinishRoute: typeof AuthGoogleFinishRoute
-  AuthInviteTokenRoute: typeof AuthInviteTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -534,41 +443,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminTeamRouteImport
       parentRoute: typeof AdminRouteRoute
     }
-    '/auth/forgot-password': {
-      id: '/auth/forgot-password'
-      path: '/auth/forgot-password'
-      fullPath: '/auth/forgot-password'
-      preLoaderRoute: typeof AuthForgotPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/reset-password': {
-      id: '/auth/reset-password'
-      path: '/auth/reset-password'
-      fullPath: '/auth/reset-password'
-      preLoaderRoute: typeof AuthResetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/sign-in': {
-      id: '/auth/sign-in'
-      path: '/auth/sign-in'
-      fullPath: '/auth/sign-in'
-      preLoaderRoute: typeof AuthSignInRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/sign-up': {
-      id: '/auth/sign-up'
-      path: '/auth/sign-up'
-      fullPath: '/auth/sign-up'
-      preLoaderRoute: typeof AuthSignUpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/two-factor': {
-      id: '/auth/two-factor'
-      path: '/auth/two-factor'
-      fullPath: '/auth/two-factor'
-      preLoaderRoute: typeof AuthTwoFactorRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/platform/': {
       id: '/platform/'
       path: '/'
@@ -610,20 +484,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/settings/security'
       preLoaderRoute: typeof AdminSettingsSecurityRouteImport
       parentRoute: typeof AdminSettingsRouteRoute
-    }
-    '/auth/google/finish': {
-      id: '/auth/google/finish'
-      path: '/auth/google/finish'
-      fullPath: '/auth/google/finish'
-      preLoaderRoute: typeof AuthGoogleFinishRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/invite/$token': {
-      id: '/auth/invite/$token'
-      path: '/auth/invite/$token'
-      fullPath: '/auth/invite/$token'
-      preLoaderRoute: typeof AuthInviteTokenRouteImport
-      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -703,13 +563,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRouteRoute: AdminRouteRouteWithChildren,
   PlatformRouteRoute: PlatformRouteRouteWithChildren,
-  AuthForgotPasswordRoute: AuthForgotPasswordRoute,
-  AuthResetPasswordRoute: AuthResetPasswordRoute,
-  AuthSignInRoute: AuthSignInRoute,
-  AuthSignUpRoute: AuthSignUpRoute,
-  AuthTwoFactorRoute: AuthTwoFactorRoute,
-  AuthGoogleFinishRoute: AuthGoogleFinishRoute,
-  AuthInviteTokenRoute: AuthInviteTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -27,6 +27,10 @@ class Features
         'style_grid' => true,
         'style_bistro' => true,
         'style_minimal' => true, // D · Minimal, text only (owner, 2026-11-12)
+        // E · Mesob, F · Night Lounge, G · Street Board (owner, 2026-11-18; Plus and up, off on Free: QUESTIONS #228).
+        'style_mesob' => true,
+        'style_lounge' => true,
+        'style_board' => true,
         'price_periods' => true, // time-based prices: happy hour, lunch (owner, 2026-11-14; off on Free)
         // "Sold out" marks (owner, 2026-11-14). Off: no toggles, list or widget, and the guest
         // menu never says "sold out"; existing marks are kept but ignored.

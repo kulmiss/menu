@@ -303,7 +303,7 @@ function LogoUpload() {
           const body = new FormData()
           body.append('image', file)
           try {
-            await api.post('/platform/settings/logo', body)
+            await api.post('/super/settings/logo', body)
             setDone(true)
           } catch {
             toast.error(t('platform.setup.save_error'))

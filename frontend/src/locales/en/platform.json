@@ -1,6 +1,5 @@
 {
   "title": "Platform",
-  "to_admin": "Restaurant admin",
   "saved": "Saved.",
   "on": "on",
   "off": "off",
@@ -113,6 +112,9 @@
     "style_grid": "Menu style B · Fresh grid",
     "style_bistro": "Menu style C · Quiet bistro",
     "style_minimal": "Menu style D · Minimal",
+    "style_mesob": "Menu style E · Mesob",
+    "style_lounge": "Menu style F · Night Lounge",
+    "style_board": "Menu style G · Street Board",
     "pdf_menu": "Printable PDF menu",
     "order_list": "\"My order\" list for guests",
     "price_periods": "Time-based prices (happy hour)",
@@ -201,7 +203,10 @@
       "editorial": "A · Warm editorial",
       "grid": "B · Fresh grid",
       "bistro": "C · Quiet bistro",
-      "minimal": "D · Minimal"
+      "minimal": "D · Minimal",
+      "mesob": "E · Mesob",
+      "lounge": "F · Night Lounge",
+      "board": "G · Street Board"
     }
   },
   "announcements": {
@@ -792,7 +797,10 @@
       "editorial": "Warm editorial",
       "grid": "Fresh grid",
       "bistro": "Quiet bistro",
-      "minimal": "Minimal"
+      "minimal": "Minimal",
+      "mesob": "Mesob",
+      "lounge": "Night Lounge",
+      "board": "Street Board"
     },
     "limits": "Plan limits",
     "limit": {
@@ -840,7 +848,10 @@
       "style_editorial": "Style: Warm editorial",
       "style_grid": "Style: Fresh grid",
       "style_bistro": "Style: Quiet bistro",
-      "style_minimal": "Style: Minimal"
+      "style_minimal": "Style: Minimal",
+      "style_mesob": "Style: Mesob",
+      "style_lounge": "Style: Night Lounge",
+      "style_board": "Style: Street Board"
     },
     "last_days": "Last {{count}} days"
   },

@@ -59,9 +59,12 @@ use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
 /*
-| JSON API for the admin SPA. Every create/change route requires an
-| Idempotency-Key header ('idempotent'). Restaurant routes live under
-| /api/v1/t/{tenant} and only resolve for members ('tenant').
+| JSON API for the admin SPA and the app. Every create/change route requires
+| an Idempotency-Key header ('idempotent'). Two separate areas (QUESTIONS
+| #215–#220): /api/v1/super (Super Admins: 'super', 'throttle:super',
+| 'super.audit') and /api/v1/restaurant/{tenant} (restaurant teams:
+| 'restaurant', 'throttle:restaurant', then 'tenant' resolves the restaurant
+| only for its members).
 */
 // Visit beacon from the guest page (no body worth replaying, so no
 // idempotency key). Counting arrives with Insights (Partition 10).
@@ -100,7 +103,7 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
         Route::get('config', 'config')->middleware('throttle:60,1');
         Route::get('slug', 'slug')->middleware('throttle:30,1');
         Route::post('/', 'store')->middleware(['guest', 'throttle:10,1']);
-        Route::post('email', 'changeEmail')->middleware(['auth:sanctum', 'throttle:6,1']);
+        Route::post('email', 'changeEmail')->middleware(['auth:sanctum', 'throttle:6,1,verify-mail']);
     });
 
     // "Continue with Google": the new owner's restaurant name (owner, 2026-11-17).
@@ -145,8 +148,8 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
         Route::post('me/sessions/logout-others', [SessionController::class, 'logoutOthers'])->middleware('throttle:6,1');
         Route::post('impersonation/stop', [AnnouncementController::class, 'stopImpersonating']);
 
-        // Super Admin (PLAN.md §7.3): Super Admins with two-factor sign-in only.
-        Route::prefix('platform')->middleware('platform')->group(function () {
+        // Super Admin (QUESTIONS #215–#220): Super Admins with two-factor sign-in, from an allowed address.
+        Route::prefix('super')->middleware(['super.ips', 'super', 'throttle:super', 'super.audit'])->group(function () {
             Route::get('dashboard', [PlatformController::class, 'dashboard']);
             // Super Admin guide and the help article editor (QUESTIONS #194).
             Route::get('help', [HelpController::class, 'platform']);
@@ -213,7 +216,7 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::post('backups', [BackupController::class, 'store'])->middleware('throttle:6,1');
             Route::put('backups/settings', [BackupController::class, 'settings']);
             Route::post('backups/{backup}/link', [BackupController::class, 'link'])->whereNumber('backup')->middleware('throttle:6,1');
-            Route::get('backups/{backup}/file', [BackupController::class, 'file'])->whereNumber('backup')->middleware('signed')->name('platform.backups.file');
+            Route::get('backups/{backup}/file', [BackupController::class, 'file'])->whereNumber('backup')->middleware('signed')->name('super.backups.file');
             Route::delete('backups/{backup}', [BackupController::class, 'destroy'])->whereNumber('backup');
             // Invoices (owner, 2026-11-13)
             Route::get('invoices', [InvoiceController::class, 'index']);
@@ -262,7 +265,7 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
         });
         Route::post('invitations/{token}/accept', [AcceptInvitationController::class, 'accept']);
 
-        Route::prefix('t/{tenant}')->middleware(['tenant', 'tenant.writable', 'owner.two_factor'])->group(function () {
+        Route::prefix('restaurant/{tenant}')->middleware(['restaurant', 'throttle:restaurant', 'tenant', 'tenant.writable', 'owner.two_factor'])->group(function () {
             Route::get('/', [TenantController::class, 'show']);
             Route::get('help', [HelpController::class, 'restaurant']);
 

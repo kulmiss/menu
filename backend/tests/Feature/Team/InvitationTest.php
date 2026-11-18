@@ -30,7 +30,7 @@ function sentInvitationToken(string $email): string
 
 function invite(User $by, int $tenantId, array $data): TestResponse
 {
-    return test()->actingAs($by)->postJson("/api/v1/t/{$tenantId}/invitations", $data, idem());
+    return test()->actingAs($by)->postJson("/api/v1/restaurant/{$tenantId}/invitations", $data, idem());
 }
 
 it('emails an invitation with a link and stores only the token hash', function () {
@@ -112,6 +112,6 @@ it('links the invitation email to the SPA invitation page', function () {
     $token = sentInvitationToken('link@example.com');
 
     Notification::assertSentOnDemand(InvitationNotification::class, function (InvitationNotification $n) use ($token) {
-        return $n->toMail(new stdClass)->actionUrl === url('/auth/invite/'.$token);
+        return $n->toMail(new stdClass)->actionUrl === url('/invite/'.$token);
     });
 });

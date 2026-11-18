@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\Role;
+use App\Models\PersonalAccessToken;
 use App\Models\User;
 use App\Notifications\SecurityNotice;
 use Illuminate\Support\Facades\Notification;
@@ -22,7 +23,7 @@ it('e-mails after a password change (web and app) and a reset', function () {
     ], idem())->assertOk();
     noticeSent($user, 'password_changed');
 
-    $token = $user->createToken('Phone', ['mobile'])->plainTextToken;
+    $token = $user->createToken('Phone', PersonalAccessToken::abilitiesFor($user))->plainTextToken;
     $this->app['auth']->forgetGuards();
     $this->withToken($token)->putJson('/api/v1/mobile/account/password', [
         'current_password' => 'another-long-secret', 'password' => 'third-long-secret-7', 'password_confirmation' => 'third-long-secret-7',
@@ -70,7 +71,7 @@ it('e-mails the device name (never an IP) for a new app sign-in, but not for "lo
 
     [$owner, $tenant] = member(Role::Owner);
     $admin = superAdmin();
-    $adminToken = $admin->createToken('Admin phone', ['mobile'])->plainTextToken;
+    $adminToken = $admin->createToken('Admin phone', PersonalAccessToken::abilitiesFor($admin))->plainTextToken;
     $this->app['auth']->forgetGuards();
     $this->withToken($adminToken)->postJson(p("restaurants/{$tenant->id}/impersonate-token"), [], idem())->assertOk();
     Notification::assertNotSentTo($owner, SecurityNotice::class);

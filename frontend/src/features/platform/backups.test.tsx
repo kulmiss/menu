@@ -21,7 +21,7 @@ describe('Backups', () => {
 
   it('warns while backups are not encrypted (SECURITY_REPORT.md H4)', async () => {
     fake = fakeApi({
-      'GET /platform/backups': {
+      'GET /super/backups': {
         data: {
           data: {
             backups: [],
@@ -56,7 +56,7 @@ describe('Backups', () => {
 
   it('lists backups, warns about problems and asks for the password before downloading', async () => {
     fake = fakeApi({
-      'GET /platform/backups': {
+      'GET /super/backups': {
         data: {
           data: {
             backups: [
@@ -102,10 +102,10 @@ describe('Backups', () => {
           },
         },
       },
-      'POST /platform/backups/3/link': invalid({
+      'POST /super/backups/3/link': invalid({
         password: 'The password or code is not correct.',
       }),
-      'POST /platform/backups': { status: 202, data: { data: {} } },
+      'POST /super/backups': { status: 202, data: { data: {} } },
     })
     const screen = await renderWithQuery(<BackupsPage />, { me: admin })
 
@@ -136,7 +136,7 @@ describe('Backups', () => {
     await expect
       .poll(() =>
         fake.calls.some(
-          (c) => c.method === 'POST' && c.url === '/platform/backups'
+          (c) => c.method === 'POST' && c.url === '/super/backups'
         )
       )
       .toBe(true)

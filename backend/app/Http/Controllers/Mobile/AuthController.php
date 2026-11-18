@@ -224,7 +224,8 @@ class AuthController extends Controller
     /** @param  array{name: string, platform: string, app_version: string|null}  $device */
     private function issue(User $user, array $device, bool $linked = false): JsonResponse
     {
-        $new = $user->createToken($device['name'], ['mobile'], now()->addDays(PersonalAccessToken::MAX_DAYS));
+        // Scoped to one area (QUESTIONS #220): a restaurant token never reaches /super, and the other way round.
+        $new = $user->createToken($device['name'], PersonalAccessToken::abilitiesFor($user), now()->addDays(PersonalAccessToken::MAX_DAYS));
         $new->accessToken->forceFill(['platform' => $device['platform'], 'app_version' => $device['app_version']])->save();
         // "Was this you?" for every new app sign-in, except a Super Admin's "log in as" (SECURITY_REPORT.md M4).
         $user->notify(new SecurityNotice('new_device', ['device' => (string) $device['name'], 'platform' => $device['platform'] === 'ios' ? 'iPhone / iPad' : 'Android']));

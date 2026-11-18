@@ -10,12 +10,12 @@ it('keeps reads working but blocks changes once the restaurant is read-only', fu
     $tenant = Tenant::factory()->expired(10)->create(); // past the 7-day grace
     [$owner] = member(Role::Owner, $tenant);
 
-    $this->actingAs($owner)->getJson("/api/v1/t/{$tenant->id}")
+    $this->actingAs($owner)->getJson("/api/v1/restaurant/{$tenant->id}")
         ->assertOk()
         ->assertJsonPath('data.subscription.state', 'read_only');
 
     $this->actingAs($owner)
-        ->postJson("/api/v1/t/{$tenant->id}/invitations", ['email' => 'a@example.com', 'role' => 'staff'], idem())
+        ->postJson("/api/v1/restaurant/{$tenant->id}/invitations", ['email' => 'a@example.com', 'role' => 'staff'], idem())
         ->assertStatus(402)
         ->assertJsonPath('code', 'subscription.read_only');
 });
@@ -25,6 +25,6 @@ it('still allows changes during the grace period', function () {
     [$owner] = member(Role::Owner, $tenant);
 
     $this->actingAs($owner)
-        ->postJson("/api/v1/t/{$tenant->id}/invitations", ['email' => 'a@example.com', 'role' => 'staff'], idem())
+        ->postJson("/api/v1/restaurant/{$tenant->id}/invitations", ['email' => 'a@example.com', 'role' => 'staff'], idem())
         ->assertCreated();
 });

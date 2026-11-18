@@ -21,12 +21,12 @@ describe('Messages', () => {
 
   it('writes an e-mail with a placeholder, counts recipients, previews, tests and sends', async () => {
     fake = fakeApi({
-      'GET /platform/campaigns': { data: { data: [] } },
-      'GET /platform/settings': { data: { data: { campaign_rate: 30 } } },
-      'GET /platform/plans': { data: { data: [] } },
-      'GET /platform/tags': { data: { data: [] } },
-      'POST /platform/campaigns/count': { data: { data: { count: 12 } } },
-      'POST /platform/campaigns/preview': {
+      'GET /super/campaigns': { data: { data: [] } },
+      'GET /super/settings': { data: { data: { campaign_rate: 30 } } },
+      'GET /super/plans': { data: { data: [] } },
+      'GET /super/tags': { data: { data: [] } },
+      'POST /super/campaigns/count': { data: { data: { count: 12 } } },
+      'POST /super/campaigns/preview': {
         data: {
           data: {
             subject: 'Hello Buna',
@@ -35,11 +35,11 @@ describe('Messages', () => {
           },
         },
       },
-      'POST /platform/campaigns/test': {
+      'POST /super/campaigns/test': {
         data: { data: { sent_to: 'me@example.com' } },
       },
-      'POST /platform/campaigns': { status: 201, data: { data: { id: 4 } } },
-      'GET /platform/campaigns/4': {
+      'POST /super/campaigns': { status: 201, data: { data: { id: 4 } } },
+      'GET /super/campaigns/4': {
         data: {
           data: {
             id: 4,
@@ -99,7 +99,7 @@ describe('Messages', () => {
     )
     await expect
       .poll(
-        () => fake.calls.find((c) => c.url === '/platform/campaigns/test')?.data
+        () => fake.calls.find((c) => c.url === '/super/campaigns/test')?.data
       )
       .toEqual({
         subject: 'Hello {restaurant_name}',
@@ -118,7 +118,7 @@ describe('Messages', () => {
     await expect
       .poll(() =>
         fake.calls.some(
-          (c) => c.method === 'POST' && c.url === '/platform/campaigns'
+          (c) => c.method === 'POST' && c.url === '/super/campaigns'
         )
       )
       .toBe(true)

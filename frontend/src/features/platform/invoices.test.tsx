@@ -38,10 +38,10 @@ describe('Invoices', () => {
 
   it('lists invoices with a PDF link and voids one with a reason', async () => {
     fake = fakeApi({
-      'GET /platform/invoices': { data: { data: [invoice] } },
-      'GET /platform/invoices?q=sahan': { data: { data: [invoice] } },
-      'GET /platform/plans': { data: { data: [] } },
-      'POST /platform/invoices/5/void': {
+      'GET /super/invoices': { data: { data: [invoice] } },
+      'GET /super/invoices?q=sahan': { data: { data: [invoice] } },
+      'GET /super/plans': { data: { data: [] } },
+      'POST /super/invoices/5/void': {
         data: { data: { void: { ...invoice, status: 'void' }, new: null } },
       },
     })
@@ -52,7 +52,7 @@ describe('Invoices', () => {
     })
     await expect
       .element(link)
-      .toHaveAttribute('href', '/api/v1/platform/invoices/5/pdf')
+      .toHaveAttribute('href', '/api/v1/super/invoices/5/pdf')
     await expect.element(screen.getByText('1,200 ETB')).toBeVisible()
     await userEvent.fill(
       screen.getByRole('searchbox', { name: 'Number, restaurant or e-mail' }),
@@ -61,7 +61,7 @@ describe('Invoices', () => {
     await expect
       .poll(() =>
         fake.calls.some((c) =>
-          c.url.startsWith('/platform/invoices?q=sahan&page=1')
+          c.url.startsWith('/super/invoices?q=sahan&page=1')
         )
       )
       .toBe(true)

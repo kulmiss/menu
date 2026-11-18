@@ -129,7 +129,7 @@ Guest menu pages don't use PHP at all (static copies), so they are fast either w
 - DNS record **proxied** (orange cloud); SSL/TLS mode **Full (strict)**.
 - Speed: Brotli **on**; **Rocket Loader off** and Auto Minify off (they rewrite the page's tiny inline script and slow it down).
 - Caching: keep Cloudflare's default (it does **not** cache HTML). Menu pages already revalidate cheaply (ETag), and edits must show at once. Static files under `/app/assets/`, `/menu-assets/` and `/media/` are sent with year-long cache headers and are cached by Cloudflare automatically.
-- If you add a "Cache Everything" rule, exclude `/api/*`, `/admin*`, `/platform*`, `/auth/*` and the menu pages — otherwise guests see old menus after edits.
+- If you add a "Cache Everything" rule, exclude `/api/*`, `/admin*`, `/signin*`, `/auth/*`, your Super Admin address (`/<SUPER_ADMIN_PATH>*`) and the menu pages — otherwise guests see old menus after edits.
 
 ## 7. E-mail (SMTP, SPF, DKIM, DMARC)
 
@@ -155,7 +155,18 @@ Super Admins are created on the server, not in the app. In `backend/`:
 php artisan tinker --execute="\$u = App\Models\User::create(['name' => 'Your Name', 'email' => 'you@example.com', 'password' => 'a-long-password']); \$u->forceFill(['is_super_admin' => true, 'email_verified_at' => now()])->save();"
 ```
 
-Use your own name, e-mail and a password of at least 10 characters. Then sign in at `https://menu.example.com/auth/sign-in` and open `https://menu.example.com/platform`. Until two-factor sign-in is on, the platform shows only **Set up two-factor**: scan the QR code with an authenticator app, enter the code and keep the recovery codes. After that the whole platform opens.
+Use your own name, e-mail and a password of at least 10 characters.
+
+**Your own address.** The Super Admin area has its own address and sign-in page, separate from the restaurants' (`/signin`, `/admin`), which never let a Super Admin in (QUESTIONS #215–#217). Choose it in `.env` before you sign in:
+
+```bash
+SUPER_ADMIN_PATH=office-7k2q   # letters, digits, - and _; hard to guess; never a menu address
+SUPER_ADMIN_IPS=               # optional: only these addresses, e.g. 203.0.113.7,198.51.100.0/24
+```
+
+Then `php artisan config:cache && php artisan route:cache`, and check with `php artisan super:access` (it prints the address and warns when it is still the default `super` or clashes with a menu). Locked out by the allow-list (your address changed)? On the server: `php artisan super:access --clear-ips`. Behind Cloudflare or a host proxy, set `TRUSTED_PROXIES=*` in `.env` first, or every visitor looks like the proxy's address.
+
+Then sign in at `https://menu.example.com/<SUPER_ADMIN_PATH>/sign-in`. Until two-factor sign-in is on, the area shows only **Set up two-factor**: scan the QR code with an authenticator app, enter the code and keep the recovery codes. After that the whole area opens.
 
 ## 9. Updating to a new version
 

@@ -1,10 +1,10 @@
-import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2, Send } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { applyFieldErrors } from '@/lib/api'
 import { toast } from '@/lib/toast'
+import { z } from '@/lib/zod'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -146,7 +146,7 @@ export function InviteDialog({
                 control={form.control}
                 name='can_edit_prices'
                 render={({ field }) => (
-                  <FormItem className='flex items-center justify-between gap-4'>
+                  <FormItem className='flex min-h-11 items-center justify-between gap-4 sm:min-h-0'>
                     <FormLabel>{t('team.can_edit_prices')}</FormLabel>
                     <FormControl>
                       <Switch

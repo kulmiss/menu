@@ -15,19 +15,38 @@ class PageTheme
         'system' => 'system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans",sans-serif',
         'serif' => '"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Noto Serif",serif',
         'rounded' => 'ui-rounded,"SF Pro Rounded","Hiragino Maru Gothic ProN",Quicksand,Nunito,system-ui,sans-serif',
+        // Street Board's headings: a tall sign-painter face where the phone has one, else the system font (no web fonts).
+        'board' => '"Arial Narrow","Roboto Condensed","Helvetica Neue Condensed","Avenir Next Condensed",Impact,system-ui,sans-serif',
     ];
 
     /**
      * Per style: the surfaces the brand colour is drawn on (the least
-     * contrasting one in light and in dark mode; must match style-*.css) and
-     * the heading font used while the restaurant keeps the default font.
+     * contrasting one in light and in dark mode; must match style-*.css), the
+     * heading font used while the restaurant keeps the default font, the
+     * banner's shape and text place, and the dish photos: their width on
+     * screen (`photo`, `lcp` for the first one), and how many load at once
+     * without / with a banner (`fold`, §15.2.4). `dark_only` styles have one
+     * palette for light and dark phones (light = dark surface).
      */
     public const STYLES = [
-        'editorial' => ['light' => '#f3ebe0', 'dark' => '#231c18', 'heading' => 'serif', 'banner' => [16, 9], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw'],
-        'grid' => ['light' => '#f5f7f6', 'dark' => '#18201d', 'heading' => 'system', 'banner' => [2, 1], 'text' => 'over', 'sizes' => '(min-width:44rem) 680px, calc(100vw - 1.5rem)'],
+        'editorial' => ['light' => '#f3ebe0', 'dark' => '#231c18', 'heading' => 'serif', 'banner' => [16, 9], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
+            'photo' => '(min-width:44rem) 672px, 100vw', 'lcp' => '(min-width:44rem) 672px, 44vw', 'fold' => [2, 0]],
+        'grid' => ['light' => '#f5f7f6', 'dark' => '#18201d', 'heading' => 'system', 'banner' => [2, 1], 'text' => 'over', 'sizes' => '(min-width:44rem) 680px, calc(100vw - 1.5rem)',
+            'photo' => '(min-width:40rem) 220px, 50vw', 'lcp' => '(min-width:40rem) 220px, 40vw', 'fold' => [4, 0]],
+        'bistro' => ['light' => '#faf8f5', 'dark' => '#161412', 'heading' => 'serif', 'banner' => [5, 2], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
+            'photo' => '104px', 'lcp' => '104px', 'fold' => [5, 0]],
         // D · Minimal: no dish photos at all, text list (owner, 2026-11-12).
-        'minimal' => ['light' => '#f5f5f4', 'dark' => '#1a1a19', 'heading' => 'system', 'banner' => [5, 2], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw'],
-        'bistro' => ['light' => '#faf8f5', 'dark' => '#161412', 'heading' => 'serif', 'banner' => [5, 2], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw'],
+        'minimal' => ['light' => '#f5f5f4', 'dark' => '#1a1a19', 'heading' => 'system', 'banner' => [5, 2], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
+            'photo' => '1px', 'lcp' => '1px', 'fold' => [0, 0]],
+        // E · Mesob: warm, woven bands, round "platter" photos (owner, 2026-11-18).
+        'mesob' => ['light' => '#f8f0e4', 'dark' => '#231a14', 'heading' => 'serif', 'banner' => [5, 2], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
+            'photo' => '76px', 'lcp' => '76px', 'fold' => [5, 0]],
+        // F · Night Lounge: always dark, a soft glow in the brand colour (owner, 2026-11-18).
+        'lounge' => ['light' => '#17131f', 'dark' => '#17131f', 'heading' => 'system', 'banner' => [2, 1], 'text' => 'over', 'sizes' => '(min-width:44rem) 704px, 100vw',
+            'photo' => '68px', 'lcp' => '68px', 'fold' => [6, 0], 'dark_only' => true],
+        // G · Street Board: a clean chalkboard, price tags (owner, 2026-11-18).
+        'board' => ['light' => '#253530', 'dark' => '#253530', 'heading' => 'board', 'banner' => [2, 1], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
+            'photo' => '72px', 'lcp' => '72px', 'fold' => [5, 0], 'dark_only' => true],
     ];
 
     public const BANNER_TEXT = ['over', 'under'];
@@ -47,11 +66,13 @@ class PageTheme
         // "Default" font keeps the style's own heading font; a chosen font is used everywhere.
         $heading = $a->font === 'system' ? self::FONTS[$surface['heading']] : $font;
 
+        $css = sprintf(':root{--a:%s;--af:%s;--ff:%s;--fh:%s}', $light, Contrast::textOn($light), $font, $heading);
+        if (! ($surface['dark_only'] ?? false)) {
+            $css .= sprintf('@media (prefers-color-scheme:dark){:root{--a:%s;--af:%s}}', $dark, Contrast::textOn($dark));
+        }
+
         return [
-            'css' => sprintf(
-                ':root{--a:%s;--af:%s;--ff:%s;--fh:%s}@media (prefers-color-scheme:dark){:root{--a:%s;--af:%s}}',
-                $light, Contrast::textOn($light), $font, $heading, $dark, Contrast::textOn($dark),
-            ),
+            'css' => $css,
             'theme_color' => $light,
             'style' => $style,
             'show_prices' => $a->show_prices,

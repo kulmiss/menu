@@ -54,6 +54,22 @@ export default defineConfig(
       ],
       // Prevent duplicate imports from the same module
       'no-duplicate-imports': 'error',
+      // zod only through @/lib/zod (it turns off zod's eval probe, which the CSP reports).
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'zod',
+              message: "Import { z } from '@/lib/zod' instead.",
+            },
+          ],
+        },
+      ],
     },
+  },
+  {
+    files: ['src/lib/zod.ts'],
+    rules: { 'no-restricted-imports': 'off' },
   }
 )

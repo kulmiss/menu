@@ -42,7 +42,7 @@ describe('PhotoField', () => {
 
   it('crops, uploads and reports the new photo', async () => {
     fake = fakeApi({
-      'POST /t/1/media': { status: 201, data: { data: media } },
+      'POST /restaurant/1/media': { status: 201, data: { data: media } },
     })
     const onChange = vi.fn()
     const screen = await renderWithQuery(
@@ -59,7 +59,7 @@ describe('PhotoField', () => {
     ;(use.element() as HTMLButtonElement).click()
 
     await vi.waitFor(() => expect(onChange).toHaveBeenCalledWith(media))
-    expect(fake.apiCalls()[0].url).toBe('/t/1/media')
+    expect(fake.apiCalls()[0].url).toBe('/restaurant/1/media')
   })
 
   it('removes the photo', async () => {

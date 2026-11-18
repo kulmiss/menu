@@ -46,8 +46,8 @@ function renderAs(
   extra: Parameters<typeof fakeApi>[0] = {}
 ) {
   fake = fakeApi({
-    'GET /t/1/members': { data: { data: MEMBERS } },
-    'GET /t/1/invitations': {
+    'GET /restaurant/1/members': { data: { data: MEMBERS } },
+    'GET /restaurant/1/invitations': {
       data: {
         data: [
           {
@@ -121,7 +121,7 @@ describe('TeamPage', () => {
 
   it('switches the price permission for staff', async () => {
     const screen = await renderAs('owner', 100, {
-      'PATCH /t/1/members/12': {
+      'PATCH /restaurant/1/members/12': {
         data: { data: { ...MEMBERS[2], can_edit_prices: true } },
       },
     })
@@ -139,7 +139,7 @@ describe('TeamPage', () => {
 
   it('removes a member after confirming', async () => {
     const screen = await renderAs('owner', 100, {
-      'DELETE /t/1/members/11': { status: 204 },
+      'DELETE /restaurant/1/members/11': { status: 204 },
     })
 
     await userEvent.click(
@@ -157,7 +157,7 @@ describe('TeamPage', () => {
   it('invites by email and shows field errors from the server', async () => {
     let attempt = 0
     const screen = await renderAs('owner', 100, {
-      'POST /t/1/invitations': () =>
+      'POST /restaurant/1/invitations': () =>
         ++attempt === 1
           ? invalid({ email: 'This person is already on your team.' })
           : {
@@ -215,7 +215,7 @@ describe('TeamPage', () => {
 
   it('lists pending invitations with a cancel button', async () => {
     const screen = await renderAs('owner', 100, {
-      'DELETE /t/1/invitations/5': { status: 204 },
+      'DELETE /restaurant/1/invitations/5': { status: 204 },
     })
 
     await userEvent.click(

@@ -10,7 +10,7 @@ public: true
 
 You can make a menu for free. You don't need a card.
 
-1. Open **{{site_url}}/auth/sign-up**.
+1. Open **{{site_url}}/signup**.
 2. Type your name, your **Restaurant name**, your e-mail and a password. Use at least 10 characters. Tap **Show** to check the password.
 3. Tick the box for the Terms and the Privacy Policy.
 4. Tap **Create my free menu**.

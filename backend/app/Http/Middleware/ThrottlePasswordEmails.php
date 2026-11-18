@@ -17,7 +17,7 @@ class ThrottlePasswordEmails
 
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->isMethod('post') && $request->is('api/v1/auth/forgot-password', 'api/v1/auth/reset-password')) {
+        if ($request->isMethod('post') && $request->is('api/v1/auth/forgot-password', 'api/v1/auth/reset-password', 'forgot-password', 'reset-password')) {
             return $this->throttle->handle($request, $next, 'password-email');
         }
 

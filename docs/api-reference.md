@@ -10,8 +10,8 @@ Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles insid
 
 | Method | Path | Who | Feature | Limit | Handler |
 |---|---|---|---|---|---|
-| POST | `auth/email/verification-notification` | signed in |  | 6 a minute | Fortify\EmailVerificationNotificationController@store |
-| GET | `auth/email/verify/{id}/{hash}` | signed in |  | 6 a minute | Fortify\VerifyEmailController@__invoke |
+| POST | `auth/email/verification-notification` | signed in |  | 6 a minute (shared: `verify-mail`) | Fortify\EmailVerificationNotificationController@store |
+| GET | `auth/email/verify/{id}/{hash}` | signed in |  | 6 a minute (shared: `verify-mail`) | Fortify\VerifyEmailController@__invoke |
 | POST | `auth/forgot-password` | signed out |  |  | Fortify\PasswordResetLinkController@store |
 | POST | `auth/google/finish` | signed out |  | 10 a minute | Auth\GoogleController@finish |
 | GET | `auth/google/pending` | anyone |  | 30 a minute | Auth\GoogleController@pending |
@@ -76,7 +76,7 @@ Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles insid
 |---|---|---|---|---|---|
 | POST | `signup` | signed out |  | 10 a minute | Auth\SignUpController@store |
 | GET | `signup/config` | anyone |  | 60 a minute | Auth\SignUpController@config |
-| POST | `signup/email` | signed in |  | 6 a minute | Auth\SignUpController@changeEmail |
+| POST | `signup/email` | signed in |  | 6 a minute (shared: `verify-mail`) | Auth\SignUpController@changeEmail |
 | GET | `signup/slug` | anyone |  | 30 a minute | Auth\SignUpController@slug |
 
 ## Team invitations
@@ -92,224 +92,224 @@ Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles insid
 |---|---|---|---|---|---|
 | POST | `impersonation/stop` | signed in |  |  | Api\AnnouncementController@stopImpersonating |
 
-## Restaurant (`t/{tenant}/…`)
+## Restaurant (`restaurant/{tenant}/…`)
 
 | Method | Path | Who | Feature | Limit | Handler |
 |---|---|---|---|---|---|
-| GET | `t/{tenant}` | restaurant team |  |  | Api\TenantController@show |
-| PATCH | `t/{tenant}/account/slug` | restaurant team |  |  | Api\AccountController@updateSlug |
-| GET | `t/{tenant}/activity` | restaurant team |  |  | Api\ActivityController |
-| GET | `t/{tenant}/addon-groups` | restaurant team |  |  | Api\Menu\AddonGroupController@index |
-| POST | `t/{tenant}/addon-groups` | restaurant team |  |  | Api\Menu\AddonGroupController@store |
-| POST | `t/{tenant}/addon-groups/reorder` | restaurant team |  |  | Api\Menu\AddonGroupController@reorder |
-| DELETE | `t/{tenant}/addon-groups/{group}` | restaurant team |  |  | Api\Menu\AddonGroupController@destroy |
-| PATCH | `t/{tenant}/addon-groups/{group}` | restaurant team |  |  | Api\Menu\AddonGroupController@update |
-| PATCH | `t/{tenant}/addon-options/{option}/sold-out` | restaurant team | `sold_out` |  | Api\Menu\AddonGroupController@optionSoldOut |
-| GET | `t/{tenant}/announcements` | restaurant team |  |  | Api\AnnouncementController@index |
-| POST | `t/{tenant}/announcements/{announcement}/read` | restaurant team |  |  | Api\AnnouncementController@read |
-| GET | `t/{tenant}/appearance` | restaurant team |  |  | Api\Restaurant\AppearanceController@show |
-| PUT | `t/{tenant}/appearance` | restaurant team |  |  | Api\Restaurant\AppearanceController@update |
-| GET | `t/{tenant}/appearance/preview` | restaurant team |  |  | Api\Restaurant\AppearanceController@preview |
-| GET | `t/{tenant}/billing` | restaurant team |  |  | Api\Restaurant\BillingController@show |
-| GET | `t/{tenant}/billing/invoices/{invoice}/pdf` | restaurant team |  | `exports` limiter | Api\Restaurant\BillingController@pdf |
-| GET | `t/{tenant}/branches` | restaurant team |  |  | Api\Restaurant\BranchController@index |
-| POST | `t/{tenant}/branches` | restaurant team | `branches` |  | Api\Restaurant\BranchController@store |
-| DELETE | `t/{tenant}/branches/{branch}` | restaurant team |  |  | Api\Restaurant\BranchController@destroy |
-| PATCH | `t/{tenant}/branches/{branch}` | restaurant team |  |  | Api\Restaurant\BranchController@update |
-| GET | `t/{tenant}/branches/{branch}/overrides` | restaurant team |  |  | Api\Restaurant\BranchController@overrides |
-| PUT | `t/{tenant}/branches/{branch}/overrides` | restaurant team |  |  | Api\Restaurant\BranchController@saveOverrides |
-| GET | `t/{tenant}/branches/{branch}/table-cards.pdf` | restaurant team |  | `exports` limiter | Api\Restaurant\QrCodeController@tableCards |
-| GET | `t/{tenant}/branches/{branch}/tables` | restaurant team |  |  | Api\Restaurant\BranchController@tables |
-| POST | `t/{tenant}/branches/{branch}/tables` | restaurant team |  |  | Api\Restaurant\BranchController@addTables |
-| POST | `t/{tenant}/categories` | restaurant team |  |  | Api\Menu\CategoryController@store |
-| POST | `t/{tenant}/categories/reorder` | restaurant team |  |  | Api\Menu\CategoryController@reorder |
-| DELETE | `t/{tenant}/categories/{category}` | restaurant team |  |  | Api\Menu\CategoryController@destroy |
-| PATCH | `t/{tenant}/categories/{category}` | restaurant team |  |  | Api\Menu\CategoryController@update |
-| POST | `t/{tenant}/categories/{category}/duplicate` | restaurant team |  |  | Api\Menu\CategoryController@duplicate |
-| GET | `t/{tenant}/closures` | restaurant team |  |  | Api\Restaurant\InfoController@closures |
-| POST | `t/{tenant}/closures` | restaurant team |  |  | Api\Restaurant\InfoController@addClosure |
-| DELETE | `t/{tenant}/closures/{closure}` | restaurant team |  |  | Api\Restaurant\InfoController@deleteClosure |
-| GET | `t/{tenant}/dashboard` | restaurant team |  |  | Api\Restaurant\InsightsController@dashboard |
-| GET | `t/{tenant}/export` | restaurant team | `import_export` | `exports` limiter | Api\Menu\ImportController@export |
-| GET | `t/{tenant}/help` | restaurant team |  |  | Api\HelpController@restaurant |
-| GET | `t/{tenant}/hours` | restaurant team |  |  | Api\Restaurant\InfoController@hours |
-| PUT | `t/{tenant}/hours` | restaurant team |  |  | Api\Restaurant\InfoController@saveHours |
-| POST | `t/{tenant}/import/commit` | restaurant team | `import_export` |  | Api\Menu\ImportController@commit |
-| POST | `t/{tenant}/import/preview` | restaurant team | `import_export` | 20 a minute | Api\Menu\ImportController@preview |
-| GET | `t/{tenant}/import/template` | restaurant team | `import_export` |  | Api\Menu\ImportController@template |
-| GET | `t/{tenant}/insights` | restaurant team | `insights` |  | Api\Restaurant\InsightsController@index |
-| GET | `t/{tenant}/insights/export.csv` | restaurant team | `insights` | `exports` limiter | Api\Restaurant\InsightsExportController@csv |
-| GET | `t/{tenant}/insights/report.pdf` | restaurant team | `insights` | `exports` limiter | Api\Restaurant\InsightsExportController@pdf |
-| GET | `t/{tenant}/insights/settings` | restaurant team | `insights` |  | Api\Restaurant\InsightsExportController@settings |
-| PUT | `t/{tenant}/insights/settings` | restaurant team | `insights` |  | Api\Restaurant\InsightsExportController@updateSettings |
-| GET | `t/{tenant}/invitations` | restaurant team |  |  | Api\InvitationController@index |
-| POST | `t/{tenant}/invitations` | restaurant team |  |  | Api\InvitationController@store |
-| DELETE | `t/{tenant}/invitations/{invitation}` | restaurant team |  |  | Api\InvitationController@destroy |
-| GET | `t/{tenant}/items` | restaurant team |  |  | Api\Menu\ItemController@index |
-| POST | `t/{tenant}/items` | restaurant team |  |  | Api\Menu\ItemController@store |
-| POST | `t/{tenant}/items/bulk` | restaurant team |  |  | Api\Menu\ItemController@bulk |
-| POST | `t/{tenant}/items/bulk-price` | restaurant team |  |  | Api\Menu\ItemController@bulkPrice |
-| POST | `t/{tenant}/items/reorder` | restaurant team |  |  | Api\Menu\ItemController@reorder |
-| DELETE | `t/{tenant}/items/{item}` | restaurant team |  |  | Api\Menu\ItemController@destroy |
-| GET | `t/{tenant}/items/{item}` | restaurant team |  |  | Api\Menu\ItemController@show |
-| PATCH | `t/{tenant}/items/{item}` | restaurant team |  |  | Api\Menu\ItemController@update |
-| POST | `t/{tenant}/items/{item}/duplicate` | restaurant team |  |  | Api\Menu\ItemController@duplicate |
-| PATCH | `t/{tenant}/items/{item}/price` | restaurant team |  |  | Api\Menu\ItemController@price |
-| PATCH | `t/{tenant}/items/{item}/sold-out` | restaurant team | `sold_out` |  | Api\Menu\ItemController@soldOut |
-| POST | `t/{tenant}/media` | restaurant team |  | 30 a minute | Api\Menu\MediaController@store |
-| DELETE | `t/{tenant}/media/{media}` | restaurant team |  |  | Api\Menu\MediaController@destroy |
-| GET | `t/{tenant}/members` | restaurant team |  |  | Api\TeamController@index |
-| DELETE | `t/{tenant}/members/{member}` | restaurant team |  |  | Api\TeamController@destroy |
-| PATCH | `t/{tenant}/members/{member}` | restaurant team |  |  | Api\TeamController@update |
-| GET | `t/{tenant}/menu-pdf` | restaurant team | `pdf_menu` | 20 a minute | Api\Restaurant\PdfMenuController@download |
-| GET | `t/{tenant}/menus` | restaurant team |  |  | Api\Menu\MenuController@index |
-| POST | `t/{tenant}/menus` | restaurant team |  |  | Api\Menu\MenuController@store |
-| POST | `t/{tenant}/menus/reorder` | restaurant team |  |  | Api\Menu\MenuController@reorder |
-| DELETE | `t/{tenant}/menus/{menu}` | restaurant team |  |  | Api\Menu\MenuController@destroy |
-| GET | `t/{tenant}/menus/{menu}` | restaurant team |  |  | Api\Menu\MenuController@show |
-| PATCH | `t/{tenant}/menus/{menu}` | restaurant team |  |  | Api\Menu\MenuController@update |
-| PUT | `t/{tenant}/menus/{menu}/branches` | restaurant team |  |  | Api\Restaurant\BranchController@menuBranches |
-| POST | `t/{tenant}/menus/{menu}/duplicate` | restaurant team |  |  | Api\Menu\MenuController@duplicate |
-| PUT | `t/{tenant}/menus/{menu}/schedules` | restaurant team |  |  | Api\Menu\MenuController@schedules |
-| GET | `t/{tenant}/menus/{menu}/tree` | restaurant team |  |  | Api\Menu\MenuController@tree |
-| GET | `t/{tenant}/price-periods` | restaurant team | `price_periods` |  | Api\Restaurant\PricePeriodController@index |
-| POST | `t/{tenant}/price-periods` | restaurant team | `price_periods` |  | Api\Restaurant\PricePeriodController@store |
-| GET | `t/{tenant}/price-periods/preview` | restaurant team | `price_periods` |  | Api\Restaurant\PricePeriodController@preview |
-| DELETE | `t/{tenant}/price-periods/{period}` | restaurant team | `price_periods` |  | Api\Restaurant\PricePeriodController@destroy |
-| PUT | `t/{tenant}/price-periods/{period}` | restaurant team | `price_periods` |  | Api\Restaurant\PricePeriodController@update |
-| GET | `t/{tenant}/print-materials` | restaurant team | `print_materials` |  | Api\Restaurant\QrCodeController@printInfo |
-| GET | `t/{tenant}/print-materials.pdf` | restaurant team | `print_materials` | `exports` limiter | Api\Restaurant\QrCodeController@printMaterials |
-| GET | `t/{tenant}/profile` | restaurant team |  |  | Api\Restaurant\InfoController@profile |
-| PUT | `t/{tenant}/profile` | restaurant team |  |  | Api\Restaurant\InfoController@saveProfile |
-| GET | `t/{tenant}/promotions` | restaurant team |  |  | Api\Restaurant\PromotionController@index |
-| POST | `t/{tenant}/promotions` | restaurant team | `promotions` |  | Api\Restaurant\PromotionController@store |
-| POST | `t/{tenant}/promotions/reorder` | restaurant team | `promotions` |  | Api\Restaurant\PromotionController@reorder |
-| DELETE | `t/{tenant}/promotions/{promotion}` | restaurant team |  |  | Api\Restaurant\PromotionController@destroy |
-| PATCH | `t/{tenant}/promotions/{promotion}` | restaurant team | `promotions` |  | Api\Restaurant\PromotionController@update |
-| GET | `t/{tenant}/qr-codes` | restaurant team |  |  | Api\Restaurant\QrCodeController@index |
-| POST | `t/{tenant}/qr-codes` | restaurant team |  |  | Api\Restaurant\QrCodeController@store |
-| DELETE | `t/{tenant}/qr-codes/{qr}` | restaurant team |  |  | Api\Restaurant\QrCodeController@destroy |
-| PATCH | `t/{tenant}/qr-codes/{qr}` | restaurant team |  |  | Api\Restaurant\QrCodeController@update |
-| GET | `t/{tenant}/qr-codes/{qr}.{format}` | restaurant team |  |  | Api\Restaurant\QrCodeController@download |
-| DELETE | `t/{tenant}/tables/{table}` | restaurant team |  |  | Api\Restaurant\BranchController@deleteTable |
-| GET | `t/{tenant}/tags` | restaurant team |  |  | Api\Menu\TagController@index |
-| POST | `t/{tenant}/tags` | restaurant team |  |  | Api\Menu\TagController@store |
-| DELETE | `t/{tenant}/tags/{tag}` | restaurant team |  |  | Api\Menu\TagController@destroy |
-| PATCH | `t/{tenant}/tags/{tag}` | restaurant team |  |  | Api\Menu\TagController@update |
-| GET | `t/{tenant}/widgets/missing-photos` | restaurant team |  |  | Api\Restaurant\DashboardWidgetController@missingPhotos |
-| GET | `t/{tenant}/widgets/orders` | restaurant team |  |  | Api\Restaurant\DashboardWidgetController@orders |
-| GET | `t/{tenant}/widgets/plan` | restaurant team |  |  | Api\Restaurant\DashboardWidgetController@plan |
-| GET | `t/{tenant}/widgets/setup` | restaurant team |  |  | Api\Restaurant\DashboardWidgetController@setup |
-| POST | `t/{tenant}/widgets/setup/hide` | restaurant team |  |  | Api\Restaurant\DashboardWidgetController@hideSetup |
-| GET | `t/{tenant}/widgets/trend` | restaurant team |  |  | Api\Restaurant\DashboardWidgetController@trend |
+| GET | `restaurant/{tenant}` | restaurant team |  | `restaurant` limiter | Api\TenantController@show |
+| PATCH | `restaurant/{tenant}/account/slug` | restaurant team |  | `restaurant` limiter | Api\AccountController@updateSlug |
+| GET | `restaurant/{tenant}/activity` | restaurant team |  | `restaurant` limiter | Api\ActivityController |
+| GET | `restaurant/{tenant}/addon-groups` | restaurant team |  | `restaurant` limiter | Api\Menu\AddonGroupController@index |
+| POST | `restaurant/{tenant}/addon-groups` | restaurant team |  | `restaurant` limiter | Api\Menu\AddonGroupController@store |
+| POST | `restaurant/{tenant}/addon-groups/reorder` | restaurant team |  | `restaurant` limiter | Api\Menu\AddonGroupController@reorder |
+| DELETE | `restaurant/{tenant}/addon-groups/{group}` | restaurant team |  | `restaurant` limiter | Api\Menu\AddonGroupController@destroy |
+| PATCH | `restaurant/{tenant}/addon-groups/{group}` | restaurant team |  | `restaurant` limiter | Api\Menu\AddonGroupController@update |
+| PATCH | `restaurant/{tenant}/addon-options/{option}/sold-out` | restaurant team | `sold_out` | `restaurant` limiter | Api\Menu\AddonGroupController@optionSoldOut |
+| GET | `restaurant/{tenant}/announcements` | restaurant team |  | `restaurant` limiter | Api\AnnouncementController@index |
+| POST | `restaurant/{tenant}/announcements/{announcement}/read` | restaurant team |  | `restaurant` limiter | Api\AnnouncementController@read |
+| GET | `restaurant/{tenant}/appearance` | restaurant team |  | `restaurant` limiter | Api\Restaurant\AppearanceController@show |
+| PUT | `restaurant/{tenant}/appearance` | restaurant team |  | `restaurant` limiter | Api\Restaurant\AppearanceController@update |
+| GET | `restaurant/{tenant}/appearance/preview` | restaurant team |  | `restaurant` limiter | Api\Restaurant\AppearanceController@preview |
+| GET | `restaurant/{tenant}/billing` | restaurant team |  | `restaurant` limiter | Api\Restaurant\BillingController@show |
+| GET | `restaurant/{tenant}/billing/invoices/{invoice}/pdf` | restaurant team |  | `restaurant, exports` limiter | Api\Restaurant\BillingController@pdf |
+| GET | `restaurant/{tenant}/branches` | restaurant team |  | `restaurant` limiter | Api\Restaurant\BranchController@index |
+| POST | `restaurant/{tenant}/branches` | restaurant team | `branches` | `restaurant` limiter | Api\Restaurant\BranchController@store |
+| DELETE | `restaurant/{tenant}/branches/{branch}` | restaurant team |  | `restaurant` limiter | Api\Restaurant\BranchController@destroy |
+| PATCH | `restaurant/{tenant}/branches/{branch}` | restaurant team |  | `restaurant` limiter | Api\Restaurant\BranchController@update |
+| GET | `restaurant/{tenant}/branches/{branch}/overrides` | restaurant team |  | `restaurant` limiter | Api\Restaurant\BranchController@overrides |
+| PUT | `restaurant/{tenant}/branches/{branch}/overrides` | restaurant team |  | `restaurant` limiter | Api\Restaurant\BranchController@saveOverrides |
+| GET | `restaurant/{tenant}/branches/{branch}/table-cards.pdf` | restaurant team |  | `restaurant, exports` limiter | Api\Restaurant\QrCodeController@tableCards |
+| GET | `restaurant/{tenant}/branches/{branch}/tables` | restaurant team |  | `restaurant` limiter | Api\Restaurant\BranchController@tables |
+| POST | `restaurant/{tenant}/branches/{branch}/tables` | restaurant team |  | `restaurant` limiter | Api\Restaurant\BranchController@addTables |
+| POST | `restaurant/{tenant}/categories` | restaurant team |  | `restaurant` limiter | Api\Menu\CategoryController@store |
+| POST | `restaurant/{tenant}/categories/reorder` | restaurant team |  | `restaurant` limiter | Api\Menu\CategoryController@reorder |
+| DELETE | `restaurant/{tenant}/categories/{category}` | restaurant team |  | `restaurant` limiter | Api\Menu\CategoryController@destroy |
+| PATCH | `restaurant/{tenant}/categories/{category}` | restaurant team |  | `restaurant` limiter | Api\Menu\CategoryController@update |
+| POST | `restaurant/{tenant}/categories/{category}/duplicate` | restaurant team |  | `restaurant` limiter | Api\Menu\CategoryController@duplicate |
+| GET | `restaurant/{tenant}/closures` | restaurant team |  | `restaurant` limiter | Api\Restaurant\InfoController@closures |
+| POST | `restaurant/{tenant}/closures` | restaurant team |  | `restaurant` limiter | Api\Restaurant\InfoController@addClosure |
+| DELETE | `restaurant/{tenant}/closures/{closure}` | restaurant team |  | `restaurant` limiter | Api\Restaurant\InfoController@deleteClosure |
+| GET | `restaurant/{tenant}/dashboard` | restaurant team |  | `restaurant` limiter | Api\Restaurant\InsightsController@dashboard |
+| GET | `restaurant/{tenant}/export` | restaurant team | `import_export` | `restaurant, exports` limiter | Api\Menu\ImportController@export |
+| GET | `restaurant/{tenant}/help` | restaurant team |  | `restaurant` limiter | Api\HelpController@restaurant |
+| GET | `restaurant/{tenant}/hours` | restaurant team |  | `restaurant` limiter | Api\Restaurant\InfoController@hours |
+| PUT | `restaurant/{tenant}/hours` | restaurant team |  | `restaurant` limiter | Api\Restaurant\InfoController@saveHours |
+| POST | `restaurant/{tenant}/import/commit` | restaurant team | `import_export` | `restaurant` limiter | Api\Menu\ImportController@commit |
+| POST | `restaurant/{tenant}/import/preview` | restaurant team | `import_export` | `restaurant, 20,1` limiter | Api\Menu\ImportController@preview |
+| GET | `restaurant/{tenant}/import/template` | restaurant team | `import_export` | `restaurant` limiter | Api\Menu\ImportController@template |
+| GET | `restaurant/{tenant}/insights` | restaurant team | `insights` | `restaurant` limiter | Api\Restaurant\InsightsController@index |
+| GET | `restaurant/{tenant}/insights/export.csv` | restaurant team | `insights` | `restaurant, exports` limiter | Api\Restaurant\InsightsExportController@csv |
+| GET | `restaurant/{tenant}/insights/report.pdf` | restaurant team | `insights` | `restaurant, exports` limiter | Api\Restaurant\InsightsExportController@pdf |
+| GET | `restaurant/{tenant}/insights/settings` | restaurant team | `insights` | `restaurant` limiter | Api\Restaurant\InsightsExportController@settings |
+| PUT | `restaurant/{tenant}/insights/settings` | restaurant team | `insights` | `restaurant` limiter | Api\Restaurant\InsightsExportController@updateSettings |
+| GET | `restaurant/{tenant}/invitations` | restaurant team |  | `restaurant` limiter | Api\InvitationController@index |
+| POST | `restaurant/{tenant}/invitations` | restaurant team |  | `restaurant` limiter | Api\InvitationController@store |
+| DELETE | `restaurant/{tenant}/invitations/{invitation}` | restaurant team |  | `restaurant` limiter | Api\InvitationController@destroy |
+| GET | `restaurant/{tenant}/items` | restaurant team |  | `restaurant` limiter | Api\Menu\ItemController@index |
+| POST | `restaurant/{tenant}/items` | restaurant team |  | `restaurant` limiter | Api\Menu\ItemController@store |
+| POST | `restaurant/{tenant}/items/bulk` | restaurant team |  | `restaurant` limiter | Api\Menu\ItemController@bulk |
+| POST | `restaurant/{tenant}/items/bulk-price` | restaurant team |  | `restaurant` limiter | Api\Menu\ItemController@bulkPrice |
+| POST | `restaurant/{tenant}/items/reorder` | restaurant team |  | `restaurant` limiter | Api\Menu\ItemController@reorder |
+| DELETE | `restaurant/{tenant}/items/{item}` | restaurant team |  | `restaurant` limiter | Api\Menu\ItemController@destroy |
+| GET | `restaurant/{tenant}/items/{item}` | restaurant team |  | `restaurant` limiter | Api\Menu\ItemController@show |
+| PATCH | `restaurant/{tenant}/items/{item}` | restaurant team |  | `restaurant` limiter | Api\Menu\ItemController@update |
+| POST | `restaurant/{tenant}/items/{item}/duplicate` | restaurant team |  | `restaurant` limiter | Api\Menu\ItemController@duplicate |
+| PATCH | `restaurant/{tenant}/items/{item}/price` | restaurant team |  | `restaurant` limiter | Api\Menu\ItemController@price |
+| PATCH | `restaurant/{tenant}/items/{item}/sold-out` | restaurant team | `sold_out` | `restaurant` limiter | Api\Menu\ItemController@soldOut |
+| POST | `restaurant/{tenant}/media` | restaurant team |  | `restaurant, 30,1` limiter | Api\Menu\MediaController@store |
+| DELETE | `restaurant/{tenant}/media/{media}` | restaurant team |  | `restaurant` limiter | Api\Menu\MediaController@destroy |
+| GET | `restaurant/{tenant}/members` | restaurant team |  | `restaurant` limiter | Api\TeamController@index |
+| DELETE | `restaurant/{tenant}/members/{member}` | restaurant team |  | `restaurant` limiter | Api\TeamController@destroy |
+| PATCH | `restaurant/{tenant}/members/{member}` | restaurant team |  | `restaurant` limiter | Api\TeamController@update |
+| GET | `restaurant/{tenant}/menu-pdf` | restaurant team | `pdf_menu` | `restaurant, 20,1` limiter | Api\Restaurant\PdfMenuController@download |
+| GET | `restaurant/{tenant}/menus` | restaurant team |  | `restaurant` limiter | Api\Menu\MenuController@index |
+| POST | `restaurant/{tenant}/menus` | restaurant team |  | `restaurant` limiter | Api\Menu\MenuController@store |
+| POST | `restaurant/{tenant}/menus/reorder` | restaurant team |  | `restaurant` limiter | Api\Menu\MenuController@reorder |
+| DELETE | `restaurant/{tenant}/menus/{menu}` | restaurant team |  | `restaurant` limiter | Api\Menu\MenuController@destroy |
+| GET | `restaurant/{tenant}/menus/{menu}` | restaurant team |  | `restaurant` limiter | Api\Menu\MenuController@show |
+| PATCH | `restaurant/{tenant}/menus/{menu}` | restaurant team |  | `restaurant` limiter | Api\Menu\MenuController@update |
+| PUT | `restaurant/{tenant}/menus/{menu}/branches` | restaurant team |  | `restaurant` limiter | Api\Restaurant\BranchController@menuBranches |
+| POST | `restaurant/{tenant}/menus/{menu}/duplicate` | restaurant team |  | `restaurant` limiter | Api\Menu\MenuController@duplicate |
+| PUT | `restaurant/{tenant}/menus/{menu}/schedules` | restaurant team |  | `restaurant` limiter | Api\Menu\MenuController@schedules |
+| GET | `restaurant/{tenant}/menus/{menu}/tree` | restaurant team |  | `restaurant` limiter | Api\Menu\MenuController@tree |
+| GET | `restaurant/{tenant}/price-periods` | restaurant team | `price_periods` | `restaurant` limiter | Api\Restaurant\PricePeriodController@index |
+| POST | `restaurant/{tenant}/price-periods` | restaurant team | `price_periods` | `restaurant` limiter | Api\Restaurant\PricePeriodController@store |
+| GET | `restaurant/{tenant}/price-periods/preview` | restaurant team | `price_periods` | `restaurant` limiter | Api\Restaurant\PricePeriodController@preview |
+| DELETE | `restaurant/{tenant}/price-periods/{period}` | restaurant team | `price_periods` | `restaurant` limiter | Api\Restaurant\PricePeriodController@destroy |
+| PUT | `restaurant/{tenant}/price-periods/{period}` | restaurant team | `price_periods` | `restaurant` limiter | Api\Restaurant\PricePeriodController@update |
+| GET | `restaurant/{tenant}/print-materials` | restaurant team | `print_materials` | `restaurant` limiter | Api\Restaurant\QrCodeController@printInfo |
+| GET | `restaurant/{tenant}/print-materials.pdf` | restaurant team | `print_materials` | `restaurant, exports` limiter | Api\Restaurant\QrCodeController@printMaterials |
+| GET | `restaurant/{tenant}/profile` | restaurant team |  | `restaurant` limiter | Api\Restaurant\InfoController@profile |
+| PUT | `restaurant/{tenant}/profile` | restaurant team |  | `restaurant` limiter | Api\Restaurant\InfoController@saveProfile |
+| GET | `restaurant/{tenant}/promotions` | restaurant team |  | `restaurant` limiter | Api\Restaurant\PromotionController@index |
+| POST | `restaurant/{tenant}/promotions` | restaurant team | `promotions` | `restaurant` limiter | Api\Restaurant\PromotionController@store |
+| POST | `restaurant/{tenant}/promotions/reorder` | restaurant team | `promotions` | `restaurant` limiter | Api\Restaurant\PromotionController@reorder |
+| DELETE | `restaurant/{tenant}/promotions/{promotion}` | restaurant team |  | `restaurant` limiter | Api\Restaurant\PromotionController@destroy |
+| PATCH | `restaurant/{tenant}/promotions/{promotion}` | restaurant team | `promotions` | `restaurant` limiter | Api\Restaurant\PromotionController@update |
+| GET | `restaurant/{tenant}/qr-codes` | restaurant team |  | `restaurant` limiter | Api\Restaurant\QrCodeController@index |
+| POST | `restaurant/{tenant}/qr-codes` | restaurant team |  | `restaurant` limiter | Api\Restaurant\QrCodeController@store |
+| DELETE | `restaurant/{tenant}/qr-codes/{qr}` | restaurant team |  | `restaurant` limiter | Api\Restaurant\QrCodeController@destroy |
+| PATCH | `restaurant/{tenant}/qr-codes/{qr}` | restaurant team |  | `restaurant` limiter | Api\Restaurant\QrCodeController@update |
+| GET | `restaurant/{tenant}/qr-codes/{qr}.{format}` | restaurant team |  | `restaurant` limiter | Api\Restaurant\QrCodeController@download |
+| DELETE | `restaurant/{tenant}/tables/{table}` | restaurant team |  | `restaurant` limiter | Api\Restaurant\BranchController@deleteTable |
+| GET | `restaurant/{tenant}/tags` | restaurant team |  | `restaurant` limiter | Api\Menu\TagController@index |
+| POST | `restaurant/{tenant}/tags` | restaurant team |  | `restaurant` limiter | Api\Menu\TagController@store |
+| DELETE | `restaurant/{tenant}/tags/{tag}` | restaurant team |  | `restaurant` limiter | Api\Menu\TagController@destroy |
+| PATCH | `restaurant/{tenant}/tags/{tag}` | restaurant team |  | `restaurant` limiter | Api\Menu\TagController@update |
+| GET | `restaurant/{tenant}/widgets/missing-photos` | restaurant team |  | `restaurant` limiter | Api\Restaurant\DashboardWidgetController@missingPhotos |
+| GET | `restaurant/{tenant}/widgets/orders` | restaurant team |  | `restaurant` limiter | Api\Restaurant\DashboardWidgetController@orders |
+| GET | `restaurant/{tenant}/widgets/plan` | restaurant team |  | `restaurant` limiter | Api\Restaurant\DashboardWidgetController@plan |
+| GET | `restaurant/{tenant}/widgets/setup` | restaurant team |  | `restaurant` limiter | Api\Restaurant\DashboardWidgetController@setup |
+| POST | `restaurant/{tenant}/widgets/setup/hide` | restaurant team |  | `restaurant` limiter | Api\Restaurant\DashboardWidgetController@hideSetup |
+| GET | `restaurant/{tenant}/widgets/trend` | restaurant team |  | `restaurant` limiter | Api\Restaurant\DashboardWidgetController@trend |
 
-## Super Admin (`platform/…`)
+## Super Admin (`super/…`)
 
 | Method | Path | Who | Feature | Limit | Handler |
 |---|---|---|---|---|---|
-| GET | `platform/activity` | Super Admin |  |  | Platform\PlatformController@activity |
-| GET | `platform/announcements` | Super Admin |  |  | Platform\PlatformController@announcements |
-| POST | `platform/announcements` | Super Admin |  |  | Platform\PlatformController@saveAnnouncement |
-| DELETE | `platform/announcements/{announcement}` | Super Admin |  |  | Platform\PlatformController@deleteAnnouncement |
-| PATCH | `platform/announcements/{announcement}` | Super Admin |  |  | Platform\PlatformController@saveAnnouncement |
-| GET | `platform/backups` | Super Admin |  |  | Platform\BackupController@index |
-| POST | `platform/backups` | Super Admin |  | 6 a minute | Platform\BackupController@store |
-| PUT | `platform/backups/settings` | Super Admin |  |  | Platform\BackupController@settings |
-| DELETE | `platform/backups/{backup}` | Super Admin |  |  | Platform\BackupController@destroy |
-| GET | `platform/backups/{backup}/file` | Super Admin |  |  | Platform\BackupController@file |
-| POST | `platform/backups/{backup}/link` | Super Admin |  | 6 a minute | Platform\BackupController@link |
-| GET | `platform/campaigns` | Super Admin |  |  | Platform\CampaignController@index |
-| POST | `platform/campaigns` | Super Admin |  |  | Platform\CampaignController@store |
-| POST | `platform/campaigns/count` | Super Admin |  |  | Platform\CampaignController@count |
-| POST | `platform/campaigns/preview` | Super Admin |  |  | Platform\CampaignController@preview |
-| PUT | `platform/campaigns/rate` | Super Admin |  |  | Platform\CampaignController@rate |
-| POST | `platform/campaigns/test` | Super Admin |  | 10 a minute | Platform\CampaignController@test |
-| GET | `platform/campaigns/{campaign}` | Super Admin |  |  | Platform\CampaignController@show |
-| POST | `platform/campaigns/{campaign}/retry` | Super Admin |  |  | Platform\CampaignController@retry |
-| GET | `platform/dashboard` | Super Admin |  |  | Platform\PlatformController@dashboard |
-| GET | `platform/help` | Super Admin |  |  | Api\HelpController@platform |
-| GET | `platform/help-articles` | Super Admin |  |  | Platform\HelpArticleController@index |
-| POST | `platform/help-articles/preview` | Super Admin |  | 60 a minute | Platform\HelpArticleController@preview |
-| DELETE | `platform/help-articles/{audience}/{slug}` | Super Admin |  |  | Platform\HelpArticleController@destroy |
-| GET | `platform/help-articles/{audience}/{slug}` | Super Admin |  |  | Platform\HelpArticleController@show |
-| PUT | `platform/help-articles/{audience}/{slug}` | Super Admin |  |  | Platform\HelpArticleController@update |
-| GET | `platform/insights` | Super Admin |  |  | Platform\InsightsController@meta |
-| GET | `platform/insights/{widget}` | Super Admin |  |  | Platform\InsightsController@show |
-| GET | `platform/invoices` | Super Admin |  |  | Platform\InvoiceController@index |
-| GET | `platform/invoices.csv` | Super Admin |  | `exports` limiter | Platform\InvoiceController@export |
-| GET | `platform/invoices/{invoice}/pdf` | Super Admin |  | `exports` limiter | Platform\InvoiceController@pdf |
-| POST | `platform/invoices/{invoice}/resend` | Super Admin |  | 10 a minute | Platform\InvoiceController@resend |
-| POST | `platform/invoices/{invoice}/void` | Super Admin |  |  | Platform\InvoiceController@void |
-| GET | `platform/landing` | Super Admin |  |  | Platform\LandingController@show |
-| PUT | `platform/landing` | Super Admin |  |  | Platform\LandingController@update |
-| DELETE | `platform/landing/images/{slot}` | Super Admin |  |  | Platform\LandingController@deleteImage |
-| POST | `platform/landing/images/{slot}` | Super Admin |  | 20 a minute | Platform\LandingController@saveImage |
-| GET | `platform/mobile-app` | Super Admin |  |  | Platform\MobileAppController@show |
-| PUT | `platform/mobile-app` | Super Admin |  |  | Platform\MobileAppController@update |
-| GET | `platform/mobile-app/devices` | Super Admin |  |  | Platform\MobileAppController@devices |
-| POST | `platform/mobile-app/devices/sign-out-all` | Super Admin |  | 3 a minute | Platform\MobileAppController@signOutAll |
-| DELETE | `platform/mobile-app/devices/{device}` | Super Admin |  |  | Platform\MobileAppController@signOutDevice |
-| GET | `platform/mobile-app/pushes` | Super Admin |  |  | Platform\MobileAppController@pushes |
-| POST | `platform/mobile-app/pushes` | Super Admin |  | 10 a minute | Platform\MobileAppController@sendPush |
-| GET | `platform/mobile-app/stats` | Super Admin |  |  | Platform\MobileAppController@stats |
-| DELETE | `platform/notes/{note}` | Super Admin |  |  | Platform\CrmController@destroyNote |
-| PATCH | `platform/notes/{note}` | Super Admin |  |  | Platform\CrmController@updateNote |
-| GET | `platform/payments` | Super Admin |  |  | Platform\PaymentController@index |
-| GET | `platform/payments.csv` | Super Admin |  | `exports` limiter | Platform\PaymentController@export |
-| GET | `platform/plans` | Super Admin |  |  | Platform\PlatformController@plans |
-| POST | `platform/plans` | Super Admin |  |  | Platform\PlatformController@savePlan |
-| PATCH | `platform/plans/{plan}` | Super Admin |  |  | Platform\PlatformController@savePlan |
-| GET | `platform/restaurants` | Super Admin |  |  | Platform\RestaurantController@index |
-| POST | `platform/restaurants` | Super Admin |  |  | Platform\RestaurantController@store |
-| POST | `platform/restaurants/bulk-tag` | Super Admin |  |  | Platform\RestaurantController@bulkTag |
-| DELETE | `platform/restaurants/{restaurant}` | Super Admin |  |  | Platform\RestaurantController@destroy |
-| GET | `platform/restaurants/{restaurant}` | Super Admin |  |  | Platform\RestaurantController@show |
-| PATCH | `platform/restaurants/{restaurant}` | Super Admin |  |  | Platform\RestaurantController@update |
-| POST | `platform/restaurants/{restaurant}/approve` | Super Admin |  |  | Platform\RestaurantController@approve |
-| PUT | `platform/restaurants/{restaurant}/features` | Super Admin |  |  | Platform\RestaurantController@features |
-| PUT | `platform/restaurants/{restaurant}/follow-up` | Super Admin |  |  | Platform\CrmController@followUp |
-| POST | `platform/restaurants/{restaurant}/impersonate` | Super Admin |  |  | Platform\RestaurantController@impersonate |
-| POST | `platform/restaurants/{restaurant}/impersonate-token` | Super Admin, app token |  |  | Platform\RestaurantController@impersonateToken |
-| GET | `platform/restaurants/{restaurant}/notes` | Super Admin |  |  | Platform\CrmController@notes |
-| POST | `platform/restaurants/{restaurant}/notes` | Super Admin |  |  | Platform\CrmController@storeNote |
-| POST | `platform/restaurants/{restaurant}/payments` | Super Admin |  |  | Platform\PaymentController@store |
-| POST | `platform/restaurants/{restaurant}/reject` | Super Admin |  |  | Platform\RestaurantController@reject |
-| POST | `platform/restaurants/{restaurant}/resend-welcome` | Super Admin |  | 6 a minute | Platform\RestaurantController@resendWelcome |
-| POST | `platform/restaurants/{restaurant}/restore` | Super Admin |  |  | Platform\RestaurantController@restore |
-| POST | `platform/restaurants/{restaurant}/suspend` | Super Admin |  |  | Platform\RestaurantController@suspend |
-| PUT | `platform/restaurants/{restaurant}/tags` | Super Admin |  |  | Platform\CrmController@setTags |
-| POST | `platform/restaurants/{restaurant}/unsuspend` | Super Admin |  |  | Platform\RestaurantController@unsuspend |
-| GET | `platform/search` | Super Admin |  | 120 a minute | Platform\SearchController |
-| GET | `platform/settings` | Super Admin |  |  | Platform\PlatformController@settings |
-| PUT | `platform/settings` | Super Admin |  |  | Platform\PlatformController@saveSettings |
-| GET | `platform/settings/features` | Super Admin |  |  | Platform\FeatureSwitchController@index |
-| PUT | `platform/settings/features` | Super Admin |  |  | Platform\FeatureSwitchController@update |
-| POST | `platform/settings/legal/{page}/reset` | Super Admin |  |  | Platform\PlatformController@resetLegal |
-| DELETE | `platform/settings/logo` | Super Admin |  |  | Platform\PlatformController@deleteLogo |
-| POST | `platform/settings/logo` | Super Admin |  |  | Platform\PlatformController@saveLogo |
-| DELETE | `platform/settings/mail` | Super Admin |  |  | Platform\PlatformController@clearMailSettings |
-| GET | `platform/settings/mail` | Super Admin |  |  | Platform\PlatformController@mailSettings |
-| PUT | `platform/settings/mail` | Super Admin |  |  | Platform\PlatformController@saveMailSettings |
-| POST | `platform/settings/mail/test` | Super Admin |  | 5 a minute | Platform\PlatformController@testMail |
-| DELETE | `platform/settings/share-image` | Super Admin |  |  | Platform\PlatformController@deleteShareImage |
-| POST | `platform/settings/share-image` | Super Admin |  |  | Platform\PlatformController@saveShareImage |
-| GET | `platform/setup` | Super Admin |  |  | Platform\SetupController@show |
-| PUT | `platform/setup` | Super Admin |  |  | Platform\SetupController@update |
-| POST | `platform/setup/demo/delete` | Super Admin |  | 3 a minute | Platform\SetupController@deleteDemo |
-| GET | `platform/tags` | Super Admin |  |  | Platform\CrmController@tags |
-| POST | `platform/tags` | Super Admin |  |  | Platform\CrmController@storeTag |
-| DELETE | `platform/tags/{tag}` | Super Admin |  |  | Platform\CrmController@destroyTag |
-| PATCH | `platform/tags/{tag}` | Super Admin |  |  | Platform\CrmController@updateTag |
-| GET | `platform/themes` | Super Admin |  |  | Platform\PlatformController@themes |
-| POST | `platform/themes` | Super Admin |  |  | Platform\PlatformController@saveTheme |
-| PATCH | `platform/themes/{theme}` | Super Admin |  |  | Platform\PlatformController@saveTheme |
-| POST | `platform/widgets/email/{tenant}` | Super Admin |  | 20 a minute | Platform\DashboardWidgetController@email |
-| GET | `platform/widgets/expiring` | Super Admin |  |  | Platform\DashboardWidgetController@expiring |
-| GET | `platform/widgets/follow-ups` | Super Admin |  |  | Platform\CrmController@due |
-| GET | `platform/widgets/health` | Super Admin |  |  | Platform\DashboardWidgetController@health |
-| GET | `platform/widgets/inactive` | Super Admin |  |  | Platform\DashboardWidgetController@inactive |
-| GET | `platform/widgets/plan-mix` | Super Admin |  |  | Platform\DashboardWidgetController@planMix |
-| GET | `platform/widgets/signups` | Super Admin |  |  | Platform\DashboardWidgetController@signups |
+| GET | `super/activity` | Super Admin |  | `super` limiter | Platform\PlatformController@activity |
+| GET | `super/announcements` | Super Admin |  | `super` limiter | Platform\PlatformController@announcements |
+| POST | `super/announcements` | Super Admin |  | `super` limiter | Platform\PlatformController@saveAnnouncement |
+| DELETE | `super/announcements/{announcement}` | Super Admin |  | `super` limiter | Platform\PlatformController@deleteAnnouncement |
+| PATCH | `super/announcements/{announcement}` | Super Admin |  | `super` limiter | Platform\PlatformController@saveAnnouncement |
+| GET | `super/backups` | Super Admin |  | `super` limiter | Platform\BackupController@index |
+| POST | `super/backups` | Super Admin |  | `super, 6,1` limiter | Platform\BackupController@store |
+| PUT | `super/backups/settings` | Super Admin |  | `super` limiter | Platform\BackupController@settings |
+| DELETE | `super/backups/{backup}` | Super Admin |  | `super` limiter | Platform\BackupController@destroy |
+| GET | `super/backups/{backup}/file` | Super Admin |  | `super` limiter | Platform\BackupController@file |
+| POST | `super/backups/{backup}/link` | Super Admin |  | `super, 6,1` limiter | Platform\BackupController@link |
+| GET | `super/campaigns` | Super Admin |  | `super` limiter | Platform\CampaignController@index |
+| POST | `super/campaigns` | Super Admin |  | `super` limiter | Platform\CampaignController@store |
+| POST | `super/campaigns/count` | Super Admin |  | `super` limiter | Platform\CampaignController@count |
+| POST | `super/campaigns/preview` | Super Admin |  | `super` limiter | Platform\CampaignController@preview |
+| PUT | `super/campaigns/rate` | Super Admin |  | `super` limiter | Platform\CampaignController@rate |
+| POST | `super/campaigns/test` | Super Admin |  | `super, 10,1` limiter | Platform\CampaignController@test |
+| GET | `super/campaigns/{campaign}` | Super Admin |  | `super` limiter | Platform\CampaignController@show |
+| POST | `super/campaigns/{campaign}/retry` | Super Admin |  | `super` limiter | Platform\CampaignController@retry |
+| GET | `super/dashboard` | Super Admin |  | `super` limiter | Platform\PlatformController@dashboard |
+| GET | `super/help` | Super Admin |  | `super` limiter | Api\HelpController@platform |
+| GET | `super/help-articles` | Super Admin |  | `super` limiter | Platform\HelpArticleController@index |
+| POST | `super/help-articles/preview` | Super Admin |  | `super, 60,1` limiter | Platform\HelpArticleController@preview |
+| DELETE | `super/help-articles/{audience}/{slug}` | Super Admin |  | `super` limiter | Platform\HelpArticleController@destroy |
+| GET | `super/help-articles/{audience}/{slug}` | Super Admin |  | `super` limiter | Platform\HelpArticleController@show |
+| PUT | `super/help-articles/{audience}/{slug}` | Super Admin |  | `super` limiter | Platform\HelpArticleController@update |
+| GET | `super/insights` | Super Admin |  | `super` limiter | Platform\InsightsController@meta |
+| GET | `super/insights/{widget}` | Super Admin |  | `super` limiter | Platform\InsightsController@show |
+| GET | `super/invoices` | Super Admin |  | `super` limiter | Platform\InvoiceController@index |
+| GET | `super/invoices.csv` | Super Admin |  | `super, exports` limiter | Platform\InvoiceController@export |
+| GET | `super/invoices/{invoice}/pdf` | Super Admin |  | `super, exports` limiter | Platform\InvoiceController@pdf |
+| POST | `super/invoices/{invoice}/resend` | Super Admin |  | `super, 10,1` limiter | Platform\InvoiceController@resend |
+| POST | `super/invoices/{invoice}/void` | Super Admin |  | `super` limiter | Platform\InvoiceController@void |
+| GET | `super/landing` | Super Admin |  | `super` limiter | Platform\LandingController@show |
+| PUT | `super/landing` | Super Admin |  | `super` limiter | Platform\LandingController@update |
+| DELETE | `super/landing/images/{slot}` | Super Admin |  | `super` limiter | Platform\LandingController@deleteImage |
+| POST | `super/landing/images/{slot}` | Super Admin |  | `super, 20,1` limiter | Platform\LandingController@saveImage |
+| GET | `super/mobile-app` | Super Admin |  | `super` limiter | Platform\MobileAppController@show |
+| PUT | `super/mobile-app` | Super Admin |  | `super` limiter | Platform\MobileAppController@update |
+| GET | `super/mobile-app/devices` | Super Admin |  | `super` limiter | Platform\MobileAppController@devices |
+| POST | `super/mobile-app/devices/sign-out-all` | Super Admin |  | `super, 3,1` limiter | Platform\MobileAppController@signOutAll |
+| DELETE | `super/mobile-app/devices/{device}` | Super Admin |  | `super` limiter | Platform\MobileAppController@signOutDevice |
+| GET | `super/mobile-app/pushes` | Super Admin |  | `super` limiter | Platform\MobileAppController@pushes |
+| POST | `super/mobile-app/pushes` | Super Admin |  | `super, 10,1` limiter | Platform\MobileAppController@sendPush |
+| GET | `super/mobile-app/stats` | Super Admin |  | `super` limiter | Platform\MobileAppController@stats |
+| DELETE | `super/notes/{note}` | Super Admin |  | `super` limiter | Platform\CrmController@destroyNote |
+| PATCH | `super/notes/{note}` | Super Admin |  | `super` limiter | Platform\CrmController@updateNote |
+| GET | `super/payments` | Super Admin |  | `super` limiter | Platform\PaymentController@index |
+| GET | `super/payments.csv` | Super Admin |  | `super, exports` limiter | Platform\PaymentController@export |
+| GET | `super/plans` | Super Admin |  | `super` limiter | Platform\PlatformController@plans |
+| POST | `super/plans` | Super Admin |  | `super` limiter | Platform\PlatformController@savePlan |
+| PATCH | `super/plans/{plan}` | Super Admin |  | `super` limiter | Platform\PlatformController@savePlan |
+| GET | `super/restaurants` | Super Admin |  | `super` limiter | Platform\RestaurantController@index |
+| POST | `super/restaurants` | Super Admin |  | `super` limiter | Platform\RestaurantController@store |
+| POST | `super/restaurants/bulk-tag` | Super Admin |  | `super` limiter | Platform\RestaurantController@bulkTag |
+| DELETE | `super/restaurants/{restaurant}` | Super Admin |  | `super` limiter | Platform\RestaurantController@destroy |
+| GET | `super/restaurants/{restaurant}` | Super Admin |  | `super` limiter | Platform\RestaurantController@show |
+| PATCH | `super/restaurants/{restaurant}` | Super Admin |  | `super` limiter | Platform\RestaurantController@update |
+| POST | `super/restaurants/{restaurant}/approve` | Super Admin |  | `super` limiter | Platform\RestaurantController@approve |
+| PUT | `super/restaurants/{restaurant}/features` | Super Admin |  | `super` limiter | Platform\RestaurantController@features |
+| PUT | `super/restaurants/{restaurant}/follow-up` | Super Admin |  | `super` limiter | Platform\CrmController@followUp |
+| POST | `super/restaurants/{restaurant}/impersonate` | Super Admin |  | `super` limiter | Platform\RestaurantController@impersonate |
+| POST | `super/restaurants/{restaurant}/impersonate-token` | Super Admin, app token |  | `super` limiter | Platform\RestaurantController@impersonateToken |
+| GET | `super/restaurants/{restaurant}/notes` | Super Admin |  | `super` limiter | Platform\CrmController@notes |
+| POST | `super/restaurants/{restaurant}/notes` | Super Admin |  | `super` limiter | Platform\CrmController@storeNote |
+| POST | `super/restaurants/{restaurant}/payments` | Super Admin |  | `super` limiter | Platform\PaymentController@store |
+| POST | `super/restaurants/{restaurant}/reject` | Super Admin |  | `super` limiter | Platform\RestaurantController@reject |
+| POST | `super/restaurants/{restaurant}/resend-welcome` | Super Admin |  | `super, 6,1` limiter | Platform\RestaurantController@resendWelcome |
+| POST | `super/restaurants/{restaurant}/restore` | Super Admin |  | `super` limiter | Platform\RestaurantController@restore |
+| POST | `super/restaurants/{restaurant}/suspend` | Super Admin |  | `super` limiter | Platform\RestaurantController@suspend |
+| PUT | `super/restaurants/{restaurant}/tags` | Super Admin |  | `super` limiter | Platform\CrmController@setTags |
+| POST | `super/restaurants/{restaurant}/unsuspend` | Super Admin |  | `super` limiter | Platform\RestaurantController@unsuspend |
+| GET | `super/search` | Super Admin |  | `super, 120,1` limiter | Platform\SearchController |
+| GET | `super/settings` | Super Admin |  | `super` limiter | Platform\PlatformController@settings |
+| PUT | `super/settings` | Super Admin |  | `super` limiter | Platform\PlatformController@saveSettings |
+| GET | `super/settings/features` | Super Admin |  | `super` limiter | Platform\FeatureSwitchController@index |
+| PUT | `super/settings/features` | Super Admin |  | `super` limiter | Platform\FeatureSwitchController@update |
+| POST | `super/settings/legal/{page}/reset` | Super Admin |  | `super` limiter | Platform\PlatformController@resetLegal |
+| DELETE | `super/settings/logo` | Super Admin |  | `super` limiter | Platform\PlatformController@deleteLogo |
+| POST | `super/settings/logo` | Super Admin |  | `super` limiter | Platform\PlatformController@saveLogo |
+| DELETE | `super/settings/mail` | Super Admin |  | `super` limiter | Platform\PlatformController@clearMailSettings |
+| GET | `super/settings/mail` | Super Admin |  | `super` limiter | Platform\PlatformController@mailSettings |
+| PUT | `super/settings/mail` | Super Admin |  | `super` limiter | Platform\PlatformController@saveMailSettings |
+| POST | `super/settings/mail/test` | Super Admin |  | `super, 5,1` limiter | Platform\PlatformController@testMail |
+| DELETE | `super/settings/share-image` | Super Admin |  | `super` limiter | Platform\PlatformController@deleteShareImage |
+| POST | `super/settings/share-image` | Super Admin |  | `super` limiter | Platform\PlatformController@saveShareImage |
+| GET | `super/setup` | Super Admin |  | `super` limiter | Platform\SetupController@show |
+| PUT | `super/setup` | Super Admin |  | `super` limiter | Platform\SetupController@update |
+| POST | `super/setup/demo/delete` | Super Admin |  | `super, 3,1` limiter | Platform\SetupController@deleteDemo |
+| GET | `super/tags` | Super Admin |  | `super` limiter | Platform\CrmController@tags |
+| POST | `super/tags` | Super Admin |  | `super` limiter | Platform\CrmController@storeTag |
+| DELETE | `super/tags/{tag}` | Super Admin |  | `super` limiter | Platform\CrmController@destroyTag |
+| PATCH | `super/tags/{tag}` | Super Admin |  | `super` limiter | Platform\CrmController@updateTag |
+| GET | `super/themes` | Super Admin |  | `super` limiter | Platform\PlatformController@themes |
+| POST | `super/themes` | Super Admin |  | `super` limiter | Platform\PlatformController@saveTheme |
+| PATCH | `super/themes/{theme}` | Super Admin |  | `super` limiter | Platform\PlatformController@saveTheme |
+| POST | `super/widgets/email/{tenant}` | Super Admin |  | `super, 20,1` limiter | Platform\DashboardWidgetController@email |
+| GET | `super/widgets/expiring` | Super Admin |  | `super` limiter | Platform\DashboardWidgetController@expiring |
+| GET | `super/widgets/follow-ups` | Super Admin |  | `super` limiter | Platform\CrmController@due |
+| GET | `super/widgets/health` | Super Admin |  | `super` limiter | Platform\DashboardWidgetController@health |
+| GET | `super/widgets/inactive` | Super Admin |  | `super` limiter | Platform\DashboardWidgetController@inactive |
+| GET | `super/widgets/plan-mix` | Super Admin |  | `super` limiter | Platform\DashboardWidgetController@planMix |
+| GET | `super/widgets/signups` | Super Admin |  | `super` limiter | Platform\DashboardWidgetController@signups |
 
 ## Guest menu (public)
 

@@ -7,7 +7,7 @@ body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.45 var(--ff,syste
 h1,h2,h3,p{margin:0}
 button{font:inherit;color:inherit}
 .w{max-width:44rem;margin:0 auto;padding:0 1rem}
-h1,h2,h3,.nm{font-family:var(--fh,inherit)}
+h1,h2,h3,.nm{font-family:var(--fh,inherit);overflow-wrap:break-word}
 .top{position:relative;max-width:44rem;margin:0 auto}
 header{padding:1.25rem 1rem .5rem;display:flex;align-items:center;gap:.75rem}
 .lg{flex:none;width:3.5rem;height:3.5rem;border-radius:.9rem;object-fit:cover;background:var(--card)}
@@ -24,9 +24,12 @@ header{padding:1.25rem 1rem .5rem;display:flex;align-items:center;gap:.75rem}
 h1{font-size:1.6rem;line-height:1.2}
 .sub{color:var(--mu);font-size:.9rem;margin-top:.25rem}
 .bar{position:sticky;top:0;z-index:2;background:var(--bg);border-bottom:1px solid var(--ln);padding:.5rem 0}
-.sr{display:flex;gap:.5rem}
+/* Search row: fixed columns for the buttons the page has (n1, n2), so a button never moves when the next one arrives (CLS). */
+.sr{display:grid;grid-template-columns:minmax(0,1fr);gap:.5rem}
+.sr.n1{grid-template-columns:minmax(0,1fr) 2.75rem}
+.sr.n2{grid-template-columns:minmax(0,1fr) 2.75rem 2.75rem}
 .ib{flex:none;width:2.75rem;height:2.75rem;border-radius:99px;display:flex;align-items:center;justify-content:center;background:var(--card);border:1px solid var(--ln);color:var(--fg)}
-.sr input{flex:1;min-width:0;height:2.75rem;padding:0 .9rem;border:1px solid var(--ln);border-radius:99px;background:var(--card);color:var(--fg);font:inherit}
+.sr input{min-width:0;height:2.75rem;padding:0 .9rem;border:1px solid var(--ln);border-radius:99px;background:var(--card);color:var(--fg);font:inherit}
 .ch{display:flex;gap:.4rem;overflow-x:auto;scrollbar-width:none;padding-top:.5rem}
 .ch::-webkit-scrollbar{display:none}
 

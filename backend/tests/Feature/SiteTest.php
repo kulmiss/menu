@@ -14,8 +14,8 @@ it('shows the landing page in simple English: hero, sections in order, sign-up a
         ->assertSee('Your menu on every phone. Free to start.')
         ->assertSee('Free plan forever')
         ->assertSee('No card needed')
-        ->assertSee('href="/auth/sign-up" data-track="signup"', false)
-        ->assertSee('href="/auth/sign-in"', false)
+        ->assertSee('href="/signup" data-track="signup"', false)
+        ->assertSee('href="/signin"', false)
         ->assertSee('href="/terms"', false)
         ->assertSee('href="#pricing"', false)
         ->assertSee('property="og:image" content="'.url('/landing/og.jpg').'"', false)
@@ -74,9 +74,9 @@ it('turns every sign-up button into "Contact us on WhatsApp" when sign-up is off
     PlatformSettings::save(['signup_open' => false, 'upgrade_whatsapp' => '+251 911 000 000']);
 
     $html = $this->get('/')->assertOk()
-        ->assertDontSee('href="/auth/sign-up"', false)
+        ->assertDontSee('href="/signup"', false)
         ->assertDontSee('Create my free menu')
-        ->assertSee('href="/auth/sign-in"', false)
+        ->assertSee('href="/signin"', false)
         ->assertSee('Contact us on WhatsApp')
         ->assertSee('Message us, and we will help you start.')
         ->getContent();
@@ -86,7 +86,7 @@ it('turns every sign-up button into "Contact us on WhatsApp" when sign-up is off
     PlatformSettings::save(['upgrade_whatsapp' => null, 'support_email' => 'help@example.com']);
     $this->get('/')->assertSee('Contact us by email')->assertSee('href="mailto:help@example.com?subject=', false);
     PlatformSettings::save(['support_email' => null]);
-    $this->get('/')->assertOk()->assertDontSee('Contact us by email')->assertDontSee('Contact us on WhatsApp')->assertSee('href="/auth/sign-in"', false)
+    $this->get('/')->assertOk()->assertDontSee('Contact us by email')->assertDontSee('Contact us on WhatsApp')->assertSee('href="/signin"', false)
         // No demo and no sign-up: no QR code pointing at a closed page.
         ->assertDontSee('class="qr-card', false);
 });
@@ -126,7 +126,7 @@ it('shows the plan ladder from the database: Free first ("Start here"), then wha
     $html = $this->get('/')->assertOk()
         ->assertSeeInOrder([
             'Start here', 'Free', 'Unlimited dishes, menus and QR codes', 'Up to 100 photos', '1 branch', '2 menu styles', 'PDF menu', 'Posters, table tents and stickers', 'Import and export (spreadsheet)', 'Create my free menu',
-            'Plus', 'Br 490', '/ month', 'or Br 4,900 / year (2 months free)', 'Everything in Free, plus:', 'Up to 500 photos', 'All 4 menu styles', 'Specials and announcements', 'Insights and monthly report', 'Start free', 'Contact us on WhatsApp',
+            'Plus', 'Br 490', '/ month', 'or Br 4,900 / year (2 months free)', 'Everything in Free, plus:', 'Up to 500 photos', 'All 7 menu styles', 'Specials and announcements', 'Insights and monthly report', 'Start free', 'Contact us on WhatsApp',
             'Pro', 'Br 990', 'Everything in Plus, plus:', 'Up to 2,000 photos', 'Up to 3 branches', 'Happy hour and lunch prices', 'No “Menu by Menu” line', 'Start free',
             'Business', 'Br 2,490', 'Everything in Pro, plus:', 'Unlimited photos', 'Unlimited branches', 'Start free',
         ])
@@ -180,7 +180,9 @@ it('lets the Super Admin edit the texts, switch sections off and reorder them; "
 it('serves robots.txt and the sitemap', function () {
     $this->get('/robots.txt')->assertOk()
         ->assertSee('Disallow: /admin')
-        ->assertSee('Disallow: /platform')
+        // The Super Admin's own address is never listed (QUESTIONS #217).
+        ->assertDontSee(config('menu.super_admin.path'))
+        ->assertDontSee('platform')
         ->assertSee('Sitemap: '.url('/sitemap.xml'));
     $this->get('/sitemap.xml')->assertOk()
         ->assertHeader('Content-Type', 'application/xml; charset=UTF-8')

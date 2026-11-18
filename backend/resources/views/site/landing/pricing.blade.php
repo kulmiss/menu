@@ -20,7 +20,7 @@
                     <div class="actions">
                         @if ($signupOpen)
                             {{-- Paid plans start free too; the owner upgrades later (payments are manual). --}}
-                            <a class="btn {{ $plan['highlight'] ? 'btn-primary' : 'btn-ghost' }}" href="/auth/sign-up" data-track="signup">{{ $plan['free'] ? $t('create_account') : $t('pricing.start_paid') }}</a>
+                            <a class="btn {{ $plan['highlight'] ? 'btn-primary' : 'btn-ghost' }}" href="/signup" data-track="signup">{{ $plan['free'] ? $t('create_account') : $t('pricing.start_paid') }}</a>
                             @if (! $plan['free'] && $plan['contact'])
                                 <a class="link" href="{{ $plan['contact']['href'] }}" @if ($plan['contact']['whatsapp']) target="_blank" rel="noopener" @endif>{!! $icon('message') !!} {{ $plan['contact']['label'] }}</a>
                             @endif

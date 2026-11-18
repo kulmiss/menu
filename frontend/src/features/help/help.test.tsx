@@ -89,7 +89,7 @@ describe('HelpCentre', () => {
   afterEach(() => fake.restore())
 
   it('lists articles by topic, searches, opens one and links on to another', async () => {
-    fake = fakeApi({ 'GET /t/1/help': { data: { data: library } } })
+    fake = fakeApi({ 'GET /restaurant/1/help': { data: { data: library } } })
     const onOpen = vi.fn()
     const screen = await renderWithQuery(
       <HelpCentre
@@ -127,7 +127,7 @@ describe('HelpCentre', () => {
 
   it('shows an article with its phone picture, follows help links and asks "Was this helpful?"', async () => {
     fake = fakeApi({
-      'GET /t/1/help': { data: { data: library } },
+      'GET /restaurant/1/help': { data: { data: library } },
       'POST /help/feedback': { status: 204 },
     })
     const onOpen = vi.fn()
@@ -163,7 +163,7 @@ describe('The "?" sheet', () => {
   afterEach(() => fake.restore())
 
   it('opens the article of this screen, and articles it links to', async () => {
-    fake = fakeApi({ 'GET /t/1/help': { data: { data: library } } })
+    fake = fakeApi({ 'GET /restaurant/1/help': { data: { data: library } } })
     const screen = await renderWithQuery(
       <HelpSheet
         source={{ audience: 'restaurant', tenantId: 1 }}

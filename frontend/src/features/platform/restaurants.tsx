@@ -33,6 +33,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
 import { type Col, DataTable, type TableFilter } from '@/components/data-table'
+import { MENU_STYLES } from '@/features/appearance/api'
 import {
   FEATURES,
   type Restaurant,
@@ -219,10 +220,7 @@ export function RestaurantsPage({ open }: Props) {
         'limit_photos',
         'near_photos',
         'limit_branches',
-        'style:editorial',
-        'style:grid',
-        'style:bistro',
-        'style:minimal',
+        ...MENU_STYLES.map((s) => `style:${s}`),
       ].map((k) => ({
         value: k,
         label: t(`platform.ins.u.${k.replace(':', '_')}`),
@@ -254,7 +252,7 @@ export function RestaurantsPage({ open }: Props) {
         id='platform-restaurants'
         queryKey={[...pkeys.all, 'restaurants', 'table']}
         fetch={(params) => fetchPage<Restaurant>('restaurants', params)}
-        csvUrl={(params) => `/api/v1/platform/restaurants?format=csv&${params}`}
+        csvUrl={(params) => `/api/v1/super/restaurants?format=csv&${params}`}
         columns={columns}
         filters={filters}
         dateLabel={t('platform.restaurants.created_on')}

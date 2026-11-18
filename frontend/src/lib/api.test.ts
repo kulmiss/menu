@@ -6,8 +6,10 @@ import {
   applyFieldErrors,
   errorStatus,
   IDEMPOTENCY_HEADER,
+  networkFailure,
   tenantUrl,
   withIdempotencyKey,
+  type SentRequest,
 } from './api'
 
 let fake: ReturnType<typeof fakeApi>
@@ -104,23 +106,27 @@ describe('api helpers', () => {
     }
     nav.addEventListener('navigate', stop)
     fake = fakeApi({
-      'GET /t/1/menus': {
+      'GET /restaurant/1/menus': {
         status: 409,
         data: { message: 'Ended.', code: 'impersonation.expired' },
       },
-      'POST /t/1/menus': { status: 409, data: { message: 'Busy.' } },
+      'POST /restaurant/1/menus': { status: 409, data: { message: 'Busy.' } },
     })
-    await expect(api.get('/t/1/menus')).rejects.toBeInstanceOf(ApiError)
-    expect(assign).toHaveBeenCalledWith('/platform')
+    await expect(api.get('/restaurant/1/menus')).rejects.toBeInstanceOf(
+      ApiError
+    )
+    expect(assign).toHaveBeenCalledWith('/admin')
     // Any other 409 (a save still running) stays on the page.
-    await expect(api.post('/t/1/menus', {})).rejects.toBeInstanceOf(ApiError)
+    await expect(api.post('/restaurant/1/menus', {})).rejects.toBeInstanceOf(
+      ApiError
+    )
     expect(assign).toHaveBeenCalledTimes(1)
     nav.removeEventListener('navigate', stop)
   })
 
   it('builds restaurant URLs', () => {
-    expect(tenantUrl(3)).toBe('/t/3')
-    expect(tenantUrl(3, '/members/9')).toBe('/t/3/members/9')
+    expect(tenantUrl(3)).toBe('/restaurant/3')
+    expect(tenantUrl(3, '/members/9')).toBe('/restaurant/3/members/9')
   })
 
   it('puts Laravel 422 messages on matching form fields only', async () => {
@@ -182,5 +188,24 @@ describe('api helpers', () => {
     api.defaults.adapter = original
 
     expect(errorStatus(error)).toBe(0)
+  })
+})
+
+describe('leaving the page', () => {
+  it('does not report requests cut off because the page is going away', async () => {
+    const request = { method: 'GET', fullUrl: '/api/v1/me' } as SentRequest
+    const settled = (p: Promise<unknown>) =>
+      Promise.race([
+        p.then(
+          () => 'resolved',
+          () => 'rejected'
+        ),
+        new Promise((r) => setTimeout(() => r('pending'), 50)),
+      ])
+    expect(await settled(networkFailure(request))).toBe('rejected')
+    window.dispatchEvent(new PageTransitionEvent('pagehide'))
+    expect(await settled(networkFailure(request))).toBe('pending')
+    window.dispatchEvent(new PageTransitionEvent('pageshow'))
+    expect(await settled(networkFailure(request))).toBe('rejected')
   })
 })
