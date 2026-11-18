@@ -197,7 +197,7 @@
         .split{display:grid;gap:48px;align-items:center}
         @media (min-width:960px){.split{grid-template-columns:1fr 1fr}}
         .scan{display:none;align-items:center;gap:20px;margin-top:32px;padding:18px;border-radius:var(--radius);background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);max-width:28rem}
-        .scan svg{width:132px;height:132px;background:#fff;border-radius:12px;padding:8px;flex:none}
+        .scan>svg{width:132px;height:132px;background:#fff;border-radius:12px;padding:8px;flex:none}
         .scan strong{display:block;font-size:1.15rem}
         .scan span{display:block;color:var(--muted)}
         .scan .link{margin-top:4px}
