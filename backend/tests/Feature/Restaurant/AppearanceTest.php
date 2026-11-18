@@ -31,7 +31,7 @@ it('returns the defaults, the theme presets and no warnings for a new restaurant
     $this->actingAs($owner)->getJson(t($tenant, 'appearance'))->assertOk()
         ->assertJsonPath('data.primary_color', '#b4432a')
         ->assertJsonPath('data.style', 'grid')
-        ->assertJsonPath('data.styles', ['editorial', 'grid', 'bistro', 'minimal', 'mesob', 'lounge', 'board'])
+        ->assertJsonPath('data.styles', TenantAppearance::STYLES)
         ->assertJsonPath('data.warnings', [])
         ->assertJsonCount(Theme::count(), 'data.themes')
         ->assertJsonPath('data.themes.0.name', 'Classic');

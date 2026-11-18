@@ -8,7 +8,7 @@ body:before,.ft:before{content:"";display:block;height:.5rem;background:repeatin
 .ft:before{margin:-2rem 0 2rem}
 .cv{aspect-ratio:5/2}
 @media (min-width:44rem){.cv{border-radius:0 0 1.25rem 1.25rem}}
-header{flex-direction:column;text-align:center;gap:.35rem;padding:1.25rem 1rem .75rem}
+header{flex-direction:column;text-align:center;gap:.35rem;padding:1.25rem 1rem .75rem}header>div{align-self:stretch}
 .lg{width:4rem;height:4rem;border-radius:50%;box-shadow:0 0 0 3px var(--bg),0 0 0 5px var(--o)}
 h1{font-size:1.9rem;font-weight:700;line-height:1.15}
 .bar{border-top:1px solid var(--ln)}

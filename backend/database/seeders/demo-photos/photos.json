@@ -12,6 +12,16 @@
       "banner": false
     },
     {
+      "key": "arabic-coffee",
+      "source": "pexels",
+      "id": "30146018",
+      "page": "https://www.pexels.com/photo/traditional-arabic-coffee-preparation-in-dallah-30146018/",
+      "photographer": "Ahmed",
+      "profile": null,
+      "licence": "Pexels License",
+      "banner": false
+    },
+    {
       "key": "avocado-smoothie",
       "source": "pexels",
       "id": "5912010",
@@ -78,6 +88,26 @@
       "page": "https://www.pexels.com/photo/a-drink-with-berries-mint-and-lime-17612807/",
       "photographer": "shameel-mukkath-3421394",
       "profile": "https://www.pexels.com/@shameel-mukkath-3421394",
+      "licence": "Pexels License",
+      "banner": false
+    },
+    {
+      "key": "biryani-dark",
+      "source": "pexels",
+      "id": "4224304",
+      "page": "https://www.pexels.com/photo/chicken-biryani-on-black-plate-4224304/",
+      "photographer": "alleksana",
+      "profile": null,
+      "licence": "Pexels License",
+      "banner": true
+    },
+    {
+      "key": "biryani-plates",
+      "source": "pexels",
+      "id": "4224314",
+      "page": "https://www.pexels.com/photo/delicious-chicken-biryani-4224314/",
+      "photographer": "alleksana",
+      "profile": null,
       "licence": "Pexels License",
       "banner": false
     },
@@ -562,6 +592,36 @@
       "banner": false
     },
     {
+      "key": "hummus-board",
+      "source": "pexels",
+      "id": "11842140",
+      "page": "https://www.pexels.com/photo/humus-with-pita-11842140/",
+      "photographer": "eat kubba",
+      "profile": null,
+      "licence": "Pexels License",
+      "banner": false
+    },
+    {
+      "key": "hummus-mint",
+      "source": "pexels",
+      "id": "14930604",
+      "page": "https://www.pexels.com/photo/a-bowl-of-hummus-with-pomegranate-mint-and-olives-14930604/",
+      "photographer": "shameel-mukkath-3421394",
+      "profile": "https://www.pexels.com/@shameel-mukkath-3421394",
+      "licence": "Pexels License",
+      "banner": false
+    },
+    {
+      "key": "hummus-pita",
+      "source": "pexels",
+      "id": "1618898",
+      "page": "https://www.pexels.com/photo/fresh-hummus-and-pita-bread-1618898/",
+      "photographer": "Zak Chapman",
+      "profile": null,
+      "licence": "Pexels License",
+      "banner": false
+    },
+    {
       "key": "ice-cream",
       "source": "pexels",
       "id": "6412948",
@@ -652,6 +712,16 @@
       "banner": true
     },
     {
+      "key": "kabsa-platter",
+      "source": "pexels",
+      "id": "17139829",
+      "page": "https://www.pexels.com/photo/top-view-of-people-sitting-and-eating-a-dish-with-rice-17139829/",
+      "photographer": "Ali Dashti",
+      "profile": null,
+      "licence": "Pexels License",
+      "banner": false
+    },
+    {
       "key": "kiwi-juice",
       "source": "pexels",
       "id": "28053287",
@@ -690,6 +760,16 @@
       "profile": "https://www.pexels.com/@shameel-mukkath-3421394",
       "licence": "Pexels License",
       "banner": false
+    },
+    {
+      "key": "mandi-chicken",
+      "source": "pexels",
+      "id": "18698231",
+      "page": "https://www.pexels.com/photo/food-photography-18698231/",
+      "photographer": "aboodi vesakaran",
+      "profile": null,
+      "licence": "Pexels License",
+      "banner": true
     },
     {
       "key": "mango-juice",
@@ -932,12 +1012,42 @@
       "banner": false
     },
     {
+      "key": "sambuusa",
+      "source": "pexels",
+      "id": "21078315",
+      "page": "https://www.pexels.com/photo/indian-samosa-with-red-sauce-21078315/",
+      "photographer": "Ann Barnes",
+      "profile": null,
+      "licence": "Pexels License",
+      "banner": false
+    },
+    {
       "key": "seafood-pasta",
       "source": "pexels",
       "id": "31235407",
       "page": "https://www.pexels.com/photo/delicious-seafood-pasta-with-creamy-mushroom-sauce-31235407/",
       "photographer": "valeriya",
       "profile": "https://www.pexels.com/@valeriya",
+      "licence": "Pexels License",
+      "banner": false
+    },
+    {
+      "key": "shawarma-fries",
+      "source": "pexels",
+      "id": "29285458",
+      "page": "https://www.pexels.com/photo/delicious-chicken-shawarma-with-fries-and-sauce-29285458/",
+      "photographer": "nano-erdozain-120534369",
+      "profile": "https://www.pexels.com/@nano-erdozain-120534369",
+      "licence": "Pexels License",
+      "banner": false
+    },
+    {
+      "key": "shawarma-wraps",
+      "source": "pexels",
+      "id": "8018079",
+      "page": "https://www.pexels.com/photo/sliced-shawarma-on-a-plate-8018079/",
+      "photographer": "Dee Dave",
+      "profile": null,
       "licence": "Pexels License",
       "banner": false
     },

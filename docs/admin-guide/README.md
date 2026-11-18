@@ -48,9 +48,10 @@ How to set up and run the platform, in easy steps. The same pages are inside the
 
 ## 7. Legal texts, languages and help
 
-- [Legal texts: Terms and Privacy](legal-texts.md) — Change the Terms of use and the Privacy policy.
+- [Legal texts and site pages](legal-texts.md) — Change the Terms of use, the Privacy policy and the About us, Contact us and Cookie info pages.
 - [Languages](languages.md) — What language the platform and the menus use.
 - [Landing page, logo and link preview](landing-and-branding.md) — The public home page, the e-mail logo and the picture for shared links.
+- [Website footer](footer.md) — The footer of the website: columns of links, contact, social links, the app badge, history.
 - [Help articles](help-articles.md) — Change the Help centre, add articles, see what helps.
 
 ## 8. "Log in as" and support

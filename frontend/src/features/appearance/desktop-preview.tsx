@@ -38,23 +38,34 @@ export function DesktopPreview({ src }: { src: string }) {
   )
 }
 
-function ScaledFrame({ src, title }: { src: string; title: string }) {
+/** A page at a fixed width (a computer's 1280 px by default), scaled down to fit its box. */
+export function ScaledFrame({
+  src,
+  title,
+  width = WIDTH,
+  height = HEIGHT,
+}: {
+  src: string
+  title: string
+  width?: number
+  height?: number
+}) {
   const box = useRef<HTMLDivElement>(null)
   const [scale, setScale] = useState(0)
   useEffect(() => {
     const el = box.current
     if (!el) return
-    const fit = () => setScale(el.clientWidth / WIDTH)
+    const fit = () => setScale(Math.min(1, el.clientWidth / width))
     fit()
     const ro = new ResizeObserver(fit)
     ro.observe(el)
     return () => ro.disconnect()
-  }, [])
+  }, [width])
   return (
     <div
       ref={box}
       className='relative w-full overflow-hidden rounded-md border bg-background'
-      style={{ height: HEIGHT * scale }}
+      style={{ height: height * scale }}
     >
       {scale > 0 && (
         <iframe
@@ -62,8 +73,8 @@ function ScaledFrame({ src, title }: { src: string; title: string }) {
           src={src}
           className='absolute start-0 top-0 origin-top-left border-0'
           style={{
-            width: WIDTH,
-            height: HEIGHT,
+            width,
+            height,
             transform: `scale(${scale})`,
           }}
         />

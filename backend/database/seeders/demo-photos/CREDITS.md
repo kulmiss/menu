@@ -8,6 +8,7 @@ credit is not required but given here. Download them with `php artisan demo:phot
 | File | Source | Photographer | Licence |
 |---|---|---|---|
 | `apple-galette.webp` | [pexels 6148262](https://www.pexels.com/photo/homemade-rustic-apple-pies-on-baking-paper-6148262/) | [roman-odintsov](https://www.pexels.com/@roman-odintsov) | Pexels License |
+| `arabic-coffee.webp` | [pexels 30146018](https://www.pexels.com/photo/traditional-arabic-coffee-preparation-in-dallah-30146018/) | Ahmed | Pexels License |
 | `avocado-smoothie.webp` | [pexels 5912010](https://www.pexels.com/photo/delicious-fruity-smoothies-5912010/) | [thy-may-5075149](https://www.pexels.com/@thy-may-5075149) | Pexels License |
 | `avocado-toast.webp` | [pexels 34305253](https://www.pexels.com/photo/healthy-breakfast-flat-lay-with-fruits-and-toast-34305253/) | [shanerich5](https://www.pexels.com/@shanerich5) | Pexels License |
 | `bakery-display.webp` | [pexels 40408087](https://www.pexels.com/photo/assorted-baked-goods-on-display-in-bakery-40408087/) | [faheem-ahamad-422934800](https://www.pexels.com/@faheem-ahamad-422934800) | Pexels License |
@@ -15,6 +16,8 @@ credit is not required but given here. Download them with `php artisan demo:phot
 | `beet-salad.webp` | [pexels 28467237](https://www.pexels.com/photo/refreshing-beetroot-salad-with-fresh-greens-28467237/) | [ayat-shahin](https://www.pexels.com/@ayat-shahin) | Pexels License |
 | `berry-desserts.webp` | [pexels 15062601](https://www.pexels.com/photo/desserts-on-wooden-tray-15062601/) | [angel-obregon-416969917](https://www.pexels.com/@angel-obregon-416969917) | Pexels License |
 | `berry-mint.webp` | [pexels 17612807](https://www.pexels.com/photo/a-drink-with-berries-mint-and-lime-17612807/) | [shameel-mukkath-3421394](https://www.pexels.com/@shameel-mukkath-3421394) | Pexels License |
+| `biryani-dark.webp` | [pexels 4224304](https://www.pexels.com/photo/chicken-biryani-on-black-plate-4224304/) | alleksana | Pexels License |
+| `biryani-plates.webp` | [pexels 4224314](https://www.pexels.com/photo/delicious-chicken-biryani-4224314/) | alleksana | Pexels License |
 | `blt.webp` | [pexels 19202817](https://www.pexels.com/photo/blt-sandwiches-for-lunch-19202817/) | [nano-erdozain-120534369](https://www.pexels.com/@nano-erdozain-120534369) | Pexels License |
 | `bolognese.webp` | [pexels 31637792](https://www.pexels.com/photo/delicious-spaghetti-bolognese-with-fresh-herbs-31637792/) | [gu-ko-2150570603](https://www.pexels.com/@gu-ko-2150570603) | Pexels License |
 | `brunch.webp` | [pexels 5865690](https://www.pexels.com/photo/meal-and-cafe-latte-5865690/) | [rachel-claire](https://www.pexels.com/@rachel-claire) | Pexels License |
@@ -63,6 +66,9 @@ credit is not required but given here. Download them with `php artisan demo:phot
 | `green-tea.webp` | [pexels 36028821](https://www.pexels.com/photo/steaming-green-tea-in-glass-cup-with-bokeh-36028821/) | [filmy-kashif-2157365380](https://www.pexels.com/@filmy-kashif-2157365380) | Pexels License |
 | `grilled-cheese.webp` | [pexels 9240536](https://www.pexels.com/photo/toasted-sandwiches-on-black-ceramic-plate-9240536/) | [akilvigneshjr](https://www.pexels.com/@akilvigneshjr) | Pexels License |
 | `hot-chocolate.webp` | [pexels 11043663](https://www.pexels.com/photo/a-cotton-flower-beside-a-delicious-cup-of-drink-11043663/) | [ioanamtc](https://www.pexels.com/@ioanamtc) | Pexels License |
+| `hummus-board.webp` | [pexels 11842140](https://www.pexels.com/photo/humus-with-pita-11842140/) | eat kubba | Pexels License |
+| `hummus-mint.webp` | [pexels 14930604](https://www.pexels.com/photo/a-bowl-of-hummus-with-pomegranate-mint-and-olives-14930604/) | [shameel-mukkath-3421394](https://www.pexels.com/@shameel-mukkath-3421394) | Pexels License |
+| `hummus-pita.webp` | [pexels 1618898](https://www.pexels.com/photo/fresh-hummus-and-pita-bread-1618898/) | Zak Chapman | Pexels License |
 | `ice-cream.webp` | [pexels 6412948](https://www.pexels.com/photo/close-up-shot-of-three-different-ice-cream-flavors-in-bowls-6412948/) | [rdne](https://www.pexels.com/@rdne) | Pexels License |
 | `iced-coffee.webp` | [pexels 4869290](https://www.pexels.com/photo/cold-coffee-drink-in-clear-drinking-glass-4869290/) | [roman-odintsov](https://www.pexels.com/@roman-odintsov) | Pexels License |
 | `iced-lemon-tea.webp` | [pexels 11009224](https://www.pexels.com/photo/iced-tea-with-fresh-lemon-drink-11009224/) | [shameel-mukkath-3421394](https://www.pexels.com/@shameel-mukkath-3421394) | Pexels License |
@@ -72,10 +78,12 @@ credit is not required but given here. Download them with `php artisan demo:phot
 | `jebena.webp` | [pexels 24375991](https://www.pexels.com/photo/traditional-jar-with-decorations-24375991/) | [christian-alemu-127251395](https://www.pexels.com/@christian-alemu-127251395) | Pexels License |
 | `juice-jars.webp` | [pexels 8181545](https://www.pexels.com/photo/different-flavors-of-fruit-juice-on-mason-jars-8181545/) | [kindelmedia](https://www.pexels.com/@kindelmedia) | Pexels License |
 | `juices-table.webp` | [pexels 8215113](https://www.pexels.com/photo/healthy-fruit-juices-in-glasses-8215113/) | [kindelmedia](https://www.pexels.com/@kindelmedia) | Pexels License |
+| `kabsa-platter.webp` | [pexels 17139829](https://www.pexels.com/photo/top-view-of-people-sitting-and-eating-a-dish-with-rice-17139829/) | Ali Dashti | Pexels License |
 | `kiwi-juice.webp` | [pexels 28053287](https://www.pexels.com/photo/kiwi-fresh-juice-28053287/) | [umarali07](https://www.pexels.com/@umarali07) | Pexels License |
 | `latte.webp` | [pexels 459489](https://www.pexels.com/photo/cup-of-coffee-on-saucer-459489/) | [pixabay](https://www.pexels.com/@pixabay) | Pexels License |
 | `latte-biscotti.webp` | [pexels 38068561](https://www.pexels.com/photo/elegant-coffee-and-dessert-on-wooden-table-38068561/) | [liudmyla-kharytoniuk-2152529089](https://www.pexels.com/@liudmyla-kharytoniuk-2152529089) | Pexels License |
 | `macchiato.webp` | [pexels 11160127](https://www.pexels.com/photo/cup-of-coffee-on-white-saucer-in-close-up-photography-11160127/) | [shameel-mukkath-3421394](https://www.pexels.com/@shameel-mukkath-3421394) | Pexels License |
+| `mandi-chicken.webp` | [pexels 18698231](https://www.pexels.com/photo/food-photography-18698231/) | aboodi vesakaran | Pexels License |
 | `mango-juice.webp` | [pexels 17612822](https://www.pexels.com/photo/a-glass-of-mango-juice-with-a-spoon-and-a-piece-of-fruit-17612822/) | [shameel-mukkath-3421394](https://www.pexels.com/@shameel-mukkath-3421394) | Pexels License |
 | `matcha.webp` | [pexels 911810](https://www.pexels.com/photo/white-ceramic-cup-near-plant-911810/) | [minan1398](https://www.pexels.com/@minan1398) | Pexels License |
 | `mocha.webp` | [pexels 20066366](https://www.pexels.com/photo/close-up-of-a-glass-of-coffee-with-four-layers-20066366/) | [felipe-vieira-651921657](https://www.pexels.com/@felipe-vieira-651921657) | Pexels License |
@@ -100,7 +108,10 @@ credit is not required but given here. Download them with `php artisan demo:phot
 | `pomodoro.webp` | [pexels 31637793](https://www.pexels.com/photo/close-up-of-spaghetti-with-tomato-sauce-on-plate-31637793/) | [gu-ko-2150570603](https://www.pexels.com/@gu-ko-2150570603) | Pexels License |
 | `roulade.webp` | [pexels 14766281](https://www.pexels.com/photo/decorated-meringue-roulade-cake-14766281/) | [evgeniya-davydova-35773675](https://www.pexels.com/@evgeniya-davydova-35773675) | Pexels License |
 | `salad-bowls.webp` | [pexels 13630358](https://www.pexels.com/photo/healthy-foods-on-a-bowl-13630358/) | [enginakyurt](https://www.pexels.com/@enginakyurt) | Pexels License |
+| `sambuusa.webp` | [pexels 21078315](https://www.pexels.com/photo/indian-samosa-with-red-sauce-21078315/) | Ann Barnes | Pexels License |
 | `seafood-pasta.webp` | [pexels 31235407](https://www.pexels.com/photo/delicious-seafood-pasta-with-creamy-mushroom-sauce-31235407/) | [valeriya](https://www.pexels.com/@valeriya) | Pexels License |
+| `shawarma-fries.webp` | [pexels 29285458](https://www.pexels.com/photo/delicious-chicken-shawarma-with-fries-and-sauce-29285458/) | [nano-erdozain-120534369](https://www.pexels.com/@nano-erdozain-120534369) | Pexels License |
+| `shawarma-wraps.webp` | [pexels 8018079](https://www.pexels.com/photo/sliced-shawarma-on-a-plate-8018079/) | Dee Dave | Pexels License |
 | `shrimp-pasta.webp` | [pexels 4374556](https://www.pexels.com/photo/pasta-dish-on-ceramic-plate-4374556/) | [nastyasensei-66707](https://www.pexels.com/@nastyasensei-66707) | Pexels License |
 | `smoothies.webp` | [pexels 6990114](https://www.pexels.com/photo/photo-of-glasses-with-smoothies-6990114/) | [minchephoto](https://www.pexels.com/@minchephoto) | Pexels License |
 | `soda-glass.webp` | [pexels 8880742](https://www.pexels.com/photo/glass-of-soda-with-ice-cubes-8880742/) | [ron-lach](https://www.pexels.com/@ron-lach) | Pexels License |

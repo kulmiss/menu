@@ -220,7 +220,7 @@ php artisan config:cache
 <section id="themes"><h2>Themes</h2><p>A <strong>theme</strong> is a ready-made look: a colour, a font and a menu style. Restaurants pick one in <strong>Appearance → Themes</strong>, then change it.</p>
 <ol>
 <li>Open <strong>Themes</strong>. Tap <strong>New theme</strong>.</li>
-<li>Type a <strong>Name</strong>. Choose the <strong>Colour</strong>, <strong>Font</strong> and <strong>Menu style</strong> (A to G).</li>
+<li>Type a <strong>Name</strong>. Choose the <strong>Colour</strong>, <strong>Font</strong> and <strong>Menu style</strong> (A to L).</li>
 <li>Turn on <strong>Offer</strong> to show it to restaurants.</li>
 </ol>
 <p>A theme with a menu style that a plan doesn't include is shown with a lock to those restaurants.</p>
@@ -307,9 +307,10 @@ php artisan config:cache
 <p>Unconfirmed sign-ups are deleted after 7 days.</p>
 </section>
 <h1 class="topic">7. Legal texts, languages and help</h1>
-<section id="legal-texts"><h2>Legal texts: Terms and Privacy</h2><p>Open <strong>Settings → General</strong>. Scroll to <strong>Terms of use</strong> and <strong>Privacy policy</strong>.</p>
+<section id="legal-texts"><h2>Legal texts and site pages</h2><p>Open <strong>Settings → General</strong>. Scroll to <strong>Terms of use</strong>, <strong>Privacy policy</strong>, <strong>About us page</strong>, <strong>Contact us page</strong> and <strong>Cookie info page</strong>.</p>
 <p>The defaults are a <strong>draft</strong>. Read them and change them for your business and your country. Ask a lawyer.</p>
-<p>The texts are shown at <code>/terms</code> and <code>/privacy</code>, at sign-up and in the app. Every saved version is kept, so you can show what was valid on a date.</p>
+<p>The texts are shown at <code>/terms</code>, <code>/privacy</code>, <code>/about</code>, <code>/contact</code> and <code>/cookies</code>. Terms and Privacy are also shown at sign-up and in the app; every saved version of them is kept, so you can show what was valid on a date. The Contact us page also shows the WhatsApp, phone and e-mail from <strong>Footer</strong>.</p>
+<p><strong>View page</strong> opens the page. <strong>Reset to default text</strong> puts the standard text back.</p>
 </section>
 <section id="languages"><h2>Languages</h2><p>The admin, the app and the guest menus are in <strong>English</strong> today. Restaurants type their dishes in their own words.</p>
 <p><strong>Default language</strong> and <strong>Default currency</strong> for new restaurants are in <strong>Settings → General</strong>.</p>
@@ -320,9 +321,9 @@ php artisan config:cache
 <li><strong>Button clicks</strong>: how often visitors clicked <strong>Create my free menu</strong>, <strong>Continue with Google</strong> and <strong>See a demo menu</strong> (last 30 days and in total). No cookies and no IP addresses: only a number per button and day.</li>
 <li><strong>Texts and sections</strong>: open a section to change its words. Leave a field empty for the default text (shown in grey). Switch a section off, or move it up or down. Click <strong>Save texts and sections</strong>.</li>
 <li><strong>Pictures</strong>: the phone screenshots (light and dark mode) and the link preview. <strong>Upload</strong> your own, or <strong>Use the built-in one</strong>.</li>
-<li><strong>Colour, WhatsApp, customers and links</strong>: the brand colour; the WhatsApp number shows <strong>Questions? Chat with us</strong>, and when sign-up is off every sign-up button becomes <strong>Contact us on WhatsApp</strong> (or the support e-mail).</li>
+<li><strong>Colour, WhatsApp and customers</strong>: the brand colour; the WhatsApp number shows <strong>Questions? Chat with us</strong>, and when sign-up is off every sign-up button becomes <strong>Contact us on WhatsApp</strong> (or the support e-mail).</li>
 <li><strong>Customers say</strong>: only real quotes from real restaurants, with their permission. Tick <strong>This is a real customer</strong> on each one. The section starts switched off; it shows only when it is on and has at least one ticked quote.</li>
-<li><strong>Footer links</strong> to your social pages.</li>
+<li><strong>Social links</strong> and the rest of the footer: see <strong>Footer</strong> (top menu).</li>
 </ul>
 <p>Prices on the landing page come from <strong>Plans</strong>: you never type them here.</p>
 <p><strong>Settings → Logo &amp; link preview</strong></p>
@@ -331,6 +332,28 @@ php artisan config:cache
 <li><strong>Link preview</strong>: the picture apps show when a restaurant without a banner shares its menu link (1200 × 630).</li>
 </ul>
 <p><strong>Settings → Billing</strong>: your company name, address and tax number on invoices, the invoice number prefix, the footer text and the VAT rate.</p>
+</section>
+<section id="footer"><h2>Website footer</h2><p><strong>Footer</strong> (top menu) is the bottom of every website page: the home page, sign-up and sign-in, Help, Terms, Privacy and the other public pages. Restaurant menus never show it.</p>
+<p><strong>Parts</strong>: switch the picture band, <strong>Contact</strong>, the <strong>Google Play badge</strong>, the <strong>Trust line</strong> and the <strong>Back to top</strong> button on or off.</p>
+<p><strong>Columns and links</strong></p>
+<ul>
+<li>Change a column's title, switch it off, or remove it. <strong>Add a column</strong> (up to 6).</li>
+<li>Each link has a text and <strong>Goes to</strong>: a page of this site from the list, or <strong>A web address…</strong> (<code>https://</code>, <code>mailto:</code> or <code>tel:</code>). Other kinds of link are refused.</li>
+<li>Change the order: drag the handle, or use the arrows. Up to 12 links a column.</li>
+<li>On phones the columns fold open and shut; the contact block always shows.</li>
+</ul>
+<p><strong>Contact</strong>: empty fields are hidden. The WhatsApp number becomes a green chat button.</p>
+<p><strong>Social links</strong>: only the networks with an address show. Search engines get them too.</p>
+<p><strong>Google Play badge</strong>: shows only when the Google Play address is set (<code>https://play.google.com/…</code>).</p>
+<p><strong>Trust line</strong>: write only what is true, for example &quot;Free plan forever&quot;.</p>
+<p><strong>Draft, preview and Publish</strong></p>
+<ol>
+<li>Change what you need and click <strong>Save draft</strong>. Guests still see the live footer.</li>
+<li>Check the <strong>Preview</strong>: <strong>Phone</strong> or <strong>Computer</strong>, <strong>Light</strong> or <strong>Dark</strong>.</li>
+<li>Click <strong>Publish</strong>. The new footer is live at once.</li>
+</ol>
+<p><strong>Discard draft</strong> throws your unpublished changes away.</p>
+<p><strong>Version history</strong> keeps every published footer. <strong>Restore</strong> puts an earlier one live again in one click; it becomes a new version, so nothing is lost. Every change is in <strong>Activity</strong>.</p>
 </section>
 <section id="help-articles"><h2>Help articles</h2><p>Open <strong>Help articles</strong>. Choose <strong>Restaurant help</strong> or <strong>Super Admin guide</strong>.</p>
 <p>The list shows each article, its topic, if it is <strong>Default</strong>, <strong>Changed</strong> or <strong>Your own</strong>, and the <strong>Was this helpful?</strong> counts. Articles with many &quot;No&quot; answers need better words.</p>

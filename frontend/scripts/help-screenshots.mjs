@@ -114,6 +114,11 @@ const shots = {
   'style-mesob': { path: '/demo-mesob', guest: true },
   'style-lounge': { path: '/demo-lounge', guest: true },
   'style-board': { path: '/demo-street', guest: true },
+  'style-arabic': { path: '/demo-mandi', guest: true },
+  'style-islamic': { path: '/demo-halal', guest: true },
+  'style-somali': { path: '/demo-xamar', guest: true },
+  'style-mono': { path: '/demo-atelier', guest: true },
+  'style-colourful': { path: '/demo-juicy', guest: true },
   'guest-my-order': {
     path: '/demo',
     guest: true,

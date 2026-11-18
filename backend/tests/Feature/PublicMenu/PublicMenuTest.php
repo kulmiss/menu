@@ -42,7 +42,7 @@ it('shows the visible menu with prices, labels and the item details data', funct
         ->assertDontSee('Secret')
         ->getContent();
 
-    expect($html)->toContain('<html lang="en">')
+    expect($html)->toContain('<html lang="en" dir="ltr">')
         ->not->toContain('<script src')       // nothing to download: CSS and JS are inline
         ->not->toContain('<link rel="stylesheet"');
 });

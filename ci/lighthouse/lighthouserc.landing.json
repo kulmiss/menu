@@ -4,7 +4,13 @@
       "url": [
         "http://localhost:8125/",
         "http://localhost:8125/signin",
-        "http://localhost:8125/signup"
+        "http://localhost:8125/signup",
+        "http://localhost:8125/terms",
+        "http://localhost:8125/about",
+        "http://localhost:8125/contact",
+        "http://localhost:8125/cookies",
+        "http://localhost:8125/support",
+        "http://localhost:8125/support/menu-styles"
       ],
       "numberOfRuns": 5,
       "settings": {

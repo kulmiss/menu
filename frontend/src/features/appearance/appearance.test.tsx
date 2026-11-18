@@ -36,6 +36,11 @@ const APPEARANCE: Appearance = {
   show_logo: true,
   show_banner: true,
   show_order_list: true,
+  menu_direction: 'auto',
+  show_halal: false,
+  ramadan_mode: false,
+  photos_greyscale: false,
+  mono_accent: false,
   theme_id: null,
   logo: null,
   cover: null,
@@ -48,6 +53,11 @@ const APPEARANCE: Appearance = {
     'mesob',
     'lounge',
     'board',
+    'arabic',
+    'islamic',
+    'somali',
+    'mono',
+    'colour',
   ],
   banner: {
     editorial: { ratio: [16, 9], text: 'under' },
@@ -57,6 +67,11 @@ const APPEARANCE: Appearance = {
     mesob: { ratio: [5, 2], text: 'under' },
     lounge: { ratio: [2, 1], text: 'over' },
     board: { ratio: [2, 1], text: 'under' },
+    arabic: { ratio: [5, 2], text: 'under' },
+    islamic: { ratio: [5, 2], text: 'under' },
+    somali: { ratio: [2, 1], text: 'under' },
+    mono: { ratio: [2, 1], text: 'under' },
+    colour: { ratio: [5, 2], text: 'under' },
   },
   themes: [
     {
@@ -191,6 +206,67 @@ describe('AppearancePage', () => {
       await expect.poll(() => frame(screen).src).toContain(`style=${style}`)
       await expect.element(screen.getByText(hint)).toBeVisible()
     }
+  })
+
+  it('offers H · Arabic to L · Colourful, and each changes the preview', async () => {
+    const screen = await render()
+    for (const [name, style, hint] of [
+      ['H · Arabic', 'arabic', /Right-to-left for Arabic menus/],
+      ['I · Islamic', 'islamic', /Optional Halal badge and Ramadan mode/],
+      ['J · Somali', 'somali', /woven-basket bands and waves/],
+      ['K · Black & White', 'mono', /Only black, white and greys/],
+      ['L · Colourful', 'colour', /A bright colour for each category/],
+    ] as const) {
+      await userEvent.click(
+        screen.getByRole('radio', { name: new RegExp(name) })
+      )
+      await expect.poll(() => frame(screen).src).toContain(`style=${style}`)
+      await expect.element(screen.getByText(hint)).toBeVisible()
+    }
+  })
+
+  it('shows each style option only with its style, and the preview follows it', async () => {
+    const screen = await render()
+    // Style B has no options.
+    await expect
+      .element(screen.getByText('Menu direction'))
+      .not.toBeInTheDocument()
+    await expect
+      .element(screen.getByRole('switch', { name: /Show a "Halal" badge/ }))
+      .not.toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('radio', { name: /H · Arabic/ }))
+    await expect
+      .element(screen.getByRole('radio', { name: /Automatic/ }))
+      .toBeChecked()
+    await userEvent.click(screen.getByRole('radio', { name: 'Right to left' }))
+    await expect.poll(() => frame(screen).src).toContain('menu_direction=rtl')
+
+    await userEvent.click(screen.getByRole('radio', { name: /I · Islamic/ }))
+    await expect
+      .element(screen.getByText('Menu direction'))
+      .not.toBeInTheDocument()
+    await userEvent.click(
+      screen.getByRole('switch', { name: /Show a "Halal" badge/ })
+    )
+    await userEvent.click(screen.getByRole('switch', { name: /Ramadan mode/ }))
+    await expect.poll(() => frame(screen).src).toContain('show_halal=1')
+    await expect.poll(() => frame(screen).src).toContain('ramadan_mode=1')
+
+    await userEvent.click(
+      screen.getByRole('radio', { name: /K · Black & White/ })
+    )
+    await expect
+      .element(screen.getByRole('switch', { name: /Ramadan mode/ }))
+      .not.toBeInTheDocument()
+    await userEvent.click(
+      screen.getByRole('switch', { name: /Black-and-white photos/ })
+    )
+    await userEvent.click(
+      screen.getByRole('switch', { name: /Use your brand colour/ })
+    )
+    await expect.poll(() => frame(screen).src).toContain('photos_greyscale=1')
+    await expect.poll(() => frame(screen).src).toContain('mono_accent=1')
   })
 
   it('offers D · Minimal next to A, B and C, with logo and banner switches', async () => {

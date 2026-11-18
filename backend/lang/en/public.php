@@ -11,6 +11,7 @@ return [
     'no_results' => 'Nothing matches your search.',
     'sold_out' => 'Sold out',
     'new' => 'New',
+    'halal' => 'Halal',
     'popular' => 'Popular',
     'close' => 'Close',
     'back_to_top' => 'Back to top',

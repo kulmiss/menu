@@ -21,7 +21,10 @@ use App\Tenancy\CurrentTenant;
  * More complete restaurants with real photos, one per menu style, to show
  * restaurants what each style looks like: A editorial (fine dining), B grid
  * (pizza & burgers), C bistro (bakery & juice bar), E mesob (Ethiopian and
- * Somali), F lounge (cocktail bar, happy hour), G board (street food).
+ * Somali), F lounge (cocktail bar, happy hour), G board (street food), H arabic
+ * (Yemeni mandi, menu in Arabic: right-to-left), I islamic (halal family
+ * restaurant), J somali (Somali café), K mono (speciality coffee) and
+ * L colour (juice bar and ice cream).
  */
 class Showcase
 {
@@ -58,6 +61,8 @@ class Showcase
             TenantAppearance::create([
                 ...TenantAppearance::DEFAULTS,
                 'style' => $def['style'], 'primary_color' => $def['color'], 'banner_text' => $def['banner_text'],
+                // Style options (H: direction, I: Halal and Ramadan mode, K: greyscale and accent).
+                ...($def['options'] ?? []),
                 'cover_media_id' => $this->photos->media($tenant, $def['banner'], true)?->id,
                 'logo_media_id' => $this->photos->logo($tenant, $def['color'], $def['logo'])?->id,
             ]);
@@ -330,6 +335,205 @@ class Showcase
                                 ['Avocado spris', 'Avocado, mango, papaya', 12000, ['vegan', 'popular'], ['k' => 280, 'ph' => ['avocado-smoothie']]],
                                 ['Mango juice', null, 10000, ['vegan'], ['k' => 190, 'ph' => ['mango-juice']]],
                                 ['Orange juice', null, 9500, ['vegan'], ['k' => 150]],
+                            ]],
+                        ]],
+                    ],
+                ],
+            ],
+            [
+                'slug' => 'demo-mandi', 'name' => 'دار المندي', 'email' => 'mandi@example.com', 'plan' => 'plus', 'age' => 3,
+                'style' => 'arabic', 'color' => '#0f5c4a', 'logo' => 'ring', 'banner' => 'shawarma-wraps', 'banner_text' => 'under',
+                // The dish and category names are in Arabic: "automatic" shows the menu right-to-left.
+                'options' => ['menu_direction' => 'auto'],
+                'about' => "Yemeni mandi and grills, slow-cooked in our tandoor oven.\nFamily seating upstairs.",
+                'address' => 'Bole Atlas, Addis Ababa', 'phone' => '+251 11 000 0877', 'hours' => [['11:00', '23:30']],
+                'special' => ['Mandi feast for four', 'Lamb mandi, chicken mandi, salads and Arabic coffee — Br 2,600.', 'لحم مندي', 'kabsa-platter'],
+                'news' => ['After 20:00:', 'Arabic coffee and dates on the house.'],
+                'catalogue' => [
+                    'groups' => [
+                        'rice' => ['Rice', 1, 1, [['Mandi rice (smoked)', 0], ['Kabsa rice (tomato)', 0]]],
+                        'sauce' => ['Sauce', 0, 2, [['Daqqus (tomato and chili)', 0], ['Toum (garlic)', 1500], ['Yogurt', 1000]]],
+                    ],
+                    'menus' => [
+                        ['name' => 'المنيو', 'slug' => 'menu', 'categories' => [
+                            ['المندي · Mandi', 'Slow-cooked in the tandoor, on smoked rice.', [
+                                ['مندي دجاج', 'Chicken mandi: half a chicken on smoked rice, with daqqus', 52000, ['halal', 'popular'], ['k' => 950, 'pm' => 20, 'ph' => ['mandi-chicken'], 'g' => ['rice', 'sauce'], 'sz' => [['Half chicken', 52000], ['Whole chicken', 95000]]]],
+                                ['لحم مندي', 'Lamb mandi: lamb shoulder on smoked rice', 78000, ['halal', 'popular'], ['k' => 1200, 'pm' => 25, 'ph' => ['kabsa-platter'], 'g' => ['rice', 'sauce']]],
+                                ['حنيذ', 'Haneeth: slow-roasted lamb, the Yemeni way', 82000, ['halal'], ['k' => 1150, 'pm' => 30, 'g' => ['rice'], 'so' => true]],
+                                ['كبسة دجاج', 'Chicken kabsa: spiced tomato rice, raisins and almonds', 48000, ['halal', 'new'], ['al' => ['nuts'], 'k' => 980, 'pm' => 20, 'g' => ['sauce']]],
+                            ]],
+                            ['شاورما · Shawarma', null, [
+                                ['صحن شاورما دجاج', 'Chicken shawarma plate with fries and toum', 34000, ['halal', 'popular'], ['al' => ['gluten'], 'k' => 880, 'pm' => 10, 'ph' => ['shawarma-fries'], 'g' => ['sauce']]],
+                                ['شاورما لحم', 'Beef shawarma wrap, pickles, tahini', 26000, ['halal'], ['al' => ['gluten', 'sesame'], 'k' => 640, 'pm' => 8, 'ph' => ['shawarma-wraps']]],
+                                ['فلافل', 'Falafel: six pieces with tahini and salad', 16000, ['vegan'], ['al' => ['sesame'], 'k' => 420, 'pm' => 8]],
+                            ]],
+                            ['مقبلات · Mezze', 'To share, with warm bread.', [
+                                ['حمص', 'Hummus with olive oil and warm bread', 14000, ['vegan'], ['al' => ['sesame', 'gluten'], 'k' => 380, 'ph' => ['hummus-pita']]],
+                                ['حمص باللحمة', 'Hummus topped with spiced minced lamb', 22000, ['halal'], ['al' => ['sesame'], 'k' => 560, 'ph' => ['hummus-board']]],
+                                ['فتوش', 'Fattoush: crisp bread, sumac and garden salad', 15000, ['vegan'], ['al' => ['gluten'], 'k' => 260]],
+                            ]],
+                            ['قهوة وحلويات · Coffee & sweets', null, [
+                                ['قهوة عربية', 'Arabic coffee with cardamom, a pot for the table', 12000, ['vegan', 'popular'], ['ph' => ['arabic-coffee'], 'sz' => [['Small pot', 12000], ['Large pot', 20000]]]],
+                                ['كنافة', 'Kunafa: warm cheese pastry, syrup and pistachio', 18000, ['vegetarian'], ['al' => ['milk', 'gluten', 'nuts'], 'k' => 520]],
+                                ['شاي عدني', 'Adeni tea: milk tea with cardamom', 6000, ['vegetarian'], ['al' => ['milk']]],
+                            ]],
+                        ]],
+                    ],
+                ],
+            ],
+            [
+                'slug' => 'demo-halal', 'name' => 'Al-Noor Family Kitchen', 'email' => 'halal@example.com', 'plan' => 'plus', 'age' => 3,
+                'style' => 'islamic', 'color' => '#0d6b5f', 'logo' => 'drop', 'banner' => 'biryani-dark', 'banner_text' => 'under',
+                'options' => ['show_halal' => true, 'ramadan_mode' => false],
+                'about' => "Halal grills, biryani and family platters.\nFamily room and a kids' corner upstairs.",
+                'address' => 'Mexico Square, Addis Ababa', 'phone' => '+251 11 000 0988', 'hours' => [['10:00', '23:00']],
+                'special' => ['Iftar set for two', 'Dates, lentil soup, chicken biryani and two drinks — Br 1,450, at sunset.', 'Chicken biryani', 'biryani-plates'],
+                'news' => ['Family room:', 'Separate family seating and a kids\' corner upstairs.'],
+                'catalogue' => [
+                    'groups' => [
+                        'side' => ['Choose your side', 1, 1, [['Saffron rice', 0], ['Bread', 0], ['Fries', 0]]],
+                        'heat' => ['How spicy?', 1, 1, [['Mild', 0], ['Medium', 0], ['Hot', 0]]],
+                    ],
+                    'menus' => [
+                        ['name' => 'Menu', 'slug' => 'menu', 'categories' => [
+                            ['Grills', 'From the charcoal grill, with rice or bread.', [
+                                ['Mixed grill', 'Lamb chops, chicken tikka, kofta and rice', 145000, ['halal', 'popular'], ['k' => 1600, 'pm' => 25, 'ph' => ['steak-veg'], 'g' => ['side'], 'sz' => [['For two', 145000], ['For four', 270000]]]],
+                                ['Chicken tikka', 'Yogurt-marinated chicken, mint chutney', 52000, ['halal', 'spicy'], ['al' => ['milk'], 'k' => 640, 'pm' => 20, 'ph' => ['chicken-plate'], 'g' => ['side', 'heat']]],
+                                ['Lamb kofta', 'Minced lamb skewers, onion and sumac', 56000, ['halal'], ['k' => 720, 'pm' => 20, 'g' => ['side', 'heat']]],
+                                ['Grilled wings', 'Eight wings, lemon and garlic', 38000, ['halal'], ['k' => 690, 'pm' => 15, 'ph' => ['wings'], 'so' => true]],
+                            ]],
+                            ['Rice', null, [
+                                ['Chicken biryani', 'Basmati, saffron, fried onions, raita', 48000, ['halal', 'popular'], ['al' => ['milk'], 'k' => 900, 'pm' => 15, 'ph' => ['biryani-dark'], 'g' => ['heat']]],
+                                ['Lamb biryani', 'Slow-cooked lamb, spiced rice', 62000, ['halal'], ['al' => ['milk'], 'k' => 1050, 'pm' => 15, 'ph' => ['biryani-plates']]],
+                                ['Vegetable pulao', 'Peas, carrots and cashews', 30000, ['vegetarian'], ['al' => ['nuts'], 'k' => 610]],
+                            ]],
+                            ['Starters & soup', null, [
+                                ['Lentil soup', 'Red lentils, cumin and lemon', 12000, ['vegan'], ['k' => 240]],
+                                ['Hummus', 'Pomegranate, mint and olives', 16000, ['vegan'], ['al' => ['sesame'], 'k' => 380, 'ph' => ['hummus-mint']]],
+                                ['Samosa', 'Three crispy beef samosas', 14000, ['halal'], ['al' => ['gluten'], 'k' => 420, 'ph' => ['sambuusa']]],
+                            ]],
+                            ['Drinks', null, [
+                                ['Fresh mango juice', null, 12000, ['vegan'], ['k' => 190, 'ph' => ['mango-juice']]],
+                                ['Mint lemonade', null, 10000, ['vegan'], ['k' => 120, 'ph' => ['iced-mint-tea']]],
+                                ['Karak tea', 'Spiced milk tea', 7000, ['vegetarian'], ['al' => ['milk'], 'ph' => ['spiced-tea']]],
+                            ]],
+                        ]],
+                    ],
+                ],
+            ],
+            [
+                'slug' => 'demo-xamar', 'name' => 'Xamar Café', 'email' => 'xamar@example.com', 'plan' => 'plus', 'age' => 3,
+                'style' => 'somali', 'color' => '#c2410c', 'logo' => 'bean', 'banner' => 'sambuusa', 'banner_text' => 'under',
+                'about' => "Somali breakfast, bariis with hilib ari, and sweet shaah all day.\nA little Eastleigh in Bole.",
+                'address' => 'Bole Rwanda, Addis Ababa', 'phone' => '+251 11 000 1099', 'hours' => [['06:00', '23:00']],
+                'special' => ['Bariis for two', 'Bariis iskukaris, hilib ari, salad and banana — Br 1,100.', 'Bariis iskukaris', 'kabsa-platter'],
+                'news' => ['Every morning:', 'Fresh canjeero and muufo from 06:00.'],
+                'catalogue' => [
+                    'groups' => [
+                        'meat' => ['Meat', 1, 1, [['Goat (hilib ari)', 0], ['Chicken (digaag)', 0], ['Camel (hilib geel)', 6000]]],
+                    ],
+                    'menus' => [
+                        ['name' => 'Menu', 'slug' => 'menu', 'categories' => [
+                            ['Quraac · Breakfast', 'Until 11:00.', [
+                                ['Canjeero iyo suqaar', 'Somali pancakes with spiced beef cubes', 22000, ['halal', 'popular'], ['k' => 680, 'pm' => 10, 'ph' => ['injera-platter']]],
+                                ['Canjeero macaan', 'Two canjeero with sesame oil and sugar', 12000, ['vegan'], ['al' => ['sesame'], 'k' => 420]],
+                                ['Beer iyo canjeero', 'Liver with onions and peppers, canjeero', 24000, ['halal'], ['k' => 610, 'pm' => 10, 'so' => true]],
+                                ['Muufo', 'Flatbread from the clay oven', 4000, ['vegan'], ['al' => ['gluten'], 'k' => 210]],
+                            ]],
+                            ['Qado · Lunch', 'With banana and basbaas (green chili sauce).', [
+                                ['Bariis iskukaris', 'Spiced rice with your choice of meat', 44000, ['halal', 'popular'], ['k' => 980, 'pm' => 15, 'ph' => ['biryani-plates'], 'g' => ['meat']]],
+                                ['Hilib ari', 'Goat on the bone, slow-roasted', 52000, ['halal'], ['k' => 860, 'pm' => 20, 'ph' => ['tibs']]],
+                                ['Baasto iyo suugo', 'Pasta with Somali beef sauce', 30000, ['halal'], ['al' => ['gluten'], 'k' => 790, 'pm' => 12, 'ph' => ['bolognese']]],
+                                ['Kalluun', 'Fried kingfish with lemon and rice', 46000, ['new'], ['al' => ['fish'], 'k' => 720, 'pm' => 15]],
+                            ]],
+                            ['Cunto fudud · Snacks', null, [
+                                ['Sambuusa', 'Crispy beef or lentil sambuusa', 9000, ['popular'], ['al' => ['gluten'], 'k' => 360, 'ph' => ['sambuusa'], 'sz' => [['3 pieces', 9000], ['6 pieces', 16000]]]],
+                                ['Bajiye', 'Black-eyed pea fritters', 8000, ['vegan'], ['k' => 320]],
+                            ]],
+                            ['Cabitaan · Drinks', null, [
+                                ['Shaah', 'Somali spiced tea with milk', 4000, ['vegetarian', 'popular'], ['al' => ['milk'], 'ph' => ['spiced-tea']]],
+                                ['Mango & papaya juice', null, 10000, ['vegan'], ['k' => 180, 'ph' => ['mango-juice']]],
+                                ['Cambe iyo caano', 'Mango and milk shake', 12000, ['vegetarian'], ['al' => ['milk'], 'k' => 290]],
+                            ]],
+                        ]],
+                    ],
+                ],
+            ],
+            [
+                'slug' => 'demo-atelier', 'name' => 'Atelier Coffee', 'email' => 'atelier@example.com', 'plan' => 'plus', 'age' => 2,
+                'style' => 'mono', 'color' => '#9a3412', 'logo' => 'bean', 'banner' => 'cafe-bali', 'banner_text' => 'under',
+                'options' => ['photos_greyscale' => true, 'mono_accent' => false],
+                'about' => "Speciality coffee from Ethiopian farms, pastry baked in-house.\nQuiet tables and fast Wi-Fi.",
+                'address' => 'Kazanchis, Addis Ababa', 'phone' => '+251 11 000 1100', 'hours' => [['07:00', '19:00']],
+                'special' => ['Pour-over flight', 'Three single-origin coffees side by side — Br 360.', 'Pour-over', 'latte-biscotti'],
+                'news' => ['This week:', 'Guji natural, roasted on Monday.'],
+                'catalogue' => [
+                    'groups' => [
+                        'milk' => ['Milk', 1, 1, [['Whole milk', 0], ['Oat milk', 2000]]],
+                    ],
+                    'menus' => [
+                        ['name' => 'Menu', 'slug' => 'menu', 'categories' => [
+                            ['Coffee', 'Single origin, roasted every week.', [
+                                ['Espresso', 'Yirgacheffe, washed', 9000, ['vegan'], ['ph' => ['espresso']]],
+                                ['Macchiato', null, 10000, ['vegetarian'], ['al' => ['milk'], 'ph' => ['macchiato'], 'g' => ['milk']]],
+                                ['Flat white', 'Double ristretto, steamed milk', 14000, ['vegetarian', 'popular'], ['al' => ['milk'], 'ph' => ['latte'], 'g' => ['milk']]],
+                                ['Cappuccino', null, 13000, ['vegetarian'], ['al' => ['milk'], 'ph' => ['cappuccino'], 'g' => ['milk']]],
+                                ['Pour-over', 'Guji or Sidamo, ask the barista', 16000, ['vegan', 'new'], ['ph' => ['latte-biscotti']]],
+                                ['Cold brew', 'Eighteen hours, served over ice', 15000, ['vegan'], ['ph' => ['cold-brew']]],
+                            ]],
+                            ['Pastry', 'Baked here every morning.', [
+                                ['Butter croissant', null, 9000, ['vegetarian'], ['al' => ['gluten', 'milk'], 'k' => 280, 'ph' => ['croissants']]],
+                                ['Pain au chocolat', null, 11000, ['vegetarian'], ['al' => ['gluten', 'milk'], 'k' => 320, 'ph' => ['pain-choc']]],
+                                ['Cardamom bun', null, 10000, ['vegetarian'], ['al' => ['gluten', 'milk'], 'k' => 300, 'so' => true]],
+                            ]],
+                            ['Brunch', 'Until 14:00.', [
+                                ['Avocado toast', 'Sourdough, lime, chili, egg', 24000, ['vegetarian'], ['al' => ['gluten', 'eggs'], 'k' => 480, 'pm' => 10, 'ph' => ['avocado-toast']]],
+                                ['Poached eggs', 'Hollandaise and greens', 26000, ['vegetarian'], ['al' => ['eggs', 'milk'], 'k' => 520, 'pm' => 12, 'ph' => ['poached-eggs']]],
+                                ['Granola', 'Yogurt, honey and berries', 18000, ['vegetarian'], ['al' => ['milk', 'nuts'], 'k' => 410, 'ph' => ['granola']]],
+                            ]],
+                        ]],
+                    ],
+                ],
+            ],
+            [
+                'slug' => 'demo-juicy', 'name' => 'Juicy Jungle', 'email' => 'juicy@example.com', 'plan' => 'plus', 'age' => 2,
+                'style' => 'colour', 'color' => '#e8437f', 'logo' => 'drop', 'banner' => 'juices-table', 'banner_text' => 'under',
+                'about' => "Fresh juice, smoothies, ice cream and snacks.\nKids' corner and free water refills.",
+                'address' => 'CMC, Addis Ababa', 'phone' => '+251 11 000 1211', 'hours' => [['08:00', '22:00']],
+                'special' => ['Rainbow cup', 'Five scoops in five colours, with sprinkles — Br 260.', 'Rainbow cup', 'ice-cream'],
+                'news' => ['Weekends:', 'Kids under 6 get a free mini juice.'],
+                'catalogue' => [
+                    'groups' => [
+                        'flavour' => ['Flavour', 1, 2, [['Vanilla', 0], ['Chocolate', 0], ['Mango', 0], ['Strawberry', 0]]],
+                    ],
+                    'menus' => [
+                        ['name' => 'Menu', 'slug' => 'menu', 'categories' => [
+                            ['Juices', 'Pressed to order, no sugar added.', [
+                                ['Mango sunrise', 'Mango, orange and a little lime', 16000, ['vegan', 'popular'], ['k' => 190, 'ph' => ['mango-juice'], 'sz' => [['Small', 16000], ['Large', 22000]]]],
+                                ['Kiwi kick', 'Kiwi, apple and mint', 15000, ['vegan'], ['k' => 150, 'ph' => ['kiwi-juice']]],
+                                ['Orange', null, 12000, ['vegan'], ['k' => 140, 'ph' => ['orange-juice']]],
+                                ['Avocado spris', 'Avocado, mango and papaya in layers', 18000, ['vegan', 'popular'], ['k' => 280, 'ph' => ['avocado-smoothie']]],
+                            ]],
+                            ['Smoothies', null, [
+                                ['Berry blast', 'Strawberry, banana and yogurt', 19000, ['vegetarian'], ['al' => ['milk'], 'k' => 260, 'ph' => ['strawberry-smoothie']]],
+                                ['Green glow', 'Spinach, apple and ginger', 18000, ['vegan', 'new'], ['k' => 170, 'ph' => ['smoothies']]],
+                            ]],
+                            ['Ice cream', 'Made here, every day.', [
+                                ['Rainbow cup', 'Five scoops, five colours, sprinkles', 26000, ['vegetarian', 'popular'], ['al' => ['milk'], 'k' => 640, 'ph' => ['ice-cream']]],
+                                ['Single scoop', 'Vanilla, chocolate, mango or strawberry', 7000, ['vegetarian'], ['al' => ['milk'], 'k' => 140, 'g' => ['flavour']]],
+                            ]],
+                            ['Waffles & sweets', null, [
+                                ['Waffle', 'Honey, cream and fruit', 20000, ['vegetarian'], ['al' => ['gluten', 'milk', 'eggs'], 'k' => 520, 'pm' => 8, 'ph' => ['waffle']]],
+                                ['Donuts', 'Three glazed donuts', 15000, ['vegetarian'], ['al' => ['gluten', 'milk', 'eggs'], 'k' => 690, 'ph' => ['donuts'], 'so' => true]],
+                                ['Cupcake', null, 9000, ['vegetarian'], ['al' => ['gluten', 'milk', 'eggs'], 'k' => 340, 'ph' => ['cupcake']]],
+                            ]],
+                            ['Snacks', null, [
+                                ['Fruit salad', 'Seasonal fruit, lime and mint', 14000, ['vegan'], ['k' => 160, 'ph' => ['fruit-salad']]],
+                                ['Fries', 'Salted, with ketchup', 11000, ['vegan'], ['k' => 410, 'ph' => ['fries-ketchup']]],
+                            ]],
+                            ["Kids' menu", 'For children under 10.', [
+                                ['Mini juice', 'Any juice in a small cup', 8000, ['vegan'], ['k' => 90]],
+                                ['Mini pancakes', 'Five little pancakes with honey', 12000, ['vegetarian'], ['al' => ['gluten', 'milk', 'eggs'], 'k' => 360, 'pm' => 8, 'ph' => ['pancakes']]],
                             ]],
                         ]],
                     ],

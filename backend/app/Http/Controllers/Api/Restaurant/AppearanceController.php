@@ -92,6 +92,7 @@ class AppearanceController extends Controller
             'font' => [$req, Rule::in(TenantAppearance::FONTS)],
             'style' => [$req, Rule::in($this->allowedStyles())],
             'banner_text' => ['sometimes', 'nullable', Rule::in(PageTheme::BANNER_TEXT)],
+            'menu_direction' => ['sometimes', Rule::in(TenantAppearance::DIRECTIONS)],
             'show_prices' => [$req, 'boolean'],
             'show_photos' => [$req, 'boolean'],
             'show_descriptions' => [$req, 'boolean'],
@@ -120,6 +121,7 @@ class AppearanceController extends Controller
             'style' => TenantAppearance::effectiveStyle($a->style, $this->allowedStyles()),
             'styles' => $this->allowedStyles(),
             'banner_text' => $a->banner_text,
+            'menu_direction' => $a->menu_direction ?? 'auto',
             // Banner shape and where the name goes by default, per style (crop frame in the admin).
             'banner' => array_map(fn (array $s) => ['ratio' => $s['banner'], 'text' => $s['text']], PageTheme::STYLES),
             'show_prices' => $a->show_prices,

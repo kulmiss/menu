@@ -6,7 +6,7 @@
 body{background-image:radial-gradient(#ffffff0a 1px,transparent 1.5px);background-size:5px 5px}
 .cv{aspect-ratio:2/1}
 @media (min-width:44rem){.cv{border-radius:0 0 1rem 1rem}}
-header{flex-direction:column;text-align:center;gap:.35rem;padding:1.4rem 1rem .75rem}
+header{flex-direction:column;text-align:center;gap:.35rem;padding:1.4rem 1rem .75rem}header>div{align-self:stretch}
 .lg{border-radius:50%;border:3px solid var(--fg);background:var(--fg)}
 h1{font-size:2.2rem;font-weight:800;line-height:1.05;letter-spacing:.03em;text-transform:uppercase}
 .st.op{color:#9cf0bf;border-color:#9cf0bf55;background:#12a15c26}

@@ -40,8 +40,9 @@ it('shows the short sign-up form in the landing style, with no script files', fu
         ->assertDontSee('Continue with Google')
         ->getContent();
     // Only inline scripts with the page's nonce: nothing to download (QUESTIONS #222 speed).
+    // The third one is the footer's (phone collapsibles and back to top, #230).
     expect(preg_match_all('/<script[^>]*\bsrc=/', $html))->toBe(0)
-        ->and(preg_match_all('/<script nonce="[^"]+">/', $html))->toBe(2);
+        ->and(preg_match_all('/<script nonce="[^"]+">/', $html))->toBe(3);
 
     config(['services.google.client_id' => 'id', 'services.google.client_secret' => 'secret']);
     PlatformSettings::save(['google_login' => true]);

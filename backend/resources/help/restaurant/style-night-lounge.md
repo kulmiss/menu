@@ -6,6 +6,7 @@ order: 12
 features: style_lounge
 roles: owner, manager
 keywords: night, lounge, bar, dark, glow, cocktails, happy hour
+public: true
 ---
 
 Style **F · Night Lounge** is always dark, even on phones in light mode, so it is easy on the eyes in a dim room. Your colour glows softly on the name, the prices and the buttons.

@@ -1,20 +1,19 @@
-# Progress — menu styles E, F, G (round of 18 Nov 2026)
+# Progress — menu styles H–L and the Super Admin footer (round of 18 Nov 2026)
 
-📍 Now: Step 10 of 10 — PR and report (done; CI green)
-📊 Progress: ▓▓▓▓▓▓▓▓▓▓ 100% done
-✅ Just finished: clean re-run of everything (A–G, Chrome + Firefox); 4 bugs fixed with tests (Night Lounge contrast, Mesob long name under +, My order list frame, search-row layout shift); PRs #157 (website) and #38 (app)
-⏭️ Next: owner merges #157, then app #38
-⚠️ Waiting for the owner: merge; check on a real iPhone (Safari) and Samsung Internet
-⏱️ Time left (estimate): none
+📍 Now: done — waiting for the owner to merge
+📊 Progress: ▓▓▓▓▓▓▓▓▓▓ 100%
+✅ Just finished: styles H–L, website footer + Super Admin editor, full re-test (A–L Chromium 372/372, Firefox 36/36; footer 112/112 and 54/54), CI green (34/34)
+⏭️ Next: owner merges website #159 and app #39
+⚠️ Waiting for the owner: the merge
+⏱️ Time left: none
 
 ## Steps
-- [x] 1. One merge per round: top PR holds the stack; workflow closes included PRs (website #156, app #37)
-- [x] 2. Style plumbing: one list of styles (A–G), theme surfaces, feature switches (Plus and up, off on Free, editable per plan / restaurant / globally)
-- [x] 3. Guest-menu CSS: E · Mesob, F · Night Lounge (prices never wrap), G · Street Board — with and without photos
-- [x] 4. Admin: style picker cards, "Preview on a computer", Super Admin switches, themes, restaurant filter
-- [x] 5. Demo restaurants per style, landing "More looks" links, help articles, CI speed matrix
-- [x] 6. Flutter app: style picker shows E/F/G (it had a fixed list of four: fixed, with a test)
-- [x] 7. Automated tests: feature, screenshot (phone + desktop, photos / photo-free, light / dark), CSP, Lighthouse CI
-- [x] 8. Real-browser runs: every feature × style × width, Chrome + Firefox, slow 3G, offline → online, style switching A → E → F → D
-- [x] 9. Fix every bug found, then re-run A–G from a clean start
-- [x] 10. One top PR into develop (CI green, not merged) and the report with screenshots
+- [x] 1. Plan and the concepts image for H–L
+- [x] 2. Style plumbing: 12 styles, options (direction, Halal, Ramadan mode, greyscale, accent), plans (Plus and up, off on Free)
+- [x] 3. H · Arabic: CSS, Noto Kufi Arabic (OFL, subset), right-to-left
+- [x] 4. I · Islamic, J · Somali, K · Black & White, L · Colourful
+- [x] 5. Admin picker and options, help articles and screenshots, demos, app style list
+- [x] 6. Footer: content, draft / publish / history, shown on every public page (not guest menus)
+- [x] 7. Footer editor in Super Admin (Content → Footer)
+- [x] 8. Tests, real-browser runs, Lighthouse; fix every bug; clean re-run of A–L and the footer
+- [x] 9. One top PR into develop and the report with screenshots

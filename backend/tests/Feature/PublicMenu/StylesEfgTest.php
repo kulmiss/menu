@@ -13,9 +13,10 @@ use App\Support\PublicMenu\MenuPageCache;
 use App\Support\PublicMenu\PageTheme;
 
 /*
- * Styles E · Mesob, F · Night Lounge and G · Street Board (owner, 2026-11-18):
- * every guest-menu feature of A–D, the style's own CSS only, the right photo
- * sizes, one dark palette for F and G, and Night Lounge prices on one line.
+ * Styles E · Mesob, F · Night Lounge and G · Street Board, and H · Arabic to
+ * L · Colourful (owner, 2026-11-18): every guest-menu feature of A–D, the
+ * style's own CSS only, the right photo sizes, one dark palette for F and G,
+ * and Night Lounge prices on one line. Style options of H–L: StylesHlTest.
  */
 function efgPage(string $style, array $appearance = [], ?callable $extra = null): string
 {
@@ -43,7 +44,7 @@ function efgPage(string $style, array $appearance = [], ?callable $extra = null)
     return (string) test()->get('/'.$tenant->slug)->assertOk()->getContent();
 }
 
-dataset('efg', ['mesob', 'lounge', 'board']);
+dataset('efg', ['mesob', 'lounge', 'board', 'arabic', 'islamic', 'somali', 'mono', 'colour']);
 
 it('shows every menu feature in the style, with its own CSS only', function (string $style) {
     $html = efgPage($style);
@@ -85,7 +86,7 @@ it('keeps one dark palette in F and G and both light and dark in E', function (s
     // (The shared CSS keeps its own small dark-phone rules, e.g. the hours pill; the palette is what counts.)
     expect(str_contains($css[1], '@media (prefers-color-scheme:dark){:root{'))->toBe(! $darkOnly)
         ->and(str_contains($css[1], 'color-scheme:dark;'))->toBe($darkOnly);
-})->with([['mesob', false], ['lounge', true], ['board', true]]);
+})->with([['mesob', false], ['lounge', true], ['board', true], ['arabic', false], ['islamic', false], ['somali', false], ['mono', false], ['colour', false]]);
 
 it('keeps Night Lounge prices on one line, old price included (happy hour)', function () {
     $css = InlineAssets::css('lounge');
@@ -99,9 +100,16 @@ it('keeps Night Lounge prices on one line, old price included (happy hour)', fun
     expect($html)->toMatch('#<span class="pr"><s>[^<]+</s> [^<]+</span>#');
 });
 
-it('loads nothing extra: no image, font or stylesheet from the CSS (CSP, speed)', function (string $style) {
+it('loads nothing extra from the CSS: only inline SVG patterns and, in style H only, its own font (CSP, speed)', function (string $style) {
     $css = (string) file_get_contents(resource_path("public-menu/style-{$style}.css"));
-    expect($css)->not->toContain('url(')->not->toContain('@import')->not->toContain('@font-face');
+    expect($css)->not->toContain('@import');
+    // Every url() is a tiny inline SVG, or (H · Arabic) its own subset font file from /menu-assets.
+    preg_match_all('/url\(\s*([^)]{0,30})/', $css, $urls);
+    foreach ($urls[1] as $url) {
+        expect(str_starts_with($url, '"data:image/svg+xml') || str_starts_with($url, 'font:'))->toBeTrue("{$style}: url({$url}…)");
+    }
+    expect(str_contains($css, '@font-face'))->toBe($style === 'arabic')
+        ->and(str_contains($css, 'url(font:'))->toBe($style === 'arabic');
 })->with(TenantAppearance::STYLES);
 
 it('shows the empty-menu note and a 500-dish menu in every new style', function (string $style) {

@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int|null $cover_media_id
  * @property string $primary_color "#b4432a"
  * @property string $font system|serif|rounded
- * @property string $style editorial|grid|bistro|minimal|mesob|lounge|board (A · Warm editorial, B · Fresh grid, C · Quiet bistro, D · Minimal, E · Mesob, F · Night Lounge, G · Street Board)
+ * @property string $style editorial|grid|bistro|minimal|mesob|lounge|board|arabic|islamic|somali|mono|colour (A · Warm editorial, B · Fresh grid, C · Quiet bistro, D · Minimal, E · Mesob, F · Night Lounge, G · Street Board, H · Arabic, I · Islamic, J · Somali, K · Black & White, L · Colourful)
  * @property bool $show_logo logo on the guest page (kept when off)
  * @property bool $show_banner banner on the guest page (kept when off)
  * @property string|null $banner_text over|under (logo and name on or below the banner); null = style default
@@ -28,11 +28,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property bool $show_pdf_link "Download menu (PDF)" link on the guest page
  * @property bool $show_other_branches "Other branches" list at the bottom of a branch's menu
  * @property bool $show_order_list "My order" list on the guest page (kept on the guest's phone)
+ * @property string $menu_direction auto|ltr|rtl, style H only (auto: right-to-left when most of the menu is in Arabic script)
+ * @property bool $show_halal "Halal" badge, style I only
+ * @property bool $ramadan_mode crescent accent, style I only
+ * @property bool $photos_greyscale black-and-white photos, style K only
+ * @property bool $mono_accent brand colour as a small accent, style K only
  * @property int|null $theme_id
  * @property-read Media|null $logo
  * @property-read Media|null $cover
  */
-#[Fillable(['logo_media_id', 'cover_media_id', 'primary_color', 'font', 'style', 'banner_text', 'show_prices', 'show_photos', 'show_descriptions', 'show_calories', 'show_share', 'show_pdf_link', 'show_order_list', 'show_other_branches', 'show_logo', 'show_banner', 'theme_id'])]
+#[Fillable(['logo_media_id', 'cover_media_id', 'primary_color', 'font', 'style', 'banner_text', 'show_prices', 'show_photos', 'show_descriptions', 'show_calories', 'show_share', 'show_pdf_link', 'show_order_list', 'show_other_branches', 'show_logo', 'show_banner', 'menu_direction', 'show_halal', 'ramadan_mode', 'photos_greyscale', 'mono_accent', 'theme_id'])]
 class TenantAppearance extends Model
 {
     use BelongsToTenant;
@@ -42,12 +47,18 @@ class TenantAppearance extends Model
     public const FONTS = ['system', 'serif', 'rounded'];
 
     /** Guest-menu styles; the order is the order of the admin picker. */
-    public const STYLES = ['editorial', 'grid', 'bistro', 'minimal', 'mesob', 'lounge', 'board'];
+    public const STYLES = ['editorial', 'grid', 'bistro', 'minimal', 'mesob', 'lounge', 'board', 'arabic', 'islamic', 'somali', 'mono', 'colour'];
+
+    /** Menu direction (style H): auto follows the menu's script. */
+    public const DIRECTIONS = ['auto', 'ltr', 'rtl'];
 
     public const DEFAULT_STYLE = 'grid';
 
     /** Guest-page extras switched in Appearance (optional in API requests; added 2026-11-11). */
-    public const EXTRA_FLAGS = ['show_share', 'show_pdf_link', 'show_order_list', 'show_other_branches', 'show_logo', 'show_banner'];
+    public const EXTRA_FLAGS = ['show_share', 'show_pdf_link', 'show_order_list', 'show_other_branches', 'show_logo', 'show_banner', ...self::STYLE_FLAGS];
+
+    /** Options of one style each (added 2026-11-19): Halal and Ramadan mode (I), greyscale photos and accent (K). */
+    public const STYLE_FLAGS = ['show_halal', 'ramadan_mode', 'photos_greyscale', 'mono_accent'];
 
     /** Values for a restaurant that never opened the Appearance screen. */
     public const DEFAULTS = [
@@ -67,6 +78,11 @@ class TenantAppearance extends Model
         'show_logo' => true,
         'show_banner' => true,
         'show_order_list' => true,
+        'menu_direction' => 'auto',
+        'show_halal' => false,
+        'ramadan_mode' => false,
+        'photos_greyscale' => false,
+        'mono_accent' => false,
         'theme_id' => null,
     ];
 
@@ -83,6 +99,10 @@ class TenantAppearance extends Model
             'show_logo' => 'boolean',
             'show_banner' => 'boolean',
             'show_order_list' => 'boolean',
+            'show_halal' => 'boolean',
+            'ramadan_mode' => 'boolean',
+            'photos_greyscale' => 'boolean',
+            'mono_accent' => 'boolean',
         ];
     }
 

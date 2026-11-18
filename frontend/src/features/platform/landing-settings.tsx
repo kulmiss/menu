@@ -17,29 +17,19 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { send, usePlatformMutation } from './api'
 
-const SOCIALS = [
-  'telegram',
-  'facebook',
-  'instagram',
-  'tiktok',
-  'x',
-  'youtube',
-  'linkedin',
-] as const
-
 type Testimonial = { quote: string; name: string; role: string; real: boolean }
 
 /** The landing-page part of GET /super/settings (owner, 2026-11-13). */
 export type LandingSettingsData = {
   brand_color: string
   landing_testimonials: Partial<Testimonial>[]
-  socials: Partial<Record<(typeof SOCIALS)[number], string>>
   upgrade_whatsapp: string | null
 }
 
 /**
- * Landing page → colour, WhatsApp number, real testimonials and footer links.
- * Texts, pictures and sections have their own editor (landing-editor.tsx).
+ * Landing page → colour, WhatsApp number and real testimonials. Texts,
+ * pictures and sections have their own editor (landing-editor.tsx); the
+ * footer and its social links have theirs too (footer-editor.tsx).
  */
 export function LandingSettings({ initial }: { initial: LandingSettingsData }) {
   const { t } = useTranslation()
@@ -50,9 +40,6 @@ export function LandingSettings({ initial }: { initial: LandingSettingsData }) {
   const [v, setV] = useState({
     brand_color: initial.brand_color || '#c2410c',
     upgrade_whatsapp: initial.upgrade_whatsapp ?? '',
-    socials: Object.fromEntries(
-      SOCIALS.map((k) => [k, initial.socials?.[k] ?? ''])
-    ) as Record<(typeof SOCIALS)[number], string>,
   })
   const [quotes, setQuotes] = useState<Testimonial[]>(
     (initial.landing_testimonials ?? []).map((q) => ({
@@ -72,9 +59,6 @@ export function LandingSettings({ initial }: { initial: LandingSettingsData }) {
       await save.mutateAsync({
         ...v,
         upgrade_whatsapp: v.upgrade_whatsapp.trim() || null,
-        socials: Object.fromEntries(
-          Object.entries(v.socials).map(([k, url]) => [k, url.trim()])
-        ),
         landing_testimonials: quotes.filter(
           (q) => q.quote.trim() || q.name.trim()
         ),
@@ -245,34 +229,9 @@ export function LandingSettings({ initial }: { initial: LandingSettingsData }) {
             )}
           </fieldset>
 
-          <fieldset className='grid gap-3'>
-            <legend className='text-sm font-medium'>
-              {t('platform.landing.socials')}
-            </legend>
-            <div className='grid gap-3 sm:grid-cols-2'>
-              {SOCIALS.map((k) => (
-                <div key={k} className='grid gap-1'>
-                  <Label htmlFor={`lp-s-${k}`}>
-                    {t(`platform.landing.social.${k}`)}
-                  </Label>
-                  <Input
-                    id={`lp-s-${k}`}
-                    type='url'
-                    dir='ltr'
-                    placeholder='https://'
-                    value={v.socials[k]}
-                    onChange={(e) =>
-                      setV({
-                        ...v,
-                        socials: { ...v.socials, [k]: e.target.value },
-                      })
-                    }
-                  />
-                  {error(`socials.${k}`)}
-                </div>
-              ))}
-            </div>
-          </fieldset>
+          <p className='text-sm text-muted-foreground'>
+            {t('platform.landing.socials_moved')}
+          </p>
 
           <Button
             type='submit'

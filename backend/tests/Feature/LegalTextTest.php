@@ -11,13 +11,19 @@ function runLegalSeed(): void
 }
 
 it('ships the default Terms and Privacy, the same as docs/legal', function () {
-    foreach (LegalText::PAGES as $page) {
+    foreach (['terms', 'privacy'] as $page) {
         $text = LegalText::default($page);
         expect($text)->toStartWith('Last updated: ')
             ->toContain('Kulmiss')
             ->toContain('info@kulmiss.com')
             ->and(file_get_contents(base_path("../docs/legal/{$page}.md")))->toBe($text);
         expect(LegalText::parse($text)['toc'])->not->toBeEmpty();
+    }
+    // About us, Contact us and Cookie info (#230): sections, and the same copy in docs/legal.
+    foreach (['about', 'contact', 'cookies'] as $page) {
+        $text = LegalText::default($page);
+        expect(LegalText::parse($text)['toc'])->not->toBeEmpty()
+            ->and(file_get_contents(base_path("../docs/legal/{$page}.md")))->toBe($text);
     }
     expect(LegalText::default('terms'))->toContain('Ethiopia')->toContain('18 years');
     expect(LegalText::default('privacy'))->toContain('under 13')->toContain('1321/2024');
@@ -66,7 +72,23 @@ it('lets a Super Admin reset one text to the default', function () {
         ->assertJsonPath('data.terms', LegalText::default('terms'));
     expect(PlatformSettings::get('terms'))->toBe(LegalText::default('terms'))
         ->and(PlatformSettings::get('privacy'))->toBe('Edited too.');
-    $this->actingAs(superAdmin())->postJson(p('settings/legal/cookies/reset'), [], idem())->assertNotFound();
+    $this->actingAs(superAdmin())->postJson(p('settings/legal/refunds/reset'), [], idem())->assertNotFound();
+});
+
+it('edits and resets the About us, Contact us and Cookie info pages too (#230)', function () {
+    $admin = superAdmin();
+    // Never edited: the editor shows the default text, like the page.
+    $this->actingAs($admin)->getJson(p('settings'))->assertOk()
+        ->assertJsonPath('data.about', LegalText::default('about'))
+        ->assertJsonPath('data.cookies', LegalText::default('cookies'));
+    $this->actingAs($admin)->putJson(p('settings'), ['about' => "## Who we are\nA small team.", 'contact' => 'Write to us.', 'cookies' => 'Only needed cookies.'], idem())->assertOk();
+    expect(PlatformSettings::get('about'))->toBe("## Who we are\nA small team.");
+    $this->get('/about')->assertOk()->assertSee('Who we are')->assertSee('A small team.');
+    $this->get('/cookies')->assertOk()->assertSee('Only needed cookies.');
+    $this->actingAs($admin)->postJson(p('settings/legal/contact/reset'), [], idem())->assertOk()
+        ->assertJsonPath('data.contact', LegalText::default('contact'));
+    expect(PlatformSettings::get('contact'))->toBe(LegalText::default('contact'));
+    $this->actingAs($admin)->putJson(p('settings'), ['cookies' => str_repeat('x', 50001)], idem())->assertInvalid('cookies');
 });
 
 it('replaces the first Privacy default (with Google Fonts) only when it was not edited', function () {

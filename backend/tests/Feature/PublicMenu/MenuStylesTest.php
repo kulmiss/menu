@@ -24,6 +24,11 @@ const STYLE_MARKERS = [
     'mesob' => '--o:#c98a1b',
     'lounge' => '--card:#17131f',
     'board' => '--card:#253530',
+    'arabic' => '@font-face{font-family:"Menu Kufi"',
+    'islamic' => ':root{--br:1rem;--bg:#f7f3e8',
+    'somali' => ':root{--br:1rem;--bg:#f2f8fc',
+    'mono' => ':root{--br:0;--bg:#fff',
+    'colour' => ':root{--br:1.25rem;--bg:#fffaf2',
 ];
 
 function pageWithStyle(string $style): string
@@ -117,7 +122,7 @@ it('offers only the styles the plan allows, and a restaurant override wins', fun
     $tenant->forceFill(['plan_id' => $plan->id])->save();
     Features::forget();
 
-    $this->actingAs($owner)->getJson(t($tenant, 'appearance'))->assertJsonPath('data.styles', ['grid', 'bistro', 'minimal', 'mesob', 'lounge', 'board']);
+    $this->actingAs($owner)->getJson(t($tenant, 'appearance'))->assertJsonPath('data.styles', ['grid', 'bistro', 'minimal', 'mesob', 'lounge', 'board', 'arabic', 'islamic', 'somali', 'mono', 'colour']);
     $this->actingAs($owner)->putJson(t($tenant, 'appearance'), [
         'primary_color' => '#b4432a', 'font' => 'system', 'style' => 'editorial',
         'show_prices' => true, 'show_photos' => true, 'show_descriptions' => true, 'show_calories' => true,

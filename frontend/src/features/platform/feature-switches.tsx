@@ -46,6 +46,11 @@ const GROUPS: { id: string; keys: string[] }[] = [
       'style_mesob',
       'style_lounge',
       'style_board',
+      'style_arabic',
+      'style_islamic',
+      'style_somali',
+      'style_mono',
+      'style_colour',
     ],
   },
   {

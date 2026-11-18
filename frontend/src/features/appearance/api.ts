@@ -6,8 +6,7 @@ import {
 import { api, tenantUrl } from '@/lib/api'
 import { type Media } from '@/features/menu/types'
 
-/** Guest-menu styles: A · Warm editorial, B · Fresh grid, C · Quiet bistro, D · Minimal. */
-/** Guest-menu styles A–G, in picker order (backend TenantAppearance::STYLES). */
+/** Guest-menu styles A–L, in picker order (backend TenantAppearance::STYLES). */
 export const MENU_STYLES = [
   'editorial',
   'grid',
@@ -16,10 +15,18 @@ export const MENU_STYLES = [
   'mesob',
   'lounge',
   'board',
+  'arabic',
+  'islamic',
+  'somali',
+  'mono',
+  'colour',
 ] as const
 export type MenuStyle = (typeof MENU_STYLES)[number]
 export type Font = 'system' | 'serif' | 'rounded'
 export type BannerText = 'over' | 'under'
+/** Menu direction, style H only: auto = right-to-left when most of the menu is in Arabic script. */
+export const MENU_DIRECTIONS = ['auto', 'ltr', 'rtl'] as const
+export type MenuDirection = (typeof MENU_DIRECTIONS)[number]
 
 export type AppearanceValues = {
   primary_color: string
@@ -40,6 +47,14 @@ export type AppearanceValues = {
   show_other_branches: boolean
   show_logo: boolean
   show_banner: boolean
+  /** Style H · Arabic only. */
+  menu_direction: MenuDirection
+  /** Style I · Islamic only: "Halal" badge and Ramadan mode. */
+  show_halal: boolean
+  ramadan_mode: boolean
+  /** Style K · Black & White only: black-and-white photos, brand colour as a small accent. */
+  photos_greyscale: boolean
+  mono_accent: boolean
   theme_id: number | null
   logo_media_id: number | null
   cover_media_id: number | null

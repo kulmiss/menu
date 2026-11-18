@@ -4,7 +4,7 @@
 
 Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles inside a restaurant are checked by each screen's policy). **Feature**: the feature switch it needs (`402 features.<key>` when off). **Limit**: how many requests are allowed. Create/change requests need an `Idempotency-Key` header. Request and answer examples for the app: [mobile-api.md](mobile-api.md).
 
-**269 endpoints.**
+**275 endpoints.**
 
 ## Sign-in and account (web session)
 
@@ -227,6 +227,12 @@ Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles insid
 | GET | `super/campaigns/{campaign}` | Super Admin |  | `super` limiter | Platform\CampaignController@show |
 | POST | `super/campaigns/{campaign}/retry` | Super Admin |  | `super` limiter | Platform\CampaignController@retry |
 | GET | `super/dashboard` | Super Admin |  | `super` limiter | Platform\PlatformController@dashboard |
+| GET | `super/footer` | Super Admin |  | `super` limiter | Platform\FooterController@show |
+| PUT | `super/footer` | Super Admin |  | `super, 60,1` limiter | Platform\FooterController@update |
+| DELETE | `super/footer/draft` | Super Admin |  | `super` limiter | Platform\FooterController@discard |
+| GET | `super/footer/preview` | Super Admin |  | `super, 120,1` limiter | Platform\FooterController@preview |
+| POST | `super/footer/publish` | Super Admin |  | `super, 20,1` limiter | Platform\FooterController@publish |
+| POST | `super/footer/versions/{version}/restore` | Super Admin |  | `super, 20,1` limiter | Platform\FooterController@restore |
 | GET | `super/help` | Super Admin |  | `super` limiter | Api\HelpController@platform |
 | GET | `super/help-articles` | Super Admin |  | `super` limiter | Platform\HelpArticleController@index |
 | POST | `super/help-articles/preview` | Super Admin |  | `super, 60,1` limiter | Platform\HelpArticleController@preview |

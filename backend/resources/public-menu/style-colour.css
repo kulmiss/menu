@@ -1,0 +1,68 @@
+/* Style L · Colourful: bright and playful. Each category has its own colour (--c1…--c6,
+   the brand colour first, made by PageTheme::palette() and always readable on its pale
+   tint --t1…--t6; --o1…--o6 is the text on each colour), rounded shapes, small
+   movements only when the phone allows motion. Surfaces must match PageTheme::STYLES['colour']. */
+:root{--br:1.25rem;--bg:#fffaf2;--fg:#1d1a33;--mu:#55506e;--ln:#ece4d6;--card:#fff}
+@media (prefers-color-scheme:dark){:root{--bg:#14121f;--fg:#f5f3ff;--mu:#bdb8d9;--ln:#2c2843;--card:#1e1b2e}}
+.k1{--c:var(--c1);--t:var(--t1);--o:var(--o1)}.k2{--c:var(--c2);--t:var(--t2);--o:var(--o2)}.k3{--c:var(--c3);--t:var(--t3);--o:var(--o3)}
+.k4{--c:var(--c4);--t:var(--t4);--o:var(--o4)}.k5{--c:var(--c5);--t:var(--t5);--o:var(--o5)}.k6{--c:var(--c6);--t:var(--t6);--o:var(--o6)}
+.cv{aspect-ratio:5/2;border-radius:0 0 1.75rem 1.75rem}
+/* Header: soft bubbles in the palette's colours behind the name (decoration, pale enough that the name always reads). */
+.top{overflow:hidden}
+header{position:relative;padding:1.5rem 1rem .9rem}
+header:before,header:after{content:"";position:absolute;z-index:-1;border-radius:50%}
+header:before{width:9rem;height:9rem;top:-4.5rem;inset-inline-end:-3rem;background:var(--c2);opacity:.3}
+header:after{width:4rem;height:4rem;top:3rem;inset-inline-end:3.5rem;background:var(--c4);opacity:.25}
+.top{isolation:isolate}
+.lg{border-radius:1.25rem;box-shadow:0 0 0 3px var(--card)}
+h1{font-size:1.9rem;font-weight:800;line-height:1.1}
+.ov header:before,.ov header:after{display:none}
+.bar{border-bottom:0}
+.sr input,.ib{border:2px solid var(--fg);background:var(--card)}
+.cn a{border:0;font-weight:800}
+.cn a.k1,.cn a.k2,.cn a.k3,.cn a.k4,.cn a.k5,.cn a.k6{background:var(--c);color:var(--o)}
+.cn a.on{box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--fg)}
+.ch button{font-weight:700}
+/* A category: its name on a pill of its colour, its dishes on cards of its tint. */
+section{padding-top:1.4rem}
+section h2{display:inline-block;max-width:100%;padding:.25rem .95rem;border-radius:99px;background:var(--c);color:var(--o);font-size:1.15rem;font-weight:800;overflow-wrap:anywhere}
+section ul{display:grid;gap:.6rem;margin-top:.7rem}
+section li{border:0;border-radius:var(--br);background:var(--t)}
+section .ad{--a:var(--c);--af:var(--o)}
+li>.it{padding:.6rem .7rem;grid-template-columns:4.5rem minmax(0,1fr);grid-template-areas:"im ." "im nm" "im sm" "im pr" "im tg" "im .";grid-template-rows:1fr auto auto auto auto 1fr;column-gap:.8rem}
+li>.it.ao,li>.it.ao.np{padding-inline-end:3.1rem}
+li>.it .ad,li>.np>.ad{top:50%;margin-top:-1.375rem;inset-inline-end:.25rem}
+li>.it .im{grid-area:im;align-self:start;width:4.5rem;height:4.5rem;border-radius:1rem}
+li>.it .nm{grid-area:nm;font-size:1.05rem;font-weight:800;line-height:1.25}
+li>.it .sm{grid-area:sm}
+li>.it .pr{grid-area:pr;justify-self:start;margin-top:.35rem;padding:.05rem .65rem;border-radius:99px;background:var(--c);color:var(--o);font-weight:800;white-space:nowrap;font-variant-numeric:tabular-nums}
+li>.it .pr s{color:inherit}
+li>.it .tg{grid-area:tg}
+li>.it.np{grid-template-columns:minmax(0,1fr);grid-template-areas:"nm" "sm" "pr" "tg";grid-template-rows:auto}
+.so .pr,li>.it.so .pr{background:none;color:var(--mu)}
+.bd{background:var(--card);border-color:transparent}
+.bd.hl{background:var(--fg);border-color:var(--fg);color:var(--bg)}
+.spc .sp{border:0;border-radius:var(--br);background:var(--t1)}
+.sp .bd.hl{background:var(--c1);border-color:var(--c1);color:var(--o1)}
+/* On the tint the brand colour may fall under 4.5:1: the special's price sits on a pill of the colour instead. */
+.sp .pr{display:inline-block;margin-top:.35rem;padding:.05rem .65rem;border-radius:99px;background:var(--c1);color:var(--o1);font-weight:800;white-space:nowrap}
+.an{border:0;border-radius:var(--br);background:var(--t3)}
+.sh h3{font-weight:800}
+.mh{font-weight:800}
+dialog{border-radius:1.75rem 1.75rem 0 0}
+@media (min-width:48rem){dialog{border-radius:1.75rem}}
+.x{border-radius:99px}
+/* Small, quick movements (only when the phone allows motion). */
+@media (prefers-reduced-motion:no-preference){
+.ad:before{transition:transform .18s cubic-bezier(.3,1.6,.5,1)}
+.it:active .ad:before{transform:scale(.86)}
+.cn a{transition:transform .18s cubic-bezier(.3,1.6,.5,1),box-shadow .2s}
+.cn a:active{transform:scale(.94)}
+section li{transition:transform .2s ease}
+section li:active{transform:scale(.985)}
+}
+/* Footer: the groups on tinted cards. */
+.ft{background:var(--card);border-top:0}
+.fg>div{border-radius:var(--br);padding:1rem;background:var(--t3)}
+.fg>div:nth-child(2n){background:var(--t1)}
+.fc svg,.fso a,.fbt,.pdl a{background:var(--bg)}
