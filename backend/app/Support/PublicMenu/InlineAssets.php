@@ -21,9 +21,40 @@ class InlineAssets
     {
         $style = in_array($style, TenantAppearance::STYLES, true) ? $style : 'grid';
 
-        return self::$memo['css.'.$style] ??= self::minifyCss(
-            file_get_contents(resource_path('public-menu/base.css'))."\n".file_get_contents(resource_path('public-menu/style-'.$style.'.css'))
+        return self::$memo['css.'.$style] ??= (string) preg_replace_callback(
+            '/url\(font:([a-z0-9-]+)\)/',
+            fn (array $m) => 'url('.self::fontUrl($m[1]).')',
+            self::minifyCss(file_get_contents(resource_path('public-menu/base.css'))."\n".file_get_contents(resource_path('public-menu/style-'.$style.'.css'))),
         );
+    }
+
+    /**
+     * A style's web font (resources/public-menu/fonts, only style H has one), written
+     * once per version to public/menu-assets/{name}.{hash}.woff2 so it can be cached
+     * for a year; `url(font:name)` in a style's CSS becomes this address.
+     */
+    public static function fontUrl(string $name): string
+    {
+        return self::$memo['font.'.$name] ??= self::publish(
+            (string) file_get_contents(resource_path('public-menu/fonts/'.$name.'.woff2')),
+            $name,
+            'woff2',
+        );
+    }
+
+    /** Writes a file under public/menu-assets with its content hash in the name (atomic, once). */
+    private static function publish(string $content, string $name, string $extension): string
+    {
+        $file = $name.'.'.substr(md5($content), 0, 10).'.'.$extension;
+        $path = public_path('menu-assets/'.$file);
+        if (! is_file($path)) {
+            @mkdir(dirname($path), 0755, true);
+            $tmp = $path.'.'.bin2hex(random_bytes(4));
+            file_put_contents($tmp, $content);
+            rename($tmp, $path);
+        }
+
+        return '/menu-assets/'.$file;
     }
 
     public static function minifyCss(string $src): string
@@ -41,19 +72,7 @@ class InlineAssets
      */
     public static function sheetUrl(): string
     {
-        return self::$memo['sheet'] ??= (function () {
-            $js = self::minifyJs((string) file_get_contents(resource_path('public-menu/sheet.js')));
-            $name = 'sheet.'.substr(md5($js), 0, 10).'.js';
-            $file = public_path('menu-assets/'.$name);
-            if (! is_file($file)) {
-                @mkdir(dirname($file), 0755, true);
-                $tmp = $file.'.'.bin2hex(random_bytes(4));
-                file_put_contents($tmp, $js);
-                rename($tmp, $file);
-            }
-
-            return '/menu-assets/'.$name;
-        })();
+        return self::$memo['sheet'] ??= self::publish(self::minifyJs((string) file_get_contents(resource_path('public-menu/sheet.js'))), 'sheet', 'js');
     }
 
     public static function js(): string

@@ -27,6 +27,7 @@ import {
   type Appearance,
   type AppearanceValues,
   type Font,
+  MENU_DIRECTIONS,
   appearanceQuery,
   previewUrl,
   useSaveAppearance,
@@ -48,6 +49,11 @@ const FLAGS = [
   'show_logo',
   'show_banner',
 ] as const
+/** Options that belong to one menu style (shown only while that style is picked). */
+const STYLE_SWITCHES = {
+  islamic: ['show_halal', 'ramadan_mode'],
+  mono: ['photos_greyscale', 'mono_accent'],
+} as const
 const FONT_STACK: Record<Font, string> = {
   system: 'system-ui, sans-serif',
   serif: '"Iowan Old Style", Palatino, Georgia, serif',
@@ -99,6 +105,11 @@ function valuesOf(a: Appearance): AppearanceValues {
     show_other_branches: a.show_other_branches,
     show_logo: a.show_logo,
     show_banner: a.show_banner,
+    menu_direction: a.menu_direction ?? 'auto',
+    show_halal: a.show_halal ?? false,
+    ramadan_mode: a.ramadan_mode ?? false,
+    photos_greyscale: a.photos_greyscale ?? false,
+    mono_accent: a.mono_accent ?? false,
     theme_id: a.theme_id,
     logo_media_id: a.logo?.id ?? null,
     cover_media_id: a.cover?.id ?? null,
@@ -291,6 +302,56 @@ function AppearanceForm({ initial }: { initial: Appearance }) {
               disabled={disabled}
               onChange={(style) => set('style', style)}
             />
+
+            {values.style === 'arabic' && (
+              <fieldset className='grid gap-2'>
+                <legend className='mb-1 text-sm font-medium'>
+                  {t('appearance.direction')}
+                </legend>
+                <p className='mb-1 text-sm text-muted-foreground'>
+                  {t('appearance.direction_hint')}
+                </p>
+                <div className='flex flex-wrap gap-2'>
+                  {MENU_DIRECTIONS.map((dir) => (
+                    <Choice
+                      key={dir}
+                      name='menu_direction'
+                      checked={values.menu_direction === dir}
+                      disabled={disabled}
+                      onChange={() => set('menu_direction', dir)}
+                    >
+                      {t(`appearance.directions.${dir}`)}
+                    </Choice>
+                  ))}
+                </div>
+              </fieldset>
+            )}
+            {(values.style === 'islamic' || values.style === 'mono') && (
+              <fieldset className='grid gap-3'>
+                <legend className='mb-1 text-sm font-medium'>
+                  {t('appearance.style_options')}
+                </legend>
+                {STYLE_SWITCHES[values.style].map((flag) => (
+                  <div
+                    key={flag}
+                    className='flex min-h-11 items-center justify-between gap-4 sm:min-h-0'
+                  >
+                    <Label htmlFor={flag} className='grid gap-0.5'>
+                      <span>{t(`appearance.style_flags.${flag}`)}</span>
+                      <span className='font-normal text-muted-foreground'>
+                        {t(`appearance.style_flags.${flag}_hint`)}
+                      </span>
+                    </Label>
+                    <Switch
+                      id={flag}
+                      checked={values[flag]}
+                      disabled={disabled}
+                      onCheckedChange={(on) => set(flag, on)}
+                    />
+                  </div>
+                ))}
+              </fieldset>
+            )}
 
             <div className='grid gap-3'>
               {FLAGS.filter((f) => featureOn[f] !== false).map((flag) => (

@@ -42,6 +42,26 @@
       "name": "G · Street Board",
       "hint": "A clean chalkboard with price tags. For fast food, burgers and juice bars."
     },
+    "arabic": {
+      "name": "H · Arabic",
+      "hint": "Kufi headings, gold ornaments and your colour as a band. Right-to-left for Arabic menus. For Arabic, Yemeni and Middle Eastern food."
+    },
+    "islamic": {
+      "name": "I · Islamic",
+      "hint": "Star patterns, an arch at the top and arched photos. Optional Halal badge and Ramadan mode. For halal and family restaurants."
+    },
+    "somali": {
+      "name": "J · Somali",
+      "hint": "Ocean blues, woven-basket bands and waves. For Somali restaurants and cafés."
+    },
+    "mono": {
+      "name": "K · Black & White",
+      "hint": "Only black, white and greys, big type and fine lines. Light or dark like the guest's phone. For modern cafés and fine dining."
+    },
+    "colour": {
+      "name": "L · Colourful",
+      "hint": "A bright colour for each category, made from your colour, and rounded cards. For juice bars, ice cream and family places."
+    },
     "locked": "Not included in your plan."
   },
   "flags": {
@@ -55,6 +75,24 @@
     "show_other_branches": "Show \"Other branches\" at the bottom of the menu (only with more than one branch)",
     "show_logo": "Show the logo",
     "show_banner": "Show the banner"
+  },
+  "direction": "Menu direction",
+  "direction_hint": "Right-to-left puts the text and buttons on the right side, for Arabic menus.",
+  "directions": {
+    "auto": "Automatic (follows your menu's language)",
+    "ltr": "Left to right",
+    "rtl": "Right to left"
+  },
+  "style_options": "Options for this style",
+  "style_flags": {
+    "show_halal": "Show a \"Halal\" badge",
+    "show_halal_hint": "A small badge under your restaurant's name. Turn it on only if all your food is halal.",
+    "ramadan_mode": "Ramadan mode",
+    "ramadan_mode_hint": "A night-sky top with a crescent. Turn it off again after Ramadan.",
+    "photos_greyscale": "Black-and-white photos",
+    "photos_greyscale_hint": "Shows your dish photos and banner in black and white.",
+    "mono_accent": "Use your brand colour as a small accent",
+    "mono_accent_hint": "Your colour on the \"+\" buttons, badges and the chosen category. Prices keep the text colour."
   },
   "images": "Logo and banner",
   "images_hint": "The banner is the wide photo at the top of your menu. It is cropped to the shape your menu style uses.",

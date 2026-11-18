@@ -81,7 +81,9 @@
           if (a && e.isIntersecting) {
             $('.cn a.on').forEach(function (x) { x.classList.remove('on'); });
             a.classList.add('on');
-            a.parentNode.scrollLeft = a.offsetLeft - a.parentNode.offsetWidth / 2 + a.offsetWidth / 2;
+            // Centre the chip in its row; measured on screen, so it works right-to-left too.
+            var p = a.parentNode, r = a.getBoundingClientRect(), q = p.getBoundingClientRect();
+            p.scrollLeft += r.left + r.width / 2 - q.left - q.width / 2;
           }
         });
       }, { rootMargin: '-25% 0px -70% 0px' });

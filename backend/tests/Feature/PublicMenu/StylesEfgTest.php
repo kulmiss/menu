@@ -99,9 +99,16 @@ it('keeps Night Lounge prices on one line, old price included (happy hour)', fun
     expect($html)->toMatch('#<span class="pr"><s>[^<]+</s> [^<]+</span>#');
 });
 
-it('loads nothing extra: no image, font or stylesheet from the CSS (CSP, speed)', function (string $style) {
+it('loads nothing extra from the CSS: only inline SVG patterns and, in style H only, its own font (CSP, speed)', function (string $style) {
     $css = (string) file_get_contents(resource_path("public-menu/style-{$style}.css"));
-    expect($css)->not->toContain('url(')->not->toContain('@import')->not->toContain('@font-face');
+    expect($css)->not->toContain('@import');
+    // Every url() is a tiny inline SVG, or (H · Arabic) its own subset font file from /menu-assets.
+    preg_match_all('/url\(\s*([^)]{0,30})/', $css, $urls);
+    foreach ($urls[1] as $url) {
+        expect(str_starts_with($url, '"data:image/svg+xml') || str_starts_with($url, 'font:'))->toBeTrue("{$style}: url({$url}…)");
+    }
+    expect(str_contains($css, '@font-face'))->toBe($style === 'arabic')
+        ->and(str_contains($css, 'url(font:'))->toBe($style === 'arabic');
 })->with(TenantAppearance::STYLES);
 
 it('shows the empty-menu note and a 500-dish menu in every new style', function (string $style) {

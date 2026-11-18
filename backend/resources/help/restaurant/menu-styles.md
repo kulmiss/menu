@@ -1,12 +1,12 @@
 ---
-title: Menu styles A to G
+title: Menu styles A to L
 topic: look
 summary: Choose how your menu looks to guests.
 order: 10
 pages: /admin/appearance
 app: /r/:tid/appearance
 roles: owner, manager
-keywords: style, design, theme, layout, editorial, grid, bistro, minimal, mesob, lounge, night, dark, board, chalkboard, street food
+keywords: style, design, theme, layout, editorial, grid, bistro, minimal, mesob, lounge, night, dark, board, chalkboard, street food, arabic, right to left, rtl, islamic, halal, ramadan, somali, black and white, monochrome, colourful, colorful, juice
 ---
 
 Open **Appearance → Menu style**. The preview shows the change at once. Guests see it after you tap **Save**.
@@ -31,6 +31,21 @@ Open **Appearance → Menu style**. The preview shows the change at once. Guests
 <!-- endif -->
 <!-- if style_board -->
 - **G · Street Board**: a clean chalkboard with price tags. For fast food and juice bars. [More about G](help:style-street-board)
+<!-- endif -->
+<!-- if style_arabic -->
+- **H · Arabic**: Kufi headings, gold ornaments and your colour as a band. It can show the menu right-to-left. For Arabic, Yemeni and Middle Eastern food. [More about H](help:style-arabic)
+<!-- endif -->
+<!-- if style_islamic -->
+- **I · Islamic**: star patterns, an arch at the top and arched photos. Optional Halal badge and Ramadan mode. For halal and family restaurants. [More about I](help:style-islamic)
+<!-- endif -->
+<!-- if style_somali -->
+- **J · Somali**: ocean blues, woven-basket bands and waves. For Somali restaurants and cafés. [More about J](help:style-somali)
+<!-- endif -->
+<!-- if style_mono -->
+- **K · Black & White**: only black, white and greys, big type and fine lines. For modern cafés and fine dining. [More about K](help:style-black-white)
+<!-- endif -->
+<!-- if style_colour -->
+- **L · Colourful**: a bright colour for each category and rounded cards. For juice bars, ice cream and family places. [More about L](help:style-colourful)
 <!-- endif -->
 
 A style with a lock is not in your plan. See [plans](help:plans-compared).

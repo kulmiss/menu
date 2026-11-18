@@ -31,6 +31,12 @@ class Features
         'style_mesob' => true,
         'style_lounge' => true,
         'style_board' => true,
+        // H · Arabic, I · Islamic, J · Somali, K · Black & White, L · Colourful (owner, 2026-11-18; Plus and up, off on Free: QUESTIONS #229).
+        'style_arabic' => true,
+        'style_islamic' => true,
+        'style_somali' => true,
+        'style_mono' => true,
+        'style_colour' => true,
         'price_periods' => true, // time-based prices: happy hour, lunch (owner, 2026-11-14; off on Free)
         // "Sold out" marks (owner, 2026-11-14). Off: no toggles, list or widget, and the guest
         // menu never says "sold out"; existing marks are kept but ignored.

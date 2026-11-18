@@ -38,6 +38,11 @@ class SiteController extends Controller
         'mesob' => 'demo-mesob',
         'lounge' => 'demo-lounge',
         'board' => 'demo-street',
+        'arabic' => 'demo-mandi',
+        'islamic' => 'demo-halal',
+        'somali' => 'demo-xamar',
+        'mono' => 'demo-atelier',
+        'colour' => 'demo-juicy',
     ];
 
     public const DEMO = 'demo';

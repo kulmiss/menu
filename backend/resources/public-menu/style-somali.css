@@ -1,0 +1,51 @@
+/* Style J · Somali: an ocean band with waves, a woven-basket stripe (after the patterns of
+   Somali baskets and mats, drawn for this page), aqal-dome category marks; ocean and sky
+   blue, white, sand and warm orange. No flag or coat of arms.
+   Surfaces must match PageTheme::STYLES['somali']. --oc, --or and --sd are decoration
+   colours; only white text sits on --oc (≥ 4.5:1 in both modes). */
+:root{--br:1rem;--bg:#f2f8fc;--fg:#0d2a3f;--mu:#44617a;--ln:#d3e4f0;--card:#fff;--oc:#0b5ea8;--or:#e8772e;--sd:#f3e3c3}
+@media (prefers-color-scheme:dark){:root{--bg:#08131d;--fg:#eef6fb;--mu:#a9c0d1;--ln:#1d3a52;--card:#10263a;--oc:#0d3b63;--or:#f08a45;--sd:#c9b48e}}
+.cv{aspect-ratio:2/1}
+/* The band: woven stripe on top, the name, a wave at the bottom. */
+header{position:relative;padding:1.6rem 1rem 1.9rem;background:var(--oc);color:#fff}
+header:before{content:"";position:absolute;inset:0 0 auto;height:.6rem;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='10'%3E%3Cpath d='M0 10L5 0h5L5 10zM10 10L15 0h5l-5 10z' fill='%23e8772e'/%3E%3Cpath d='M5 0l5 10H5zM15 0l5 10h-5z' fill='%23f3e3c3'/%3E%3C/svg%3E") 0 0/1.2rem .6rem repeat-x}
+header:after{content:"";position:absolute;inset:auto 0 -1px;height:.8rem;background:var(--bg);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='12'%3E%3Cpath d='M0 6q8-6 16 0t16 0v6H0z'/%3E%3C/svg%3E") 0 100%/2rem .8rem repeat-x;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='12'%3E%3Cpath d='M0 6q8-6 16 0t16 0v6H0z'/%3E%3C/svg%3E") 0 100%/2rem .8rem repeat-x}
+header .sub{color:#fff}
+/* The hours pill sits on the band: a solid card under its colours, so its text always reads. */
+header .st{background:var(--card)}
+header .st.op{background:linear-gradient(#0f6b3a12,#0f6b3a12),var(--card)}
+.lg{border-radius:50%;box-shadow:0 0 0 3px #fff}
+h1{font-size:1.75rem;font-weight:800;line-height:1.15}
+.ov header{background:linear-gradient(#0000,#000c)}
+.ov header:after{display:none}
+.bar{border-bottom-color:var(--ln)}
+.sr input,.ib{background:var(--card);border-color:var(--ln)}
+.cn a{background:var(--card);border-color:var(--ln);font-weight:600}
+/* A category: a small aqal (the Somali dome house) before its name. */
+section{padding-top:1.4rem}
+section h2{display:flex;align-items:center;gap:.55rem;font-size:1.2rem;font-weight:800;color:var(--a);overflow-wrap:anywhere}
+section h2:before{content:"";flex:none;width:1.6rem;height:1rem;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 14'%3E%3Cpath d='M1 13Q1 1 11 1t10 12z' fill='%23f3e3c3' stroke='%23e8772e' stroke-width='1.5'/%3E%3Cpath d='M6 13Q6 5 11 5t5 8M11 1v4' fill='none' stroke='%23e8772e'/%3E%3C/svg%3E") center/contain no-repeat}
+section ul{display:grid;gap:.6rem;margin-top:.75rem}
+section li{border:0;border-bottom:3px solid var(--sd);border-radius:var(--br);background:var(--card);box-shadow:0 1px 3px #0b5ea814}
+/* A dish: the photo at the start, "+" at the end, never over the text. */
+li>.it{padding:.7rem .8rem;grid-template-columns:5rem minmax(0,1fr);grid-template-areas:"im ." "im nm" "im sm" "im pr" "im tg" "im .";grid-template-rows:1fr auto auto auto auto 1fr;column-gap:.85rem}
+li>.it.ao{padding-inline-end:3.1rem}
+li>.it .ad,li>.np>.ad{top:50%;margin-top:-1.375rem;inset-inline-end:.25rem}
+li>.it .im{grid-area:im;align-self:start;width:5rem;height:5rem;border-radius:.8rem}
+li>.it .nm{grid-area:nm;font-size:1.05rem;font-weight:700;line-height:1.3}
+li>.it .sm{grid-area:sm}
+li>.it .pr{grid-area:pr;font-weight:800;white-space:nowrap;font-variant-numeric:tabular-nums}
+li>.it .tg{grid-area:tg}
+/* Without a photo: a small woven mark at the start. */
+li>.it.np{grid-template-columns:.7rem minmax(0,1fr);grid-template-areas:"mk nm" "mk sm" "mk pr" "mk tg";grid-template-rows:auto;column-gap:.7rem}
+li>.it.np:before{content:"";grid-area:mk;align-self:start;width:.7rem;height:.7rem;margin-top:.4rem;border-radius:.15rem;background:linear-gradient(135deg,var(--or) 50%,var(--sd) 50%)}
+.bd{background:none;border-color:var(--ln)}
+.spc .sp{border:0;border-radius:var(--br);box-shadow:0 1px 3px #0b5ea81f;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='10'%3E%3Cpath d='M0 10L5 0h5L5 10zM10 10L15 0h5l-5 10z' fill='%23e8772e'/%3E%3Cpath d='M5 0l5 10H5zM15 0l5 10h-5z' fill='%23f3e3c3'/%3E%3C/svg%3E") 0 0/1.2rem .45rem repeat-x,var(--card)}
+.sp .tx{padding-top:1rem}
+.an{border-radius:var(--br)}
+dialog{border-top:4px solid var(--oc)}
+/* Footer: a wave of the ocean colour, then the groups. */
+.ft{background:var(--card);border-top:0}
+.ft:before{content:"";display:block;height:.8rem;margin:-2.8rem 0 2rem;background:var(--card);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='12'%3E%3Cpath d='M0 6q8-6 16 0t16 0v6H0z'/%3E%3C/svg%3E") 0 100%/2rem .8rem repeat-x;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='12'%3E%3Cpath d='M0 6q8-6 16 0t16 0v6H0z'/%3E%3C/svg%3E") 0 100%/2rem .8rem repeat-x}
+.fg>div{background:var(--bg);border-radius:1rem;padding:1rem}
+.fso a,.fc svg{background:var(--bg)}

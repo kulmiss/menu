@@ -74,8 +74,15 @@
     ];
 
 @endphp
+@php
+    // H · Arabic: right-to-left when set, or (auto) when most of the menu is in Arabic script (owner, 2026-11-18).
+    $dir = $theme['direction'] === 'ltr' ? 'ltr' : \App\Support\PublicMenu\MenuDirection::for($theme['direction'], $tenant->name, $menus);
+    // L · Colourful: each category gets one of six colours, the same in the bar and on the page.
+    $colours = $style === 'colour';
+    $k = 0;
+@endphp
 <!doctype html>
-<html lang="{{ $locale }}">
+<html lang="{{ $locale }}" dir="{{ $dir }}">
 <head>
 <meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy" content="{!! \App\Support\Security\Csp::menu() !!}">
@@ -119,7 +126,7 @@
 @endif
 <style>{!! InlineAssets::css($style) !!}{!! $theme['css'] !!}</style>
 </head>
-<body class="S-{{ $style }}{{ $anyPhoto ? '' : ' NP' }}">
+<body class="S-{{ $style }}{{ $anyPhoto ? '' : ' NP' }}{{ $theme['ramadan'] ? ' rm' : '' }}{{ $theme['greyscale'] ? ' gs' : '' }}">
 <div @class(['top', 'hc' => $cover, 'ov' => $cover && $cover['over']])>
 @if ($cover)
 {{-- The banner keeps its shape from the first paint (CSS aspect-ratio + placeholder), so nothing moves. --}}
@@ -134,6 +141,7 @@
 @if ($theme['logo'])<img class="lg" src="{{ $theme['logo']['320'] ?? '' }}" alt="" width="76" height="76">@endif
 <div><h1>{{ $tenant->name }}</h1>
 @if ($branch)<p class="sub">{{ $branch }}</p>@endif
+@if ($theme['halal'])<p class="hb"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="M7.5 12.5l3 3 6-6.5"/></svg>{{ __('public.halal') }}</p>@endif
 {{-- The open/closed pill is filled in by the script; its space is kept so nothing moves (CLS). --}}
 <p class="st ld" id="st"@if (! $hours) hidden @endif>&nbsp;</p></div>
 </header>
@@ -147,7 +155,8 @@
 @if (count($tags) > 1)
 <div class="ch" role="group" aria-label="{{ __('public.filter') }}">@foreach ($tags as $key => $label)<button type="button" data-tag="{{ $key }}" aria-pressed="false">{{ $label }}</button>@endforeach</div>
 @endif
-<nav class="ch cn" aria-label="Categories">@foreach ($menus as $m)@foreach ($m['categories'] as $c)<a href="#c{{ $c['id'] }}">{{ $c['name'] }}</a>@endforeach @endforeach</nav>
+<nav class="ch cn" aria-label="Categories">@foreach ($menus as $m)@foreach ($m['categories'] as $c)<a href="#c{{ $c['id'] }}"@if ($colours) class="k{{ $k++ % 6 + 1 }}"@endif>{{ $c['name'] }}</a>@endforeach @endforeach</nav>
+@php $k = 0; @endphp
 </div></div>
 <main class="w">
 @foreach ($promotions as $p)
@@ -172,7 +181,7 @@
 <div class="mn"@if ($m['scheduled']) data-s="{{ json_encode($m['schedules']) }}"@endif>
 @if (count($menus) > 1)<h2 class="mh" data-off="{{ __('public.not_now') }}">{{ $m['name'] }}</h2>@endif
 @foreach ($m['categories'] as $c)
-<section id="c{{ $c['id'] }}">
+<section id="c{{ $c['id'] }}"@if ($colours) class="k{{ $k++ % 6 + 1 }}"@endif>
 <h2>{{ $c['name'] }}</h2>
 @if ($c['description'] !== '')<p class="cd">{{ $c['description'] }}</p>@endif
 <ul>

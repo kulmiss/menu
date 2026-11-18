@@ -26,6 +26,11 @@ export const FEATURES = [
   'style_mesob',
   'style_lounge',
   'style_board',
+  'style_arabic',
+  'style_islamic',
+  'style_somali',
+  'style_mono',
+  'style_colour',
 ] as const
 export const LIMITS = [
   'menus',

@@ -115,6 +115,11 @@
     "style_mesob": "Menu style E · Mesob",
     "style_lounge": "Menu style F · Night Lounge",
     "style_board": "Menu style G · Street Board",
+    "style_arabic": "Menu style H · Arabic",
+    "style_islamic": "Menu style I · Islamic",
+    "style_somali": "Menu style J · Somali",
+    "style_mono": "Menu style K · Black & White",
+    "style_colour": "Menu style L · Colourful",
     "pdf_menu": "Printable PDF menu",
     "order_list": "\"My order\" list for guests",
     "price_periods": "Time-based prices (happy hour)",
@@ -206,7 +211,12 @@
       "minimal": "D · Minimal",
       "mesob": "E · Mesob",
       "lounge": "F · Night Lounge",
-      "board": "G · Street Board"
+      "board": "G · Street Board",
+      "arabic": "H · Arabic",
+      "islamic": "I · Islamic",
+      "somali": "J · Somali",
+      "mono": "K · Black & White",
+      "colour": "L · Colourful"
     }
   },
   "announcements": {
@@ -800,7 +810,12 @@
       "minimal": "Minimal",
       "mesob": "Mesob",
       "lounge": "Night Lounge",
-      "board": "Street Board"
+      "board": "Street Board",
+      "arabic": "Arabic",
+      "islamic": "Islamic",
+      "somali": "Somali",
+      "mono": "Black & White",
+      "colour": "Colourful"
     },
     "limits": "Plan limits",
     "limit": {
@@ -851,7 +866,12 @@
       "style_minimal": "Style: Minimal",
       "style_mesob": "Style: Mesob",
       "style_lounge": "Style: Night Lounge",
-      "style_board": "Style: Street Board"
+      "style_board": "Style: Street Board",
+      "style_arabic": "Style: Arabic",
+      "style_islamic": "Style: Islamic",
+      "style_somali": "Style: Somali",
+      "style_mono": "Style: Black & White",
+      "style_colour": "Style: Colourful"
     },
     "last_days": "Last {{count}} days"
   },

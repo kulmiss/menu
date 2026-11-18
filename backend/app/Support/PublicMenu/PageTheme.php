@@ -17,6 +17,12 @@ class PageTheme
         'rounded' => 'ui-rounded,"SF Pro Rounded","Hiragino Maru Gothic ProN",Quicksand,Nunito,system-ui,sans-serif',
         // Street Board's headings: a tall sign-painter face where the phone has one, else the system font (no web fonts).
         'board' => '"Arial Narrow","Roboto Condensed","Helvetica Neue Condensed","Avenir Next Condensed",Impact,system-ui,sans-serif',
+        // H · Arabic's headings: Noto Kufi Arabic Bold (SIL Open Font License), two small subsets in
+        // /menu-assets/fonts (Arabic, Latin; style-arabic.css). Shown only when it is ready at once
+        // (font-display: optional), else the phone's own font: no layout shift, no wait.
+        'kufi' => '"Menu Kufi",system-ui,"Segoe UI",Tahoma,"Noto Sans Arabic",sans-serif',
+        // K · Black & White: a refined serif, the phone's own.
+        'didone' => '"Didot","Bodoni 72","Bodoni MT","Iowan Old Style","Palatino Linotype",Georgia,"Noto Serif",serif',
     ];
 
     /**
@@ -47,7 +53,28 @@ class PageTheme
         // G · Street Board: a clean chalkboard, price tags (owner, 2026-11-18).
         'board' => ['light' => '#253530', 'dark' => '#253530', 'heading' => 'board', 'banner' => [2, 1], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
             'photo' => '72px', 'lcp' => '72px', 'fold' => [5, 0], 'dark_only' => true],
+        // H · Arabic: sand, the brand colour as a scalloped band, gold ornaments, Kufi headings, right-to-left when the menu is (owner, 2026-11-18).
+        'arabic' => ['light' => '#f6efe2', 'dark' => '#172723', 'heading' => 'kufi', 'banner' => [5, 2], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
+            'photo' => '72px', 'lcp' => '72px', 'fold' => [5, 0]],
+        // I · Islamic: star lattice, an arch-shaped header and arched photos in two columns, teal and cream (owner, 2026-11-18).
+        'islamic' => ['light' => '#f7f3e8', 'dark' => '#132b28', 'heading' => 'serif', 'banner' => [5, 2], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
+            'photo' => '(min-width:40rem) 224px, 47vw', 'lcp' => '(min-width:40rem) 224px, 45vw', 'fold' => [4, 0]],
+        // J · Somali: ocean band with waves, woven-basket stripe, aqal-dome marks (owner, 2026-11-18).
+        'somali' => ['light' => '#f2f8fc', 'dark' => '#10263a', 'heading' => 'system', 'banner' => [2, 1], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
+            'photo' => '80px', 'lcp' => '80px', 'fold' => [5, 0]],
+        // K · Black & White: monochrome, big serif, hairlines, dotted price leaders (owner, 2026-11-18).
+        'mono' => ['light' => '#f4f4f4', 'dark' => '#1b1b1b', 'heading' => 'didone', 'banner' => [2, 1], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
+            'photo' => '88px', 'lcp' => '88px', 'fold' => [5, 0], 'mono' => true],
+        // L · Colourful: one bright colour per category, made from the brand colour (owner, 2026-11-18).
+        'colour' => ['light' => '#fffaf2', 'dark' => '#1e1b2e', 'heading' => 'rounded', 'banner' => [5, 2], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
+            'photo' => '72px', 'lcp' => '72px', 'fold' => [5, 0]],
     ];
+
+    /** L · Colourful: hue steps from the brand colour for categories 2–6 (category 1 is the brand colour). */
+    private const PALETTE_STEPS = [0, 48, 150, 205, 265, 320];
+
+    /** K · Black & White without its accent: ink on paper, paper on ink. */
+    private const MONO_INK = ['light' => ['#111111', '#ffffff'], 'dark' => ['#f2f2f2', '#111111']];
 
     public const BANNER_TEXT = ['over', 'under'];
 
@@ -66,15 +93,25 @@ class PageTheme
         // "Default" font keeps the style's own heading font; a chosen font is used everywhere.
         $heading = $a->font === 'system' ? self::FONTS[$surface['heading']] : $font;
 
-        $css = sprintf(':root{--a:%s;--af:%s;--ff:%s;--fh:%s}', $light, Contrast::textOn($light), $font, $heading);
+        // K · Black & White keeps to ink and paper unless the restaurant turns its accent on.
+        $mono = ($surface['mono'] ?? false) && ! $a->mono_accent;
+        [$lightA, $lightF] = $mono ? self::MONO_INK['light'] : [$light, Contrast::textOn($light)];
+        [$darkA, $darkF] = $mono ? self::MONO_INK['dark'] : [$dark, Contrast::textOn($dark)];
+
+        $css = sprintf(':root{--a:%s;--af:%s;--ff:%s;--fh:%s%s}', $lightA, $lightF, $font, $heading, $style === 'colour' ? self::palette($primary, 'light') : '');
         if (! ($surface['dark_only'] ?? false)) {
-            $css .= sprintf('@media (prefers-color-scheme:dark){:root{--a:%s;--af:%s}}', $dark, Contrast::textOn($dark));
+            $css .= sprintf('@media (prefers-color-scheme:dark){:root{--a:%s;--af:%s%s}}', $darkA, $darkF, $style === 'colour' ? self::palette($primary, 'dark') : '');
         }
 
         return [
             'css' => $css,
-            'theme_color' => $light,
+            'theme_color' => $lightA,
             'style' => $style,
+            // Style options, each used only in its own style (QUESTIONS #229).
+            'direction' => $style === 'arabic' && in_array($a->menu_direction, TenantAppearance::DIRECTIONS, true) ? $a->menu_direction : ($style === 'arabic' ? 'auto' : 'ltr'),
+            'halal' => $style === 'islamic' && $a->show_halal,
+            'ramadan' => $style === 'islamic' && $a->ramadan_mode,
+            'greyscale' => $style === 'mono' && $a->photos_greyscale,
             'show_prices' => $a->show_prices,
             // Style D shows no dish or special photos, whatever the switch says.
             'show_photos' => $a->show_photos && $style !== 'minimal',
@@ -87,6 +124,79 @@ class PageTheme
             'logo' => ($a->show_logo ?? true) ? $a->logo?->urls() : null,
             'cover' => ($a->show_banner ?? true) && $a->cover ? self::cover($a, $style) : null,
         ];
+    }
+
+    /**
+     * L · Colourful: six bright category colours (--c1…--c6, the brand colour
+     * first), a pale tint of each for its cards (--t1…--t6) and the text on
+     * each colour (--o1…--o6: white or near-black, at least 4.5:1). The
+     * colours are only ever backgrounds (pills, chips, "+"), never text, so
+     * they can stay bright; the text on them is always readable.
+     */
+    public static function palette(string $primary, string $mode): string
+    {
+        [$h, $sat] = self::hsl($primary);
+        $page = self::STYLES['colour'][$mode];
+        $out = '';
+        foreach (self::PALETTE_STEPS as $i => $step) {
+            // The brand colour as it is; the others bright and clear, whatever the brand's own saturation.
+            $c = $i === 0 ? $primary : self::fromHsl(fmod($h + $step, 360), max(0.7, min(0.9, $sat)), $mode === 'light' ? 0.52 : 0.6);
+            // Mid-tones can miss 4.5:1 with both black and white: then the colour moves away from its text a little.
+            $text = Contrast::textOn($c);
+            $c = Contrast::readableOn($c, $text);
+            $tint = self::mix($c, $page, $mode === 'light' ? 0.13 : 0.22);
+            $out .= sprintf(';--c%1$d:%2$s;--t%1$d:%3$s;--o%1$d:%4$s', $i + 1, $c, $tint, $text);
+        }
+
+        return $out;
+    }
+
+
+    /** @return array{0: float, 1: float, 2: float} hue 0–360, saturation and lightness 0–1 */
+    private static function hsl(string $hex): array
+    {
+        [$r, $g, $b] = array_map(fn (int $v) => $v / 255, Contrast::rgb($hex));
+        $max = max($r, $g, $b);
+        $min = min($r, $g, $b);
+        $l = ($max + $min) / 2;
+        $d = $max - $min;
+        if ($d == 0) {
+            return [0.0, 0.0, $l];
+        }
+        $s = $d / (1 - abs(2 * $l - 1));
+        $h = match ($max) {
+            $r => fmod(($g - $b) / $d + 6, 6),
+            $g => ($b - $r) / $d + 2,
+            default => ($r - $g) / $d + 4,
+        };
+
+        return [$h * 60, $s, $l];
+    }
+
+    private static function fromHsl(float $h, float $s, float $l): string
+    {
+        $c = (1 - abs(2 * $l - 1)) * $s;
+        $x = $c * (1 - abs(fmod($h / 60, 2) - 1));
+        $m = $l - $c / 2;
+        [$r, $g, $b] = match (true) {
+            $h < 60 => [$c, $x, 0],
+            $h < 120 => [$x, $c, 0],
+            $h < 180 => [0, $c, $x],
+            $h < 240 => [0, $x, $c],
+            $h < 300 => [$x, 0, $c],
+            default => [$c, 0, $x],
+        };
+
+        return Contrast::hex((int) round(($r + $m) * 255), (int) round(($g + $m) * 255), (int) round(($b + $m) * 255));
+    }
+
+    /** $amount of $colour over $base (0 = base, 1 = colour). */
+    private static function mix(string $colour, string $base, float $amount): string
+    {
+        $c = Contrast::rgb($colour);
+        $b = Contrast::rgb($base);
+
+        return Contrast::hex(...array_map(fn (int $i) => (int) round($b[$i] + ($c[$i] - $b[$i]) * $amount), [0, 1, 2]));
     }
 
     /**

@@ -117,7 +117,7 @@ it('offers only the styles the plan allows, and a restaurant override wins', fun
     $tenant->forceFill(['plan_id' => $plan->id])->save();
     Features::forget();
 
-    $this->actingAs($owner)->getJson(t($tenant, 'appearance'))->assertJsonPath('data.styles', ['grid', 'bistro', 'minimal', 'mesob', 'lounge', 'board']);
+    $this->actingAs($owner)->getJson(t($tenant, 'appearance'))->assertJsonPath('data.styles', ['grid', 'bistro', 'minimal', 'mesob', 'lounge', 'board', 'arabic', 'islamic', 'somali', 'mono', 'colour']);
     $this->actingAs($owner)->putJson(t($tenant, 'appearance'), [
         'primary_color' => '#b4432a', 'font' => 'system', 'style' => 'editorial',
         'show_prices' => true, 'show_photos' => true, 'show_descriptions' => true, 'show_calories' => true,
