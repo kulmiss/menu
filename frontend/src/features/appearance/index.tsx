@@ -28,6 +28,7 @@ import {
   type AppearanceValues,
   type Font,
   MENU_DIRECTIONS,
+  type MenuStyle,
   appearanceQuery,
   previewUrl,
   useSaveAppearance,
@@ -50,10 +51,21 @@ const FLAGS = [
   'show_banner',
 ] as const
 /** Options that belong to one menu style (shown only while that style is picked). */
-const STYLE_SWITCHES = {
+type StyleFlag =
+  | 'show_halal'
+  | 'ramadan_mode'
+  | 'photos_greyscale'
+  | 'mono_accent'
+  | 'show_decoration'
+const STYLE_SWITCHES: Partial<Record<MenuStyle, readonly StyleFlag[]>> = {
   islamic: ['show_halal', 'ramadan_mode'],
   mono: ['photos_greyscale', 'mono_accent'],
-} as const
+  coffee: ['show_decoration'],
+  grill: ['show_decoration'],
+  garden: ['show_decoration'],
+  coastal: ['show_decoration'],
+  luxe: ['show_decoration'],
+}
 const FONT_STACK: Record<Font, string> = {
   system: 'system-ui, sans-serif',
   serif: '"Iowan Old Style", Palatino, Georgia, serif',
@@ -110,6 +122,7 @@ function valuesOf(a: Appearance): AppearanceValues {
     ramadan_mode: a.ramadan_mode ?? false,
     photos_greyscale: a.photos_greyscale ?? false,
     mono_accent: a.mono_accent ?? false,
+    show_decoration: a.show_decoration ?? true,
     theme_id: a.theme_id,
     logo_media_id: a.logo?.id ?? null,
     cover_media_id: a.cover?.id ?? null,
@@ -326,12 +339,12 @@ function AppearanceForm({ initial }: { initial: Appearance }) {
                 </div>
               </fieldset>
             )}
-            {(values.style === 'islamic' || values.style === 'mono') && (
+            {STYLE_SWITCHES[values.style] && (
               <fieldset className='grid gap-3'>
                 <legend className='mb-1 text-sm font-medium'>
                   {t('appearance.style_options')}
                 </legend>
-                {STYLE_SWITCHES[values.style].map((flag) => (
+                {STYLE_SWITCHES[values.style]?.map((flag) => (
                   <div
                     key={flag}
                     className='flex min-h-11 items-center justify-between gap-4 sm:min-h-0'

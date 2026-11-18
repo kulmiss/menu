@@ -62,7 +62,27 @@
       "name": "L · Colourful",
       "hint": "A bright colour for each category, made from your colour, and rounded cards. For juice bars, ice cream and family places."
     },
-    "locked": "Not included in your plan."
+    "locked": "Not included in your plan.",
+    "coffee": {
+      "name": "M · Coffee House",
+      "hint": "A dark-roast band with a jebena and cups, round photos, coffee-bean marks. For coffee houses, cafés and tea rooms."
+    },
+    "grill": {
+      "name": "N · Grill & BBQ",
+      "hint": "Charcoal and embers, flames, tall bold headings, price tags. For tibs, kitfo and grill houses, nyama choma, burgers and steaks."
+    },
+    "garden": {
+      "name": "O · Garden Fresh",
+      "hint": "Leaves and soft greens, white rounded cards. For juice houses, salad bars, healthy cafés and fasting menus."
+    },
+    "coastal": {
+      "name": "P · Coastal",
+      "hint": "A deep-sea band with a dhow, sand and coral, ticket-like cards. For fish and seafood places by the sea."
+    },
+    "luxe": {
+      "name": "Q · Fine Dining",
+      "hint": "Marble, thin gold lines, an elegant serif, centred headings. For hotels, fine dining and events."
+    }
   },
   "flags": {
     "show_prices": "Show prices",
@@ -92,7 +112,9 @@
     "photos_greyscale": "Black-and-white photos",
     "photos_greyscale_hint": "Shows your dish photos and banner in black and white.",
     "mono_accent": "Use your brand colour as a small accent",
-    "mono_accent_hint": "Your colour on the \"+\" buttons, badges and the chosen category. Prices keep the text colour."
+    "mono_accent_hint": "Your colour on the \"+\" buttons, badges and the chosen category. Prices keep the text colour.",
+    "show_decoration": "Show the style's pictures and icons",
+    "show_decoration_hint": "The header picture, textures and category icons. Your banner replaces the header picture; a category photo (Menu editor) replaces its icon."
   },
   "images": "Logo and banner",
   "images_hint": "The banner is the wide photo at the top of your menu. It is cropped to the shape your menu style uses.",

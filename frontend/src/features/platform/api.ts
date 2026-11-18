@@ -31,6 +31,11 @@ export const FEATURES = [
   'style_somali',
   'style_mono',
   'style_colour',
+  'style_coffee',
+  'style_grill',
+  'style_garden',
+  'style_coastal',
+  'style_luxe',
 ] as const
 export const LIMITS = [
   'menus',

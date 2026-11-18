@@ -41,6 +41,7 @@ const APPEARANCE: Appearance = {
   ramadan_mode: false,
   photos_greyscale: false,
   mono_accent: false,
+  show_decoration: true,
   theme_id: null,
   logo: null,
   cover: null,
@@ -58,6 +59,11 @@ const APPEARANCE: Appearance = {
     'somali',
     'mono',
     'colour',
+    'coffee',
+    'grill',
+    'garden',
+    'coastal',
+    'luxe',
   ],
   banner: {
     editorial: { ratio: [16, 9], text: 'under' },
@@ -72,6 +78,11 @@ const APPEARANCE: Appearance = {
     somali: { ratio: [2, 1], text: 'under' },
     mono: { ratio: [2, 1], text: 'under' },
     colour: { ratio: [5, 2], text: 'under' },
+    coffee: { ratio: [5, 2], text: 'under' },
+    grill: { ratio: [2, 1], text: 'under' },
+    garden: { ratio: [5, 2], text: 'under' },
+    coastal: { ratio: [2, 1], text: 'under' },
+    luxe: { ratio: [2, 1], text: 'under' },
   },
   themes: [
     {
@@ -267,6 +278,39 @@ describe('AppearancePage', () => {
     )
     await expect.poll(() => frame(screen).src).toContain('photos_greyscale=1')
     await expect.poll(() => frame(screen).src).toContain('mono_accent=1')
+  })
+
+  it('offers the styles M–Q with a switch for their pictures and icons', async () => {
+    const screen = await render()
+    for (const name of [
+      /M · Coffee House/,
+      /N · Grill & BBQ/,
+      /O · Garden Fresh/,
+      /P · Coastal/,
+      /Q · Fine Dining/,
+    ])
+      await expect.element(screen.getByRole('radio', { name })).toBeVisible()
+    await expect
+      .element(
+        screen.getByRole('switch', { name: /Show the style's pictures/ })
+      )
+      .not.toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('radio', { name: /P · Coastal/ }))
+    await expect.poll(() => frame(screen).src).toContain('style=coastal')
+    const deco = screen.getByRole('switch', {
+      name: /Show the style's pictures and icons/,
+    })
+    await expect.element(deco).toBeChecked()
+    await userEvent.click(deco)
+    await expect.poll(() => frame(screen).src).toContain('show_decoration=0')
+    // The choice is kept when moving to another style of M–Q.
+    await userEvent.click(screen.getByRole('radio', { name: /Q · Fine Dining/ }))
+    await expect
+      .element(
+        screen.getByRole('switch', { name: /Show the style's pictures/ })
+      )
+      .not.toBeChecked()
   })
 
   it('offers D · Minimal next to A, B and C, with logo and banner switches', async () => {

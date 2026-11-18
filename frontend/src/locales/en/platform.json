@@ -121,6 +121,11 @@
     "style_somali": "Menu style J · Somali",
     "style_mono": "Menu style K · Black & White",
     "style_colour": "Menu style L · Colourful",
+    "style_coffee": "Menu style M · Coffee House",
+    "style_grill": "Menu style N · Grill & BBQ",
+    "style_garden": "Menu style O · Garden Fresh",
+    "style_coastal": "Menu style P · Coastal",
+    "style_luxe": "Menu style Q · Fine Dining",
     "pdf_menu": "Printable PDF menu",
     "order_list": "\"My order\" list for guests",
     "price_periods": "Time-based prices (happy hour)",
@@ -869,7 +874,12 @@
       "style_islamic": "Style: Islamic",
       "style_somali": "Style: Somali",
       "style_mono": "Style: Black & White",
-      "style_colour": "Style: Colourful"
+      "style_colour": "Style: Colourful",
+      "style_coffee": "Style: Coffee House",
+      "style_grill": "Style: Grill & BBQ",
+      "style_garden": "Style: Garden Fresh",
+      "style_coastal": "Style: Coastal",
+      "style_luxe": "Style: Fine Dining"
     },
     "last_days": "Last {{count}} days"
   },
