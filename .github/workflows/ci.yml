@@ -183,7 +183,7 @@ jobs:
       fail-fast: false
       matrix:
         # Every menu style must meet every speed budget (owner, 2026-11-11).
-        style: [editorial, grid, bistro, minimal]
+        style: [editorial, grid, bistro, minimal, mesob, lounge, board]
         # …with the banner and without it: then the first photo is the largest paint (owner, 2026-11-12).
         banner: [banner, no-banner]
         # …and A without banner and specials: its full-width first dish photo is then the largest paint.
@@ -192,6 +192,9 @@ jobs:
             banner: no-banner-no-specials
           # …and during a time-based price period (crossed-out prices and labels on the page).
           - style: grid
+            banner: price-period
+          # …and F · Night Lounge during happy hour: old and new prices, each on one line (owner, 2026-11-18).
+          - style: lounge
             banner: price-period
     defaults:
       run:

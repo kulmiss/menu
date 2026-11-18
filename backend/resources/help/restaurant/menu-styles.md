@@ -1,12 +1,12 @@
 ---
-title: Menu styles A, B, C and D
+title: Menu styles A to G
 topic: look
 summary: Choose how your menu looks to guests.
 order: 10
 pages: /admin/appearance
 app: /r/:tid/appearance
 roles: owner, manager
-keywords: style, design, theme, layout, editorial, grid, bistro, minimal
+keywords: style, design, theme, layout, editorial, grid, bistro, minimal, mesob, lounge, night, dark, board, chalkboard, street food
 ---
 
 Open **Appearance → Menu style**. The preview shows the change at once. Guests see it after you tap **Save**.
@@ -22,6 +22,15 @@ Open **Appearance → Menu style**. The preview shows the change at once. Guests
 <!-- endif -->
 <!-- if style_minimal -->
 - **D · Minimal**: text only. Names, short descriptions and prices. No dish photos. Fastest.
+<!-- endif -->
+<!-- if style_mesob -->
+- **E · Mesob**: warm colours, woven bands and round photos. Made for Ethiopian and Somali food. [More about E](help:style-mesob)
+<!-- endif -->
+<!-- if style_lounge -->
+- **F · Night Lounge**: always dark, with a soft glow in your colour. For bars and late nights. [More about F](help:style-night-lounge)
+<!-- endif -->
+<!-- if style_board -->
+- **G · Street Board**: a clean chalkboard with price tags. For fast food and juice bars. [More about G](help:style-street-board)
 <!-- endif -->
 
 A style with a lock is not in your plan. See [plans](help:plans-compared).

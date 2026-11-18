@@ -69,7 +69,7 @@ A feature can be off in three places: **Settings → Features** (for everyone), 
 {"message": "\"Sold out\" marks is not included in your plan. Upgrade your plan to use it.", "code": "features.sold_out", "upgrade": {"whatsapp": "https://wa.me/251911222333", "email": "hello@menu.example"}}
 ```
 
-The combined switches are in `GET me` (`tenants[].features`, per restaurant) and the global ones in `GET mobile/config` (`features`). Feature keys: `branches`, `promotions`, `insights`, `import_export`, `remove_branding`, `pdf_menu`, `order_list`, `style_editorial`, `style_grid`, `style_bistro`, `style_minimal`, `price_periods`, `sold_out`, `share`, `print_materials`, and the platform-only `signup`. A missing key means **on** (an older server).
+The combined switches are in `GET me` (`tenants[].features`, per restaurant) and the global ones in `GET mobile/config` (`features`). Feature keys: `branches`, `promotions`, `insights`, `import_export`, `remove_branding`, `pdf_menu`, `order_list`, `style_editorial`, `style_grid`, `style_bistro`, `style_minimal`, `style_mesob`, `style_lounge`, `style_board`, `price_periods`, `sold_out`, `share`, `print_materials`, and the platform-only `signup`. A missing key means **on** (an older server).
 
 ## Start-up settings
 
@@ -634,7 +634,7 @@ Idempotency-Key: 6a5b…
 {"features": {"sold_out": false, "share": true}}
 ```
 
-Answer: the same rows as `GET`. All four styles off: `422 {"errors": {"features": ["Keep at least one menu style switched on."]}}`.
+Answer: the same rows as `GET`. All menu styles off: `422 {"errors": {"features": ["Keep at least one menu style switched on."]}}`.
 
 ## Super Admin: Mobile app control (QUESTIONS #193)
 
