@@ -58,6 +58,9 @@ class DemoSeeder extends Seeder
 
             return;
         }
+        // A fresh start (migrate:fresh): static guest pages left from the old data would
+        // still be served for the same addresses, so they go first.
+        Artisan::call('menu:refresh-pages', ['--all' => true]);
         // One Photos instance, so each photo is processed once and copied for the next restaurant.
         app()->instance(Photos::class, new Photos(app(ImageProcessor::class)));
         $missing = count(array_filter(DownloadDemoPhotos::manifest(), fn (array $p) => ! Photos::has($p['key'])));

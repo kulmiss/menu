@@ -11,7 +11,7 @@
 .cv{aspect-ratio:5/2}
 .hc header{margin-top:1rem}
 /* The header is an arch (a mihrab-like frame) with a thin gold line inside. */
-header{position:relative;margin:0 1rem;flex-direction:column;text-align:center;gap:.3rem;padding:2.4rem 1.25rem 1rem;background:var(--bg);border-radius:50% 50% 0 0/5.5rem 5.5rem 0 0}
+header{position:relative;margin:0 1rem;flex-direction:column;text-align:center;gap:.3rem;padding:2.4rem 1.25rem 1rem;background:var(--bg);border-radius:50% 50% 0 0/5.5rem 5.5rem 0 0}header>div{align-self:stretch}
 header:before{content:"";position:absolute;inset:.45rem .45rem 0;border:1.5px solid var(--g);border-bottom:0;border-radius:50% 50% 0 0/5.1rem 5.1rem 0 0;pointer-events:none}
 /* A lantern hanging at the arch's side. */
 header:after{content:"";position:absolute;top:-1.4rem;inset-inline-end:1.25rem;width:1.1rem;height:2.6rem;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 38'%3E%3Cpath d='M8 0v7' stroke='%23c9a24b'/%3E%3Cpath d='M5 7h6l1 2H4z' fill='%23c9a24b'/%3E%3Cpath d='M4 9h8l2.5 5v11L12 30H4l-2.5-5V14z' fill='%23f2d98f' stroke='%23c9a24b'/%3E%3Cpath d='M8 9v21M1.5 14h13M1.5 25h13' stroke='%23c9a24b' stroke-width='.8'/%3E%3Cpath d='M5 30h6l-3 5z' fill='%23c9a24b'/%3E%3C/svg%3E") center/contain no-repeat}
@@ -21,7 +21,7 @@ h1{font-size:1.75rem;font-weight:700;line-height:1.2}
 .ov header{margin:0;border-radius:0;background:linear-gradient(#0000,#000c)}
 .ov header:before,.ov header:after{display:none}
 /* Halal badge (restaurant setting). */
-.hb{display:inline-flex;align-items:center;gap:.3rem;margin-top:.35rem;padding:.2rem .75rem .2rem .55rem;border:1px solid var(--ln);border-radius:99px;background:var(--card);color:var(--fg);font-size:.8125rem;font-weight:700}
+.hb{display:flex;width:fit-content;align-items:center;gap:.3rem;margin:.35rem auto 0;padding:.2rem .75rem .2rem .55rem;border:1px solid var(--ln);border-radius:99px;background:var(--card);color:var(--fg);font-size:.8125rem;font-weight:700}
 .hb svg{color:var(--a)}
 /* Ramadan mode: the lattice under a night sky, a crescent above the arch. */
 .rm .top{background-color:#18204a}

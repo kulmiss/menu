@@ -14,7 +14,7 @@
 /* The band: the brand colour behind the name, ending in hanging scallops (an original ogee shape). */
 .top{padding-bottom:.85rem}
 .cv{aspect-ratio:5/2}
-header{position:relative;flex-direction:column;text-align:center;gap:.3rem;padding:1.4rem 1rem 1.2rem;background:var(--a);color:var(--af)}
+header{position:relative;flex-direction:column;text-align:center;gap:.3rem;padding:1.4rem 1rem 1.2rem;background:var(--a);color:var(--af)}header>div{align-self:stretch}
 header:after{content:"";position:absolute;inset:100% 0 auto;height:.75rem;background:var(--a);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='12'%3E%3Cpath d='M0 0h24v2c-4 0-6 2-8 6-1 2-3 4-4 4s-3-2-4-4C6 4 4 2 0 2z'/%3E%3C/svg%3E") 0 0/1.5rem .75rem repeat-x;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='12'%3E%3Cpath d='M0 0h24v2c-4 0-6 2-8 6-1 2-3 4-4 4s-3-2-4-4C6 4 4 2 0 2z'/%3E%3C/svg%3E") 0 0/1.5rem .75rem repeat-x}
 header .sub{color:inherit}
 /* The hours pill sits on the band: a solid card under its colours, so its text always reads. */

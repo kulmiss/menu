@@ -24,6 +24,11 @@ const STYLE_MARKERS = [
     'mesob' => '--o:#c98a1b',
     'lounge' => '--card:#17131f',
     'board' => '--card:#253530',
+    'arabic' => '@font-face{font-family:"Menu Kufi"',
+    'islamic' => ':root{--br:1rem;--bg:#f7f3e8',
+    'somali' => ':root{--br:1rem;--bg:#f2f8fc',
+    'mono' => ':root{--br:0;--bg:#fff',
+    'colour' => ':root{--br:1.25rem;--bg:#fffaf2',
 ];
 
 function pageWithStyle(string $style): string

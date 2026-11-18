@@ -151,7 +151,6 @@ class PageTheme
         return $out;
     }
 
-
     /** @return array{0: float, 1: float, 2: float} hue 0–360, saturation and lightness 0–1 */
     private static function hsl(string $hex): array
     {

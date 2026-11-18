@@ -24,13 +24,19 @@ use Database\Seeders\Demo\Photos;
 use Database\Seeders\DemoCafeSeeder;
 use Database\Seeders\DemoSeeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use PragmaRX\Google2FA\Google2FA;
 
 beforeEach(fn () => Storage::fake('public'));
 
 it('seeds the complete sales demo: café, three showcases, small restaurants and platform data', function () {
+    // A static page left from an earlier seed must not be served for the new restaurant.
+    $stale = public_path('menu-cache/demo-mandi/index.html');
+    File::ensureDirectoryExists(dirname($stale));
+    File::put($stale, 'old page');
     $this->seed(DemoSeeder::class);
+    expect(File::exists($stale))->toBeFalse();
     $cafe = Tenant::where('slug', DemoSeeder::SLUG)->sole();
 
     // Every demo account is confirmed, so nobody lands on "Check your inbox" (owner, 2026-11-13).

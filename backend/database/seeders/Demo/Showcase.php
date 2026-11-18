@@ -342,7 +342,7 @@ class Showcase
             ],
             [
                 'slug' => 'demo-mandi', 'name' => 'دار المندي', 'email' => 'mandi@example.com', 'plan' => 'plus', 'age' => 3,
-                'style' => 'arabic', 'color' => '#0f5c4a', 'logo' => 'ring', 'banner' => 'mandi-chicken', 'banner_text' => 'under',
+                'style' => 'arabic', 'color' => '#0f5c4a', 'logo' => 'ring', 'banner' => 'shawarma-wraps', 'banner_text' => 'under',
                 // The dish and category names are in Arabic: "automatic" shows the menu right-to-left.
                 'options' => ['menu_direction' => 'auto'],
                 'about' => "Yemeni mandi and grills, slow-cooked in our tandoor oven.\nFamily seating upstairs.",
@@ -423,7 +423,7 @@ class Showcase
             ],
             [
                 'slug' => 'demo-xamar', 'name' => 'Xamar Café', 'email' => 'xamar@example.com', 'plan' => 'plus', 'age' => 3,
-                'style' => 'somali', 'color' => '#c2410c', 'logo' => 'bean', 'banner' => 'kabsa-platter', 'banner_text' => 'under',
+                'style' => 'somali', 'color' => '#c2410c', 'logo' => 'bean', 'banner' => 'sambuusa', 'banner_text' => 'under',
                 'about' => "Somali breakfast, bariis with hilib ari, and sweet shaah all day.\nA little Eastleigh in Bole.",
                 'address' => 'Bole Rwanda, Addis Ababa', 'phone' => '+251 11 000 1099', 'hours' => [['06:00', '23:00']],
                 'special' => ['Bariis for two', 'Bariis iskukaris, hilib ari, salad and banana — Br 1,100.', 'Bariis iskukaris', 'kabsa-platter'],

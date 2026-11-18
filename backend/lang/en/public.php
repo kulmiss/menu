@@ -104,7 +104,6 @@ return [
         'halal' => 'Halal',
         'gluten_free' => 'Gluten-free',
         'new' => 'New',
-    'halal' => 'Halal',
         'popular' => 'Popular',
     ],
     'allergens' => [

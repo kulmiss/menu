@@ -4,7 +4,7 @@
 :root{--br:.5rem;--bg:#fff;--fg:#171717;--mu:#5c5c5a;--ln:#e8e8e6;--card:#f5f5f4}
 @media (prefers-color-scheme:dark){:root{--bg:#111110;--fg:#f2f2f0;--mu:#a3a3a0;--ln:#2a2a28;--card:#1a1a19}}
 .cv{aspect-ratio:5/2}
-header{flex-direction:column;text-align:center;gap:.25rem;padding:1.5rem 1rem .75rem}
+header{flex-direction:column;text-align:center;gap:.25rem;padding:1.5rem 1rem .75rem}header>div{align-self:stretch}
 .lg{width:3rem;height:3rem;border-radius:.75rem}
 h1{font-size:1.75rem;font-weight:650;line-height:1.15;letter-spacing:-.015em}
 .bar{border-top:1px solid var(--ln)}
