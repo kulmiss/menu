@@ -63,7 +63,9 @@ class ItemController extends Controller
         $soldOut = Features::enabled($tenant, 'sold_out');
 
         return TableQuery::respond($query, $request, [
-            'search' => fn ($q, string $s) => $q->where('items.name', 'like', "%{$s}%"),
+            // Names are JSON (one per language): MySQL compares JSON text case by case and
+            // would also match the language codes, so search the lower-cased values only.
+            'search' => fn ($q, string $s) => $q->whereRaw("JSON_SEARCH(LOWER(items.name), 'one', ?) IS NOT NULL", ['%'.addcslashes(mb_strtolower($s), '%_\\').'%']),
             'filters' => [
                 'menu' => fn ($q, array $v) => $q->whereHas('category', fn ($c) => $c->whereIn('menu_id', array_map('intval', $v))),
                 'category' => fn ($q, array $v) => $q->whereIn('items.category_id', array_map('intval', $v)),

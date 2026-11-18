@@ -130,10 +130,14 @@ it('lists, filters and exports invoices; resends one; VAT is shown as included',
     $this->getJson(p('invoices'))->assertOk()->assertJsonCount(2, 'data');
     $this->getJson(p('invoices?q='.urlencode($tenant->name)))->assertJsonCount(1, 'data')->assertJsonPath('data.0.tenant.id', $tenant->id);
     $this->getJson(p('invoices?q=0002'))->assertJsonCount(1, 'data')->assertJsonPath('data.0.tenant.id', $other->id);
+    // Any letter case finds the customer's name or e-mail (bug 2026-11-18: JSON was compared case by case).
+    $this->getJson(p('invoices?q='.urlencode(mb_strtolower($tenant->name))))->assertJsonCount(1, 'data')->assertJsonPath('data.0.tenant.id', $tenant->id);
+    $this->getJson(p('invoices?q='.urlencode(mb_strtoupper($invoice->customer['email']))))->assertJsonCount(1, 'data')->assertJsonPath('data.0.tenant.id', $tenant->id);
     $this->getJson(p("invoices?tenant_id={$other->id}"))->assertJsonCount(1, 'data');
     $this->getJson(p('invoices?from='.now()->addDay()->toDateString()))->assertJsonCount(0, 'data');
     $this->getJson(p('invoices?status=void'))->assertJsonCount(0, 'data');
 
+    expect(substr_count($this->get(p('invoices.csv?q='.urlencode(mb_strtoupper($tenant->name))))->assertOk()->getContent(), "\n"))->toBe(2); // header + 1
     $csv = $this->get(p('invoices.csv'))->assertOk()->assertHeader('Content-Type', 'text/csv; charset=UTF-8')->getContent();
     expect($csv)->toContain('Number,Issued,Status')->toContain($invoice->number)->toContain('1000.00,15.00,150.00,1150.00,ETB');
 
