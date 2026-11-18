@@ -29,7 +29,7 @@ section ul{display:grid;gap:.6rem;margin-top:.75rem}
 section li{border:0;border-bottom:3px solid var(--sd);border-radius:var(--br);background:var(--card);box-shadow:0 1px 3px #0b5ea814}
 /* A dish: the photo at the start, "+" at the end, never over the text. */
 li>.it{padding:.7rem .8rem;grid-template-columns:5rem minmax(0,1fr);grid-template-areas:"im ." "im nm" "im sm" "im pr" "im tg" "im .";grid-template-rows:1fr auto auto auto auto 1fr;column-gap:.85rem}
-li>.it.ao{padding-inline-end:3.1rem}
+li>.it.ao,li>.it.ao.np{padding-inline-end:3.1rem}
 li>.it .ad,li>.np>.ad{top:50%;margin-top:-1.375rem;inset-inline-end:.25rem}
 li>.it .im{grid-area:im;align-self:start;width:5rem;height:5rem;border-radius:.8rem}
 li>.it .nm{grid-area:nm;font-size:1.05rem;font-weight:700;line-height:1.3}

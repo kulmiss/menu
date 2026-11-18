@@ -144,7 +144,7 @@ class PageTheme
             // Mid-tones can miss 4.5:1 with both black and white: then the colour moves away from its text a little.
             $text = Contrast::textOn($c);
             $c = Contrast::readableOn($c, $text);
-            $tint = self::mix($c, $page, $mode === 'light' ? 0.13 : 0.22);
+            $tint = self::mix($c, $page, $mode === 'light' ? 0.13 : 0.16);
             $out .= sprintf(';--c%1$d:%2$s;--t%1$d:%3$s;--o%1$d:%4$s', $i + 1, $c, $tint, $text);
         }
 

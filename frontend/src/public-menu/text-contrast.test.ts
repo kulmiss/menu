@@ -43,6 +43,66 @@ const textOn = (a: string) =>
     ? '#ffffff'
     : '#141210'
 
+// The same as PHP PageTheme::palette() (style L · Colourful): six bright colours from the
+// brand colour, each with its text colour (white or near-black) and a pale tint for its cards.
+const hsl = ([r, g, b]: Rgb): [number, number] => {
+  const [x, y, z] = [r, g, b].map((v) => v / 255)
+  const max = Math.max(x, y, z)
+  const min = Math.min(x, y, z)
+  const l = (max + min) / 2
+  const d = max - min
+  if (d === 0) return [0, 0]
+  const sat = d / (1 - Math.abs(2 * l - 1))
+  const h =
+    max === x
+      ? ((y - z) / d + 6) % 6
+      : max === y
+        ? (z - x) / d + 2
+        : (x - y) / d + 4
+  return [h * 60, sat]
+}
+const fromHsl = (h: number, sat: number, l: number) => {
+  const c = (1 - Math.abs(2 * l - 1)) * sat
+  const x = c * (1 - Math.abs(((h / 60) % 2) - 1))
+  const m = l - c / 2
+  const [r, g, b] =
+    h < 60
+      ? [c, x, 0]
+      : h < 120
+        ? [x, c, 0]
+        : h < 180
+          ? [0, c, x]
+          : h < 240
+            ? [0, x, c]
+            : h < 300
+              ? [x, 0, c]
+              : [c, 0, x]
+  return toHex([r, g, b].map((v) => Math.round((v + m) * 255)) as Rgb)
+}
+const mix = (c: string, base: string, amount: number) =>
+  toHex(
+    hex(base).map((v, i) => Math.round(v + (hex(c)[i] - v) * amount)) as Rgb
+  )
+export const palette = (brand: string, dark: boolean) => {
+  const [h, sat] = hsl(hex(brand))
+  const page = dark ? '#1e1b2e' : '#fffaf2'
+  return [0, 48, 150, 205, 265, 320]
+    .map((step, i) => {
+      let c =
+        i === 0
+          ? brand
+          : fromHsl(
+              (h + step) % 360,
+              Math.max(0.7, Math.min(0.9, sat)),
+              dark ? 0.6 : 0.52
+            )
+      const text = textOn(c)
+      c = readableOn(c, text)
+      return `;--c${i + 1}:${c};--t${i + 1}:${mix(c, page, dark ? 0.16 : 0.13)};--o${i + 1}:${text}`
+    })
+    .join('')
+}
+
 /** Every colour in a computed CSS value (rgb(), rgba(), color(srgb …)), as [r, g, b, alpha]. */
 const colours = (v: string) => {
   const out: number[][] = []
@@ -75,6 +135,9 @@ function backgrounds(el: Element): Rgb[] {
       .trim() || '#ffffff'
   )
   const layers: number[][][] = []
+  // See-through backgrounds (a pale tint) lie over the next one up: collect them up to the
+  // first solid one, then lay them over it from the bottom (the hours pill on a coloured band).
+  const tints: number[][] = []
   for (const p of chain) {
     const cs = getComputedStyle(p)
     const bg = colours(cs.backgroundColor)[0]
@@ -82,11 +145,13 @@ function backgrounds(el: Element): Rgb[] {
     const band = /^\S+\s+([\d.]+)px/.exec(cs.backgroundSize)
     if (cs.backgroundImage !== 'none' && !(band && Number(band[1]) < 12))
       layers.push(colours(cs.backgroundImage))
-    if (bg && bg[3] > 0) {
+    if (bg && bg[3] >= 1) {
       solid = over(bg, solid)
       break
     }
+    if (bg && bg[3] > 0) tints.push(bg)
   }
+  for (const t of tints.reverse()) solid = over(t, solid)
   const out = [solid]
   for (const stops of layers) for (const s of stops) out.push(over(s, solid))
   return out
@@ -100,11 +165,12 @@ const BRANDS = [
   '#c58bff',
   '#3d3a6b',
 ]
-const html = `<header><div><h1>Habesha Table</h1><p class="sub">Bole</p></div></header>
+const html = `<header><div><h1>Habesha Table</h1><p class="sub">Bole</p><p class="hb">Halal</p><p class="st op">Open now · until 22:00</p><p class="st">Closed · opens 08:00</p></div></header>
+<nav class="ch cn"><a class="k1 on" href="#c1">Wot</a><a class="k2" href="#c2">Drinks</a></nav>
 <main class="w">
 <p class="an"><b>Tonight:</b> live music from 20:00</p>
 <div class="spc"><button type="button" class="it sp"><span class="tx"><span class="bd hl">Special</span><span class="nm">Sunset set</span><span class="sm">Two drinks and a plate</span><span class="pr">Br 450</span></span></button></div>
-<section><h2>Wot · ወጥ</h2><p class="cd">Served on injera.</p><ul>
+<section class="k1"><h2>Wot · ወጥ</h2><p class="cd">Served on injera.</p><ul>
 <li data-i="1"><button type="button" class="it ao"><span class="tx"><span class="nm">Doro wot · ዶሮ ወጥ</span><span class="sm">Chicken, berbere, egg</span><span class="pr"><s>Br 450</s> Br 384</span><span class="tg"><span class="bd hl">Popular</span><span class="bd">Spicy</span></span></span><span class="ad" data-x="A">+</span><span class="im"><img alt="" width="640" height="480"></span></button></li>
 <li data-i="2"><button type="button" class="it np ao"><span class="tx"><span class="nm">Shiro</span><span class="sm">Chickpea stew</span><span class="pr">from Br 220</span><span class="tg"><span class="bd">Vegan</span></span></span><span class="ad" data-x="A">+</span></button></li>
 <li data-i="3" class="so"><button type="button" class="it np"><span class="tx"><span class="nm">Kitfo</span><span class="pr">Br 460</span><span class="tg"><span class="bd x0">Sold out</span></span></span></button></li>
@@ -112,6 +178,9 @@ const html = `<header><div><h1>Habesha Table</h1><p class="sub">Bole</p></div></
 const TEXTS = [
   'h1',
   '.sub',
+  '.hb',
+  '.st',
+  '.cn a',
   '.an',
   'h2',
   '.cd',
@@ -160,7 +229,8 @@ describe('text contrast on the guest page', () => {
               ? (base + css)
                   .split('@media (prefers-color-scheme:dark)')
                   .join('@media all')
-              : base + css) + `:root{--a:${a};--af:${textOn(a)}}`
+              : base + css) +
+            `:root{--a:${a};--af:${textOn(a)}${palette(brand, dark)}}`
           document.body.className = `S-${name}`
           root = document.body.appendChild(document.createElement('div'))
           root.innerHTML = html

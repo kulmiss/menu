@@ -3,7 +3,7 @@
    tint --t1…--t6; --o1…--o6 is the text on each colour), rounded shapes, small
    movements only when the phone allows motion. Surfaces must match PageTheme::STYLES['colour']. */
 :root{--br:1.25rem;--bg:#fffaf2;--fg:#1d1a33;--mu:#55506e;--ln:#ece4d6;--card:#fff}
-@media (prefers-color-scheme:dark){:root{--bg:#14121f;--fg:#f5f3ff;--mu:#b3aed0;--ln:#2c2843;--card:#1e1b2e}}
+@media (prefers-color-scheme:dark){:root{--bg:#14121f;--fg:#f5f3ff;--mu:#bdb8d9;--ln:#2c2843;--card:#1e1b2e}}
 .k1{--c:var(--c1);--t:var(--t1);--o:var(--o1)}.k2{--c:var(--c2);--t:var(--t2);--o:var(--o2)}.k3{--c:var(--c3);--t:var(--t3);--o:var(--o3)}
 .k4{--c:var(--c4);--t:var(--t4);--o:var(--o4)}.k5{--c:var(--c5);--t:var(--t5);--o:var(--o5)}.k6{--c:var(--c6);--t:var(--t6);--o:var(--o6)}
 .cv{aspect-ratio:5/2;border-radius:0 0 1.75rem 1.75rem}
@@ -30,7 +30,7 @@ section ul{display:grid;gap:.6rem;margin-top:.7rem}
 section li{border:0;border-radius:var(--br);background:var(--t)}
 section .ad{--a:var(--c);--af:var(--o)}
 li>.it{padding:.6rem .7rem;grid-template-columns:4.5rem minmax(0,1fr);grid-template-areas:"im ." "im nm" "im sm" "im pr" "im tg" "im .";grid-template-rows:1fr auto auto auto auto 1fr;column-gap:.8rem}
-li>.it.ao{padding-inline-end:3.1rem}
+li>.it.ao,li>.it.ao.np{padding-inline-end:3.1rem}
 li>.it .ad,li>.np>.ad{top:50%;margin-top:-1.375rem;inset-inline-end:.25rem}
 li>.it .im{grid-area:im;align-self:start;width:4.5rem;height:4.5rem;border-radius:1rem}
 li>.it .nm{grid-area:nm;font-size:1.05rem;font-weight:800;line-height:1.25}
@@ -44,6 +44,8 @@ li>.it.np{grid-template-columns:minmax(0,1fr);grid-template-areas:"nm" "sm" "pr"
 .bd.hl{background:var(--fg);border-color:var(--fg);color:var(--bg)}
 .spc .sp{border:0;border-radius:var(--br);background:var(--t1)}
 .sp .bd.hl{background:var(--c1);border-color:var(--c1);color:var(--o1)}
+/* On the tint the brand colour may fall under 4.5:1: the special's price sits on a pill of the colour instead. */
+.sp .pr{display:inline-block;margin-top:.35rem;padding:.05rem .65rem;border-radius:99px;background:var(--c1);color:var(--o1);font-weight:800;white-space:nowrap}
 .an{border:0;border-radius:var(--br);background:var(--t3)}
 .sh h3{font-weight:800}
 .mh{font-weight:800}

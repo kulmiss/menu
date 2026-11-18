@@ -76,6 +76,12 @@ class Cafe
             'primary_color' => '#9a3b1f',
             'banner_text' => 'under',
             'show_banner' => (bool) config('menu.demo_banner'),
+            // Style options CI measures (DEMO_MENU_OPTIONS); each one works only in its own style.
+            'menu_direction' => in_array('rtl', config('menu.demo_options'), true) ? 'rtl' : 'auto',
+            'show_halal' => in_array('halal', config('menu.demo_options'), true),
+            'ramadan_mode' => in_array('ramadan', config('menu.demo_options'), true),
+            'photos_greyscale' => in_array('greyscale', config('menu.demo_options'), true),
+            'mono_accent' => in_array('accent', config('menu.demo_options'), true),
             'cover_media_id' => $this->photos->media($tenant, 'cafe-rustic', true)?->id,
             'logo_media_id' => $this->photos->logo($tenant, '#9a3b1f', 'bean')?->id,
         ]);

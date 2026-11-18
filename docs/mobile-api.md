@@ -69,7 +69,7 @@ A feature can be off in three places: **Settings → Features** (for everyone), 
 {"message": "\"Sold out\" marks is not included in your plan. Upgrade your plan to use it.", "code": "features.sold_out", "upgrade": {"whatsapp": "https://wa.me/251911222333", "email": "hello@menu.example"}}
 ```
 
-The combined switches are in `GET me` (`tenants[].features`, per restaurant) and the global ones in `GET mobile/config` (`features`). Feature keys: `branches`, `promotions`, `insights`, `import_export`, `remove_branding`, `pdf_menu`, `order_list`, `style_editorial`, `style_grid`, `style_bistro`, `style_minimal`, `style_mesob`, `style_lounge`, `style_board`, `price_periods`, `sold_out`, `share`, `print_materials`, and the platform-only `signup`. A missing key means **on** (an older server).
+The combined switches are in `GET me` (`tenants[].features`, per restaurant) and the global ones in `GET mobile/config` (`features`). Feature keys: `branches`, `promotions`, `insights`, `import_export`, `remove_branding`, `pdf_menu`, `order_list`, `style_editorial`, `style_grid`, `style_bistro`, `style_minimal`, `style_mesob`, `style_lounge`, `style_board`, `style_arabic`, `style_islamic`, `style_somali`, `style_mono`, `style_colour`, `price_periods`, `sold_out`, `share`, `print_materials`, and the platform-only `signup`. A missing key means **on** (an older server).
 
 ## Start-up settings
 

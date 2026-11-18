@@ -34,6 +34,10 @@ return [
     // Demo happy hour running all day (CI measures a page during a price period).
     'demo_price_period' => (bool) env('DEMO_MENU_PRICE_PERIOD', false),
 
+    // Style options on the demo restaurant, comma-separated (CI measures them):
+    // rtl (H · Arabic right-to-left), halal and ramadan (I), greyscale and accent (K).
+    'demo_options' => array_values(array_filter(explode(',', (string) env('DEMO_MENU_OPTIONS', '')))),
+
     // Where the demo seeders find the downloaded demo photos (php artisan demo:photos).
     'demo_photos_path' => env('DEMO_PHOTOS_PATH'),
 
