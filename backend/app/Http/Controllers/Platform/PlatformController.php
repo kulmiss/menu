@@ -118,6 +118,7 @@ class PlatformController extends Controller
             'is_public' => ['sometimes', 'boolean'],
             'is_active' => ['sometimes', 'boolean'],
         ]);
+        $before = $model->exists ? DB::table('plan_features')->where('plan_id', $model->id)->pluck('enabled', 'feature_key')->map(fn ($on) => (bool) $on)->all() : [];
         DB::transaction(function () use ($model, $data) {
             $model->fill(array_diff_key($data, ['features' => true]));
             $model->limits ??= [];
@@ -129,7 +130,13 @@ class PlatformController extends Controller
         Features::forget();
         // Restaurants on this plan may show or hide things on their menu now.
         Tenant::where('plan_id', $model->id)->get()->each->bumpCacheVersion();
-        $this->activity->log($plan ? 'platform.plan_updated' : 'platform.plan_created', $model, null, null);
+        // Who changed which feature, from what to what (QUESTIONS #236).
+        $changed = array_filter($data['features'] ?? [], fn ($on, $key) => ($before[$key] ?? null) !== (bool) $on, ARRAY_FILTER_USE_BOTH);
+        $changes = $changed === [] ? null : ['features' => [
+            'from' => array_map(fn (string $key) => $before[$key] ?? null, array_combine(array_keys($changed), array_keys($changed))),
+            'to' => array_map(fn ($on) => (bool) $on, $changed),
+        ]];
+        $this->activity->log($plan ? 'platform.plan_updated' : 'platform.plan_created', $model, $changes, null);
 
         return response()->json(['data' => ['id' => $model->id]], $plan ? 200 : 201);
     }

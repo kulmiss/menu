@@ -57,6 +57,7 @@ use App\Http\Controllers\Platform\PlatformController;
 use App\Http\Controllers\Platform\RestaurantController;
 use App\Http\Controllers\Platform\SearchController;
 use App\Http\Controllers\Platform\SetupController;
+use App\Support\Features;
 use App\Support\Landing\LandingImages;
 use App\Support\Legal\LegalText;
 use Illuminate\Support\Facades\Route;
@@ -256,6 +257,7 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::get('mobile-app/stats', [MobileAppController::class, 'stats']);
             Route::get('settings/features', [FeatureSwitchController::class, 'index']);
             Route::put('settings/features', [FeatureSwitchController::class, 'update']);
+            Route::get('settings/features/{key}/impact', [FeatureSwitchController::class, 'impact'])->whereIn('key', array_keys(Features::DEFAULTS));
             Route::get('settings', [PlatformController::class, 'settings']);
             Route::put('settings', [PlatformController::class, 'saveSettings']);
             Route::post('settings/legal/{page}/reset', [PlatformController::class, 'resetLegal'])->whereIn('page', LegalText::PAGES);
