@@ -1,4 +1,25 @@
-# Progress — overnight job: menu styles M–Q + go-live pack (19 Nov 2026)
+# Progress — "My order" switch, website + API (19 Nov 2026)
+
+📍 Now: done — CI running on the top PR
+📊 Progress: ▓▓▓▓▓▓▓▓▓░ 90%
+✅ Just finished: switches (platform, plan, restaurant), guest page without any My order code when off, Super Admin impact/column/filter, logs, help, API field, tests (backend 1134 + new, frontend 1078 + new), browser runs, Lighthouse on/off
+⏭️ Next: CI green, then the owner merges the top PR
+⚠️ Waiting for the owner: merge the top PR (it includes #160)
+⏱️ Time left: CI only
+
+## Steps
+- [x] 1. Check what existed (feature `order_list`, `show_order_list`), plan the edge cases
+- [x] 2. One rule (`MyOrder::state`) for the guest page, Appearance, `me`, widgets, beacon, Super Admin
+- [x] 3. Guest page off: no "+", no order.js / order.css / data / texts; saved list cleared
+- [x] 4. Owner switch with reasons; Super Admin impact, column, filter; queued rebuild; logs old → new
+- [x] 5. Help article, e-mail text, API (new fields only)
+- [x] 6. Tests: 8 combinations, 17 styles on/off, layout off (all styles × widths × RTL), cache, roles, logs
+- [x] 7. Real browser: 5 styles × 5 widths on/off, service worker with a saved list, owner and Super Admin screens; Lighthouse
+- [ ] 8. CI green on the top PR
+
+---
+
+# Earlier: overnight job: menu styles M–Q + go-live pack (19 Nov 2026)
 
 📍 Now: final checks and the report
 📊 Progress: ▓▓▓▓▓▓▓▓▓░ 90%
