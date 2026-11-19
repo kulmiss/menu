@@ -83,6 +83,8 @@ class Cafe
             'photos_greyscale' => in_array('greyscale', config('menu.demo_options'), true),
             'mono_accent' => in_array('accent', config('menu.demo_options'), true),
             'show_decoration' => ! in_array('no-decoration', config('menu.demo_options'), true),
+            // "My order" switched off by the restaurant (QUESTIONS #236).
+            'show_order_list' => ! in_array('no-my-order', config('menu.demo_options'), true),
             'cover_media_id' => $this->photos->media($tenant, 'cafe-rustic', true)?->id,
             'logo_media_id' => $this->photos->logo($tenant, '#9a3b1f', 'bean')?->id,
         ]);
