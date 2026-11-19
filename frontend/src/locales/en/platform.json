@@ -102,7 +102,10 @@
     "rejected": "Sign-up rejected and removed.",
     "signup_short_unverified": "E-mail not confirmed",
     "signup_short_pending_approval": "Needs approval",
-    "created_on": "Created"
+    "created_on": "Created",
+    "my_order": "My order",
+    "my_order_on": "My order on for guests",
+    "my_order_off": "My order off for guests"
   },
   "features": {
     "branches": "More branches",
@@ -128,7 +131,7 @@
     "style_coastal": "Menu style P · Coastal",
     "style_luxe": "Menu style Q · Fine Dining",
     "pdf_menu": "Printable PDF menu",
-    "order_list": "\"My order\" list for guests",
+    "order_list": "My order (add to order buttons)",
     "price_periods": "Time-based prices (happy hour)",
     "sold_out": "“Sold out” marks",
     "share": "“Share” button on the menu",
@@ -912,7 +915,19 @@
     "unsaved_other": "{{count}} changes not saved",
     "unsaved": "{{count}} changes not saved",
     "global_off": "Off for everyone (Settings → Features)",
-    "load_failed": "The switches could not be loaded. Try again."
+    "load_failed": "The switches could not be loaded. Try again.",
+    "impact_off": "When you save: off for {{count}} restaurants that have it now.",
+    "impact_off_one": "When you save: off for {{count}} restaurant that has it now.",
+    "impact_off_other": "When you save: off for {{count}} restaurants that have it now.",
+    "impact_on": "When you save: on again for {{count}} restaurants (their plan has it).",
+    "impact_on_one": "When you save: on again for {{count}} restaurant (its plan has it).",
+    "impact_on_other": "When you save: on again for {{count}} restaurants (their plan has it).",
+    "impact_off_guests": "When you save: the \"+\" buttons disappear from {{count}} menus now showing them.",
+    "impact_off_guests_one": "When you save: the \"+\" buttons disappear from {{count}} menu now showing them.",
+    "impact_off_guests_other": "When you save: the \"+\" buttons disappear from {{count}} menus now showing them.",
+    "impact_on_guests": "When you save: the \"+\" buttons come back on {{count}} menus (their own switch is on).",
+    "impact_on_guests_one": "When you save: the \"+\" buttons come back on {{count}} menu (its own switch is on).",
+    "impact_on_guests_other": "When you save: the \"+\" buttons come back on {{count}} menus (their own switch is on)."
   },
   "mobile": {
     "hint": "What the Menu Admin app shows and allows. The app reads this when it starts and when it comes back to the screen, so changes reach phones within a minute or two.",

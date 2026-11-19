@@ -21,7 +21,7 @@ In **Appearance** you can turn these on or off:
 - **Show "Download menu (PDF)" link**
 <!-- endif -->
 <!-- if order_list -->
-- **Show "My order" list** (see [My order](help:my-order))
+- **Show "Add to my order" (+) buttons on my menu** (see [My order](help:my-order) and [Turn My order on or off](help:my-order-switch))
 <!-- endif -->
 
 Tap **Save**. Guests see it at once.

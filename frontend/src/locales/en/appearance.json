@@ -91,10 +91,11 @@
     "show_calories": "Show calories",
     "show_share": "Show \"Share menu\" button",
     "show_pdf_link": "Show \"Download menu (PDF)\" link",
-    "show_order_list": "Show \"My order\" list (guests note dishes to show the waiter)",
+    "show_order_list": "Show \"Add to my order\" (+) buttons on my menu",
     "show_other_branches": "Show \"Other branches\" at the bottom of the menu (only with more than one branch)",
     "show_logo": "Show the logo",
-    "show_banner": "Show the banner"
+    "show_banner": "Show the banner",
+    "show_order_list_hint": "Guests tap + to note dishes on their own phone, then show the list to the waiter. Nothing is sent to you. Off: no + buttons and no list, your menu looks just as clean."
   },
   "direction": "Menu direction",
   "direction_hint": "Right-to-left puts the text and buttons on the right side, for Arabic menus.",
@@ -134,5 +135,9 @@
   "banner_texts": {
     "over": "On the banner",
     "under": "Below the banner"
+  },
+  "my_order_locked": {
+    "platform": "Turned off by the platform.",
+    "plan": "Not in your plan."
   }
 }

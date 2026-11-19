@@ -11,7 +11,7 @@ public: true
 
 **2. Do guests need an app?** No. They scan the QR code and the menu opens in their browser.
 
-**3. Can guests order and pay online?** No. "My order" is a list they show the waiter. Nothing is sent or paid.
+**3. Can guests order and pay online?** No.<!-- if order_list --> "My order" is a list they show the waiter. Nothing is sent or paid.<!-- endif -->
 
 **4. Do I need to print new QR codes when I change the menu?** No. The code always opens your newest menu.
 

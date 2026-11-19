@@ -45,4 +45,55 @@ describe('Settings → Features', () => {
       .poll(() => fake.calls.find((c) => c.method === 'PUT')?.data)
       .toEqual({ features: { promotions: false } })
   })
+
+  // QUESTIONS #236: before saving, how many restaurants a change reaches.
+  it('says how many menus lose the + buttons before My order is saved off', async () => {
+    fake = fakeApi({
+      'GET /super/settings/features': {
+        data: {
+          data: [...rows, row('order_list', 'My order (add to order buttons)')],
+        },
+      },
+      'GET /super/settings/features/order_list/impact': {
+        data: {
+          data: {
+            key: 'order_list',
+            enabled: true,
+            restaurants: 7,
+            guests_see: 5,
+          },
+        },
+      },
+      'GET /super/settings/features/promotions/impact': {
+        data: { data: { key: 'promotions', enabled: true, restaurants: 1 } },
+      },
+    })
+    const screen = await renderWithQuery(<FeatureSwitches />)
+    const toggle = screen.getByRole('switch', {
+      name: 'My order (add to order buttons)',
+    })
+    await expect.element(toggle).toBeChecked()
+    // Nothing asked before a change.
+    expect(fake.calls.some((c) => c.url.includes('/impact'))).toBe(false)
+
+    await userEvent.click(toggle)
+    await expect
+      .element(
+        screen.getByText(
+          'When you save: the "+" buttons disappear from 5 menus now showing them.'
+        )
+      )
+      .toBeVisible()
+    await userEvent.click(screen.getByRole('switch', { name: 'Promotions' }))
+    await expect
+      .element(
+        screen.getByText('When you save: off for 1 restaurant that has it now.')
+      )
+      .toBeVisible()
+    // Back as it was: the note goes.
+    await userEvent.click(toggle)
+    await expect
+      .element(screen.getByText(/buttons disappear/))
+      .not.toBeInTheDocument()
+  })
 })

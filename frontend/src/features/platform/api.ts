@@ -83,6 +83,8 @@ export type Restaurant = {
   health?: { band: 'healthy' | 'at_risk' | 'inactive'; score: number } | null
   views_30d?: number | null
   scans_30d?: number | null
+  /** Does "My order" reach this restaurant's guests (platform, plan, its own switch)? Table rows only. */
+  my_order?: boolean | null
 }
 
 export type TagRef = {

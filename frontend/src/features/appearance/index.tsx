@@ -376,20 +376,42 @@ function AppearanceForm({ initial }: { initial: Appearance }) {
             )}
 
             <div className='grid gap-3'>
-              {FLAGS.filter((f) => featureOn[f] !== false).map((flag) => (
-                <div
-                  key={flag}
-                  className='flex min-h-11 items-center justify-between gap-4 sm:min-h-0'
-                >
-                  <Label htmlFor={flag}>{t(`appearance.flags.${flag}`)}</Label>
-                  <Switch
-                    id={flag}
-                    checked={values[flag]}
-                    disabled={disabled}
-                    onCheckedChange={(on) => set(flag, on)}
-                  />
-                </div>
-              ))}
+              {FLAGS.filter(
+                (f) =>
+                  featureOn[f] !== false ||
+                  // "My order" stays visible, switched off with the reason (QUESTIONS #236).
+                  (f === 'show_order_list' && !!initial.my_order)
+              ).map((flag) => {
+                const locked =
+                  flag === 'show_order_list' &&
+                  (initial.my_order?.reason === 'platform' ||
+                    initial.my_order?.reason === 'plan')
+                    ? initial.my_order.reason
+                    : null
+                return (
+                  <div
+                    key={flag}
+                    className='flex min-h-11 items-center justify-between gap-4 sm:min-h-0'
+                  >
+                    <Label htmlFor={flag} className='grid gap-0.5'>
+                      <span>{t(`appearance.flags.${flag}`)}</span>
+                      {flag === 'show_order_list' && (
+                        <span className='font-normal text-muted-foreground'>
+                          {locked
+                            ? t(`appearance.my_order_locked.${locked}`)
+                            : t('appearance.flags.show_order_list_hint')}
+                        </span>
+                      )}
+                    </Label>
+                    <Switch
+                      id={flag}
+                      checked={locked ? false : values[flag]}
+                      disabled={disabled || !!locked}
+                      onCheckedChange={(on) => set(flag, on)}
+                    />
+                  </div>
+                )
+              })}
             </div>
           </CardContent>
         </Card>

@@ -57,6 +57,16 @@ export type AppearanceValues = {
   show_pdf_link: boolean
   /** "My order" list for guests (kept on their phone; plan feature order_list). */
   show_order_list: boolean
+  /**
+   * "My order" as guests get it, and which level turned it off (QUESTIONS #236):
+   * the platform (Settings → Features or the Super Admin for this restaurant), the plan, or this switch.
+   */
+  my_order?: {
+    enabled: boolean
+    available: boolean
+    restaurant: boolean
+    reason: 'platform' | 'plan' | 'restaurant' | null
+  }
   show_other_branches: boolean
   show_logo: boolean
   show_banner: boolean
