@@ -35,6 +35,18 @@ function myOrderRestaurant(array $appearance = []): array
     return [$owner, $tenant->fresh(), $plan];
 }
 
+/** A logged change, keys sorted (MySQL's JSON column may store keys in another order). */
+function sortedChanges(?string $json): array
+{
+    $sort = function (array $a) use (&$sort): array {
+        ksort($a);
+
+        return array_map(fn ($v) => is_array($v) ? $sort($v) : $v, $a);
+    };
+
+    return $sort((array) json_decode((string) $json, true));
+}
+
 function setLevels(Tenant $tenant, Plan $plan, bool $platform, bool $planOn, bool $restaurant): void
 {
     PlatformSettings::save(['features_global' => $platform ? [] : ['order_list' => false]]);
@@ -145,7 +157,7 @@ it('takes effect at once: the owner switch drops the saved page, the platform sw
     expect(File::exists(MenuPageCache::path($tenant->slug)))->toBeFalse();
     $this->assertDatabaseHas('activity_log', ['tenant_id' => $tenant->id, 'action' => 'appearance.updated']);
     $log = DB::table('activity_log')->where('tenant_id', $tenant->id)->where('action', 'appearance.updated')->latest('id')->first();
-    expect(json_decode((string) $log->changes, true)['show_order_list'])->toBe(['from' => true, 'to' => false])
+    expect(sortedChanges($log->changes)['show_order_list'])->toBe(['from' => true, 'to' => false])
         ->and((int) $log->actor_id)->toBe($owner->id);
     expect($this->get('/'.$tenant->slug)->getContent())->not->toContain('data-x="A"');
 
@@ -230,7 +242,7 @@ it('logs the plan and the per-restaurant switch from old to new, and moves the r
     $this->actingAs($admin)->patchJson(p("plans/{$plan->id}"), ['features' => ['order_list' => false, 'sold_out' => true]], idem())->assertOk();
     $log = DB::table('activity_log')->where('action', 'platform.plan_updated')->latest('id')->first();
     expect((int) $log->actor_id)->toBe($admin->id)
-        ->and(json_decode((string) $log->changes, true))->toBe(['features' => ['from' => ['order_list' => true, 'sold_out' => null], 'to' => ['order_list' => false, 'sold_out' => true]]])
+        ->and(sortedChanges($log->changes))->toBe(['features' => ['from' => ['order_list' => true, 'sold_out' => null], 'to' => ['order_list' => false, 'sold_out' => true]]])
         ->and($tenant->fresh()->cache_version)->toBe($version + 1);
     Features::forget();
     expect(MyOrder::state($tenant->fresh())['reason'])->toBe('plan');
@@ -238,7 +250,7 @@ it('logs the plan and the per-restaurant switch from old to new, and moves the r
     $this->putJson(p("restaurants/{$tenant->id}/features"), ['features' => ['order_list' => true]], idem())->assertOk();
     $this->putJson(p("restaurants/{$tenant->id}/features"), ['features' => ['order_list' => null]], idem())->assertOk();
     $logs = DB::table('activity_log')->where('action', 'platform.features_changed')->where('subject_id', $tenant->id)->orderBy('id')->pluck('changes')
-        ->map(fn ($c) => json_decode((string) $c, true))->all();
+        ->map(fn ($c) => sortedChanges($c))->all();
     expect($logs)->toBe([
         ['features' => ['from' => ['order_list' => null], 'to' => ['order_list' => true]]],
         ['features' => ['from' => ['order_list' => true], 'to' => ['order_list' => null]]],

@@ -48,7 +48,7 @@ it('lets the guest page run only its own inline script, by hash, its own sheet.j
     $hash = 'sha256-'.base64_encode(hash('sha256', InlineAssets::js(), true));
     // The sheet (dish details, "My order", share) loads on demand from this site: 'self' must allow it.
     preg_match('/"s":"([^"]+)"/', $html, $sheet);
-    expect(stripslashes($sheet[1] ?? ''))->toMatch('#^(/|'.preg_quote(rtrim((string) config('app.url'), '/'), '#').'/)menu-assets/sheet\.[a-f0-9]+\.js$#');
+    expect(stripslashes($sheet[1] ?? ''))->toMatch('#^(/|'.preg_quote(rtrim((string) config('app.url'), '/'), '#').'/)menu-assets/sheet(?:-o)?\.[a-f0-9]+\.js$#');
     expect($policy)->toContain("script-src 'self' '".$hash."'")->toContain("object-src 'none'")->toContain("base-uri 'none'")
         ->and(Csp::menuScriptHash())->toBe($hash)
         // The meta tag comes before any script or style, so it covers them.

@@ -45,16 +45,19 @@ it('turns red for an unsafe live server and says how to fix each thing', functio
 });
 
 it('is green, maybe with warnings, when the server is ready', function () {
-    ready();
-    $c = doctor();
-    $red = array_filter($c, fn ($x) => $x['status'] === 'fail');
+    // The admin app is built on a real server; CI's backend job has no build (failed there, 2026-11-19).
+    withBuiltSpa(function () {
+        ready();
+        $c = doctor();
+        $red = array_filter($c, fn ($x) => $x['status'] === 'fail');
 
-    expect($red)->toBe([])
-        ->and($c['super_admin']['message'])->toBe('1 Super Admin(s), all with two-factor')
-        ->and($c['backups']['status'])->toBe('ok')
-        ->and($c['backup_offsite']['status'])->toBe('warn')     // off-site copy is optional
-        ->and(collect($c)->every(fn ($x) => $x['status'] === 'ok' ? $x['fix'] === null : $x['fix'] !== null))->toBeTrue();
-    $this->artisan('menu:doctor --production')->assertExitCode(0);
+        expect($red)->toBe([])
+            ->and($c['super_admin']['message'])->toBe('1 Super Admin(s), all with two-factor')
+            ->and($c['backups']['status'])->toBe('ok')
+            ->and($c['backup_offsite']['status'])->toBe('warn')     // off-site copy is optional
+            ->and(collect($c)->every(fn ($x) => $x['status'] === 'ok' ? $x['fix'] === null : $x['fix'] !== null))->toBeTrue();
+        $this->artisan('menu:doctor --production')->assertExitCode(0);
+    });
 });
 
 it('flags a Super Admin without two-factor, the default /super address and the demo admin', function () {
@@ -74,14 +77,17 @@ it('prints JSON for scripts and never shows a password', function () {
 });
 
 it('answers /health with the overall state only: 503 when down, 200 when ready', function () {
-    $this->get('/health')->assertStatus(503)->assertExactJson(['status' => 'down'])->assertHeader('Cache-Control', 'no-store, private');
-    Cache::forget('health:status');
-    ready();
-    app()->detectEnvironment(fn () => 'production');
-    $res = $this->get('/health')->assertOk();
-    expect($res->json('status'))->toBeIn(['ok', 'degraded'])
-        ->and($res->getContent())->not->toContain('fix');
-    expect(config('menu.reserved_slugs'))->toContain('health');
+    // The admin app is built on a real server; CI's backend job has no build (failed there, 2026-11-19).
+    withBuiltSpa(function () {
+        $this->get('/health')->assertStatus(503)->assertExactJson(['status' => 'down'])->assertHeader('Cache-Control', 'no-store, private');
+        Cache::forget('health:status');
+        ready();
+        app()->detectEnvironment(fn () => 'production');
+        $res = $this->get('/health')->assertOk();
+        expect($res->json('status'))->toBeIn(['ok', 'degraded'])
+            ->and($res->getContent())->not->toContain('fix');
+        expect(config('menu.reserved_slugs'))->toContain('health');
+    });
 });
 
 it('creates a Super Admin from the command line, with a strong password typed twice', function () {
