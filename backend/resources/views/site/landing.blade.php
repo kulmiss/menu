@@ -206,8 +206,23 @@
         @media (min-width:960px){.scan{display:flex}.open-demo{display:none}}
         .styles{margin-top:56px}
         .styles h3{font-size:1.35rem;font-weight:800}
-        .style-row{display:flex;gap:16px;margin:16px 0 0;padding:4px 2px 16px;list-style:none;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:thin}
+        .styles-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px}
+        .row-nav{display:none;gap:10px;flex:none}
+        .rn{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--fg);cursor:pointer;box-shadow:var(--shadow);transition:background .2s,color .2s,opacity .2s,transform .2s}
+        .rn:hover:not(:disabled){background:var(--brand);color:var(--on-brand);border-color:var(--brand);transform:translateY(-1px)}
+        .rn:disabled{opacity:.35;cursor:default;box-shadow:none}
+        .style-row{display:flex;gap:20px;margin:16px -8px 0;padding:8px 8px 20px;list-style:none;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-inline:8px;overscroll-behavior-x:contain}
         .style-row li{flex:none;scroll-snap-align:start}
+        /* With JavaScript: no scroll bar; the edges fade where more styles wait, and a progress line shows where you are. */
+        .js .style-row{scrollbar-width:none;--fs:48px;--fe:48px;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 var(--fs),#000 calc(100% - var(--fe)),transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 var(--fs),#000 calc(100% - var(--fe)),transparent 100%)}
+        .js .style-row::-webkit-scrollbar{display:none}
+        .js .style-row.at-start{--fs:0px}.js .style-row.at-end{--fe:0px}
+        .row-track{display:none}
+        .js .row-track{display:block;position:relative;height:4px;margin:4px auto 0;max-width:240px;border-radius:99px;background:var(--line);overflow:hidden}
+        .row-track span{position:absolute;inset:0 auto 0 0;width:var(--w,30%);border-radius:inherit;background:var(--brand);transform:translateX(var(--x,0));transition:transform .15s linear}
+        @media (min-width:640px){.js .row-nav{display:flex}}
+        @media (hover:hover){.style-row img{transition:transform .25s,box-shadow .25s}.style-row a:hover img{transform:translateY(-6px);box-shadow:0 22px 40px -18px rgb(15 23 42/.45)}}
+        @media (prefers-reduced-motion:reduce){.rn,.row-track span,.style-row img{transition:none}.style-row a:hover img,.rn:hover:not(:disabled){transform:none}}
         .style-row a{display:flex;flex-direction:column;gap:10px;width:150px;min-height:44px;color:var(--fg);text-decoration:none;font-weight:650;font-size:.95rem}
         .style-row img{display:block;width:150px;height:304px;object-fit:cover;object-position:top;border-radius:20px;border:4px solid #0b0f19;background:var(--card);box-shadow:var(--shadow)}
         .style-row a:hover span{text-decoration:underline}
@@ -406,6 +421,34 @@
         var a = e.target.closest && e.target.closest('[data-track]');
         if (a && navigator.sendBeacon) { navigator.sendBeacon('/api/v1/landing/click', new URLSearchParams({ k: a.dataset.track })); }
     });
+
+    // "More menu styles" slider: arrows, soft edges and the progress line follow the row (owner, 2026-11-19).
+    var row = document.getElementById('style-row');
+    if (row) {
+        var track = document.querySelector('.row-track span'), prev = document.querySelector('.rn[data-step="-1"]'), next = document.querySelector('.rn[data-step="1"]');
+        var smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var frame = 0, update = function () {
+            frame = 0;
+            var max = row.scrollWidth - row.clientWidth, x = Math.abs(row.scrollLeft), start = x < 2, end = x > max - 2;
+            row.classList.toggle('at-start', start);
+            row.classList.toggle('at-end', end || max <= 0);
+            prev.disabled = start;
+            next.disabled = end || max <= 0;
+            var part = max > 0 ? row.clientWidth / row.scrollWidth : 1;
+            track.style.setProperty('--w', (part * 100) + '%');
+            track.style.setProperty('--x', (max > 0 ? (x / max) * (1 / part - 1) * 100 : 0) + '%');
+        };
+        var later = function () { if (!frame) frame = requestAnimationFrame(update); };
+        row.addEventListener('scroll', later, { passive: true });
+        window.addEventListener('resize', later, { passive: true });
+        [prev, next].forEach(function (b) {
+            b.addEventListener('click', function () {
+                var dir = Number(b.dataset.step) * (getComputedStyle(row).direction === 'rtl' ? -1 : 1);
+                row.scrollBy({ left: dir * row.clientWidth * 0.85, behavior: smooth ? 'smooth' : 'auto' });
+            });
+        });
+        later();
+    }
 
     if (!('IntersectionObserver' in window)) {
         document.querySelectorAll('.reveal').forEach(function (el) { el.classList.add('in'); });

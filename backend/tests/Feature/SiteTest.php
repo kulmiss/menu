@@ -4,6 +4,7 @@ use App\Enums\Role;
 use App\Models\Plan;
 use App\Models\Tenant;
 use App\Support\BrandColor;
+use App\Support\Landing\LandingTexts;
 use App\Support\PlatformSettings;
 
 it('shows the landing page in simple English: hero, sections in order, sign-up and sign-in', function () {
@@ -30,6 +31,23 @@ it('shows the landing page in simple English: hero, sections in order, sign-up a
         ->not->toContain('Customers say');
     // Every section ends with one button.
     expect(substr_count($html, 'data-track="signup"'))->toBeGreaterThanOrEqual(7);
+});
+
+it('makes "More menu styles" a slider: arrows, a progress line and soft edges instead of a scroll bar', function () {
+    Tenant::factory()->create(['slug' => 'demo']);
+    Tenant::factory()->create(['slug' => 'demo-jebena']);
+    $html = $this->get('/')->assertOk()->getContent();
+
+    expect($html)
+        ->toContain('<button type="button" class="rn" data-step="-1" aria-controls="style-row" aria-label="Previous menu styles" disabled>')
+        ->toContain('<button type="button" class="rn" data-step="1" aria-controls="style-row" aria-label="More menu styles">')
+        ->toContain('<ul class="style-row at-start" id="style-row" aria-labelledby="styles-title">')
+        ->toContain('<div class="row-track" aria-hidden="true"><span></span></div>')
+        // No scroll bar only when the script runs; without it the row scrolls as before.
+        ->toContain('.js .style-row{scrollbar-width:none;')->not->toContain('scrollbar-width:thin')
+        ->toContain("row.scrollBy({ left: dir * row.clientWidth * 0.85, behavior: smooth ? 'smooth' : 'auto' })");
+    // The two button names are landing texts the Super Admin can change.
+    expect(LandingTexts::defaults())->toHaveKey('demo.styles_prev')->toHaveKey('demo.styles_next');
 });
 
 it('shows "More menu styles": a phone picture of each live style demo, lazy, and the name alone without a picture', function () {
