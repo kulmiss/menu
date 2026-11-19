@@ -4,7 +4,7 @@
 
 Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles inside a restaurant are checked by each screen's policy). **Feature**: the feature switch it needs (`402 features.<key>` when off). **Limit**: how many requests are allowed. Create/change requests need an `Idempotency-Key` header. Request and answer examples for the app: [mobile-api.md](mobile-api.md).
 
-**283 endpoints.**
+**284 endpoints.**
 
 ## Sign-in and account (web session)
 
@@ -298,6 +298,7 @@ Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles insid
 | PUT | `super/settings` | Super Admin |  | `super` limiter | Platform\PlatformController@saveSettings |
 | GET | `super/settings/features` | Super Admin |  | `super` limiter | Platform\FeatureSwitchController@index |
 | PUT | `super/settings/features` | Super Admin |  | `super` limiter | Platform\FeatureSwitchController@update |
+| GET | `super/settings/features/{key}/impact` | Super Admin |  | `super` limiter | Platform\FeatureSwitchController@impact |
 | POST | `super/settings/legal/{page}/reset` | Super Admin |  | `super` limiter | Platform\PlatformController@resetLegal |
 | DELETE | `super/settings/logo` | Super Admin |  | `super` limiter | Platform\PlatformController@deleteLogo |
 | POST | `super/settings/logo` | Super Admin |  | `super` limiter | Platform\PlatformController@saveLogo |

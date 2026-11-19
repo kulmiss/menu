@@ -4,6 +4,7 @@
 // desktop, left-to-right and (H, M–Q) right-to-left.
 // Bug (2026-11-18): in style I a dish without a photo had its "+" half above its card.
 import base from '@public-menu/base.css?raw'
+import order from '@public-menu/order.css?raw'
 import { afterEach, describe, expect, it } from 'vitest'
 import { page } from 'vitest/browser'
 import { GUEST_ART, GUEST_STYLES } from './guest-styles'
@@ -81,6 +82,7 @@ describe('styles H–Q: prices, "+" and names', () => {
             style = document.head.appendChild(document.createElement('style'))
             style.textContent =
               base +
+              order +
               GUEST_STYLES[name] +
               ':root{--a:#9a3412;--af:#fff;--c1:#e8437f;--t1:#fde4ee;--o1:#111}'
             document.body.className = `S-${name}${photos ? '' : ' NP'}`
@@ -92,6 +94,11 @@ describe('styles H–Q: prices, "+" and names', () => {
               card(n, PRICES[(i + 1) % PRICES.length], false),
             ])
             main.innerHTML = `<section class="k1"><h2>Lunch</h2><ul>${cards.join('')}</ul></section>`
+            // Nothing wider than the screen (bug 2026-11-19: style K at 320 px with a long price).
+            expect(
+              document.documentElement.scrollWidth,
+              'no sideways scroll'
+            ).toBeLessThanOrEqual(width)
             for (const li of main.querySelectorAll('li')) {
               const box = li.getBoundingClientRect()
               const pr = li.querySelector('.pr')!
@@ -162,7 +169,7 @@ describe('styles M–Q: header drawing and category icons', () => {
           document.documentElement.dir = dir
           style = document.head.appendChild(document.createElement('style'))
           style.textContent =
-            base + GUEST_STYLES[name] + ':root{--a:#9a3412;--af:#fff}'
+            base + order + GUEST_STYLES[name] + ':root{--a:#9a3412;--af:#fff}'
           document.body.className = `S-${name} dc`
           main = document.body.appendChild(document.createElement('div'))
           for (const title of [

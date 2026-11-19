@@ -55,6 +55,8 @@
         'b' => $branch_id,
         'p' => $preview ? 1 : 0,
         's' => InlineAssets::sheetUrl(),
+        // The "My order" script, only when My order is on (QUESTIONS #236).
+        'os' => $orderList ? InlineAssets::orderUrl() : null,
         'z' => $timezone,
         'h' => $hours,
         'x' => $closures,
@@ -127,7 +129,7 @@
 @php $preloadAvif = ! empty($lcp['img']['avif']); @endphp
 <link rel="preload" as="image" fetchpriority="high" type="image/{{ $preloadAvif ? 'avif' : 'webp' }}" imagesrcset="{{ $preloadAvif ? $lcp['img']['avif'] : $lcp['img']['webp'] }}" imagesizes="{{ $lcp['sizes'] }}">
 @endif
-<style>{!! InlineAssets::css($style) !!}{!! $theme['css'] !!}</style>
+<style>{!! InlineAssets::css($style, $orderList) !!}{!! $theme['css'] !!}</style>
 </head>
 <body class="S-{{ $style }}{{ $anyPhoto ? '' : ' NP' }}{{ $theme['ramadan'] ? ' rm' : '' }}{{ $theme['greyscale'] ? ' gs' : '' }}{{ $theme['decoration'] ? ' dc' : '' }}">
 @if ($catIcons !== [])

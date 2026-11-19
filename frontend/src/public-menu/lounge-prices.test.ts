@@ -2,6 +2,7 @@
 // "ETB 384" broke in the mockup), stays inside its card and clear of the name
 // and the "+", with or without a photo, from small phones to desktop.
 import base from '@public-menu/base.css?raw'
+import order from '@public-menu/order.css?raw'
 import { afterEach, describe, expect, it } from 'vitest'
 import { page } from 'vitest/browser'
 import { GUEST_STYLES } from './guest-styles'
@@ -55,7 +56,7 @@ describe('Night Lounge prices', () => {
       await page.viewport(width, 900)
       style = document.head.appendChild(document.createElement('style'))
       style.textContent =
-        base + GUEST_STYLES.lounge + ':root{--a:#c58bff;--af:#000}'
+        base + order + GUEST_STYLES.lounge + ':root{--a:#c58bff;--af:#000}'
       document.body.className = 'S-lounge'
       main = document.body.appendChild(document.createElement('main'))
       main.className = 'w'

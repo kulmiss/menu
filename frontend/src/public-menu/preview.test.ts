@@ -3,6 +3,8 @@
 // "Cannot read properties of undefined (reading 'fmt')" and the dish never
 // opened; tapping a "+" did nothing and loaded the on-demand file again.
 import base from '@public-menu/base.css?raw'
+import order from '@public-menu/order.css?raw'
+import orderSource from '@public-menu/order.js?raw'
 import source from '@public-menu/sheet.js?raw'
 import grid from '@public-menu/style-grid.css?raw'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -72,7 +74,7 @@ beforeEach(() => {
   errors.length = 0
   window.addEventListener('error', onError)
   css = document.head.appendChild(document.createElement('style'))
-  css.textContent = grid + base
+  css.textContent = grid + base + order
   host = document.body.appendChild(document.createElement('div'))
   host.innerHTML = `<ul><li data-i="7"><button class="it ao"><span class="nm">Cappuccino</span>
     <span class="pr">from Br 100</span><span class="ad" data-x="A">+</span></button></li>
@@ -83,7 +85,9 @@ beforeEach(() => {
   delete w.mA
   delete w.mC
   w.mD = D
+  // The page loads both when My order is on (menu.js: D.s and D.os).
   new Function(source)()
+  new Function(orderSource)()
 })
 afterEach(() => {
   window.removeEventListener('error', onError)

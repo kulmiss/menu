@@ -2,6 +2,8 @@
 // full width, sticky at the bottom of the sheet, price with the chosen size and
 // add-ons, and never on top of the sheet's content (owner, 2026-11-12).
 import base from '@public-menu/base.css?raw'
+import order from '@public-menu/order.css?raw'
+import orderSource from '@public-menu/order.js?raw'
 import source from '@public-menu/sheet.js?raw'
 import grid from '@public-menu/style-grid.css?raw'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -62,7 +64,7 @@ const btn = () => document.querySelector<HTMLButtonElement>('.oa')!
 
 beforeEach(() => {
   css = document.head.appendChild(document.createElement('style'))
-  css.textContent = grid + base + ':root{--a:#9a3412;--af:#fff}' // set per restaurant by the page
+  css.textContent = grid + base + order + ':root{--a:#9a3412;--af:#fff}' // set per restaurant by the page
   host = document.body.appendChild(document.createElement('div'))
   host.innerHTML = `<ul><li data-i="7"><button class="it"><span class="nm">Cappuccino</span>
     <span class="pr">from Br 100</span><span class="ad">+</span></button></li></ul>
@@ -70,7 +72,9 @@ beforeEach(() => {
   dl = document.getElementById('s') as HTMLDialogElement
   localStorage.clear()
   w.mD = D
+  // The page loads both when My order is on (menu.js: D.s and D.os).
   new Function(source)()
+  new Function(orderSource)()
   w.mS!(host.querySelector('li')!, D)
 })
 afterEach(() => {

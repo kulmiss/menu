@@ -3,6 +3,7 @@
 // specials and news, also on a tinted or striped background (owner, 2026-11-18:
 // Lighthouse found Night Lounge prices at 4.06:1 under their glow).
 import base from '@public-menu/base.css?raw'
+import order from '@public-menu/order.css?raw'
 import { afterEach, describe, expect, it } from 'vitest'
 import { GUEST_ART, GUEST_STYLES } from './guest-styles'
 
@@ -226,10 +227,10 @@ describe('text contrast on the guest page', () => {
           style = document.head.appendChild(document.createElement('style'))
           style.textContent =
             (dark
-              ? (base + css)
+              ? (base + order + css)
                   .split('@media (prefers-color-scheme:dark)')
                   .join('@media all')
-              : base + css) +
+              : base + order + css) +
             `:root{--a:${a};--af:${textOn(a)}${palette(brand, dark)}}`
           // Styles M–Q: with decoration on (header texture and drawing, category icons).
           document.body.className = `S-${name}${GUEST_ART[name] ? ' dc' : ''}`

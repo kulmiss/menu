@@ -5,6 +5,7 @@ namespace App\Notifications;
 use App\Models\Tenant;
 use App\Support\Insights\InsightsReport;
 use App\Support\Insights\ReportPdf;
+use App\Support\MyOrder;
 use App\Support\PlatformSettings;
 use App\Tenancy\CurrentTenant;
 use Carbon\CarbonImmutable;
@@ -42,7 +43,7 @@ class MonthlyInsightsNotification extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject(__('insights.mail.subject', ['restaurant' => $tenant->name, 'month' => $month]))
             ->greeting(__('insights.mail.greeting', ['name' => $notifiable->name ?? '']))
-            ->line(__('insights.mail.line', [
+            ->line(__(MyOrder::enabled($tenant) ? 'insights.mail.line' : 'insights.mail.line_no_order', [
                 'restaurant' => $tenant->name,
                 'month' => $month,
                 'views' => number_format($report['totals']['views']),

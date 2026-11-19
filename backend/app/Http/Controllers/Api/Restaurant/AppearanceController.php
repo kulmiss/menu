@@ -13,6 +13,7 @@ use App\Support\ActivityLogger;
 use App\Support\Contrast;
 use App\Support\Features;
 use App\Support\MediaJanitor;
+use App\Support\MyOrder;
 use App\Support\PublicMenu\MenuPageData;
 use App\Support\PublicMenu\PageTheme;
 use App\Tenancy\CurrentTenant;
@@ -130,6 +131,8 @@ class AppearanceController extends Controller
             'show_calories' => $a->show_calories,
             ...collect(TenantAppearance::EXTRA_FLAGS)->mapWithKeys(fn (string $f) => [$f => (bool) $a->{$f}])->all(),
             'theme_id' => $a->theme_id,
+            // "My order" for the owner's switch: on for guests, and why not (QUESTIONS #236). New field; nothing else changed.
+            'my_order' => MyOrder::state(app(CurrentTenant::class)->get() ?? throw new \LogicException('no restaurant'), $a),
             'logo' => $a->logo ? new MediaResource($a->logo) : null,
             'cover' => $a->cover ? new MediaResource($a->cover) : null,
             'warnings' => array_map(fn (string $key) => ['key' => $key, 'message' => __($key)], Contrast::warnings($a->primary_color)),

@@ -234,15 +234,18 @@ class MenuPageData
                     ];
                 })->values()->all();
 
+            // "My order": the platform, the plan (or override) and the restaurant all on (QUESTIONS #236).
+            $orderList = $features['order_list'] && $theme['show_order_list'] && $prices;
+
             return [
                 'tenant' => $tenant,
                 'theme' => $theme,
                 'promotions' => $promotions,
                 'branding' => ! $features['remove_branding'],
                 'pdfMenu' => $features['pdf_menu'],
-                'orderList' => $features['order_list'] && $theme['show_order_list'] && $prices,
+                'orderList' => $orderList,
                 // QR code → table, so "Show to waiter" can say which table (codes are printed on the tables anyway).
-                'tables' => $features['order_list'] ? self::tables($branchId) : [],
+                'tables' => $orderList ? self::tables($branchId) : [],
                 'branch' => $branch && $branches->count() > 1 ? $text($branch->name) : null,
                 // One URL per branch, no picker (owner, 2026-11-12): only a footer list of the other branches.
                 'otherBranches' => $branches->count() > 1 && $theme['show_other_branches']

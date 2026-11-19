@@ -59,14 +59,8 @@ li[hidden],section[hidden]{display:none}
 .im{overflow:hidden;background:var(--card) center/cover no-repeat}
 .im img{display:block;width:100%;height:100%;object-fit:cover}
 .so .im img{filter:grayscale(1);opacity:.6}
-/* "My order" quick add */
 .it{position:relative}
-/* 44 px tap area, 30 px visible circle with a thin "+", on the photo's corner;
-   rows without a photo keep room for it at the end, so it never covers text. */
-.ad{position:absolute;top:var(--adt,0);inset-inline-end:0;z-index:1;width:2.75rem;height:2.75rem;font-size:0}
-.ad:before{content:"";position:absolute;inset:.4375rem;border-radius:50%;background:linear-gradient(var(--af),var(--af)) center/.75rem 2px no-repeat,linear-gradient(var(--af),var(--af)) center/2px .75rem no-repeat,var(--a);box-shadow:0 1px 3px #0004}
-.np>.ad{top:50%;margin-top:-1.375rem}
-li>.it.ao.np{padding-inline-end:2.75rem}
+/* The "My order" "+" lives in order.css, inlined only when My order is on (QUESTIONS #236). */
 .nr{color:var(--mu);padding:3rem 1rem;text-align:center;display:flex;flex-direction:column;align-items:center;gap:.75rem}
 .nr svg{color:var(--ln)}
 

@@ -3,6 +3,7 @@
 // Bug (2026-11-17): in style B (editorial) a 70-letter name ran under the
 // price and out of the card.
 import base from '@public-menu/base.css?raw'
+import order from '@public-menu/order.css?raw'
 import { afterEach, describe, expect, it } from 'vitest'
 import { page } from 'vitest/browser'
 import { GUEST_STYLES } from './guest-styles'
@@ -40,7 +41,7 @@ describe('very long names on the guest page', () => {
     it(`${key} at 360 px: the name wraps inside the card, clear of the price and +`, async () => {
       await page.viewport(360, 800)
       style = document.head.appendChild(document.createElement('style'))
-      style.textContent = base + css + ':root{--a:#9a3412;--af:#fff}'
+      style.textContent = base + order + css + ':root{--a:#9a3412;--af:#fff}'
       document.body.className = `S-${key}`
       main = document.body.appendChild(document.createElement('main'))
       main.className = 'w'
