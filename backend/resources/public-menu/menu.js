@@ -15,17 +15,12 @@
   // file loaded on demand (sheet.js), fetched in the background after load.
   var wait, tag;
   function big(id) { var x = data().c[id]; if (x && x.i && !seen[id]) { seen[id] = 1; new Image().src = x.i; } }
-  // The sheet file, and the "My order" file only when My order is on (os); a waiting tap runs when both are in.
   function load() {
     if (tag) return;
-    var src = [data().s].concat(data().os || []), n = 0;
-    tag = 1;
-    src.forEach(function (u) {
-      var t = d.createElement('script');
-      t.src = u;
-      t.onload = function () { if (++n === src.length) { var a = wait; wait = null; if (a) run(a[0], a[1]); } };
-      d.head.appendChild(t);
-    });
+    tag = d.createElement('script');
+    tag.src = data().s;
+    tag.onload = function () { if (wait) run(wait[0], wait[1]); wait = null; };
+    d.head.appendChild(tag);
   }
   // Calls a part of the on-demand file (mS sheet, mH share, …), loading it first if needed.
   function run(f, a) { if (w['m' + f]) w['m' + f](a, data()); else { wait = [f, a]; load(); } }

@@ -35,8 +35,9 @@ li>.it .pr s{font-weight:400}
 li>.it .tg{grid-area:tg}
 /* The photo column takes the .5rem space before the photo too (a margin would push it out of the card). */
 li>.it .im{grid-area:im;justify-self:end;width:5.5rem;height:5.5rem}
-/* Small phones (320 px): a smaller photo, and an old price above the new one, so each price still fits on its one line. */
-@media (max-width:22.4rem){li>.it{grid-template-columns:minmax(0,auto) minmax(1.25rem,1fr) max-content 5rem}li>.it .im{width:4.5rem;height:4.5rem}li>.it .pr s{display:block}}
+/* Small phones (320 px): a smaller photo, a shorter dotted leader and an old price above the new one,
+   so each price still fits on its one line (also with the wider fonts of CI's Linux). */
+@media (max-width:22.4rem){li>.it{grid-template-columns:minmax(0,auto) minmax(.5rem,1fr) max-content 4.5rem}li>.it .im{width:4rem;height:4rem}li>.it .pr s{display:block}}
 li>.it{--adt:-.4rem}
 li>.it.np{grid-template-columns:minmax(0,auto) minmax(1.25rem,1fr) max-content;grid-template-areas:"nm ld pr" "sm sm sm" "tg tg tg"}
 li>.np>.ad{top:.55rem;margin-top:0}

@@ -78,9 +78,9 @@ it('is off when the restaurant, the plan or hidden prices say so', function (str
 })->with(['appearance', 'plan', 'prices']);
 
 it('keeps the list code out of the inline script and the list on the phone only', function () {
-    // The list lives in its own file, linked only when My order is on (QUESTIONS #236).
-    $file = (string) file_get_contents(public_path(ltrim(InlineAssets::orderUrl(), '/')));
-    expect((string) file_get_contents(public_path(ltrim(InlineAssets::sheetUrl(), '/'))))->not->toContain('w.mC={');
+    $file = (string) file_get_contents(public_path(ltrim(InlineAssets::sheetUrl(), '/')));
+    // With My order off the page links the sheet file without the list (QUESTIONS #236).
+    expect((string) file_get_contents(public_path(ltrim(InlineAssets::sheetUrl(false), '/'))))->not->toContain('w.mC=')->not->toContain('localStorage.setItem');
 
     expect(InlineAssets::js())->not->toContain('localStorage')->not->toContain('mC');
     expect($file)->toContain('w.mC={')->toContain('localStorage')->toContain("'mo:'+D.id+':'+D.b")

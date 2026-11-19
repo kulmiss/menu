@@ -168,17 +168,18 @@ class InlineAssets
 
     /**
      * The item sheet script (loaded on demand), written once per version to
-     * public/menu-assets/sheet.{hash}.js so it can be cached for a year.
+     * public/menu-assets/sheet.{hash}.js so it can be cached for a year. With
+     * "My order" on, the same file also holds the list (order.js) — still one
+     * request; with it off the page never gets that code (QUESTIONS #236).
      */
-    public static function sheetUrl(): string
+    public static function sheetUrl(bool $order = true): string
     {
-        return self::$memo['sheet'] ??= self::publish(self::minifyJs((string) file_get_contents(resource_path('public-menu/sheet.js'))), 'sheet', 'js');
-    }
-
-    /** The "My order" script (QUESTIONS #236): public/menu-assets/order.{hash}.js, linked only when My order is on. */
-    public static function orderUrl(): string
-    {
-        return self::$memo['order'] ??= self::publish(self::minifyJs((string) file_get_contents(resource_path('public-menu/order.js'))), 'order', 'js');
+        return self::$memo['sheet'.($order ? '+o' : '')] ??= self::publish(
+            self::minifyJs((string) file_get_contents(resource_path('public-menu/sheet.js'))
+                .($order ? "\n".file_get_contents(resource_path('public-menu/order.js')) : '')),
+            $order ? 'sheet-o' : 'sheet',
+            'js',
+        );
     }
 
     public static function js(): string

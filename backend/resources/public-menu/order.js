@@ -1,7 +1,7 @@
 // "My order": a list kept only on this phone (localStorage, per restaurant
 // and branch). Nothing is sent to the restaurant; it is shown to the waiter.
-// Loaded only when My order is on for this menu (QUESTIONS #236); with it off
-// the page never downloads this file. The dish sheet (sheet.js) uses mC from here.
+// Joined to the sheet file only when My order is on for this menu (sheet-o.{hash}.js,
+// QUESTIONS #236); with it off the page never downloads this code. sheet.js uses mC from here.
 (function () {
   var d = document, w = window, D = w.mD || JSON.parse(d.getElementById('d').textContent);
   // The admin's live preview keeps no list: there a "+" opens the dish (without an Add button).

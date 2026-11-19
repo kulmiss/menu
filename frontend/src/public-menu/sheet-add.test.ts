@@ -72,7 +72,7 @@ beforeEach(() => {
   dl = document.getElementById('s') as HTMLDialogElement
   localStorage.clear()
   w.mD = D
-  // The page loads both when My order is on (menu.js: D.s and D.os).
+  // With My order on the page loads one file holding both (InlineAssets::sheetUrl).
   new Function(source)()
   new Function(orderSource)()
   w.mS!(host.querySelector('li')!, D)

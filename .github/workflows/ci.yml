@@ -281,7 +281,7 @@ jobs:
           grep -q 'class="S-${{ matrix.style }}[ "]' public/menu-cache/demo/index.html
           if [ "$DEMO_MENU_BANNER" = 1 ]; then grep -q '<div class="cv' public/menu-cache/demo/index.html; else ! grep -q '<div class="cv' public/menu-cache/demo/index.html; fi
           if [ "${{ matrix.banner }}" = rtl ] || [ "${{ matrix.banner }}" = no-my-order-rtl ]; then grep -q '<html lang="en" dir="rtl">' public/menu-cache/demo/index.html; fi
-          case "${{ matrix.banner }}" in no-my-order*) ! grep -q 'data-x="A"\|/menu-assets/order\.' public/menu-cache/demo/index.html;; *) grep -q 'data-x="A"' public/menu-cache/demo/index.html;; esac
+          case "${{ matrix.banner }}" in no-my-order*) ! grep -q 'data-x="A"\|/menu-assets/sheet-o\.' public/menu-cache/demo/index.html;; *) grep -q 'data-x="A"' public/menu-cache/demo/index.html;; esac
           if [ "${{ matrix.banner }}" = ramadan ]; then grep -q 'class="hb"' public/menu-cache/demo/index.html && grep -q ' rm"' public/menu-cache/demo/index.html; fi
           if [ "${{ matrix.banner }}" = greyscale ]; then grep -q ' gs"' public/menu-cache/demo/index.html; fi
           case "${{ matrix.style }}" in coffee|grill|garden|coastal|luxe)

@@ -54,9 +54,8 @@
         'id' => $tenant->id,
         'b' => $branch_id,
         'p' => $preview ? 1 : 0,
-        's' => InlineAssets::sheetUrl(),
-        // The "My order" script, only when My order is on (QUESTIONS #236).
-        'os' => $orderList ? InlineAssets::orderUrl() : null,
+        // The sheet file; with "My order" on it holds the list too (QUESTIONS #236).
+        's' => InlineAssets::sheetUrl($orderList),
         'z' => $timezone,
         'h' => $hours,
         'x' => $closures,

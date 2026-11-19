@@ -85,7 +85,7 @@ beforeEach(() => {
   delete w.mA
   delete w.mC
   w.mD = D
-  // The page loads both when My order is on (menu.js: D.s and D.os).
+  // With My order on the page loads one file holding both (InlineAssets::sheetUrl).
   new Function(source)()
   new Function(orderSource)()
 })

@@ -84,9 +84,13 @@ describe('guest menu service worker', () => {
 
     await same.shown()
     await diff.shown()
+    // Reading both page texts can take longer than one short pause on a busy CI machine
+    // (failed there once, 2026-11-19): wait for the answer, then check both.
+    await expect
+      .poll(() => diff.page.postMessage.mock.calls)
+      .toContainEqual(['mu'])
     await settle()
     expect(same.page.postMessage).not.toHaveBeenCalled()
-    expect(diff.page.postMessage).toHaveBeenCalledWith('mu')
   })
 
   it('has nothing to tell on a first visit (no saved copy)', async () => {

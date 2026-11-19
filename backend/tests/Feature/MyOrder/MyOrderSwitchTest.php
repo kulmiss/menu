@@ -64,7 +64,8 @@ it('follows platform × plan × restaurant everywhere: guest menu, owner screen,
     $html = $this->get('/'.$tenant->slug)->assertOk()->getContent();
     expect(str_contains($html, 'data-x="A"'))->toBe($on)
         ->and(str_contains($html, 'class="it np ao"'))->toBe($on)
-        ->and(str_contains($html, InlineAssets::orderUrl()))->toBe($on)
+        ->and(str_contains($html, InlineAssets::sheetUrl(true)))->toBe($on)
+        ->and(str_contains($html, InlineAssets::sheetUrl(false)))->toBe(! $on)
         ->and(str_contains($html, '.np>.ad{'))->toBe($on)
         ->and(str_contains($html, '"o":null'))->toBe(! $on);
 
@@ -107,7 +108,7 @@ it('leaves nothing of My order on the guest menu of every style when it is off, 
     [, $tenant] = myOrderRestaurant(['style' => $style, 'show_order_list' => false]);
     $off = $this->get('/'.$tenant->slug)->assertOk()->getContent();
     expect($off)->not->toContain('data-x="A"')->not->toMatch('/class="it[^"]*\bao\b/')
-        ->not->toContain('order.')->not->toContain('.ad{')->not->toContain('"q":{')
+        ->not->toContain('sheet-o.')->not->toContain('.ad{')->not->toContain('"q":{')
         ->not->toContain('My order')->not->toContain('Add to my order')
         ->toContain('"o":null');
     // None of the style's own "+" rules either.
@@ -118,7 +119,7 @@ it('leaves nothing of My order on the guest menu of every style when it is off, 
     asTenant($tenant, fn () => TenantAppearance::query()->update(['show_order_list' => true]));
     MenuPageCache::forget($tenant);
     $on = $this->get('/'.$tenant->slug)->assertOk()->getContent();
-    expect($on)->toContain('data-x="A"')->toContain(InlineAssets::orderUrl())->toContain('.ad{');
+    expect($on)->toContain('data-x="A"')->toContain(InlineAssets::sheetUrl(true))->toContain('.ad{');
     // Off is the smaller page.
     expect(strlen($off))->toBeLessThan(strlen($on));
 })->with(TenantAppearance::STYLES);
