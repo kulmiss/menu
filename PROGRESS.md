@@ -1,4 +1,23 @@
-# Progress — "My order" switch, website + API (19 Nov 2026)
+# Progress — guest menu footer, demo view bar, styles slider (19 Nov 2026)
+
+📍 Now: done — CI running on the top PR
+📊 Progress: ▓▓▓▓▓▓▓▓▓░ 90%
+✅ Just finished: footer social links (space, centred, every style), right-to-left numbers fixed, Phone / Desktop bar on demo menus with a phone-frame page, "More menu styles" slider
+⏭️ Next: CI green, then the owner merges the top PR
+⚠️ Waiting for the owner: merge the top PR (it includes #161 and #160)
+⏱️ Time left: CI only
+
+## Steps
+- [x] 1. Footer: social links with space above, centred, "Follow us"; PDF link centred; test for all 17 styles × widths × directions
+- [x] 2. Right-to-left: phone numbers and opening hours read left to right (found by the new test)
+- [x] 3. Demo menus: Phone / Desktop bar from tablet width; /phone/{slug} phone frame with QR code
+- [x] 4. Landing "More menu styles": arrows, soft edges, progress line, no scroll bar
+- [x] 5. Backend 1143, frontend 1233+ tests; lint, types, build; real browser; Lighthouse
+- [ ] 6. CI green on the top PR
+
+---
+
+# Earlier: "My order" switch, website + API (19 Nov 2026)
 
 📍 Now: done — CI running on the top PR
 📊 Progress: ▓▓▓▓▓▓▓▓▓░ 90%
@@ -15,7 +34,7 @@
 - [x] 5. Help article, e-mail text, API (new fields only)
 - [x] 6. Tests: 8 combinations, 17 styles on/off, layout off (all styles × widths × RTL), cache, roles, logs
 - [x] 7. Real browser: 5 styles × 5 widths on/off, service worker with a saved list, owner and Super Admin screens; Lighthouse
-- [ ] 8. CI green on the top PR
+- [x] 8. CI green on the top PR (#161, 48/48)
 
 ---
 
