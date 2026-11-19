@@ -1,0 +1,13 @@
+/* The website's demo menus: the Phone / Desktop bar (owner, 2026-11-19). Shown from tablet
+   width up only, so phones and the phone-sized speed checks never see it. Also used by the
+   phone-frame page (resources/views/public/demo-phone.blade.php). */
+.dvb{display:none}
+@media (min-width:48rem){
+  .dvb{display:flex;align-items:center;justify-content:center;gap:1rem;padding:.3rem 1rem;background:#0f172a;color:#f8fafc;font:600 .875rem/1.2 system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:.01em}
+  .dvb b{font-weight:600;opacity:.8}
+  .dvs{display:inline-flex;padding:.2rem;border-radius:99px;background:#1e293b;border:1px solid #334155}
+  .dvs a{display:inline-flex;align-items:center;gap:.4rem;min-height:2.75rem;padding:0 1rem;border-radius:99px;color:#e2e8f0;text-decoration:none}
+  .dvs a[href]:hover{background:#334155;color:#fff}
+  .dvs a[aria-current]{background:#f8fafc;color:#0f172a}
+  .dvs a:focus-visible{outline:2px solid #93c5fd;outline-offset:2px}
+}

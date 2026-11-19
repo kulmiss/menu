@@ -27,8 +27,16 @@
     @if ($styles)
         {{-- Menu styles (owner, 2026-11-19): a phone picture of each style's demo, a swipeable row on phones. --}}
         <div class="wrap styles reveal">
-            <h3 id="styles-title">{{ $t('demo.styles') }}</h3>
-            <ul class="style-row" aria-labelledby="styles-title">
+            {{-- A slider instead of a plain scroll bar (owner, 2026-11-19): arrows on wide screens, a progress
+                 line, soft edges where more styles wait. Without JavaScript it is a normal scrolling row. --}}
+            <div class="styles-head">
+                <h3 id="styles-title">{{ $t('demo.styles') }}</h3>
+                <div class="row-nav">
+                    <button type="button" class="rn" data-step="-1" aria-controls="style-row" aria-label="{{ $t('demo.styles_prev') }}" disabled><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+                    <button type="button" class="rn" data-step="1" aria-controls="style-row" aria-label="{{ $t('demo.styles_next') }}"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
+                </div>
+            </div>
+            <ul class="style-row at-start" id="style-row" aria-labelledby="styles-title">
                 @foreach ($styles as $key => $style)
                     <li><a href="{{ $style['href'] }}" target="_blank" rel="noopener" data-track="demo" aria-label="{{ $t('demo.style_label', ['style' => $t("demo.style_names.{$key}")]) }}">
                         @if ($style['shot'])
@@ -38,6 +46,7 @@
                     </a></li>
                 @endforeach
             </ul>
+            <div class="row-track" aria-hidden="true"><span></span></div>
         </div>
     @endif
 </section>

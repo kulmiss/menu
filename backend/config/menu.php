@@ -89,7 +89,7 @@ return [
     'reserved_slugs' => [
         'about', 'admin', 'api', 'app', 'assets', 'auth', 'build', 'contact', 'cookies', 'css', 'dashboard', 'docs', 'email',
         'favicon.ico', 'forgot-password', 'health', 'help', 'invite', 'img', 'images', 'js', 'login', 'logout', 'media',
-        'menu', 'menu-cache', 'platform', 'privacy', 'q', 'register', 'reset-password', 'robots.txt', 'sanctum',
+        'menu', 'menu-cache', 'phone', 'platform', 'privacy', 'q', 'register', 'reset-password', 'robots.txt', 'sanctum',
         'settings', 'signin', 'signout', 'signup', 'sitemap.xml', 'static', 'sw.js', 'status', 'storage', 'super', 'support',
         'terms', 'up', 'verify-email', 'waiting', 'www',
     ],

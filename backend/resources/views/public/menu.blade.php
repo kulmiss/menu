@@ -2,6 +2,8 @@
     use App\Support\PublicMenu\InlineAssets;
     use App\Support\PublicMenu\PageTheme;
     $preview ??= false;
+    // A demo menu from the website (not in the admin preview): the Phone / Desktop bar.
+    $demoView = ! $preview && in_array($tenant->slug, \App\Http\Controllers\SiteController::demoSlugs(), true);
     $cover = $theme['cover'];
     $style = $theme['style'];
     // Photo widths per menu style, so the browser picks the right file (§15.2.4).
@@ -128,9 +130,11 @@
 @php $preloadAvif = ! empty($lcp['img']['avif']); @endphp
 <link rel="preload" as="image" fetchpriority="high" type="image/{{ $preloadAvif ? 'avif' : 'webp' }}" imagesrcset="{{ $preloadAvif ? $lcp['img']['avif'] : $lcp['img']['webp'] }}" imagesizes="{{ $lcp['sizes'] }}">
 @endif
-<style>{!! InlineAssets::css($style, $orderList) !!}{!! $theme['css'] !!}</style>
+<style>{!! InlineAssets::css($style, $orderList) !!}{!! $theme['css'] !!}@if ($demoView){!! InlineAssets::demoCss() !!}@endif</style>
 </head>
 <body class="S-{{ $style }}{{ $anyPhoto ? '' : ' NP' }}{{ $theme['ramadan'] ? ' rm' : '' }}{{ $theme['greyscale'] ? ' gs' : '' }}{{ $theme['decoration'] ? ' dc' : '' }}">
+{{-- Demo menus on a tablet or computer: see it in a phone frame or as it is (owner, 2026-11-19). Hidden on phones. --}}
+@if ($demoView)<nav class="dvb" aria-label="{{ __('public.demo_view.label') }}"><b>{{ __('public.demo_view.title') }}</b><span class="dvs"><a href="/phone{{ $canonical }}"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg>{{ __('public.demo_view.phone') }}</a><a aria-current="page"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M8 20.5h8M12 17v3.5"/></svg>{{ __('public.demo_view.desktop') }}</a></span></nav>@endif
 @if ($catIcons !== [])
 {{-- M–Q: the category icons used on this page, drawn once (QUESTIONS #232). --}}
 <svg class="sx" aria-hidden="true" width="0" height="0">{!! \App\Support\PublicMenu\CategoryIcons::symbols($catIcons) !!}</svg>
@@ -263,11 +267,12 @@
 @if ($hoursSummary || $info['address'] !== '' || $info['maps'] || $info['links'] || $info['wifi'] || $otherBranches)<div class="fg">
 @if ($hoursSummary)<div><h2>{!! $icon('clock') !!}{{ __('public.hours') }}</h2><dl class="hs">@foreach ($hoursSummary as $h)<div><dt>{{ $h['days'] }}</dt><dd>{{ $h['times'] }}</dd></div>@endforeach</dl></div>@endif
 @if ($info['address'] !== '' || $info['maps'])<div><h2>{!! $icon('pin') !!}{{ __('public.address') }}</h2>@if ($info['address'] !== '')<p>{{ $info['address'] }}</p>@endif @if ($info['maps'])<a class="fbt" href="{{ $info['maps'] }}" rel="noopener" target="_blank">{{ __('public.open_maps') }}</a>@endif</div>@endif
-@if ($info['links'])<div><h2>{{ __('public.contact') }}</h2><ul class="fc">@foreach ($info['links'] as $l)<li><a href="{{ $l['href'] }}" rel="noopener">{!! $icon($l['icon']) !!}<span><small>{{ $l['label'] }}</small>{{ $l['text'] }}</span></a></li>@endforeach</ul></div>@endif
+@if ($info['links'])<div><h2>{{ __('public.contact') }}</h2><ul class="fc">@foreach ($info['links'] as $l)<li><a href="{{ $l['href'] }}" rel="noopener">{!! $icon($l['icon']) !!}<span><small>{{ $l['label'] }}</small><bdi class="v">{{ $l['text'] }}</bdi></span></a></li>@endforeach</ul></div>@endif
 @if ($info['wifi'])<div><h2>{!! $icon('wifi') !!}Wi-Fi</h2><p>{{ __('public.wifi_name') }}: <b>{{ $info['wifi']['name'] }}</b>@if ($info['wifi']['password'])<br>{{ __('public.wifi_password') }}: <b class="pw">{{ $info['wifi']['password'] }}</b>@endif</p></div>@endif
 @if ($otherBranches)<div><h2>{!! $icon('store') !!}{{ __('public.other_branches') }}</h2><ul class="ob">@foreach ($otherBranches as $b)<li><a href="{{ $b['path'] }}">{{ $b['name'] }}</a>@if ($b['address'] !== '')<span>{{ $b['address'] }}</span>@endif</li>@endforeach</ul></div>@endif
 </div>@endif
-@if ($info['socials'])<ul class="fso">@foreach ($info['socials'] as $l)<li><a href="{{ $l['href'] }}" rel="noopener" target="_blank" aria-label="{{ $l['label'] }}" title="{{ $l['label'] }}">{!! $icon($l['icon']) !!}</a></li>@endforeach</ul>@endif
+{{-- Social links: their own centred row with a title, clear of the cards above (owner, 2026-11-19). --}}
+@if ($info['socials'])<div class="fsw"><h2>{{ __('public.follow_us') }}</h2><ul class="fso">@foreach ($info['socials'] as $l)<li><a href="{{ $l['href'] }}" rel="noopener" target="_blank" aria-label="{{ $l['label'] }}" title="{{ $l['label'] }}">{!! $icon($l['icon']) !!}</a></li>@endforeach</ul></div>@endif
 @if ($pdfLink)<p class="pdl"><a href="{{ rtrim($canonical, '/') }}/menu.pdf">{!! $icon('file') !!}{{ __('public.pdf_menu') }}</a></p>@endif
 @if ($branding)<p class="pb">{{ __('public.powered', ['app' => \App\Support\PlatformSettings::get('name')]) }}</p>@endif
 </div></footer>

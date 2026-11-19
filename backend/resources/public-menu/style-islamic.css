@@ -67,5 +67,5 @@ dialog{border-top:3px solid var(--g)}
 @media (min-width:48rem){dialog{border:1px solid var(--g)}}
 /* Footer: a strip of the lattice, then the groups on cards. */
 .ft:before{content:"";display:block;height:2.5rem;margin:-2rem 0 1.75rem;background:var(--tl) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Cg fill='none' stroke='%23c9a24b' stroke-opacity='.4'%3E%3Crect x='12' y='12' width='16' height='16'/%3E%3Crect x='12' y='12' width='16' height='16' transform='rotate(45 20 20)'/%3E%3Cpath d='M0 0l8.7 8.7M40 0l-8.7 8.7M0 40l8.7-8.7M40 40l-8.7-8.7M20 0v8.7M20 40v-8.7M0 20h8.7M40 20h-8.7'/%3E%3C/g%3E%3C/svg%3E") 0 0/2.5rem 2.5rem}
-.fh{flex-direction:column;text-align:center}.fn{font-family:var(--fh);font-size:1.4rem}.ft .ab{margin-inline:auto;text-align:center}.fso{justify-content:center}.pdl{text-align:center}
+.fh{flex-direction:column;text-align:center}.fn{font-family:var(--fh);font-size:1.4rem}.ft .ab{margin-inline:auto;text-align:center}
 .fg>div{background:var(--bg);border-radius:1rem;padding:1rem}

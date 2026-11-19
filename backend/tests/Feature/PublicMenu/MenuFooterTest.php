@@ -2,6 +2,7 @@
 
 use App\Enums\Role;
 use App\Models\TenantAppearance;
+use App\Support\PublicMenu\InlineAssets;
 
 /** The guest page footer (owner, 2026-11-12). */
 it('shows name, grouped hours, address with maps, contact and social icons in the footer', function () {
@@ -27,7 +28,9 @@ it('shows name, grouped hours, address with maps, contact and social icons in th
         ->toContain('<dt>Mon–Fri</dt><dd>07:00–22:00</dd>')->toContain('<dt>Sat</dt><dd>08:00–23:00</dd>')->toContain('<dt>Sun</dt><dd>Closed</dd>')
         ->toContain('Bole Road, Addis Ababa')->toContain('<a class="fbt" href="https://maps.app.goo.gl/abc" rel="noopener" target="_blank">Open in Maps</a>')
         ->toContain('href="tel:+251115550100"')->toContain('href="https://wa.me/251915550100"')->toContain('href="https://t.me/bunabread"')
-        ->toContain('aria-label="Instagram"')->toContain('aria-label="TikTok"')
+        // Social links in their own centred block with a title (owner, 2026-11-19).
+        ->toMatch('#<div class="fsw"><h2>Follow us</h2><ul class="fso"><li><a href="https://instagram.com/buna"[^>]*aria-label="Instagram"#')
+        ->toContain('aria-label="TikTok"')
         ->toContain('Buna-Guest')
         ->and(substr_count($footer, '<svg aria-hidden="true"'))->toBeGreaterThanOrEqual(8);
     // No old collapsible info box any more; the (i) button still points at the footer.
@@ -53,4 +56,18 @@ it('keeps "Nothing matches your search" hidden until a search finds nothing', fu
     expect($this->get('/'.$tenant->slug)->getContent())
         ->toContain('<p class="nr" id="nr" hidden>')
         ->toContain('.nr[hidden]{display:none}');
+});
+
+it('keeps clear space above the social links in every style (".ft ul" used to wipe it)', function () {
+    foreach (TenantAppearance::STYLES as $style) {
+        $css = InlineAssets::css($style);
+        expect($css)->toContain('.ft .fso{display:flex;flex-direction:row;flex-wrap:wrap;justify-content:center')
+            ->toContain('.fsw{margin-top:2rem;text-align:center}');
+    }
+});
+
+it('shows no social block when the restaurant has no social links', function () {
+    [, $tenant] = member(Role::Owner);
+    sampleMenu($tenant);
+    expect($this->get('/'.$tenant->slug)->getContent())->not->toContain('class="fsw"')->not->toContain('Follow us');
 });

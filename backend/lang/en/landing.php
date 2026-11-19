@@ -61,6 +61,8 @@ return [
         'open' => 'Open the demo menu',
         'phone_alt' => 'A real demo menu on a phone',
         'styles' => 'More menu styles — tap one to open its demo',
+        'styles_prev' => 'Previous menu styles',
+        'styles_next' => 'More menu styles',
         'style_names' => [
             'editorial' => 'Editorial',
             'grid' => 'Grid',
