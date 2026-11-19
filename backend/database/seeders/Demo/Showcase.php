@@ -23,8 +23,10 @@ use App\Tenancy\CurrentTenant;
  * (pizza & burgers), C bistro (bakery & juice bar), E mesob (Ethiopian and
  * Somali), F lounge (cocktail bar, happy hour), G board (street food), H arabic
  * (Yemeni mandi, menu in Arabic: right-to-left), I islamic (halal family
- * restaurant), J somali (Somali café), K mono (speciality coffee) and
- * L colour (juice bar and ice cream).
+ * restaurant), J somali (Somali café), K mono (speciality coffee),
+ * L colour (juice bar and ice cream), M coffee (coffee house), N grill (tibs
+ * and grill), O garden (juice and fasting food), P coastal (seafood by the sea,
+ * in US dollars) and Q luxe (fine dining).
  */
 class Showcase
 {
@@ -49,7 +51,7 @@ class Showcase
     {
         $tenant = Tenant::create([
             'slug' => $def['slug'], 'name' => $def['name'], 'plan_id' => $plans[$def['plan']]->id ?? null,
-            'paid_until' => now()->addMonths(5), 'timezone' => 'Africa/Addis_Ababa', 'default_locale' => 'en', 'currency_code' => 'ETB',
+            'paid_until' => now()->addMonths(5), 'timezone' => $def['timezone'] ?? 'Africa/Addis_Ababa', 'default_locale' => 'en', 'currency_code' => $def['currency'] ?? 'ETB',
         ]);
         $tenant->forceFill(['created_at' => now()->subMonths($def['age']), 'qr_downloaded_at' => now()->subMonths($def['age'] - 1)])->save();
         $user = User::firstOrCreate(['email' => $def['email']], ['name' => 'Demo Owner · '.$def['name'], 'password' => 'password']);
@@ -63,7 +65,8 @@ class Showcase
                 'style' => $def['style'], 'primary_color' => $def['color'], 'banner_text' => $def['banner_text'],
                 // Style options (H: direction, I: Halal and Ramadan mode, K: greyscale and accent).
                 ...($def['options'] ?? []),
-                'cover_media_id' => $this->photos->media($tenant, $def['banner'], true)?->id,
+                // No banner (M–Q demos): the style's own header picture shows.
+                'cover_media_id' => isset($def['banner']) ? $this->photos->media($tenant, $def['banner'], true)?->id : null,
                 'logo_media_id' => $this->photos->logo($tenant, $def['color'], $def['logo'])?->id,
             ]);
             TenantProfile::create([
@@ -534,6 +537,211 @@ class Showcase
                             ["Kids' menu", 'For children under 10.', [
                                 ['Mini juice', 'Any juice in a small cup', 8000, ['vegan'], ['k' => 90]],
                                 ['Mini pancakes', 'Five little pancakes with honey', 12000, ['vegetarian'], ['al' => ['gluten', 'milk', 'eggs'], 'k' => 360, 'pm' => 8, 'ph' => ['pancakes']]],
+                            ]],
+                        ]],
+                    ],
+                ],
+            ],
+            // M–Q (owner, 2026-11-19, QUESTIONS #232): no banner, so each shows its style's own header
+            // picture; some categories carry their own photo, the others get the style's icon.
+            [
+                'slug' => 'demo-jebena', 'name' => 'Jebena Corner', 'email' => 'jebena@example.com', 'plan' => 'plus', 'age' => 1,
+                'style' => 'coffee', 'color' => '#8a3b12', 'logo' => 'bean', 'banner' => null, 'banner_text' => 'under',
+                'about' => "Coffee roasted in front of you, the way it is at home: three rounds, popcorn and incense.\nFresh bread, breakfast and spiced tea all day.",
+                'address' => 'Piassa, Addis Ababa', 'phone' => '+251 11 000 1301', 'hours' => [['06:30', '21:00']],
+                'special' => ['Sunday coffee ceremony', 'A full jebena for the table, roasted in front of you — Br 180, Sundays from 15:00.', 'Coffee ceremony', 'ceremony'],
+                'news' => ['New:', 'Ginger and cinnamon tea, brewed fresh every hour.'],
+                'catalogue' => [
+                    'groups' => [
+                        'milk' => ['Milk', 0, 1, [['A little milk', 0], ['Extra milk', 1000], ['Oat milk', 2500]]],
+                    ],
+                    'menus' => [
+                        ['name' => 'Menu', 'slug' => 'menu', 'categories' => [
+                            ['Coffee ceremony', 'Served in a jebena with three rounds.', [
+                                ['Coffee ceremony', 'For 2–4, with popcorn and incense', 18000, ['popular'], ['d' => 'Green beans roasted at your table, ground by hand and brewed in a clay jebena. Three rounds: abol, tona and baraka.', 'pm' => 25, 'ph' => ['ceremony', 'jebena']]],
+                                ['Jebena for one', 'Two small cups', 6000, [], ['ph' => ['ceremony-2']]],
+                            ], 'jebena'],
+                            ['Coffee', 'Ethiopian beans, roasted this week.', [
+                                ['Macchiato', 'Strong, a little milk foam', 5500, ['vegetarian', 'popular'], ['al' => ['milk'], 'ph' => ['macchiato'], 'g' => ['milk']]],
+                                ['Espresso', null, 4500, ['vegan'], ['ph' => ['espresso']]],
+                                ['Cappuccino', null, 7000, ['vegetarian'], ['al' => ['milk'], 'ph' => ['cappuccino'], 'g' => ['milk']]],
+                                ['Buna with tena adam', 'Black coffee with a sprig of rue', 4000, ['vegan'], []],
+                            ]],
+                            ['Tea', null, [
+                                ['Spiced tea', 'Cinnamon, clove and cardamom', 4000, ['vegan'], ['ph' => ['spiced-tea']]],
+                                ['Ginger tea', 'Fresh ginger and honey', 4500, ['vegetarian', 'new'], ['ph' => ['ginger-tea']]],
+                                ['Spris', 'Half tea, half coffee', 4500, ['vegan'], []],
+                            ]],
+                            ['Breakfast', 'Until 11:00.', [
+                                ['Chechebsa', 'Torn flatbread, niter kibbeh, berbere and honey', 16000, ['vegetarian', 'spicy'], ['al' => ['gluten', 'milk'], 'k' => 520, 'pm' => 10]],
+                                ['Ful', 'Fava beans, egg, tomato, warm bread', 15000, ['vegetarian'], ['al' => ['gluten', 'eggs'], 'k' => 480, 'pm' => 8]],
+                                ['Eggs on toast', 'Two poached eggs, sourdough', 17000, ['vegetarian'], ['al' => ['gluten', 'eggs'], 'ph' => ['poached-eggs']]],
+                            ]],
+                            ['Pastries & sweets', null, [
+                                ['Butter croissant', null, 7000, ['vegetarian'], ['al' => ['gluten', 'milk'], 'ph' => ['croissants']]],
+                                ['Sambusa', 'Lentils and green chilli, three pieces', 6000, ['vegan', 'spicy'], ['al' => ['gluten'], 'ph' => ['sambuusa']]],
+                                ['Chocolate cake', 'One slice', 11000, ['vegetarian'], ['al' => ['gluten', 'milk', 'eggs'], 'ph' => ['chocolate-cake'], 'so' => true]],
+                            ]],
+                        ]],
+                    ],
+                ],
+            ],
+            [
+                'slug' => 'demo-firewood', 'name' => 'Firewood Grill', 'email' => 'firewood@example.com', 'plan' => 'business', 'age' => 1,
+                'style' => 'grill', 'color' => '#e8622a', 'logo' => 'ring', 'banner' => null, 'banner_text' => 'under',
+                'about' => "Charcoal grill, awaze and cold drinks. Tibs and kitfo the way grandmother made them.\nGroups and football nights welcome.",
+                'address' => 'Kazanchis, Addis Ababa', 'phone' => '+251 11 000 1402', 'hours' => [['11:00', '23:30']],
+                'special' => ['Grill platter for four', 'Tibs, steak, wings and skewers on one board — Br 2,400.', 'Special tibs', 'steak-fries'],
+                'news' => ['Football nights:', 'Big screen on match days, book a table.'],
+                'happy' => [[0, 1, 2, 3, 4], '16:00', '18:00', [['Spicy wings', 20]]],
+                'catalogue' => [
+                    'groups' => [
+                        'heat' => ['How spicy?', 1, 1, [['Mild', 0], ['Medium', 0], ['Hot (awaze)', 0]]],
+                        'doneness' => ['Cooked', 1, 1, [['Medium rare', 0], ['Medium', 0], ['Well done', 0]]],
+                        'side' => ['Side', 0, 2, [['Injera', 0], ['Fries', 4000], ['Rice', 3500], ['Salad', 3000]]],
+                    ],
+                    'menus' => [
+                        ['name' => 'Menu', 'slug' => 'menu', 'categories' => [
+                            ['Tibs', 'Sizzling in a clay pot.', [
+                                ['Special tibs', 'Beef, rosemary, onion, green chilli', 42000, ['popular', 'spicy'], ['d' => 'Beef cubes seared over high heat with rosemary, onion and green chilli, served sizzling in a clay pot.', 'k' => 690, 'pm' => 15, 'ph' => ['tibs'], 'g' => ['heat', 'side']]],
+                                ['Lamb tibs', 'Lamb, garlic, awaze', 46000, ['spicy'], ['k' => 720, 'pm' => 15, 'g' => ['heat', 'side']]],
+                                ['Shekla tibs', 'On a charcoal burner at the table', 52000, ['new'], ['pm' => 20, 'g' => ['side']]],
+                            ], 'tibs'],
+                            ['Kitfo', 'Minced beef with mitmita and niter kibbeh.', [
+                                ['Kitfo', 'Raw, leb leb (warm) or cooked', 45000, ['spicy'], ['al' => ['milk'], 'pm' => 12]],
+                                ['Special kitfo', 'With ayib and gomen', 52000, ['popular'], ['al' => ['milk'], 'pm' => 12]],
+                            ]],
+                            ['From the grill', 'Charcoal, every day from 11:00.', [
+                                ['Charcoal steak', '300 g, grilled vegetables', 65000, [], ['k' => 820, 'pm' => 20, 'ph' => ['steak-veg'], 'g' => ['doneness', 'side']]],
+                                ['Pepper steak', 'Black pepper sauce, fries', 68000, [], ['k' => 880, 'pm' => 20, 'ph' => ['steak-sauce'], 'g' => ['doneness']]],
+                                ['Spicy wings', 'Berbere glaze, twelve pieces', 29000, ['spicy', 'popular'], ['k' => 760, 'pm' => 15, 'ph' => ['wings']]],
+                                ['Half chicken', 'Lemon, garlic, chilli', 38000, [], ['k' => 680, 'pm' => 25, 'ph' => ['chicken-plate'], 'g' => ['side']]],
+                            ]],
+                            ['Burgers', null, [
+                                ['Firewood burger', 'Double beef, smoked cheese, onion', 36000, ['popular'], ['al' => ['gluten', 'milk'], 'k' => 980, 'ph' => ['burger-board']]],
+                                ['Bacon burger', null, 38000, [], ['al' => ['gluten', 'milk'], 'k' => 1040, 'ph' => ['burger-bacon'], 'so' => true]],
+                            ]],
+                            ['Sides & drinks', null, [
+                                ['Fries', null, 9000, ['vegan'], ['ph' => ['fries-bowl']]],
+                                ['Cold soda', 'Cola, orange or lemon', 5000, ['vegan'], ['ph' => ['soda-glass']]],
+                                ['Sparkling water', null, 4000, ['vegan'], []],
+                            ]],
+                        ]],
+                    ],
+                ],
+            ],
+            [
+                'slug' => 'demo-green-spoon', 'name' => 'Green Spoon', 'email' => 'greenspoon@example.com', 'plan' => 'plus', 'age' => 1,
+                'style' => 'garden', 'color' => '#1d6b43', 'logo' => 'drop', 'banner' => null, 'banner_text' => 'under',
+                'about' => "Fresh juice, salads and bowls, and a full fasting menu on Wednesdays and Fridays.\nNo added sugar in our juices.",
+                'address' => 'Bole Medhanialem, Addis Ababa', 'phone' => '+251 11 000 1503', 'hours' => [['07:00', '21:00']],
+                'special' => ['Fasting platter', 'Beyaynetu for two, eight dishes on injera — Br 380.', 'Beyaynetu', 'injera-platter'],
+                'news' => ['Wednesdays and Fridays:', 'The whole menu can be made fasting (vegan).'],
+                'catalogue' => [
+                    'groups' => [
+                        'size' => ['Size', 1, 1, [['Regular', 0], ['Large', 3000]]],
+                        'extras' => ['Add', 0, 3, [['Avocado', 3000], ['Chickpeas', 2000], ['Seeds', 1500]]],
+                    ],
+                    'menus' => [
+                        ['name' => 'Menu', 'slug' => 'menu', 'categories' => [
+                            ['Fresh juices', 'Pressed to order.', [
+                                ['Avocado spris', 'Avocado, mango and papaya in layers', 9500, ['vegan', 'popular'], ['k' => 280, 'ph' => ['avocado-smoothie'], 'g' => ['size']]],
+                                ['Mango juice', null, 8000, ['vegan'], ['k' => 190, 'ph' => ['mango-juice'], 'g' => ['size']]],
+                                ['Kiwi & apple', 'With a little mint', 8500, ['vegan'], ['k' => 150, 'ph' => ['kiwi-juice']]],
+                                ['Orange', null, 7000, ['vegan'], ['k' => 140, 'ph' => ['orange-juice']]],
+                            ], 'juices-table'],
+                            ['Salads', null, [
+                                ['Garden salad', 'Lettuce, tomato, cucumber, lemon', 14000, ['vegan', 'gluten_free'], ['k' => 180, 'ph' => ['garden-salad'], 'g' => ['extras']]],
+                                ['Beet & citrus salad', 'Beetroot, orange, seeds', 16000, ['vegan', 'gluten_free', 'new'], ['k' => 220, 'ph' => ['beet-salad'], 'g' => ['extras']]],
+                                ['Timatim fitfit', 'Tomato, onion, chilli and injera', 12000, ['vegan', 'spicy'], ['k' => 260]],
+                            ]],
+                            ['Bowls', 'Warm or cold.', [
+                                ['Chicken bowl', 'Grilled chicken, rice, greens', 22000, [], ['k' => 610, 'ph' => ['chicken-bowl']]],
+                                ['Yogurt bowl', 'Fruit, honey, granola', 15000, ['vegetarian'], ['al' => ['milk', 'nuts'], 'k' => 420, 'ph' => ['yogurt-bowls']]],
+                                ['Fruit salad', 'Papaya, mango, banana, passion fruit', 11000, ['vegan', 'gluten_free'], ['k' => 210, 'ph' => ['fruit-salad']]],
+                            ]],
+                            ['Fasting dishes', 'Vegan, every day.', [
+                                ['Beyaynetu', 'Eight dishes on injera', 19000, ['vegan', 'popular'], ['k' => 640, 'ph' => ['injera-platter']]],
+                                ['Shiro', 'Chickpea stew, berbere', 13000, ['vegan', 'spicy'], ['k' => 480]],
+                                ['Misir wot', 'Red lentils, berbere', 13000, ['vegan', 'spicy'], ['k' => 450]],
+                            ]],
+                        ]],
+                    ],
+                ],
+            ],
+            [
+                'slug' => 'demo-dhow', 'name' => 'Dhow & Reef', 'email' => 'dhow@example.com', 'plan' => 'plus', 'age' => 1,
+                'style' => 'coastal', 'color' => '#c4523a', 'logo' => 'drop', 'banner' => null, 'banner_text' => 'under',
+                'currency' => 'USD', 'timezone' => 'Africa/Mogadishu',
+                'about' => "Fish from this morning's boats, grilled over charcoal by the sea.\nFamily room upstairs, fresh juice all day.",
+                'address' => 'Lido Beach Road, Mogadishu', 'phone' => '+252 61 000 1604', 'hours' => [['10:00', '23:00']],
+                'special' => ['Catch of the day', 'Ask for today\'s fish: grilled whole with lime and chilli, rice and salad — $12.50.', 'Whole grilled fish', 'fish-tilapia'],
+                'news' => ['Friday:', 'Family platter with fish, prawns and rice for four — $38.'],
+                'catalogue' => [
+                    'groups' => [
+                        'sauce' => ['Sauce', 0, 2, [['Lime & chilli', 0], ['Garlic butter', 75], ['Basbaas (hot sauce)', 0]]],
+                        'side' => ['Side', 1, 1, [['Rice', 0], ['Fries', 0], ['Banana', 0]]],
+                    ],
+                    'menus' => [
+                        ['name' => 'Menu', 'slug' => 'menu', 'categories' => [
+                            ['Grilled fish', 'Whole fish from the morning boats.', [
+                                ['Whole grilled fish', 'Kingfish or snapper, lime, chilli', 1250, ['popular', 'gluten_free'], ['d' => 'Today\'s fish, scored, rubbed with spices and grilled whole over charcoal. With rice or fries and a little salad.', 'al' => ['fish'], 'pm' => 25, 'ph' => ['fish-tilapia'], 'g' => ['sauce', 'side']]],
+                                ['Red mullet', 'Three small fish, lemon', 950, ['gluten_free'], ['al' => ['fish'], 'pm' => 20, 'ph' => ['fish-mullet'], 'g' => ['sauce', 'side']]],
+                                ['Fish steak', 'Tuna, cumin, garlic', 1100, ['gluten_free', 'spicy'], ['al' => ['fish'], 'pm' => 15, 'g' => ['sauce', 'side']]],
+                            ], 'fish-tilapia'],
+                            ['Prawns & seafood', null, [
+                                ['Prawn pasta', 'Garlic, tomato, chilli', 1050, ['spicy'], ['al' => ['gluten', 'crustaceans'], 'pm' => 18, 'ph' => ['shrimp-pasta']]],
+                                ['Seafood pasta', 'Prawns, calamari, cream', 1150, [], ['al' => ['gluten', 'crustaceans', 'molluscs', 'milk'], 'pm' => 18, 'ph' => ['seafood-pasta']]],
+                                ['Fried calamari', 'Lemon and garlic sauce', 850, ['new'], ['al' => ['gluten', 'molluscs', 'eggs'], 'pm' => 12]],
+                            ]],
+                            ['Rice', null, [
+                                ['Bariis iskukaris', 'Spiced rice, raisins, banana', 450, ['vegan'], ['ph' => ['biryani-plates']]],
+                                ['Fish & rice platter', 'For two', 2200, ['popular'], ['al' => ['fish'], 'ph' => ['kabsa-platter'], 'so' => true]],
+                            ]],
+                            ['Starters', null, [
+                                ['Sambuusa', 'Tuna, three pieces', 300, ['spicy'], ['al' => ['gluten', 'fish'], 'ph' => ['sambuusa']]],
+                                ['Fries', null, 250, ['vegan'], ['ph' => ['fries-bowl']]],
+                            ]],
+                            ['Juices', 'Fresh, no sugar added.', [
+                                ['Mango', null, 250, ['vegan'], ['ph' => ['mango-juice']]],
+                                ['Lemon & mint', null, 225, ['vegan'], ['ph' => ['iced-mint-tea']]],
+                                ['Papaya', null, 250, ['vegan'], []],
+                            ]],
+                        ]],
+                    ],
+                ],
+            ],
+            [
+                'slug' => 'demo-maison', 'name' => 'Maison Sheba', 'email' => 'maison@example.com', 'plan' => 'business', 'age' => 1,
+                'style' => 'luxe', 'color' => '#7a2e3a', 'logo' => 'ring', 'banner' => null, 'banner_text' => 'under',
+                'about' => "Ethiopian ingredients, French technique. A seven-table dining room and a tej cellar.\nPlease book; dress smart casual.",
+                'address' => 'Old Airport, Addis Ababa', 'phone' => '+251 11 000 1705', 'hours' => [['18:30', '23:00']],
+                'special' => ['Tasting menu', 'Seven courses chosen by the chef, with tej pairing — Br 7,800 per guest.', 'Lamb loin', 'fine-plated'],
+                'news' => ['This month:', 'Harar honey and wild thyme on the dessert menu.'],
+                'catalogue' => [
+                    'groups' => [
+                        'doneness' => ['Cooked', 1, 1, [['Rare', 0], ['Medium rare', 0], ['Medium', 0]]],
+                    ],
+                    'menus' => [
+                        ['name' => 'Dinner', 'slug' => 'dinner', 'categories' => [
+                            ['Starters', 'To begin.', [
+                                ['Beef tartare', 'Mitmita, quail egg, teff crisp', 98000, ['spicy'], ['al' => ['eggs'], 'ph' => ['fine-starter']]],
+                                ['Garden of the season', 'Vegetables, herb oil, seeds', 86000, ['vegan', 'gluten_free'], ['ph' => ['fine-salad']]],
+                                ['Lentil velouté', 'Red lentils, berbere butter', 72000, ['vegetarian'], ['al' => ['milk']]],
+                            ]],
+                            ['Mains', 'With seasonal vegetables.', [
+                                ['Lamb loin', 'Teff crumble, rosemary jus', 165000, ['popular'], ['d' => 'Lamb loin roasted pink, with a teff and herb crumble and a rosemary jus.', 'pm' => 25, 'ph' => ['fine-plated'], 'g' => ['doneness']]],
+                                ['Beef fillet', 'Red wine, microgreens', 178000, [], ['pm' => 25, 'ph' => ['steak-micro'], 'g' => ['doneness']]],
+                                ['Nile perch', 'Beurre blanc, crushed potatoes', 142000, ['gluten_free'], ['al' => ['fish', 'milk'], 'pm' => 20]],
+                            ]],
+                            ['Desserts', null, [
+                                ['Honey panna cotta', 'Tej, berries', 52000, ['vegetarian', 'gluten_free'], ['al' => ['milk'], 'ph' => ['panna-cotta']]],
+                                ['Chocolate & coffee', 'Yirgacheffe, cocoa, cream', 58000, ['vegetarian'], ['al' => ['milk', 'eggs', 'gluten'], 'ph' => ['dessert-plate']]],
+                            ], 'dessert-plate'],
+                            ['Tej & wine', 'By the glass.', [
+                                ['House tej', 'Honey wine, semi-dry', 38000, ['vegan'], []],
+                                ['Red wine', 'Rift Valley, glass', 52000, ['vegan'], []],
+                                ['Sparkling water', null, 12000, ['vegan'], ['ph' => ['sparkling-water']]],
                             ]],
                         ]],
                     ],

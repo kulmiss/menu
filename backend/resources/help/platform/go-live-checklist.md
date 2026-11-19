@@ -14,6 +14,9 @@ order: 100
 5. **Never** run the demo seeder.
 6. Folder permissions. `.env` (with `APP_KEY`) and `BACKUP_KEY` saved in your password manager.
 7. Cron line every minute. `/up` says "Application up".
+7a. `php artisan menu:doctor --production`: fix every red line (✗); it says how. Put **{{site_url}}/health** in an uptime monitor (UptimeRobot, Better Stack).
+
+On a VPS, `scripts/deploy-vps.sh install` does steps 1–7 for you (docs/deploy.md section 4).
 
 **Platform**
 

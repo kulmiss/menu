@@ -5,8 +5,12 @@ use App\Models\Branch;
 use App\Models\DiningTable;
 use App\Models\Plan;
 use App\Models\QrCode;
+use App\Models\TenantAppearance;
+use App\Support\Contrast;
 use App\Support\Features;
 use App\Support\PlatformSettings;
+use App\Support\Print\PrintMaterials;
+use App\Support\PublicMenu\PageTheme;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
@@ -39,7 +43,7 @@ function printUrl($tenant, array $q): string
 }
 
 it('makes every material at its real paper size, with vector QR codes', function () {
-    // 36 PDFs in a row: far more than the 30-a-minute download limit a person needs.
+    // 48 PDFs in a row: far more than the 30-a-minute download limit a person needs.
     RateLimiter::for('exports', fn () => Limit::none());
     [$owner, $tenant] = member(Role::Owner);
     $code = asTenant($tenant, fn () => QrCode::firstOrFail());
@@ -53,7 +57,7 @@ it('makes every material at its real paper size, with vector QR codes', function
         'sticker_square' => [210.0, 297.0],
     ];
     foreach ($sizes as $material => $size) {
-        foreach (['classic', 'bold', 'minimal'] as $design) {
+        foreach (PrintMaterials::DESIGNS as $design) {
             foreach (['light', 'dark'] as $theme) {
                 $res = $this->actingAs($owner)->get(printUrl($tenant, ['material' => $material, 'design' => $design, 'theme' => $theme, 'codes' => (string) $code->id]));
                 $res->assertOk()->assertHeader('Content-Type', 'application/pdf');
@@ -105,6 +109,33 @@ it('prints one face per table, the headline, the table name and "Menu by" only o
     Features::forget();
     $pro = pdfFacts($this->actingAs($owner)->get(printUrl($tenant, ['codes' => explode(',', $ids)[0]]))->getContent());
     expect($pro['text'])->toContain('(Scan for our menu)')->and($pro['text'])->not->toContain('Menu by');
+});
+
+it('prints in the colours of the menu style ("Like my menu"), readable on every style', function () {
+    foreach (PageTheme::STYLES as $style => $st) {
+        foreach (['light', 'dark'] as $theme) {
+            foreach (['#b4432a', '#fde047', '#0b1f3a'] as $brand) {
+                $c = PrintMaterials::palette('style', $theme, PrintMaterials::rgb($brand), ['light' => $st['light'], 'dark' => $st['dark'], 'dark_only' => $st['dark_only'] ?? false]);
+                $page = ($theme === 'dark' || ($st['dark_only'] ?? false)) ? $st['dark'] : $st['light'];
+                expect($c['bg'])->toBe(PrintMaterials::rgb($page), "{$style} {$theme}")
+                    ->and(Contrast::ratio(sprintf('#%02x%02x%02x', ...$c['text']), $page))->toBeGreaterThanOrEqual(7.0, "{$style} {$theme} text")
+                    ->and(Contrast::ratio(sprintf('#%02x%02x%02x', ...$c['muted']), $page))->toBeGreaterThanOrEqual(4.5, "{$style} {$theme} muted")
+                    ->and(Contrast::ratio(sprintf('#%02x%02x%02x', ...$c['accent']), $page))->toBeGreaterThanOrEqual(3.0, "{$style} {$theme} {$brand} headline");
+            }
+        }
+    }
+
+    [$owner, $tenant] = member(Role::Owner);
+    $code = asTenant($tenant, function () {
+        TenantAppearance::create([...TenantAppearance::DEFAULTS, 'style' => 'grill', 'primary_color' => '#e8622a']);
+
+        return QrCode::firstOrFail();
+    });
+    $this->actingAs($owner)->getJson(t($tenant, 'print-materials'))->assertOk()
+        ->assertJsonPath('data.surface', ['light' => PageTheme::STYLES['grill']['light'], 'dark' => PageTheme::STYLES['grill']['dark'], 'dark_only' => true]);
+    $pdf = $this->actingAs($owner)->get(printUrl($tenant, ['material' => 'tent', 'design' => 'style', 'codes' => (string) $code->id]))->assertOk()->getContent();
+    // The grill's charcoal page (#231d1a = 0.137 0.114 0.102) fills the faces.
+    expect(pdfFacts($pdf)['text'])->toContain('0.137 0.114 0.102 rg');
 });
 
 it('checks who asks and what they ask for', function () {

@@ -18,7 +18,7 @@ Style **F · Night Lounge** is always dark, even on phones in light mode, so it 
 <!-- if price_periods -->
 - During a [happy hour](help:happy-hour) the old price shows small above the new one.
 <!-- endif -->
-- **Dishes with a photo** show a small square photo; the "+" for **My order** sits on its corner. Without photos, the price is the hero of each row.
+- **Dishes with a photo** show a small square photo<!-- if order_list -->; the "+" for **My order** sits on its corner<!-- endif -->. Without photos, the price is the hero of each row.
 - **Your colour**: light, bright colours (purple, pink, gold, turquoise) glow best. A very dark colour is made lighter so it stays readable.
 
 To use it: **Appearance → Menu style → F · Night Lounge**, then **Save**. See all styles in [Menu styles](help:menu-styles).

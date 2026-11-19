@@ -2,7 +2,7 @@ import { fakeApi } from '@/test-utils/fake-api'
 import { meFixture } from '@/test-utils/fixtures'
 import { renderWithQuery } from '@/test-utils/render'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { userEvent } from 'vitest/browser'
+import { page, userEvent } from 'vitest/browser'
 import { toast } from '@/lib/toast'
 import { PlatformDashboard } from './dashboard'
 import { RestaurantsPage } from './restaurants'
@@ -81,6 +81,40 @@ describe('Super Admin screens', () => {
     await expect
       .element(screen.getByRole('button', { name: 'Last 30 days' }))
       .toHaveAttribute('aria-pressed', 'true')
+  })
+
+  // QUESTIONS #236: the effective "My order" value per restaurant, and a filter on it.
+  it('shows whether guests see My order, and filters on it', async () => {
+    fake = fakeApi({
+      'GET /super/restaurants': {
+        data: {
+          data: [
+            { ...restaurant, my_order: false },
+            { ...restaurant, id: 8, name: 'Bun Cafe', my_order: true },
+          ],
+        },
+      },
+      'GET /super/plans': { data: { data: [] } },
+    })
+    await page.viewport(1280, 900)
+    window.history.replaceState(null, '', '/super/restaurants?my_order=off')
+    const screen = await renderWithQuery(<RestaurantsPage />, { me: admin })
+    await expect
+      .element(screen.getByRole('columnheader', { name: 'My order' }))
+      .toBeVisible()
+    await expect
+      .element(
+        screen.getByRole('row', { name: /Sahan Grill/ }).getByText('Off')
+      )
+      .toBeVisible()
+    await expect
+      .element(screen.getByRole('row', { name: /Bun Cafe/ }).getByText('On'))
+      .toBeVisible()
+    expect(
+      fake.calls.find((c) => c.url.startsWith('/super/restaurants?'))?.url
+    ).toContain('my_order=off')
+    window.history.replaceState(null, '', '/')
+    await page.viewport(414, 896)
   })
 
   it('records a payment for a restaurant', async () => {

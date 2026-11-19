@@ -31,6 +31,11 @@ export const FEATURES = [
   'style_somali',
   'style_mono',
   'style_colour',
+  'style_coffee',
+  'style_grill',
+  'style_garden',
+  'style_coastal',
+  'style_luxe',
 ] as const
 export const LIMITS = [
   'menus',
@@ -78,6 +83,8 @@ export type Restaurant = {
   health?: { band: 'healthy' | 'at_risk' | 'inactive'; score: number } | null
   views_30d?: number | null
   scans_30d?: number | null
+  /** Does "My order" reach this restaurant's guests (platform, plan, its own switch)? Table rows only. */
+  my_order?: boolean | null
 }
 
 export type TagRef = {
@@ -253,6 +260,10 @@ export const backupsQ = () =>
       backup_s3_prefix: string
       backup_s3_key: string
       backup_s3_secret_set: boolean
+      alerts_email: boolean
+      alerts_telegram_enabled: boolean
+      alerts_telegram_chat: string
+      alerts_telegram_token_set: boolean
     }
   }>('backups')
 export const tagsQ = () => q<TagRef[]>('tags')

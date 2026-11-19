@@ -22,7 +22,7 @@ use Illuminate\Support\Collection;
  * g (add-on group keys), so (sold out), new_days (the "New" badge ends).
  *
  * @phpstan-type ItemRow array{0: string, 1: string|null, 2: int, 3: list<string>, 4?: array<string, mixed>}
- * @phpstan-type Catalogue array{groups?: array<string, array{0: string, 1: int, 2: int, 3: list<array{0: string, 1: int, 2?: bool}>}>, menus: list<array{name: string, slug: string, schedule?: array{0: string, 1: string}, categories: list<array{0: string, 1: string|null, 2: list<ItemRow>}>}>}
+ * @phpstan-type Catalogue array{groups?: array<string, array{0: string, 1: int, 2: int, 3: list<array{0: string, 1: int, 2?: bool}>}>, menus: list<array{name: string, slug: string, schedule?: array{0: string, 1: string}, categories: list<array{0: string, 1: string|null, 2: list<ItemRow>, 3?: string}>}>}
  */
 class MenuBuilder
 {
@@ -56,10 +56,13 @@ class MenuBuilder
                     MenuSchedule::create(['menu_id' => $menu->id, 'weekday' => $day, 'starts_at' => $menuRow['schedule'][0], 'ends_at' => $menuRow['schedule'][1]]);
                 }
             }
-            foreach ($menuRow['categories'] as [$categoryName, $categoryText, $rows]) {
+            // [name, description, dishes, category photo (optional: shown by styles M–Q)]
+            foreach ($menuRow['categories'] as $categoryRow) {
+                [$categoryName, $categoryText, $rows] = $categoryRow;
                 $category = Category::create([
                     'menu_id' => $menu->id, 'name' => ['en' => $categoryName],
                     'description' => $categoryText ? ['en' => $categoryText] : null, 'sort' => $sort++,
+                    'media_id' => isset($categoryRow[3]) ? $this->photos->media($tenant, $categoryRow[3])?->id : null,
                 ]);
                 foreach ($rows as $ii => $row) {
                     $items[$row[0]] = $this->item($tenant, $category, $ii, $row, $tags, $groups);

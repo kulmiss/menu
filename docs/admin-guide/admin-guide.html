@@ -104,8 +104,9 @@ php artisan config:cache
 <p>Next: <a href="#first-super-admin">The first Super Admin</a>.</p>
 </section>
 <section id="first-super-admin"><h2>8. The first Super Admin and two-factor</h2><p>Super Admins are made on the server, not in the app. In <code>backend/</code>:</p>
-<pre><code class="language-bash">php artisan tinker --execute=&quot;\$u = App\Models\User::create(['name' =&gt; 'Your Name', 'email' =&gt; 'you@example.com', 'password' =&gt; 'a-long-password']); \$u-&gt;forceFill(['is_super_admin' =&gt; true, 'email_verified_at' =&gt; now()])-&gt;save();&quot;
+<pre><code class="language-bash">php artisan super:create
 </code></pre>
+<p>It asks for your name, e-mail and a password (typed twice, not shown).</p>
 <ol>
 <li>Sign in at <strong><a href="https://your-domain/">https://your-domain/</a>&lt;SUPER_ADMIN_PATH&gt;/sign-in</strong>. This address is yours only: it is set by <code>SUPER_ADMIN_PATH</code> in <code>.env</code> (default <code>super</code>; choose something hard to guess). Restaurant teams sign in at <a href="https://your-domain/signin">https://your-domain/signin</a>, which doesn't let Super Admins in.</li>
 <li>You see only <strong>Set up two-factor</strong>.</li>
@@ -144,8 +145,10 @@ php artisan config:cache
 <li><code>php artisan key:generate --force</code>, <code>migrate --force</code>, <code>platform:aggregate</code>, <code>optimize</code>.</li>
 <li><strong>Never</strong> run the demo seeder.</li>
 <li>Folder permissions. <code>.env</code> (with <code>APP_KEY</code>) and <code>BACKUP_KEY</code> saved in your password manager.</li>
-<li>Cron line every minute. <code>/up</code> says &quot;Application up&quot;.</li>
+<li>Cron line every minute. <code>/up</code> says &quot;Application up&quot;.
+7a. <code>php artisan menu:doctor --production</code>: fix every red line (✗); it says how. Put <strong><a href="https://your-domain/health">https://your-domain/health</a></strong> in an uptime monitor (UptimeRobot, Better Stack).</li>
 </ol>
+<p>On a VPS, <code>scripts/deploy-vps.sh install</code> does steps 1–7 for you (docs/deploy.md section 4).</p>
 <p><strong>Platform</strong></p>
 <ol start="8">
 <li>First Super Admin, two-factor on, recovery codes saved.</li>
@@ -201,6 +204,16 @@ php artisan config:cache
 <li>Send. They go out a few per minute (<strong>E-mails per minute</strong>, keep it below your mail provider's limit). Owners who switched off news don't get them.</li>
 </ol>
 <p>For the mobile app only, use <a href="#mobile-push">Mobile app: send a push notification</a>.</p>
+</section>
+<section id="menu-requests"><h2>Menu requests (&quot;Add my menu for me&quot;)</h2><p>Restaurants can tap <strong>Add my menu for me</strong> on their Dashboard and send photos (or a PDF) of their paper menu. Every Super Admin gets an e-mail.</p>
+<ol>
+<li>Open <strong>Menu requests</strong>. New ones are at the top, with the photos and the owner's note. Tap a photo to see it full size.</li>
+<li>Tap <strong>Start</strong>, so the owner sees &quot;We are typing in your menu now&quot;.</li>
+<li><strong>Open restaurant → Log in as</strong>, and type the menu in (Menu editor, or Import for a spreadsheet).</li>
+<li>Back here, tap <strong>Mark as done</strong>. The owner gets an e-mail &quot;Your menu is ready&quot;.</li>
+</ol>
+<p>The photos are private (only Super Admins can open them). Done requests and their photos are deleted after 30 days; <strong>Delete photos</strong> removes them at once. A restaurant can have 3 open requests at a time.</p>
+<p>Switch it off in <strong>Settings → Sign-up → &quot;Add my menu for me&quot;</strong>.</p>
 </section>
 <h1 class="topic">3. Plans and limits</h1>
 <section id="plans-and-limits"><h2>Plans and limits</h2><p>Open <strong>Plans</strong>. Today's plans:</p>
@@ -305,6 +318,10 @@ php artisan config:cache
 <li><strong>Anti-spam</strong>: Cloudflare Turnstile (optional) and <strong>Blocked e-mail domains</strong> (one per line).</li>
 </ul>
 <p>Unconfirmed sign-ups are deleted after 7 days.</p>
+<ul>
+<li><strong>Welcome e-mails (day 1, 3 and 7)</strong>: short tips after sign-up — add dishes, print the QR codes, choose a style. A tip that is already done is skipped, and owners can stop them with one click. Off until you switch it on.</li>
+<li><strong>&quot;Add my menu for me&quot;</strong>: restaurants can send photos of their paper menu (see <a href="#menu-requests">Menu requests</a>). On from the start.</li>
+</ul>
 </section>
 <h1 class="topic">7. Legal texts, languages and help</h1>
 <section id="legal-texts"><h2>Legal texts and site pages</h2><p>Open <strong>Settings → General</strong>. Scroll to <strong>Terms of use</strong>, <strong>Privacy policy</strong>, <strong>About us page</strong>, <strong>Contact us page</strong> and <strong>Cookie info page</strong>.</p>
@@ -402,6 +419,13 @@ php artisan demo:photos
 <p>If no backup works for 26 hours, the dashboard shows a warning and every Super Admin gets one e-mail a day.</p>
 <p><strong>Restore</strong> has no button on purpose: it replaces everything. Follow &quot;Restoring a backup&quot; in <code>docs/deploy.md</code>.</p>
 <p>Test a restore once, on a copy of the site.</p>
+<h2>Alerts</h2>
+<p>Under the backups, <strong>Alerts</strong> tells you when something goes wrong on the server: errors (grouped, at most one alert every 30 minutes), a red go-live check (once a day) and backup problems.</p>
+<ul>
+<li><strong>E-mail every Super Admin</strong> is on from the start.</li>
+<li><strong>Telegram</strong> (optional): in Telegram, ask <strong>@BotFather</strong> for a new bot and copy its token. Add the bot to your group (or start a chat with it) and put the chat ID here. <strong>Send a test alert</strong> shows where it arrived.</li>
+</ul>
+<p>On the server, <code>php artisan menu:doctor</code> lists everything that needs fixing, with how. For an uptime monitor use <strong><a href="https://your-domain/health">https://your-domain/health</a></strong>.</p>
 </section>
 <h1 class="topic">10. Security</h1>
 <section id="security-log"><h2>Security log and activity log</h2><p><strong>Activity log</strong> (in the panel) shows changes on the platform and in restaurants: who, what and when. Filter by area, action or person.</p>

@@ -23,6 +23,20 @@ describe('InsightsPage', () => {
   beforeEach(() => useTenantStore.setState({ currentTenantId: 1 }))
   afterEach(() => fake.restore())
 
+  // The loading placeholder sat inside a <p> (React: "<div> cannot be a descendant of <p>").
+  it('keeps the loading placeholders out of paragraphs', async () => {
+    fake = fakeApi({})
+    const screen = await renderWithQuery(<InsightsPage />, {
+      me: meFixture({ tenants: [tenantFixture()] }),
+    })
+    await expect
+      .poll(
+        () => screen.container.querySelectorAll('[data-slot=skeleton]').length
+      )
+      .toBeGreaterThan(0)
+    expect(screen.container.querySelector('p [data-slot=skeleton]')).toBeNull()
+  })
+
   it('shows totals, top dishes and scans per code, and changes the period', async () => {
     const data = (days: number) => ({
       data: {

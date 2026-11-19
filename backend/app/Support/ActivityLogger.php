@@ -48,12 +48,15 @@ class ActivityLogger
      */
     public static function diff(Model $model): array
     {
+        // Called after save(): getOriginal() already holds the new values by then, so the
+        // old ones come from getPrevious(), read through the model's casts (QUESTIONS #236).
+        $before = $model->newInstance()->setRawAttributes($model->getPrevious(), true);
         $diff = [];
         foreach ($model->getChanges() as $key => $value) {
             if ($key === 'updated_at') {
                 continue;
             }
-            $diff[$key] = ['from' => $model->getOriginal($key), 'to' => $value];
+            $diff[$key] = ['from' => $before->getOriginal($key), 'to' => $value];
         }
 
         return $diff;

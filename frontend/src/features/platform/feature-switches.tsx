@@ -51,6 +51,11 @@ const GROUPS: { id: string; keys: string[] }[] = [
       'style_somali',
       'style_mono',
       'style_colour',
+      'style_coffee',
+      'style_grill',
+      'style_garden',
+      'style_coastal',
+      'style_luxe',
     ],
   },
   {
@@ -152,6 +157,9 @@ export function FeatureSwitches() {
                             {notes.join(' · ')}
                           </span>
                         )}
+                        {v !== r.enabled && r.plan_feature && (
+                          <Impact featureKey={r.key} turningOn={v} />
+                        )}
                       </span>
                       <Badge variant={v ? 'secondary' : 'destructive'}>
                         {v
@@ -196,5 +204,39 @@ export function FeatureSwitches() {
         </div>
       </CardContent>
     </Card>
+  )
+}
+
+/** Before saving: how many restaurants the change reaches (QUESTIONS #236). */
+function Impact({
+  featureKey,
+  turningOn,
+}: {
+  featureKey: string
+  turningOn: boolean
+}) {
+  const { t } = useTranslation()
+  const q = useQuery({
+    queryKey: [...pkeys.all, 'features-impact', featureKey],
+    queryFn: async () =>
+      (
+        await api.get<{
+          data: { restaurants: number; guests_see?: number }
+        }>(`/super/settings/features/${featureKey}/impact`)
+      ).data.data,
+  })
+  if (!q.data) return null
+  const d = q.data
+  const guests = d.guests_see !== undefined
+  return (
+    <span
+      className='mt-0.5 block text-xs font-medium text-amber-800 dark:text-amber-300'
+      role='status'
+    >
+      {t(
+        `platform.switches.impact_${turningOn ? 'on' : 'off'}${guests ? '_guests' : ''}`,
+        { count: guests ? d.guests_see : d.restaurants }
+      )}
+    </span>
   )
 }

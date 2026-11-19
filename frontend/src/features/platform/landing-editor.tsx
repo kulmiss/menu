@@ -5,12 +5,14 @@ import {
   ArrowUp,
   ChevronDown,
   ExternalLink,
+  FileText,
   Loader2,
   RotateCcw,
   Upload,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { validationErrors } from '@/lib/api'
+import { superPath } from '@/lib/area'
 import { toast } from '@/lib/toast'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -60,6 +62,16 @@ export function LandingEditorPage() {
         <Button asChild variant='outline' className='min-h-11 sm:min-h-9'>
           <a href='/' target='_blank' rel='noopener'>
             <ExternalLink aria-hidden /> {t('platform.landing.open')}
+          </a>
+        </Button>
+        {/* One-page sales sheet for owners: print it or save it as PDF (QUESTIONS #234). */}
+        <Button asChild variant='outline' className='min-h-11 sm:min-h-9'>
+          <a
+            href={`${superPath() ?? '/super'}/sales-sheet`}
+            target='_blank'
+            rel='noopener'
+          >
+            <FileText aria-hidden /> {t('platform.landing.sales_sheet')}
           </a>
         </Button>
       </PageTitle>

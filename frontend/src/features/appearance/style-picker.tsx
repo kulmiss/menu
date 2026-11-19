@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils'
 import { MENU_STYLES, type MenuStyle } from './api'
 
 /**
- * "Menu style" picker: one card per style (A–L) with a small drawing of it.
+ * "Menu style" picker: one card per style (A–Q) with a small drawing of it.
  * Styles the plan doesn't include stay visible but can't be picked.
  */
 export function StylePicker({
@@ -433,6 +433,189 @@ function StyleThumb({ style }: { style: MenuStyle }) {
                 {...accent}
               />
               <circle cx='106' cy={y + 9} r='4' fill='#1d1a33' />
+            </g>
+          ))}
+        </>
+      )}
+      {style === 'coffee' && (
+        <>
+          <rect width='120' height='90' fill='#f5ece0' />
+          <rect width='120' height='34' fill='#2b1d14' />
+          <path
+            d='M95 30c-7 0-11-4-11-11 0-7 4-12 10-14v-4h3v4c6 2 10 7 10 14 0 7-4 11-12 11z'
+            fill='none'
+            stroke='#c8a165'
+            strokeWidth='1.5'
+          />
+          <circle cx='14' cy='22' r='7' {...accent} />
+          <rect x='25' y='16' width='40' height='6' rx='2' fill='#f5ece0' />
+          {[42, 66].map((y) => (
+            <g key={y}>
+              <circle cx='17' cy={y + 9} r='9' {...photo} />
+              <rect x='31' y={y + 3} width='50' height='5' rx='2' {...ink} />
+              <rect
+                x='31'
+                y={y + 11}
+                width='22'
+                height='4'
+                rx='2'
+                {...accent}
+              />
+              <path
+                d={`M6 ${y + 21}h108`}
+                stroke='#c8a165'
+                strokeDasharray='2 2'
+              />
+            </g>
+          ))}
+        </>
+      )}
+      {style === 'grill' && (
+        <>
+          <rect width='120' height='90' fill='#161311' />
+          <rect width='120' height='34' fill='#7a2410' />
+          <path
+            d='M88 34c-4-10 6-14 3-24 9 7 11 16 6 24zM104 34c-3-7 4-10 2-17 6 5 8 11 4 17z'
+            fill='#ffb347'
+          />
+          <rect x='8' y='14' width='48' height='9' rx='1' fill='#f3e9e0' />
+          {[40, 64].map((y) => (
+            <g key={y}>
+              <rect x='6' y={y} width='108' height='20' rx='3' fill='#231d1a' />
+              <rect x='6' y={y} width='2' height='20' fill='#ff8a3d' />
+              <rect x='11' y={y + 3} width='19' height='14' rx='2' {...photo} />
+              <rect
+                x='35'
+                y={y + 4}
+                width='40'
+                height='4'
+                rx='2'
+                fill='#f3e9e0'
+              />
+              <rect
+                x='35'
+                y={y + 11}
+                width='18'
+                height='6'
+                rx='1'
+                {...accent}
+              />
+            </g>
+          ))}
+        </>
+      )}
+      {style === 'garden' && (
+        <>
+          <rect width='120' height='90' fill='#f1f7ef' />
+          <rect width='120' height='34' rx='10' fill='#dcefd8' />
+          <path
+            d='M112 2c-12 4-20 16-18 30M100 12c-8-2-14 2-16 8 7 2 13-1 16-8z'
+            fill='#a8dcb2'
+            stroke='#2f8f5b'
+          />
+          <rect x='8' y='14' width='46' height='7' rx='3' fill='#173b2a' />
+          {[40, 64].map((y) => (
+            <g key={y}>
+              <rect x='6' y={y} width='108' height='20' rx='8' fill='#fff' />
+              <rect x='10' y={y + 3} width='14' height='14' rx='5' {...photo} />
+              <rect
+                x='29'
+                y={y + 4}
+                width='44'
+                height='4'
+                rx='2'
+                fill='#173b2a'
+              />
+              <rect
+                x='29'
+                y={y + 11}
+                width='18'
+                height='4'
+                rx='2'
+                {...accent}
+              />
+            </g>
+          ))}
+        </>
+      )}
+      {style === 'coastal' && (
+        <>
+          <rect width='120' height='90' fill='#f6f1e7' />
+          <rect width='120' height='34' fill='#0b4a68' />
+          <circle cx='104' cy='10' r='5' fill='#ffd27a' />
+          <path d='M84 28l9-20 2 20zM95 8l7 20h-7z' fill='#fff' />
+          <path d='M78 28h28l-4 4H82z' fill='#7a4a26' />
+          <path
+            d='M0 34q7-4 14 0t14 0 14 0 14 0 14 0 14 0 14 0 14 0 8 0v2H0z'
+            fill='#f6f1e7'
+          />
+          <rect x='8' y='14' width='44' height='7' rx='2' fill='#fff' />
+          {[42, 65].map((y) => (
+            <g key={y}>
+              <rect x='6' y={y} width='108' height='19' rx='2' fill='#fff' />
+              <rect x='6' y={y} width='2.5' height='19' fill='#e8735a' />
+              <rect
+                x='12'
+                y={y + 3}
+                width='13'
+                height='13'
+                rx='1.5'
+                {...photo}
+              />
+              <rect
+                x='30'
+                y={y + 4}
+                width='44'
+                height='4'
+                rx='2'
+                fill='#0d2f45'
+              />
+              <rect
+                x='30'
+                y={y + 11}
+                width='18'
+                height='4'
+                rx='2'
+                {...accent}
+              />
+            </g>
+          ))}
+        </>
+      )}
+      {style === 'luxe' && (
+        <>
+          <rect width='120' height='90' fill='#f7f4ee' />
+          <path
+            d='M0 10c22 8 32-4 54 3s30 14 66 6M0 28c18-4 34 10 56 4s34-6 64 0'
+            fill='none'
+            stroke='#d7cdbb'
+          />
+          <rect x='38' y='12' width='44' height='6' rx='1' {...ink} />
+          <path d='M44 24h12M64 24h12' stroke='#b08d57' />
+          <path d='M60 21.5l2.5 2.5-2.5 2.5-2.5-2.5z' fill='#b08d57' />
+          <rect x='46' y='34' width='28' height='4' rx='1' fill='#b08d57' />
+          {[44, 67].map((y) => (
+            <g key={y}>
+              <rect
+                x='9'
+                y={y}
+                width='15'
+                height='15'
+                fill='none'
+                stroke='#b08d57'
+                strokeWidth='0.8'
+              />
+              <rect x='10.5' y={y + 1.5} width='12' height='12' {...photo} />
+              <rect x='30' y={y + 3} width='46' height='4' rx='1' {...ink} />
+              <rect
+                x='30'
+                y={y + 10}
+                width='16'
+                height='3'
+                rx='1'
+                {...accent}
+              />
+              <path d={`M8 ${y + 19}h104`} stroke='#e3dccf' />
             </g>
           ))}
         </>

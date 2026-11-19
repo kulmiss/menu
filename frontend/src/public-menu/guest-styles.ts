@@ -12,3 +12,17 @@ export const GUEST_STYLES: Record<string, string> = Object.fromEntries(
     css,
   ])
 )
+
+// The header drawings of the styles M–Q (backend/resources/public-menu/art/*.svg).
+const art = import.meta.glob<string>('@public-menu/art/*.svg', {
+  query: '?raw',
+  import: 'default',
+  eager: true,
+})
+
+export const GUEST_ART: Record<string, string> = Object.fromEntries(
+  Object.entries(art).map(([path, svg]) => [
+    path.replace(/^.*\/(\w+)\.svg$/, '$1'),
+    svg,
+  ])
+)

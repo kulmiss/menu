@@ -166,6 +166,20 @@ export function RestaurantsPage({ open }: Props) {
       ),
     },
     {
+      id: 'my_order',
+      label: t('platform.restaurants.my_order'),
+      text: (r) =>
+        r.my_order == null ? '' : r.my_order ? t('common.on') : t('common.off'),
+      cell: (r) =>
+        r.my_order == null ? (
+          '—'
+        ) : (
+          <Badge variant={r.my_order ? 'default' : 'outline'}>
+            {r.my_order ? t('common.on') : t('common.off')}
+          </Badge>
+        ),
+    },
+    {
       id: 'created_at',
       label: t('platform.restaurants.created_on'),
       sort: 'created_at',
@@ -224,6 +238,14 @@ export function RestaurantsPage({ open }: Props) {
       ].map((k) => ({
         value: k,
         label: t(`platform.ins.u.${k.replace(':', '_')}`),
+      })),
+    },
+    {
+      id: 'my_order',
+      label: t('platform.restaurants.my_order'),
+      options: (['on', 'off'] as const).map((v) => ({
+        value: v,
+        label: t(`platform.restaurants.my_order_${v}`),
       })),
     },
     {

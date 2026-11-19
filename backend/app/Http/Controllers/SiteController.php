@@ -48,6 +48,11 @@ class SiteController extends Controller
         'somali' => 'demo-xamar',
         'mono' => 'demo-atelier',
         'colour' => 'demo-juicy',
+        'coffee' => 'demo-jebena',
+        'grill' => 'demo-firewood',
+        'garden' => 'demo-green-spoon',
+        'coastal' => 'demo-dhow',
+        'luxe' => 'demo-maison',
     ];
 
     public const DEMO = 'demo';
@@ -92,7 +97,9 @@ class SiteController extends Controller
             'demoUrl' => $demoUrl,
             // The demo menu, else the sign-up page; none while both are unavailable.
             'qr' => $demoUrl !== null || $signupOpen ? $this->qrPath($demoUrl ?? url('/signup')) : null,
-            'styles' => collect(self::STYLE_DEMOS)->map(fn ($slug) => isset($live[$slug]) ? url('/'.$slug) : null)->filter()->all(),
+            // "Menu styles" under the demo: each style with a live demo, with its phone screenshot when there is one.
+            'styles' => collect(self::STYLE_DEMOS)->filter(fn ($slug) => isset($live[$slug]))
+                ->map(fn ($slug, $style) => ['href' => url('/'.$slug), 'shot' => LandingImages::style($style)])->all(),
             'plans' => $sections['pricing'] ? $plans : [],
             'free' => $free,
             'paidOnly' => $this->paidOnly($free),
@@ -104,6 +111,30 @@ class SiteController extends Controller
             'shots' => array_combine(['hero', 'hero_dark', 'demo', 'demo_dark'], array_map(LandingImages::phone(...), ['hero', 'hero_dark', 'demo', 'demo_dark'])),
             'ogImage' => LandingImages::og()['url'],
             'jsonLd' => $this->jsonLd($name, $socials, $plans, $sections['faq'], $free !== null, $t),
+        ]);
+    }
+
+    /**
+     * The one-page sales sheet for owners (Super Admin → Landing page, QUESTIONS #234):
+     * A4, live plans and prices, the demo QR code and the contact details. Print it,
+     * or "Save as PDF" in the browser.
+     */
+    public function salesSheet(): View
+    {
+        $s = PlatformSettings::all();
+        $name = (string) $s['name'];
+        $contact = UpgradeContact::payload();
+        $demo = Tenant::where('slug', self::DEMO)->whereNull('suspended_at')->exists() ? url('/'.self::DEMO) : url('/');
+
+        return view('site.sales-sheet', [
+            'platform' => $name,
+            'logo' => EmailLogo::url(),
+            'colors' => BrandColor::palette($s['brand_color'] ?? null),
+            'plans' => $this->plans($name, $contact),
+            'qr' => $this->qrPath($demo),
+            'site' => preg_replace('#^https?://#', '', rtrim(url('/'), '/')),
+            'contact' => $contact,
+            'styles' => count(TenantAppearance::STYLES),
         ]);
     }
 

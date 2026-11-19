@@ -25,7 +25,8 @@
     "help": "Guide",
     "help-articles": "Help articles",
     "landing": "Landing page",
-    "footer": "Footer"
+    "footer": "Footer",
+    "menu-requests": "Menu requests"
   },
   "dash": {
     "restaurants": "Restaurants",
@@ -101,7 +102,10 @@
     "rejected": "Sign-up rejected and removed.",
     "signup_short_unverified": "E-mail not confirmed",
     "signup_short_pending_approval": "Needs approval",
-    "created_on": "Created"
+    "created_on": "Created",
+    "my_order": "My order",
+    "my_order_on": "My order on for guests",
+    "my_order_off": "My order off for guests"
   },
   "features": {
     "branches": "More branches",
@@ -121,8 +125,13 @@
     "style_somali": "Menu style J · Somali",
     "style_mono": "Menu style K · Black & White",
     "style_colour": "Menu style L · Colourful",
+    "style_coffee": "Menu style M · Coffee House",
+    "style_grill": "Menu style N · Grill & BBQ",
+    "style_garden": "Menu style O · Garden Fresh",
+    "style_coastal": "Menu style P · Coastal",
+    "style_luxe": "Menu style Q · Fine Dining",
     "pdf_menu": "Printable PDF menu",
-    "order_list": "\"My order\" list for guests",
+    "order_list": "My order (add to order buttons)",
     "price_periods": "Time-based prices (happy hour)",
     "sold_out": "“Sold out” marks",
     "share": "“Share” button on the menu",
@@ -411,7 +420,11 @@
     "domains_hint": "Disposable e-mail services, one domain per line. Sign-ups and e-mail changes with these domains are refused.",
     "google_login": "Continue with Google",
     "google_login_hint": "Restaurant people can sign up and sign in with their Google account. Super Admins always use their password and two-factor code. Off: no Google buttons anywhere.",
-    "google_keys_missing": "Google keys are missing: add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET to the .env file (see docs/google-login.md). Until then the buttons stay hidden."
+    "google_keys_missing": "Google keys are missing: add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET to the .env file (see docs/google-login.md). Until then the buttons stay hidden.",
+    "menu_help_enabled": "\"Add my menu for me\"",
+    "menu_help_enabled_hint": "Restaurants can send photos of their paper menu; you type it in (Super Admin → Menu requests).",
+    "welcome_series": "Welcome e-mails (day 1, 3 and 7)",
+    "welcome_series_hint": "Short tips after sign-up: add dishes, print the QR codes, choose a style. A tip already done is skipped; owners can stop them with one click."
   },
   "logo": {
     "title": "E-mail logo",
@@ -456,7 +469,8 @@
     "add_quote": "Add a testimonial",
     "remove_quote": "Remove",
     "quote_real": "This is a real customer (they agreed to be shown)",
-    "socials_moved": "Social links and the rest of the footer are now in Footer (in the top menu)."
+    "socials_moved": "Social links and the rest of the footer are now in Footer (in the top menu).",
+    "sales_sheet": "Sales sheet (print or PDF)"
   },
   "invoices": {
     "hint": "Every recorded payment gets an invoice with the next number. Invoices are never changed or deleted: void a wrong one and issue a new one.",
@@ -869,7 +883,12 @@
       "style_islamic": "Style: Islamic",
       "style_somali": "Style: Somali",
       "style_mono": "Style: Black & White",
-      "style_colour": "Style: Colourful"
+      "style_colour": "Style: Colourful",
+      "style_coffee": "Style: Coffee House",
+      "style_grill": "Style: Grill & BBQ",
+      "style_garden": "Style: Garden Fresh",
+      "style_coastal": "Style: Coastal",
+      "style_luxe": "Style: Fine Dining"
     },
     "last_days": "Last {{count}} days"
   },
@@ -896,7 +915,19 @@
     "unsaved_other": "{{count}} changes not saved",
     "unsaved": "{{count}} changes not saved",
     "global_off": "Off for everyone (Settings → Features)",
-    "load_failed": "The switches could not be loaded. Try again."
+    "load_failed": "The switches could not be loaded. Try again.",
+    "impact_off": "When you save: off for {{count}} restaurants that have it now.",
+    "impact_off_one": "When you save: off for {{count}} restaurant that has it now.",
+    "impact_off_other": "When you save: off for {{count}} restaurants that have it now.",
+    "impact_on": "When you save: on again for {{count}} restaurants (their plan has it).",
+    "impact_on_one": "When you save: on again for {{count}} restaurant (its plan has it).",
+    "impact_on_other": "When you save: on again for {{count}} restaurants (their plan has it).",
+    "impact_off_guests": "When you save: the \"+\" buttons disappear from {{count}} menus now showing them.",
+    "impact_off_guests_one": "When you save: the \"+\" buttons disappear from {{count}} menu now showing them.",
+    "impact_off_guests_other": "When you save: the \"+\" buttons disappear from {{count}} menus now showing them.",
+    "impact_on_guests": "When you save: the \"+\" buttons come back on {{count}} menus (their own switch is on).",
+    "impact_on_guests_one": "When you save: the \"+\" buttons come back on {{count}} menu (its own switch is on).",
+    "impact_on_guests_other": "When you save: the \"+\" buttons come back on {{count}} menus (their own switch is on)."
   },
   "mobile": {
     "hint": "What the Menu Admin app shows and allows. The app reads this when it starts and when it comes back to the screen, so changes reach phones within a minute or two.",
@@ -1340,5 +1371,37 @@
     "desktop": "Computer",
     "light": "Light",
     "dark": "Dark"
+  },
+  "alerts": {
+    "title": "Alerts",
+    "hint": "Server errors and failed go-live checks (the same as \"php artisan menu:doctor\"). Errors are grouped: at most one alert every 30 minutes.",
+    "email": "E-mail every Super Admin",
+    "telegram_title": "Telegram (optional)",
+    "telegram": "Also send alerts to a Telegram chat",
+    "token": "Bot token",
+    "chat": "Chat ID",
+    "telegram_hint": "In Telegram, ask @BotFather for a new bot and copy its token. Add the bot to your group (or start a chat with it), then put the group's or your chat ID here. The token is stored encrypted and never shown again.",
+    "test": "Send a test alert",
+    "test_sent": "Test sent by e-mail to {{count}} Super Admins{{telegram}}.",
+    "test_sent_one": "Test sent by e-mail to {{count}} Super Admin{{telegram}}.",
+    "test_sent_other": "Test sent by e-mail to {{count}} Super Admins{{telegram}}.",
+    "test_telegram": " and to Telegram",
+    "test_none": "Nothing was sent: switch on e-mail or Telegram first (and check Settings → Email)."
+  },
+  "menu_requests": {
+    "hint": "Restaurants that tapped \"Add my menu for me\" and sent photos of their paper menu. Type the menu in (Restaurants → Log in as), then mark it done: the owner gets an e-mail.",
+    "none": "No requests yet.",
+    "status": {
+      "new": "New",
+      "working": "Working on it",
+      "done": "Done"
+    },
+    "to": {
+      "working": "Start",
+      "done": "Mark as done (e-mails the owner)"
+    },
+    "open_restaurant": "Open restaurant",
+    "delete": "Delete photos",
+    "delete_confirm": "Delete this request and its photos?"
   }
 }

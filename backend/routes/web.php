@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\ConfirmEmailChangeController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\SignInController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\HealthController;
 use App\Http\Controllers\NewsSubscriptionController;
 use App\Http\Controllers\PublicMenuController;
 use App\Http\Controllers\SiteController;
@@ -37,6 +38,8 @@ Route::withoutMiddleware($cookieFree)->group(function () {
     Route::get('/support/{slug}', [SiteController::class, 'helpArticle'])->where('slug', '[a-z0-9-]+');
     Route::get('/robots.txt', [SiteController::class, 'robots']);
     Route::get('/sitemap.xml', [SiteController::class, 'sitemap']);
+    // For uptime monitors (UptimeRobot, Better Stack…): 200 "ok"/"degraded", 503 "down" (QUESTIONS #233).
+    Route::get('/health', HealthController::class)->middleware('throttle:60,1');
 });
 // News e-mails: signed unsubscribe links (owner, 2026-11-13). The POST also serves
 // mail clients' one-click "List-Unsubscribe-Post". The signature is the
@@ -92,6 +95,8 @@ Route::prefix(SuperAdminAccess::path())->middleware('super.web')->group(function
     Route::get('sign-in', [SignInController::class, 'super'])->name('super.signin');
     Route::post('sign-in', [AuthenticatedSessionController::class, 'store'])
         ->middleware(['guest:web', 'signin.area:super', 'throttle:login'])->name('super.signin.store');
+    // The sales sheet (QUESTIONS #234): Super Admins with two-factor only, a printable page.
+    Route::get('sales-sheet', [SiteController::class, 'salesSheet'])->middleware(['auth', 'super'])->name('super.sales-sheet');
     Route::get('{path?}', [SpaController::class, 'super'])->where('path', '.*')->name('spa.super');
 });
 

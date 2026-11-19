@@ -17,7 +17,7 @@ Style **H · Arabic** has a warm sand page, your colour as a band at the top wit
 
 - **Automatic**: right-to-left when most of your restaurant name, categories and dishes are in Arabic letters. Otherwise left-to-right.
 - **Left to right**: for menus mostly in English.
-- **Right to left**: the categories, prices, "+" buttons, dish details and **My order** all move to the other side.
+- **Right to left**: the categories, prices, dish details<!-- if order_list -->, "+" buttons and **My order**<!-- endif --> all move to the other side.
 
 The guest buttons (like "Search the menu") stay in English.
 

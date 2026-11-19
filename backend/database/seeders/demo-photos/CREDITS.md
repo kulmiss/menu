@@ -55,6 +55,8 @@ credit is not required but given here. Download them with `php artisan demo:phot
 | `fine-plated.webp` | [pexels 33033817](https://www.pexels.com/photo/elegant-culinary-presentation-in-tokyo-restaurant-33033817/) | [szymon-shields-1503561](https://www.pexels.com/@szymon-shields-1503561) | Pexels License |
 | `fine-salad.webp` | [pexels 29138860](https://www.pexels.com/photo/gourmet-plated-salad-with-fresh-ingredients-29138860/) | [nano-erdozain-120534369](https://www.pexels.com/@nano-erdozain-120534369) | Pexels License |
 | `fine-starter.webp` | [pexels 6327536](https://www.pexels.com/photo/photo-of-an-appetizer-on-a-white-plate-6327536/) | [tima-miroshnichenko](https://www.pexels.com/@tima-miroshnichenko) | Pexels License |
+| `fish-mullet.webp` | [pexels 10917524](https://www.pexels.com/photo/fresh-fishes-on-top-of-a-griller-10917524/) | [alexeydemidov](https://www.pexels.com/@alexeydemidov) | Pexels License |
+| `fish-tilapia.webp` | [pexels 8352777](https://www.pexels.com/photo/fresh-fishes-on-the-grill-8352777/) | [kindelmedia](https://www.pexels.com/@kindelmedia) | Pexels License |
 | `flaky-pastries.webp` | [pexels 30632253](https://www.pexels.com/photo/close-up-of-assorted-flaky-pastries-30632253/) | [nataliaolivera](https://www.pexels.com/@nataliaolivera) | Pexels License |
 | `fries-bowl.webp` | [pexels 5836999](https://www.pexels.com/photo/french-fries-in-a-ceramic-bowl-5836999/) | [roman-odintsov](https://www.pexels.com/@roman-odintsov) | Pexels License |
 | `fries-ketchup.webp` | [pexels 29150162](https://www.pexels.com/photo/crispy-french-fries-with-ketchup-in-a-bowl-29150162/) | Pexels contributor 530123908 | Pexels License |

@@ -1,0 +1,8 @@
+/* "My order" quick add (QUESTIONS #236): inlined between base.css and the style's CSS,
+   only when My order is on for the menu; with it off there is no "+" and none of this. */
+/* 44 px tap area, 30 px visible circle with a thin "+", on the photo's corner;
+   rows without a photo keep room for it at the end, so it never covers text. */
+.ad{position:absolute;top:var(--adt,0);inset-inline-end:0;z-index:1;width:2.75rem;height:2.75rem;font-size:0}
+.ad:before{content:"";position:absolute;inset:.4375rem;border-radius:50%;background:linear-gradient(var(--af),var(--af)) center/.75rem 2px no-repeat,linear-gradient(var(--af),var(--af)) center/2px .75rem no-repeat,var(--a);box-shadow:0 1px 3px #0004}
+.np>.ad{top:50%;margin-top:-1.375rem}
+li>.it.ao.np{padding-inline-end:2.75rem}

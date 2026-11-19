@@ -41,6 +41,7 @@ const APPEARANCE: Appearance = {
   ramadan_mode: false,
   photos_greyscale: false,
   mono_accent: false,
+  show_decoration: true,
   theme_id: null,
   logo: null,
   cover: null,
@@ -58,6 +59,11 @@ const APPEARANCE: Appearance = {
     'somali',
     'mono',
     'colour',
+    'coffee',
+    'grill',
+    'garden',
+    'coastal',
+    'luxe',
   ],
   banner: {
     editorial: { ratio: [16, 9], text: 'under' },
@@ -72,6 +78,11 @@ const APPEARANCE: Appearance = {
     somali: { ratio: [2, 1], text: 'under' },
     mono: { ratio: [2, 1], text: 'under' },
     colour: { ratio: [5, 2], text: 'under' },
+    coffee: { ratio: [5, 2], text: 'under' },
+    grill: { ratio: [2, 1], text: 'under' },
+    garden: { ratio: [5, 2], text: 'under' },
+    coastal: { ratio: [2, 1], text: 'under' },
+    luxe: { ratio: [2, 1], text: 'under' },
   },
   themes: [
     {
@@ -92,14 +103,18 @@ const APPEARANCE: Appearance = {
 }
 
 let fake: ReturnType<typeof fakeApi>
+const MY_ORDER = /Show "Add to my order" \(\+\) buttons on my menu/
 
-function render(writable = true) {
+function render(writable = true, extra: Partial<Appearance> = {}) {
   fake = fakeApi({
-    'GET /restaurant/1/appearance': { data: { data: APPEARANCE } },
+    'GET /restaurant/1/appearance': {
+      data: { data: { ...APPEARANCE, ...extra } },
+    },
     'PUT /restaurant/1/appearance': (req) => ({
       data: {
         data: {
           ...APPEARANCE,
+          ...extra,
           ...JSON.parse(String(req.body)),
           logo: null,
           cover: null,
@@ -269,6 +284,47 @@ describe('AppearancePage', () => {
     await expect.poll(() => frame(screen).src).toContain('mono_accent=1')
   })
 
+  it('offers the styles M–Q with a switch for their pictures and icons', async () => {
+    const screen = await render()
+    for (const name of [
+      /M · Coffee House/,
+      /N · Grill & BBQ/,
+      /O · Garden Fresh/,
+      /P · Coastal/,
+      /Q · Fine Dining/,
+    ])
+      await expect.element(screen.getByRole('radio', { name })).toBeVisible()
+    await expect
+      .element(
+        screen.getByRole('switch', { name: /Show the style's pictures/ })
+      )
+      .not.toBeInTheDocument()
+    await expect
+      .element(screen.getByText('Menu direction'))
+      .not.toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('radio', { name: /P · Coastal/ }))
+    await expect.poll(() => frame(screen).src).toContain('style=coastal')
+    // Menu direction, for Arabic menus (H and M–Q).
+    await userEvent.click(screen.getByRole('radio', { name: 'Right to left' }))
+    await expect.poll(() => frame(screen).src).toContain('menu_direction=rtl')
+    const deco = screen.getByRole('switch', {
+      name: /Show the style's pictures and icons/,
+    })
+    await expect.element(deco).toBeChecked()
+    await userEvent.click(deco)
+    await expect.poll(() => frame(screen).src).toContain('show_decoration=0')
+    // The choice is kept when moving to another style of M–Q.
+    await userEvent.click(
+      screen.getByRole('radio', { name: /Q · Fine Dining/ })
+    )
+    await expect
+      .element(
+        screen.getByRole('switch', { name: /Show the style's pictures/ })
+      )
+      .not.toBeChecked()
+  })
+
   it('offers D · Minimal next to A, B and C, with logo and banner switches', async () => {
     const screen = await render()
     await userEvent.click(screen.getByRole('radio', { name: /D · Minimal/ }))
@@ -343,9 +399,7 @@ describe('AppearancePage', () => {
       screen.getByRole('switch', { name: 'Show "Share menu" button' })
     )
     await expect.poll(() => frame(screen).src).toContain('show_share=0')
-    await userEvent.click(
-      screen.getByRole('switch', { name: /Show "My order" list/ })
-    )
+    await userEvent.click(screen.getByRole('switch', { name: MY_ORDER }))
     await expect.poll(() => frame(screen).src).toContain('show_order_list=0')
   })
 
@@ -357,5 +411,71 @@ describe('AppearancePage', () => {
     await expect
       .element(screen.getByRole('button', { name: 'Save' }))
       .toBeDisabled()
+  })
+
+  // "My order" switch (QUESTIONS #236): the owner's own switch, or greyed out with the reason.
+  const ON = { enabled: true, available: true, restaurant: true, reason: null }
+
+  it('lets the owner turn the + buttons off, with an easy hint, and the preview follows at once', async () => {
+    const screen = await render(true, { my_order: ON })
+    const toggle = screen.getByRole('switch', { name: MY_ORDER })
+    await expect.element(toggle).toBeChecked()
+    await expect.element(toggle).toBeEnabled()
+    await expect
+      .element(screen.getByText(/Guests tap \+ to note dishes/))
+      .toBeVisible()
+    await userEvent.click(toggle)
+    await expect.poll(() => frame(screen).src).toContain('show_order_list=0')
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await expect
+      .poll(
+        () => fake.calls.find((c) => c.method === 'PUT')?.data?.show_order_list
+      )
+      .toBe(false)
+  })
+
+  for (const [reason, text] of [
+    ['platform', 'Turned off by the platform.'],
+    ['plan', 'Not in your plan.'],
+  ] as const) {
+    it(`greys the switch out with the reason when it is off for the ${reason}`, async () => {
+      const screen = await render(true, {
+        my_order: {
+          enabled: false,
+          available: false,
+          restaurant: true,
+          reason,
+        },
+      })
+      const toggle = screen.getByRole('switch', { name: MY_ORDER })
+      await expect.element(toggle).toBeDisabled()
+      await expect.element(toggle).not.toBeChecked()
+      await expect.element(screen.getByText(text)).toBeVisible()
+      // Saving something else keeps the owner's own choice for when it comes back.
+      await userEvent.click(screen.getByRole('switch', { name: 'Show prices' }))
+      await userEvent.click(screen.getByRole('button', { name: 'Save' }))
+      await expect
+        .poll(
+          () =>
+            fake.calls.find((c) => c.method === 'PUT')?.data?.show_order_list
+        )
+        .toBe(true)
+    })
+  }
+
+  it('shows the switch off (not greyed) when only the restaurant turned it off', async () => {
+    const screen = await render(true, {
+      show_order_list: false,
+      my_order: {
+        enabled: false,
+        available: true,
+        restaurant: false,
+        reason: 'restaurant',
+      },
+    })
+    const toggle = screen.getByRole('switch', { name: MY_ORDER })
+    await expect.element(toggle).toBeEnabled()
+    await expect.element(toggle).not.toBeChecked()
+    expect(frame(screen).src).toContain('show_order_list=0')
   })
 })

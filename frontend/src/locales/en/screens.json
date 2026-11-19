@@ -428,7 +428,8 @@
     "designs": {
       "classic": "Classic",
       "bold": "Bold",
-      "minimal": "Minimal"
+      "minimal": "Minimal",
+      "style": "Like my menu"
     },
     "colours": "Colours",
     "themes": {
@@ -938,5 +939,26 @@
       "text": "Download your QR code, print it for the tables, and share your menu link.",
       "go": "Get my QR code"
     }
+  },
+  "menu_help": {
+    "title": "Add my menu for me",
+    "hint": "No time to type your menu? Send photos of your paper menu (or a PDF). We type it in for you and e-mail you when it is ready.",
+    "start": "Send photos of my menu",
+    "files": "Photos or PDF of your menu",
+    "files_hint": "Up to {{max}} files: one photo per page, sharp and flat. JPG, PNG, WebP or PDF.",
+    "heic": "iPhone photos (HEIC) can't be read. In Settings → Camera → Formats choose \"Most Compatible\", or take a screenshot of the photo.",
+    "remove": "Remove {{name}}",
+    "note": "Anything we should know? (optional)",
+    "note_placeholder": "For example: prices on page 2 changed, the drinks are on the back.",
+    "send": "Send {{count}} files",
+    "send_one": "Send 1 file",
+    "send_other": "Send {{count}} files",
+    "none": "Choose at least one photo or PDF.",
+    "sent": "Thank you! We got your menu and will e-mail you when it is ready.",
+    "failed": "Sending failed. Please try again.",
+    "status_new_one": "We got your menu (1 file). We start soon.",
+    "status_new_other": "We got your menu ({{count}} files). We start soon.",
+    "status_working_one": "We are typing in your menu now.",
+    "status_working_other": "We are typing in your menu now."
   }
 }

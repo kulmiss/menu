@@ -19,6 +19,11 @@ it('lists every dish with search, filters, sort and pages; CSV for owners and ma
         ->and($res->json('data.0.menu.id'))->toBe($menu->id);
     expect($this->actingAs($staff)->getJson(t($tenant, 'items?page=1&status=sold_out'))->json('meta.total'))->toBe(4);
     expect($this->actingAs($staff)->getJson(t($tenant, 'items?page=1&q=Dish%203'))->json('meta.total'))->toBe(10);
+    // Any letter case, and only the names (not the language code "en"). Bug 2026-11-18: "cappuccino" didn't find "Cappuccino".
+    expect($this->actingAs($staff)->getJson(t($tenant, 'items?page=1&q=dish%203'))->json('meta.total'))->toBe(10)
+        ->and($this->actingAs($staff)->getJson(t($tenant, 'items?page=1&q=DISH%2040'))->json('meta.total'))->toBe(1)
+        ->and($this->actingAs($staff)->getJson(t($tenant, 'items?page=1&q=en'))->json('meta.total'))->toBe(0)
+        ->and($this->actingAs($staff)->getJson(t($tenant, 'items?page=1&q=50%25'))->json('meta.total'))->toBe(0);
     expect($this->actingAs($staff)->getJson(t($tenant, "items?page=1&menu={$menu->id}&status=no_photo"))->json('meta.total'))->toBe(41);
     expect($this->actingAs($staff)->getJson(t($tenant, 'items?page=1&sort=name&per=10'))->json('data.0.name.en'))->toBe('Dish 01');
 

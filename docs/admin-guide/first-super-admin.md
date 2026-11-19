@@ -7,8 +7,10 @@
 Super Admins are made on the server, not in the app. In `backend/`:
 
 ```bash
-php artisan tinker --execute="\$u = App\Models\User::create(['name' => 'Your Name', 'email' => 'you@example.com', 'password' => 'a-long-password']); \$u->forceFill(['is_super_admin' => true, 'email_verified_at' => now()])->save();"
+php artisan super:create
 ```
+
+It asks for your name, e-mail and a password (typed twice, not shown).
 
 1. Sign in at **https://your-domain/<SUPER_ADMIN_PATH>/sign-in**. This address is yours only: it is set by `SUPER_ADMIN_PATH` in `.env` (default `super`; choose something hard to guess). Restaurant teams sign in at https://your-domain/signin, which doesn't let Super Admins in.
 2. You see only **Set up two-factor**.

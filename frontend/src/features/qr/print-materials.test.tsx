@@ -45,6 +45,7 @@ function setup() {
         data: {
           name: 'Buna Café',
           colour: '#b4441c',
+          surface: { light: '#f5ece0', dark: '#261b14', dark_only: false },
           logo: null,
           headline: 'Scan for our menu',
           scan: 'Point your phone camera at the code.',
@@ -70,6 +71,17 @@ const pdfLink = (screen: Awaited<ReturnType<typeof setup>>) =>
 describe('Print materials', () => {
   beforeEach(() => useTenantStore.setState({ currentTenantId: 1 }))
   afterEach(() => fake.restore())
+
+  it('offers "Like my menu": the colours of the menu style, light and dark', async () => {
+    const screen = await setup()
+    await userEvent.click(screen.getByRole('button', { name: 'Like my menu' }))
+    expect(pdfLink(screen).searchParams.get('design')).toBe('style')
+    const face = () =>
+      getComputedStyle(screen.getByRole('figure').element()).backgroundColor
+    await expect.poll(face).toBe('rgb(245, 236, 224)')
+    await userEvent.click(screen.getByRole('button', { name: 'Dark' }))
+    await expect.poll(face).toBe('rgb(38, 27, 20)')
+  })
 
   it('builds the PDF link from the choices', async () => {
     const screen = await setup()

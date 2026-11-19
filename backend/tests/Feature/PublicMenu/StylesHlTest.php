@@ -68,7 +68,15 @@ it('shows style H right-to-left when the menu is in Arabic (automatic), and as s
 it('keeps every other style left-to-right, whatever the saved direction', function (string $style) {
     $html = hlPage(['style' => $style, 'menu_direction' => 'rtl'], 'دار المندي', ['المندي' => ['مندي دجاج']]);
     expect($html)->toContain('<html lang="en" dir="ltr">');
-})->with(array_values(array_diff(TenantAppearance::STYLES, ['arabic'])));
+})->with(array_values(array_diff(TenantAppearance::STYLES, TenantAppearance::DIRECTION_STYLES)));
+
+it('offers the menu direction in M–Q too (Arabic menus by the sea, in a coffee house…)', function (string $style) {
+    $arabic = ['المندي' => ['مندي دجاج', 'لحم مندي'], 'مقبلات' => ['حمص', 'فتوش']];
+    expect(hlPage(['style' => $style], 'دار المندي', $arabic))->toContain('<html lang="en" dir="rtl">')
+        ->and(hlPage(['style' => $style]))->toContain('<html lang="en" dir="ltr">')
+        ->and(hlPage(['style' => $style, 'menu_direction' => 'rtl']))->toContain('<html lang="en" dir="rtl">')
+        ->and(hlPage(['style' => $style, 'menu_direction' => 'ltr'], 'دار المندي', $arabic))->toContain('<html lang="en" dir="ltr">');
+})->with(TenantAppearance::ART_STYLES);
 
 it('shows the Halal badge and Ramadan mode only in style I, and only when switched on', function () {
     $off = hlPage(['style' => 'islamic']);

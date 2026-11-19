@@ -32,6 +32,32 @@ it('shows the landing page in simple English: hero, sections in order, sign-up a
     expect(substr_count($html, 'data-track="signup"'))->toBeGreaterThanOrEqual(7);
 });
 
+it('shows "More menu styles": a phone picture of each live style demo, lazy, and the name alone without a picture', function () {
+    Tenant::factory()->create(['slug' => 'demo']);
+    Tenant::factory()->create(['slug' => 'demo-jebena']);
+    Tenant::factory()->create(['slug' => 'demo-maison', 'suspended_at' => now()]);   // not live: left out
+    $shot = public_path('landing/styles/coffee-360.webp');
+    $kept = is_file($shot) ? (string) file_get_contents($shot) : null;   // the real screenshot, put back after
+    @mkdir(dirname($shot), 0777, true);
+    file_put_contents($shot, 'x');
+    try {
+        $html = $this->get('/')->assertOk()->assertSee('More menu styles — tap one to open its demo')->getContent();
+        expect($html)->toContain('aria-label="Open the Coffee House demo menu (opens in a new tab)"')
+            ->toContain('srcset="'.asset('landing/styles/coffee-180.webp').' 180w, '.asset('landing/styles/coffee-360.webp').' 360w" sizes="150px" width="150" height="304" alt="" loading="lazy"')
+            ->not->toContain(url('/demo-maison'));
+
+        unlink($shot);
+        $html = $this->get('/')->assertOk()->getContent();
+        expect($html)->toContain(url('/demo-jebena'))->not->toContain('landing/styles/coffee-');
+    } finally {
+        if ($kept !== null) {
+            file_put_contents($shot, $kept);
+        } elseif (is_file($shot)) {
+            unlink($shot);
+        }
+    }
+});
+
 it('uses only WebP for a screenshot whose AVIF copies are missing (GD without AVIF)', function () {
     $moved = [];
     foreach ([300, 450, 600] as $w) {
@@ -126,7 +152,7 @@ it('shows the plan ladder from the database: Free first ("Start here"), then wha
     $html = $this->get('/')->assertOk()
         ->assertSeeInOrder([
             'Start here', 'Free', 'Unlimited dishes, menus and QR codes', 'Up to 100 photos', '1 branch', '2 menu styles', 'PDF menu', 'Posters, table tents and stickers', 'Import and export (spreadsheet)', 'Create my free menu',
-            'Plus', 'Br 490', '/ month', 'or Br 4,900 / year (2 months free)', 'Everything in Free, plus:', 'Up to 500 photos', 'All 12 menu styles', 'Specials and announcements', 'Insights and monthly report', 'Start free', 'Contact us on WhatsApp',
+            'Plus', 'Br 490', '/ month', 'or Br 4,900 / year (2 months free)', 'Everything in Free, plus:', 'Up to 500 photos', 'All 17 menu styles', 'Specials and announcements', 'Insights and monthly report', 'Start free', 'Contact us on WhatsApp',
             'Pro', 'Br 990', 'Everything in Plus, plus:', 'Up to 2,000 photos', 'Up to 3 branches', 'Happy hour and lunch prices', 'No “Menu by Menu” line', 'Start free',
             'Business', 'Br 2,490', 'Everything in Pro, plus:', 'Unlimited photos', 'Unlimited branches', 'Start free',
         ])

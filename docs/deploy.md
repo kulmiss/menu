@@ -6,7 +6,7 @@ Contents: [1 Requirements](#1-requirements) · [2 Build a release](#2-build-a-re
 
 ## 1. Requirements
 
-- PHP **8.3+** with: `pdo_mysql`, `mbstring`, `openssl`, `tokenizer`, `xml`, `ctype`, `json`, `fileinfo`, `gd` (WebP support), `intl`, `zip`, `exif`, `bcmath`. AVIF photos are made automatically when GD supports AVIF; otherwise WebP only.
+- PHP **8.3+** with: `pdo_mysql`, `mbstring`, `openssl`, `tokenizer`, `xml`, `ctype`, `json`, `fileinfo`, `gd` (WebP support), `intl`, `zip`, `exif`, `curl`. `php artisan menu:doctor` checks them. AVIF photos are made automatically when GD supports AVIF; otherwise WebP only.
 - MySQL **8** or MariaDB **10.6+**, `utf8mb4`.
 - Apache with `mod_rewrite` (shared hosting) or Nginx + PHP-FPM (VPS).
 - HTTPS.
@@ -103,10 +103,37 @@ Upload the whole `backend/` folder (it now contains `vendor/` and `public/app/`)
 
 ## 4. VPS (Nginx + PHP-FPM)
 
-- Use [`docker/nginx/default.conf`](../docker/nginx/default.conf) as the site config: document root `backend/public`, static menu pages from `menu-cache/` with `gzip_static on`, year-long caching for `/app/assets`, `/media`, `/menu-assets`, and `/q/CODE` handled by `qr.php`. Change `root` and `fastcgi_pass` to your paths/socket.
-- Add HTTPS (e.g. `certbot --nginx`) and HTTP/2 or HTTP/3.
-- Cron: the same `schedule:run` line as above (as the web user). With Supervisor you may also run `php artisan queue:work` permanently; the scheduler line can stay.
-- Give the PHP-FPM user write access to the folders listed in 3.6.
+A small VPS (1 vCPU, 1–2 GB RAM, Ubuntu 24.04) is enough for hundreds of restaurants: guests get static pages from Nginx without PHP. One script installs everything from zero, updates with a backup first, and goes back to the previous version (tested from zero in a clean Ubuntu 24.04 container, 2026-11-19, QUESTIONS #233).
+
+**Before you start:** a VPS with Ubuntu 24.04 and SSH as root; your domain's **A record** pointing to the VPS's IP address (for HTTPS).
+
+1. **Build the release on your computer** (from the repository root, on `main`):
+   ```bash
+   bash scripts/make-release.sh            # → menu-release.tar.gz (backend + vendor + built admin app, no secrets)
+   scp menu-release.tar.gz scripts/deploy-vps.sh root@YOUR-VPS:
+   ```
+2. **Install** (on the VPS, about 5 minutes):
+   ```bash
+   sudo DOMAIN=menu.example.com EMAIL=you@example.com bash deploy-vps.sh install menu-release.tar.gz
+   ```
+   It installs Nginx, PHP 8.3-FPM (with OPcache and 10 MB uploads), MySQL 8 and cron; makes the database and a random database password; writes `.env` (production, https, daily logs, secure cookies, a random Super Admin address, `APP_KEY`, `BACKUP_KEY`); creates the tables; sets up Nginx (static menu pages, security headers), the HTTPS certificate (Let's Encrypt, renewed automatically), the cron line and the firewall (SSH + web only). At the end it prints the database password and the Super Admin address: **save them in your password manager**, together with a copy of `/var/www/menu/shared/.env`.
+3. **First Super Admin + two-factor:**
+   ```bash
+   cd /var/www/menu/current && sudo -u www-data php artisan super:create
+   ```
+   Open the printed address (`https://menu.example.com/office-…/sign-in`), sign in, scan the two-factor QR code, keep the recovery codes.
+4. **E-mail and backups:** Super Admin → Settings → Email → **Send test email** (section 7); Backups → **Back up now**; optional off-site copy and **Alerts** (Telegram) on the same page.
+5. **Check:** `sudo bash deploy-vps.sh doctor` — every red line must be gone (section 12).
+
+**Update to a new version:** build a new `menu-release.tar.gz`, copy it up, then `sudo bash deploy-vps.sh update menu-release.tar.gz`. It takes a backup first (and stops if that fails), unpacks the new version next to the old one, runs the database changes, switches over in one step and keeps the last 3 versions. Guests never see a half-updated site.
+
+**Go back:** `sudo bash deploy-vps.sh rollback` switches to the previous version. Database changes are not undone (the older version ignores new columns); to undo data, restore the backup the update made (section 10).
+
+**Folders:** `/var/www/menu/current` → the live version; `/var/www/menu/shared` holds `.env`, `storage/` (logs, backups, sessions) and `media/` (photos), kept across versions. Logs: `shared/storage/logs/laravel-YYYY-MM-DD.log` (14 days), Nginx: `/var/log/nginx/` (rotated weekly by Ubuntu).
+
+**Uptime:** add `https://menu.example.com/health` to a free uptime monitor (UptimeRobot, Better Stack, Uptime Kuma): it answers 200 `ok`/`degraded` and 503 `down`.
+
+Prefer to set it up by hand? Use [`docker/nginx/default.conf`](../docker/nginx/default.conf) as the site config (document root `backend/public`, static pages from `menu-cache/` with `gzip_static on`, `/q/CODE` via `qr.php`), the cron line from 3.7, and the folder permissions from 3.6.
 
 ## 5. OPcache
 
@@ -149,11 +176,13 @@ On cPanel, **Email Deliverability** shows and can install SPF and DKIM for you. 
 
 ## 8. The first Super Admin
 
-Super Admins are created on the server, not in the app. In `backend/`:
+Super Admins are created on the server, not in the app. In `backend/` (cPanel → Terminal, or SSH):
 
 ```bash
-php artisan tinker --execute="\$u = App\Models\User::create(['name' => 'Your Name', 'email' => 'you@example.com', 'password' => 'a-long-password']); \$u->forceFill(['is_super_admin' => true, 'email_verified_at' => now()])->save();"
+php artisan super:create
 ```
+
+It asks for the name, e-mail and a password (typed twice, not shown).
 
 Use your own name, e-mail and a password of at least 10 characters.
 
@@ -259,6 +288,7 @@ Tick these in order on the live server. Details are in the sections above.
 7. In `backend/`: `php artisan key:generate --force` → `php artisan migrate --force` → `php artisan platform:aggregate` → `php artisan optimize` (= the four cache commands). **Never** run `DemoSeeder`.
 8. Folder permissions (section 3.6). Save a copy of `.env` (with `APP_KEY`) in your password manager.
 9. Cron line, every minute (section 3.7). After two minutes `php artisan schedule:list` shows the jobs, and `https://your-domain/up` answers "Application up".
+9a. `php artisan menu:doctor --production` (VPS: `sudo bash deploy-vps.sh doctor`): fix every red line (✗); it says how. Add `https://your-domain/health` to an uptime monitor (section 4).
 
 **Platform set-up**
 10. Create the first Super Admin (section 8), sign in, turn on two-factor and keep the recovery codes.

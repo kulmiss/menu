@@ -3,8 +3,9 @@
 // specials and news, also on a tinted or striped background (owner, 2026-11-18:
 // Lighthouse found Night Lounge prices at 4.06:1 under their glow).
 import base from '@public-menu/base.css?raw'
+import order from '@public-menu/order.css?raw'
 import { afterEach, describe, expect, it } from 'vitest'
-import { GUEST_STYLES } from './guest-styles'
+import { GUEST_ART, GUEST_STYLES } from './guest-styles'
 
 type Rgb = [number, number, number]
 const hex = (h: string): Rgb => {
@@ -170,7 +171,7 @@ const html = `<header><div><h1>Habesha Table</h1><p class="sub">Bole</p><p class
 <main class="w">
 <p class="an"><b>Tonight:</b> live music from 20:00</p>
 <div class="spc"><button type="button" class="it sp"><span class="tx"><span class="bd hl">Special</span><span class="nm">Sunset set</span><span class="sm">Two drinks and a plate</span><span class="pr">Br 450</span></span></button></div>
-<section class="k1"><h2>Wot · ወጥ</h2><p class="cd">Served on injera.</p><ul>
+<section class="k1"><h2><svg class="ci" aria-hidden="true" width="24" height="24"></svg>Wot · ወጥ</h2><p class="cd">Served on injera.</p><ul>
 <li data-i="1"><button type="button" class="it ao"><span class="tx"><span class="nm">Doro wot · ዶሮ ወጥ</span><span class="sm">Chicken, berbere, egg</span><span class="pr"><s>Br 450</s> Br 384</span><span class="tg"><span class="bd hl">Popular</span><span class="bd">Spicy</span></span></span><span class="ad" data-x="A">+</span><span class="im"><img alt="" width="640" height="480"></span></button></li>
 <li data-i="2"><button type="button" class="it np ao"><span class="tx"><span class="nm">Shiro</span><span class="sm">Chickpea stew</span><span class="pr">from Br 220</span><span class="tg"><span class="bd">Vegan</span></span></span><span class="ad" data-x="A">+</span></button></li>
 <li data-i="3" class="so"><button type="button" class="it np"><span class="tx"><span class="nm">Kitfo</span><span class="pr">Br 460</span><span class="tg"><span class="bd x0">Sold out</span></span></span></button></li>
@@ -226,26 +227,42 @@ describe('text contrast on the guest page', () => {
           style = document.head.appendChild(document.createElement('style'))
           style.textContent =
             (dark
-              ? (base + css)
+              ? (base + order + css)
                   .split('@media (prefers-color-scheme:dark)')
                   .join('@media all')
-              : base + css) +
+              : base + order + css) +
             `:root{--a:${a};--af:${textOn(a)}${palette(brand, dark)}}`
-          document.body.className = `S-${name}`
+          // Styles M–Q: with decoration on (header texture and drawing, category icons).
+          document.body.className = `S-${name}${GUEST_ART[name] ? ' dc' : ''}`
           root = document.body.appendChild(document.createElement('div'))
-          root.innerHTML = html
-          for (const sel of TEXTS)
+          root.innerHTML = GUEST_ART[name]
+            ? html.replace('<header>', `<header>${GUEST_ART[name]}`)
+            : html
+          // The category icons (M–Q) are graphics: 3:1 (WCAG 1.4.11).
+          for (const sel of [...TEXTS, 'svg.ci'])
             for (const el of root.querySelectorAll(sel)) {
               const c = colours(getComputedStyle(el).color)[0]
               const opacity = Number(
                 getComputedStyle(el.closest('.tg,.pr,.nm,.sm') ?? el).opacity
               )
-              for (const b of backgrounds(el)) {
+              // Q · Luxe: a faint texture over the whole header lies under its text too.
+              const under = backgrounds(el)
+              const ha = el.closest('header')?.querySelector('.ha')
+              if (
+                ha &&
+                ha.getBoundingClientRect().width >=
+                  ha.parentElement!.getBoundingClientRect().width - 1
+              ) {
+                const line = hex(ha.getAttribute('stroke')!)
+                const o = Number(getComputedStyle(ha).opacity)
+                under.push(over([...line, o], under[0]))
+              }
+              for (const b of under) {
                 const fg = over([c[0], c[1], c[2], c[3] * opacity], b)
                 expect(
                   ratio(fg, b),
                   `${name} brand ${brand}: ${sel} "${el.textContent}"`
-                ).toBeGreaterThanOrEqual(4.5)
+                ).toBeGreaterThanOrEqual(sel === 'svg.ci' ? 3 : 4.5)
               }
             }
           style.remove()

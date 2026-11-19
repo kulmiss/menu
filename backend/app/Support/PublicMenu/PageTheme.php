@@ -68,6 +68,23 @@ class PageTheme
         // L · Colourful: one bright colour per category, made from the brand colour (owner, 2026-11-18).
         'colour' => ['light' => '#fffaf2', 'dark' => '#1e1b2e', 'heading' => 'rounded', 'banner' => [5, 2], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
             'photo' => '72px', 'lcp' => '72px', 'fold' => [5, 0]],
+        // M–Q (owner, 2026-11-19, QUESTIONS #232): each with its own artwork (`art`): a header picture
+        // when there is no banner, textures and category icons, all switchable (show_decoration).
+        // M · Coffee House: dark-roast band with a jebena and cups, cream page, round photos.
+        'coffee' => ['light' => '#f5ece0', 'dark' => '#261b14', 'heading' => 'serif', 'banner' => [5, 2], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
+            'photo' => '72px', 'lcp' => '72px', 'fold' => [5, 0], 'art' => true],
+        // N · Grill & BBQ: always dark, charcoal and embers, bold tall headings, price tags.
+        'grill' => ['light' => '#231d1a', 'dark' => '#231d1a', 'heading' => 'board', 'banner' => [2, 1], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
+            'photo' => '80px', 'lcp' => '80px', 'fold' => [5, 0], 'dark_only' => true, 'art' => true],
+        // O · Garden Fresh: leaves, soft greens, rounded white cards.
+        'garden' => ['light' => '#f1f7ef', 'dark' => '#16291f', 'heading' => 'rounded', 'banner' => [5, 2], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
+            'photo' => '72px', 'lcp' => '72px', 'fold' => [5, 0], 'art' => true],
+        // P · Coastal: sea and a dhow sail, sand, ticket-like cards.
+        'coastal' => ['light' => '#f6f1e7', 'dark' => '#12304a', 'heading' => 'system', 'banner' => [2, 1], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
+            'photo' => '76px', 'lcp' => '76px', 'fold' => [5, 0], 'art' => true],
+        // Q · Fine Dining: marble veins, thin gold lines, a refined serif, centred headings.
+        'luxe' => ['light' => '#f7f4ee', 'dark' => '#1a1814', 'heading' => 'didone', 'banner' => [2, 1], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
+            'photo' => '72px', 'lcp' => '72px', 'fold' => [5, 0], 'art' => true],
     ];
 
     /** L · Colourful: hue steps from the brand colour for categories 2–6 (category 1 is the brand colour). */
@@ -108,10 +125,16 @@ class PageTheme
             'theme_color' => $lightA,
             'style' => $style,
             // Style options, each used only in its own style (QUESTIONS #229).
-            'direction' => $style === 'arabic' && in_array($a->menu_direction, TenantAppearance::DIRECTIONS, true) ? $a->menu_direction : ($style === 'arabic' ? 'auto' : 'ltr'),
+            'direction' => in_array($style, TenantAppearance::DIRECTION_STYLES, true)
+                ? (in_array($a->menu_direction, TenantAppearance::DIRECTIONS, true) ? $a->menu_direction : 'auto')
+                : 'ltr',
             'halal' => $style === 'islamic' && $a->show_halal,
             'ramadan' => $style === 'islamic' && $a->ramadan_mode,
             'greyscale' => $style === 'mono' && $a->photos_greyscale,
+            // M–Q: their artwork (header picture, textures, category icons) unless switched off.
+            'decoration' => ($surface['art'] ?? false) && ($a->show_decoration ?? true),
+            // M–Q show category photos (the restaurant's own pictures) in the category headings.
+            'art' => (bool) ($surface['art'] ?? false),
             'show_prices' => $a->show_prices,
             // Style D shows no dish or special photos, whatever the switch says.
             'show_photos' => $a->show_photos && $style !== 'minimal',

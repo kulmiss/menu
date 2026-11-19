@@ -4,6 +4,7 @@
 // photo had its name and price side by side; on phones a name like "Chechebsa"
 // or "Berbere chicken" ran under the price ("ChechebBr 160").
 import base from '@public-menu/base.css?raw'
+import order from '@public-menu/order.css?raw'
 import { afterEach, describe, expect, it } from 'vitest'
 import { page } from 'vitest/browser'
 import { GUEST_STYLES } from './guest-styles'
@@ -41,7 +42,7 @@ describe('dish card text', () => {
       it(`${key} at ${width} px: name, price and add button never overlap (no photo)`, async () => {
         await page.viewport(width, 800)
         style = document.head.appendChild(document.createElement('style'))
-        style.textContent = base + css + ':root{--a:#9a3412;--af:#fff}'
+        style.textContent = base + order + css + ':root{--a:#9a3412;--af:#fff}'
         document.body.className = `S-${key}`
         main = document.body.appendChild(document.createElement('main'))
         main.className = 'w'

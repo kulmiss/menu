@@ -26,14 +26,18 @@ section h2:before{content:counter(k,decimal-leading-zero);font-family:var(--ff);
 section ul{margin-top:.6rem;border-top:1px solid var(--fg)}
 section li{border-bottom:1px solid var(--ln)}
 /* A dish: name …… price on one line, the description below, the photo at the end. */
-li>.it{padding:1rem 0;grid-template-columns:minmax(0,auto) minmax(1.25rem,1fr) max-content 5.5rem;grid-template-areas:"nm ld pr im" "sm sm sm im" "tg tg tg im";grid-template-rows:auto auto 1fr;column-gap:.5rem}
+li>.it{padding:1rem 0;grid-template-columns:minmax(0,auto) minmax(1.25rem,1fr) max-content 6rem;grid-template-areas:"nm ld pr im" "sm sm sm im" "tg tg tg im";grid-template-rows:auto auto 1fr;column-gap:.5rem}
 li>.it:before{content:"";grid-area:ld;align-self:end;margin-bottom:.4em;border-bottom:1px dotted var(--mu)}
 li>.it .nm{grid-area:nm;font-size:1.05rem;font-weight:600;line-height:1.3}
 li>.it .sm{grid-area:sm;margin-top:.25rem}
 li>.it .pr{grid-area:pr;margin:0;color:var(--fg);font-size:1rem;font-weight:600;line-height:1.3;white-space:nowrap;font-variant-numeric:tabular-nums}
 li>.it .pr s{font-weight:400}
 li>.it .tg{grid-area:tg}
-li>.it .im{grid-area:im;width:5.5rem;height:5.5rem;margin-inline-start:.5rem}
+/* The photo column takes the .5rem space before the photo too (a margin would push it out of the card). */
+li>.it .im{grid-area:im;justify-self:end;width:5.5rem;height:5.5rem}
+/* Small phones (320 px): a smaller photo, a shorter dotted leader and an old price above the new one,
+   so each price still fits on its one line (also with the wider fonts of CI's Linux). */
+@media (max-width:22.4rem){li>.it{grid-template-columns:minmax(0,auto) minmax(.5rem,1fr) max-content 4.5rem}li>.it .im{width:4rem;height:4rem}li>.it .pr s{display:block}}
 li>.it{--adt:-.4rem}
 li>.it.np{grid-template-columns:minmax(0,auto) minmax(1.25rem,1fr) max-content;grid-template-areas:"nm ld pr" "sm sm sm" "tg tg tg"}
 li>.np>.ad{top:.55rem;margin-top:0}

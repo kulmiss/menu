@@ -109,13 +109,13 @@ function InsightsScreen() {
                 <p className='text-sm text-muted-foreground'>
                   {t(`insights.total_${k}`)}
                 </p>
-                <p className='text-3xl font-bold tabular-nums'>
+                <div className='text-3xl font-bold tabular-nums'>
                   {d ? (
                     d.totals[k].toLocaleString()
                   ) : (
                     <Skeleton className='mt-1 h-9 w-20' />
                   )}
-                </p>
+                </div>
               </CardContent>
             </Card>
           ))}

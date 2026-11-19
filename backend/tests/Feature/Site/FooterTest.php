@@ -232,7 +232,7 @@ it('shows About us, Contact us and Cookie info with their default text, and a re
 });
 
 it('has a Help centre for everyone with the public articles only', function () {
-    $this->get('/support')->assertOk()->assertSee('Help centre')->assertSee('Delete my account')->assertSee('Menu styles A to L')
+    $this->get('/support')->assertOk()->assertSee('Help centre')->assertSee('Delete my account')->assertSee('Menu styles A to Q')
         ->assertDontSee('href="/support/dashboard"', false);
     $this->get('/support/delete-account')->assertOk()->assertSee('Only the <strong>Owner</strong>', false)
         // A link to another public article opens it; one to an admin-only article is plain text.
@@ -276,4 +276,10 @@ it('gives every site page a description for search engines', function () {
     foreach (['terms', 'privacy', 'about', 'contact', 'cookies'] as $page) {
         $this->get('/'.$page)->assertOk()->assertSee('<meta name="description" content="', false)->assertSee('Buna Menus', false);
     }
+});
+
+it('styles only the QR code as a white tile, not the small link icon next to it', function () {
+    // Bug (owner screenshot, 2026-11-18): ".scan svg" turned the "opens in a new tab" icon into a white dot.
+    $html = (string) $this->get('/')->getContent();
+    expect($html)->toContain('.scan>svg{width:132px')->not->toContain('.scan svg{');
 });

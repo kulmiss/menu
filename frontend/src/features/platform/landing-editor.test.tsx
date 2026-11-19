@@ -60,6 +60,10 @@ describe('Super Admin → Landing page', () => {
     const screen = await renderWithQuery(<LandingEditorPage />)
 
     await expect.element(screen.getByText('Button clicks')).toBeVisible()
+    // The one-page sales sheet for owners opens in a new tab (QUESTIONS #234).
+    await expect
+      .element(screen.getByRole('link', { name: 'Sales sheet (print or PDF)' }))
+      .toHaveAttribute('href', '/super/sales-sheet')
     await expect.element(screen.getByText('12', { exact: true })).toBeVisible()
     await expect.element(screen.getByText('40 in total')).toBeVisible()
     await userEvent.click(

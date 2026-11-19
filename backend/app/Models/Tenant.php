@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * @property int $id
@@ -83,6 +84,10 @@ class Tenant extends Model
             }
         });
         static::deleted(fn () => QrMap::touch());
+        // Photos of "Add my menu for me" requests are private files, not rows: remove them too (QUESTIONS #235).
+        static::forceDeleting(function (Tenant $tenant): void {
+            MenuRequest::where('tenant_id', $tenant->id)->get()->each(fn (MenuRequest $r) => Storage::disk('local')->deleteDirectory($r->dir()));
+        });
     }
 
     protected function casts(): array

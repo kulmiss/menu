@@ -197,7 +197,7 @@ it('keeps the demo menu page within the 30 KB budget in every style (PLAN.md §1
     expect(preg_match('#<script>(.*?)</script>#s', (string) $html, $js))->toBe(1);
     expect(strlen($js[1]))->toBeLessThan(5 * 1024);  // inline JS under 5 KB (§15.2.2)
     // D · Minimal adds " NP" (no dish photos).
-    expect($html)->toMatch('/class="S-'.$style.'( NP)?"/');
+    expect($html)->toMatch('/class="S-'.$style.'( NP)?( dc)?"/');
 })->with(TenantAppearance::STYLES);
 
 it('accepts the visit beacon without an idempotency key', function () {

@@ -1,0 +1,51 @@
+/* Style P · Coastal (owner, 2026-11-19, QUESTIONS #232): a deep-sea band with a dhow under sail
+   and a sun (art/coastal.svg), a wave at its foot, sand page, ticket-like cards with a coral
+   edge and rope lines. For fish and seafood places on the Red Sea and Indian Ocean coasts.
+   Original artwork only. Surfaces must match PageTheme::STYLES['coastal']. --sea, --cr (coral)
+   are decoration colours; on --sea only white text (≥ 4.5:1). */
+:root{--br:.4rem;--bg:#f6f1e7;--fg:#0d2f45;--mu:#45606f;--ln:#e4dccb;--card:#fff;--sea:#0b4a68;--cr:#e8735a;--ic:#fbe3dc;--io:#b4432a}
+@media (prefers-color-scheme:dark){:root{--bg:#0b1c2a;--fg:#e8f2f8;--mu:#a6bccb;--ln:#20384c;--card:#12304a;--sea:#072f43;--cr:#f08a72;--ic:#2a3346;--io:#f6a58f}}
+.cv{aspect-ratio:2/1}
+header{position:relative;flex-wrap:wrap;padding:1.1rem 1rem 2rem;background:var(--sea);color:#fff}
+.dc header{background:linear-gradient(170deg,#0e6386 0,var(--sea) 70%),var(--sea)}
+header:after{content:"";position:absolute;inset:auto 0 -1px;height:.9rem;background:var(--bg);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='14'%3E%3Cpath d='M0 7q10-7 20 0t20 0v7H0z'/%3E%3C/svg%3E") 0 100%/2.5rem .9rem repeat-x;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='14'%3E%3Cpath d='M0 7q10-7 20 0t20 0v7H0z'/%3E%3C/svg%3E") 0 100%/2.5rem .9rem repeat-x}
+.ha{display:block;flex:0 0 100%;height:5.5rem;margin-bottom:.3rem}
+[dir=rtl] .ha{transform:scaleX(-1)}
+@media (min-width:30rem){.dc .top:not(.hc) header{min-height:10rem;padding-inline-end:13rem}.ha{position:absolute;inset-inline-end:.75rem;bottom:.9rem;width:12rem;height:8.5rem;margin:0}}
+header>div{min-width:0;position:relative}
+header .sub{color:#d3eef6}
+header .st{background:var(--card);color:var(--fg)}header .st.op{background:linear-gradient(#0f6b3a12,#0f6b3a12),var(--card)}
+.lg{border-radius:50%;box-shadow:0 0 0 3px #fff}
+h1{font-size:1.8rem;font-weight:800;line-height:1.15}
+.ov header{background:linear-gradient(#0000,#000c)}
+.ov header:after{display:none}
+.bar{border-bottom-color:var(--ln)}
+.sr input,.ib{background:var(--card);border-color:var(--ln)}
+.cn a{background:var(--card);border-color:var(--cr);border-style:dashed;font-weight:600}
+section{padding-top:1.5rem}
+section h2{display:flex;align-items:center;gap:.6rem;font-size:1.3rem;font-weight:800;overflow-wrap:anywhere}
+.dc section h2{padding-bottom:.45rem;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='6'%3E%3Cpath d='M0 5q3-5 6 0t6 0' fill='none' stroke='%23c9a978' stroke-width='1.6'/%3E%3C/svg%3E") 0 100%/.75rem .375rem repeat-x}
+svg.ci{flex:none;width:2.5rem;height:2.5rem;padding:.48rem;border-radius:50%;background:var(--ic);color:var(--io)}
+span.ci{flex:none;width:3.25rem;height:3.25rem;border-radius:.4rem;overflow:hidden}
+.ci img{display:block;width:100%;height:100%;object-fit:cover}
+section ul{display:grid;gap:.6rem;margin-top:.7rem}
+section li{border:0;border-radius:var(--br);background:var(--card);border-inline-start:4px solid var(--cr);box-shadow:0 1px 3px #0d2f4514}
+li>.it{padding:.7rem .75rem;grid-template-columns:4.75rem minmax(0,1fr);grid-template-areas:"im ." "im nm" "im sm" "im pr" "im tg" "im .";grid-template-rows:1fr auto auto auto auto 1fr;column-gap:.8rem}
+li>.it.ao,li>.it.ao.np{padding-inline-end:3.1rem}
+li>.it .ad,li>.np>.ad{top:50%;margin-top:-1.375rem;inset-inline-end:.2rem}
+li>.it .im{grid-area:im;align-self:start;width:4.75rem;height:4.75rem;border-radius:.3rem}
+li>.it .nm{grid-area:nm;font-size:1.05rem;font-weight:700;line-height:1.3}
+li>.it .sm{grid-area:sm}
+li>.it .pr{grid-area:pr;font-weight:800;white-space:nowrap;font-variant-numeric:tabular-nums}
+li>.it .tg{grid-area:tg}
+/* Without a photo: a small shell (scallop) at the start. */
+li>.it.np{grid-template-columns:.9rem minmax(0,1fr);grid-template-areas:"mk nm" "mk sm" "mk pr" "mk tg";grid-template-rows:auto;column-gap:.7rem}
+li>.it.np:before{content:"";grid-area:mk;align-self:start;width:.9rem;height:.8rem;margin-top:.35rem;border-radius:50% 50% .15rem .15rem;background:repeating-linear-gradient(90deg,var(--cr) 0 .16rem,var(--ic) .16rem .24rem)}
+.bd{background:none;border-color:var(--ln)}
+.spc .sp{border:0;border-radius:var(--br);background:var(--card);border-inline-start:4px solid var(--cr);box-shadow:0 1px 3px #0d2f451f}
+.an{border-radius:var(--br)}
+dialog{border-top:4px solid var(--cr)}
+.ft{background:var(--card);border-top:0}
+.ft:before{content:"";display:block;height:.9rem;margin:-2.9rem 0 2rem;background:var(--card);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='14'%3E%3Cpath d='M0 7q10-7 20 0t20 0v7H0z'/%3E%3C/svg%3E") 0 100%/2.5rem .9rem repeat-x;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='14'%3E%3Cpath d='M0 7q10-7 20 0t20 0v7H0z'/%3E%3C/svg%3E") 0 100%/2.5rem .9rem repeat-x}
+.fg>div{background:var(--bg);border-radius:.6rem;padding:1rem}
+.fso a,.fc svg{background:var(--bg)}

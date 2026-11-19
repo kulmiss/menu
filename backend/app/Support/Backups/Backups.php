@@ -5,6 +5,7 @@ namespace App\Support\Backups;
 use App\Models\Backup;
 use App\Models\User;
 use App\Notifications\BackupProblemNotification;
+use App\Support\Ops\Alerts;
 use App\Support\PlatformSettings;
 use App\Support\Push\Push;
 use Illuminate\Contracts\Encryption\DecryptException;
@@ -239,5 +240,6 @@ class Backups
         }
         Push::send(Push::superAdmins(), 'backup_failed', __('push.types.backup_failed'), (string) $problem, '/p/backups');
         Notification::send(User::where('is_super_admin', true)->get(), new BackupProblemNotification((string) $problem));
+        Alerts::telegram(__('backups.mail.subject', ['platform' => PlatformSettings::get('name')])."\n\n".$problem);
     }
 }

@@ -46,12 +46,16 @@
         if ($orderList) { $cart[$i['id']] = [...$i['cart'], $i['sold_out'] ? 1 : 0]; }
         $anyPhoto = $anyPhoto || $i['media'] !== null;
     } } }
+    // M–Q: the icons of the categories without their own photo.
+    $catIcons = [];
+    foreach ($menus as $m) { foreach ($m['categories'] as $c) { if (! ($c['image'] ?? null) && ($c['icon'] ?? null)) { $catIcons[] = $c['icon']; } } }
     // No dish photo anywhere (switched off, hidden per dish, or none uploaded): the styles use a text layout.
     $data = [
         'id' => $tenant->id,
         'b' => $branch_id,
         'p' => $preview ? 1 : 0,
-        's' => InlineAssets::sheetUrl(),
+        // The sheet file; with "My order" on it holds the list too (QUESTIONS #236).
+        's' => InlineAssets::sheetUrl($orderList),
         'z' => $timezone,
         'h' => $hours,
         'x' => $closures,
@@ -124,9 +128,13 @@
 @php $preloadAvif = ! empty($lcp['img']['avif']); @endphp
 <link rel="preload" as="image" fetchpriority="high" type="image/{{ $preloadAvif ? 'avif' : 'webp' }}" imagesrcset="{{ $preloadAvif ? $lcp['img']['avif'] : $lcp['img']['webp'] }}" imagesizes="{{ $lcp['sizes'] }}">
 @endif
-<style>{!! InlineAssets::css($style) !!}{!! $theme['css'] !!}</style>
+<style>{!! InlineAssets::css($style, $orderList) !!}{!! $theme['css'] !!}</style>
 </head>
-<body class="S-{{ $style }}{{ $anyPhoto ? '' : ' NP' }}{{ $theme['ramadan'] ? ' rm' : '' }}{{ $theme['greyscale'] ? ' gs' : '' }}">
+<body class="S-{{ $style }}{{ $anyPhoto ? '' : ' NP' }}{{ $theme['ramadan'] ? ' rm' : '' }}{{ $theme['greyscale'] ? ' gs' : '' }}{{ $theme['decoration'] ? ' dc' : '' }}">
+@if ($catIcons !== [])
+{{-- M–Q: the category icons used on this page, drawn once (QUESTIONS #232). --}}
+<svg class="sx" aria-hidden="true" width="0" height="0">{!! \App\Support\PublicMenu\CategoryIcons::symbols($catIcons) !!}</svg>
+@endif
 <div @class(['top', 'hc' => $cover, 'ov' => $cover && $cover['over']])>
 @if ($cover)
 {{-- The banner keeps its shape from the first paint (CSS aspect-ratio + placeholder), so nothing moves. --}}
@@ -138,6 +146,7 @@
 </picture></div>
 @endif
 <header>
+@if (! $cover && $theme['decoration']){!! InlineAssets::art($style) !!}@endif
 @if ($theme['logo'])<img class="lg" src="{{ $theme['logo']['320'] ?? '' }}" alt="" width="76" height="76">@endif
 <div><h1>{{ $tenant->name }}</h1>
 @if ($branch)<p class="sub">{{ $branch }}</p>@endif
@@ -182,7 +191,7 @@
 @if (count($menus) > 1)<h2 class="mh" data-off="{{ __('public.not_now') }}">{{ $m['name'] }}</h2>@endif
 @foreach ($m['categories'] as $c)
 <section id="c{{ $c['id'] }}"@if ($colours) class="k{{ $k++ % 6 + 1 }}"@endif>
-<h2>{{ $c['name'] }}</h2>
+<h2>@if ($c['image'] ?? null)@php $ci = $c['image']; @endphp<span class="ci" style="background-color:{{ $ci['color'] ?? 'transparent' }}"><picture>@if ($ci['avif'])<source type="image/avif" srcset="{{ $ci['avif'] }}" sizes="72px">@endif<source type="image/webp" srcset="{{ $ci['webp'] }}" sizes="72px"><img src="{{ $ci['jpg'] }}" alt="" width="{{ $ci['w'] }}" height="{{ $ci['h'] }}" loading="lazy" decoding="async"></picture></span>@elseif ($c['icon'] ?? null)<svg class="ci" aria-hidden="true" width="24" height="24"><use href="#i-{{ $c['icon'] }}"/></svg>@endif{{ $c['name'] }}</h2>
 @if ($c['description'] !== '')<p class="cd">{{ $c['description'] }}</p>@endif
 <ul>
 @foreach ($c['items'] as $i)

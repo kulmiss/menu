@@ -4,7 +4,7 @@
 
 Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles inside a restaurant are checked by each screen's policy). **Feature**: the feature switch it needs (`402 features.<key>` when off). **Limit**: how many requests are allowed. Create/change requests need an `Idempotency-Key` header. Request and answer examples for the app: [mobile-api.md](mobile-api.md).
 
-**275 endpoints.**
+**284 endpoints.**
 
 ## Sign-in and account (web session)
 
@@ -162,6 +162,8 @@ Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles insid
 | DELETE | `restaurant/{tenant}/members/{member}` | restaurant team |  | `restaurant` limiter | Api\TeamController@destroy |
 | PATCH | `restaurant/{tenant}/members/{member}` | restaurant team |  | `restaurant` limiter | Api\TeamController@update |
 | GET | `restaurant/{tenant}/menu-pdf` | restaurant team | `pdf_menu` | `restaurant, 20,1` limiter | Api\Restaurant\PdfMenuController@download |
+| GET | `restaurant/{tenant}/menu-requests` | restaurant team |  | `restaurant` limiter | Api\Restaurant\MenuRequestController@index |
+| POST | `restaurant/{tenant}/menu-requests` | restaurant team |  | `restaurant, 6,60` limiter | Api\Restaurant\MenuRequestController@store |
 | GET | `restaurant/{tenant}/menus` | restaurant team |  | `restaurant` limiter | Api\Menu\MenuController@index |
 | POST | `restaurant/{tenant}/menus` | restaurant team |  | `restaurant` limiter | Api\Menu\MenuController@store |
 | POST | `restaurant/{tenant}/menus/reorder` | restaurant team |  | `restaurant` limiter | Api\Menu\MenuController@reorder |
@@ -208,6 +210,8 @@ Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles insid
 | Method | Path | Who | Feature | Limit | Handler |
 |---|---|---|---|---|---|
 | GET | `super/activity` | Super Admin |  | `super` limiter | Platform\PlatformController@activity |
+| PUT | `super/alerts` | Super Admin |  | `super` limiter | Platform\BackupController@alerts |
+| POST | `super/alerts/test` | Super Admin |  | `super, 5,1` limiter | Platform\BackupController@testAlert |
 | GET | `super/announcements` | Super Admin |  | `super` limiter | Platform\PlatformController@announcements |
 | POST | `super/announcements` | Super Admin |  | `super` limiter | Platform\PlatformController@saveAnnouncement |
 | DELETE | `super/announcements/{announcement}` | Super Admin |  | `super` limiter | Platform\PlatformController@deleteAnnouncement |
@@ -250,6 +254,10 @@ Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles insid
 | PUT | `super/landing` | Super Admin |  | `super` limiter | Platform\LandingController@update |
 | DELETE | `super/landing/images/{slot}` | Super Admin |  | `super` limiter | Platform\LandingController@deleteImage |
 | POST | `super/landing/images/{slot}` | Super Admin |  | `super, 20,1` limiter | Platform\LandingController@saveImage |
+| GET | `super/menu-requests` | Super Admin |  | `super` limiter | Platform\MenuRequestController@index |
+| DELETE | `super/menu-requests/{menuRequest}` | Super Admin |  | `super` limiter | Platform\MenuRequestController@destroy |
+| PUT | `super/menu-requests/{menuRequest}` | Super Admin |  | `super` limiter | Platform\MenuRequestController@update |
+| GET | `super/menu-requests/{menuRequest}/files/{n}` | Super Admin |  | `super` limiter | Platform\MenuRequestController@file |
 | GET | `super/mobile-app` | Super Admin |  | `super` limiter | Platform\MobileAppController@show |
 | PUT | `super/mobile-app` | Super Admin |  | `super` limiter | Platform\MobileAppController@update |
 | GET | `super/mobile-app/devices` | Super Admin |  | `super` limiter | Platform\MobileAppController@devices |
@@ -290,6 +298,7 @@ Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles insid
 | PUT | `super/settings` | Super Admin |  | `super` limiter | Platform\PlatformController@saveSettings |
 | GET | `super/settings/features` | Super Admin |  | `super` limiter | Platform\FeatureSwitchController@index |
 | PUT | `super/settings/features` | Super Admin |  | `super` limiter | Platform\FeatureSwitchController@update |
+| GET | `super/settings/features/{key}/impact` | Super Admin |  | `super` limiter | Platform\FeatureSwitchController@impact |
 | POST | `super/settings/legal/{page}/reset` | Super Admin |  | `super` limiter | Platform\PlatformController@resetLegal |
 | DELETE | `super/settings/logo` | Super Admin |  | `super` limiter | Platform\PlatformController@deleteLogo |
 | POST | `super/settings/logo` | Super Admin |  | `super` limiter | Platform\PlatformController@saveLogo |

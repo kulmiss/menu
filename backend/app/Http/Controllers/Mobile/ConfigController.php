@@ -50,6 +50,8 @@ class ConfigController extends Controller
             ],
             'banner' => MobileApp::activeBanner(),
             'features' => (object) Features::global(),
+            // "My order" on the platform at all (each restaurant's own value is in its settings: my_order).
+            'my_order' => Features::globallyOn('order_list'),
             'app_features' => (object) $m['app_features'],
             'links' => [
                 'privacy' => $m['links']['privacy'] ?: url('/privacy'),
