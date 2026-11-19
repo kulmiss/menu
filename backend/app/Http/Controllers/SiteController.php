@@ -115,6 +115,30 @@ class SiteController extends Controller
     }
 
     /**
+     * The one-page sales sheet for owners (Super Admin → Landing page, QUESTIONS #234):
+     * A4, live plans and prices, the demo QR code and the contact details. Print it,
+     * or "Save as PDF" in the browser.
+     */
+    public function salesSheet(): View
+    {
+        $s = PlatformSettings::all();
+        $name = (string) $s['name'];
+        $contact = UpgradeContact::payload();
+        $demo = Tenant::where('slug', self::DEMO)->whereNull('suspended_at')->exists() ? url('/'.self::DEMO) : url('/');
+
+        return view('site.sales-sheet', [
+            'platform' => $name,
+            'logo' => EmailLogo::url(),
+            'colors' => BrandColor::palette($s['brand_color'] ?? null),
+            'plans' => $this->plans($name, $contact),
+            'qr' => $this->qrPath($demo),
+            'site' => preg_replace('#^https?://#', '', rtrim(url('/'), '/')),
+            'contact' => $contact,
+            'styles' => count(TenantAppearance::STYLES),
+        ]);
+    }
+
+    /**
      * @param  array{whatsapp: string|null, email: string|null}  $contact
      * @param  \Closure(string, array<string, string>=): string  $t
      * @return array{href: string, label: string, external: bool, track: string|null}|null

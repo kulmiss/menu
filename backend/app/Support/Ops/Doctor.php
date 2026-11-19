@@ -206,7 +206,7 @@ final class Doctor
             return;
         }
         $without = $admins->filter(fn (User $u) => $u->two_factor_confirmed_at === null)->count();
-        $this->add('super_admin', $without === 0 ? 'ok' : ($live ? 'fail' : 'warn'), $without === 0 ? $admins->count().' Super Admin(s), all with two-factor' : "{$without} Super Admin(s) without two-factor", 'Sign in as each Super Admin and turn on two-factor (Account > Security)');
+        $this->add('super_admin', $without === 0 ? 'ok' : ($live ? 'fail' : 'warn'), $without === 0 ? $admins->count().' Super Admin(s), all with two-factor' : "{$without} Super Admin(s) without two-factor", 'Each Super Admin signs in and sets up two-factor (the Super Admin area asks for it first)');
         $path = SuperAdminAccess::path();
         $this->add('super_admin_path', $path === 'super' ? ($live ? 'fail' : 'warn') : 'ok', $path === 'super' ? 'The Super Admin address is still the default /super' : 'The Super Admin address is your own', 'Set SUPER_ADMIN_PATH in .env to something hard to guess, then php artisan optimize (php artisan super:access shows it)');
         $default = $admins->contains(fn (User $u) => $u->email === 'admin@example.com');

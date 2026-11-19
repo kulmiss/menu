@@ -95,6 +95,8 @@ Route::prefix(SuperAdminAccess::path())->middleware('super.web')->group(function
     Route::get('sign-in', [SignInController::class, 'super'])->name('super.signin');
     Route::post('sign-in', [AuthenticatedSessionController::class, 'store'])
         ->middleware(['guest:web', 'signin.area:super', 'throttle:login'])->name('super.signin.store');
+    // The sales sheet (QUESTIONS #234): Super Admins with two-factor only, a printable page.
+    Route::get('sales-sheet', [SiteController::class, 'salesSheet'])->middleware(['auth', 'super'])->name('super.sales-sheet');
     Route::get('{path?}', [SpaController::class, 'super'])->where('path', '.*')->name('spa.super');
 });
 

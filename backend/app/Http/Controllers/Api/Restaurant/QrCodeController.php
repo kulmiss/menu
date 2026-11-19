@@ -116,6 +116,18 @@ class QrCodeController extends Controller
         return $this->file(TableCards::pdf($cards, $this->colour()), 'application/pdf', Str::slug($tenant->name.' '.$this->text($model->name).' tables').'.pdf');
     }
 
+    /**
+     * The menu style's page colours, for the "Like my menu" print design (QUESTIONS #234).
+     *
+     * @return array{light: string, dark: string, dark_only: bool}
+     */
+    private static function surface(TenantAppearance $appearance): array
+    {
+        $st = PageTheme::STYLES[$appearance->style] ?? PageTheme::STYLES['editorial'];
+
+        return ['light' => $st['light'], 'dark' => $st['dark'], 'dark_only' => (bool) ($st['dark_only'] ?? false)];
+    }
+
     /** What the print screen needs to draw its preview and the social-media pictures. */
     public function printInfo(Tenant $tenant): JsonResponse
     {
@@ -126,6 +138,7 @@ class QrCodeController extends Controller
         return response()->json(['data' => [
             'name' => $tenant->name,
             'colour' => $theme['theme_color'],
+            'surface' => self::surface($appearance),
             'logo' => $appearance->logo?->urls()['jpg'] ?? null,
             'headline' => __('qr.print.headline'),
             'scan' => __('qr.print.scan'),
@@ -169,6 +182,7 @@ class QrCodeController extends Controller
                 'scan' => __('qr.print.scan'),
                 'bleed' => (bool) ($data['bleed'] ?? false),
                 'colour' => PageTheme::from($appearance)['theme_color'],
+                'surface' => self::surface($appearance),
                 'logo' => $logoFile !== null && is_file($logoFile) ? $logoFile : null,
                 'branding' => Features::enabled($tenant, 'remove_branding') ? null : __('public.powered', ['app' => PlatformSettings::get('name')]),
             ],

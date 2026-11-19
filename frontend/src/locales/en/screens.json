@@ -428,7 +428,8 @@
     "designs": {
       "classic": "Classic",
       "bold": "Bold",
-      "minimal": "Minimal"
+      "minimal": "Minimal",
+      "style": "Like my menu"
     },
     "colours": "Colours",
     "themes": {

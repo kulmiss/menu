@@ -461,7 +461,8 @@
     "add_quote": "Add a testimonial",
     "remove_quote": "Remove",
     "quote_real": "This is a real customer (they agreed to be shown)",
-    "socials_moved": "Social links and the rest of the footer are now in Footer (in the top menu)."
+    "socials_moved": "Social links and the rest of the footer are now in Footer (in the top menu).",
+    "sales_sheet": "Sales sheet (print or PDF)"
   },
   "invoices": {
     "hint": "Every recorded payment gets an invoice with the next number. Invoices are never changed or deleted: void a wrong one and issue a new one.",
