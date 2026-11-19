@@ -1367,6 +1367,7 @@
     "chat": "Chat ID",
     "telegram_hint": "In Telegram, ask @BotFather for a new bot and copy its token. Add the bot to your group (or start a chat with it), then put the group's or your chat ID here. The token is stored encrypted and never shown again.",
     "test": "Send a test alert",
+    "test_sent": "Test sent by e-mail to {{count}} Super Admins{{telegram}}.",
     "test_sent_one": "Test sent by e-mail to {{count}} Super Admin{{telegram}}.",
     "test_sent_other": "Test sent by e-mail to {{count}} Super Admins{{telegram}}.",
     "test_telegram": " and to Telegram",

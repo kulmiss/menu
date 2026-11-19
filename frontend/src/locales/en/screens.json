@@ -950,6 +950,7 @@
     "remove": "Remove {{name}}",
     "note": "Anything we should know? (optional)",
     "note_placeholder": "For example: prices on page 2 changed, the drinks are on the back.",
+    "send": "Send {{count}} files",
     "send_one": "Send 1 file",
     "send_other": "Send {{count}} files",
     "none": "Choose at least one photo or PDF.",
