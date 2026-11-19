@@ -8,3 +8,10 @@ useDefault = true
 description = "Example passwords in tests"
 targetRules = ["generic-api-key"]
 paths = ['''^backend/tests/''']
+
+[[allowlists]]
+description = "The made-up Telegram bot token of the alert tests (the example from Telegram's bot documentation)"
+condition = "AND"
+targetRules = ["telegram-bot-api-token"]
+regexes = ['''123456789:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsawQ''']
+paths = ['''^backend/tests/''', '''^frontend/src/.*\.test\.tsx$''']
