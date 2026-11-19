@@ -15,3 +15,6 @@ Open **Settings → Sign-up**.
 - **Anti-spam**: Cloudflare Turnstile (optional) and **Blocked e-mail domains** (one per line).
 
 Unconfirmed sign-ups are deleted after 7 days.
+
+- **Welcome e-mails (day 1, 3 and 7)**: short tips after sign-up — add dishes, print the QR codes, choose a style. A tip that is already done is skipped, and owners can stop them with one click. Off until you switch it on.
+- **"Add my menu for me"**: restaurants can send photos of their paper menu (see [Menu requests](menu-requests.md)). On from the start.

@@ -20,6 +20,7 @@ const PUBLIC_ROUTES = [
     'POST api/v1/mobile/auth/google', 'POST api/v1/mobile/auth/google/finish',
     'GET api/v1/help/public', // sign-in help for signed-out people (QUESTIONS #194)
     'GET support', 'GET support/{slug}', // the public Help centre, linked from the footer (#230)
+    'GET health', // for uptime monitors: the overall state only (QUESTIONS #233)
     // "Continue with Google" (owner, 2026-11-17): Google's round trip and the new owner's restaurant name.
     'GET auth/google', 'GET auth/google/callback', 'GET api/v1/auth/google/pending', 'POST api/v1/auth/google/finish',
     'GET email/verify/{id}/{hash}', 'GET email/change/{user}/{hash}',

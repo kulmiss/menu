@@ -942,7 +942,7 @@
   },
   "menu_help": {
     "title": "Add my menu for me",
-    "hint": "No time to type your menu? Send photos of your paper menu (or a PDF). We type it in for you, usually within 2 working days, and e-mail you when it is ready.",
+    "hint": "No time to type your menu? Send photos of your paper menu (or a PDF). We type it in for you and e-mail you when it is ready.",
     "start": "Send photos of my menu",
     "files": "Photos or PDF of your menu",
     "files_hint": "Up to {{max}} files: one photo per page, sharp and flat. JPG, PNG, WebP or PDF.",

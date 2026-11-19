@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Notification;
  * Welcome e-mails on day 1, 3 and 7 (owner, 2026-11-19, QUESTIONS #235): behind
  * a switch, each once, skipped when already done, never late, with a way out.
  */
-function newRestaurant(): array
+function welcomeRestaurant(): array
 {
     [$owner, $tenant] = member(Role::Owner);
     $owner->forceFill(['email_verified_at' => now()])->save();
@@ -21,7 +21,7 @@ function newRestaurant(): array
 
 it('sends nothing while switched off', function () {
     Notification::fake();
-    [$owner] = newRestaurant();
+    [$owner] = welcomeRestaurant();
     $this->travel(1)->days();
     $this->artisan('onboarding:emails')->expectsOutputToContain('switched off')->assertExitCode(0);
     Notification::assertNothingSent();
@@ -30,7 +30,7 @@ it('sends nothing while switched off', function () {
 it('sends day 1, 3 and 7 once each, in order, to confirmed owners', function () {
     Notification::fake();
     PlatformSettings::save(['welcome_series' => true]);
-    [$owner, $tenant] = newRestaurant();
+    [$owner, $tenant] = welcomeRestaurant();
     [$manager] = member(Role::Manager, $tenant);
 
     $this->artisan('onboarding:emails');
@@ -54,7 +54,7 @@ it('sends day 1, 3 and 7 once each, in order, to confirmed owners', function () 
 it('skips a tip that is already done, and never sends old tips', function () {
     Notification::fake();
     PlatformSettings::save(['welcome_series' => true]);
-    [$owner, $tenant] = newRestaurant();
+    [$owner, $tenant] = welcomeRestaurant();
     [, $category] = sampleMenu($tenant);
     asTenant($tenant, fn () => collect(range(1, 4))->each(fn ($n) => Item::create(['category_id' => $category->id, 'name' => ['en' => "D{$n}"], 'price_minor' => 100])));
     $tenant->markQrDownloaded();
@@ -66,7 +66,7 @@ it('skips a tip that is already done, and never sends old tips', function () {
     Notification::assertNothingSent();                       // 5 dishes and a QR code already
 
     // Switched on late: a restaurant 6 days old gets no day 1 or day 3 tips.
-    [$late, $old] = newRestaurant();
+    [$late, $old] = welcomeRestaurant();
     $old->forceFill(['created_at' => now()->subDays(6)])->saveQuietly();
     $this->artisan('onboarding:emails');
     Notification::assertNotSentTo($late, WelcomeSeriesNotification::class);
@@ -74,7 +74,7 @@ it('skips a tip that is already done, and never sends old tips', function () {
 
 it('respects "no news e-mails" and has a one-click way out', function () {
     PlatformSettings::save(['welcome_series' => true]);
-    [$owner, $tenant] = newRestaurant();
+    [$owner, $tenant] = welcomeRestaurant();
     $owner->forceFill(['news_unsubscribed_at' => now()])->save();
     Notification::fake();
     $this->travelTo($tenant->created_at->copy()->addDays(1)->addHour());

@@ -15,7 +15,7 @@ it('runs everything from the one schedule:run cron line (docs/deploy.md)', funct
 it('runs the daily jobs at night in Addis Ababa while the app clock stays UTC (owner, 2026-11-14)', function () {
     expect(config('app.timezone'))->toBe('UTC');
     // Messages to people (push reminders, the two-factor reminder) go out in the Addis daytime instead.
-    $daytime = ['push:plan-reminders', 'push:followups', 'security:two-factor-reminders'];
+    $daytime = ['push:plan-reminders', 'push:followups', 'security:two-factor-reminders', 'onboarding:emails'];
     $daily = collect(app(Schedule::class)->events())
         ->filter(fn ($e) => preg_match('/^\d+ \d+ \* \* \*$/', $e->expression))
         ->reject(fn ($e) => collect($daytime)->contains(fn ($c) => str_contains((string) $e->command, $c)));

@@ -9,6 +9,7 @@ use App\Models\Impersonation;
 use App\Models\Invitation;
 use App\Models\Invoice;
 use App\Models\Membership;
+use App\Models\MenuRequest;
 use App\Models\Payment;
 use App\Models\RestaurantNote;
 use App\Models\Tenant;
@@ -98,7 +99,9 @@ it('makes every model with a tenant_id column use BelongsToTenant (except the do
     // Bridges, plus platform records only the Super Admin area reads (payments, "log in as"),
     // and invoices (Settings → Billing filters them by the current restaurant itself; tested in InvoiceTest).
     // App inbox lines are per user; tenant_id only says which restaurant a line is about (QUESTIONS #189).
-    $bridges = [Membership::class, ActivityLog::class, TenantSlugHistory::class, Payment::class, Impersonation::class, Invoice::class, RestaurantNote::class, CampaignRecipient::class, AppNotification::class];
+    // "Add my menu for me" requests: the Super Admin reads them across restaurants; the restaurant's own list
+    // filters by its id (tested in MenuRequestTest, QUESTIONS #235).
+    $bridges = [Membership::class, ActivityLog::class, TenantSlugHistory::class, Payment::class, Impersonation::class, Invoice::class, RestaurantNote::class, CampaignRecipient::class, AppNotification::class, MenuRequest::class];
 
     $offenders = collect(File::files(app_path('Models')))
         ->map(fn ($file) => 'App\\Models\\'.$file->getFilenameWithoutExtension())

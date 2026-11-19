@@ -23,6 +23,7 @@ How to set up and run the platform, in easy steps. The same pages are inside the
 - [Restaurants](restaurants.md) — Find, create, change, suspend and delete restaurants.
 - [Payments and invoices](payments.md) — Record a payment by hand. The invoice is made by itself.
 - [Messages and announcements](messages-and-announcements.md) — Tell restaurants about news: on their dashboard, or by e-mail.
+- [Menu requests ("Add my menu for me")](menu-requests.md) — Restaurants send photos of their paper menu; you type it in.
 
 ## 3. Plans and limits
 
