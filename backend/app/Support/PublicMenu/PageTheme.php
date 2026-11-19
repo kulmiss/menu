@@ -125,7 +125,9 @@ class PageTheme
             'theme_color' => $lightA,
             'style' => $style,
             // Style options, each used only in its own style (QUESTIONS #229).
-            'direction' => $style === 'arabic' && in_array($a->menu_direction, TenantAppearance::DIRECTIONS, true) ? $a->menu_direction : ($style === 'arabic' ? 'auto' : 'ltr'),
+            'direction' => in_array($style, TenantAppearance::DIRECTION_STYLES, true)
+                ? (in_array($a->menu_direction, TenantAppearance::DIRECTIONS, true) ? $a->menu_direction : 'auto')
+                : 'ltr',
             'halal' => $style === 'islamic' && $a->show_halal,
             'ramadan' => $style === 'islamic' && $a->ramadan_mode,
             'greyscale' => $style === 'mono' && $a->photos_greyscale,

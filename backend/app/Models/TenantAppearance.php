@@ -66,6 +66,9 @@ class TenantAppearance extends Model
     /** M–Q: styles with their own artwork, replaceable by the restaurant's banner and category photos. */
     public const ART_STYLES = ['coffee', 'grill', 'garden', 'coastal', 'luxe'];
 
+    /** Styles with "Menu direction" (right-to-left for Arabic menus): H and M–Q (QUESTIONS #229, #232). */
+    public const DIRECTION_STYLES = ['arabic', ...self::ART_STYLES];
+
     /** Values for a restaurant that never opened the Appearance screen. */
     public const DEFAULTS = [
         'logo_media_id' => null,

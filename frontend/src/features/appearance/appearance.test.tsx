@@ -295,9 +295,15 @@ describe('AppearancePage', () => {
         screen.getByRole('switch', { name: /Show the style's pictures/ })
       )
       .not.toBeInTheDocument()
+    await expect
+      .element(screen.getByText('Menu direction'))
+      .not.toBeInTheDocument()
 
     await userEvent.click(screen.getByRole('radio', { name: /P · Coastal/ }))
     await expect.poll(() => frame(screen).src).toContain('style=coastal')
+    // Menu direction, for Arabic menus (H and M–Q).
+    await userEvent.click(screen.getByRole('radio', { name: 'Right to left' }))
+    await expect.poll(() => frame(screen).src).toContain('menu_direction=rtl')
     const deco = screen.getByRole('switch', {
       name: /Show the style's pictures and icons/,
     })
@@ -305,7 +311,9 @@ describe('AppearancePage', () => {
     await userEvent.click(deco)
     await expect.poll(() => frame(screen).src).toContain('show_decoration=0')
     // The choice is kept when moving to another style of M–Q.
-    await userEvent.click(screen.getByRole('radio', { name: /Q · Fine Dining/ }))
+    await userEvent.click(
+      screen.getByRole('radio', { name: /Q · Fine Dining/ })
+    )
     await expect
       .element(
         screen.getByRole('switch', { name: /Show the style's pictures/ })

@@ -57,6 +57,15 @@ type StyleFlag =
   | 'photos_greyscale'
   | 'mono_accent'
   | 'show_decoration'
+/** Styles with "Menu direction": H and M–Q (QUESTIONS #229, #232). */
+const DIRECTION_STYLES: readonly MenuStyle[] = [
+  'arabic',
+  'coffee',
+  'grill',
+  'garden',
+  'coastal',
+  'luxe',
+]
 const STYLE_SWITCHES: Partial<Record<MenuStyle, readonly StyleFlag[]>> = {
   islamic: ['show_halal', 'ramadan_mode'],
   mono: ['photos_greyscale', 'mono_accent'],
@@ -316,7 +325,7 @@ function AppearanceForm({ initial }: { initial: Appearance }) {
               onChange={(style) => set('style', style)}
             />
 
-            {values.style === 'arabic' && (
+            {DIRECTION_STYLES.includes(values.style) && (
               <fieldset className='grid gap-2'>
                 <legend className='mb-1 text-sm font-medium'>
                   {t('appearance.direction')}
