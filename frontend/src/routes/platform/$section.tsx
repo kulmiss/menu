@@ -11,6 +11,7 @@ const SECTIONS = [
   'payments',
   'invoices',
   'messages',
+  'menu-requests',
   'backups',
   'mobile-app',
   'themes',

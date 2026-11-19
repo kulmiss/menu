@@ -92,6 +92,10 @@ class PlatformSettings
         'backup_s3_prefix' => 'menu-backups',
         'backup_s3_key' => '',
         'backup_s3_secret' => '', // encrypted (Crypt), never sent to the browser
+        // First-customer experience (owner, 2026-11-19, QUESTIONS #235): "Add my menu for me"
+        // requests, and the welcome e-mails on day 1, 3 and 7 after sign-up.
+        'menu_help_enabled' => true,
+        'welcome_series' => false,
         // Alerts (owner, 2026-11-19, QUESTIONS #233): server errors and failed go-live checks
         // e-mailed to every Super Admin and, optionally, sent to a Telegram chat.
         'alerts_email' => true,

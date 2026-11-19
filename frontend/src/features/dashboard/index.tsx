@@ -24,6 +24,8 @@ import { TwoFactorCard } from './two-factor-card'
 const Announcements = lazy(() => import('./announcements'))
 // Widgets (checklist, trend chart, plan, order stats, missing photos): on demand.
 const Widgets = lazy(() => import('./widgets'))
+// "Add my menu for me" (QUESTIONS #235): owners and managers only, on demand.
+const MenuHelp = lazy(() => import('./menu-help'))
 // The welcome tour: only on the first sign-in.
 const WelcomeTour = lazy(() => import('@/features/help/tour'))
 
@@ -94,6 +96,11 @@ export function Dashboard() {
             fallback={<Skeleton className='h-40 w-full' aria-busy='true' />}
           >
             <Widgets tenantId={tenantId} locale={locale} manager={manager} />
+          </Suspense>
+        )}
+        {tenant && manager && (
+          <Suspense fallback={null}>
+            <MenuHelp tenantId={tenantId} />
           </Suspense>
         )}
         {soldOutOn && (

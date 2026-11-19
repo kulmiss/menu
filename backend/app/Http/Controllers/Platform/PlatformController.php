@@ -352,6 +352,8 @@ class PlatformController extends Controller
             'signup_approval' => ['sometimes', 'boolean'],
             'google_login' => ['sometimes', 'boolean'],
             'signup_notify' => ['sometimes', 'boolean'],
+            'menu_help_enabled' => ['sometimes', 'boolean'],
+            'welcome_series' => ['sometimes', 'boolean'],
             'turnstile_enabled' => ['sometimes', 'boolean'],
             'turnstile_site_key' => ['sometimes', 'nullable', 'string', 'max:100'],
             'turnstile_secret' => ['sometimes', 'nullable', 'string', 'max:200'],

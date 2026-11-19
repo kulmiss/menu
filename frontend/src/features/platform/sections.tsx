@@ -16,6 +16,9 @@ const SCREENS = {
   messages: lazy(() =>
     import('./messages').then((m) => ({ default: m.MessagesPage }))
   ),
+  'menu-requests': lazy(() =>
+    import('./menu-requests').then((m) => ({ default: m.MenuRequestsPage }))
+  ),
   backups: lazy(() =>
     import('./backups').then((m) => ({ default: m.BackupsPage }))
   ),

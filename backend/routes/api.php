@@ -23,6 +23,7 @@ use App\Http\Controllers\Api\Restaurant\DashboardWidgetController;
 use App\Http\Controllers\Api\Restaurant\InfoController;
 use App\Http\Controllers\Api\Restaurant\InsightsController;
 use App\Http\Controllers\Api\Restaurant\InsightsExportController;
+use App\Http\Controllers\Api\Restaurant\MenuRequestController as RestaurantMenuRequestController;
 use App\Http\Controllers\Api\Restaurant\PdfMenuController;
 use App\Http\Controllers\Api\Restaurant\PricePeriodController;
 use App\Http\Controllers\Api\Restaurant\PromotionController;
@@ -49,6 +50,7 @@ use App\Http\Controllers\Platform\HelpArticleController;
 use App\Http\Controllers\Platform\InsightsController as PlatformInsightsController;
 use App\Http\Controllers\Platform\InvoiceController;
 use App\Http\Controllers\Platform\LandingController;
+use App\Http\Controllers\Platform\MenuRequestController;
 use App\Http\Controllers\Platform\MobileAppController;
 use App\Http\Controllers\Platform\PaymentController;
 use App\Http\Controllers\Platform\PlatformController;
@@ -221,6 +223,10 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::get('backups/{backup}/file', [BackupController::class, 'file'])->whereNumber('backup')->middleware('signed')->name('super.backups.file');
             Route::delete('backups/{backup}', [BackupController::class, 'destroy'])->whereNumber('backup');
             Route::put('alerts', [BackupController::class, 'alerts']);
+            Route::get('menu-requests', [MenuRequestController::class, 'index']);
+            Route::put('menu-requests/{menuRequest}', [MenuRequestController::class, 'update'])->whereNumber('menuRequest');
+            Route::get('menu-requests/{menuRequest}/files/{n}', [MenuRequestController::class, 'file'])->whereNumber(['menuRequest', 'n']);
+            Route::delete('menu-requests/{menuRequest}', [MenuRequestController::class, 'destroy'])->whereNumber('menuRequest');
             Route::post('alerts/test', [BackupController::class, 'testAlert'])->middleware('throttle:5,1');
             // Invoices (owner, 2026-11-13)
             Route::get('invoices', [InvoiceController::class, 'index']);
@@ -289,6 +295,10 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::delete('invitations/{invitation}', [InvitationController::class, 'destroy'])->whereNumber('invitation');
 
             Route::patch('account/slug', [AccountController::class, 'updateSlug']);
+
+            // "Add my menu for me" (QUESTIONS #235).
+            Route::get('menu-requests', [RestaurantMenuRequestController::class, 'index']);
+            Route::post('menu-requests', [RestaurantMenuRequestController::class, 'store'])->middleware('throttle:6,60');
 
             Route::get('activity', ActivityController::class);
 

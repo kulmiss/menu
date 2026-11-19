@@ -2,6 +2,7 @@
 
 use App\Jobs\SendCampaignBatch;
 use App\Models\AppNotification;
+use App\Models\MenuRequest;
 use App\Models\Tenant;
 use App\Support\Backups\Backups;
 use App\Support\Ops\Alerts;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schedule;
+use Illuminate\Support\Facades\Storage;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
@@ -69,6 +71,8 @@ Schedule::command('mobile:prune-tokens')->dailyAt('00:25');
 // Messages to owners go out in the Addis Ababa daytime (09:00 UTC = 12:00, 08:00 UTC = 11:00).
 Schedule::command('push:plan-reminders')->dailyAt('09:00');
 Schedule::command('push:followups')->dailyAt('08:00');
+// Welcome e-mails on day 1, 3 and 7 (QUESTIONS #235): mornings in Addis Ababa (06:40 UTC = 09:40), when switched on.
+Schedule::command('onboarding:emails')->dailyAt('06:40')->withoutOverlapping();
 Schedule::command('push:health')->everyFifteenMinutes()->withoutOverlapping(10);
 Schedule::call(fn () => AppNotification::where('created_at', '<', now()->subDays(AppNotification::KEEP_DAYS))->delete())
     ->dailyAt('00:35')->name('notifications:prune');
@@ -76,6 +80,13 @@ Schedule::call(fn () => AppNotification::where('created_at', '<', now()->subDays
 // Insights keep 13 months of daily counters (enough for "same month last year").
 Schedule::call(fn () => DB::table('stats_daily')->where('date', '<', now()->subDays(400)->toDateString())->delete())
     ->dailyAt('00:15')->name('stats:prune');
+
+// "Add my menu for me": photos of done requests are deleted after 30 days (QUESTIONS #235).
+Schedule::call(fn () => MenuRequest::where('status', 'done')->where('updated_at', '<', now()->subDays(30))->get()
+    ->each(function (MenuRequest $r) {
+        Storage::disk('local')->deleteDirectory($r->dir());
+        $r->delete();
+    }))->dailyAt('00:40')->name('menu-requests:prune');
 
 // Deleted restaurants are kept 30 days (Super Admin can restore), then purged.
 Schedule::call(fn () => Tenant::onlyTrashed()->where('deleted_at', '<', now()->subDays(30))->get()->each->forceDelete())

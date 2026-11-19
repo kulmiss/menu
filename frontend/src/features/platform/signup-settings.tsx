@@ -30,6 +30,9 @@ export type SignupSettingsData = {
   signup_plan_id: number | null
   signup_approval: boolean
   signup_notify: boolean
+  /** "Add my menu for me" and the day 1/3/7 welcome e-mails (QUESTIONS #235). */
+  menu_help_enabled?: boolean
+  welcome_series?: boolean
   /** Owners must set up two-factor (off: only encouraged). SECURITY_REPORT.md M17. */
   owner_two_factor_required?: boolean
   turnstile_enabled: boolean
@@ -58,6 +61,8 @@ export function SignupSettings({ initial }: { initial: SignupSettingsData }) {
       : FREE,
     signup_approval: initial.signup_approval,
     signup_notify: initial.signup_notify,
+    menu_help_enabled: initial.menu_help_enabled ?? true,
+    welcome_series: initial.welcome_series ?? false,
     owner_two_factor_required: initial.owner_two_factor_required ?? false,
     turnstile_enabled: initial.turnstile_enabled,
     google_login: initial.google_login ?? false,
@@ -72,6 +77,8 @@ export function SignupSettings({ initial }: { initial: SignupSettingsData }) {
       | 'signup_open'
       | 'signup_approval'
       | 'signup_notify'
+      | 'menu_help_enabled'
+      | 'welcome_series'
       | 'owner_two_factor_required'
       | 'turnstile_enabled'
       | 'google_login'
@@ -103,6 +110,8 @@ export function SignupSettings({ initial }: { initial: SignupSettingsData }) {
           v.signup_plan_id === FREE ? null : Number(v.signup_plan_id),
         signup_approval: v.signup_approval,
         signup_notify: v.signup_notify,
+        menu_help_enabled: v.menu_help_enabled,
+        welcome_series: v.welcome_series,
         owner_two_factor_required: v.owner_two_factor_required,
         turnstile_enabled: v.turnstile_enabled,
         google_login: v.google_login,
@@ -171,6 +180,8 @@ export function SignupSettings({ initial }: { initial: SignupSettingsData }) {
           </div>
           {toggle('signup_approval')}
           {toggle('signup_notify')}
+          {toggle('welcome_series')}
+          {toggle('menu_help_enabled')}
           {toggle('owner_two_factor_required')}
           {toggle('google_login')}
           {v.google_login && !initial.google_configured && (
