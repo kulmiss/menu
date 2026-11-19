@@ -57,6 +57,17 @@ class SiteController extends Controller
 
     public const DEMO = 'demo';
 
+    /**
+     * The demo menus the website links to: on a tablet or computer they get a bar to
+     * see them in a phone frame or as they are (owner, 2026-11-19).
+     *
+     * @return list<string>
+     */
+    public static function demoSlugs(): array
+    {
+        return [self::DEMO, ...array_values(self::STYLE_DEMOS)];
+    }
+
     public function home(): View
     {
         $s = PlatformSettings::all();

@@ -75,6 +75,18 @@ return [
     'address' => 'Address',
     'open_maps' => 'Open in Maps',
     'contact' => 'Contact',
+    'follow_us' => 'Follow us',
+    // Demo menus on a tablet or computer (owner, 2026-11-19).
+    'demo_view' => [
+        'label' => 'How to show this demo',
+        'title' => 'Demo menu',
+        'phone' => 'Phone',
+        'desktop' => 'Desktop',
+        'page_title' => ':name — on a phone',
+        'frame' => ':name menu on a phone',
+        'scan' => 'Scan to open it on your phone',
+        'hint' => 'Guests open your menu on their phone by scanning the QR code on the table.',
+    ],
     'call' => 'Call',
     'email' => 'Email',
     'wifi_name' => 'Network',

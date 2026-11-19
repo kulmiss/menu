@@ -113,6 +113,9 @@ Route::withoutMiddleware($cookieFree)->group(function () {
     Route::get('/{slug}/{branch}/menu.pdf', [PublicMenuController::class, 'pdf'])->where(['slug' => '[a-z0-9-]+', 'branch' => '[a-z0-9-]+']);
     Route::get('/{slug}/menu.pdf', [PublicMenuController::class, 'pdf'])->where('slug', '[a-z0-9-]+');
 
+    // A website demo menu in a phone frame (tablet and computer visitors, owner 2026-11-19).
+    Route::get('/phone/{slug}/{branch?}', [PublicMenuController::class, 'phone'])->where(['slug' => '[a-z0-9-]+', 'branch' => '[a-z0-9-]+']);
+
     // Guest menu page. Normally served as a static file by the web server; PHP
     // only renders it when the copy is missing (PLAN.md §15.2.1).
     Route::get('/{slug}/{branch?}', [PublicMenuController::class, 'show'])

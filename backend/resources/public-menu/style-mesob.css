@@ -41,5 +41,5 @@ li>.it.np:before{content:"";grid-area:im;align-self:start;width:.5rem;height:.5r
 dialog{border-radius:1.25rem 1.25rem 0 0}
 @media (min-width:48rem){dialog{border-radius:1.25rem}}
 /* Footer: the band again, centred name, groups on cards. */
-.fh{flex-direction:column;text-align:center}.fn{font-family:var(--fh);font-size:1.5rem}.ft .ab{margin-inline:auto;text-align:center}.fso{justify-content:center}.pdl{text-align:center}
+.fh{flex-direction:column;text-align:center}.fn{font-family:var(--fh);font-size:1.5rem}.ft .ab{margin-inline:auto;text-align:center}
 .fg>div{background:var(--bg);border-radius:1rem;padding:1rem}

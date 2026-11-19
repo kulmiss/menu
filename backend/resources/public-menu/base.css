@@ -142,16 +142,24 @@ dialog[open]::backdrop{animation:fd .28s ease}
 .ft h2{display:flex;align-items:center;gap:.45rem;font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mu);margin-bottom:.6rem}
 .ft h2 svg{width:1rem;height:1rem}
 .hs div{display:flex;justify-content:space-between;gap:1rem;padding:.3rem 0;border-bottom:1px dashed var(--ln)}
-.hs dt{color:var(--mu);white-space:nowrap}.hs dd{margin:0;font-variant-numeric:tabular-nums;text-align:end}
+.hs dt{color:var(--mu);white-space:nowrap}.hs dd{margin:0;font-variant-numeric:tabular-nums;text-align:end;direction:ltr;unicode-bidi:isolate}
 .fbt,.pdl a{display:inline-flex;align-items:center;gap:.5rem;min-height:2.75rem;margin-top:.6rem;padding:0 1.1rem;border-radius:99px;border:1px solid var(--ln);background:var(--bg);color:var(--fg);font-weight:600;text-decoration:none}
 .ft ul{margin:0}.ft li{border:0;background:none;border-radius:0;box-shadow:none;overflow:visible}
 .fc{display:grid;grid-template-columns:minmax(0,1fr);gap:.4rem}
 .fc a{display:flex;align-items:center;gap:.75rem;min-height:2.75rem;color:var(--fg);text-decoration:none}
 .fc svg{flex:none;width:2.5rem;height:2.5rem;padding:.55rem;border-radius:99px;background:var(--bg);border:1px solid var(--ln);color:var(--a)}
 .fc span{display:flex;flex-direction:column;line-height:1.25;overflow-wrap:anywhere}.fc small{font-size:.75rem;color:var(--mu)}
+/* Phone numbers, e-mail, handles and times always read left to right, also on a right-to-left menu
+   (bug 2026-11-19: "+251 11 000 1402" showed as "0877 000 11 251+", "11:00–23:30" as "23:30–11:00"). */
+.fc .v{direction:ltr;unicode-bidi:isolate;align-self:flex-start}
 .ob{display:block}.ob li{padding:.15rem 0}.ob a{display:inline-flex;align-items:center;min-height:2.75rem;font-weight:600;color:var(--fg)}.ob span{display:block;font-size:.875rem;color:var(--mu);margin-top:-.4rem}
-.fso{display:flex;flex-direction:row;flex-wrap:wrap;gap:.5rem;margin-top:1.75rem}
-.fso a{display:flex;align-items:center;justify-content:center;width:2.75rem;height:2.75rem;border-radius:99px;background:var(--bg);border:1px solid var(--ln);color:var(--fg)}
-.pdl{margin-top:1.25rem}
+/* Social links, the PDF link and "Menu by": a centred end to the page, with clear space above
+   (".ft .fso": ".ft ul{margin:0}" used to wipe the row's top margin, owner 2026-11-19). */
+.fsw{margin-top:2rem;text-align:center}
+.ft .fsw h2{justify-content:center}
+.ft .fso{display:flex;flex-direction:row;flex-wrap:wrap;justify-content:center;gap:.75rem}
+.fso a{display:flex;align-items:center;justify-content:center;width:2.75rem;height:2.75rem;border-radius:99px;background:var(--bg);border:1px solid var(--ln);color:var(--fg);transition:border-color .15s,color .15s}
+.fso a:hover{border-color:var(--a);color:var(--a)}
+.pdl{margin-top:1.5rem;text-align:center}
 .pb{margin-top:2rem;padding-top:1rem;border-top:1px solid var(--ln);text-align:center;font-size:.8rem;color:var(--mu)}
 .ft a:focus-visible{outline:2px solid var(--a);outline-offset:2px}

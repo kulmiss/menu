@@ -115,6 +115,15 @@ class InlineAssets
     }
 
     /**
+     * The demo menus' Phone / Desktop bar (only on the website's demo menus): shown from
+     * tablet width up, so phones and the speed checks (phone size) never see it.
+     */
+    public static function demoCss(): string
+    {
+        return self::$memo['demo'] ??= self::minifyCss((string) file_get_contents(resource_path('public-menu/demo.css')));
+    }
+
+    /**
      * A style's web font (resources/public-menu/fonts, only style H has one), written
      * once per version to public/menu-assets/{name}.{hash}.woff2 so it can be cached
      * for a year; `url(font:name)` in a style's CSS becomes this address.
