@@ -47,7 +47,7 @@ class Showcase
      * @param  array<string, mixed>  $def
      * @param  array<string, Plan>  $plans
      */
-    private function restaurant(array $def, array $plans): Tenant
+    public function restaurant(array $def, array $plans): Tenant
     {
         $tenant = Tenant::create([
             'slug' => $def['slug'], 'name' => $def['name'], 'plan_id' => $plans[$def['plan']]->id ?? null,

@@ -48,8 +48,11 @@ export function PlatformLayout() {
   const needs2fa = !me.two_factor_enabled && path !== '/platform/security'
   const [searching, setSearching] = useState(false)
   const wizardOpen = useSetupWizard((s) => s.open)
+  // Not before two-factor is on: the server holds back the wizard's data until then (also on the
+  // two-factor page itself, where it used to open empty over the "Turn on" button).
   const showWizard =
-    !needs2fa && (wizardOpen || me.onboarding?.setup_needed === true)
+    me.two_factor_enabled === true &&
+    (wizardOpen || me.onboarding?.setup_needed === true)
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
