@@ -6,7 +6,11 @@ import { describe, expect, it, vi } from 'vitest'
 
 type Handler = (e: unknown) => void
 
-function setup(saved: Response | undefined, fresh: Response) {
+function setup(
+  saved: Response | undefined,
+  fresh: Response,
+  url = 'https://menu.test/demo'
+) {
   const handlers: Record<string, Handler> = {}
   const stored: Record<string, Response> = {}
   const page = { url: 'https://menu.test/demo', postMessage: vi.fn() }
@@ -36,11 +40,11 @@ function setup(saved: Response | undefined, fresh: Response) {
   const waits: Promise<unknown>[] = []
   let shown: Promise<Response> | undefined
   handlers.fetch({
-    request: new Request('https://menu.test/demo', { mode: 'same-origin' }),
+    request: new Request(url, { mode: 'same-origin' }),
     respondWith: (p: Promise<Response>) => (shown = p),
     waitUntil: (p: Promise<unknown>) => waits.push(p),
   })
-  return { page, other, stored, shown: () => shown!, waits, handlers }
+  return { page, other, stored, shown: () => shown, waits, handlers }
 }
 
 // Request objects can't be created with mode "navigate", so the test request
@@ -60,7 +64,7 @@ describe('guest menu service worker', () => {
       html('Macchiato Br 80', '"v2"')
     )
 
-    expect(await (await t.shown()).text()).toContain('Br 75')
+    expect(await (await t.shown()!).text()).toContain('Br 75')
     await settle()
     expect(t.stored['/demo']).toBeDefined()
     expect(t.page.postMessage).toHaveBeenCalledWith('mu')
@@ -96,7 +100,7 @@ describe('guest menu service worker', () => {
   it('has nothing to tell on a first visit (no saved copy)', async () => {
     const t = setup(undefined, html('Br 80', '"v2"'))
 
-    expect(await (await t.shown()).text()).toContain('Br 80')
+    expect(await (await t.shown()!).text()).toContain('Br 80')
     await settle()
     expect(t.page.postMessage).not.toHaveBeenCalled()
   })
@@ -112,6 +116,21 @@ describe('guest menu service worker', () => {
     expect(t.page.postMessage).toHaveBeenCalledWith('mu')
     t.page.postMessage.mockClear()
     t.handlers.message({ data: Date.now() + 1000, source: t.page }) // opened after the change
+    expect(t.page.postMessage).not.toHaveBeenCalled()
+  })
+
+  // A website demo tried in another layout (owner, 2026-11-21): straight from the
+  // network, never the saved copy of the page, and never saved over it.
+  it('leaves a demo with ?layout= to the network', async () => {
+    const t = setup(
+      html('Own layout', '"v1"'),
+      html('Grid layout', '"v2"'),
+      'https://menu.test/demo?layout=grid'
+    )
+
+    expect(t.shown()).toBeUndefined()
+    await settle()
+    expect(t.stored['/demo']).toBeUndefined()
     expect(t.page.postMessage).not.toHaveBeenCalled()
   })
 })

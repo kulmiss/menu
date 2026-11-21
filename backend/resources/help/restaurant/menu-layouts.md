@@ -23,3 +23,5 @@ Using the other layout (a grid for a list style, or a list for a grid style) is 
 **See it before you save:** the phone on the right shows your menu as you change it. Tap **Light** or **Dark** above it to see how it looks on a phone in day mode or night mode. **Preview on a computer** shows it on a big screen.
 
 Tap **Save**. Guests see the new layout at once.
+
+**Try them first:** on the website's demo menus, use **Grid · List · Text** in the bar at the top (on a tablet or computer) to see any style in each layout.

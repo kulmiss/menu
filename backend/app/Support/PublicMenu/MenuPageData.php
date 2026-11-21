@@ -36,16 +36,17 @@ class MenuPageData
 
     /**
      * @param  bool  $periods  apply time-based prices running now (off for the printable PDF menu)
+     * @param  bool|null  $layouts  another layout than the style's own allowed (null: as the plan says; a website demo tries any)
      * @return array<string, mixed>
      */
-    public function build(Tenant $tenant, ?TenantAppearance $appearance = null, ?Branch $branch = null, bool $periods = true): array
+    public function build(Tenant $tenant, ?TenantAppearance $appearance = null, ?Branch $branch = null, bool $periods = true, ?bool $layouts = null): array
     {
-        return $this->current->runAs($tenant, function () use ($tenant, $appearance, $branch, $periods) {
+        return $this->current->runAs($tenant, function () use ($tenant, $appearance, $branch, $periods, $layouts) {
             $branches = Branch::where('is_active', true)->orderByDesc('is_default')->orderBy('sort')->orderBy('id')->get();
             $branch ??= $branches->firstWhere('is_default', true) ?? $branches->first();
             $branchId = $branch?->id;
             $appearance ??= TenantAppearance::current();
-            $theme = PageTheme::from($appearance, Features::styles($tenant), Features::enabled($tenant, 'layouts'));
+            $theme = PageTheme::from($appearance, Features::styles($tenant), $layouts ?? Features::enabled($tenant, 'layouts'));
             if (! Features::enabled($tenant, 'share')) {
                 $theme['show_share'] = false;
             }
