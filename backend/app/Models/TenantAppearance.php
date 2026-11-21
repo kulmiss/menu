@@ -21,7 +21,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property bool $show_banner banner on the guest page (kept when off)
  * @property string|null $banner_text over|under (logo and name on or below the banner); null = style default
  * @property bool $show_prices
- * @property bool $show_photos
+ * @property bool $show_photos off: the text layout, whatever menu_layout says
+ * @property string|null $menu_layout grid|list (owner, 2026-11-21); null = the style's own layout
  * @property bool $show_descriptions
  * @property bool $show_calories
  * @property bool $show_share "Share menu" button on the guest page
@@ -37,7 +38,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read Media|null $logo
  * @property-read Media|null $cover
  */
-#[Fillable(['logo_media_id', 'cover_media_id', 'primary_color', 'font', 'style', 'banner_text', 'show_prices', 'show_photos', 'show_descriptions', 'show_calories', 'show_share', 'show_pdf_link', 'show_order_list', 'show_other_branches', 'show_logo', 'show_banner', 'menu_direction', 'show_halal', 'ramadan_mode', 'photos_greyscale', 'mono_accent', 'show_decoration', 'theme_id'])]
+#[Fillable(['logo_media_id', 'cover_media_id', 'primary_color', 'font', 'style', 'banner_text', 'show_prices', 'show_photos', 'menu_layout', 'show_descriptions', 'show_calories', 'show_share', 'show_pdf_link', 'show_order_list', 'show_other_branches', 'show_logo', 'show_banner', 'menu_direction', 'show_halal', 'ramadan_mode', 'photos_greyscale', 'mono_accent', 'show_decoration', 'theme_id'])]
 class TenantAppearance extends Model
 {
     use BelongsToTenant;
@@ -53,6 +54,12 @@ class TenantAppearance extends Model
     public const DIRECTIONS = ['auto', 'ltr', 'rtl'];
 
     public const DEFAULT_STYLE = 'grid';
+
+    /**
+     * Layouts a restaurant can pick instead of its style's own (owner, 2026-11-21): photo cards
+     * in two columns, or a list with small photos. The text layout is "show_photos" off.
+     */
+    public const LAYOUTS = ['grid', 'list'];
 
     /** Guest-page extras switched in Appearance (optional in API requests; added 2026-11-11). */
     public const EXTRA_FLAGS = ['show_share', 'show_pdf_link', 'show_order_list', 'show_other_branches', 'show_logo', 'show_banner', ...self::STYLE_FLAGS];
@@ -79,6 +86,7 @@ class TenantAppearance extends Model
         'banner_text' => null,
         'show_prices' => true,
         'show_photos' => true,
+        'menu_layout' => null,
         'show_descriptions' => true,
         'show_calories' => true,
         'show_share' => true,

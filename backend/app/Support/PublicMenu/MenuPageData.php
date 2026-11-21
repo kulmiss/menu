@@ -45,7 +45,7 @@ class MenuPageData
             $branch ??= $branches->firstWhere('is_default', true) ?? $branches->first();
             $branchId = $branch?->id;
             $appearance ??= TenantAppearance::current();
-            $theme = PageTheme::from($appearance, Features::styles($tenant));
+            $theme = PageTheme::from($appearance, Features::styles($tenant), Features::enabled($tenant, 'layouts'));
             if (! Features::enabled($tenant, 'share')) {
                 $theme['show_share'] = false;
             }

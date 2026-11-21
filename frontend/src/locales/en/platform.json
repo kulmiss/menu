@@ -130,6 +130,7 @@
     "style_garden": "Menu style O · Garden Fresh",
     "style_coastal": "Menu style P · Coastal",
     "style_luxe": "Menu style Q · Fine Dining",
+    "layouts": "Menu layouts (grid or list, not only the style’s own)",
     "pdf_menu": "Printable PDF menu",
     "order_list": "My order (add to order buttons)",
     "price_periods": "Time-based prices (happy hour)",

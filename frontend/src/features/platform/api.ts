@@ -36,6 +36,7 @@ export const FEATURES = [
   'style_garden',
   'style_coastal',
   'style_luxe',
+  'layouts',
 ] as const
 export const LIMITS = [
   'menus',

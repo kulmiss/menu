@@ -56,11 +56,16 @@ class AppearanceController extends Controller
         return response()->json(['data' => $this->payload($model->fresh(['logo', 'cover']) ?? $model)]);
     }
 
-    /** The guest page with the settings in the query string, not saved and not cached. */
+    /**
+     * The guest page with the settings in the query string, not saved and not
+     * cached. `scheme` (light|dark) shows it as on a phone in that mode, whatever
+     * the computer's own mode (owner, 2026-11-21).
+     */
     public function preview(Request $request, Tenant $tenant, MenuPageData $data): Response
     {
         Gate::authorize('restaurant.manage');
         $values = $request->validate($this->rules(partial: true));
+        $scheme = $request->validate(['scheme' => ['sometimes', Rule::in(['light', 'dark'])]])['scheme'] ?? null;
         foreach (['show_prices', 'show_photos', 'show_descriptions', 'show_calories', ...TenantAppearance::EXTRA_FLAGS] as $flag) {
             if (array_key_exists($flag, $values)) {
                 $values[$flag] = $request->boolean($flag);
@@ -72,6 +77,10 @@ class AppearanceController extends Controller
         $appearance->setRelation('cover', $appearance->cover_media_id ? Media::find($appearance->cover_media_id) : null);
 
         $html = view('public.menu', [...$data->build($tenant, $appearance), 'preview' => true])->render();
+        if ($scheme !== null) {
+            // The dark-mode rules always on (dark) or never (light).
+            $html = (string) preg_replace('/@media\s*\(\s*prefers-color-scheme\s*:\s*dark\s*\)/', $scheme === 'dark' ? '@media all' : '@media not all', $html);
+        }
         $request->attributes->set('guest_menu', true);
 
         return response($html, 200, [
@@ -96,6 +105,7 @@ class AppearanceController extends Controller
             'menu_direction' => ['sometimes', Rule::in(TenantAppearance::DIRECTIONS)],
             'show_prices' => [$req, 'boolean'],
             'show_photos' => [$req, 'boolean'],
+            'menu_layout' => ['sometimes', 'nullable', Rule::in(TenantAppearance::LAYOUTS)],
             'show_descriptions' => [$req, 'boolean'],
             'show_calories' => [$req, 'boolean'],
             ...array_fill_keys(TenantAppearance::EXTRA_FLAGS, ['sometimes', 'boolean']),
@@ -113,6 +123,14 @@ class AppearanceController extends Controller
         return $tenant ? Features::styles($tenant) : TenantAppearance::STYLES;
     }
 
+    /** The plan has "Layouts": a layout other than the style's own (Plus and up). */
+    private function layoutsAllowed(): bool
+    {
+        $tenant = app(CurrentTenant::class)->get();
+
+        return $tenant === null || Features::enabled($tenant, 'layouts');
+    }
+
     /** @return array<string, mixed> */
     private function payload(TenantAppearance $a): array
     {
@@ -127,6 +145,12 @@ class AppearanceController extends Controller
             'banner' => array_map(fn (array $s) => ['ratio' => $s['banner'], 'text' => $s['text']], PageTheme::STYLES),
             'show_prices' => $a->show_prices,
             'show_photos' => $a->show_photos,
+            // Layouts (owner, 2026-11-21): the choice (null = the style's own), each style's own,
+            // whether the plan allows another one, and what guests see now.
+            'menu_layout' => $a->menu_layout,
+            'style_layouts' => array_map(fn (array $s) => $s['layout'], PageTheme::STYLES),
+            'layouts' => $this->layoutsAllowed(),
+            'layout' => PageTheme::layout(TenantAppearance::effectiveStyle($a->style, $this->allowedStyles()), $a->menu_layout, $a->show_photos, $this->layoutsAllowed()),
             'show_descriptions' => $a->show_descriptions,
             'show_calories' => $a->show_calories,
             ...collect(TenantAppearance::EXTRA_FLAGS)->mapWithKeys(fn (string $f) => [$f => (bool) $a->{$f}])->all(),

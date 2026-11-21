@@ -1,4 +1,20 @@
-# Progress — long demo menus with photos (21 Nov 2026)
+# Progress — layouts, new styles R–T, new Appearance page (21 Nov 2026)
+
+📍 Now: PR 1 (layout setting + shared CSS) into develop, CI running
+📊 Progress: ▓▓░░░░░░░░ 20%
+✅ Just finished: `menu_layout` setting (style's own · grid · list; text = photos off), plan feature `layouts` (off on Free), preview in light or dark mode
+⏭️ Next: 3 new styles R · Burger & Pizza, S · Injera & Tibs, T · Juice & Drinks with long demo menus; then layout CSS per style; then the new Appearance page
+⚠️ Waiting for the owner: nothing (merges later)
+⏱️ Time left: several PRs
+
+## Steps
+- [x] 1. Layout setting, plan feature, shared CSS, preview light/dark (QUESTIONS #242)
+- [ ] 2. New styles R, S, T with long demo menus and photos
+- [ ] 3. Layout CSS fine-tuned per style (A–G, H–L, M–T) with phone screenshots
+- [ ] 4. New Appearance page: style, layout, colours & font, logo & banner, what guests see; light/dark phone preview
+- [ ] 5. Grid · List · Text switch on the demo bar and /phone/ page; help article
+
+# Earlier: long demo menus with photos (21 Nov 2026)
 
 📍 Now: PR into develop, CI running
 📊 Progress: ▓▓▓▓▓▓▓▓▓░ 90%

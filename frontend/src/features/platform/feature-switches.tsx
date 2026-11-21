@@ -56,6 +56,7 @@ const GROUPS: { id: string; keys: string[] }[] = [
       'style_garden',
       'style_coastal',
       'style_luxe',
+      'layouts',
     ],
   },
   {

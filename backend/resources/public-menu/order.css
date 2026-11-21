@@ -6,3 +6,9 @@
 .ad:before{content:"";position:absolute;inset:.4375rem;border-radius:50%;background:linear-gradient(var(--af),var(--af)) center/.75rem 2px no-repeat,linear-gradient(var(--af),var(--af)) center/2px .75rem no-repeat,var(--a);box-shadow:0 1px 3px #0004}
 .np>.ad{top:50%;margin-top:-1.375rem}
 li>.it.ao.np{padding-inline-end:2.75rem}
+/* Layouts: on a grid card the "+" sits on the photo's corner; in a list it sits at the end of the row. */
+.L-grid li>.it .ad,.L-grid li>.it.np>.ad{top:.15rem;margin-top:0;inset-inline-start:auto;inset-inline-end:.15rem}
+.L-grid li>.it.ao{padding-inline-end:0}
+.L-grid li>.it.ao.np{padding-inline-end:2.75rem}
+.L-list li>.it .ad,.L-list li>.it.np>.ad{top:50%;margin-top:-1.375rem;inset-inline-start:auto;inset-inline-end:.2rem}
+.L-list li>.it.ao,.L-list li>.it.ao.np{padding-inline-end:3.1rem}

@@ -27,6 +27,7 @@ return [
         'style_garden' => 'Menu style O · Garden Fresh',
         'style_coastal' => 'Menu style P · Coastal',
         'style_luxe' => 'Menu style Q · Fine Dining',
+        'layouts' => 'Menu layouts (grid or list, not only the style’s own)',
         'price_periods' => 'Happy hour (time-based prices)',
         'sold_out' => '“Sold out” marks',
         'share' => '“Share” button on the menu',
