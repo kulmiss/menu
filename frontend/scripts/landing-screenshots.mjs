@@ -81,7 +81,7 @@ const styles = {
   mesob: 'demo-mesob', lounge: 'demo-lounge', board: 'demo-street', arabic: 'demo-mandi',
   islamic: 'demo-halal', somali: 'demo-xamar', mono: 'demo-atelier', colour: 'demo-juicy',
   coffee: 'demo-jebena', grill: 'demo-firewood', garden: 'demo-green-spoon', coastal: 'demo-dhow',
-  luxe: 'demo-maison',
+  luxe: 'demo-maison', burger: 'demo-bigbite', injera: 'demo-shekla', juice: 'demo-spris',
 }
 mkdirSync(join(out, 'styles'), { recursive: true })
 const thumbs = await browser.newContext({ viewport: { width: 375, height: 760 }, deviceScaleFactor: 2, colorScheme: 'light' })

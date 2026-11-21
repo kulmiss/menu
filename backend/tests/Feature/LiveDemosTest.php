@@ -30,7 +30,7 @@ beforeEach(function () {
 
 it('creates the café and one demo restaurant per menu style on a live server, with no way to sign in', function () {
     $this->artisan('demo:live', ['--force' => true])->assertSuccessful()
-        ->expectsOutputToContain('18 demo restaurant(s) created, 18 in total.');
+        ->expectsOutputToContain('21 demo restaurant(s) created, 21 in total.');
 
     // Exactly the addresses the website links to: /demo and the "More menu styles" row.
     expect(Tenant::pluck('slug')->sort()->values()->all())->toBe(collect(SiteController::demoSlugs())->sort()->values()->all());
@@ -48,16 +48,16 @@ it('creates the café and one demo restaurant per menu style on a live server, w
     }
     expect(Auth::attempt(['email' => 'demo@example.com', 'password' => 'password']))->toBeFalse();
     // Super Admin still sees them as demo data (and can delete them in one go).
-    expect(SetupStatus::demo()->count())->toBe(18);
+    expect(SetupStatus::demo()->count())->toBe(21);
 
     // A sales demo never runs out, and gets no invented visitors.
     expect(Tenant::where('paid_until', '<', now()->addYears(9))->exists())->toBeFalse()
         ->and(DB::table('stats_daily')->count())->toBe(0);
 
-    // Long menus: a photo on every dish, except style D, which shows none.
+    // Long menus (S · Injera & Tibs short on purpose): a photo on every dish, except style D, which shows none.
     foreach (SiteController::STYLE_DEMOS as $style => $slug) {
         [$dishes, $bare] = app(CurrentTenant::class)->runAs(Tenant::where('slug', $slug)->sole(), fn () => [Item::count(), Item::whereNull('media_id')->count()]);
-        expect($dishes)->toBeGreaterThanOrEqual(35, $slug)
+        expect($dishes)->toBeGreaterThanOrEqual(SeedLiveDemos::SHORT_MENUS[$slug] ?? 35, $slug)
             ->and($bare)->toBe($style === 'minimal' ? $dishes : 0, $slug);
     }
 
@@ -75,7 +75,7 @@ it('leaves existing demo restaurants alone when run again, and only adds what is
     Tenant::where('slug', 'demo-fine')->update(['name' => 'Renamed by the owner']);
 
     $this->artisan('demo:live', ['--force' => true])->assertSuccessful()
-        ->expectsOutputToContain('1 demo restaurant(s) created, 18 in total.');
+        ->expectsOutputToContain('1 demo restaurant(s) created, 21 in total.');
     expect(Tenant::where('slug', 'demo-juicy')->exists())->toBeTrue()
         ->and(Tenant::where('slug', 'demo-fine')->value('name'))->toBe('Renamed by the owner')->not->toBe($name);
 });
@@ -100,7 +100,7 @@ it('gives every style demo a long menu, with a different real photo for every di
     foreach (SeedLiveDemos::restaurants() as $def) {
         $dishes = collect($def['catalogue']['menus'])->flatMap(fn ($menu) => $menu['categories'])->flatMap(fn ($category) => $category[2]);
         $photos = $dishes->flatMap(fn ($dish) => $dish[4]['ph'] ?? []);
-        expect($dishes->count())->toBeGreaterThanOrEqual(35, $def['slug']);
+        expect($dishes->count())->toBeGreaterThanOrEqual(SeedLiveDemos::SHORT_MENUS[$def['slug']] ?? 35, $def['slug']);
         if ($def['style'] === 'minimal') {
             // Style D shows no photos: nothing stored that is never shown.
             expect($photos)->toBeEmpty($def['slug']);
@@ -130,8 +130,8 @@ it('replaces the demo restaurants with --refresh, removing their photos, and nev
     Tenant::where('slug', 'demo-pizza')->sole()->delete();
 
     $this->artisan('demo:live', ['--force' => true, '--refresh' => true])->assertSuccessful()
-        ->expectsOutputToContain('17 demo restaurant(s) deleted.')
-        ->expectsOutputToContain('17 demo restaurant(s) created, 18 in total.');
+        ->expectsOutputToContain('20 demo restaurant(s) deleted.')
+        ->expectsOutputToContain('20 demo restaurant(s) created, 21 in total.');
 
     expect(Tenant::where('slug', 'demo-fine')->sole())->name->toBe('Lumière Table')->id->not->toBe($fine->id)
         ->and(Tenant::where('slug', 'demo-pizza')->exists())->toBeTrue()

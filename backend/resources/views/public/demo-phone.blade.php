@@ -34,9 +34,10 @@ body{display:flex;flex-direction:column;background:#0b1120;color:#e2e8f0;font:16
 </style>
 </head>
 <body>
-<nav class="dvb" aria-label="{{ __('public.demo_view.label') }}"><b>{{ __('public.demo_view.title') }}</b><span class="dvs"><a aria-current="page"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg>{{ __('public.demo_view.phone') }}</a><a href="{{ $path }}"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M8 20.5h8M12 17v3.5"/></svg>{{ __('public.demo_view.desktop') }}</a></span></nav>
+@php $q = $layout ? '?layout='.$layout : ''; $now = $layout ?? $own; @endphp
+<nav class="dvb" aria-label="{{ __('public.demo_view.label') }}"><b>{{ __('public.demo_view.title') }}</b>@if ($photos)<span class="dvs dvl" role="group" aria-label="{{ __('public.demo_view.layout') }}">@foreach (['grid', 'list', 'text'] as $l)<a {!! $l === $now ? 'aria-current="true"' : 'href="'.e('/phone'.$path.($l === $own ? '' : '?layout='.$l)).'"' !!}>{{ __('public.demo_view.'.$l) }}</a>@endforeach</span>@endif<span class="dvs"><a aria-current="page"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg>{{ __('public.demo_view.phone') }}</a><a href="{{ $path }}{{ $q }}"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M8 20.5h8M12 17v3.5"/></svg>{{ __('public.demo_view.desktop') }}</a></span></nav>
 <main class="stage">
-<div class="ph"><iframe src="{{ $path }}" title="{{ __('public.demo_view.frame', ['name' => $tenant->name]) }}"></iframe></div>
+<div class="ph"><iframe src="{{ $path }}{{ $q }}" title="{{ __('public.demo_view.frame', ['name' => $tenant->name]) }}"></iframe></div>
 <div class="side">
 <h1>{{ $tenant->name }}</h1>
 <p>{{ __('public.demo_view.hint') }}</p>

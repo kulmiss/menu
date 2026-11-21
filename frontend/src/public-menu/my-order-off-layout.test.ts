@@ -7,7 +7,17 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { page } from 'vitest/browser'
 import { GUEST_STYLES } from './guest-styles'
 
-const RTL = ['arabic', 'coffee', 'grill', 'garden', 'coastal', 'luxe']
+const RTL = [
+  'arabic',
+  'coffee',
+  'grill',
+  'garden',
+  'coastal',
+  'luxe',
+  'burger',
+  'injera',
+  'juice',
+]
 const NAMES = [
   'Shaah',
   'Bariis iskukaris with hilib ari and banana on the side',

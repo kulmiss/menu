@@ -23,3 +23,5 @@ li>.it .tg{grid-area:tg}
 li>.it{--adt:1rem}
 /* Footer: centred name and socials, hairline rule above the groups. */
 .ft{background:var(--bg)}.fh{flex-direction:column;text-align:center}.fn{font-family:var(--fh);font-weight:500;font-size:1.5rem}.ft .ab{margin-inline:auto;text-align:center}.fg{border-top:1px solid var(--ln);padding-top:1.5rem}
+/* Layout "grid" (QUESTIONS #242): each dish on a calm card. */
+.L-grid section li{background:var(--card);border:1px solid var(--ln);border-radius:1rem}

@@ -32,59 +32,70 @@ class PageTheme
      * banner's shape and text place, and the dish photos: their width on
      * screen (`photo`, `lcp` for the first one), and how many load at once
      * without / with a banner (`fold`, §15.2.4). `dark_only` styles have one
-     * palette for light and dark phones (light = dark surface).
+     * palette for light and dark phones (light = dark surface). `layout` is the
+     * style's own layout: grid (photo on top), list (photo at the side) or text.
      */
     public const STYLES = [
-        'editorial' => ['light' => '#f3ebe0', 'dark' => '#231c18', 'heading' => 'serif', 'banner' => [16, 9], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
+        'editorial' => ['layout' => 'grid', 'light' => '#f3ebe0', 'dark' => '#231c18', 'heading' => 'serif', 'banner' => [16, 9], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
             'photo' => '(min-width:44rem) 672px, 100vw', 'lcp' => '(min-width:44rem) 672px, 44vw', 'fold' => [2, 0]],
-        'grid' => ['light' => '#f5f7f6', 'dark' => '#18201d', 'heading' => 'system', 'banner' => [2, 1], 'text' => 'over', 'sizes' => '(min-width:44rem) 680px, calc(100vw - 1.5rem)',
+        'grid' => ['layout' => 'grid', 'light' => '#f5f7f6', 'dark' => '#18201d', 'heading' => 'system', 'banner' => [2, 1], 'text' => 'over', 'sizes' => '(min-width:44rem) 680px, calc(100vw - 1.5rem)',
             'photo' => '(min-width:40rem) 220px, 50vw', 'lcp' => '(min-width:40rem) 220px, 40vw', 'fold' => [4, 0]],
-        'bistro' => ['light' => '#faf8f5', 'dark' => '#161412', 'heading' => 'serif', 'banner' => [5, 2], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
+        'bistro' => ['layout' => 'list', 'light' => '#faf8f5', 'dark' => '#161412', 'heading' => 'serif', 'banner' => [5, 2], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
             'photo' => '104px', 'lcp' => '104px', 'fold' => [5, 0]],
         // D · Minimal: no dish photos at all, text list (owner, 2026-11-12).
-        'minimal' => ['light' => '#f5f5f4', 'dark' => '#1a1a19', 'heading' => 'system', 'banner' => [5, 2], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
+        'minimal' => ['layout' => 'text', 'light' => '#f5f5f4', 'dark' => '#1a1a19', 'heading' => 'system', 'banner' => [5, 2], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
             'photo' => '1px', 'lcp' => '1px', 'fold' => [0, 0]],
         // E · Mesob: warm, woven bands, round "platter" photos (owner, 2026-11-18).
-        'mesob' => ['light' => '#f8f0e4', 'dark' => '#231a14', 'heading' => 'serif', 'banner' => [5, 2], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
+        'mesob' => ['layout' => 'list', 'light' => '#f8f0e4', 'dark' => '#231a14', 'heading' => 'serif', 'banner' => [5, 2], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
             'photo' => '76px', 'lcp' => '76px', 'fold' => [5, 0]],
         // F · Night Lounge: always dark, a soft glow in the brand colour (owner, 2026-11-18).
-        'lounge' => ['light' => '#17131f', 'dark' => '#17131f', 'heading' => 'system', 'banner' => [2, 1], 'text' => 'over', 'sizes' => '(min-width:44rem) 704px, 100vw',
+        'lounge' => ['layout' => 'list', 'light' => '#17131f', 'dark' => '#17131f', 'heading' => 'system', 'banner' => [2, 1], 'text' => 'over', 'sizes' => '(min-width:44rem) 704px, 100vw',
             'photo' => '68px', 'lcp' => '68px', 'fold' => [6, 0], 'dark_only' => true],
         // G · Street Board: a clean chalkboard, price tags (owner, 2026-11-18).
-        'board' => ['light' => '#253530', 'dark' => '#253530', 'heading' => 'board', 'banner' => [2, 1], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
+        'board' => ['layout' => 'list', 'light' => '#253530', 'dark' => '#253530', 'heading' => 'board', 'banner' => [2, 1], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
             'photo' => '72px', 'lcp' => '72px', 'fold' => [5, 0], 'dark_only' => true],
         // H · Arabic: sand, the brand colour as a scalloped band, gold ornaments, Kufi headings, right-to-left when the menu is (owner, 2026-11-18).
-        'arabic' => ['light' => '#f6efe2', 'dark' => '#172723', 'heading' => 'kufi', 'banner' => [5, 2], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
+        'arabic' => ['layout' => 'list', 'light' => '#f6efe2', 'dark' => '#172723', 'heading' => 'kufi', 'banner' => [5, 2], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
             'photo' => '72px', 'lcp' => '72px', 'fold' => [5, 0]],
         // I · Islamic: star lattice, an arch-shaped header and arched photos in two columns, teal and cream (owner, 2026-11-18).
-        'islamic' => ['light' => '#f7f3e8', 'dark' => '#132b28', 'heading' => 'serif', 'banner' => [5, 2], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
+        'islamic' => ['layout' => 'grid', 'light' => '#f7f3e8', 'dark' => '#132b28', 'heading' => 'serif', 'banner' => [5, 2], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
             'photo' => '(min-width:40rem) 224px, 47vw', 'lcp' => '(min-width:40rem) 224px, 45vw', 'fold' => [4, 0]],
         // J · Somali: ocean band with waves, woven-basket stripe, aqal-dome marks (owner, 2026-11-18).
-        'somali' => ['light' => '#f2f8fc', 'dark' => '#10263a', 'heading' => 'system', 'banner' => [2, 1], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
+        'somali' => ['layout' => 'list', 'light' => '#f2f8fc', 'dark' => '#10263a', 'heading' => 'system', 'banner' => [2, 1], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
             'photo' => '80px', 'lcp' => '80px', 'fold' => [5, 0]],
         // K · Black & White: monochrome, big serif, hairlines, dotted price leaders (owner, 2026-11-18).
-        'mono' => ['light' => '#f4f4f4', 'dark' => '#1b1b1b', 'heading' => 'didone', 'banner' => [2, 1], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
+        'mono' => ['layout' => 'list', 'light' => '#f4f4f4', 'dark' => '#1b1b1b', 'heading' => 'didone', 'banner' => [2, 1], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
             'photo' => '88px', 'lcp' => '88px', 'fold' => [5, 0], 'mono' => true],
         // L · Colourful: one bright colour per category, made from the brand colour (owner, 2026-11-18).
-        'colour' => ['light' => '#fffaf2', 'dark' => '#1e1b2e', 'heading' => 'rounded', 'banner' => [5, 2], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
+        'colour' => ['layout' => 'list', 'light' => '#fffaf2', 'dark' => '#1e1b2e', 'heading' => 'rounded', 'banner' => [5, 2], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
             'photo' => '72px', 'lcp' => '72px', 'fold' => [5, 0]],
         // M–Q (owner, 2026-11-19, QUESTIONS #232): each with its own artwork (`art`): a header picture
         // when there is no banner, textures and category icons, all switchable (show_decoration).
         // M · Coffee House: dark-roast band with a jebena and cups, cream page, round photos.
-        'coffee' => ['light' => '#f5ece0', 'dark' => '#261b14', 'heading' => 'serif', 'banner' => [5, 2], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
+        'coffee' => ['layout' => 'list', 'light' => '#f5ece0', 'dark' => '#261b14', 'heading' => 'serif', 'banner' => [5, 2], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
             'photo' => '72px', 'lcp' => '72px', 'fold' => [5, 0], 'art' => true],
         // N · Grill & BBQ: always dark, charcoal and embers, bold tall headings, price tags.
-        'grill' => ['light' => '#231d1a', 'dark' => '#231d1a', 'heading' => 'board', 'banner' => [2, 1], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
+        'grill' => ['layout' => 'list', 'light' => '#231d1a', 'dark' => '#231d1a', 'heading' => 'board', 'banner' => [2, 1], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
             'photo' => '80px', 'lcp' => '80px', 'fold' => [5, 0], 'dark_only' => true, 'art' => true],
         // O · Garden Fresh: leaves, soft greens, rounded white cards.
-        'garden' => ['light' => '#f1f7ef', 'dark' => '#16291f', 'heading' => 'rounded', 'banner' => [5, 2], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
+        'garden' => ['layout' => 'list', 'light' => '#f1f7ef', 'dark' => '#16291f', 'heading' => 'rounded', 'banner' => [5, 2], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
             'photo' => '72px', 'lcp' => '72px', 'fold' => [5, 0], 'art' => true],
         // P · Coastal: sea and a dhow sail, sand, ticket-like cards.
-        'coastal' => ['light' => '#f6f1e7', 'dark' => '#12304a', 'heading' => 'system', 'banner' => [2, 1], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
+        'coastal' => ['layout' => 'list', 'light' => '#f6f1e7', 'dark' => '#12304a', 'heading' => 'system', 'banner' => [2, 1], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
             'photo' => '76px', 'lcp' => '76px', 'fold' => [5, 0], 'art' => true],
         // Q · Fine Dining: marble veins, thin gold lines, a refined serif, centred headings.
-        'luxe' => ['light' => '#f7f4ee', 'dark' => '#1a1814', 'heading' => 'didone', 'banner' => [2, 1], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
+        'luxe' => ['layout' => 'list', 'light' => '#f7f4ee', 'dark' => '#1a1814', 'heading' => 'didone', 'banner' => [2, 1], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
             'photo' => '72px', 'lcp' => '72px', 'fold' => [5, 0], 'art' => true],
+        // R–T (owner, 2026-11-21, QUESTIONS #243), with artwork like M–Q.
+        // R · Burger & Pizza: mustard and ketchup, sticker cards two per row, prices on tilted stickers.
+        'burger' => ['layout' => 'grid', 'light' => '#fff8ec', 'dark' => '#221a14', 'heading' => 'board', 'banner' => [2, 1], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
+            'photo' => '(min-width:40rem) 220px, 50vw', 'lcp' => '(min-width:40rem) 220px, 40vw', 'fold' => [4, 0], 'art' => true],
+        // S · Injera & Tibs: a white netela page with a woven tibeb border, round "injera plate" photos.
+        'injera' => ['layout' => 'list', 'light' => '#fbf8f2', 'dark' => '#1e1712', 'heading' => 'serif', 'banner' => [5, 2], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
+            'photo' => '80px', 'lcp' => '80px', 'fold' => [5, 0], 'art' => true],
+        // T · Juice & Drinks: deep green and spris layers (avocado, mango, papaya), rounded cards two per row.
+        'juice' => ['layout' => 'grid', 'light' => '#f8fbf2', 'dark' => '#16221a', 'heading' => 'rounded', 'banner' => [2, 1], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
+            'photo' => '(min-width:40rem) 220px, 50vw', 'lcp' => '(min-width:40rem) 220px, 40vw', 'fold' => [4, 0], 'art' => true],
     ];
 
     /** L · Colourful: hue steps from the brand colour for categories 2–6 (category 1 is the brand colour). */
@@ -96,13 +107,40 @@ class PageTheme
     public const BANNER_TEXT = ['over', 'under'];
 
     /**
+     * Dish photo widths and how many load at once, for a layout that is not
+     * the style's own (owner, 2026-11-21): base.css `.L-grid` / `.L-list`.
+     */
+    private const LAYOUT_PHOTOS = [
+        'grid' => ['photo' => '(min-width:44rem) 330px, 50vw', 'lcp' => '(min-width:44rem) 330px, 48vw', 'fold' => [4, 0]],
+        'list' => ['photo' => '76px', 'lcp' => '76px', 'fold' => [5, 0]],
+    ];
+
+    /**
+     * The layout guests see (owner, 2026-11-21): the style's own unless the
+     * restaurant picked the other one and its plan has "Layouts"; text (no
+     * photos) whenever photos are off. Every plan has the style's own and text.
+     */
+    public static function layout(string $style, ?string $chosen, bool $showPhotos, bool $layouts = true): string
+    {
+        $own = self::STYLES[$style]['layout'] ?? 'list'; // unknown style: list
+        $layout = in_array($chosen, TenantAppearance::LAYOUTS, true) && $layouts ? $chosen : $own;
+
+        return $showPhotos ? $layout : 'text';
+    }
+
+    /**
      * @param  list<string>|null  $allowed  styles the plan allows (null: all)
+     * @param  bool  $layouts  the plan has "Layouts": a layout other than the style's own
      * @return array<string, mixed>
      */
-    public static function from(TenantAppearance $a, ?array $allowed = null): array
+    public static function from(TenantAppearance $a, ?array $allowed = null, bool $layouts = true): array
     {
         $style = TenantAppearance::effectiveStyle($a->style, $allowed ?? TenantAppearance::STYLES);
         $surface = self::STYLES[$style];
+        $layout = self::layout($style, $a->menu_layout, (bool) $a->show_photos, $layouts);
+        // Another layout than the style's own: its body class and photo sizes (text needs neither).
+        $other = $layout !== 'text' && $layout !== $surface['layout'];
+        $photos = $other ? self::LAYOUT_PHOTOS[$layout] : ['photo' => $surface['photo'], 'lcp' => $surface['lcp'], 'fold' => $surface['fold']];
         $primary = Contrast::valid($a->primary_color) ? strtolower($a->primary_color) : TenantAppearance::DEFAULTS['primary_color'];
         $light = Contrast::readableOn($primary, $surface['light']);
         $dark = Contrast::readableOn($primary, $surface['dark']);
@@ -135,9 +173,12 @@ class PageTheme
             'decoration' => ($surface['art'] ?? false) && ($a->show_decoration ?? true),
             // M–Q show category photos (the restaurant's own pictures) in the category headings.
             'art' => (bool) ($surface['art'] ?? false),
+            'layout' => $layout,
+            'layout_class' => $other ? 'L-'.$layout : '',
+            ...$photos,
             'show_prices' => $a->show_prices,
-            // Style D shows no dish or special photos, whatever the switch says.
-            'show_photos' => $a->show_photos && $style !== 'minimal',
+            // No dish or special photos in the text layout (style D's own, or photos switched off).
+            'show_photos' => $layout !== 'text',
             'show_descriptions' => $a->show_descriptions,
             'show_calories' => $a->show_calories,
             'show_share' => $a->show_share ?? true,

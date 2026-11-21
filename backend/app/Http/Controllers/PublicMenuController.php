@@ -4,12 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Enums\SubscriptionState;
 use App\Models\Branch;
+use App\Models\Item;
 use App\Models\Tenant;
 use App\Models\TenantAppearance;
 use App\Models\TenantSlugHistory;
 use App\Support\Features;
 use App\Support\PublicMenu\MenuPageCache;
 use App\Support\PublicMenu\MenuPageData;
+use App\Support\PublicMenu\PageTheme;
 use App\Support\PublicMenu\PdfMenu;
 use App\Support\Qr\QrImages;
 use App\Support\Qr\QrMap;
@@ -30,7 +32,10 @@ class PublicMenuController extends Controller
      * A demo menu from the website in a phone frame, for visitors on a tablet or computer
      * (owner, 2026-11-19). Demo menus only; the menu itself loads in the frame as usual.
      */
-    public function phone(string $slug, ?string $branch = null): Response
+    /** The layouts a visitor can try on a website demo (QUESTIONS #242). */
+    public const DEMO_LAYOUTS = ['grid', 'list', 'text'];
+
+    public function phone(Request $request, string $slug, ?string $branch = null): Response
     {
         abort_unless(in_array($slug, SiteController::demoSlugs(), true), 404);
         $tenant = Tenant::where('slug', $slug)->whereNull('suspended_at')->firstOrFail();
@@ -41,9 +46,19 @@ class PublicMenuController extends Controller
             $path = $place->path($tenant);
         }
 
+        $layout = $request->query('layout');
+        // The style's own layout, and whether the menu has photos at all (no switch on a text-only demo).
+        [$style, $photos] = app(CurrentTenant::class)->runAs($tenant, fn () => [
+            TenantAppearance::effectiveStyle(TenantAppearance::current()->style, Features::styles($tenant)),
+            Item::whereNotNull('media_id')->exists(),
+        ]);
+
         return response()->view('public.demo-phone', [
+            'own' => PageTheme::STYLES[$style]['layout'],
+            'photos' => $photos,
             'tenant' => $tenant,
             'path' => $path,
+            'layout' => is_string($layout) && in_array($layout, self::DEMO_LAYOUTS, true) ? $layout : null,
             'qr' => QrImages::svg(url($path)),
         ], 200, ['X-Robots-Tag' => 'noindex', 'Cache-Control' => 'public, max-age=300']);
     }
@@ -77,6 +92,23 @@ class PublicMenuController extends Controller
             if ($place->is_default) {
                 return redirect('/'.$tenant->slug.($request->getQueryString() ? '?'.$request->getQueryString() : ''), 301);
             }
+        }
+
+        // Website demos: try another layout (?layout=grid|list|text, owner 2026-11-21). Not saved,
+        // not cached: the static copy keeps the demo's own look.
+        $tryLayout = $request->query('layout');
+        if (is_string($tryLayout) && in_array($tryLayout, self::DEMO_LAYOUTS, true) && in_array($tenant->slug, SiteController::demoSlugs(), true)) {
+            $appearance = app(CurrentTenant::class)->runAs($tenant, fn () => TenantAppearance::current());
+            $appearance->show_photos = $tryLayout !== 'text';
+            $appearance->menu_layout = $tryLayout === 'text' ? null : $tryLayout;
+            $html = view('public.menu', [...$data->build($tenant, $appearance, $place, layouts: true), 'demoLayout' => $tryLayout])->render();
+            $request->attributes->set('guest_menu', true);
+
+            return response($html, 200, [
+                'Content-Type' => 'text/html; charset=UTF-8',
+                'Cache-Control' => 'public, max-age=300',
+                'X-Robots-Tag' => 'noindex',
+            ]);
         }
 
         // A server without the rewrite rules still gets the fast path.

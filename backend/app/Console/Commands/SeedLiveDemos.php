@@ -42,6 +42,9 @@ class SeedLiveDemos extends Command
 
     protected $description = 'Create the website demo menus (café + one per style) with no usable logins';
 
+    /** Demos with a short menu on purpose (owner, 2026-11-21: S · Injera & Tibs, "only a few dishes"); the others have 35 or more. */
+    public const SHORT_MENUS = ['demo-shekla' => 12];
+
     public function handle(): int
     {
         if (app()->isProduction() && ! $this->option('force')

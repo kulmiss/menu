@@ -48,3 +48,5 @@ dialog{border-top:4px solid var(--gd)}
 .ft{background:var(--card);border-top:3px dotted var(--gd)}
 .fg>div{background:var(--bg);border-radius:1rem;padding:1rem}
 .fso a,.fc svg{background:var(--bg)}
+/* Layout "grid" (QUESTIONS #242): cream cards instead of dotted lines. */
+.L-grid section li,.L-grid section li:last-child{border:0;border-radius:var(--br);background:var(--card);box-shadow:0 0 0 1px var(--ln)}

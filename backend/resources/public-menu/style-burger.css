@@ -1,0 +1,67 @@
+/* Style R · Burger & Pizza (owner, 2026-11-21, QUESTIONS #243): a mustard band with a red-and-white
+   checked edge, a burger and a pizza slice drawn in ink (art/burger.svg), tall bold headings, two
+   "sticker" cards per row with an ink outline and a hard shadow, prices on tilted mustard stickers.
+   Original artwork only. Surfaces must match PageTheme::STYLES['burger']. --ms (mustard) and --ky
+   (ketchup) are decoration colours; on mustard only ink text (#231a12, ≥ 4.5:1). */
+:root{--br:1rem;--bg:#fff8ec;--fg:#231a12;--mu:#6b5847;--ln:#efdcc2;--card:#fff;--ms:#f5b301;--ky:#d7261e;--ol:#231a12}
+@media (prefers-color-scheme:dark){:root{--bg:#16110d;--fg:#fbf1e4;--mu:#c6b19b;--ln:#3a2c20;--card:#221a14;--ol:#5c4838}}
+.cv{aspect-ratio:2/1}
+header{position:relative;flex-wrap:wrap;padding:1.1rem 1rem 1.3rem;background:var(--ms);color:#231a12}
+.dc header{padding-bottom:1.9rem;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='38'%3E%3Cg fill='%23231a12' opacity='.12'%3E%3Cellipse cx='9' cy='9' rx='3' ry='1.7' transform='rotate(-25 9 9)'/%3E%3Cellipse cx='31' cy='27' rx='3' ry='1.7' transform='rotate(30 31 27)'/%3E%3C/g%3E%3C/svg%3E"),var(--ms)}
+.dc header:after{content:"";position:absolute;inset:auto 0 0;height:.75rem;background:repeating-conic-gradient(var(--ky) 0 25%,#fff 0 50%) 0 0/.75rem .75rem}
+/* The picture: its own row on phones (never under the name), at the end beside it on wider screens. */
+.ha{display:block;flex:0 0 100%;height:5.5rem;margin-bottom:.4rem}
+[dir=rtl] .ha{transform:scaleX(-1)}
+@media (min-width:30rem){.dc .top:not(.hc) header{min-height:10rem;padding-inline-end:13rem}.ha{position:absolute;inset-inline-end:.75rem;bottom:1.1rem;width:11.5rem;height:8.2rem;margin:0}}
+header>div{min-width:0;position:relative}
+header .sub{color:#4a3622}
+header .st{background:#fff;color:#231a12;border-color:#231a1240}header .st.op{background:#fff;color:#0b5e33}
+.lg{border-radius:50%;box-shadow:0 0 0 3px #231a12}
+h1{font-size:2.15rem;font-weight:800;line-height:1.02;text-transform:uppercase;letter-spacing:.02em}
+.ov header{background:linear-gradient(#0000,#000d);color:#fff}.ov header:after{content:none}
+.ov header .sub{color:#fff}
+.bar{border-bottom-color:var(--ln)}
+.sr input,.ib{border:2px solid var(--ol);background:var(--card)}
+.cn a{background:var(--card);border:2px solid var(--ol);font-weight:800;font-size:.8rem;text-transform:uppercase;letter-spacing:.04em}
+/* A category: its photo (the restaurant's) or an icon on a mustard disc, then the name. */
+section{padding-top:1.6rem}
+section h2{display:flex;align-items:center;gap:.6rem;font-size:1.6rem;font-weight:800;line-height:1.05;text-transform:uppercase;letter-spacing:.03em;overflow-wrap:anywhere}
+svg.ci{flex:none;width:2.5rem;height:2.5rem;padding:.45rem;border-radius:50%;background:var(--ms);color:#231a12;box-shadow:0 0 0 2px var(--ol)}
+span.ci{flex:none;width:3.25rem;height:3.25rem;border-radius:50%;overflow:hidden;box-shadow:0 0 0 2px var(--ol)}
+.ci img{display:block;width:100%;height:100%;object-fit:cover}
+/* Dishes: two sticker cards per row (three on wide screens), the price on the photo. */
+section ul{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.8rem;margin-top:.8rem}
+@media (min-width:40rem){section ul{grid-template-columns:repeat(3,minmax(0,1fr))}}
+section li{border:2px solid var(--ol);border-radius:var(--br);background:var(--card);overflow:hidden;box-shadow:3px 3px 0 var(--ol)}
+li>.it{height:100%;padding:0 0 .85rem;grid-template-columns:minmax(0,1fr);align-content:start}
+li>.it .im{grid-row:1;grid-column:1;aspect-ratio:1;border-bottom:2px solid var(--ol)}
+li>.it .pr{grid-row:1;grid-column:1;align-self:end;justify-self:start;z-index:1;max-width:calc(100% - .8rem);margin:.4rem;padding:.1rem .5rem;border:2px solid #231a12;border-radius:.9rem;background:var(--ms);color:#231a12;font-size:.88rem;font-weight:800;line-height:1.25;white-space:nowrap;font-variant-numeric:tabular-nums;transform:rotate(-3deg)}
+/* The old price on its own line in the sticker; small phones get a smaller sticker (cards are narrow). */
+li>.it .pr s{display:block;color:inherit;opacity:.75;font-size:.75rem;font-weight:600}
+@media (max-width:26rem){li>.it .pr{font-size:.74rem;padding-inline:.4rem;letter-spacing:-.01em}}
+li>.it .nm{grid-row:2;padding:.6rem .75rem 0;font-size:1rem;font-weight:800;line-height:1.2}
+li>.it .sm{grid-row:3;padding:0 .75rem;font-size:.8rem}
+li>.it .tg{grid-row:4;padding:0 .75rem}
+.so .pr,li>.it.so .pr{background:var(--card);color:var(--mu);border-color:var(--ln);transform:none}
+/* Without a photo: name, then the sticker price, then the description. */
+li>.it.np{padding:.85rem .9rem}
+li>.it.np .nm,li>.it.np .sm,li>.it.np .tg{grid-column:1/-1;padding:0}
+li>.it.np .nm{grid-row:1}
+li>.it.np .pr{grid-row:2;align-self:start;margin:.45rem 0 .1rem}
+/* The "+" at the top end of a card without a photo, never over the price. */
+li>.np>.ad{top:.35rem;margin-top:0}
+/* Narrow cards: the name keeps clear of the "+" and the price goes under both, using the whole width. */
+li>.it.ao.np{padding-inline-end:.9rem}
+li>.it.ao.np .nm{min-height:2.3rem;margin-inline-end:2.6rem}
+.NP section ul{grid-template-columns:minmax(0,1fr)}
+@media (min-width:40rem){.NP section ul{grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* Layout "list" (QUESTIONS #242): the sticker price sits under the name. */
+.L-list li>.it .pr{align-self:start;margin:.4rem 0 0}
+.L-list li>.it .im{border:2px solid var(--ol)}
+.bd{border-width:2px}
+.spc .sp{border:2px solid var(--ol);border-radius:var(--br);box-shadow:3px 3px 0 var(--ol)}
+.an{border:2px dashed var(--ky);border-radius:var(--br);background:var(--card)}
+dialog{border-top:5px solid var(--ms)}
+.ft{background:var(--card);border-top:3px solid var(--ol)}
+.fg>div{background:var(--bg);border-radius:1rem;padding:1rem}
+.fso a,.fc svg{background:var(--bg)}

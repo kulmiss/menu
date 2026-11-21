@@ -29,16 +29,18 @@ final class PlanLadder
     public static function plans(): array
     {
         $all = array_fill_keys(array_keys(Features::DEFAULTS), true);
-        // Free shows 2 styles (B, D); E–Q are for Plus and up too (owner, 2026-11-18/19, QUESTIONS #228, #229, #232).
+        // Free shows 2 styles (B, D); E–T are for Plus and up too (owner, 2026-11-18/19/21, QUESTIONS #228, #229, #232, #243).
+        // Free keeps each style's own layout and the text layout; other layouts are Plus and up (owner, 2026-11-21).
         $styles2 = ['style_editorial' => false, 'style_bistro' => false, 'style_mesob' => false, 'style_lounge' => false, 'style_board' => false,
             'style_arabic' => false, 'style_islamic' => false, 'style_somali' => false, 'style_mono' => false, 'style_colour' => false,
-            'style_coffee' => false, 'style_grill' => false, 'style_garden' => false, 'style_coastal' => false, 'style_luxe' => false];
+            'style_coffee' => false, 'style_grill' => false, 'style_garden' => false, 'style_coastal' => false, 'style_luxe' => false,
+            'style_burger' => false, 'style_injera' => false, 'style_juice' => false];
 
         return [
             'free' => [
                 'name' => 'Free', 'price' => 0, 'year' => null, 'sort' => 0,
                 'limits' => ['photos' => 100, 'branches' => 1],
-                'features' => [...$all, ...$styles2, 'branches' => false, 'promotions' => false, 'insights' => false, 'price_periods' => false, 'remove_branding' => false],
+                'features' => [...$all, ...$styles2, 'branches' => false, 'promotions' => false, 'insights' => false, 'price_periods' => false, 'layouts' => false, 'remove_branding' => false],
             ],
             'plus' => [
                 'name' => 'Plus', 'price' => 49_000, 'year' => 490_000, 'sort' => 1,

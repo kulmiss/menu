@@ -124,6 +124,9 @@ const shots = {
   'style-garden': { path: '/demo-green-spoon', guest: true },
   'style-coastal': { path: '/demo-dhow', guest: true },
   'style-fine-dining': { path: '/demo-maison', guest: true },
+  'style-burger': { path: '/demo-bigbite', guest: true },
+  'style-injera': { path: '/demo-shekla', guest: true },
+  'style-juice': { path: '/demo-spris', guest: true },
   'guest-my-order': {
     path: '/demo',
     guest: true,
