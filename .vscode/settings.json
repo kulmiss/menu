@@ -1,0 +1,7 @@
+{
+    "VsCodeTaskButtons.tasks": [
+        { "label": "▶ Serve", "task": "Start Laravel Server" },
+        { "label": "🚀 Deploy", "task": "Deploy live site" },
+        { "label": "🧪 Deploy (dry run)", "task": "Deploy live site (dry run)" }
+    ]
+}

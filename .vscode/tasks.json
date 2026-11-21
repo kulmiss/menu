@@ -1,0 +1,29 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Deploy live site",
+            "detail": "Builds the admin app and updates the server from GitHub (main). Settings: deploy.config.json",
+            "type": "shell",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/deploy/deploy.ps1",
+            "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
+            "problemMatcher": []
+        },
+        {
+            "label": "Deploy live site (dry run)",
+            "detail": "Shows what Deploy would do; changes nothing",
+            "type": "shell",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/deploy/deploy.ps1 -DryRun",
+            "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
+            "problemMatcher": []
+        },
+        {
+            "label": "Start Laravel Server",
+            "type": "shell",
+            "command": "php artisan serve --port=8000",
+            "options": { "cwd": "${workspaceFolder}/backend" },
+            "presentation": { "reveal": "always", "panel": "new" },
+            "problemMatcher": []
+        }
+    ]
+}

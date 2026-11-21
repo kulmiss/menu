@@ -4,9 +4,13 @@ Thumbs.db
 .idea/
 .vscode/*
 !.vscode/extensions.json
+# Shared VS Code buttons: Serve, Deploy (scripts/deploy)
+!.vscode/tasks.json
+!.vscode/settings.json
 
 # Secrets
 .env
+deploy.config.json
 .env.*
 !.env.example
 *.pem

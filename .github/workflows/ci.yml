@@ -30,6 +30,13 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      # The VS Code "Deploy" scripts (docs/deploy.md 3a): they must at least parse and pass shellcheck.
+      - name: Deploy scripts
+        run: |
+          bash -n scripts/deploy/menu-deploy.sh
+          shellcheck scripts/deploy/menu-deploy.sh
+          pwsh -NoProfile -Command '$e = $null; [System.Management.Automation.Language.Parser]::ParseFile("scripts/deploy/deploy.ps1", [ref]$null, [ref]$e) | Out-Null; if ($e) { $e | ForEach-Object { Write-Error $_.Message }; exit 1 }'
+          python3 -c "import json; json.load(open('deploy.config.example.json')); json.load(open('.vscode/tasks.json'))"
       - id: f
         uses: dorny/paths-filter@v3
         with:
