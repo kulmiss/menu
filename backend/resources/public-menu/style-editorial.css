@@ -31,3 +31,5 @@ li>.it .tg{grid-area:tg}
 .NP li>.it{padding:1.1rem 0}
 /* Footer: quiet paper, serif name, hairline between the groups. */
 .ft{background:var(--bg)}.fn{font-family:var(--fh);font-size:1.5rem;font-weight:600}.fg>div{border-top:1px solid var(--ln);padding-top:1rem}
+/* Layout "list" (QUESTIONS #242): warm cards, small photo at the side. */
+.L-list section li{background:var(--card);border-radius:1.1rem}

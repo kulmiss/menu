@@ -59,7 +59,9 @@ self.addEventListener('fetch', function (e) {
   }
 
   // Guest pages are single-segment paths; the admin, API and files are left alone.
-  if (r.mode === 'navigate' && /^\/[a-z0-9-]+$/.test(u.pathname) && !/^\/(admin|platform|auth|api|q)$/.test(u.pathname)) {
+  // A demo tried in another layout (?layout=…, owner 2026-11-21) always comes from the network
+  // and is never saved as the page's copy.
+  if (r.mode === 'navigate' && /^\/[a-z0-9-]+$/.test(u.pathname) && !/^\/(admin|platform|auth|api|q)$/.test(u.pathname) && !u.searchParams.has('layout')) {
     e.respondWith(caches.open(PAGES).then(function (c) {
       return c.match(r, { ignoreSearch: true }).then(function (hit) {
         var old = hit && hit.clone();

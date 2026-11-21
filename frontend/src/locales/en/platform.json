@@ -130,6 +130,10 @@
     "style_garden": "Menu style O · Garden Fresh",
     "style_coastal": "Menu style P · Coastal",
     "style_luxe": "Menu style Q · Fine Dining",
+    "style_burger": "Menu style R · Burger & Pizza",
+    "style_injera": "Menu style S · Injera & Tibs",
+    "style_juice": "Menu style T · Juice & Drinks",
+    "layouts": "Menu layouts (grid or list, not only the style’s own)",
     "pdf_menu": "Printable PDF menu",
     "order_list": "My order (add to order buttons)",
     "price_periods": "Time-based prices (happy hour)",
@@ -888,7 +892,10 @@
       "style_grill": "Style: Grill & BBQ",
       "style_garden": "Style: Garden Fresh",
       "style_coastal": "Style: Coastal",
-      "style_luxe": "Style: Fine Dining"
+      "style_luxe": "Style: Fine Dining",
+      "style_burger": "Style: Burger & Pizza",
+      "style_injera": "Style: Injera & Tibs",
+      "style_juice": "Style: Juice & Drinks"
     },
     "last_days": "Last {{count}} days"
   },

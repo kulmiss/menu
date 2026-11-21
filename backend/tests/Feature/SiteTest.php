@@ -170,7 +170,7 @@ it('shows the plan ladder from the database: Free first ("Start here"), then wha
     $html = $this->get('/')->assertOk()
         ->assertSeeInOrder([
             'Start here', 'Free', 'Unlimited dishes, menus and QR codes', 'Up to 100 photos', '1 branch', '2 menu styles', 'PDF menu', 'Posters, table tents and stickers', 'Import and export (spreadsheet)', 'Create my free menu',
-            'Plus', 'Br 490', '/ month', 'or Br 4,900 / year (2 months free)', 'Everything in Free, plus:', 'Up to 500 photos', 'All 17 menu styles', 'Specials and announcements', 'Insights and monthly report', 'Start free', 'Contact us on WhatsApp',
+            'Plus', 'Br 490', '/ month', 'or Br 4,900 / year (2 months free)', 'Everything in Free, plus:', 'Up to 500 photos', 'All 20 menu styles', 'Specials and announcements', 'Insights and monthly report', 'Start free', 'Contact us on WhatsApp',
             'Pro', 'Br 990', 'Everything in Plus, plus:', 'Up to 2,000 photos', 'Up to 3 branches', 'Happy hour and lunch prices', 'No “Menu by Menu” line', 'Start free',
             'Business', 'Br 2,490', 'Everything in Pro, plus:', 'Unlimited photos', 'Unlimited branches', 'Start free',
         ])

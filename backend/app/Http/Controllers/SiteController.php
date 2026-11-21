@@ -53,6 +53,9 @@ class SiteController extends Controller
         'garden' => 'demo-green-spoon',
         'coastal' => 'demo-dhow',
         'luxe' => 'demo-maison',
+        'burger' => 'demo-bigbite',
+        'injera' => 'demo-shekla',
+        'juice' => 'demo-spris',
     ];
 
     public const DEMO = 'demo';

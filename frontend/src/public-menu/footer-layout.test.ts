@@ -8,7 +8,17 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { page } from 'vitest/browser'
 import { GUEST_STYLES } from './guest-styles'
 
-const RTL = ['arabic', 'coffee', 'grill', 'garden', 'coastal', 'luxe']
+const RTL = [
+  'arabic',
+  'coffee',
+  'grill',
+  'garden',
+  'coastal',
+  'luxe',
+  'burger',
+  'injera',
+  'juice',
+]
 const icon =
   '<svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24"></svg>'
 // As menu.blade.php writes it.

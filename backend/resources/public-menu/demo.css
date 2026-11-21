@@ -10,4 +10,6 @@
   .dvs a[href]:hover{background:#334155;color:#fff}
   .dvs a[aria-current]{background:#f8fafc;color:#0f172a}
   .dvs a:focus-visible{outline:2px solid #93c5fd;outline-offset:2px}
+  /* Grid · List · Text (owner, 2026-11-21): text only, so the bar stays one line. */
+  .dvl a{padding:0 .85rem}
 }

@@ -50,3 +50,5 @@ dialog{border:2px dashed var(--ln);border-bottom:0}
 .ft{background:var(--bg);border-top:2px dashed var(--ln)}.fn{font-family:var(--fh);text-transform:uppercase;letter-spacing:.04em}
 .fg>div{border:2px dashed var(--ln);border-radius:var(--br);padding:1rem}
 .fc svg,.fso a,.fbt,.pdl a{background:var(--card)}
+/* Layout "grid" (QUESTIONS #242): each dish in a dashed chalk frame. */
+.L-grid section li,.L-grid section li:last-child{border:1px dashed var(--ln);border-radius:.4rem}

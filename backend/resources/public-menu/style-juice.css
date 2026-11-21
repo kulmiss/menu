@@ -1,0 +1,64 @@
+/* Style T · Juice & Drinks (owner, 2026-11-21, QUESTIONS #243): a deep green band with a layered
+   spris glass, a lemon slice and fruit drawn on it (art/juice.svg), avocado, mango and papaya
+   layers along its edge, two rounded cards per row, each in turn with an avocado, mango or papaya
+   line under the photo and a matching pale price pill. Original artwork only. Surfaces must match
+   PageTheme::STYLES['juice']. --av, --mg, --pp are decoration colours, never text; the pills
+   (--t1…--t3) carry the text colour (≥ 4.5:1). */
+:root{--br:1.4rem;--bg:#f8fbf2;--fg:#17251a;--mu:#55665a;--ln:#dfe9d6;--card:#fff;--hd:#1d4d2b;--av:#8cc63f;--mg:#f4a62a;--pp:#e8505b;--t1:#e6f3d2;--t2:#fde9c4;--t3:#fbdadd;--ic:#e6f3d2;--io:#1d4d2b}
+@media (prefers-color-scheme:dark){:root{--bg:#0e1611;--fg:#eef6ea;--mu:#a9bba9;--ln:#22342a;--card:#16221a;--hd:#123620;--t1:#263b1e;--t2:#3d2f15;--t3:#3d1f22;--ic:#20361f;--io:#b9e07e}}
+.cv{aspect-ratio:2/1}
+header{position:relative;flex-wrap:wrap;padding:1.1rem 1rem 1.3rem;background:var(--hd);color:#fff}
+.dc header{padding-bottom:2.1rem;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Cg fill='none' stroke='%23fff' opacity='.1'%3E%3Ccircle cx='10' cy='12' r='4'/%3E%3Ccircle cx='34' cy='30' r='6'/%3E%3Ccircle cx='38' cy='8' r='2'/%3E%3C/g%3E%3C/svg%3E"),var(--hd)}
+.dc header:after{content:"";position:absolute;inset:auto 0 0;height:1.05rem;background:linear-gradient(var(--av) 0 33.3%,var(--mg) 0 66.6%,var(--pp) 0);-webkit-mask:radial-gradient(circle at 50% 0,#0000 .42rem,#000 .46rem) 0 0/1.2rem 100% repeat-x;mask:radial-gradient(circle at 50% 0,#0000 .42rem,#000 .46rem) 0 0/1.2rem 100% repeat-x}
+.ha{display:block;flex:0 0 100%;height:5.5rem;margin-bottom:.4rem}
+[dir=rtl] .ha{transform:scaleX(-1)}
+@media (min-width:30rem){.dc .top:not(.hc) header{min-height:10rem;padding-inline-end:13rem}.ha{position:absolute;inset-inline-end:.75rem;bottom:1.3rem;width:11.5rem;height:8.2rem;margin:0}}
+header>div{min-width:0;position:relative}
+header .sub{color:#d9f2b4}
+header .st{background:var(--card);color:var(--fg)}header .st.op{background:linear-gradient(#0f6b3a12,#0f6b3a12),var(--card)}
+.lg{border-radius:1.2rem;box-shadow:0 0 0 3px #fff}
+h1{font-size:1.95rem;font-weight:800;line-height:1.12}
+.ov header{background:linear-gradient(#0000,#000c)}.ov header:after{content:none}
+.bar{border-bottom-color:var(--ln)}
+.sr input,.ib{background:var(--card);border-color:var(--ln)}
+.cn a{background:var(--card);border-color:var(--ln);font-weight:700}
+/* A category: icon in a drop shape, then the name. */
+section{padding-top:1.6rem}
+section h2{display:flex;align-items:center;gap:.6rem;font-size:1.4rem;font-weight:800;overflow-wrap:anywhere}
+svg.ci{flex:none;width:2.5rem;height:2.5rem;padding:.45rem;border-radius:1.1rem 1.1rem 1.1rem .35rem;background:var(--ic);color:var(--io)}
+span.ci{flex:none;width:3.25rem;height:3.25rem;border-radius:1.2rem;overflow:hidden}
+.ci img{display:block;width:100%;height:100%;object-fit:cover}
+/* Dishes: two rounded cards per row (three on wide screens), avocado, mango and papaya in turn. */
+section ul{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.7rem;margin-top:.75rem}
+@media (min-width:40rem){section ul{grid-template-columns:repeat(3,minmax(0,1fr))}}
+section li{--t:var(--t1);--k:var(--av);border:0;border-radius:var(--br);background:var(--card);overflow:hidden;box-shadow:0 1px 3px #17251a17}
+section li:nth-child(3n+2){--t:var(--t2);--k:var(--mg)}
+section li:nth-child(3n){--t:var(--t3);--k:var(--pp)}
+li>.it{height:100%;padding:0 0 .9rem;grid-template-columns:minmax(0,1fr);align-content:start}
+li>.it .im{grid-row:1;grid-column:1;aspect-ratio:1;border-bottom:.3rem solid var(--k)}
+li>.it .nm{grid-row:2;padding:.6rem .75rem 0;font-size:.98rem;font-weight:800;line-height:1.25}
+li>.it .sm{grid-row:3;padding:0 .75rem;font-size:.8rem}
+li>.it .pr{grid-row:4;justify-self:start;max-width:calc(100% - 1.2rem);margin:.45rem .6rem 0;padding:.1rem .55rem;border-radius:.8rem;background:var(--t);color:var(--fg);font-size:.88rem;font-weight:800;white-space:nowrap;font-variant-numeric:tabular-nums}
+/* The old price on its own line; small phones get a smaller pill (cards are narrow). */
+li>.it .pr s{display:block;color:var(--mu);font-size:.75rem;font-weight:600}
+@media (max-width:26rem){li>.it .pr{font-size:.74rem;padding-inline:.45rem;letter-spacing:-.01em}}
+li>.it .tg{grid-row:5;padding:0 .75rem}
+.so .pr,li>.it.so .pr{background:none;color:var(--mu)}
+/* Without a photo: the coloured line on top of the card. */
+li>.it.np{padding:.85rem .9rem;border-top:.3rem solid var(--k)}
+li>.it.np .nm,li>.it.np .sm,li>.it.np .tg{padding:0}
+li>.it.np .pr{margin-inline:0}
+/* The "+" at the top end of a card without a photo, never over the price. */
+li>.np>.ad{top:.35rem;margin-top:0}
+.NP section ul{grid-template-columns:minmax(0,1fr)}
+@media (min-width:40rem){.NP section ul{grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* Layout "list" (QUESTIONS #242): the coloured line moves to the card's start. */
+.L-list li>.it .im{border-bottom:0}
+.L-list li>.it .pr{margin:.35rem 0 0}
+.L-list section li{border-inline-start:.3rem solid var(--k)}
+.spc .sp{border:0;border-radius:var(--br);box-shadow:0 1px 3px #17251a17}
+.an{border:0;border-radius:var(--br);background:var(--t2)}
+dialog{border-top:4px solid var(--mg)}
+.ft{background:var(--card)}
+.fg>div{background:var(--bg);border-radius:1rem;padding:1rem}
+.fso a,.fc svg{background:var(--bg)}

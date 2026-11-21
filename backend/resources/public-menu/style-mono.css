@@ -62,3 +62,5 @@ dialog{border-radius:0;border-top:1px solid var(--fg)}
 .fn{font-family:var(--fh);font-weight:400;font-size:1.75rem}
 .fg>div{border-top:1px solid var(--ln);padding-top:.75rem}
 .fc svg,.fso a,.fbt,.pdl a{border-radius:0;color:var(--fg)}
+/* Layout "grid" (QUESTIONS #242): ink-outlined squares, no rounding. */
+.L-grid section li{border:1px solid var(--fg);border-radius:0;background:var(--card)}

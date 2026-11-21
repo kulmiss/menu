@@ -36,6 +36,10 @@ export const FEATURES = [
   'style_garden',
   'style_coastal',
   'style_luxe',
+  'style_burger',
+  'style_injera',
+  'style_juice',
+  'layouts',
 ] as const
 export const LIMITS = [
   'menus',

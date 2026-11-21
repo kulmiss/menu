@@ -1,24 +1,22 @@
 @php
     use App\Support\PublicMenu\InlineAssets;
-    use App\Support\PublicMenu\PageTheme;
     $preview ??= false;
     // A demo menu from the website (not in the admin preview): the Phone / Desktop bar.
     $demoView = ! $preview && in_array($tenant->slug, \App\Http\Controllers\SiteController::demoSlugs(), true);
     $cover = $theme['cover'];
     $style = $theme['style'];
-    // Photo widths per menu style, so the browser picks the right file (§15.2.4).
-    $styleDef = PageTheme::STYLES[$style];
-    $sizes = $styleDef['photo'];
+    // Photo widths per menu style and layout, so the browser picks the right file (§15.2.4).
+    $sizes = $theme['photo'];
     // Only photos likely on the first screen load at once; the rest lazily
     // (PLAN.md §15.2.4). How many dishes fit depends on the style and the banner.
     // With a banner, A and B show no dish photo on the first screen (the banner is the LCP).
-    $fold = $styleDef['fold'][$cover ? 1 : 0];
+    $fold = $theme['fold'][$cover ? 1 : 0];
     // Without a banner the first photo on screen is the largest paint (LCP, owner 2026-11-12): the first
     // special's photo, else the first dish photo. It is preloaded with high priority.
     $lcp = null;
     // A's first dish photo is full width: on a phone it takes the 320 px file, one size below B/C's pick
     // logic would give (owner, 2026-11-12: same quality, only this photo, only without banner and specials).
-    $lcpSizes = $styleDef['lcp'];
+    $lcpSizes = $theme['lcp'];
     if (! $cover) {
         foreach ($promotions as $p) {
             if ($p['type'] !== 'announcement' && ! $p['hidden'] && $p['image']) {
@@ -130,11 +128,15 @@
 @php $preloadAvif = ! empty($lcp['img']['avif']); @endphp
 <link rel="preload" as="image" fetchpriority="high" type="image/{{ $preloadAvif ? 'avif' : 'webp' }}" imagesrcset="{{ $preloadAvif ? $lcp['img']['avif'] : $lcp['img']['webp'] }}" imagesizes="{{ $lcp['sizes'] }}">
 @endif
-<style>{!! InlineAssets::css($style, $orderList) !!}{!! $theme['css'] !!}@if ($demoView){!! InlineAssets::demoCss() !!}@endif</style>
+<style>{!! InlineAssets::css($style, $orderList, $anyPhoto && $theme['layout_class'] !== '') !!}{!! $theme['css'] !!}@if ($demoView){!! InlineAssets::demoCss() !!}@endif</style>
 </head>
-<body class="S-{{ $style }}{{ $anyPhoto ? '' : ' NP' }}{{ $theme['ramadan'] ? ' rm' : '' }}{{ $theme['greyscale'] ? ' gs' : '' }}{{ $theme['decoration'] ? ' dc' : '' }}">
+<body class="S-{{ $style }}{{ $anyPhoto ? '' : ' NP' }}{{ $anyPhoto && $theme['layout_class'] ? ' '.$theme['layout_class'] : '' }}{{ $theme['ramadan'] ? ' rm' : '' }}{{ $theme['greyscale'] ? ' gs' : '' }}{{ $theme['decoration'] ? ' dc' : '' }}">
 {{-- Demo menus on a tablet or computer: see it in a phone frame or as it is (owner, 2026-11-19). Hidden on phones. --}}
-@if ($demoView)<nav class="dvb" aria-label="{{ __('public.demo_view.label') }}"><b>{{ __('public.demo_view.title') }}</b><span class="dvs"><a href="/phone{{ $canonical }}"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg>{{ __('public.demo_view.phone') }}</a><a aria-current="page"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M8 20.5h8M12 17v3.5"/></svg>{{ __('public.demo_view.desktop') }}</a></span></nav>@endif
+@if ($demoView)
+{{-- Grid · List · Text: try the other layouts of this style (owner, 2026-11-21); not shown on a menu without photos. --}}
+@php $demoLayout ??= null; $nowLayout = $demoLayout ?? $theme['layout']; $ownLayout = \App\Support\PublicMenu\PageTheme::STYLES[$style]['layout']; $tryQ = $demoLayout ? '?layout='.$demoLayout : ''; @endphp
+<nav class="dvb" aria-label="{{ __('public.demo_view.label') }}"><b>{{ __('public.demo_view.title') }}</b>@if ($anyPhoto || $demoLayout)<span class="dvs dvl" role="group" aria-label="{{ __('public.demo_view.layout') }}">@foreach (['grid', 'list', 'text'] as $l)<a {!! $l === $nowLayout ? 'aria-current="true"' : 'href="'.e($canonical.($l === $ownLayout ? '' : '?layout='.$l)).'"' !!}>{{ __('public.demo_view.'.$l) }}</a>@endforeach</span>@endif<span class="dvs"><a href="/phone{{ $canonical }}{{ $tryQ }}"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg>{{ __('public.demo_view.phone') }}</a><a aria-current="page"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M8 20.5h8M12 17v3.5"/></svg>{{ __('public.demo_view.desktop') }}</a></span></nav>
+@endif
 @if ($catIcons !== [])
 {{-- M–Q: the category icons used on this page, drawn once (QUESTIONS #232). --}}
 <svg class="sx" aria-hidden="true" width="0" height="0">{!! \App\Support\PublicMenu\CategoryIcons::symbols($catIcons) !!}</svg>

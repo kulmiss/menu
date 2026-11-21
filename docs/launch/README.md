@@ -10,7 +10,7 @@ Everything to tell restaurants about the platform. Replace **[Name]** with your 
 | Table tents (A6, two per A4), posters A5/A4, window sign, round and square stickers (12 per A4) | Each restaurant: **QR codes → Print materials** | Designs: Classic, Bold, Minimal and **Like my menu** (the colours of the restaurant's menu style). Light or dark. Posters can add 3 mm bleed for a print shop. |
 | Social media pictures (square post 1080 × 1080, story 1080 × 1920) | **QR codes → Print materials → For social media** | The restaurant's colour, QR code and name. |
 | Demo menus, one per style | `https://[site]/demo`, `/demo-jebena`, `/demo-firewood`, `/demo-green-spoon`, `/demo-dhow`, `/demo-maison`, … | The landing page shows all 17 under **More menu styles**. Only if you load the demo data (never on the live database; see LAUNCH_TODO.md). |
-| Screenshots | Landing page: `backend/public/landing/` (hero, demo, 17 styles). Help: `backend/public/help/shots/`. Play Store: the app repository, `store/` | Regenerate after design changes: `node frontend/scripts/landing-screenshots.mjs`, `node frontend/scripts/help-screenshots.mjs`. |
+| Screenshots | Landing page: `backend/public/landing/` (hero, demo, 20 styles). Help: `backend/public/help/shots/`. Play Store: the app repository, `store/` | Regenerate after design changes: `node frontend/scripts/landing-screenshots.mjs`, `node frontend/scripts/help-screenshots.mjs`. |
 
 ## WhatsApp invite (send one by one, not to groups)
 
@@ -26,7 +26,7 @@ Everything to tell restaurants about the platform. Replace **[Name]** with your 
 > Guests scan the QR code on the table and see your dishes, photos and prices — in English, Amharic, Somali or Arabic.
 > ✅ Change a price in seconds, no reprinting
 > ✅ "Sold out" with one tap
-> ✅ 17 menu styles: coffee house, grill, garden, coastal, fine dining…
+> ✅ 20 menu styles: coffee house, grill, burger & pizza, injera & tibs, juice, fine dining…
 > ✅ Table tents and stickers ready to print
 > Try the demo: [site]/demo · Start free: [site]
 > No time? Send us photos of your paper menu and we add it for you.

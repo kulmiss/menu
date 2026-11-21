@@ -63,6 +63,36 @@ li[hidden],section[hidden]{display:none}
 /* The "My order" "+" lives in order.css, inlined only when My order is on (QUESTIONS #236). */
 .nr{color:var(--mu);padding:3rem 1rem;text-align:center;display:flex;flex-direction:column;align-items:center;gap:.75rem}
 .nr svg{color:var(--ln)}
+/* Layouts (owner, 2026-11-21): a style shows its own layout unless the restaurant picks the other one.
+   L-grid: two columns of cards, photo on top. L-list: one column, small photo at the side.
+   (Text, no photos, is the NP layout every style has.) Each style may fine-tune these in its own file. */
+.L-grid section ul{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.65rem;border:0}
+.L-grid section li{overflow:hidden;border-radius:var(--lgr,1rem);transform:none}
+.L-grid li>.it{height:100%;padding:0 0 .8rem;grid-template-columns:minmax(0,1fr);grid-template-areas:"im" "nm" "sm" "pr" "tg";grid-template-rows:auto;align-content:start;row-gap:0;column-gap:0}
+.L-grid li>.it:before{content:none}
+.L-grid li>.it .im{grid-area:im;justify-self:stretch;align-self:start;width:auto;height:auto;aspect-ratio:4/3;margin:0;padding:0;border:0;border-radius:0;box-shadow:none;transform:none}
+.L-grid li>.it .nm,.L-grid li>.it .sm,.L-grid li>.it .pr,.L-grid li>.it .tg{margin-inline:.6rem}
+.L-grid li>.it .nm{grid-area:nm;margin-top:.6rem;font-size:.95rem;line-height:1.25}
+.L-grid li>.it .sm{grid-area:sm;font-size:.8rem}
+.L-grid li>.it .pr{grid-area:pr;justify-self:start;align-self:start;text-align:start;max-width:calc(100% - 1.2rem);font-size:.85rem;white-space:nowrap}
+.L-grid li>.it .pr s,.L-list li>.it .pr s{display:block;font-size:.75rem}
+.L-grid li>.it .tg{grid-area:tg}
+.L-grid li>.it.np{padding:.8rem 0;grid-template-columns:minmax(0,1fr);grid-template-areas:"nm" "sm" "pr" "tg"}
+.L-grid li>.it.np .nm{margin-top:0}
+.L-list section ul{display:grid;grid-template-columns:minmax(0,1fr);gap:.6rem}
+.L-list section li{border-radius:var(--llr,1rem)}
+.L-list li>.it{height:auto;padding:.7rem .8rem;grid-template-columns:4.75rem minmax(0,1fr);grid-template-areas:"im ." "im nm" "im sm" "im pr" "im tg" "im .";grid-template-rows:1fr auto auto auto auto 1fr;column-gap:.85rem;row-gap:0;align-content:normal}
+.L-list li>.it .im{grid-area:im;justify-self:start;align-self:start;width:4.75rem;height:4.75rem;aspect-ratio:auto;margin:0;border-radius:.8rem}
+.L-list li>.it .nm,.L-list li>.it .sm,.L-list li>.it .tg{padding:0}
+.L-list li>.it .nm{grid-area:nm;font-size:1.05rem;line-height:1.3}
+.L-list li>.it .sm{grid-area:sm;margin-top:.15rem}
+.L-list li>.it .pr{grid-area:pr;justify-self:start}
+.L-list li>.it .tg{grid-area:tg}
+.L-list li>.it.np{grid-template-columns:minmax(0,1fr);grid-template-areas:"nm" "sm" "pr" "tg";grid-template-rows:auto}
+.L-list li>.it.np:before{content:none}
+.L-list li>.it.np .nm,.L-list li>.it.np .sm,.L-list li>.it.np .pr,.L-list li>.it.np .tg{grid-column:auto;grid-row:auto}
+/* Small phones: the cards are narrow, so prices get a little smaller (one line, inside the card). */
+@media (max-width:22.5rem){.L-grid li>.it .pr{font-size:.74rem;letter-spacing:-.01em}.L-list li>.it{grid-template-columns:4rem minmax(0,1fr);column-gap:.7rem}.L-list li>.it .im{width:4rem;height:4rem}.L-list li>.it .pr{font-size:.85rem}}
 
 .st.ld{visibility:hidden}
 .pw{user-select:all}

@@ -28,6 +28,7 @@ const APPEARANCE: Appearance = {
   banner_text: null,
   show_prices: true,
   show_photos: true,
+  menu_layout: null,
   show_descriptions: true,
   show_calories: true,
   show_share: true,
@@ -64,6 +65,9 @@ const APPEARANCE: Appearance = {
     'garden',
     'coastal',
     'luxe',
+    'burger',
+    'injera',
+    'juice',
   ],
   banner: {
     editorial: { ratio: [16, 9], text: 'under' },
@@ -83,7 +87,34 @@ const APPEARANCE: Appearance = {
     garden: { ratio: [5, 2], text: 'under' },
     coastal: { ratio: [2, 1], text: 'under' },
     luxe: { ratio: [2, 1], text: 'under' },
+    burger: { ratio: [2, 1], text: 'under' },
+    injera: { ratio: [5, 2], text: 'under' },
+    juice: { ratio: [2, 1], text: 'under' },
   },
+  style_layouts: {
+    editorial: 'grid',
+    grid: 'grid',
+    bistro: 'list',
+    minimal: 'text',
+    mesob: 'list',
+    lounge: 'list',
+    board: 'list',
+    arabic: 'list',
+    islamic: 'grid',
+    somali: 'list',
+    mono: 'list',
+    colour: 'list',
+    coffee: 'list',
+    grill: 'list',
+    garden: 'list',
+    coastal: 'list',
+    luxe: 'list',
+    burger: 'grid',
+    injera: 'list',
+    juice: 'grid',
+  },
+  layouts: true,
+  layout: 'grid',
   themes: [
     {
       id: 1,
@@ -477,5 +508,135 @@ describe('AppearancePage', () => {
     await expect.element(toggle).toBeEnabled()
     await expect.element(toggle).not.toBeChecked()
     expect(frame(screen).src).toContain('show_order_list=0')
+  })
+
+  // The new page (owner, 2026-11-21): five steps, a layout picker, the phone in light or dark.
+  it('walks through five steps, each a section the step bar scrolls to', async () => {
+    const screen = await render()
+    const nav = screen.getByRole('navigation', { name: 'Steps' })
+    await expect.element(nav).toBeVisible()
+    for (const [i, name] of [
+      'Look',
+      'Layout',
+      'Colours & font',
+      'Logo & banner',
+      'What guests see',
+    ].entries()) {
+      const link = nav.getByRole('link', {
+        name: new RegExp(`${i + 1}\\s*${name}`),
+      })
+      await expect.element(link).toBeVisible()
+      const id = link.element().getAttribute('href')!.slice(1)
+      expect(document.getElementById(id), name).not.toBeNull()
+    }
+  })
+
+  it("picks a layout: the style's own, the other one or text, and the preview follows", async () => {
+    const screen = await render()
+    const grid = screen.getByRole('radio', { name: /Grid/ })
+    const list = screen.getByRole('radio', { name: /List/ })
+    const text = screen.getByRole('radio', { name: /^Text/ })
+    // B's own layout is the grid: picked, and marked as the style's own.
+    await expect.element(grid).toBeChecked()
+    await expect.element(screen.getByText("This style's own")).toBeVisible()
+    expect(frame(screen).src).toContain('menu_layout=&')
+
+    await userEvent.click(list)
+    await expect.poll(() => frame(screen).src).toContain('menu_layout=list&')
+    expect(frame(screen).src).toContain('show_photos=1')
+
+    await userEvent.click(text)
+    await expect.poll(() => frame(screen).src).toContain('show_photos=0')
+    await expect.element(screen.getByText(/Your photos are kept/)).toBeVisible()
+
+    // Back to the style's own: no setting needed, photos back on.
+    await userEvent.click(grid)
+    await expect.poll(() => frame(screen).src).toContain('show_photos=1')
+    expect(frame(screen).src).toContain('menu_layout=&')
+
+    await userEvent.click(list)
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await expect
+      .poll(() => fake.calls.find((c) => c.method === 'PUT')?.data)
+      .toMatchObject({ menu_layout: 'list', show_photos: true })
+  })
+
+  it('keeps the other layout for Plus and up, with text on every plan', async () => {
+    const screen = await render(true, { layouts: false })
+    await expect
+      .element(screen.getByRole('radio', { name: /List/ }))
+      .toBeDisabled()
+    await expect.element(screen.getByText('Plus and up')).toBeVisible()
+    await expect
+      .element(screen.getByRole('radio', { name: /^Text/ }))
+      .toBeEnabled()
+    await expect
+      .element(screen.getByRole('radio', { name: /Grid/ }))
+      .toBeEnabled()
+  })
+
+  it('lets style D, text by itself, show photos in a grid or a list', async () => {
+    const screen = await render(true, { style: 'minimal' })
+    await expect
+      .element(screen.getByRole('radio', { name: /^Text/ }))
+      .toBeChecked()
+    await userEvent.click(screen.getByRole('radio', { name: /Grid/ }))
+    await expect.poll(() => frame(screen).src).toContain('menu_layout=grid&')
+    expect(frame(screen).src).toContain('show_photos=1')
+    await userEvent.click(screen.getByRole('radio', { name: /^Text/ }))
+    await expect.poll(() => frame(screen).src).toContain('menu_layout=&')
+  })
+
+  it('shows the phone in light or dark mode', async () => {
+    const screen = await render()
+    const modes = screen.getByRole('group', { name: 'Phone colour mode' })
+    await expect
+      .element(modes.getByRole('button', { name: 'Light' }))
+      .toHaveAttribute('aria-pressed', 'true')
+    expect(frame(screen).src).toContain('scheme=light')
+
+    await userEvent.click(modes.getByRole('button', { name: 'Dark' }))
+    await expect.poll(() => frame(screen).src).toContain('scheme=dark')
+    await userEvent.click(modes.getByRole('button', { name: 'Light' }))
+    await expect.poll(() => frame(screen).src).toContain('scheme=light')
+  })
+
+  it('filters the styles by kind of place, keeping the picked one in view', async () => {
+    const screen = await render()
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Fast food & grill' })
+    )
+    await expect
+      .element(screen.getByRole('radio', { name: /R · Burger & Pizza/ }))
+      .toBeVisible()
+    await expect
+      .element(screen.getByRole('radio', { name: /Q · Fine Dining/ }))
+      .not.toBeInTheDocument()
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Ethiopian & Somali' })
+    )
+    await expect
+      .element(screen.getByRole('radio', { name: /S · Injera & Tibs/ }))
+      .toBeVisible()
+    // B is picked: it stays, whatever the filter.
+    await expect
+      .element(screen.getByRole('radio', { name: /B · Fresh grid/ }))
+      .toBeChecked()
+    await userEvent.click(screen.getByRole('button', { name: 'All' }))
+    await expect
+      .element(screen.getByRole('radio', { name: /Q · Fine Dining/ }))
+      .toBeVisible()
+  })
+
+  // Bug (2026-11-21): an empty value (no logo, no banner, the style's own layout) was left out of
+  // the preview address, so the preview showed the saved one instead.
+  it('sends empty values to the preview, so a removed logo or the own layout shows at once', async () => {
+    const screen = await render()
+    await expect
+      .element(screen.getByRole('radio', { name: /Grid/ }))
+      .toBeChecked()
+    expect(frame(screen).src).toContain('logo_media_id=&')
+    expect(frame(screen).src).toContain('cover_media_id=&')
+    expect(frame(screen).src).toContain('banner_text=&')
   })
 })

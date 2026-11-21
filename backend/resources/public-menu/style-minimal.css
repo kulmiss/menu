@@ -33,3 +33,5 @@ li>.it .tg{grid-area:tg}
 dialog{border-radius:.75rem .75rem 0 0}
 /* Footer: plain page, hairline between the groups. */
 .ft{background:var(--bg)}.fg>div{border-top:1px solid var(--ln);padding-top:1rem}
+/* Layouts "grid" and "list" with photos (QUESTIONS #242, Plus and up): plain cards. */
+.L-grid section li,.L-list section li{border:1px solid var(--ln);border-radius:.75rem;background:var(--card)}

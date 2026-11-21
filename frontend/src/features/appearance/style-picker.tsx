@@ -1,9 +1,29 @@
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import { MENU_STYLES, type MenuStyle } from './api'
 
+/** Quick filters above the styles, so a restaurant finds its kind of look at once. */
+const GROUPS: Record<string, readonly MenuStyle[]> = {
+  all: MENU_STYLES,
+  east_african: ['mesob', 'injera', 'coffee', 'somali', 'grill', 'coastal'],
+  cafe: [
+    'editorial',
+    'bistro',
+    'minimal',
+    'mono',
+    'coffee',
+    'colour',
+    'garden',
+    'juice',
+  ],
+  fast: ['grid', 'burger', 'board', 'grill', 'colour'],
+  halal: ['arabic', 'islamic', 'somali', 'coastal'],
+  fine: ['luxe', 'lounge', 'editorial', 'mono'],
+}
+
 /**
- * "Menu style" picker: one card per style (A–Q) with a small drawing of it.
+ * "Menu style" picker: one card per style (A–T) with a small drawing of it.
  * Styles the plan doesn't include stay visible but can't be picked.
  */
 export function StylePicker({
@@ -18,21 +38,65 @@ export function StylePicker({
   onChange: (style: MenuStyle) => void
 }) {
   const { t } = useTranslation()
+  const [group, setGroup] = useState('all')
+  const row = useRef<HTMLDivElement>(null)
+  // Phones: the swipe row starts at the picked style, not at A.
+  useEffect(() => {
+    const el = row.current
+    const picked =
+      el?.querySelector<HTMLElement>('input:checked')?.parentElement
+    if (el && picked && el.scrollWidth > el.clientWidth) {
+      el.scrollLeft +=
+        picked.getBoundingClientRect().left -
+        el.getBoundingClientRect().left -
+        8
+    }
+    // Only when the page opens and when the filter changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [group])
+  // The picked style always stays in view, whatever the filter.
+  const shown = MENU_STYLES.filter(
+    (style) => GROUPS[group].includes(style) || style === value
+  )
 
   return (
-    <fieldset className='grid gap-2'>
-      <legend className='mb-2 text-sm font-medium'>
-        {t('appearance.menu_style')}
-      </legend>
-      <div className='grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4'>
-        {MENU_STYLES.map((style) => {
+    <fieldset className='grid min-w-0 gap-2'>
+      <legend className='sr-only'>{t('appearance.menu_style')}</legend>
+      <div
+        className='-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1'
+        role='group'
+        aria-label={t('appearance.style_groups.label')}
+      >
+        {Object.keys(GROUPS).map((key) => (
+          <button
+            key={key}
+            type='button'
+            aria-pressed={group === key}
+            onClick={() => setGroup(key)}
+            className={cn(
+              'min-h-9 flex-none rounded-full border px-3 text-sm whitespace-nowrap transition-colors',
+              group === key
+                ? 'border-primary bg-primary text-primary-foreground'
+                : 'hover:bg-accent'
+            )}
+          >
+            {t(`appearance.style_groups.${key}`)}
+          </button>
+        ))}
+      </div>
+      {/* Phones: one swipeable row (the page stays short); wider screens: a grid. */}
+      <div
+        ref={row}
+        className='-mx-1 flex snap-x gap-2 overflow-x-auto px-1 pb-2 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 sm:pb-0 xl:grid-cols-4'
+      >
+        {shown.map((style) => {
           const locked = !allowed.includes(style)
           const checked = value === style
           return (
             <label
               key={style}
               className={cn(
-                'flex cursor-pointer flex-col gap-2 rounded-lg border p-2 text-sm has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring',
+                'relative flex w-[44%] flex-none cursor-pointer snap-start flex-col gap-2 rounded-lg border p-2 text-sm has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring sm:w-auto',
                 checked && 'border-primary bg-primary/5 ring-2 ring-primary/30',
                 (disabled || locked) && 'cursor-not-allowed opacity-60'
               )}
@@ -577,6 +641,168 @@ function StyleThumb({ style }: { style: MenuStyle }) {
                 height='4'
                 rx='2'
                 {...accent}
+              />
+            </g>
+          ))}
+        </>
+      )}
+      {style === 'burger' && (
+        <>
+          <rect width='120' height='90' fill='#fff8ec' />
+          <rect width='120' height='30' fill='#f5b301' />
+          {Array.from({ length: 30 }, (_, i) => (
+            <rect
+              key={i}
+              x={i * 4}
+              y={i % 2 ? 30 : 32}
+              width='4'
+              height='2'
+              fill='#d7261e'
+            />
+          ))}
+          <rect x='8' y='10' width='46' height='8' rx='1' fill='#231a12' />
+          <path d='M90 18a12 9 0 0 1 24 0z' fill='#fff3d6' stroke='#231a12' />
+          <rect x='89' y='19' width='26' height='4' rx='2' fill='#7a3b1c' />
+          {[8, 62].map((x) => (
+            <g key={x}>
+              <rect x={x} y='40' width='50' height='46' rx='5' fill='#231a12' />
+              <rect
+                x={x - 1.5}
+                y='38.5'
+                width='50'
+                height='46'
+                rx='5'
+                fill='#fff'
+                stroke='#231a12'
+              />
+              <rect x={x} y='40' width='47' height='26' rx='3.5' {...photo} />
+              <rect
+                x={x + 3}
+                y='59'
+                width='18'
+                height='6'
+                rx='3'
+                fill='#f5b301'
+                stroke='#231a12'
+                strokeWidth='0.8'
+                transform={`rotate(-4 ${x + 12} 62)`}
+              />
+              <rect
+                x={x + 3}
+                y='71'
+                width='30'
+                height='4'
+                rx='1'
+                fill='#231a12'
+              />
+            </g>
+          ))}
+        </>
+      )}
+      {style === 'injera' && (
+        <>
+          <rect width='120' height='90' fill='#fbf8f2' />
+          <rect width='120' height='30' fill='#2a1d17' />
+          {Array.from({ length: 10 }, (_, i) => (
+            <rect
+              key={i}
+              x={i * 12}
+              y='30'
+              width='12'
+              height='3'
+              fill={['#135e57', '#a8321f', '#2c3e7a'][i % 3]}
+            />
+          ))}
+          <rect x='8' y='11' width='44' height='7' rx='2' fill='#f6ede2' />
+          <ellipse
+            cx='98'
+            cy='21'
+            rx='15'
+            ry='5'
+            fill='none'
+            stroke='#e3b25a'
+            strokeDasharray='1 2'
+          />
+          {[42, 65].map((y) => (
+            <g key={y}>
+              <circle cx='17' cy={y + 8} r='9' fill='#fff' stroke='#c98f2a' />
+              <circle cx='17' cy={y + 8} r='7.5' {...photo} />
+              <rect
+                x='32'
+                y={y + 3}
+                width='46'
+                height='4'
+                rx='2'
+                fill='#2a1d17'
+              />
+              <rect
+                x='32'
+                y={y + 10}
+                width='18'
+                height='4'
+                rx='2'
+                {...accent}
+              />
+              <path d={`M8 ${y + 20}h104`} stroke='#e7dccd' />
+            </g>
+          ))}
+        </>
+      )}
+      {style === 'juice' && (
+        <>
+          <rect width='120' height='90' fill='#f8fbf2' />
+          <rect width='120' height='30' fill='#1d4d2b' />
+          <rect y='28' width='120' height='2' fill='#8cc63f' />
+          <rect y='30' width='120' height='2' fill='#f4a62a' />
+          <rect y='32' width='120' height='2' fill='#e8505b' />
+          <rect x='8' y='11' width='44' height='7' rx='3' fill='#fff' />
+          <path d='M94 6h14l-2 20h-10z' fill='none' stroke='#fff' />
+          <rect x='95' y='10' width='12' height='5' fill='#8cc63f' />
+          <rect x='95.5' y='15' width='11' height='5' fill='#f4a62a' />
+          <rect x='96' y='20' width='10' height='5' fill='#e8505b' />
+          {[
+            [8, '#8cc63f', '#e6f3d2'],
+            [62, '#f4a62a', '#fde9c4'],
+          ].map(([x, line, pill]) => (
+            <g key={x as number}>
+              <rect
+                x={x as number}
+                y='40'
+                width='50'
+                height='46'
+                rx='8'
+                fill='#fff'
+              />
+              <rect
+                x={x as number}
+                y='40'
+                width='50'
+                height='26'
+                rx='8'
+                {...photo}
+              />
+              <rect
+                x={x as number}
+                y='64'
+                width='50'
+                height='2'
+                fill={line as string}
+              />
+              <rect
+                x={(x as number) + 4}
+                y='70'
+                width='30'
+                height='4'
+                rx='2'
+                fill='#17251a'
+              />
+              <rect
+                x={(x as number) + 4}
+                y='77'
+                width='18'
+                height='6'
+                rx='3'
+                fill={pill as string}
               />
             </g>
           ))}

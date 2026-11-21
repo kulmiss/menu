@@ -52,3 +52,5 @@ li>.it.np{grid-template-columns:minmax(0,1fr);grid-template-areas:"nm" "sm" "pr"
 dialog{border-radius:0;border-top:1px solid var(--gd)}
 .ft{background:var(--card);border-top:1px solid var(--gd)}
 .fg>div{border:1px solid var(--ln);padding:1rem}
+/* Layout "grid" (QUESTIONS #242): square cards with a hairline. */
+.L-grid section li,.L-grid section li:last-child{border:1px solid var(--ln);border-radius:0;background:var(--card)}
