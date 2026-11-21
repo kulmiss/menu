@@ -1,7 +1,7 @@
-// Styles H–Q (owner, 2026-11-18 and -19): a price never breaks onto two lines and stays
+// Styles H–T (owner, 2026-11-18, -19 and -21): a price never breaks onto two lines and stays
 // inside its card, the "+" is never cut off or outside its card, and the name is
 // clear of the price and the "+", with or without photos, from small phones to
-// desktop, left-to-right and (H, M–Q) right-to-left.
+// desktop, left-to-right and (H, M–T) right-to-left.
 // Bug (2026-11-18): in style I a dish without a photo had its "+" half above its card.
 import base from '@public-menu/base.css?raw'
 import order from '@public-menu/order.css?raw'
@@ -20,8 +20,21 @@ const NEW = [
   'garden',
   'coastal',
   'luxe',
+  'burger',
+  'injera',
+  'juice',
 ]
-const RTL = ['arabic', 'coffee', 'grill', 'garden', 'coastal', 'luxe']
+const RTL = [
+  'arabic',
+  'coffee',
+  'grill',
+  'garden',
+  'coastal',
+  'luxe',
+  'burger',
+  'injera',
+  'juice',
+]
 const NAMES = [
   'Shaah',
   'Bariis iskukaris with hilib ari and banana on the side',

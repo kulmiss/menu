@@ -1,0 +1,11 @@
+<svg class="ha" aria-hidden="true" viewBox="0 0 210 150" preserveAspectRatio="xMaxYMax meet" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M75 78h46l-2.4 33H77.4z" fill="#f4a62a" stroke="none"/>
+<path d="M72.6 56h50.8l-1.6 22H74.2z" fill="#8cc63f" stroke="none"/>
+<path d="M77.4 111h41.2l-2.4 33H79.8z" fill="#e8505b" stroke="none"/>
+<path d="M70 46h56l-7 98H77z"/>
+<path d="M108 46l14-38h12"/>
+<circle cx="72" cy="44" r="15" fill="#ffe36b"/><path d="M72 29v30M57 44h30M61 33l22 22M83 33L61 55" stroke-width="1.6"/>
+<rect x="150" y="118" width="22" height="22" rx="4" fill="#f4a62a" transform="rotate(-12 161 129)"/>
+<path d="M184 140c0-14 6-24 14-24s10 10 6 18c-3 5-10 6-20 6z" fill="#8cc63f"/><circle cx="196" cy="130" r="4" fill="#7a4a1c" stroke="none"/>
+<g fill="#ffffff" stroke="none" opacity=".55"><circle cx="150" cy="40" r="3"/><circle cx="166" cy="60" r="2"/><circle cx="182" cy="30" r="4"/><circle cx="30" cy="90" r="2.5"/><circle cx="20" cy="120" r="3.5"/></g>
+</svg>

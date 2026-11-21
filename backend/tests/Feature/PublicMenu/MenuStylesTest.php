@@ -34,6 +34,9 @@ const STYLE_MARKERS = [
     'garden' => ':root{--br:1.25rem;--bg:#f1f7ef',
     'coastal' => ':root{--br:.4rem;--bg:#f6f1e7',
     'luxe' => ':root{--br:0;--bg:#f7f4ee',
+    'burger' => ':root{--br:1rem;--bg:#fff8ec',
+    'injera' => ':root{--br:.9rem;--bg:#fbf8f2',
+    'juice' => ':root{--br:1.4rem;--bg:#f8fbf2',
 ];
 
 function pageWithStyle(string $style): string
@@ -127,7 +130,7 @@ it('offers only the styles the plan allows, and a restaurant override wins', fun
     $tenant->forceFill(['plan_id' => $plan->id])->save();
     Features::forget();
 
-    $this->actingAs($owner)->getJson(t($tenant, 'appearance'))->assertJsonPath('data.styles', ['grid', 'bistro', 'minimal', 'mesob', 'lounge', 'board', 'arabic', 'islamic', 'somali', 'mono', 'colour', 'coffee', 'grill', 'garden', 'coastal', 'luxe']);
+    $this->actingAs($owner)->getJson(t($tenant, 'appearance'))->assertJsonPath('data.styles', ['grid', 'bistro', 'minimal', 'mesob', 'lounge', 'board', 'arabic', 'islamic', 'somali', 'mono', 'colour', 'coffee', 'grill', 'garden', 'coastal', 'luxe', 'burger', 'injera', 'juice']);
     $this->actingAs($owner)->putJson(t($tenant, 'appearance'), [
         'primary_color' => '#b4432a', 'font' => 'system', 'style' => 'editorial',
         'show_prices' => true, 'show_photos' => true, 'show_descriptions' => true, 'show_calories' => true,

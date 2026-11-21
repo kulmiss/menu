@@ -20,7 +20,7 @@ it('shows the sales sheet to a Super Admin with live prices, the demo QR code an
         ->assertSee('@page{size:A4;margin:0}', false)
         ->assertSee('<meta name="robots" content="noindex">', false)
         ->getContent();
-    expect($html)->toContain('<svg viewBox="0 0 ')->toContain('17 menu styles');
+    expect($html)->toContain('<svg viewBox="0 0 ')->toContain('20 menu styles');
 });
 
 it('is not there for restaurant owners, guests or a Super Admin without two-factor', function () {

@@ -3,7 +3,7 @@
 namespace App\Support\PublicMenu;
 
 /**
- * Category icons of the menu styles M–Q (owner, 2026-11-19, QUESTIONS #232):
+ * Category icons of the menu styles M–T (owner, 2026-11-19 and -21, QUESTIONS #232, #243):
  * small line drawings made for this project (24 × 24, drawn in the text colour
  * of the style). The icon follows the category's name in any of its languages
  * ("Coffee", "ቡና", "Kalluun", "قهوة"); a name with no known word gets the next
@@ -35,6 +35,34 @@ final class CategoryIcons
         'plate' => 'M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM1.8 6v5M1.8 13.5v6.5M22.2 6v14M20.4 6v3.6a1.8 1.8 0 0 0 3.6 0V6',
         'rice' => 'M3.5 12.5h17a8.5 8.5 0 0 1-17 0zM6.5 12.5c.5-2.6 2.7-4.4 5.5-4.4s5 1.8 5.5 4.4M9 9.5l.6.9M12 8.4v1M15 9.5l-.6.9',
         'pizza' => 'M12 21L3.5 6.5C8.6 3.6 15.4 3.6 20.5 6.5zM5.4 9.8c4-2 9.2-2 13.2 0M9.5 12.4h.1M13.6 11.3h.1M12 16.2h.1',
+        // R–T (owner, 2026-11-21, QUESTIONS #243).
+        'burger' => 'M4 11a8 6 0 0 1 16 0zM3 14.5h18M4 17.5h16a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3zM8.5 8.5h.01M12 7.5h.01M15.5 8.5h.01',
+        'fries' => 'M6 10h12l-1.6 10.5H7.6zM7.5 10l-1-6.5M10 10V3M14 10V3.5M16.5 10l1-6M6.6 13.5c3.5 1.2 7.3 1.2 10.8 0',
+        'drumstick' => 'M10 14l-4.6 4.6a1.9 1.9 0 1 0 2.2 2.2 1.9 1.9 0 1 0 2.2-2.2L14 14M10 14a5.5 5.5 0 1 1 4 0',
+        'injera' => 'M12 19c5 0 9.5-3.1 9.5-7S17 5 12 5 2.5 8.1 2.5 12 7 19 12 19zM8 11h.01M11.5 9h.01M15 10.5h.01M9.5 14.5h.01M13 13h.01M16.5 14h.01M12 16.5h.01',
+        'pot' => 'M4 11h16M5 11c0 4.5 3 8 7 8s7-3.5 7-8M3 11h1M20 11h1M8 21.5h8M9 8c-.8-1 .8-1.8 0-3M12 7.5c-.8-1 .8-1.8 0-3M15 8c-.8-1 .8-1.8 0-3',
+        'citrus' => 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 17.5a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11zM12 6.5v11M6.5 12h11M8.1 8.1l7.8 7.8M15.9 8.1l-7.8 7.8',
+        'tallglass' => 'M7 6h10l-1.2 15H8.2zM7.4 11h9.2M7.8 15.5h8.4M13 6l2-4h2.5',
+    ];
+
+    /**
+     * Words checked first in one style only (R–T), so the styles before them keep
+     * every icon they had (e.g. "Burgers" stays a flame in N · Grill, a burger in R).
+     */
+    private const STYLE_WORDS = [
+        'burger' => [
+            'burger' => ['burger', 'በርገር', 'برجر', 'برغر', 'baargar'],
+            'drumstick' => ['chicken', 'wings', 'ዶሮ', 'digaag', 'دجاج', 'nugget', 'tender'],
+            'fries' => ['fries', 'chips', 'ፍራይ', 'side', 'loaded', 'snack'],
+        ],
+        'injera' => [
+            'injera' => ['injera', 'እንጀራ', 'beyaynetu', 'በያይነቱ', 'combo', 'platter', 'firfir', 'ፍርፍር'],
+            'pot' => ['wot', 'wat', 'ወጥ', 'stew', 'shekla', 'ሸክላ', 'fasting', 'tsom', 'ፆም', 'ጾም', 'shiro', 'ሽሮ'],
+        ],
+        'juice' => [
+            'tallglass' => ['spris', 'ስፕሪስ', 'layered', 'smoothie', 'shake', 'ሼክ', 'milkshake'],
+            'citrus' => ['fresh', 'fruit', 'ፍራፍሬ', 'lemon', 'orange', 'citrus', 'فواكه', 'miro'],
+        ],
     ];
 
     /**
@@ -68,6 +96,9 @@ final class CategoryIcons
         'garden' => ['leaf', 'bowl', 'glass', 'egg', 'cake', 'plate'],
         'coastal' => ['fish', 'shrimp', 'rice', 'bowl', 'glass', 'plate'],
         'luxe' => ['star', 'cloche', 'bowl', 'wine', 'cake', 'plate'],
+        'burger' => ['burger', 'pizza', 'fries', 'drumstick', 'glass', 'cake'],
+        'injera' => ['injera', 'pot', 'flame', 'leaf', 'cup', 'glass'],
+        'juice' => ['tallglass', 'citrus', 'glass', 'bowl', 'leaf', 'cake'],
     ];
 
     /**
@@ -83,7 +114,7 @@ final class CategoryIcons
             return $chosen;
         }
         $text = mb_strtolower(implode(' · ', $names));
-        foreach (self::WORDS as $icon => $words) {
+        foreach ([...(self::STYLE_WORDS[$style] ?? []), ...self::WORDS] as $icon => $words) {
             foreach ($words as $word) {
                 if (preg_match('/(?<![\p{L}\p{M}])'.preg_quote(mb_strtolower($word), '/').'/u', $text) === 1) {
                     return $icon;

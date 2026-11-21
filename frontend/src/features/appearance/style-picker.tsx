@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils'
 import { MENU_STYLES, type MenuStyle } from './api'
 
 /**
- * "Menu style" picker: one card per style (A–Q) with a small drawing of it.
+ * "Menu style" picker: one card per style (A–T) with a small drawing of it.
  * Styles the plan doesn't include stay visible but can't be picked.
  */
 export function StylePicker({
@@ -577,6 +577,168 @@ function StyleThumb({ style }: { style: MenuStyle }) {
                 height='4'
                 rx='2'
                 {...accent}
+              />
+            </g>
+          ))}
+        </>
+      )}
+      {style === 'burger' && (
+        <>
+          <rect width='120' height='90' fill='#fff8ec' />
+          <rect width='120' height='30' fill='#f5b301' />
+          {Array.from({ length: 30 }, (_, i) => (
+            <rect
+              key={i}
+              x={i * 4}
+              y={i % 2 ? 30 : 32}
+              width='4'
+              height='2'
+              fill='#d7261e'
+            />
+          ))}
+          <rect x='8' y='10' width='46' height='8' rx='1' fill='#231a12' />
+          <path d='M90 18a12 9 0 0 1 24 0z' fill='#fff3d6' stroke='#231a12' />
+          <rect x='89' y='19' width='26' height='4' rx='2' fill='#7a3b1c' />
+          {[8, 62].map((x) => (
+            <g key={x}>
+              <rect x={x} y='40' width='50' height='46' rx='5' fill='#231a12' />
+              <rect
+                x={x - 1.5}
+                y='38.5'
+                width='50'
+                height='46'
+                rx='5'
+                fill='#fff'
+                stroke='#231a12'
+              />
+              <rect x={x} y='40' width='47' height='26' rx='3.5' {...photo} />
+              <rect
+                x={x + 3}
+                y='59'
+                width='18'
+                height='6'
+                rx='3'
+                fill='#f5b301'
+                stroke='#231a12'
+                strokeWidth='0.8'
+                transform={`rotate(-4 ${x + 12} 62)`}
+              />
+              <rect
+                x={x + 3}
+                y='71'
+                width='30'
+                height='4'
+                rx='1'
+                fill='#231a12'
+              />
+            </g>
+          ))}
+        </>
+      )}
+      {style === 'injera' && (
+        <>
+          <rect width='120' height='90' fill='#fbf8f2' />
+          <rect width='120' height='30' fill='#2a1d17' />
+          {Array.from({ length: 10 }, (_, i) => (
+            <rect
+              key={i}
+              x={i * 12}
+              y='30'
+              width='12'
+              height='3'
+              fill={['#135e57', '#a8321f', '#2c3e7a'][i % 3]}
+            />
+          ))}
+          <rect x='8' y='11' width='44' height='7' rx='2' fill='#f6ede2' />
+          <ellipse
+            cx='98'
+            cy='21'
+            rx='15'
+            ry='5'
+            fill='none'
+            stroke='#e3b25a'
+            strokeDasharray='1 2'
+          />
+          {[42, 65].map((y) => (
+            <g key={y}>
+              <circle cx='17' cy={y + 8} r='9' fill='#fff' stroke='#c98f2a' />
+              <circle cx='17' cy={y + 8} r='7.5' {...photo} />
+              <rect
+                x='32'
+                y={y + 3}
+                width='46'
+                height='4'
+                rx='2'
+                fill='#2a1d17'
+              />
+              <rect
+                x='32'
+                y={y + 10}
+                width='18'
+                height='4'
+                rx='2'
+                {...accent}
+              />
+              <path d={`M8 ${y + 20}h104`} stroke='#e7dccd' />
+            </g>
+          ))}
+        </>
+      )}
+      {style === 'juice' && (
+        <>
+          <rect width='120' height='90' fill='#f8fbf2' />
+          <rect width='120' height='30' fill='#1d4d2b' />
+          <rect y='28' width='120' height='2' fill='#8cc63f' />
+          <rect y='30' width='120' height='2' fill='#f4a62a' />
+          <rect y='32' width='120' height='2' fill='#e8505b' />
+          <rect x='8' y='11' width='44' height='7' rx='3' fill='#fff' />
+          <path d='M94 6h14l-2 20h-10z' fill='none' stroke='#fff' />
+          <rect x='95' y='10' width='12' height='5' fill='#8cc63f' />
+          <rect x='95.5' y='15' width='11' height='5' fill='#f4a62a' />
+          <rect x='96' y='20' width='10' height='5' fill='#e8505b' />
+          {[
+            [8, '#8cc63f', '#e6f3d2'],
+            [62, '#f4a62a', '#fde9c4'],
+          ].map(([x, line, pill]) => (
+            <g key={x as number}>
+              <rect
+                x={x as number}
+                y='40'
+                width='50'
+                height='46'
+                rx='8'
+                fill='#fff'
+              />
+              <rect
+                x={x as number}
+                y='40'
+                width='50'
+                height='26'
+                rx='8'
+                {...photo}
+              />
+              <rect
+                x={x as number}
+                y='64'
+                width='50'
+                height='2'
+                fill={line as string}
+              />
+              <rect
+                x={(x as number) + 4}
+                y='70'
+                width='30'
+                height='4'
+                rx='2'
+                fill='#17251a'
+              />
+              <rect
+                x={(x as number) + 4}
+                y='77'
+                width='18'
+                height='6'
+                rx='3'
+                fill={pill as string}
               />
             </g>
           ))}

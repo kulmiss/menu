@@ -6,7 +6,7 @@ import {
 import { api, tenantUrl } from '@/lib/api'
 import { type Media } from '@/features/menu/types'
 
-/** Guest-menu styles A–Q, in picker order (backend TenantAppearance::STYLES). */
+/** Guest-menu styles A–T, in picker order (backend TenantAppearance::STYLES). */
 export const MENU_STYLES = [
   'editorial',
   'grid',
@@ -25,14 +25,20 @@ export const MENU_STYLES = [
   'garden',
   'coastal',
   'luxe',
+  'burger',
+  'injera',
+  'juice',
 ] as const
-/** M–Q: styles with their own artwork (header picture, textures, category icons). */
+/** M–T: styles with their own artwork (header picture, textures, category icons). */
 export const ART_STYLES: readonly MenuStyle[] = [
   'coffee',
   'grill',
   'garden',
   'coastal',
   'luxe',
+  'burger',
+  'injera',
+  'juice',
 ]
 export type MenuStyle = (typeof MENU_STYLES)[number]
 export type Font = 'system' | 'serif' | 'rounded'

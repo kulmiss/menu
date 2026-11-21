@@ -1,12 +1,12 @@
 ---
-title: Menu styles A to Q
+title: Menu styles A to T
 topic: look
 summary: Choose how your menu looks to guests.
 order: 10
 pages: /admin/appearance
 app: /r/:tid/appearance
 roles: owner, manager
-keywords: style, design, theme, layout, editorial, grid, bistro, minimal, mesob, lounge, night, dark, board, chalkboard, street food, arabic, right to left, rtl, islamic, halal, ramadan, somali, black and white, monochrome, colourful, colorful, juice, coffee, jebena, grill, bbq, garden, fresh, coastal, seafood, fish, fine dining, luxe, hotel
+keywords: style, design, theme, layout, editorial, grid, bistro, minimal, mesob, lounge, night, dark, board, chalkboard, street food, arabic, right to left, rtl, islamic, halal, ramadan, somali, black and white, monochrome, colourful, colorful, juice, coffee, jebena, grill, bbq, garden, fresh, coastal, seafood, fish, fine dining, luxe, hotel, burger, pizza, injera, tibs, spris
 public: true
 ---
 
@@ -63,8 +63,17 @@ Open **Appearance → Menu style**. The preview shows the change at once. Guests
 <!-- if style_luxe -->
 - **Q · Fine Dining**: marble, thin gold lines and an elegant serif. For hotels and fine dining. [More about Q](help:style-fine-dining)
 <!-- endif -->
+<!-- if style_burger -->
+- **R · Burger & Pizza**: mustard and ketchup, a checked edge, sticker cards two per row. For burger, pizza and fast-food shops. [More about R](help:style-burger)
+<!-- endif -->
+<!-- if style_injera -->
+- **S · Injera & Tibs**: a white netela page with a woven tibeb border and round photos. For traditional Ethiopian restaurants. [More about S](help:style-injera)
+<!-- endif -->
+<!-- if style_juice -->
+- **T · Juice & Drinks**: deep green with spris layers, rounded cards two per row. For juice houses and drink menus. [More about T](help:style-juice)
+<!-- endif -->
 
-Styles M to Q come with their own pictures: a drawing at the top and an icon for each category. Your banner and your category photos replace them, and **Show the style's pictures and icons** turns them off.
+Styles M to T come with their own pictures: a drawing at the top and an icon for each category. Your banner and your category photos replace them, and **Show the style's pictures and icons** turns them off.
 
 A style with a lock is not in your plan. See [plans](help:plans-compared).
 

@@ -82,6 +82,18 @@
     "luxe": {
       "name": "Q · Fine Dining",
       "hint": "Marble, thin gold lines, an elegant serif, centred headings. For hotels, fine dining and events."
+    },
+    "burger": {
+      "name": "R · Burger & Pizza",
+      "hint": "Mustard and ketchup, a checked edge, bold sticker cards two per row with tilted price stickers. For burger, pizza and fast-food shops."
+    },
+    "injera": {
+      "name": "S · Injera & Tibs",
+      "hint": "A white page with a woven tibeb border, injera and a clay pot of tibs drawn at the top, round photos like injera on its plate. For traditional Ethiopian restaurants."
+    },
+    "juice": {
+      "name": "T · Juice & Drinks",
+      "hint": "Deep green with spris layers of avocado, mango and papaya, rounded cards two per row. For juice houses, smoothie bars and drink menus."
     }
   },
   "flags": {

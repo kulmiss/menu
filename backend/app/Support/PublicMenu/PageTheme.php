@@ -86,6 +86,16 @@ class PageTheme
         // Q · Fine Dining: marble veins, thin gold lines, a refined serif, centred headings.
         'luxe' => ['layout' => 'list', 'light' => '#f7f4ee', 'dark' => '#1a1814', 'heading' => 'didone', 'banner' => [2, 1], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
             'photo' => '72px', 'lcp' => '72px', 'fold' => [5, 0], 'art' => true],
+        // R–T (owner, 2026-11-21, QUESTIONS #243), with artwork like M–Q.
+        // R · Burger & Pizza: mustard and ketchup, sticker cards two per row, prices on tilted stickers.
+        'burger' => ['layout' => 'grid', 'light' => '#fff8ec', 'dark' => '#221a14', 'heading' => 'board', 'banner' => [2, 1], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
+            'photo' => '(min-width:40rem) 220px, 50vw', 'lcp' => '(min-width:40rem) 220px, 40vw', 'fold' => [4, 0], 'art' => true],
+        // S · Injera & Tibs: a white netela page with a woven tibeb border, round "injera plate" photos.
+        'injera' => ['layout' => 'list', 'light' => '#fbf8f2', 'dark' => '#1e1712', 'heading' => 'serif', 'banner' => [5, 2], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
+            'photo' => '80px', 'lcp' => '80px', 'fold' => [5, 0], 'art' => true],
+        // T · Juice & Drinks: deep green and spris layers (avocado, mango, papaya), rounded cards two per row.
+        'juice' => ['layout' => 'grid', 'light' => '#f8fbf2', 'dark' => '#16221a', 'heading' => 'rounded', 'banner' => [2, 1], 'text' => 'under', 'sizes' => '(min-width:44rem) 704px, 100vw',
+            'photo' => '(min-width:40rem) 220px, 50vw', 'lcp' => '(min-width:40rem) 220px, 40vw', 'fold' => [4, 0], 'art' => true],
     ];
 
     /** L · Colourful: hue steps from the brand colour for categories 2–6 (category 1 is the brand colour). */

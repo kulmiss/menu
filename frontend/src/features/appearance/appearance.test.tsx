@@ -64,6 +64,9 @@ const APPEARANCE: Appearance = {
     'garden',
     'coastal',
     'luxe',
+    'burger',
+    'injera',
+    'juice',
   ],
   banner: {
     editorial: { ratio: [16, 9], text: 'under' },
@@ -83,6 +86,9 @@ const APPEARANCE: Appearance = {
     garden: { ratio: [5, 2], text: 'under' },
     coastal: { ratio: [2, 1], text: 'under' },
     luxe: { ratio: [2, 1], text: 'under' },
+    burger: { ratio: [2, 1], text: 'under' },
+    injera: { ratio: [5, 2], text: 'under' },
+    juice: { ratio: [2, 1], text: 'under' },
   },
   themes: [
     {

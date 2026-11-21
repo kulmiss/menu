@@ -79,10 +79,10 @@ class DemoSeeder extends Seeder
         $paying = [$cafe];
 
         if (! $this->cafeOnly) {
-            $showcases = $this->step('Showcase restaurants (A, B, C, E–Q)', fn () => app(Showcase::class)->seed($plans));
+            $showcases = $this->step('Showcase restaurants (A, B, C, E–T)', fn () => app(Showcase::class)->seed($plans));
             $this->step('Showcase restaurants: insights', function () use ($showcases, $insights) {
                 foreach ($showcases as $i => $tenant) {
-                    $insights->seed($tenant, 90, [60, 85, 45, 50, 70, 40, 55, 65, 50, 35, 75, 58, 72, 46, 52, 38][$i]);
+                    $insights->seed($tenant, 90, [60, 85, 45, 50, 70, 40, 55, 65, 50, 35, 75, 58, 72, 46, 52, 38, 66, 44, 57][$i]);
                 }
             });
             $paying = [...$paying, ...$showcases];

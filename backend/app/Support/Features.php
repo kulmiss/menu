@@ -43,6 +43,10 @@ class Features
         'style_garden' => true,
         'style_coastal' => true,
         'style_luxe' => true,
+        // R · Burger & Pizza, S · Injera & Tibs, T · Juice & Drinks (owner, 2026-11-21; Plus and up, off on Free: QUESTIONS #243).
+        'style_burger' => true,
+        'style_injera' => true,
+        'style_juice' => true,
         // Layouts other than the style's own: grid or list (owner, 2026-11-21; Plus and up, off on Free).
         'layouts' => true,
         'price_periods' => true, // time-based prices: happy hour, lunch (owner, 2026-11-14; off on Free)

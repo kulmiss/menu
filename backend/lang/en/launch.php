@@ -14,7 +14,7 @@ return [
         ['Photos that sell', 'Guests see the food before they order.'],
         ['English, Amharic, Somali, Arabic', 'Write dish names in any language, also right-to-left.'],
         ['Works on any phone', 'No app for guests. Fast even on a slow connection.'],
-        ['17 menu styles', 'From coffee house to fine dining. Your logo and colours.'],
+        ['20 menu styles', 'From coffee house to fine dining. Your logo and colours.'],
     ],
     'steps_title' => 'Ready in 3 steps',
     'steps' => ['Sign up free at :url', 'Add your dishes and photos (or send us photos of your paper menu)', 'Print the QR codes and put them on the tables'],

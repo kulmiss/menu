@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int|null $cover_media_id
  * @property string $primary_color "#b4432a"
  * @property string $font system|serif|rounded
- * @property string $style editorial|grid|bistro|minimal|mesob|lounge|board|arabic|islamic|somali|mono|colour (A · Warm editorial, B · Fresh grid, C · Quiet bistro, D · Minimal, E · Mesob, F · Night Lounge, G · Street Board, H · Arabic, I · Islamic, J · Somali, K · Black & White, L · Colourful)
+ * @property string $style editorial|grid|bistro|minimal|mesob|lounge|board|arabic|islamic|somali|mono|colour|coffee|grill|garden|coastal|luxe|burger|injera|juice (A · Warm editorial, B · Fresh grid, C · Quiet bistro, D · Minimal, E · Mesob, F · Night Lounge, G · Street Board, H · Arabic, I · Islamic, J · Somali, K · Black & White, L · Colourful, M · Coffee House, N · Grill & BBQ, O · Garden Fresh, P · Coastal, Q · Fine Dining, R · Burger & Pizza, S · Injera & Tibs, T · Juice & Drinks)
  * @property bool $show_logo logo on the guest page (kept when off)
  * @property bool $show_banner banner on the guest page (kept when off)
  * @property string|null $banner_text over|under (logo and name on or below the banner); null = style default
@@ -48,7 +48,7 @@ class TenantAppearance extends Model
     public const FONTS = ['system', 'serif', 'rounded'];
 
     /** Guest-menu styles; the order is the order of the admin picker. */
-    public const STYLES = ['editorial', 'grid', 'bistro', 'minimal', 'mesob', 'lounge', 'board', 'arabic', 'islamic', 'somali', 'mono', 'colour', 'coffee', 'grill', 'garden', 'coastal', 'luxe'];
+    public const STYLES = ['editorial', 'grid', 'bistro', 'minimal', 'mesob', 'lounge', 'board', 'arabic', 'islamic', 'somali', 'mono', 'colour', 'coffee', 'grill', 'garden', 'coastal', 'luxe', 'burger', 'injera', 'juice'];
 
     /** Menu direction (style H): auto follows the menu's script. */
     public const DIRECTIONS = ['auto', 'ltr', 'rtl'];
@@ -70,8 +70,8 @@ class TenantAppearance extends Model
      */
     public const STYLE_FLAGS = ['show_halal', 'ramadan_mode', 'photos_greyscale', 'mono_accent', 'show_decoration'];
 
-    /** M–Q: styles with their own artwork, replaceable by the restaurant's banner and category photos. */
-    public const ART_STYLES = ['coffee', 'grill', 'garden', 'coastal', 'luxe'];
+    /** M–T: styles with their own artwork, replaceable by the restaurant's banner and category photos. */
+    public const ART_STYLES = ['coffee', 'grill', 'garden', 'coastal', 'luxe', 'burger', 'injera', 'juice'];
 
     /** Styles with "Menu direction" (right-to-left for Arabic menus): H and M–Q (QUESTIONS #229, #232). */
     public const DIRECTION_STYLES = ['arabic', ...self::ART_STYLES];

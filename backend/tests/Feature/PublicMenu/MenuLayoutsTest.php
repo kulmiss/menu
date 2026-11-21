@@ -50,7 +50,7 @@ it('gives each style its own layout: grid, list or text', function () {
     $own = array_map(fn (array $s) => $s['layout'], PageTheme::STYLES);
 
     expect(array_keys($own))->toEqualCanonicalizing(TenantAppearance::STYLES)
-        ->and(array_keys(array_filter($own, fn ($l) => $l === 'grid')))->toBe(['editorial', 'grid', 'islamic'])
+        ->and(array_keys(array_filter($own, fn ($l) => $l === 'grid')))->toBe(['editorial', 'grid', 'islamic', 'burger', 'juice'])
         ->and(array_keys(array_filter($own, fn ($l) => $l === 'text')))->toBe(['minimal']);
 });
 

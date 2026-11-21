@@ -57,7 +57,7 @@ type StyleFlag =
   | 'photos_greyscale'
   | 'mono_accent'
   | 'show_decoration'
-/** Styles with "Menu direction": H and M–Q (QUESTIONS #229, #232). */
+/** Styles with "Menu direction": H and M–T (QUESTIONS #229, #232, #243). */
 const DIRECTION_STYLES: readonly MenuStyle[] = [
   'arabic',
   'coffee',
@@ -65,6 +65,9 @@ const DIRECTION_STYLES: readonly MenuStyle[] = [
   'garden',
   'coastal',
   'luxe',
+  'burger',
+  'injera',
+  'juice',
 ]
 const STYLE_SWITCHES: Partial<Record<MenuStyle, readonly StyleFlag[]>> = {
   islamic: ['show_halal', 'ramadan_mode'],
@@ -74,6 +77,9 @@ const STYLE_SWITCHES: Partial<Record<MenuStyle, readonly StyleFlag[]>> = {
   garden: ['show_decoration'],
   coastal: ['show_decoration'],
   luxe: ['show_decoration'],
+  burger: ['show_decoration'],
+  injera: ['show_decoration'],
+  juice: ['show_decoration'],
 }
 const FONT_STACK: Record<Font, string> = {
   system: 'system-ui, sans-serif',
