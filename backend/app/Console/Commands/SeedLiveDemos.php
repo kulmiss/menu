@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Http\Controllers\SiteController;
+use App\Models\Media;
 use App\Models\Membership;
 use App\Models\Plan;
 use App\Models\Tenant;
@@ -10,6 +11,8 @@ use App\Models\User;
 use App\Support\ImageProcessor;
 use App\Support\PublicMenu\MenuPageCache;
 use App\Support\Qr\QrMap;
+use App\Support\Setup\SetupStatus;
+use App\Tenancy\CurrentTenant;
 use Database\Seeders\Demo\Cafe;
 use Database\Seeders\Demo\Photos;
 use Database\Seeders\Demo\Showcase;
@@ -24,20 +27,27 @@ use Illuminate\Support\Str;
  * demo account gets a long random password nobody knows. Demo restaurants keep @example.com
  * addresses, so Super Admin still sees them as demo data ("Delete demo restaurants").
  *
- *   php artisan demo:live          (asks first on a live server; --force does not ask)
+ *   php artisan demo:live            (asks first on a live server; --force does not ask)
+ *   php artisan demo:live --refresh  (replaces the demo restaurants with the current menus)
  *
- * Safe to run again: restaurants that exist are left as they are.
+ * Safe to run again: restaurants that exist are left as they are, unless --refresh. --refresh
+ * only removes demo restaurants (every member @example.com) at the demo addresses, with
+ * their photos and menu pages, never a real restaurant.
  */
 class SeedLiveDemos extends Command
 {
-    protected $signature = 'demo:live {--force : Do not ask on a live server}';
+    protected $signature = 'demo:live
+        {--force : Do not ask on a live server}
+        {--refresh : Delete the demo restaurants first, then make them again with the current menus}';
 
     protected $description = 'Create the website demo menus (café + one per style) with no usable logins';
 
     public function handle(): int
     {
         if (app()->isProduction() && ! $this->option('force')
-            && ! $this->confirm('Create the demo restaurants on this live server? Their menus are public; nobody can sign in to them.')) {
+            && ! $this->confirm($this->option('refresh')
+                ? 'Replace the demo restaurants on this live server? They are deleted and made again; their menus are public; nobody can sign in to them.'
+                : 'Create the demo restaurants on this live server? Their menus are public; nobody can sign in to them.')) {
             return self::FAILURE;
         }
         $plans = Plan::whereIn('slug', ['free', 'plus', 'pro', 'business'])->get()->keyBy('slug')->all();
@@ -45,6 +55,9 @@ class SeedLiveDemos extends Command
             $this->error('The plans are missing: run php artisan migrate --force first.');
 
             return self::FAILURE;
+        }
+        if ($this->option('refresh')) {
+            $this->line(sprintf('%d demo restaurant(s) deleted.', $this->deleteDemos()));
         }
         // One Photos instance: each photo is processed once, then copied for the next restaurant.
         app()->instance(Photos::class, new Photos(app(ImageProcessor::class)));
@@ -86,8 +99,26 @@ class SeedLiveDemos extends Command
     }
 
     /**
+     * The demo restaurants at the demo addresses, deleted for good (not the 30 days of a normal
+     * delete, so the addresses are free again), with their photo files and menu pages.
+     */
+    private function deleteDemos(): int
+    {
+        $slugs = [SiteController::DEMO, ...array_column(self::restaurants(), 'slug')];
+        $demos = SetupStatus::demo()->withTrashed()->whereIn('slug', $slugs)->get();
+        foreach ($demos as $tenant) {
+            app(CurrentTenant::class)->runAs($tenant, fn () => Media::all()->each(fn (Media $media) => $media->deleteFiles()));
+            MenuPageCache::forget($tenant);
+            $tenant->forceDelete();
+        }
+
+        return $demos->count();
+    }
+
+    /**
      * One restaurant per menu style, as on the website: the showcases (A, B, C, E–Q) and,
      * for style D, Nine Wells Coffee (in the full demo it is one of the small restaurants).
+     * Style D shows no photos, so its dishes get none (nothing stored that is never shown).
      *
      * @return list<array<string, mixed>>
      */
@@ -104,6 +135,15 @@ class SeedLiveDemos extends Command
             'special' => ['Morning deal', 'Any coffee and a pastry for Br 150 before 10:00.', 'Croissant basket', 'juices-table'],
             'news' => ['New beans:', 'Washed Guji, fruity and bright.'],
         ];
+        $minimal = array_key_last($defs);
+        $defs[$minimal]['special'][3] = null;
+        foreach ($defs[$minimal]['catalogue']['menus'] as $m => $menu) {
+            foreach ($menu['categories'] as $c => $category) {
+                foreach ($category[2] as $i => $dish) {
+                    unset($defs[$minimal]['catalogue']['menus'][$m]['categories'][$c][2][$i][4]['ph']);
+                }
+            }
+        }
 
         return $defs;
     }
