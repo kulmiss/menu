@@ -107,8 +107,11 @@ class PaymentController extends Controller
             if ($tenant->paid_until === null || $end->gt($tenant->paid_until)) {
                 $tenant->forceFill(['paid_until' => $end->copy()->endOfDay()])->save();
             }
-            if (isset($data['plan_id'])) {
+            if (isset($data['plan_id']) && (int) $data['plan_id'] !== (int) $tenant->plan_id) {
+                // Logged so the dashboard can count upgrades and downgrades (owner, 2026-11-22).
+                $from = $tenant->plan_id;
                 $tenant->forceFill(['plan_id' => $data['plan_id']])->save();
+                $this->activity->log('platform.plan_changed', $tenant, ['plan_id' => ['from' => $from, 'to' => (int) $data['plan_id']]], $tenant->id);
             }
             // Every payment gets its invoice in the same transaction (owner, 2026-11-13).
             $this->invoices->issue($payment->setRelation('tenant', $tenant), $request->user());
