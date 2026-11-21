@@ -24,6 +24,8 @@ Upload the whole `backend/` folder (it now contains `vendor/` and `public/app/`)
 
 ## 3. Shared hosting (cPanel)
 
+Short, step-by-step version of this section and 3a, as done for the live site: [deploy-cpanel-guide.md](deploy-cpanel-guide.md).
+
 1. **Upload** `backend/` to a folder **outside** `public_html`, e.g. `/home/USER/menu/backend`.
 2. **Document root**: point the domain (cPanel → Domains) to `/home/USER/menu/backend/public`.
    If the host doesn't allow that, replace `public_html` with a symlink: `ln -s /home/USER/menu/backend/public /home/USER/public_html` (after moving the old folder away).
