@@ -72,6 +72,8 @@ Upload the whole `backend/` folder (it now contains `vendor/` and `public/app/`)
    ```
 
    Never run the demo seeders on a live server: they create restaurants with known passwords (`DemoSeeder` refuses when `APP_ENV=production`). Plain `php artisan db:seed` adds nothing.
+
+   **Demo menus for the website** (optional): `php artisan demo:live` creates the café (`/demo`) and one restaurant per menu style, the addresses the home page links to. Nobody can sign in to them (random passwords, no Super Admin), and Super Admin can delete them all from the setup checklist. Safe to run again.
 6. **Writable folders** (755 for folders, owned by your cPanel user): `storage/`, `bootstrap/cache/`, `public/media/`, `public/menu-cache/`, `public/menu-assets/`.
 7. **Cron** (cPanel → Cron Jobs, every minute) — the only cron line needed:
 
