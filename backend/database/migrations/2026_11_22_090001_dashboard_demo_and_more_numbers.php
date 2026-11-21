@@ -26,6 +26,8 @@ return new class extends Migration
             $table->unsignedInteger('deleted_restaurants')->default(0)->after('new_restaurants');
             // First guest view of a new restaurant's menu that day.
             $table->unsignedInteger('activated')->default(0)->after('deleted_restaurants');
+            // "My order" lists shown to a waiter (counted on the guest's phone, no personal data).
+            $table->unsignedInteger('order_lists')->default(0)->after('order_adds');
             $table->unsignedInteger('dishes_added')->default(0)->after('edits');
             $table->unsignedInteger('menu_changes')->default(0)->after('dishes_added');
             $table->unsignedInteger('upgrades')->default(0)->after('menu_changes');
@@ -58,7 +60,7 @@ return new class extends Migration
             $table->dropPrimary(['demo', 'plan_id', 'date']);
         });
         Schema::table('platform_daily', function (Blueprint $table) {
-            $table->dropColumn(['demo', 'deleted_restaurants', 'activated', 'dishes_added', 'menu_changes', 'upgrades', 'downgrades', 'cancellations']);
+            $table->dropColumn(['demo', 'deleted_restaurants', 'activated', 'order_lists', 'dishes_added', 'menu_changes', 'upgrades', 'downgrades', 'cancellations']);
             $table->primary(['plan_id', 'date']);
         });
     }

@@ -61,6 +61,8 @@ function dashboardWorld(): array
     dashStat($a, 'menu_view', 40, 50); // A's first guest view: 40 days ago
     dashStat($b, 'menu_view', 2, 7); // B's first: 2 days ago
     dashStat($b, 'order_add', 2, 3);
+    dashStat($b, 'order_shown', 2, 2);
+    dashStat($demo, 'order_shown', 1, 9);
     dashStat($demo, 'menu_view', 1, 1000);
     dashStat($demo, 'qr_scan', 1, 40);
 
@@ -117,6 +119,7 @@ it('counts restaurants, plan changes, money, guests and team changes without the
         ->and($k['menu_views']['value'])->toBe(107)
         ->and($k['qr_scans']['value'])->toBe(0)
         ->and($k['order_adds']['value'])->toBe(3)
+        ->and($k['order_lists']['value'])->toBe(2)
         ->and($k['dishes_added']['value'])->toBe(2)
         ->and($k['menu_changes']['value'])->toBe(3)
         ->and($k['edits']['value'] ?? null)->toBeNull()
@@ -136,7 +139,8 @@ it('adds the demo restaurants only with "Include demo data", and says so', funct
         ->and($o['kpis']['qr_scans']['value'])->toBe(40)
         ->and($o['kpis']['dishes_added']['value'])->toBe(3)
         ->and($o['kpis']['upgrades']['value'])->toBe(3)
-        ->and($o['kpis']['activated']['value'])->toBe(2);
+        ->and($o['kpis']['activated']['value'])->toBe(2)
+        ->and($o['kpis']['order_lists']['value'])->toBe(11);
     // The day rows add up the same way.
     expect(array_sum(array_column($o['series'], 'menu_views')))->toBe(1107)
         ->and(array_sum(array_column(dashWidget('overview')['series'], 'menu_views')))->toBe(107);

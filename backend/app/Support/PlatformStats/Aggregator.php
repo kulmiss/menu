@@ -226,7 +226,7 @@ final class Aggregator
         $demo = self::demoIds();
         $plans = array_values(array_unique([0, ...array_values($planOf)]));
         $zero = ['restaurants' => 0, 'new_restaurants' => 0, 'deleted_restaurants' => 0, 'activated' => 0, 'paying' => 0, 'active' => 0,
-            'revenue_minor' => 0, 'mrr_minor' => 0, 'menu_views' => 0, 'qr_scans' => 0, 'dish_views' => 0, 'order_adds' => 0, 'edits' => 0,
+            'revenue_minor' => 0, 'mrr_minor' => 0, 'menu_views' => 0, 'qr_scans' => 0, 'dish_views' => 0, 'order_adds' => 0, 'order_lists' => 0, 'edits' => 0,
             'dishes_added' => 0, 'menu_changes' => 0, 'upgrades' => 0, 'downgrades' => 0, 'cancellations' => 0];
         $out = [];
         foreach ([0, 1] as $scope) {
@@ -323,7 +323,7 @@ final class Aggregator
         }
 
         // Menu counters, per plan, summed in SQL.
-        $fields = ['menu_view' => 'menu_views', 'qr_scan' => 'qr_scans', 'item_view' => 'dish_views', 'order_add' => 'order_adds'];
+        $fields = ['menu_view' => 'menu_views', 'qr_scan' => 'qr_scans', 'item_view' => 'dish_views', 'order_add' => 'order_adds', 'order_shown' => 'order_lists'];
         $demoStats = $isDemoSql('stats_daily.tenant_id');
         foreach (DB::table('stats_daily')->join('tenants', 'tenants.id', '=', 'stats_daily.tenant_id')
             ->whereBetween('stats_daily.date', [$a, $b])->whereIn('stats_daily.metric', array_keys($fields))

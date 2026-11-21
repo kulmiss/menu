@@ -142,7 +142,7 @@ describe('Super Admin → Themes: phone preview', () => {
       .elements()
       .map((o) => o.textContent)
     expect(names).toHaveLength(MENU_STYLES.length)
-    expect(names.at(-1)).toBe('T · Juice & Drinks')
+    expect(names[names.length - 1]).toBe('T · Juice & Drinks')
     for (const name of names) expect(name).toMatch(/^[A-T] · /)
   })
 

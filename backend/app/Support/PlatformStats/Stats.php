@@ -66,7 +66,7 @@ final class Stats
     /** @return array<string, mixed> */
     public function overview(): array
     {
-        $flows = ['new_restaurants', 'deleted_restaurants', 'activated', 'revenue_minor', 'menu_views', 'qr_scans', 'dish_views', 'order_adds', 'edits',
+        $flows = ['new_restaurants', 'deleted_restaurants', 'activated', 'revenue_minor', 'menu_views', 'qr_scans', 'dish_views', 'order_adds', 'order_lists', 'edits',
             'dishes_added', 'menu_changes', 'upgrades', 'downgrades', 'cancellations'];
         $sql = implode(', ', array_map(fn (string $f) => "COALESCE(SUM({$f}),0) AS {$f}", $flows));
         $sums = fn (CarbonImmutable $a, CarbonImmutable $b) => (array) $this->days($a, $b)->selectRaw(
@@ -83,7 +83,7 @@ final class Stats
 
         $series = $this->days($this->from, $this->to)->orderBy('date')
             ->get(['date', 'new_restaurants', 'activated', 'deleted_restaurants', 'menu_views', 'qr_scans', 'revenue_minor', 'active', 'paying', 'restaurants',
-                'mrr_minor', 'dishes_added', 'menu_changes', 'order_adds', 'upgrades', 'downgrades', 'cancellations'])
+                'mrr_minor', 'dishes_added', 'menu_changes', 'order_adds', 'order_lists', 'upgrades', 'downgrades', 'cancellations'])
             ->map(fn ($r) => ['date' => (string) $r->date] + array_map('intval', array_diff_key((array) $r, ['date' => 1])))->all();
 
         return [
@@ -103,6 +103,7 @@ final class Stats
                 'dishes_added' => $kpi('dishes_added'),
                 'menu_changes' => $kpi('menu_changes'),
                 'order_adds' => $kpi('order_adds'),
+                'order_lists' => $kpi('order_lists'),
                 'dish_views' => $kpi('dish_views'),
                 'active' => $kpi('active'),
                 'new_restaurants' => $kpi('new_restaurants'),

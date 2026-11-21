@@ -780,11 +780,27 @@
       "mrr_minor": "MRR",
       "revenue_minor": "Revenue",
       "menu_views": "Menu views",
-      "qr_scans": "QR scans"
+      "qr_scans": "QR scans",
+      "activated": "First guest view",
+      "paused": "Paused now",
+      "deleted_restaurants": "Deleted",
+      "upgrades": "Upgrades",
+      "downgrades": "Downgrades",
+      "cancellations": "Cancellations",
+      "arppu_minor": "Per paying restaurant",
+      "dish_views": "Dish views",
+      "dishes_added": "Dishes added",
+      "menu_changes": "Menu changes",
+      "order_adds": "Added to \"My order\"",
+      "order_lists": "\"My order\" lists shown"
     },
     "chart": {
       "views": "Menu views",
-      "revenue": "Revenue"
+      "revenue": "Revenue",
+      "signups": "New restaurants: signed up and first guest view",
+      "guests": "Menu views and QR scans",
+      "revenue_month": "Revenue per month",
+      "team": "Dishes added and menu changes"
     },
     "growth": "Growth",
     "signups_week": "Sign-ups per week",
@@ -838,7 +854,10 @@
       "price_periods": "Happy hour (price periods)",
       "promotions": "Promotions",
       "order_list": "My order (last 30 days)",
-      "print": "Printed or downloaded QR"
+      "print": "Printed or downloaded QR",
+      "photos": "Dish photos",
+      "pdf": "PDF menu link",
+      "languages": "More than one language"
     },
     "styles": "Menu styles",
     "style": {
@@ -853,7 +872,15 @@
       "islamic": "Islamic",
       "somali": "Somali",
       "mono": "Black & White",
-      "colour": "Colourful"
+      "colour": "Colourful",
+      "coffee": "M · Coffee House",
+      "grill": "N · Grill & BBQ",
+      "garden": "O · Garden Fresh",
+      "coastal": "P · Coastal",
+      "luxe": "Q · Fine Dining",
+      "burger": "R · Burger & Pizza",
+      "injera": "S · Injera & Tibs",
+      "juice": "T · Juice & Drinks"
     },
     "limits": "Plan limits",
     "limit": {
@@ -919,7 +946,79 @@
       "style_injera": "Style: Injera & Tibs",
       "style_juice": "Style: Juice & Drinks"
     },
-    "last_days": "Last {{count}} days"
+    "last_days": "Last {{count}} days",
+    "group": {
+      "restaurants": "Restaurants",
+      "plans": "Plans",
+      "money": "Money",
+      "guests": "Guests",
+      "engagement": "Engagement"
+    },
+    "series": {
+      "new_restaurants": "Signed up",
+      "activated": "First guest view",
+      "menu_views": "Menu views",
+      "qr_scans": "QR scans",
+      "revenue_minor": "Revenue",
+      "dishes_added": "Dishes added",
+      "menu_changes": "Menu changes",
+      "order_lists": "\"My order\" lists"
+    },
+    "act": {
+      "signed_up": "Signed up",
+      "dishes": "Added dishes",
+      "style": "Chose a style",
+      "published": "Published (first guest view)",
+      "views_100": "100 guest views"
+    },
+    "csv": {
+      "number": "Number",
+      "value": "Value",
+      "previous": "Previous period",
+      "date": "Date",
+      "step": "Step",
+      "restaurants": "Restaurants",
+      "plan": "Plan",
+      "paid": "Paid plan (1 = yes)",
+      "week": "Week",
+      "kind": "Kind",
+      "name": "Name",
+      "list": "List"
+    },
+    "compare": "Compare with previous period",
+    "include_demo": "Include demo data",
+    "demo_included": "Demo data included: the website demo restaurants are counted.",
+    "no_payments": "No payments yet. Revenue and MRR show here once the first payment is recorded.",
+    "not_collected_guests": "Unique visitors and guest devices are not collected (no tracking of guests).",
+    "not_collected_scheme": "Whether guests use light or dark mode is not collected.",
+    "activation": "Activation",
+    "activation_hint": "How far the restaurants that signed up in this period got.",
+    "activation_steps": "From sign-up to 100 guest views",
+    "no_signups": "No restaurant signed up in this period.",
+    "mix": "Plans",
+    "mix_hint": "Restaurants per plan now, and plan changes in this period.",
+    "per_plan": "Restaurants per plan",
+    "plan_changes": "Plan changes per week",
+    "free_plan": "free",
+    "no_plan": "No plan",
+    "reach": "Styles, languages and places",
+    "reach_hint": "What the restaurants chose, now.",
+    "languages": "Menu language",
+    "places": "Places (from the time zone)",
+    "spark": "Menu views per day for {{name}}",
+    "info": {
+      "overview": "Numbers for the chosen period, from the daily summary the server builds every hour. Restaurants and paying are counted on the last day; new, views, scans, revenue and changes are added up over the period. \"First guest view\" is the day a menu was opened by a guest for the first time. \"Paused now\" is menus that are read only, switched off or suspended right now. Demo restaurants are left out unless \"Include demo data\" is on.",
+      "activation": "Restaurants that signed up in the chosen period, and how many of them added at least one dish, saved a menu style in Appearance, got their first guest view (published), and reached 100 guest views in total.",
+      "mix": "Restaurants per plan right now. Plan changes: an upgrade is a move to a dearer plan, a downgrade to a cheaper paid plan, and a cancellation a move to a free plan. Made by you in Restaurants or Payments, or when an old plan is replaced.",
+      "reach": "Menu style and menu language as each restaurant set them. Places come from the restaurant's time zone (for example Africa/Addis_Ababa is Addis Ababa), because addresses are free text.",
+      "top": "The restaurants with the most menu views, QR scans, growth or revenue. The small line shows menu views per day in the chosen period.",
+      "growth": "New restaurants per week, and how far the restaurants that signed up in this period got.",
+      "usage": "How many restaurants use each feature now, out of all restaurants (with the plan filter).",
+      "cohorts": "Restaurants by the month they signed up: how many are still active and how many pay now.",
+      "health": "Each restaurant gets a score from its setup, guest views and team changes. Healthy, at risk and inactive are bands of that score.",
+      "engagement": "Restaurant teams that made changes or signed in, and how complete the restaurants' setup is.",
+      "team": "Team members of the restaurants, with two-factor sign-in, and who was active."
+    }
   },
   "switches": {
     "title": "Features for the whole platform",
