@@ -15,3 +15,8 @@ condition = "AND"
 targetRules = ["telegram-bot-api-token"]
 regexes = ['''123456789:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsawQ''']
 paths = ['''^backend/tests/''', '''^frontend/src/.*\.test\.tsx$''']
+
+[[allowlists]]
+description = "Demo photo names in the photo list (\"strawberry-smoothie-2\" looks like a key to the generic rule)"
+targetRules = ["generic-api-key"]
+paths = ['''^backend/database/seeders/demo-photos/photos\.json$''']
