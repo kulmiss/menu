@@ -18,12 +18,14 @@ class InlineAssets
      * a page never carries the other styles): base.css, then the "My order" "+"
      * (order.css) when My order is on, then the style's own CSS. With My order off
      * the style's own "+" rules (.ad, .ao) are left out too (QUESTIONS #236).
+     * The layout rules (.L-grid, .L-list, QUESTIONS #242) only come with a page
+     * in another layout than its style's own, so every other page stays as small.
      */
-    public static function css(string $style = 'grid', bool $order = true): string
+    public static function css(string $style = 'grid', bool $order = true, bool $layouts = false): string
     {
         $style = in_array($style, TenantAppearance::STYLES, true) ? $style : 'grid';
 
-        $key = 'css.'.$style.($order ? '+o' : '');
+        $key = 'css.'.$style.($order ? '+o' : '').($layouts ? '+l' : '');
         if (! isset(self::$memo[$key])) {
             $css = self::minifyCss(file_get_contents(resource_path('public-menu/base.css'))."\n"
                 .($order ? file_get_contents(resource_path('public-menu/order.css'))."\n" : '')
@@ -33,6 +35,9 @@ class InlineAssets
                 fn (array $m) => 'url('.self::fontUrl($m[1]).')',
                 $order ? $css : self::withoutSelectors($css, '/\.a[do](?![\w-])/'),
             );
+            if (! $layouts) {
+                self::$memo[$key] = self::withoutSelectors(self::$memo[$key], '/\.L-(?:grid|list)(?![\w-])/');
+            }
         }
 
         return self::$memo[$key];
