@@ -63,11 +63,13 @@ jobs:
               - 'backend/resources/views/site/**'
               - 'backend/resources/views/account/**'
               - 'backend/lang/en/landing.php'
+              - 'backend/lang/en/landing2.php'
               - 'backend/lang/en/footer.php'
               - 'backend/lang/en/site.php'
               - 'backend/resources/legal/**'
               - 'backend/resources/views/legal.blade.php'
               - 'ci/lighthouse/lighthouserc.landing.json'
+              - 'ci/lighthouse/lighthouserc.landing2.json'
               - 'backend/lang/en/account.php'
               - 'backend/app/Http/Controllers/Auth/AccountController.php'
               - 'backend/app/Http/Controllers/Auth/SignInController.php'
@@ -400,11 +402,16 @@ jobs:
           curl -sf http://localhost:8125/ | grep -q 'id="demo"'
           curl -sf http://localhost:8125/signin | grep -q 'action="/signin"'
           curl -sf http://localhost:8125/signup | grep -q 'action="/signup"'
+          curl -sf http://localhost:8125/landing2 | grep -q 'id="styles"'
       - name: Lighthouse CI
         working-directory: ci/lighthouse
         run: |
           npm ci --ignore-scripts --no-audit --no-fund
           npx --no-install lhci autorun --config=./lighthouserc.landing.json
+          # Landing 2 (owner, 2026-11-22): same targets; "noindex" until it is the home page.
+          mkdir -p .lighthouseci-l1 && cp .lighthouseci/lhr-*.json .lighthouseci-l1/
+          npx --no-install lhci autorun --config=./lighthouserc.landing2.json
+          cp .lighthouseci-l1/lhr-*.json .lighthouseci/
       - name: Scores (median of 5 runs)
         if: always()
         run: |
@@ -433,5 +440,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: lighthouse-landing
-          path: /tmp/lhci-landing
+          path: |
+            /tmp/lhci-landing
+            /tmp/lhci-landing2
           if-no-files-found: ignore

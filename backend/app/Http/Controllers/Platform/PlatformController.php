@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Platform;
 
 use App\Enums\SubscriptionState;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\SiteController;
 use App\Jobs\PushAnnouncement;
 use App\Models\ActivityLog;
 use App\Models\Plan;
@@ -391,6 +392,7 @@ class PlatformController extends Controller
             'invoice_email' => ['sometimes', 'boolean'],
             // Landing page (owner, 2026-11-13)
             'brand_color' => ['sometimes', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'home_design' => ['sometimes', Rule::in(SiteController::HOME_DESIGNS)],
             'landing_headline' => ['sometimes', 'nullable', 'string', 'max:120'],
             'landing_subline' => ['sometimes', 'nullable', 'string', 'max:300'],
             'landing_sections' => ['sometimes', 'array'],
@@ -445,7 +447,12 @@ class PlatformController extends Controller
         if (($data['turnstile_enabled'] ?? false) && (($data['turnstile_site_key'] ?? PlatformSettings::get('turnstile_site_key')) === '' || (! isset($data['turnstile_secret']) && PlatformSettings::turnstileSecret() === ''))) {
             throw ValidationException::withMessages(['turnstile_enabled' => __('signup.turnstile_keys_needed')]);
         }
+        $design = PlatformSettings::get('home_design');
         PlatformSettings::save($data);
+        if (isset($data['home_design']) && $data['home_design'] !== $design) {
+            // Shows at once: save() empties the settings cache and the home page has no saved copy.
+            $this->activity->log('platform.home_design_changed', null, ['home_design' => ['from' => $design, 'to' => $data['home_design']]], null);
+        }
         // The older version fields now live in Super Admin → Mobile app (QUESTIONS #193).
         $versions = array_filter(['min_version' => $data['app_min_version'] ?? null, 'latest_version' => $data['app_latest_version'] ?? null]);
         if ($versions !== []) {

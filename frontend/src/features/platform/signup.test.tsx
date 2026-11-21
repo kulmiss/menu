@@ -488,6 +488,44 @@ describe('Super Admin settings: the legal texts open and close', () => {
       .toHaveAttribute('aria-invalid', 'true')
   })
 
+  it('switches the home page design at once, and back', async () => {
+    const screen = await render()
+    const one = screen.getByRole('radio', { name: /^Landing 1/ })
+    const two = screen.getByRole('radio', { name: /^Landing 2/ })
+    await expect.element(one).toBeChecked()
+    await expect
+      .element(screen.getByRole('link', { name: 'Preview Landing 2' }))
+      .toHaveAttribute('href', '/landing2')
+
+    await userEvent.click(two)
+    await expect
+      .poll(() =>
+        fake.calls.filter((c) => c.method === 'PUT').map((c) => c.data)
+      )
+      .toEqual([{ home_design: 'landing2' }])
+    await expect.element(two).toBeChecked()
+
+    await userEvent.click(one)
+    await expect
+      .poll(() => fake.calls.filter((c) => c.method === 'PUT').length)
+      .toBe(2)
+    expect(fake.calls.filter((c) => c.method === 'PUT')[1].data).toEqual({
+      home_design: 'landing1',
+    })
+    await expect.element(one).toBeChecked()
+  })
+
+  it('goes back to the saved design when switching fails', async () => {
+    const screen = await render(invalid({ home_design: 'Not allowed.' }))
+    await userEvent.click(screen.getByRole('radio', { name: /^Landing 2/ }))
+    await expect
+      .poll(() => fake.calls.filter((c) => c.method === 'PUT').length)
+      .toBe(1)
+    await expect
+      .element(screen.getByRole('radio', { name: /^Landing 1/ }))
+      .toBeChecked()
+  })
+
   it('has no accessibility problems, closed and open', async () => {
     const screen = await render()
     await expect.element(termsHeader(screen)).toBeVisible()

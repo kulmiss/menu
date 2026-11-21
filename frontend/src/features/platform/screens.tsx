@@ -35,6 +35,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import {
   Select,
   SelectContent,
@@ -1127,7 +1128,12 @@ function SettingsForm({
       <SettingsTabs
         t={t}
         tabs={{
-          general,
+          general: (
+            <div className='grid gap-6'>
+              <HomeDesignCard initial={initial.home_design} t={t} />
+              {general}
+            </div>
+          ),
           features: <FeatureSwitches />,
           signup: (
             <SignupSettings
@@ -1152,6 +1158,96 @@ function SettingsForm({
         }}
       />
     </>
+  )
+}
+
+/**
+ * The home page design (owner, 2026-11-22): Landing 1 or Landing 2. Saved the
+ * moment it is picked; switching back works the same way.
+ */
+function HomeDesignCard({
+  initial,
+  t,
+}: {
+  initial: string | null
+  t: (k: string, o?: Record<string, unknown>) => string
+}) {
+  const [design, setDesign] = useState(
+    initial === 'landing2' ? 'landing2' : 'landing1'
+  )
+  const save = usePlatformMutation((body: object) =>
+    send('put', 'settings', body)
+  )
+  return (
+    <Card className='max-w-2xl'>
+      <CardHeader>
+        <CardTitle>{t('platform.home_design.title')}</CardTitle>
+        <CardDescription>{t('platform.home_design.hint')}</CardDescription>
+      </CardHeader>
+      <CardContent className='grid gap-3'>
+        <RadioGroup
+          aria-label={t('platform.home_design.title')}
+          value={design}
+          disabled={save.isPending}
+          onValueChange={async (next) => {
+            const before = design
+            setDesign(next)
+            try {
+              await save.mutateAsync({ home_design: next })
+              toast.success(
+                t('platform.home_design.saved', {
+                  name: t(`platform.home_design.${next}`),
+                })
+              )
+            } catch {
+              setDesign(before)
+            }
+          }}
+          className='grid gap-2 sm:grid-cols-2'
+        >
+          {(['landing1', 'landing2'] as const).map((k) => (
+            <Label
+              key={k}
+              htmlFor={`hd-${k}`}
+              className='flex min-h-11 cursor-pointer items-start gap-3 rounded-lg border p-3 has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5'
+            >
+              <RadioGroupItem id={`hd-${k}`} value={k} className='mt-0.5' />
+              <span className='grid gap-0.5'>
+                <span className='font-medium'>
+                  {t(`platform.home_design.${k}`)}
+                </span>
+                <span className='font-normal text-muted-foreground'>
+                  {t(`platform.home_design.${k}_hint`)}
+                </span>
+              </span>
+            </Label>
+          ))}
+        </RadioGroup>
+        <div className='flex flex-wrap gap-2'>
+          <Button
+            asChild
+            variant='outline'
+            size='sm'
+            className='min-h-11 sm:min-h-8'
+          >
+            <a href='/' target='_blank' rel='noopener'>
+              <ExternalLink aria-hidden /> {t('platform.home_design.view_home')}
+            </a>
+          </Button>
+          <Button
+            asChild
+            variant='outline'
+            size='sm'
+            className='min-h-11 sm:min-h-8'
+          >
+            <a href='/landing2' target='_blank' rel='noopener'>
+              <ExternalLink aria-hidden />{' '}
+              {t('platform.home_design.view_landing2')}
+            </a>
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 

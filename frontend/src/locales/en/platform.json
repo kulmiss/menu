@@ -1531,5 +1531,16 @@
     "open_restaurant": "Open restaurant",
     "delete": "Delete photos",
     "delete_confirm": "Delete this request and its photos?"
+  },
+  "home_design": {
+    "title": "Home page design",
+    "hint": "Which design visitors see at your main address. It changes at once, and you can switch back any time.",
+    "landing1": "Landing 1",
+    "landing1_hint": "The first design (the one live until now).",
+    "landing2": "Landing 2",
+    "landing2_hint": "The new design: bold blocks, all menu styles, live prices.",
+    "saved": "The home page now shows {{name}}.",
+    "view_home": "Open the home page",
+    "view_landing2": "Preview Landing 2"
   }
 }
