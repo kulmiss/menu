@@ -63,18 +63,18 @@ export function SchemeSwitch({
   const { t } = useTranslation()
   return (
     <PreviewSwitch
-      label={t('appearance.scheme.label')}
+      label={t('common.preview.scheme_label')}
       value={value}
       onChange={onChange}
       options={[
         {
           value: 'light',
-          label: t('appearance.scheme.light'),
+          label: t('common.preview.light'),
           icon: <Sun className='size-4' aria-hidden />,
         },
         {
           value: 'dark',
-          label: t('appearance.scheme.dark'),
+          label: t('common.preview.dark'),
           icon: <Moon className='size-4' aria-hidden />,
         },
       ]}

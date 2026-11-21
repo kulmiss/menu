@@ -42,7 +42,11 @@ export function ThemePreview({ values }: { values: ThemeValues }) {
         aria-label={t('platform.themes.preview_title')}
         className='sticky top-20'
       >
-        <PreviewBody values={values} />
+        {/* Short screens: the phone shrinks so its bottom stays in view. */}
+        <PreviewBody
+          values={values}
+          frameClassName='h-[min(640px,calc(100dvh-19rem))] min-h-80'
+        />
       </aside>
     )
   }

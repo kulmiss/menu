@@ -22,17 +22,17 @@ export function DesktopPreview({ src }: { src: string }) {
       <DialogTrigger asChild>
         <Button variant='outline' className='mt-2 w-full'>
           <Monitor aria-hidden />
-          {t('appearance.preview_desktop')}
+          {t('common.preview.desktop')}
         </Button>
       </DialogTrigger>
       <DialogContent className='sm:max-w-[calc(100%-2rem)] xl:max-w-6xl'>
         <DialogHeader>
-          <DialogTitle>{t('appearance.preview_desktop')}</DialogTitle>
+          <DialogTitle>{t('common.preview.desktop')}</DialogTitle>
           <DialogDescription>
-            {t('appearance.preview_desktop_hint')}
+            {t('common.preview.desktop_hint')}
           </DialogDescription>
         </DialogHeader>
-        <ScaledFrame src={src} title={t('appearance.preview_desktop')} />
+        <ScaledFrame src={src} title={t('common.preview.desktop')} />
       </DialogContent>
     </Dialog>
   )

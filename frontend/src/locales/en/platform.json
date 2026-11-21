@@ -749,7 +749,8 @@
     "words_one": "{{formatted}} word",
     "words_other": "{{formatted}} words",
     "default_text": "Default text",
-    "updated": "Last updated {{date}}"
+    "updated": "Last updated {{date}}",
+    "words": "{{formatted}} words"
   },
   "ins": {
     "hint": "Numbers are rebuilt every hour from data the app already keeps. Click any number to see the restaurants behind it.",

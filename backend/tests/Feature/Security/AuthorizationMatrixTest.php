@@ -22,6 +22,7 @@ const PUBLIC_ROUTES = [
     'GET support', 'GET support/{slug}', // the public Help centre, linked from the footer (#230)
     'GET health', // for uptime monitors: the overall state only (QUESTIONS #233)
     'GET phone/{slug}/{branch?}', // a website demo menu in a phone frame (QUESTIONS #237)
+    'GET landing2', // the new home page design, a preview before it is picked (QUESTIONS #251)
     // "Continue with Google" (owner, 2026-11-17): Google's round trip and the new owner's restaurant name.
     'GET auth/google', 'GET auth/google/callback', 'GET api/v1/auth/google/pending', 'POST api/v1/auth/google/finish',
     'GET email/verify/{id}/{hash}', 'GET email/change/{user}/{hash}',
