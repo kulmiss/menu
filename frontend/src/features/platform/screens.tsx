@@ -75,6 +75,7 @@ import {
   SignupSettings,
   type SignupSettingsData,
 } from './signup-settings'
+import { ThemePreview } from './theme-preview'
 
 function useErrors() {
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -538,104 +539,115 @@ export function ThemesPage() {
         title={t('platform.nav.themes')}
         hint={t('platform.themes.hint')}
       />
-      <div className='grid gap-3 md:grid-cols-2'>
-        {themes.data?.map((th) => (
-          <Card key={th.id} className='py-3'>
-            <CardContent className='flex items-center gap-3 text-sm'>
-              <span
-                className='size-8 rounded-full border'
-                style={{ background: th.primary }}
-              />
-              <div className='flex-1'>
-                <p className='font-medium'>{th.name.en}</p>
-                <p className='text-muted-foreground'>
-                  {t(`platform.themes.fonts.${th.font}`)} ·{' '}
-                  {t(`platform.themes.styles.${th.style}`)}
-                </p>
-              </div>
-              <Switch
-                aria-label={t('platform.themes.offered', { name: th.name.en })}
-                checked={th.is_active}
-                onCheckedChange={(on) =>
-                  save.mutate({ id: th.id, is_active: on })
-                }
-              />
+      <div className='grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_380px]'>
+        <div className='grid min-w-0 gap-4'>
+          <div className='grid gap-3 md:grid-cols-2'>
+            {themes.data?.map((th) => (
+              <Card key={th.id} className='py-3'>
+                <CardContent className='flex items-center gap-3 text-sm'>
+                  <span
+                    className='size-8 rounded-full border'
+                    style={{ background: th.primary }}
+                  />
+                  <div className='flex-1'>
+                    <p className='font-medium'>{th.name.en}</p>
+                    <p className='text-muted-foreground'>
+                      {t(`platform.themes.fonts.${th.font}`)} ·{' '}
+                      {t(`platform.themes.styles.${th.style}`)}
+                    </p>
+                  </div>
+                  <Switch
+                    aria-label={t('platform.themes.offered', {
+                      name: th.name.en,
+                    })}
+                    checked={th.is_active}
+                    onCheckedChange={(on) =>
+                      save.mutate({ id: th.id, is_active: on })
+                    }
+                  />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('platform.themes.new')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form
+                className='flex flex-wrap items-end gap-2'
+                onSubmit={async (ev) => {
+                  ev.preventDefault()
+                  try {
+                    await save.mutateAsync({ ...v, name: { en: v.name } })
+                    setV({ ...v, name: '' })
+                  } catch (err) {
+                    e.catchErr(err)
+                  }
+                }}
+              >
+                <div className='grid gap-1'>
+                  <Label htmlFor='th-name'>{t('platform.themes.name')}</Label>
+                  <Input
+                    id='th-name'
+                    value={v.name}
+                    onChange={(x) => setV({ ...v, name: x.target.value })}
+                  />
+                </div>
+                <div className='grid gap-1'>
+                  <Label htmlFor='th-col'>{t('platform.themes.colour')}</Label>
+                  <input
+                    id='th-col'
+                    type='color'
+                    className='h-9 w-14 rounded border'
+                    value={v.primary}
+                    onChange={(x) => setV({ ...v, primary: x.target.value })}
+                  />
+                </div>
+                {(['font', 'style'] as const).map((k) => (
+                  <div key={k} className='grid gap-1'>
+                    <Label>{t(`platform.themes.${k}`)}</Label>
+                    <Select
+                      value={v[k]}
+                      onValueChange={(x) => setV({ ...v, [k]: x })}
+                    >
+                      <SelectTrigger
+                        className='w-36'
+                        aria-label={t(`platform.themes.${k}`)}
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(k === 'font'
+                          ? ['system', 'serif', 'rounded']
+                          : MENU_STYLES
+                        ).map((o) => (
+                          <SelectItem key={o} value={o}>
+                            {t(
+                              `platform.themes.${k === 'font' ? 'fonts' : 'styles'}.${o}`
+                            )}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                ))}
+                <Button
+                  type='submit'
+                  disabled={!v.name.trim() || save.isPending}
+                >
+                  <Plus /> {t('platform.add')}
+                </Button>
+              </form>
+              {e.first && (
+                <p className='mt-2 text-sm text-destructive'>{e.first}</p>
+              )}
             </CardContent>
           </Card>
-        ))}
+        </div>
+        {/* The new theme on a demo menu, before saving (owner, 2026-11-21). */}
+        <ThemePreview values={v} />
       </div>
-      <Card className='mt-4'>
-        <CardHeader>
-          <CardTitle>{t('platform.themes.new')}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form
-            className='flex flex-wrap items-end gap-2'
-            onSubmit={async (ev) => {
-              ev.preventDefault()
-              try {
-                await save.mutateAsync({ ...v, name: { en: v.name } })
-                setV({ ...v, name: '' })
-              } catch (err) {
-                e.catchErr(err)
-              }
-            }}
-          >
-            <div className='grid gap-1'>
-              <Label htmlFor='th-name'>{t('platform.themes.name')}</Label>
-              <Input
-                id='th-name'
-                value={v.name}
-                onChange={(x) => setV({ ...v, name: x.target.value })}
-              />
-            </div>
-            <div className='grid gap-1'>
-              <Label htmlFor='th-col'>{t('platform.themes.colour')}</Label>
-              <input
-                id='th-col'
-                type='color'
-                className='h-9 w-14 rounded border'
-                value={v.primary}
-                onChange={(x) => setV({ ...v, primary: x.target.value })}
-              />
-            </div>
-            {(['font', 'style'] as const).map((k) => (
-              <div key={k} className='grid gap-1'>
-                <Label>{t(`platform.themes.${k}`)}</Label>
-                <Select
-                  value={v[k]}
-                  onValueChange={(x) => setV({ ...v, [k]: x })}
-                >
-                  <SelectTrigger
-                    className='w-36'
-                    aria-label={t(`platform.themes.${k}`)}
-                  >
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(k === 'font'
-                      ? ['system', 'serif', 'rounded']
-                      : MENU_STYLES
-                    ).map((o) => (
-                      <SelectItem key={o} value={o}>
-                        {t(
-                          `platform.themes.${k === 'font' ? 'fonts' : 'styles'}.${o}`
-                        )}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            ))}
-            <Button type='submit' disabled={!v.name.trim() || save.isPending}>
-              <Plus /> {t('platform.add')}
-            </Button>
-          </form>
-          {e.first && (
-            <p className='mt-2 text-sm text-destructive'>{e.first}</p>
-          )}
-        </CardContent>
-      </Card>
     </>
   )
 }

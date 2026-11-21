@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import {
   AlertTriangle,
@@ -10,10 +10,8 @@ import {
   Image as ImageIcon,
   LayoutGrid,
   Loader2,
-  Moon,
   Palette,
   Sparkles,
-  Sun,
   ToggleRight,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -38,6 +36,7 @@ import {
   type AppearanceValues,
   type Font,
   type Layout,
+  DIRECTION_STYLES,
   MENU_DIRECTIONS,
   type MenuStyle,
   type PreviewScheme,
@@ -47,11 +46,14 @@ import {
   useSaveAppearance,
 } from './api'
 import { isHex, tooLightOnWhite } from './contrast'
-import { DesktopPreview } from './desktop-preview'
 import { LayoutPicker } from './layout-picker'
+import { PhonePreview } from './phone-preview'
 import { StylePicker } from './style-picker'
+import { usePreviewSrc } from './use-preview-src'
 
 const FONTS: Font[] = ['system', 'serif', 'rounded']
+/** Preview settings that reload the phone at once (others wait for a pause in typing). */
+const INSTANT_PREVIEW = ['style', 'scheme', 'show_photos', 'menu_layout']
 /** What guests see, in small groups (photos on or off is the "Text" layout). */
 const GUEST_GROUPS = {
   dish: ['show_prices', 'show_descriptions', 'show_calories'],
@@ -124,18 +126,6 @@ type StyleFlag =
   | 'photos_greyscale'
   | 'mono_accent'
   | 'show_decoration'
-/** Styles with "Menu direction": H and M–T (QUESTIONS #229, #232, #243). */
-const DIRECTION_STYLES: readonly MenuStyle[] = [
-  'arabic',
-  'coffee',
-  'grill',
-  'garden',
-  'coastal',
-  'luxe',
-  'burger',
-  'injera',
-  'juice',
-]
 const STYLE_SWITCHES: Partial<Record<MenuStyle, readonly StyleFlag[]>> = {
   islamic: ['show_halal', 'ramadan_mode'],
   mono: ['photos_greyscale', 'mono_accent'],
@@ -229,11 +219,12 @@ function AppearanceForm({ initial }: { initial: Appearance }) {
   const [colourText, setColourText] = useState(initial.primary_color)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [scheme, setScheme] = useState<PreviewScheme>('light')
-  const [src, setSrc] = useState(() =>
-    previewUrl(ctx.tenantId, values, 'light')
+  // The preview follows the settings: a new style, layout or colour mode at once, typing after a pause.
+  const preview = usePreviewSrc(
+    previewUrl(ctx.tenantId, values, scheme),
+    INSTANT_PREVIEW
   )
   const [showPreview, setShowPreview] = useState(false)
-  const [loading, setLoading] = useState(true)
   const disabled = !ctx.canManage || !ctx.canWrite
   const dirty = JSON.stringify(values) !== JSON.stringify(saved)
   const sections = useOpenSections('appearance', SECTION_DEFAULTS, SECTION_IDS)
@@ -241,27 +232,6 @@ function AppearanceForm({ initial }: { initial: Appearance }) {
     SECTION_KEYS[step].some((k) => values[k] !== saved[k])
   const errorsIn = (step: Step) =>
     SECTION_KEYS[step].filter((k) => errors[k] && !FIELD_ERRORS.includes(k))
-
-  // The preview follows the settings, a moment after the last change.
-  useEffect(() => {
-    const next = previewUrl(ctx.tenantId, values, scheme)
-    // A new menu style, layout or colour mode shows at once; typing a colour waits for a pause.
-    const instant =
-      !src.includes(`style=${values.style}&`) ||
-      !src.includes(`scheme=${scheme}`) ||
-      !src.includes(`show_photos=${values.show_photos ? 1 : 0}`) ||
-      !src.includes(`menu_layout=${values.menu_layout ?? ''}&`)
-    const timer = setTimeout(
-      () => {
-        if (next !== src) {
-          setLoading(true)
-          setSrc(next)
-        }
-      },
-      instant ? 0 : 350
-    )
-    return () => clearTimeout(timer)
-  }, [ctx.tenantId, values, scheme, src])
 
   function set<K extends keyof AppearanceValues>(
     key: K,
@@ -721,55 +691,13 @@ function AppearanceForm({ initial }: { initial: Appearance }) {
           showPreview ? 'block' : 'hidden'
         )}
       >
-        <div
-          role='group'
-          aria-label={t('appearance.scheme.label')}
-          className='mx-auto mb-3 flex w-fit gap-1 rounded-full border bg-muted p-1'
-        >
-          {(['light', 'dark'] as const).map((mode) => (
-            <button
-              key={mode}
-              type='button'
-              aria-pressed={scheme === mode}
-              onClick={() => setScheme(mode)}
-              className={cn(
-                'flex min-h-9 items-center gap-1.5 rounded-full px-4 text-sm font-medium transition-colors',
-                scheme === mode
-                  ? 'bg-background shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              )}
-            >
-              {mode === 'light' ? (
-                <Sun className='size-4' aria-hidden />
-              ) : (
-                <Moon className='size-4' aria-hidden />
-              )}
-              {t(`appearance.scheme.${mode}`)}
-            </button>
-          ))}
-        </div>
-        <div
-          className={cn(
-            'relative mx-auto h-[640px] w-[340px] overflow-hidden rounded-[2.25rem] border-[10px] shadow-xl transition-colors',
-            scheme === 'dark'
-              ? 'border-zinc-700 bg-zinc-900'
-              : 'border-zinc-800 bg-background'
-          )}
-        >
-          {loading && (
-            <Skeleton className='absolute inset-0 rounded-none' aria-hidden />
-          )}
-          <iframe
-            title={t('appearance.preview')}
-            src={src}
-            onLoad={() => setLoading(false)}
-            className='relative size-full'
-          />
-        </div>
-        <p className='mt-2 text-center text-xs text-muted-foreground'>
-          {t('appearance.preview_hint')}
-        </p>
-        <DesktopPreview src={src} />
+        <PhonePreview
+          {...preview}
+          scheme={scheme}
+          onScheme={setScheme}
+          title={t('appearance.preview')}
+          hint={t('appearance.preview_hint')}
+        />
       </div>
     </div>
   )

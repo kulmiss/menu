@@ -76,4 +76,9 @@ return [
         'too_many_columns' => 'The footer can have up to :max columns.',
         'too_many_links' => 'A column can have up to :max links.',
     ],
+    // Super Admin → Themes: the phone preview (owner, 2026-11-21).
+    'theme_preview' => [
+        'missing_title' => 'No demo menu yet',
+        'missing_text' => 'The preview shows a theme on the website demo menus. Create them on the server with:',
+    ],
 ];

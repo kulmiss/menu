@@ -230,8 +230,26 @@
       "islamic": "I · Islamic",
       "somali": "J · Somali",
       "mono": "K · Black & White",
-      "colour": "L · Colourful"
-    }
+      "colour": "L · Colourful",
+      "coffee": "M · Coffee House",
+      "grill": "N · Grill & BBQ",
+      "garden": "O · Garden Fresh",
+      "coastal": "P · Coastal",
+      "luxe": "Q · Fine Dining",
+      "burger": "R · Burger & Pizza",
+      "injera": "S · Injera & Tibs",
+      "juice": "T · Juice & Drinks"
+    },
+    "preview": "Preview",
+    "preview_title": "Preview on a demo menu",
+    "preview_hint": "A demo menu with this theme. Nothing is saved.",
+    "dir_label": "Text direction",
+    "ltr": "Left to right",
+    "rtl": "Right to left (Arabic)",
+    "rtl_off": "This style is always left to right.",
+    "photos_label": "Dish photos",
+    "photos_on": "Photos",
+    "photos_off": "No photos"
   },
   "announcements": {
     "hint": "Messages on restaurant dashboards.",

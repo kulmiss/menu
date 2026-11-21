@@ -354,6 +354,22 @@ export function usePlatformMutation<V>(
   })
 }
 
+/** Super Admin → Themes: a theme on a demo menu, never saved (owner, 2026-11-21). */
+export function themePreviewUrl(
+  v: { style: string; primary: string; font: string },
+  o: { scheme: 'light' | 'dark'; dir: 'ltr' | 'rtl'; photos: boolean }
+) {
+  const q = new URLSearchParams({
+    style: v.style,
+    primary: v.primary,
+    font: v.font,
+    scheme: o.scheme,
+    dir: o.dir,
+    photos: o.photos ? '1' : '0',
+  })
+  return `${api.defaults.baseURL}/super/themes/preview?${q}`
+}
+
 export const send = (
   method: 'post' | 'patch' | 'put' | 'delete',
   path: string,

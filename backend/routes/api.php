@@ -57,6 +57,7 @@ use App\Http\Controllers\Platform\PlatformController;
 use App\Http\Controllers\Platform\RestaurantController;
 use App\Http\Controllers\Platform\SearchController;
 use App\Http\Controllers\Platform\SetupController;
+use App\Http\Controllers\Platform\ThemePreviewController;
 use App\Support\Features;
 use App\Support\Landing\LandingImages;
 use App\Support\Legal\LegalText;
@@ -239,6 +240,8 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::post('plans', [PlatformController::class, 'savePlan']);
             Route::patch('plans/{plan}', [PlatformController::class, 'savePlan'])->whereNumber('plan');
             Route::get('themes', [PlatformController::class, 'themes']);
+            // A theme on a demo menu in the phone frame; nothing is saved (owner, 2026-11-21).
+            Route::get('themes/preview', [ThemePreviewController::class, 'show'])->middleware('throttle:120,1');
             Route::post('themes', [PlatformController::class, 'saveTheme']);
             Route::patch('themes/{theme}', [PlatformController::class, 'saveTheme'])->whereNumber('theme');
             Route::get('announcements', [PlatformController::class, 'announcements']);
