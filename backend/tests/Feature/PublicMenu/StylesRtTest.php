@@ -61,6 +61,9 @@ it('gives the new styles their own words without changing any icon of the styles
         ->and(CategoryIcons::pick('burger', ['Sides'], 0))->toBe('fries')
         ->and(CategoryIcons::pick('injera', ['Beyaynetu · በያይነቱ'], 0))->toBe('injera')
         ->and(CategoryIcons::pick('juice', ['Spris'], 0))->toBe('tallglass')
+        // Word starts only: "Water" is not "wat", "Tenderloin" not chicken.
+        ->and(CategoryIcons::pick('injera', ['Water'], 2))->toBe('flame')
+        ->and(CategoryIcons::pick('burger', ['Tenderloin'], 0))->not->toBe('drumstick')
         // N · Grill keeps a flame for burgers, O · Garden a glass for fresh juice, the fallback turn is unchanged.
         ->and(CategoryIcons::pick('grill', ['Burgers'], 0))->toBe('flame')
         ->and(CategoryIcons::pick('garden', ['Fresh juices'], 0))->toBe('glass')

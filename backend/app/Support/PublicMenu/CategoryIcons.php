@@ -52,12 +52,12 @@ final class CategoryIcons
     private const STYLE_WORDS = [
         'burger' => [
             'burger' => ['burger', 'በርገር', 'برجر', 'برغر', 'baargar'],
-            'drumstick' => ['chicken', 'wings', 'ዶሮ', 'digaag', 'دجاج', 'nugget', 'tender'],
+            'drumstick' => ['chicken', 'wings', 'ዶሮ', 'digaag', 'دجاج', 'nugget'],
             'fries' => ['fries', 'chips', 'ፍራይ', 'side', 'loaded', 'snack'],
         ],
         'injera' => [
             'injera' => ['injera', 'እንጀራ', 'beyaynetu', 'በያይነቱ', 'combo', 'platter', 'firfir', 'ፍርፍር'],
-            'pot' => ['wot', 'wat', 'ወጥ', 'stew', 'shekla', 'ሸክላ', 'fasting', 'tsom', 'ፆም', 'ጾም', 'shiro', 'ሽሮ'],
+            'pot' => ['wot', 'ወጥ', 'stew', 'shekla', 'ሸክላ', 'fasting', 'tsom', 'ፆም', 'ጾም', 'shiro', 'ሽሮ'],
         ],
         'juice' => [
             'tallglass' => ['spris', 'ስፕሪስ', 'layered', 'smoothie', 'shake', 'ሼክ', 'milkshake'],
