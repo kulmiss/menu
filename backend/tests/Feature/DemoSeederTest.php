@@ -94,13 +94,13 @@ it('seeds the complete sales demo: café, three showcases, small restaurants and
         asTenant($tenant, fn () => expect(TenantAppearance::sole()->style)->toBe($style)->and(Item::count())->toBeGreaterThan(12)->and(Item::whereNotNull('media_id')->count())->toBeGreaterThan(7));
         $this->get('/'.$slug)->assertOk();
     }
-    // E, F and G: smaller menus that still mix dishes with and without photos (owner, 2026-11-18).
+    // E, F and G: long menus with a photo on every dish (owner, 2026-11-21, QUESTIONS #241; before:
+    // a mix of dishes with and without photos, 2026-11-18).
     foreach (array_intersect_key(SiteController::STYLE_DEMOS, array_flip(['mesob', 'lounge', 'board'])) as $style => $slug) {
         $tenant = Tenant::where('slug', $slug)->sole();
         asTenant($tenant, fn () => expect(TenantAppearance::sole()->style)->toBe($style)
-            ->and(Item::count())->toBeGreaterThanOrEqual(10)
-            ->and(Item::whereNotNull('media_id')->count())->toBeGreaterThanOrEqual(5)
-            ->and(Item::whereNull('media_id')->count())->toBeGreaterThan(0));
+            ->and(Item::count())->toBeGreaterThanOrEqual(35)
+            ->and(Item::whereNull('media_id')->count())->toBe(0));
         $this->get('/'.$slug)->assertOk()->assertSee('S-'.$style, false);
     }
     // Night Lounge's demo has a happy hour every evening, Mesob's shows Amharic dish names.

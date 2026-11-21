@@ -8,7 +8,7 @@ Digital menu SaaS for restaurants and cafés: a fast public QR menu, a phone-fri
 |---|---|
 | Use the restaurant admin | **Help** in the admin (and the **?** on every page) — sources: `backend/resources/help/restaurant/` |
 | Run the platform as Super Admin | [Super Admin guide](docs/admin-guide/README.md) · [PDF](docs/admin-guide.pdf) · inside the panel: **Guide** |
-| Put it on a server | [docs/deploy.md](docs/deploy.md) · [docs/security.md](docs/security.md) · [go-live checklist](docs/admin-guide/go-live-checklist.md) |
+| Put it on a server | [docs/deploy.md](docs/deploy.md) · [cPanel step by step](docs/deploy-cpanel-guide.md) · [docs/security.md](docs/security.md) · [go-live checklist](docs/admin-guide/go-live-checklist.md) |
 | Build the mobile app | [kulmiss/menu-admin-app](https://github.com/kulmiss/menu-admin-app) · its API: [docs/mobile-api.md](docs/mobile-api.md) |
 | Look up an endpoint | [docs/api-reference.md](docs/api-reference.md) (generated from the routes) |
 | Know why something is the way it is | [QUESTIONS.md](QUESTIONS.md) (every decision) · [PLAN.md](PLAN.md) |
