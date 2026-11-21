@@ -1,0 +1,9 @@
+{
+  "host": "example.your-host.com",
+  "user": "example-cpanel-user",
+  "port": 22,
+  "path": "~/menu.example.com",
+  "branch": "main",
+  "php": "/opt/alt/php84/usr/bin/php",
+  "composer": "/opt/alt/php84/usr/bin/php /opt/cpanel/composer/bin/composer"
+}

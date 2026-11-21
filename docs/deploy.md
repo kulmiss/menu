@@ -2,7 +2,7 @@
 
 Shared hosting (cPanel) is the main target; a VPS with Nginx works the same way with a few extras. Production runs **without Docker**.
 
-Contents: [1 Requirements](#1-requirements) · [2 Build a release](#2-build-a-release-on-your-computer) · [3 Shared hosting](#3-shared-hosting-cpanel) · [4 VPS](#4-vps-nginx--php-fpm) · [5 OPcache](#5-opcache) · [6 Cloudflare](#6-cloudflare-optional) · [7 E-mail](#7-e-mail-smtp-spf-dkim-dmarc) · [8 First Super Admin](#8-the-first-super-admin) · [9 Updating](#9-updating-to-a-new-version) · [10 Backups](#10-backups) · [11 Troubleshooting](#11-troubleshooting) · [12 Go-live checklist](#12-go-live-checklist)
+Contents: [1 Requirements](#1-requirements) · [2 Build a release](#2-build-a-release-on-your-computer) · [3 Shared hosting](#3-shared-hosting-cpanel) · [3a Deploy from VS Code](#3a-deploy-from-vs-code-one-click) · [4 VPS](#4-vps-nginx--php-fpm) · [5 OPcache](#5-opcache) · [6 Cloudflare](#6-cloudflare-optional) · [7 E-mail](#7-e-mail-smtp-spf-dkim-dmarc) · [8 First Super Admin](#8-the-first-super-admin) · [9 Updating](#9-updating-to-a-new-version) · [10 Backups](#10-backups) · [11 Troubleshooting](#11-troubleshooting) · [12 Go-live checklist](#12-go-live-checklist)
 
 ## 1. Requirements
 
@@ -101,6 +101,45 @@ Upload the whole `backend/` folder (it now contains `vendor/` and `public/app/`)
 8. **PHP settings** (cPanel → MultiPHP INI Editor): `upload_max_filesize = 10M`, `post_max_size = 12M`, `memory_limit = 256M` (photo resizing), and OPcache on (section 5).
 9. Open `https://menu.example.com/up` → "Application up". Then create the Super Admin (section 8).
 
+## 3a. Deploy from VS Code (one click)
+
+Instead of uploading files by hand, keep a git copy on the server and update it with the **🚀 Deploy** button in VS Code (`scripts/deploy/deploy.ps1`, Windows). It checks that you are on `main` with nothing uncommitted and nothing unpushed, builds the admin app on your computer, uploads it, and then on the server: `git pull` → maintenance mode → `composer install --no-dev` → admin app → `migrate --force` → `optimize` → menu pages → live again. If a step fails, the site comes back up and the button tells you which step.
+
+**Once, on your computer (Windows)**
+
+1. An SSH key: in a terminal, `ssh-keygen -t ed25519` (press Enter for every question). In cPanel → **SSH Access → Manage SSH Keys → Import Key**, paste the content of `C:\Users\YOU\.ssh\id_ed25519.pub`, then **Authorize** it. Test: `ssh CPANELUSER@YOUR-HOST` logs in without a password.
+2. Copy `deploy.config.example.json` to `deploy.config.json` (repo root; never committed) and fill it in:
+
+   | Key | What | Example |
+   |---|---|---|
+   | `host`, `user`, `port` | your SSH login (cPanel → SSH Access) | `server.host.com`, `cpaneluser`, `22` |
+   | `path` | the git copy on the server | `~/menu.example.com` |
+   | `branch` | what goes live | `main` |
+   | `php` | PHP 8.3+ on the server; find it with `ls /opt/alt/php8*/usr/bin/php` or `which php` | `/opt/alt/php84/usr/bin/php` |
+   | `composer` | Composer, run with that PHP; find it with `which composer` | `/opt/alt/php84/usr/bin/php /opt/cpanel/composer/bin/composer` |
+
+3. VS Code suggests the **Task Buttons** extension: install it to get the **▶ Serve**, **🚀 Deploy** and **🧪 Deploy (dry run)** buttons in the status bar. Without it: **Terminal → Run Task… → Deploy live site**.
+
+**Once, on the server** (cPanel → Terminal), instead of 3.1:
+
+```bash
+git clone https://github.com/kulmiss/menu.git ~/menu.example.com
+cd ~/menu.example.com && git checkout main
+cd backend && cp .env.example .env       # then edit .env as in 3.4 (database from 3.3)
+/opt/alt/php84/usr/bin/php /opt/cpanel/composer/bin/composer install --no-dev --optimize-autoloader
+/opt/alt/php84/usr/bin/php artisan key:generate --force
+```
+
+Then point the domain's document root to `~/menu.example.com/backend/public` (3.2), press **🧪 Deploy (dry run)** and **🚀 Deploy** once, and finish with 3.5's `platform:aggregate`, 3.6–3.9 (folders, cron, PHP settings) and the first Super Admin (section 8).
+
+**Every update after that**
+
+1. Merge the release pull request into `main` on GitHub.
+2. In VS Code: `git checkout main` and `git pull`.
+3. Press **🚀 Deploy**. Open the site and check it.
+
+The button never deploys work that is not on GitHub's `main`, so the live site always matches GitHub.
+
 ## 4. VPS (Nginx + PHP-FPM)
 
 A small VPS (1 vCPU, 1–2 GB RAM, Ubuntu 24.04) is enough for hundreds of restaurants: guests get static pages from Nginx without PHP. One script installs everything from zero, updates with a backup first, and goes back to the previous version (tested from zero in a clean Ubuntu 24.04 container, 2026-11-19, QUESTIONS #233).
@@ -198,6 +237,8 @@ Then `php artisan config:cache && php artisan route:cache`, and check with `php 
 Then sign in at `https://menu.example.com/<SUPER_ADMIN_PATH>/sign-in`. Until two-factor sign-in is on, the area shows only **Set up two-factor**: scan the QR code with an authenticator app, enter the code and keep the recovery codes. After that the whole area opens.
 
 ## 9. Updating to a new version
+
+With the git copy from section 3a, press **🚀 Deploy** in VS Code: it does all of this. By hand:
 
 ```bash
 cd /home/USER/menu/backend
