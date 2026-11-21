@@ -128,7 +128,7 @@
 @php $preloadAvif = ! empty($lcp['img']['avif']); @endphp
 <link rel="preload" as="image" fetchpriority="high" type="image/{{ $preloadAvif ? 'avif' : 'webp' }}" imagesrcset="{{ $preloadAvif ? $lcp['img']['avif'] : $lcp['img']['webp'] }}" imagesizes="{{ $lcp['sizes'] }}">
 @endif
-<style>{!! InlineAssets::css($style, $orderList) !!}{!! $theme['css'] !!}@if ($demoView){!! InlineAssets::demoCss() !!}@endif</style>
+<style>{!! InlineAssets::css($style, $orderList, $anyPhoto && $theme['layout_class'] !== '') !!}{!! $theme['css'] !!}@if ($demoView){!! InlineAssets::demoCss() !!}@endif</style>
 </head>
 <body class="S-{{ $style }}{{ $anyPhoto ? '' : ' NP' }}{{ $anyPhoto && $theme['layout_class'] ? ' '.$theme['layout_class'] : '' }}{{ $theme['ramadan'] ? ' rm' : '' }}{{ $theme['greyscale'] ? ' gs' : '' }}{{ $theme['decoration'] ? ' dc' : '' }}">
 {{-- Demo menus on a tablet or computer: see it in a phone frame or as it is (owner, 2026-11-19). Hidden on phones. --}}

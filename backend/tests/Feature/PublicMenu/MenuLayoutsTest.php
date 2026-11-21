@@ -161,8 +161,13 @@ it('previews the menu as on a phone in light or dark mode', function () {
     $this->actingAs($owner)->getJson(t($tenant, 'appearance/preview').'?scheme=sepia')->assertInvalid('scheme');
 });
 
-it('ships the layout rules once, shared by every style', function () {
-    // The layout rules are shared (base.css), a few hundred bytes, not one copy per style.
-    expect(substr_count(InlineAssets::css('bistro'), '.L-grid section ul{'))->toBe(1)
-        ->and(substr_count(InlineAssets::css('grid'), '.L-list section ul{'))->toBe(1);
+it('ships the layout rules once, and only to a page in another layout', function () {
+    // Shared (base.css), not one copy per style.
+    expect(substr_count(InlineAssets::css('bistro', true, true), '.L-grid section ul{'))->toBe(1)
+        ->and(substr_count(InlineAssets::css('grid', true, true), '.L-list section ul{'))->toBe(1);
+    // A page in its style's own layout (nearly every restaurant) carries none of them: as small as before.
+    expect(InlineAssets::css('bistro'))->not->toContain('.L-grid')->not->toContain('.L-list')
+        ->and(strlen(InlineAssets::css('bistro')))->toBeLessThan(strlen(InlineAssets::css('bistro', true, true)) - 2_000);
+    expect(layoutPage(['style' => 'bistro']))->not->toContain('.L-grid')
+        ->and(layoutPage(['style' => 'bistro', 'menu_layout' => 'grid']))->toContain('.L-grid section ul{');
 });
