@@ -25,6 +25,7 @@ use App\Support\PlatformSettings;
 use App\Support\PublicMenu\ShareImage;
 use App\Support\Security\OutboundHost;
 use App\Support\Tables\TableQuery;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -292,8 +293,16 @@ class PlatformController extends Controller
                 $settings[$page] = LegalText::default($page);
             }
         }
+        // When each page's text was last saved (null: never), for the closed sections' summary (owner, 2026-11-21).
+        $saved = DB::table('platform_settings')->whereIn('key', LegalText::PAGES)->get(['key', 'value', 'updated_at'])->keyBy('key');
+        $legalUpdatedAt = [];
+        foreach (LegalText::PAGES as $page) {
+            $row = $saved->get($page);
+            $legalUpdatedAt[$page] = $row && $row->updated_at && trim((string) json_decode((string) $row->value, true)) !== ''
+                ? CarbonImmutable::parse($row->updated_at)->toIso8601String() : null;
+        }
 
-        return response()->json(['data' => [...$settings, 'google_configured' => GoogleLogin::configured(), 'share_image_url' => ShareImage::for(null)['url'], 'logo_url' => EmailLogo::url(), 'plans' => Plan::orderBy('sort')->get(['id', 'name', 'slug'])->map(fn (Plan $p) => ['id' => $p->id, 'name' => $p->name['en'] ?? $p->slug, 'slug' => $p->slug])]]);
+        return response()->json(['data' => [...$settings, 'legal_updated_at' => $legalUpdatedAt, 'google_configured' => GoogleLogin::configured(), 'share_image_url' => ShareImage::for(null)['url'], 'logo_url' => EmailLogo::url(), 'plans' => Plan::orderBy('sort')->get(['id', 'name', 'slug'])->map(fn (Plan $p) => ['id' => $p->id, 'name' => $p->name['en'] ?? $p->slug, 'slug' => $p->slug])]]);
     }
 
     /** The default link preview for menus without a banner (owner, 2026-11-12). */

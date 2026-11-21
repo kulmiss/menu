@@ -3,6 +3,8 @@ import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import {
   AlertTriangle,
+  ChevronsDownUp,
+  ChevronsUpDown,
   ExternalLink,
   Loader2,
   Plus,
@@ -12,6 +14,7 @@ import { useTranslation } from 'react-i18next'
 import { useSetupWizard } from '@/stores/setup-wizard-store'
 import { validationErrors } from '@/lib/api'
 import { toast } from '@/lib/toast'
+import { useOpenSections } from '@/hooks/use-open-sections'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -43,6 +46,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
+import { CollapsibleCard } from '@/components/collapsible-card'
 import { ConfirmDialog } from '@/components/confirm-dialog'
 import { type Col, DataTable } from '@/components/data-table'
 import { MENU_STYLES } from '@/features/appearance/api'
@@ -966,6 +970,7 @@ function SettingsForm({
     send('put', 'settings', body)
   )
   const e = useErrors()
+  const legal = useOpenSections('platform-settings', LEGAL_CLOSED, LEGAL_IDS)
   const [v, setV] = useState({
     name: initial.name ?? '',
     support_email: initial.support_email ?? '',
@@ -977,6 +982,11 @@ function SettingsForm({
     contact: initial.contact ?? '',
     cookies: initial.cookies ?? '',
   })
+  // The texts as last saved: only changed ones are sent, so saving the name never touches the Terms.
+  const [savedLegal, setSavedLegal] = useState(() => legalOf(v))
+  const legalChanged = (k: LegalPage) => v[k] !== savedLegal[k]
+  const updatedAt = (initial as unknown as { legal_updated_at?: LegalDates })
+    .legal_updated_at
   const input = (
     k: keyof typeof v,
     props: React.ComponentProps<typeof Input> = {}
@@ -1003,15 +1013,26 @@ function SettingsForm({
           className='grid gap-4'
           onSubmit={async (ev) => {
             ev.preventDefault()
+            const sent = legalOf(v)
             try {
               await save.mutateAsync({
-                ...v,
+                name: v.name,
                 support_email: v.support_email || null,
                 domain: v.domain || null,
+                default_currency: v.default_currency,
+                ...Object.fromEntries(
+                  LEGAL_PAGES.filter(legalChanged).map((k) => [k, v[k]])
+                ),
               })
+              setSavedLegal(sent)
+              e.setErrors({})
               toast.success(t('platform.saved'))
             } catch (err) {
-              e.catchErr(err)
+              const errors = validationErrors(err) ?? {}
+              e.setErrors(errors)
+              // A text with an error opens, scrolls into view and takes the focus.
+              const page = LEGAL_PAGES.find((k) => errors[k])
+              if (page) legal.reveal(page, true)
             }
           }}
         >
@@ -1028,14 +1049,46 @@ function SettingsForm({
             </AlertTitle>
             <AlertDescription>{t('platform.legal.format')}</AlertDescription>
           </Alert>
+          <div className='flex justify-end'>
+            <Button
+              type='button'
+              variant='outline'
+              size='sm'
+              className='min-h-11 sm:min-h-9'
+              onClick={() => legal.setAll(!legal.allOpen)}
+            >
+              {legal.allOpen ? (
+                <ChevronsDownUp aria-hidden />
+              ) : (
+                <ChevronsUpDown aria-hidden />
+              )}
+              {t(legal.allOpen ? 'common.collapse_all' : 'common.expand_all')}
+            </Button>
+          </div>
           {LEGAL_PAGES.map((k) => (
-            <LegalField
+            <CollapsibleCard
               key={k}
-              page={k}
-              value={v[k]}
-              onChange={(text) => setV((x) => ({ ...x, [k]: text }))}
-              t={t}
-            />
+              id={LEGAL_IDS[k]}
+              open={legal.open[k]}
+              onOpenChange={(open) => legal.setOpen(k, open)}
+              title={t(`platform.settings.${k}`)}
+              summary={legalSummary(t, v[k], updatedAt?.[k] ?? null)}
+              changed={legalChanged(k)}
+              className='shadow-none'
+            >
+              <LegalField
+                page={k}
+                value={v[k]}
+                error={e.errors[k]}
+                onChange={(text) => setV((x) => ({ ...x, [k]: text }))}
+                onReset={(text) => {
+                  // The reset is saved at once: the text and its saved copy both change.
+                  setV((x) => ({ ...x, [k]: text }))
+                  setSavedLegal((x) => ({ ...x, [k]: text }))
+                }}
+                t={t}
+              />
+            </CollapsibleCard>
           ))}
           <Button
             type='submit'
@@ -1092,17 +1145,63 @@ function SettingsForm({
 
 /** Terms and Privacy (#181), and About us, Contact us and Cookie info, linked from the footer (#230). */
 const LEGAL_PAGES = ['terms', 'privacy', 'about', 'contact', 'cookies'] as const
+type LegalPage = (typeof LEGAL_PAGES)[number]
+type LegalDates = Partial<Record<LegalPage, string | null>>
+/** The long texts start closed (owner, 2026-11-21); #legal-terms opens Terms. */
+const LEGAL_CLOSED: Record<LegalPage, boolean> = {
+  terms: false,
+  privacy: false,
+  about: false,
+  contact: false,
+  cookies: false,
+}
+const LEGAL_IDS: Record<LegalPage, string> = {
+  terms: 'legal-terms',
+  privacy: 'legal-privacy',
+  about: 'legal-about',
+  contact: 'legal-contact',
+  cookies: 'legal-cookies',
+}
+const legalOf = (v: Record<LegalPage, string>) =>
+  Object.fromEntries(LEGAL_PAGES.map((k) => [k, v[k]])) as Record<
+    LegalPage,
+    string
+  >
+
+/** "Last updated 12 Nov 2026 · 2,340 words" (or "Default text · …" when never saved). */
+function legalSummary(
+  t: (k: string, o?: Record<string, unknown>) => string,
+  text: string,
+  updatedAt: string | null
+) {
+  const words = text.trim() === '' ? 0 : text.trim().split(/\s+/).length
+  const count = t('platform.legal.words', {
+    count: words,
+    formatted: words.toLocaleString('en'),
+  })
+  if (!updatedAt) return `${t('platform.legal.default_text')} · ${count}`
+  const date = new Intl.DateTimeFormat('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  }).format(new Date(updatedAt))
+  return `${t('platform.legal.updated', { date })} · ${count}`
+}
 
 /** One page's text with "View page" and "Reset to default text". */
 function LegalField({
   page,
   value,
+  error,
   onChange,
+  onReset,
   t,
 }: {
-  page: (typeof LEGAL_PAGES)[number]
+  page: LegalPage
   value: string
+  error?: string
   onChange: (text: string) => void
+  onReset: (text: string) => void
   t: (k: string) => string
 }) {
   const [confirm, setConfirm] = useState(false)
@@ -1111,8 +1210,10 @@ function LegalField({
   )
   return (
     <div className='grid gap-1'>
-      <div className='flex flex-wrap items-end justify-between gap-2'>
-        <Label htmlFor={`st-${page}`}>{t(`platform.settings.${page}`)}</Label>
+      <div className='flex flex-wrap items-end justify-end gap-2'>
+        <Label htmlFor={`st-${page}`} className='sr-only'>
+          {t(`platform.settings.${page}`)}
+        </Label>
         <div className='flex flex-wrap gap-1'>
           <Button
             asChild
@@ -1140,8 +1241,15 @@ function LegalField({
         rows={14}
         className='font-mono text-sm'
         value={value}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={error ? `st-${page}-error` : undefined}
         onChange={(x) => onChange(x.target.value)}
       />
+      {error && (
+        <p id={`st-${page}-error`} className='text-sm text-destructive'>
+          {error}
+        </p>
+      )}
       <ConfirmDialog
         open={confirm}
         onOpenChange={setConfirm}
@@ -1154,7 +1262,7 @@ function LegalField({
           const res = (await reset.mutateAsync(undefined)) as {
             data: { data: Record<string, string> }
           }
-          onChange(res.data.data[page])
+          onReset(res.data.data[page])
           setConfirm(false)
           toast.success(t('platform.legal.reset_done'))
         }}

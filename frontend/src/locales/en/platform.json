@@ -727,7 +727,11 @@
     "reset_done": "Default text restored and saved.",
     "reset_title_about": "Reset the About us page?",
     "reset_title_contact": "Reset the Contact us page?",
-    "reset_title_cookies": "Reset the Cookie info page?"
+    "reset_title_cookies": "Reset the Cookie info page?",
+    "words_one": "{{formatted}} word",
+    "words_other": "{{formatted}} words",
+    "default_text": "Default text",
+    "updated": "Last updated {{date}}"
   },
   "ins": {
     "hint": "Numbers are rebuilt every hour from data the app already keeps. Click any number to see the restaurants behind it.",

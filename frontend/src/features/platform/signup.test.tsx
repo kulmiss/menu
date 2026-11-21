@@ -1,4 +1,5 @@
-import { fakeApi } from '@/test-utils/fake-api'
+import { axeViolations } from '@/test-utils/axe'
+import { fakeApi, invalid } from '@/test-utils/fake-api'
 import { meFixture } from '@/test-utils/fixtures'
 import { renderWithQuery } from '@/test-utils/render'
 import { navigate } from '@/test-utils/router-mock'
@@ -163,7 +164,11 @@ describe('Super Admin sign-up controls', () => {
 })
 
 describe('Super Admin landing page settings', () => {
-  afterEach(() => fake.restore())
+  afterEach(() => {
+    fake.restore()
+    for (const key of Object.keys(localStorage))
+      if (key.startsWith('menu:sections:')) localStorage.removeItem(key)
+  })
 
   it('opens the new Landing page from an old "Settings → Landing page" link', async () => {
     window.history.replaceState(null, '', '#landing')
@@ -292,6 +297,8 @@ describe('Super Admin landing page settings', () => {
         screen.getByText('Draft — have a lawyer review before relying on it.')
       )
       .toBeVisible()
+    // The long texts start closed (owner, 2026-11-21).
+    await userEvent.click(screen.getByRole('button', { name: 'Expand all' }))
     const terms = screen.getByLabelText('Terms of use')
     await expect.element(terms).toHaveValue('My own terms')
     await expect
@@ -341,5 +348,154 @@ describe('Super Admin landing page settings', () => {
       '/contact',
       '/cookies',
     ])
+  })
+})
+
+describe('Super Admin settings: the legal texts open and close', () => {
+  const SETTINGS = {
+    name: 'Menu',
+    support_email: 'help@example.com',
+    domain: null,
+    default_currency: 'ETB',
+    terms: 'Our own terms, three.',
+    privacy: 'Privacy text',
+    about: 'About text',
+    contact: 'Contact text',
+    cookies: 'Cookie text',
+    legal_updated_at: {
+      terms: '2026-11-12T09:30:00+00:00',
+      privacy: null,
+      about: null,
+      contact: null,
+      cookies: null,
+    },
+    share_image_url: '/img/share.jpg',
+    logo_url: null,
+    signup_open: true,
+    signup_plan_id: null,
+    signup_approval: false,
+    signup_notify: true,
+    turnstile_enabled: false,
+    turnstile_site_key: '',
+    turnstile_secret_set: false,
+    disposable_domains: [],
+    upgrade_whatsapp: '',
+    plans: [{ id: 1, name: 'Free', slug: 'free' }],
+  }
+  const termsHeader = (screen: Awaited<ReturnType<typeof renderWithQuery>>) =>
+    screen.getByRole('button', { name: /^Terms of use/ })
+
+  function render(put?: ReturnType<typeof invalid>) {
+    fake = fakeApi({
+      'GET /super/settings': { data: { data: SETTINGS } },
+      'GET /super/settings/mail': { status: 404 },
+      'PUT /super/settings': put ?? { data: { data: {} } },
+    })
+    return renderWithQuery(<SettingsPage />, { me: admin })
+  }
+
+  afterEach(() => {
+    fake.restore()
+    for (const key of Object.keys(localStorage))
+      if (key.startsWith('menu:sections:')) localStorage.removeItem(key)
+    window.history.replaceState(null, '', window.location.pathname)
+  })
+
+  it('starts closed with when it was saved and how long it is', async () => {
+    const screen = await render()
+    await expect
+      .element(termsHeader(screen))
+      .toHaveAttribute('aria-expanded', 'false')
+    await expect
+      .element(termsHeader(screen))
+      .toHaveTextContent('Last updated 12 Nov 2026 · 4 words')
+    await expect
+      .element(screen.getByRole('button', { name: /^Privacy policy/ }))
+      .toHaveTextContent('Default text · 2 words')
+    expect(screen.container.querySelector('#st-terms')).toBeNull()
+
+    await userEvent.click(termsHeader(screen))
+    await expect
+      .element(screen.getByLabelText('Terms of use'))
+      .toHaveValue('Our own terms, three.')
+  })
+
+  it('opens from a link to it, also when the page loads', async () => {
+    window.history.replaceState(null, '', '#legal-terms')
+    const screen = await render()
+    await expect
+      .element(termsHeader(screen))
+      .toHaveAttribute('aria-expanded', 'true')
+    // The General tab is the one shown.
+    await expect.element(screen.getByLabelText('Platform name')).toBeVisible()
+  })
+
+  it('saves the other settings without sending the Terms, and sends only a changed text', async () => {
+    const screen = await render()
+    await userEvent.fill(screen.getByLabelText('Platform name'), 'Menu Hub')
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }).first())
+    await expect
+      .poll(() => fake.calls.filter((c) => c.method === 'PUT').length)
+      .toBe(1)
+    const first = fake.calls.find((c) => c.method === 'PUT')?.data as Record<
+      string,
+      unknown
+    >
+    expect(first).toEqual({
+      name: 'Menu Hub',
+      support_email: 'help@example.com',
+      domain: null,
+      default_currency: 'ETB',
+    })
+
+    await userEvent.click(termsHeader(screen))
+    await userEvent.fill(screen.getByLabelText('Terms of use'), 'New terms')
+    await userEvent.click(termsHeader(screen))
+    await expect.element(termsHeader(screen)).toHaveTextContent(/Changed/)
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }).first())
+    await expect
+      .poll(() => fake.calls.filter((c) => c.method === 'PUT').length)
+      .toBe(2)
+    const second = fake.calls.filter((c) => c.method === 'PUT')[1]
+      .data as Record<string, unknown>
+    expect(second.terms).toBe('New terms')
+    expect(
+      Object.keys(second).filter((k) =>
+        ['privacy', 'about', 'contact', 'cookies'].includes(k)
+      )
+    ).toEqual([])
+    await expect.element(termsHeader(screen)).not.toHaveTextContent(/Changed/)
+  })
+
+  it('opens itself on an error and puts the focus in the text', async () => {
+    const screen = await render(invalid({ terms: 'The text is too long.' }))
+    await userEvent.click(termsHeader(screen))
+    await userEvent.fill(screen.getByLabelText('Terms of use'), 'Too long')
+    await userEvent.click(termsHeader(screen))
+    await expect
+      .element(termsHeader(screen))
+      .toHaveAttribute('aria-expanded', 'false')
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }).first())
+    await expect
+      .element(termsHeader(screen))
+      .toHaveAttribute('aria-expanded', 'true')
+    await expect
+      .element(screen.getByText('The text is too long.'))
+      .toBeVisible()
+    await expect.poll(() => document.activeElement?.id).toBe('st-terms')
+    await expect
+      .element(screen.getByLabelText('Terms of use'))
+      .toHaveAttribute('aria-invalid', 'true')
+  })
+
+  it('has no accessibility problems, closed and open', async () => {
+    const screen = await render()
+    await expect.element(termsHeader(screen)).toBeVisible()
+    expect(await axeViolations(screen.container)).toEqual([])
+    await userEvent.click(screen.getByRole('button', { name: 'Expand all' }))
+    await expect
+      .element(screen.getByLabelText('Cookie info page'))
+      .toBeVisible()
+    expect(await axeViolations(screen.container)).toEqual([])
   })
 })
