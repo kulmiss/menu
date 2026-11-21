@@ -51,8 +51,9 @@ it('keeps Landing 1 as the home page until the Super Admin picks Landing 2, and 
         ->not->toContain('name="robots"')
         ->toContain('application/ld+json')
         ->toContain('<link rel="canonical" href="'.url('/').'">');
-    expect(DB::table('activity_log')->where('action', 'platform.home_design_changed')->latest('id')->value('changes'))
-        ->toBe(json_encode(['home_design' => ['from' => 'landing1', 'to' => 'landing2']]));
+    // Compared decoded: MySQL stores JSON in its own order and spacing.
+    expect(json_decode((string) DB::table('activity_log')->where('action', 'platform.home_design_changed')->latest('id')->value('changes'), true))
+        ->toBe(['home_design' => ['from' => 'landing1', 'to' => 'landing2']]);
     // /landing2 itself stays noindex (the home page is the one to index).
     expect($this->get('/landing2')->getContent())->toContain('content="noindex"');
 

@@ -156,7 +156,7 @@ it('caches each widget until the next aggregate run', function () {
     expect($this->getJson(p('insights/overview?days=7'))->json('data.kpis.menu_views.value'))->toBe($before);
 });
 
-it('stays fast with 5,000 restaurants and a year of data (owner, 2026-11-22: was 1,500)', function () {
+it('stays fast with 5,000 restaurants and 100 days of guest counters (owner, 2026-11-22: was 1,500)', function () {
     $plans = collect([0, 49_000, 99_000])->map(fn ($price, $i) => Plan::create(['name' => ['en' => "P{$i}"], 'slug' => "perf-{$i}", 'price_minor' => $price, 'interval' => 'month', 'limits' => ['photos' => 100]]));
     $now = now();
     foreach (array_chunk(range(1, 5000), 500) as $chunk) {
@@ -164,10 +164,11 @@ it('stays fast with 5,000 restaurants and a year of data (owner, 2026-11-22: was
             'timezone' => 'Africa/Addis_Ababa', 'default_locale' => 'en', 'currency_code' => 'ETB', 'cache_version' => 1,
             'created_at' => $now->copy()->subDays($i % 365), 'updated_at' => $now], $chunk));
     }
-    // A year of menu views and scans per restaurant (~3.65 million rows), built in SQL.
+    // 100 days of menu views and scans per restaurant (~1 million rows, about what the old 1,500 × 1 year test
+    // had: a year for 5,000 restaurants filled MySQL's redo log on CI and stalled the tests after it), built in SQL.
     foreach (['menu_view' => 40, 'qr_scan' => 9] as $metric => $mod) {
         DB::statement("INSERT INTO stats_daily (tenant_id, date, metric, count)
-            WITH RECURSIVE seq (n) AS (SELECT 0 UNION ALL SELECT n + 1 FROM seq WHERE n < 364)
+            WITH RECURSIVE seq (n) AS (SELECT 0 UNION ALL SELECT n + 1 FROM seq WHERE n < 99)
             SELECT t.id, DATE_SUB(CURDATE(), INTERVAL seq.n DAY), '{$metric}', (t.id * 7 + seq.n) % {$mod}
             FROM tenants t CROSS JOIN seq");
     }

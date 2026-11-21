@@ -89,10 +89,10 @@ Decisions are in QUESTIONS #247–#251.
 | System (errors, failed jobs, queue) | existing System health card (log file count, `failed_jobs`, `jobs`) | — |
 
 #### Speed
-5,000 restaurants and a year of data (about 3.65 million counter rows), in the CI test:
-- All 12 cards together: **137–177 ms uncached** (limit: each under 200 ms, all under 1.5 s).
-- The hourly update takes **19–25 s**. The very first full build of 400 days takes **77–98 s**. Both run from the command line, which is fine on shared hosting.
-- Cached card answers come straight from the 5-minute cache.
+5,000 restaurants with 100 days of guest counters (~1 million rows), measured in the CI test:
+- All 12 cards together: **142–190 ms uncached** (limit: each under 200 ms, all under 1.5 s).
+- The hourly update takes **7–16 s**, and the first full build takes **23–26 s**.
+- With a full year of counters (3.65 million rows), the cards took 137–177 ms and the hourly update 19–25 s. That much data filled MySQL's redo log on CI and stalled the tests after it, so the CI test now uses 100 days.
 
 ### 5. Landing 2
 - **Backup:**
