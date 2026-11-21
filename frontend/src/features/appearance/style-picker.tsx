@@ -1,6 +1,26 @@
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import { MENU_STYLES, type MenuStyle } from './api'
+
+/** Quick filters above the styles, so a restaurant finds its kind of look at once. */
+const GROUPS: Record<string, readonly MenuStyle[]> = {
+  all: MENU_STYLES,
+  east_african: ['mesob', 'injera', 'coffee', 'somali', 'grill', 'coastal'],
+  cafe: [
+    'editorial',
+    'bistro',
+    'minimal',
+    'mono',
+    'coffee',
+    'colour',
+    'garden',
+    'juice',
+  ],
+  fast: ['grid', 'burger', 'board', 'grill', 'colour'],
+  halal: ['arabic', 'islamic', 'somali', 'coastal'],
+  fine: ['luxe', 'lounge', 'editorial', 'mono'],
+}
 
 /**
  * "Menu style" picker: one card per style (A–T) with a small drawing of it.
@@ -18,21 +38,65 @@ export function StylePicker({
   onChange: (style: MenuStyle) => void
 }) {
   const { t } = useTranslation()
+  const [group, setGroup] = useState('all')
+  const row = useRef<HTMLDivElement>(null)
+  // Phones: the swipe row starts at the picked style, not at A.
+  useEffect(() => {
+    const el = row.current
+    const picked =
+      el?.querySelector<HTMLElement>('input:checked')?.parentElement
+    if (el && picked && el.scrollWidth > el.clientWidth) {
+      el.scrollLeft +=
+        picked.getBoundingClientRect().left -
+        el.getBoundingClientRect().left -
+        8
+    }
+    // Only when the page opens and when the filter changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [group])
+  // The picked style always stays in view, whatever the filter.
+  const shown = MENU_STYLES.filter(
+    (style) => GROUPS[group].includes(style) || style === value
+  )
 
   return (
-    <fieldset className='grid gap-2'>
-      <legend className='mb-2 text-sm font-medium'>
-        {t('appearance.menu_style')}
-      </legend>
-      <div className='grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4'>
-        {MENU_STYLES.map((style) => {
+    <fieldset className='grid min-w-0 gap-2'>
+      <legend className='sr-only'>{t('appearance.menu_style')}</legend>
+      <div
+        className='-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1'
+        role='group'
+        aria-label={t('appearance.style_groups.label')}
+      >
+        {Object.keys(GROUPS).map((key) => (
+          <button
+            key={key}
+            type='button'
+            aria-pressed={group === key}
+            onClick={() => setGroup(key)}
+            className={cn(
+              'min-h-9 flex-none rounded-full border px-3 text-sm whitespace-nowrap transition-colors',
+              group === key
+                ? 'border-primary bg-primary text-primary-foreground'
+                : 'hover:bg-accent'
+            )}
+          >
+            {t(`appearance.style_groups.${key}`)}
+          </button>
+        ))}
+      </div>
+      {/* Phones: one swipeable row (the page stays short); wider screens: a grid. */}
+      <div
+        ref={row}
+        className='-mx-1 flex snap-x gap-2 overflow-x-auto px-1 pb-2 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 sm:pb-0 xl:grid-cols-4'
+      >
+        {shown.map((style) => {
           const locked = !allowed.includes(style)
           const checked = value === style
           return (
             <label
               key={style}
               className={cn(
-                'flex cursor-pointer flex-col gap-2 rounded-lg border p-2 text-sm has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring',
+                'relative flex w-[44%] flex-none cursor-pointer snap-start flex-col gap-2 rounded-lg border p-2 text-sm has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring sm:w-auto',
                 checked && 'border-primary bg-primary/5 ring-2 ring-primary/30',
                 (disabled || locked) && 'cursor-not-allowed opacity-60'
               )}

@@ -41,6 +41,11 @@ export const ART_STYLES: readonly MenuStyle[] = [
   'juice',
 ]
 export type MenuStyle = (typeof MENU_STYLES)[number]
+/** Layouts (QUESTIONS #242): photo cards in two columns, a list with small photos, or text only. */
+export const LAYOUTS = ['grid', 'list', 'text'] as const
+export type Layout = (typeof LAYOUTS)[number]
+/** The phone's colour mode in the preview: as the phone decides, or forced. */
+export type PreviewScheme = 'light' | 'dark'
 export type Font = 'system' | 'serif' | 'rounded'
 export type BannerText = 'over' | 'under'
 /** Menu direction, style H only: auto = right-to-left when most of the menu is in Arabic script. */
@@ -55,6 +60,8 @@ export type AppearanceValues = {
   banner_text: BannerText | null
   show_prices: boolean
   show_photos: boolean
+  /** Another layout than the style's own (null = the style's own); text = show_photos off. */
+  menu_layout: 'grid' | 'list' | null
   show_descriptions: boolean
   show_calories: boolean
   /** "Share menu" button on the guest page. */
@@ -84,7 +91,7 @@ export type AppearanceValues = {
   /** Style K · Black & White only: black-and-white photos, brand colour as a small accent. */
   photos_greyscale: boolean
   mono_accent: boolean
-  /** Styles M–Q only: their artwork on or off (the banner and category photos replace it). */
+  /** Styles M–T only: their artwork on or off (the banner and category photos replace it). */
   show_decoration: boolean
   theme_id: number | null
   logo_media_id: number | null
@@ -111,6 +118,24 @@ export type Appearance = Omit<
   styles: MenuStyle[]
   /** Banner shape [width, height] and default name position per style. */
   banner: Record<MenuStyle, { ratio: [number, number]; text: BannerText }>
+  /** Each style's own layout. */
+  style_layouts: Record<MenuStyle, Layout>
+  /** The plan allows a layout other than the style's own (Plus and up). */
+  layouts: boolean
+  /** What guests see now. */
+  layout: Layout
+}
+
+/** The layout guests get (mirrors the backend's PageTheme::layout). */
+export function layoutOf(
+  style: MenuStyle,
+  menuLayout: 'grid' | 'list' | null,
+  showPhotos: boolean,
+  own: Record<MenuStyle, Layout>,
+  allowed: boolean
+): Layout {
+  const layout = menuLayout && allowed ? menuLayout : own[style]
+  return showPhotos ? layout : 'text'
 }
 
 export const appearanceKey = (t: number) => ['appearance', t] as const
@@ -134,12 +159,30 @@ export function useSaveAppearance(t: number) {
   })
 }
 
-/** URL of the guest page rendered with unsaved values (for the preview frame). */
-export function previewUrl(t: number, v: AppearanceValues) {
+/**
+ * URL of the guest page rendered with unsaved values (for the preview frame),
+ * as a phone in light or dark mode when a scheme is given. An empty value
+ * (no logo, the style's own layout) is sent empty, so the saved one doesn't show.
+ */
+export function previewUrl(
+  t: number,
+  v: AppearanceValues,
+  scheme?: PreviewScheme
+) {
   const q = new URLSearchParams()
   for (const [key, value] of Object.entries(v)) {
-    if (value === null || key === 'theme_id') continue
-    q.set(key, typeof value === 'boolean' ? (value ? '1' : '0') : String(value))
+    if (key === 'theme_id') continue
+    q.set(
+      key,
+      value === null
+        ? ''
+        : typeof value === 'boolean'
+          ? value
+            ? '1'
+            : '0'
+          : String(value)
+    )
   }
+  if (scheme) q.set('scheme', scheme)
   return `${api.defaults.baseURL}${tenantUrl(t, 'appearance/preview')}?${q}`
 }

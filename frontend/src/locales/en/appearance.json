@@ -13,6 +13,53 @@
     "rounded": "Rounded"
   },
   "menu_style": "Menu style",
+  "steps": {
+    "label": "Steps",
+    "look": "Look",
+    "layout": "Layout",
+    "colours": "Colours & font",
+    "images": "Logo & banner",
+    "guests": "What guests see"
+  },
+  "step_hints": {
+    "look": "Pick the style that fits your place. You can change it any time.",
+    "layout": "How the dishes sit on the page.",
+    "colours": "Your brand colour and font. Start from a ready-made look if you like.",
+    "images": "Your logo and the wide photo at the top of your menu.",
+    "guests": "Turn parts of your menu on or off."
+  },
+  "next": "Next: {{step}}",
+  "layout": {
+    "title": "Layout",
+    "grid": "Grid",
+    "list": "List",
+    "text": "Text",
+    "grid_hint": "Big photos, two per row",
+    "list_hint": "Small photos at the side",
+    "text_hint": "No photos, fastest",
+    "own": "This style's own",
+    "locked": "Plus and up",
+    "text_note": "Text shows no dish photos. Your photos are kept for when you switch back."
+  },
+  "style_groups": {
+    "label": "Show styles for",
+    "all": "All",
+    "east_african": "Ethiopian & Somali",
+    "cafe": "Cafés & juice",
+    "fast": "Fast food & grill",
+    "halal": "Arabic & halal",
+    "fine": "Fine dining & bars"
+  },
+  "guest_groups": {
+    "dish": "On each dish",
+    "buttons": "Buttons",
+    "more": "More"
+  },
+  "scheme": {
+    "label": "Phone colour mode",
+    "light": "Light",
+    "dark": "Dark"
+  },
   "styles": {
     "editorial": {
       "name": "A · Warm editorial",
