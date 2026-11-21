@@ -220,7 +220,7 @@ export function PromotionDialog({
               </Select>
             </div>
           )}
-          <div className='flex items-center justify-between gap-4'>
+          <div className='flex min-h-11 items-center justify-between gap-4 sm:min-h-0'>
             <Label htmlFor='pr-active'>{t('promotions.active')}</Label>
             <Switch
               id='pr-active'

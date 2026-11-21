@@ -428,7 +428,8 @@
     "designs": {
       "classic": "Classic",
       "bold": "Bold",
-      "minimal": "Minimal"
+      "minimal": "Minimal",
+      "style": "Like my menu"
     },
     "colours": "Colours",
     "themes": {
@@ -582,6 +583,7 @@
     "heic": "iPhone HEIC photos can't be used. Choose \"Most Compatible\" in Settings › Camera › Formats, or pick a JPEG.",
     "type": "Choose a JPEG, PNG or WebP photo.",
     "too_big": "This file is too large.",
+    "unreadable": "This photo can't be opened. It may be damaged or too large. Choose another JPEG, PNG or WebP photo.",
     "crop_title": "Crop the photo",
     "crop_intro": "Drag to move, use the slider to zoom.",
     "zoom": "Zoom",
@@ -883,5 +885,80 @@
       "delete": "{{count}} dishes deleted.",
       "price": "Prices of {{count}} dishes changed."
     }
+  },
+  "help": {
+    "title": "Help",
+    "intro": "Short how-tos for every part of your menu. Search, or pick a topic.",
+    "search": "Search help",
+    "results_one": "{{count}} article found",
+    "results_other": "{{count}} articles found",
+    "results": "{{count}} articles found",
+    "nothing": "Nothing found. Try other words.",
+    "contact": "Contact support",
+    "all_articles": "All articles",
+    "not_found": "This article is not available.",
+    "load_error": "Help could not be loaded.",
+    "helpful": "Was this helpful?",
+    "thanks": "Thank you! You can change your answer.",
+    "yes": "Yes",
+    "no": "No",
+    "this_page": "Help for this page",
+    "no_article": "Pick an article.",
+    "back": "Back",
+    "open_centre": "Open the Help centre",
+    "try_again": "Try again"
+  },
+  "tour": {
+    "step": "{{n}} of {{total}}",
+    "skip": "Skip tour",
+    "next": "Next",
+    "back": "Back",
+    "open": "Take the tour",
+    "dashboard": {
+      "title": "Welcome! This is your dashboard",
+      "text": "See your menu views and QR scans here, and a short list of what to do next. Your first step: add your first dish.",
+      "go": "Done"
+    },
+    "dish": {
+      "title": "Add your first dish",
+      "text": "Open the Menu editor, tap Add item, type the name and price, and add a photo.",
+      "go": "Add a dish"
+    },
+    "sold_out": {
+      "title": "Mark dishes sold out",
+      "text": "Finished for today? Switch on Sold out. Switch it off when the dish is back.",
+      "go": "Open the dishes"
+    },
+    "look": {
+      "title": "Choose your menu look",
+      "text": "Pick a style, your colour, your logo and a banner photo. The preview shows it at once.",
+      "go": "Choose a look"
+    },
+    "qr": {
+      "title": "Share your QR code",
+      "text": "Download your QR code, print it for the tables, and share your menu link.",
+      "go": "Get my QR code"
+    }
+  },
+  "menu_help": {
+    "title": "Add my menu for me",
+    "hint": "No time to type your menu? Send photos of your paper menu (or a PDF). We type it in for you and e-mail you when it is ready.",
+    "start": "Send photos of my menu",
+    "files": "Photos or PDF of your menu",
+    "files_hint": "Up to {{max}} files: one photo per page, sharp and flat. JPG, PNG, WebP or PDF.",
+    "heic": "iPhone photos (HEIC) can't be read. In Settings → Camera → Formats choose \"Most Compatible\", or take a screenshot of the photo.",
+    "remove": "Remove {{name}}",
+    "note": "Anything we should know? (optional)",
+    "note_placeholder": "For example: prices on page 2 changed, the drinks are on the back.",
+    "send": "Send {{count}} files",
+    "send_one": "Send 1 file",
+    "send_other": "Send {{count}} files",
+    "none": "Choose at least one photo or PDF.",
+    "sent": "Thank you! We got your menu and will e-mail you when it is ready.",
+    "failed": "Sending failed. Please try again.",
+    "status_new_one": "We got your menu (1 file). We start soon.",
+    "status_new_other": "We got your menu ({{count}} files). We start soon.",
+    "status_working_one": "We are typing in your menu now.",
+    "status_working_other": "We are typing in your menu now."
   }
 }

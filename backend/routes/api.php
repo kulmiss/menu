@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AccountController;
 use App\Http\Controllers\Api\ActivityController;
 use App\Http\Controllers\Api\AnnouncementController;
 use App\Http\Controllers\Api\BeaconController;
+use App\Http\Controllers\Api\HelpController;
 use App\Http\Controllers\Api\InvitationController;
 use App\Http\Controllers\Api\MeController;
 use App\Http\Controllers\Api\Menu\AddonGroupController;
@@ -14,6 +15,7 @@ use App\Http\Controllers\Api\Menu\ItemController;
 use App\Http\Controllers\Api\Menu\MediaController;
 use App\Http\Controllers\Api\Menu\MenuController;
 use App\Http\Controllers\Api\Menu\TagController;
+use App\Http\Controllers\Api\OnboardingController;
 use App\Http\Controllers\Api\Restaurant\AppearanceController;
 use App\Http\Controllers\Api\Restaurant\BillingController;
 use App\Http\Controllers\Api\Restaurant\BranchController;
@@ -21,6 +23,7 @@ use App\Http\Controllers\Api\Restaurant\DashboardWidgetController;
 use App\Http\Controllers\Api\Restaurant\InfoController;
 use App\Http\Controllers\Api\Restaurant\InsightsController;
 use App\Http\Controllers\Api\Restaurant\InsightsExportController;
+use App\Http\Controllers\Api\Restaurant\MenuRequestController as RestaurantMenuRequestController;
 use App\Http\Controllers\Api\Restaurant\PdfMenuController;
 use App\Http\Controllers\Api\Restaurant\PricePeriodController;
 use App\Http\Controllers\Api\Restaurant\PromotionController;
@@ -28,7 +31,9 @@ use App\Http\Controllers\Api\Restaurant\QrCodeController;
 use App\Http\Controllers\Api\SessionController;
 use App\Http\Controllers\Api\TeamController;
 use App\Http\Controllers\Api\TenantController;
+use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\SignUpController;
+use App\Http\Controllers\LandingClickController;
 use App\Http\Controllers\Mobile\AccountController as MobileAccountController;
 use App\Http\Controllers\Mobile\AuthController as MobileAuthController;
 use App\Http\Controllers\Mobile\ConfigController;
@@ -39,19 +44,32 @@ use App\Http\Controllers\Platform\BackupController;
 use App\Http\Controllers\Platform\CampaignController;
 use App\Http\Controllers\Platform\CrmController;
 use App\Http\Controllers\Platform\DashboardWidgetController as PlatformDashboardWidgetController;
+use App\Http\Controllers\Platform\FeatureSwitchController;
+use App\Http\Controllers\Platform\FooterController;
+use App\Http\Controllers\Platform\HelpArticleController;
 use App\Http\Controllers\Platform\InsightsController as PlatformInsightsController;
 use App\Http\Controllers\Platform\InvoiceController;
+use App\Http\Controllers\Platform\LandingController;
+use App\Http\Controllers\Platform\MenuRequestController;
+use App\Http\Controllers\Platform\MobileAppController;
 use App\Http\Controllers\Platform\PaymentController;
 use App\Http\Controllers\Platform\PlatformController;
 use App\Http\Controllers\Platform\RestaurantController;
 use App\Http\Controllers\Platform\SearchController;
+use App\Http\Controllers\Platform\SetupController;
+use App\Support\Features;
+use App\Support\Landing\LandingImages;
+use App\Support\Legal\LegalText;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
 /*
-| JSON API for the admin SPA. Every create/change route requires an
-| Idempotency-Key header ('idempotent'). Restaurant routes live under
-| /api/v1/t/{tenant} and only resolve for members ('tenant').
+| JSON API for the admin SPA and the app. Every create/change route requires
+| an Idempotency-Key header ('idempotent'). Two separate areas (QUESTIONS
+| #215–#220): /api/v1/super (Super Admins: 'super', 'throttle:super',
+| 'super.audit') and /api/v1/restaurant/{tenant} (restaurant teams:
+| 'restaurant', 'throttle:restaurant', then 'tenant' resolves the restaurant
+| only for its members).
 */
 // Visit beacon from the guest page (no body worth replaying, so no
 // idempotency key). Counting arrives with Insights (Partition 10).
@@ -61,6 +79,13 @@ Route::post('v1/beacon', BeaconController::class)
     ->withoutMiddleware([EnsureFrontendRequestsAreStateful::class])
     ->name('beacon');
 
+// Landing page button clicks (owner, 2026-11-17): no cookie, no session, no
+// address stored. One limit for everyone together, so no visitor is told apart.
+Route::post('v1/landing/click', LandingClickController::class)
+    ->middleware('throttle:landing-click')
+    ->withoutMiddleware([EnsureFrontendRequestsAreStateful::class])
+    ->name('landing.click');
+
 // Mobile app sign-in (QUESTIONS #187). Not idempotent on purpose: a replayed
 // answer would have to store the new token in the database.
 // App start-up settings: public, cached 5 minutes (QUESTIONS #190).
@@ -69,6 +94,9 @@ Route::get('v1/mobile/config', ConfigController::class)->middleware('throttle:60
 Route::prefix('v1/mobile/auth')->controller(MobileAuthController::class)->group(function () {
     Route::post('login', 'login')->middleware('throttle:mobile-login')->name('mobile.login');
     Route::post('two-factor', 'twoFactor')->middleware('throttle:mobile-two-factor')->name('mobile.two-factor');
+    // "Continue with Google" (owner, 2026-11-17): Google's ID token in, the app token out.
+    Route::post('google', 'google')->middleware('throttle:mobile-google')->name('mobile.google');
+    Route::post('google/finish', 'googleFinish')->middleware('throttle:mobile-google')->name('mobile.google.finish');
 });
 
 Route::prefix('v1')->middleware('idempotent')->group(function () {
@@ -80,11 +108,24 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
         Route::get('config', 'config')->middleware('throttle:60,1');
         Route::get('slug', 'slug')->middleware('throttle:30,1');
         Route::post('/', 'store')->middleware(['guest', 'throttle:10,1']);
-        Route::post('email', 'changeEmail')->middleware(['auth:sanctum', 'throttle:6,1']);
+        Route::post('email', 'changeEmail')->middleware(['auth:sanctum', 'throttle:6,1,verify-mail']);
     });
+
+    // "Continue with Google": the new owner's restaurant name (owner, 2026-11-17).
+    Route::prefix('auth/google')->controller(GoogleController::class)->group(function () {
+        Route::get('pending', 'pending')->middleware('throttle:30,1');
+        Route::post('finish', 'finish')->middleware(['guest', 'throttle:10,1']);
+    });
+
+    // Help centre for signed-out people: sign-in problems (QUESTIONS #194).
+    Route::get('help/public', [HelpController::class, 'public'])->middleware('throttle:30,1');
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('me', MeController::class);
+        Route::delete('me/google', [GoogleController::class, 'unlink'])->middleware('throttle:6,1');
+        Route::post('me/password-link', [GoogleController::class, 'passwordLink'])->middleware('throttle:3,10');
+        Route::post('help/feedback', [HelpController::class, 'feedback'])->middleware('throttle:30,1');
+        Route::put('me/onboarding', OnboardingController::class)->middleware('throttle:30,1');
 
         // Mobile app: this device, other devices, account (QUESTIONS #187).
         Route::prefix('mobile')->middleware('mobile.token')->group(function () {
@@ -112,9 +153,19 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
         Route::post('me/sessions/logout-others', [SessionController::class, 'logoutOthers'])->middleware('throttle:6,1');
         Route::post('impersonation/stop', [AnnouncementController::class, 'stopImpersonating']);
 
-        // Super Admin (PLAN.md §7.3): Super Admins with two-factor sign-in only.
-        Route::prefix('platform')->middleware('platform')->group(function () {
+        // Super Admin (QUESTIONS #215–#220): Super Admins with two-factor sign-in, from an allowed address.
+        Route::prefix('super')->middleware(['super.ips', 'super', 'throttle:super', 'super.audit'])->group(function () {
             Route::get('dashboard', [PlatformController::class, 'dashboard']);
+            // Super Admin guide and the help article editor (QUESTIONS #194).
+            Route::get('help', [HelpController::class, 'platform']);
+            Route::get('setup', [SetupController::class, 'show']);
+            Route::put('setup', [SetupController::class, 'update']);
+            Route::post('setup/demo/delete', [SetupController::class, 'deleteDemo'])->middleware('throttle:3,1');
+            Route::get('help-articles', [HelpArticleController::class, 'index']);
+            Route::post('help-articles/preview', [HelpArticleController::class, 'preview'])->middleware('throttle:60,1');
+            Route::get('help-articles/{audience}/{slug}', [HelpArticleController::class, 'show']);
+            Route::put('help-articles/{audience}/{slug}', [HelpArticleController::class, 'update']);
+            Route::delete('help-articles/{audience}/{slug}', [HelpArticleController::class, 'destroy']);
             Route::prefix('widgets')->controller(PlatformDashboardWidgetController::class)->group(function () {
                 foreach (['expiring', 'inactive', 'signups', 'health'] as $widget) {
                     Route::get($widget, $widget);
@@ -170,8 +221,14 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::post('backups', [BackupController::class, 'store'])->middleware('throttle:6,1');
             Route::put('backups/settings', [BackupController::class, 'settings']);
             Route::post('backups/{backup}/link', [BackupController::class, 'link'])->whereNumber('backup')->middleware('throttle:6,1');
-            Route::get('backups/{backup}/file', [BackupController::class, 'file'])->whereNumber('backup')->middleware('signed')->name('platform.backups.file');
+            Route::get('backups/{backup}/file', [BackupController::class, 'file'])->whereNumber('backup')->middleware('signed')->name('super.backups.file');
             Route::delete('backups/{backup}', [BackupController::class, 'destroy'])->whereNumber('backup');
+            Route::put('alerts', [BackupController::class, 'alerts']);
+            Route::get('menu-requests', [MenuRequestController::class, 'index']);
+            Route::put('menu-requests/{menuRequest}', [MenuRequestController::class, 'update'])->whereNumber('menuRequest');
+            Route::get('menu-requests/{menuRequest}/files/{n}', [MenuRequestController::class, 'file'])->whereNumber(['menuRequest', 'n']);
+            Route::delete('menu-requests/{menuRequest}', [MenuRequestController::class, 'destroy'])->whereNumber('menuRequest');
+            Route::post('alerts/test', [BackupController::class, 'testAlert'])->middleware('throttle:5,1');
             // Invoices (owner, 2026-11-13)
             Route::get('invoices', [InvoiceController::class, 'index']);
             Route::get('invoices.csv', [InvoiceController::class, 'export'])->middleware('throttle:exports');
@@ -189,9 +246,33 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::patch('announcements/{announcement}', [PlatformController::class, 'saveAnnouncement'])->whereNumber('announcement');
             Route::delete('announcements/{announcement}', [PlatformController::class, 'deleteAnnouncement'])->whereNumber('announcement');
             Route::get('activity', [PlatformController::class, 'activity']);
+            // Super Admin → Mobile app (QUESTIONS #193).
+            Route::get('mobile-app', [MobileAppController::class, 'show']);
+            Route::put('mobile-app', [MobileAppController::class, 'update']);
+            Route::get('mobile-app/pushes', [MobileAppController::class, 'pushes']);
+            Route::post('mobile-app/pushes', [MobileAppController::class, 'sendPush'])->middleware('throttle:10,1');
+            Route::get('mobile-app/devices', [MobileAppController::class, 'devices']);
+            Route::delete('mobile-app/devices/{device}', [MobileAppController::class, 'signOutDevice'])->whereNumber('device');
+            Route::post('mobile-app/devices/sign-out-all', [MobileAppController::class, 'signOutAll'])->middleware('throttle:3,1');
+            Route::get('mobile-app/stats', [MobileAppController::class, 'stats']);
+            Route::get('settings/features', [FeatureSwitchController::class, 'index']);
+            Route::put('settings/features', [FeatureSwitchController::class, 'update']);
+            Route::get('settings/features/{key}/impact', [FeatureSwitchController::class, 'impact'])->whereIn('key', array_keys(Features::DEFAULTS));
             Route::get('settings', [PlatformController::class, 'settings']);
             Route::put('settings', [PlatformController::class, 'saveSettings']);
-            Route::post('settings/legal/{page}/reset', [PlatformController::class, 'resetLegal'])->whereIn('page', ['terms', 'privacy']);
+            Route::post('settings/legal/{page}/reset', [PlatformController::class, 'resetLegal'])->whereIn('page', LegalText::PAGES);
+            // Super Admin → Landing page (owner, 2026-11-17).
+            // Website footer (QUESTIONS #230): draft, preview, publish, history.
+            Route::get('footer', [FooterController::class, 'show']);
+            Route::put('footer', [FooterController::class, 'update'])->middleware('throttle:60,1');
+            Route::post('footer/publish', [FooterController::class, 'publish'])->middleware('throttle:20,1');
+            Route::delete('footer/draft', [FooterController::class, 'discard']);
+            Route::post('footer/versions/{version}/restore', [FooterController::class, 'restore'])->whereNumber('version')->middleware('throttle:20,1');
+            Route::get('footer/preview', [FooterController::class, 'preview'])->middleware('throttle:120,1');
+            Route::get('landing', [LandingController::class, 'show']);
+            Route::put('landing', [LandingController::class, 'update']);
+            Route::post('landing/images/{slot}', [LandingController::class, 'saveImage'])->whereIn('slot', array_keys(LandingImages::SLOTS))->middleware('throttle:20,1');
+            Route::delete('landing/images/{slot}', [LandingController::class, 'deleteImage'])->whereIn('slot', array_keys(LandingImages::SLOTS));
             Route::post('settings/share-image', [PlatformController::class, 'saveShareImage']);
             Route::delete('settings/share-image', [PlatformController::class, 'deleteShareImage']);
             Route::post('settings/logo', [PlatformController::class, 'saveLogo']);
@@ -203,8 +284,9 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
         });
         Route::post('invitations/{token}/accept', [AcceptInvitationController::class, 'accept']);
 
-        Route::prefix('t/{tenant}')->middleware(['tenant', 'tenant.writable', 'owner.two_factor'])->group(function () {
+        Route::prefix('restaurant/{tenant}')->middleware(['restaurant', 'throttle:restaurant', 'tenant', 'tenant.writable', 'owner.two_factor'])->group(function () {
             Route::get('/', [TenantController::class, 'show']);
+            Route::get('help', [HelpController::class, 'restaurant']);
 
             Route::get('members', [TeamController::class, 'index']);
             Route::patch('members/{member}', [TeamController::class, 'update'])->whereNumber('member');
@@ -215,6 +297,10 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::delete('invitations/{invitation}', [InvitationController::class, 'destroy'])->whereNumber('invitation');
 
             Route::patch('account/slug', [AccountController::class, 'updateSlug']);
+
+            // "Add my menu for me" (QUESTIONS #235).
+            Route::get('menu-requests', [RestaurantMenuRequestController::class, 'index']);
+            Route::post('menu-requests', [RestaurantMenuRequestController::class, 'store'])->middleware('throttle:6,60');
 
             Route::get('activity', ActivityController::class);
 
@@ -244,7 +330,7 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::patch('items/{item}', [ItemController::class, 'update'])->whereNumber('item');
             Route::delete('items/{item}', [ItemController::class, 'destroy'])->whereNumber('item');
             Route::post('items/{item}/duplicate', [ItemController::class, 'duplicate'])->whereNumber('item');
-            Route::patch('items/{item}/sold-out', [ItemController::class, 'soldOut'])->whereNumber('item');
+            Route::patch('items/{item}/sold-out', [ItemController::class, 'soldOut'])->whereNumber('item')->middleware('feature:sold_out');
             Route::patch('items/{item}/price', [ItemController::class, 'price'])->whereNumber('item');
 
             Route::get('addon-groups', [AddonGroupController::class, 'index']);
@@ -252,7 +338,7 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::post('addon-groups/reorder', [AddonGroupController::class, 'reorder']);
             Route::patch('addon-groups/{group}', [AddonGroupController::class, 'update'])->whereNumber('group');
             Route::delete('addon-groups/{group}', [AddonGroupController::class, 'destroy'])->whereNumber('group');
-            Route::patch('addon-options/{option}/sold-out', [AddonGroupController::class, 'optionSoldOut'])->whereNumber('option');
+            Route::patch('addon-options/{option}/sold-out', [AddonGroupController::class, 'optionSoldOut'])->whereNumber('option')->middleware('feature:sold_out');
 
             Route::post('media', [MediaController::class, 'store'])->middleware('throttle:30,1');
             Route::delete('media/{media}', [MediaController::class, 'destroy'])->whereNumber('media');
@@ -278,8 +364,8 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::post('qr-codes', [QrCodeController::class, 'store']);
             Route::patch('qr-codes/{qr}', [QrCodeController::class, 'update']);
             Route::delete('qr-codes/{qr}', [QrCodeController::class, 'destroy']);
-            Route::get('print-materials', [QrCodeController::class, 'printInfo']);
-            Route::get('print-materials.pdf', [QrCodeController::class, 'printMaterials'])->middleware('throttle:exports');
+            Route::get('print-materials', [QrCodeController::class, 'printInfo'])->middleware('feature:print_materials');
+            Route::get('print-materials.pdf', [QrCodeController::class, 'printMaterials'])->middleware(['throttle:exports', 'feature:print_materials']);
             Route::get('qr-codes/{qr}.{format}', [QrCodeController::class, 'download'])->whereIn('format', ['svg', 'png', 'pdf']);
 
             Route::get('announcements', [AnnouncementController::class, 'index']);

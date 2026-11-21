@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { useNavigate } from '@tanstack/react-router'
 import {
   AlertTriangle,
   ExternalLink,
@@ -8,6 +9,7 @@ import {
   RotateCcw,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { useSetupWizard } from '@/stores/setup-wizard-store'
 import { validationErrors } from '@/lib/api'
 import { toast } from '@/lib/toast'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -43,6 +45,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
 import { ConfirmDialog } from '@/components/confirm-dialog'
 import { type Col, DataTable } from '@/components/data-table'
+import { MENU_STYLES } from '@/features/appearance/api'
 import {
   FEATURES,
   LIMITS,
@@ -59,8 +62,8 @@ import {
   usePlatformMutation,
 } from './api'
 import { EmailSettings } from './email-settings'
+import { FeatureSwitches, useGloballyOff } from './feature-switches'
 import { BillingSettings, type BillingSettingsData } from './invoices'
-import { LandingSettings, type LandingSettingsData } from './landing-settings'
 import { PageTitle } from './layout'
 import { ShareImageCard } from './share-image'
 import {
@@ -167,6 +170,7 @@ function PlanDialog({
   onClose: () => void
 }) {
   const { t } = useTranslation()
+  const globallyOff = useGloballyOff()
   const save = usePlatformMutation((body: object) =>
     plan ? send('patch', `plans/${plan.id}`, body) : send('post', 'plans', body)
   )
@@ -357,6 +361,11 @@ function PlanDialog({
                   }
                 />
                 {t(`platform.features.${f}`)}
+                {globallyOff.has(f) && (
+                  <span className='text-xs text-destructive'>
+                    {t('platform.switches.global_off')}
+                  </span>
+                )}
               </label>
             ))}
           </fieldset>
@@ -463,7 +472,7 @@ export function PaymentsPage() {
         id='platform-payments'
         queryKey={[...pkeys.all, 'payments', 'table']}
         fetch={(params) => fetchPage<PaymentRow>('payments', params)}
-        csvUrl={(params) => `/api/v1/platform/payments?format=csv&${params}`}
+        csvUrl={(params) => `/api/v1/super/payments?format=csv&${params}`}
         columns={columns}
         rowId={(p) => p.id}
         searchPlaceholder={t('platform.payments.search')}
@@ -602,7 +611,7 @@ export function ThemesPage() {
                   <SelectContent>
                     {(k === 'font'
                       ? ['system', 'serif', 'rounded']
-                      : ['editorial', 'grid', 'bistro', 'minimal']
+                      : MENU_STYLES
                     ).map((o) => (
                       <SelectItem key={o} value={o}>
                         {t(
@@ -896,7 +905,7 @@ export function ActivityPage() {
         id='platform-activity'
         queryKey={[...pkeys.all, 'activity', 'table']}
         fetch={(params) => fetchPage<ActivityRow>('activity', params)}
-        csvUrl={(params) => `/api/v1/platform/activity?format=csv&${params}`}
+        csvUrl={(params) => `/api/v1/super/activity?format=csv&${params}`}
         columns={columns}
         rowId={(l) => l.id}
         searchPlaceholder={t('platform.activity.search')}
@@ -932,6 +941,16 @@ export function ActivityPage() {
 export function SettingsPage() {
   const { t } = useTranslation()
   const settings = useQuery(settingsQ())
+  const navigate = useNavigate()
+  // Settings → Landing page moved to its own page (owner, 2026-11-17); old links still work.
+  useEffect(() => {
+    if (window.location.hash === '#landing')
+      void navigate({
+        to: '/platform/$section',
+        params: { section: 'landing' },
+        replace: true,
+      })
+  }, [navigate])
   if (!settings.data) return <Skeleton className='h-64' />
   return <SettingsForm initial={settings.data} t={t} />
 }
@@ -954,6 +973,9 @@ function SettingsForm({
     default_currency: initial.default_currency ?? 'ETB',
     terms: initial.terms ?? '',
     privacy: initial.privacy ?? '',
+    about: initial.about ?? '',
+    contact: initial.contact ?? '',
+    cookies: initial.cookies ?? '',
   })
   const input = (
     k: keyof typeof v,
@@ -1006,7 +1028,7 @@ function SettingsForm({
             </AlertTitle>
             <AlertDescription>{t('platform.legal.format')}</AlertDescription>
           </Alert>
-          {(['terms', 'privacy'] as const).map((k) => (
+          {LEGAL_PAGES.map((k) => (
             <LegalField
               key={k}
               page={k}
@@ -1028,19 +1050,23 @@ function SettingsForm({
   )
   return (
     <>
-      <PageTitle title={t('platform.nav.settings')} />
+      <PageTitle title={t('platform.nav.settings')}>
+        <Button
+          variant='outline'
+          className='min-h-11 sm:min-h-9'
+          onClick={() => useSetupWizard.getState().setOpen(true)}
+        >
+          {t('platform.setup.reopen')}
+        </Button>
+      </PageTitle>
       <SettingsTabs
         t={t}
         tabs={{
           general,
+          features: <FeatureSwitches />,
           signup: (
             <SignupSettings
               initial={initial as unknown as SignupSettingsData}
-            />
-          ),
-          landing: (
-            <LandingSettings
-              initial={initial as unknown as LandingSettingsData}
             />
           ),
           billing: (
@@ -1064,14 +1090,17 @@ function SettingsForm({
   )
 }
 
-/** Terms / Privacy text with "View page" and "Reset to default text" (QUESTIONS #181). */
+/** Terms and Privacy (#181), and About us, Contact us and Cookie info, linked from the footer (#230). */
+const LEGAL_PAGES = ['terms', 'privacy', 'about', 'contact', 'cookies'] as const
+
+/** One page's text with "View page" and "Reset to default text". */
 function LegalField({
   page,
   value,
   onChange,
   t,
 }: {
-  page: 'terms' | 'privacy'
+  page: (typeof LEGAL_PAGES)[number]
   value: string
   onChange: (text: string) => void
   t: (k: string) => string
@@ -1136,8 +1165,8 @@ function LegalField({
 
 const SETTINGS_TABS = [
   'general',
+  'features',
   'signup',
-  'landing',
   'billing',
   'branding',
   'email',

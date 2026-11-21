@@ -263,7 +263,7 @@ function ProfileForm({
                 maxLength: 64,
               })}
             </div>
-            <div className='flex items-center justify-between gap-4'>
+            <div className='flex min-h-11 items-center justify-between gap-4 sm:min-h-0'>
               <Label htmlFor='p-show-wifi'>{t('info.show_wifi')}</Label>
               <Switch
                 id='p-show-wifi'

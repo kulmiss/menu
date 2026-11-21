@@ -34,7 +34,7 @@ const MATERIALS = [
   'sticker_round',
   'sticker_square',
 ] as const
-const DESIGNS = ['classic', 'bold', 'minimal'] as const
+const DESIGNS = ['classic', 'bold', 'minimal', 'style'] as const
 type Material = (typeof MATERIALS)[number]
 type Design = (typeof DESIGNS)[number]
 type Theme = 'light' | 'dark'
@@ -42,6 +42,8 @@ type Theme = 'light' | 'dark'
 type PrintInfo = {
   name: string
   colour: string
+  /** The menu style's page colours (design "style", QUESTIONS #234). */
+  surface?: { light: string; dark: string; dark_only: boolean }
   logo: string | null
   headline: string
   scan: string
@@ -93,12 +95,37 @@ function luminance([r, g, b]: RGB) {
 }
 
 /** Same colours as the PDF (App\Support\Print\PrintMaterials::palette). */
-function palette(design: Design, theme: Theme, brand: RGB): Palette {
+const contrast = (a: RGB, b: RGB) => {
+  const [x, y] = [luminance(a), luminance(b)]
+  return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05)
+}
+
+/** The same as PHP PrintMaterials::palette(). */
+function palette(
+  design: Design,
+  theme: Theme,
+  brand: RGB,
+  surface?: PrintInfo['surface']
+): Palette {
   const ink: RGB = [20, 18, 16]
   const paper: RGB = [255, 255, 255]
   const night: RGB = [22, 20, 18]
   const onBrand = luminance(brand) > 0.45 ? ink : paper
   const dark = theme === 'dark'
+  if (design === 'style' && surface) {
+    const bg = rgb(dark || surface.dark_only ? surface.dark : surface.light)
+    const light = luminance(bg) > 0.4
+    const text: RGB = light ? ink : [245, 242, 238]
+    const accent = contrast(brand, bg) >= 3 ? brand : text
+    return {
+      bg,
+      text,
+      muted: light ? [92, 86, 80] : [196, 190, 182],
+      accent,
+      band: brand,
+      border: accent,
+    }
+  }
   if (design === 'bold')
     return dark
       ? {
@@ -214,7 +241,12 @@ export function PrintMaterialsPage() {
     return downloadUrl(ctx.tenantId, `print-materials.pdf?${q}`)
   }
 
-  const colours = palette(design, theme, rgb(info.data?.colour ?? '#141210'))
+  const colours = palette(
+    design,
+    theme,
+    rgb(info.data?.colour ?? '#141210'),
+    info.data?.surface
+  )
   const shownHeadline = headline.trim() || info.data?.headline || ''
 
   async function social(kind: 'post' | 'story') {

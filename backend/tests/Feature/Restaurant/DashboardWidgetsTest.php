@@ -120,7 +120,7 @@ it('suggests the next plan up the ladder and what it adds (QUESTIONS #184)', fun
     expect($data['usage'][0])->toBe(['key' => 'items', 'used' => 0, 'limit' => null])
         ->and($data['usage'][1]['limit'])->toBe(100)
         ->and($data['next']['name'])->toBe(['en' => 'Plus'])
-        ->and($data['next']['adds'])->toBe(['All 4 menu styles', 'Specials and announcements', 'Insights and monthly report', 'Up to 500 photos'])
+        ->and($data['next']['adds'])->toBe(['All 17 menu styles', 'Specials and announcements', 'Insights and monthly report', 'Up to 500 photos'])
         ->and($data['upgrade']['whatsapp'])->toBe('https://wa.me/251911000000');
 
     $tenant->forceFill(['plan_id' => Plan::where('slug', 'business')->value('id')])->save();

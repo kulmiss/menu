@@ -21,7 +21,7 @@ describe('CRM section', () => {
 
   it('toggles tags, sets a follow-up and adds a note', async () => {
     fake = fakeApi({
-      'GET /platform/tags': {
+      'GET /super/tags': {
         data: {
           data: [
             { id: 1, name: 'VIP', color: '#dc2626' },
@@ -29,7 +29,7 @@ describe('CRM section', () => {
           ],
         },
       },
-      'GET /platform/restaurants/7/notes': {
+      'GET /super/restaurants/7/notes': {
         data: {
           data: [
             {
@@ -43,9 +43,9 @@ describe('CRM section', () => {
           ],
         },
       },
-      'PUT /platform/restaurants/7/tags': { data: { data: [] } },
-      'PUT /platform/restaurants/7/follow-up': { data: { data: {} } },
-      'POST /platform/restaurants/7/notes': { status: 201, data: { data: {} } },
+      'PUT /super/restaurants/7/tags': { data: { data: [] } },
+      'PUT /super/restaurants/7/follow-up': { data: { data: {} } },
+      'POST /super/restaurants/7/notes': { status: 201, data: { data: {} } },
     })
     const screen = await renderWithQuery(
       <CrmSection

@@ -8,6 +8,7 @@ import {
 } from '@tanstack/react-query'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { errorStatus, validationErrors } from '@/lib/api'
+import { rewriteIn, rewriteOut, signInUrl } from '@/lib/area'
 import { handleServerError } from '@/lib/handle-server-error'
 import { toast } from '@/lib/toast'
 import { DirectionProvider } from './context/direction-provider'
@@ -67,22 +68,33 @@ const queryClient = new QueryClient({
   }),
 })
 
-/** Signed out on the server (expired session, signed out elsewhere). */
+/** Signed out on the server (expired session, signed out elsewhere): the area's sign-in page. */
 function sessionExpired() {
-  const { pathname } = router.history.location
-  if (pathname.startsWith('/auth/')) return
   queryClient.clear()
-  toast.error(i18n.t('auth.session_expired'))
-  void router.navigate({
-    to: '/auth/sign-in',
-    search: { redirect: router.history.location.href },
-  })
+  window.location.assign(
+    signInUrl(window.location.pathname + window.location.search, true)
+  )
 }
 
-// Create a new router instance
 const router = createRouter({
   routeTree,
   context: { queryClient },
+  // Super Admin screens are /platform/… inside the app and the secret
+  // address in the browser (QUESTIONS #215).
+  rewrite: {
+    input: ({ url }) => {
+      const pathname = rewriteIn(url.pathname)
+      if (pathname === url.pathname) return undefined
+      url.pathname = pathname
+      return url
+    },
+    output: ({ url }) => {
+      const pathname = rewriteOut(url.pathname)
+      if (pathname === url.pathname) return undefined
+      url.pathname = pathname
+      return url
+    },
+  },
   defaultPreload: 'intent',
   defaultPreloadStaleTime: 0,
 })

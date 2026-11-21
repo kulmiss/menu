@@ -31,6 +31,8 @@ class MobileServiceProvider extends ServiceProvider
             ...LoginCheck::limits((string) $request->input('email'), (string) $request->ip()),
             Limit::perMinute(30)->by('ip:'.$request->ip()),
         ]);
+        // "Continue with Google" in the app (owner, 2026-11-17): 10 a minute per address.
+        RateLimiter::for('mobile-google', fn (Request $request) => [Limit::perMinute(10)->by('g:'.$request->ip())]);
         RateLimiter::for('mobile-two-factor', fn (Request $request) => [
             Limit::perMinute(5)->by('c:'.hash('sha256', (string) $request->input('challenge'))),
             Limit::perMinute(30)->by('ip:'.$request->ip()),

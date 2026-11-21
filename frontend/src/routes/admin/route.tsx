@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { loadScreenTexts } from '@/i18n'
+import { useTenantStore } from '@/stores/tenant-store'
 import { AuthenticatedLayout } from '@/components/layout/authenticated-layout'
 import { requireMe } from '@/features/auth/guard'
 
@@ -11,6 +12,13 @@ export const Route = createFileRoute('/admin')({
       requireMe(context.queryClient, location.href),
       loadScreenTexts(),
     ])
+    // ?restaurant=ID (after accepting an invitation): open that restaurant.
+    const id = Number(
+      new URLSearchParams(window.location.search).get('restaurant')
+    )
+    if (id && me.tenants.some((t) => t.id === id)) {
+      useTenantStore.getState().setCurrentTenantId(id)
+    }
     return me
   },
   component: AuthenticatedLayout,

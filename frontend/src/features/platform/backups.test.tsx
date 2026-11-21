@@ -3,6 +3,7 @@ import { meFixture } from '@/test-utils/fixtures'
 import { renderWithQuery } from '@/test-utils/render'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { userEvent } from 'vitest/browser'
+import { toast } from '@/lib/toast'
 import { BackupsPage } from './backups'
 
 vi.mock('@tanstack/react-router', async (orig) =>
@@ -21,7 +22,7 @@ describe('Backups', () => {
 
   it('warns while backups are not encrypted (SECURITY_REPORT.md H4)', async () => {
     fake = fakeApi({
-      'GET /platform/backups': {
+      'GET /super/backups': {
         data: {
           data: {
             backups: [],
@@ -56,7 +57,7 @@ describe('Backups', () => {
 
   it('lists backups, warns about problems and asks for the password before downloading', async () => {
     fake = fakeApi({
-      'GET /platform/backups': {
+      'GET /super/backups': {
         data: {
           data: {
             backups: [
@@ -102,10 +103,10 @@ describe('Backups', () => {
           },
         },
       },
-      'POST /platform/backups/3/link': invalid({
+      'POST /super/backups/3/link': invalid({
         password: 'The password or code is not correct.',
       }),
-      'POST /platform/backups': { status: 202, data: { data: {} } },
+      'POST /super/backups': { status: 202, data: { data: {} } },
     })
     const screen = await renderWithQuery(<BackupsPage />, { me: admin })
 
@@ -136,9 +137,83 @@ describe('Backups', () => {
     await expect
       .poll(() =>
         fake.calls.some(
-          (c) => c.method === 'POST' && c.url === '/platform/backups'
+          (c) => c.method === 'POST' && c.url === '/super/backups'
         )
       )
       .toBe(true)
+  })
+
+  it('sets up alerts: e-mail, Telegram token (never shown) and chat, and a test alert', async () => {
+    fake = fakeApi({
+      'GET /super/backups': {
+        data: {
+          data: {
+            backups: [],
+            disk_free: null,
+            disk_total: null,
+            problem: null,
+            encryption: 'on',
+            settings: {
+              backup_enabled: true,
+              backup_keep_daily: 7,
+              backup_keep_weekly: 4,
+              backup_keep_monthly: 3,
+              backup_s3_enabled: false,
+              backup_s3_endpoint: '',
+              backup_s3_region: 'auto',
+              backup_s3_bucket: '',
+              backup_s3_prefix: '',
+              backup_s3_key: '',
+              backup_s3_secret_set: false,
+              alerts_email: true,
+              alerts_telegram_enabled: false,
+              alerts_telegram_chat: '',
+              alerts_telegram_token_set: false,
+            },
+          },
+        },
+      },
+      'PUT /super/alerts': { data: { data: {} } },
+      'POST /super/alerts/test': {
+        data: { data: { email: 2, telegram: true } },
+      },
+    })
+    const screen = await renderWithQuery(<BackupsPage />, { me: admin })
+
+    await expect
+      .element(screen.getByText('Alerts', { exact: true }))
+      .toBeVisible()
+    await expect
+      .element(screen.getByRole('switch', { name: 'E-mail every Super Admin' }))
+      .toBeChecked()
+    await userEvent.click(
+      screen.getByRole('switch', {
+        name: 'Also send alerts to a Telegram chat',
+      })
+    )
+    await userEvent.fill(
+      screen.getByLabelText('Bot token'),
+      '123456789:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsawQ'
+    )
+    await userEvent.fill(screen.getByLabelText('Chat ID'), '-1001234567890')
+    const saves = screen.getByRole('button', { name: 'Save' }).all()
+    await userEvent.click(saves[saves.length - 1])
+    await expect
+      .poll(() => fake.calls.find((c) => c.url === '/super/alerts')?.data)
+      .toEqual({
+        alerts_email: true,
+        alerts_telegram_enabled: true,
+        alerts_telegram_chat: '-1001234567890',
+        alerts_telegram_token: '123456789:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsawQ',
+      })
+    await expect.element(screen.getByLabelText('Bot token')).toHaveValue('')
+
+    const success = vi.spyOn(toast, 'success')
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Send a test alert' })
+    )
+    await expect
+      .poll(() => success.mock.calls[success.mock.calls.length - 1]?.[0])
+      .toBe('Test sent by e-mail to 2 Super Admins and to Telegram.')
   })
 })

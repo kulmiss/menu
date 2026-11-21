@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Models\Tenant;
 use App\Support\PlatformSettings;
+use App\Support\Security\SuperAdminAccess;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -62,9 +63,9 @@ class SignupNotification extends Notification implements ShouldQueue
                 ->line(__($k.'owner', $r))
                 ->line(__('signup.mail.menu_address', $r))
                 ->line(__(($this->extra['approval'] ?? false) ? $k.'waiting' : $k.'live'))
-                ->action(__($k.'action'), url('/platform/restaurants'.(($this->extra['approval'] ?? false) ? '?state=pending' : ''))),
+                ->action(__($k.'action'), url(SuperAdminAccess::url('restaurants').(($this->extra['approval'] ?? false) ? '?state=pending' : ''))),
             'existing' => $mail->line(__($k.'intro', $r))
-                ->action(__($k.'action'), url('/auth/sign-in'))
+                ->action(__($k.'action'), url('/signin'))
                 ->line(__($k.'forgot'))
                 ->line(__($k.'not_you')),
             default => null,

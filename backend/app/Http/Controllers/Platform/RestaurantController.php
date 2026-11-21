@@ -16,6 +16,7 @@ use App\Rules\ValidSlug;
 use App\Support\ActivityLogger;
 use App\Support\Features;
 use App\Support\ImpersonationManager;
+use App\Support\MyOrder;
 use App\Support\PublicMenu\MenuPageCache;
 use App\Support\Qr\QrMap;
 use App\Support\SignUp\SignUp;
@@ -105,7 +106,9 @@ class RestaurantController extends Controller
             ->when($request->boolean('deleted') || in_array('deleted', $show, true), fn ($q) => $q->onlyTrashed())
             // Health, views and scans from the dashboard summary (QUESTIONS #186): one subquery per column, no join.
             ->select('tenants.*')->addSelect(collect(['h_score' => 'score', 'h_band' => 'band', 'h_views' => 'views_30d', 'h_scans' => 'scans_30d'])
-            ->map(fn (string $col) => DB::table('tenant_health')->whereColumn('tenant_health.tenant_id', 'tenants.id')->select($col))->all());
+            ->map(fn (string $col) => DB::table('tenant_health')->whereColumn('tenant_health.tenant_id', 'tenants.id')->select($col))->all())
+            // "My order" as guests get it: platform, plan / override and the restaurant's own switch (QUESTIONS #236).
+            ->selectRaw(self::myOrderSql().' AS mo_on', self::myOrderBindings());
 
         return TableQuery::respond($query, $request, [
             'search' => fn ($q, string $s) => $q->where(fn ($w) => $w->where('tenants.name', 'like', "%{$s}%")->orWhere('tenants.slug', 'like', "{$s}%")
@@ -119,6 +122,8 @@ class RestaurantController extends Controller
                 // Dashboard click-throughs (QUESTIONS #186), from the nightly summary.
                 'health' => fn ($q, array $v) => $q->whereIn('tenants.id', DB::table('tenant_health')->whereIn('band', $v)->select('tenant_id')),
                 'usage' => fn ($q, array $v) => $q->whereIn('tenants.id', $this->usage(DB::table('tenant_health'), $v)->select('tenant_id')),
+                'my_order' => fn ($q, array $v) => count(array_intersect($v, ['on', 'off'])) === 1
+                    ? $q->whereRaw(self::myOrderSql().' = ?', [...self::myOrderBindings(), in_array('on', $v, true) ? 1 : 0]) : null,
             ],
             'date' => 'tenants.created_at',
             'sorts' => [
@@ -146,8 +151,25 @@ class RestaurantController extends Controller
                 'Health score' => fn (Tenant $t) => $t->getAttributes()['h_score'] ?? null,
                 'Menu views (30 days)' => fn (Tenant $t) => $t->getAttributes()['h_views'] ?? null,
                 'QR scans (30 days)' => fn (Tenant $t) => $t->getAttributes()['h_scans'] ?? null,
+                'My order' => fn (Tenant $t) => (int) ($t->getAttributes()['mo_on'] ?? 0) === 1 ? 'on' : 'off',
             ]],
         ], fn (Tenant $t) => $this->row($t));
+    }
+
+    /** 1 when guests of this restaurant (tenants.*) get "My order", else 0 — the same rule as MyOrder::state(). */
+    private static function myOrderSql(): string
+    {
+        return 'CASE WHEN ? = 1'
+            .' AND COALESCE((SELECT o.enabled FROM tenant_feature_overrides o WHERE o.tenant_id = tenants.id AND o.feature_key = ?),'
+            .' (SELECT pf.enabled FROM plan_features pf WHERE pf.plan_id = tenants.plan_id AND pf.feature_key = ?), ?) = 1'
+            .' AND COALESCE((SELECT a.show_order_list FROM tenant_appearance a WHERE a.tenant_id = tenants.id LIMIT 1), 1) = 1'
+            .' THEN 1 ELSE 0 END';
+    }
+
+    /** @return list<int|string> */
+    private static function myOrderBindings(): array
+    {
+        return [(int) Features::globallyOn(MyOrder::FEATURE), MyOrder::FEATURE, MyOrder::FEATURE, (int) Features::DEFAULTS[MyOrder::FEATURE]];
     }
 
     /** Bulk: add or remove a tag on many restaurants at once. */
@@ -348,6 +370,9 @@ class RestaurantController extends Controller
     {
         $tenant = Tenant::findOrFail($restaurant);
         $data = $request->validate(['features' => ['required', 'array:'.implode(',', array_keys(Features::DEFAULTS))], 'features.*' => ['nullable', 'boolean']]);
+        $before = DB::table('tenant_feature_overrides')->where('tenant_id', $tenant->id)->whereIn('feature_key', array_keys($data['features']))
+            ->pluck('enabled', 'feature_key')->map(fn ($on) => (bool) $on);
+        $from = array_map(fn (string $key) => $before[$key] ?? null, array_combine(array_keys($data['features']), array_keys($data['features'])));
         foreach ($data['features'] as $key => $enabled) {
             if ($enabled === null) {
                 DB::table('tenant_feature_overrides')->where('tenant_id', $tenant->id)->where('feature_key', $key)->delete();
@@ -357,7 +382,7 @@ class RestaurantController extends Controller
         }
         Features::forget($tenant->id);
         $tenant->bumpCacheVersion();
-        $this->activity->log('platform.features_changed', $tenant, ['features' => ['to' => $data['features']]], null);
+        $this->activity->log('platform.features_changed', $tenant, ['features' => ['from' => $from, 'to' => $data['features']]], null);
 
         return $this->show($tenant->id);
     }
@@ -416,6 +441,8 @@ class RestaurantController extends Controller
             'health' => isset($h['h_band']) ? ['band' => $h['h_band'], 'score' => (int) $h['h_score']] : null,
             'views_30d' => isset($h['h_views']) ? (int) $h['h_views'] : null,
             'scans_30d' => isset($h['h_scans']) ? (int) $h['h_scans'] : null,
+            // In the table only (computed in the query): does "My order" reach this restaurant's guests?
+            'my_order' => array_key_exists('mo_on', $h) ? (int) $h['mo_on'] === 1 : null,
         ];
     }
 }

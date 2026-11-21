@@ -16,14 +16,32 @@ const SCREENS = {
   messages: lazy(() =>
     import('./messages').then((m) => ({ default: m.MessagesPage }))
   ),
+  'menu-requests': lazy(() =>
+    import('./menu-requests').then((m) => ({ default: m.MenuRequestsPage }))
+  ),
   backups: lazy(() =>
     import('./backups').then((m) => ({ default: m.BackupsPage }))
+  ),
+  help: lazy(() =>
+    import('./help-guide').then((m) => ({ default: m.HelpGuidePage }))
+  ),
+  'help-articles': lazy(() =>
+    import('./help-articles').then((m) => ({ default: m.HelpArticlesPage }))
+  ),
+  'mobile-app': lazy(() =>
+    import('./mobile-app').then((m) => ({ default: m.MobileAppPage }))
   ),
   themes: lazy(() =>
     import('./screens').then((m) => ({ default: m.ThemesPage }))
   ),
   announcements: lazy(() =>
     import('./screens').then((m) => ({ default: m.AnnouncementsPage }))
+  ),
+  landing: lazy(() =>
+    import('./landing-editor').then((m) => ({ default: m.LandingEditorPage }))
+  ),
+  footer: lazy(() =>
+    import('./footer-editor').then((m) => ({ default: m.FooterEditorPage }))
   ),
   activity: lazy(() =>
     import('./screens').then((m) => ({ default: m.ActivityPage }))

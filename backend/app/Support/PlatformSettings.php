@@ -20,6 +20,12 @@ class PlatformSettings
         'default_currency' => 'ETB',
         'terms' => '',
         'privacy' => '',
+        // Site pages linked from the footer (owner, 2026-11-18): empty = the default text (resources/legal).
+        'about' => '',
+        'contact' => '',
+        'cookies' => '',
+        // Super Admin → Footer: the unpublished draft (null = none; the live footer is the newest FooterVersion).
+        'footer_draft' => null,
         // Default link preview when a restaurant has no banner (path on the public disk; null = built-in).
         'share_image' => null,
         // E-mail header logo (path on the public disk; null = the platform name in text).
@@ -44,13 +50,25 @@ class PlatformSettings
         'app_min_version' => '1.0.0',
         'app_latest_version' => '1.0.0',
         'app_flags' => [],
+        'mobile' => [], // Super Admin → Mobile app, see App\Support\MobileApp (QUESTIONS #193)
+        'features_global' => [], // feature key => false to switch it off for everyone (Settings → Features)
+        // Setup wizard (QUESTIONS #195): done_at = finished; card_hidden = the dashboard checklist closed.
+        'setup' => ['done_at' => null, 'card_hidden' => false],
+        // "Continue with Google" (owner, 2026-11-17): needs GOOGLE_CLIENT_ID/SECRET in .env too.
+        'google_login' => false,
         // Public landing page (owner, 2026-11-13). Empty texts use the translated defaults.
         'brand_color' => '#c2410c',
         'landing_headline' => '',
         'landing_subline' => '',
-        'landing_sections' => ['how' => true, 'features' => true, 'styles' => true, 'speed' => true, 'pricing' => true, 'testimonials' => true, 'faq' => true, 'cta' => true],
-        // Real quotes only, added by the Super Admin: [{quote, name, role}]. Hidden while empty.
+        // Sections between the hero and the footer (owner, 2026-11-17). "Customers say" starts hidden.
+        'landing_sections' => ['problem' => true, 'demo' => true, 'how' => true, 'features' => true, 'compare' => true, 'pricing' => true, 'testimonials' => false, 'faq' => true, 'cta' => true],
+        'landing_order' => ['problem', 'demo', 'how', 'features', 'compare', 'pricing', 'testimonials', 'faq', 'cta'],
+        // Real quotes only, added by the Super Admin: [{quote, name, role, real}]. Only ticked "real" ones show.
         'landing_testimonials' => [],
+        // Super Admin → Landing page (owner, 2026-11-17): changed texts (key => text; others use
+        // lang/en/landing.php) and uploaded pictures (see App\Support\Landing\LandingImages).
+        'landing_texts' => [],
+        'landing_images' => [],
         // Footer links: network => URL (empty = hidden).
         // Billing (owner, 2026-11-13): shown on every invoice, copied into it when issued.
         'billing_company' => '',
@@ -74,6 +92,16 @@ class PlatformSettings
         'backup_s3_prefix' => 'menu-backups',
         'backup_s3_key' => '',
         'backup_s3_secret' => '', // encrypted (Crypt), never sent to the browser
+        // First-customer experience (owner, 2026-11-19, QUESTIONS #235): "Add my menu for me"
+        // requests, and the welcome e-mails on day 1, 3 and 7 after sign-up.
+        'menu_help_enabled' => true,
+        'welcome_series' => false,
+        // Alerts (owner, 2026-11-19, QUESTIONS #233): server errors and failed go-live checks
+        // e-mailed to every Super Admin and, optionally, sent to a Telegram chat.
+        'alerts_email' => true,
+        'alerts_telegram_enabled' => false,
+        'alerts_telegram_chat' => '',
+        'alerts_telegram_token' => '', // encrypted (Crypt), never sent to the browser
         'socials' => ['telegram' => '', 'facebook' => '', 'instagram' => '', 'tiktok' => '', 'x' => '', 'youtube' => '', 'linkedin' => ''],
     ];
 
@@ -108,7 +136,8 @@ class PlatformSettings
         $all = self::all();
         $all['turnstile_secret_set'] = ($all['turnstile_secret'] ?? '') !== '';
         $all['backup_s3_secret_set'] = ($all['backup_s3_secret'] ?? '') !== '';
-        unset($all['turnstile_secret'], $all['backup_s3_secret']);
+        $all['alerts_telegram_token_set'] = ($all['alerts_telegram_token'] ?? '') !== '';
+        unset($all['turnstile_secret'], $all['backup_s3_secret'], $all['alerts_telegram_token']);
 
         return $all;
     }

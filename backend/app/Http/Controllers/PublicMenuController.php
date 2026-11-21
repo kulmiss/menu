@@ -11,6 +11,7 @@ use App\Support\Features;
 use App\Support\PublicMenu\MenuPageCache;
 use App\Support\PublicMenu\MenuPageData;
 use App\Support\PublicMenu\PdfMenu;
+use App\Support\Qr\QrImages;
 use App\Support\Qr\QrMap;
 use App\Tenancy\CurrentTenant;
 use Illuminate\Http\RedirectResponse;
@@ -25,6 +26,28 @@ use Illuminate\Support\Facades\File;
  */
 class PublicMenuController extends Controller
 {
+    /**
+     * A demo menu from the website in a phone frame, for visitors on a tablet or computer
+     * (owner, 2026-11-19). Demo menus only; the menu itself loads in the frame as usual.
+     */
+    public function phone(string $slug, ?string $branch = null): Response
+    {
+        abort_unless(in_array($slug, SiteController::demoSlugs(), true), 404);
+        $tenant = Tenant::where('slug', $slug)->whereNull('suspended_at')->firstOrFail();
+        $path = '/'.$tenant->slug;
+        if ($branch !== null) {
+            $place = app(CurrentTenant::class)->runAs($tenant, fn () => Branch::where('slug', $branch)->where('is_active', true)->first());
+            abort_if($place === null, 404);
+            $path = $place->path($tenant);
+        }
+
+        return response()->view('public.demo-phone', [
+            'tenant' => $tenant,
+            'path' => $path,
+            'qr' => QrImages::svg(url($path)),
+        ], 200, ['X-Robots-Tag' => 'noindex', 'Cache-Control' => 'public, max-age=300']);
+    }
+
     public function show(Request $request, MenuPageData $data, string $slug, ?string $branch = null): Response|RedirectResponse
     {
         $tenant = Tenant::where('slug', $slug)->first();

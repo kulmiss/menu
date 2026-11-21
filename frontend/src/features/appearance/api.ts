@@ -6,10 +6,40 @@ import {
 import { api, tenantUrl } from '@/lib/api'
 import { type Media } from '@/features/menu/types'
 
-/** Guest-menu styles: A · Warm editorial, B · Fresh grid, C · Quiet bistro, D · Minimal. */
-export type MenuStyle = 'editorial' | 'grid' | 'bistro' | 'minimal'
+/** Guest-menu styles A–Q, in picker order (backend TenantAppearance::STYLES). */
+export const MENU_STYLES = [
+  'editorial',
+  'grid',
+  'bistro',
+  'minimal',
+  'mesob',
+  'lounge',
+  'board',
+  'arabic',
+  'islamic',
+  'somali',
+  'mono',
+  'colour',
+  'coffee',
+  'grill',
+  'garden',
+  'coastal',
+  'luxe',
+] as const
+/** M–Q: styles with their own artwork (header picture, textures, category icons). */
+export const ART_STYLES: readonly MenuStyle[] = [
+  'coffee',
+  'grill',
+  'garden',
+  'coastal',
+  'luxe',
+]
+export type MenuStyle = (typeof MENU_STYLES)[number]
 export type Font = 'system' | 'serif' | 'rounded'
 export type BannerText = 'over' | 'under'
+/** Menu direction, style H only: auto = right-to-left when most of the menu is in Arabic script. */
+export const MENU_DIRECTIONS = ['auto', 'ltr', 'rtl'] as const
+export type MenuDirection = (typeof MENU_DIRECTIONS)[number]
 
 export type AppearanceValues = {
   primary_color: string
@@ -27,9 +57,29 @@ export type AppearanceValues = {
   show_pdf_link: boolean
   /** "My order" list for guests (kept on their phone; plan feature order_list). */
   show_order_list: boolean
+  /**
+   * "My order" as guests get it, and which level turned it off (QUESTIONS #236):
+   * the platform (Settings → Features or the Super Admin for this restaurant), the plan, or this switch.
+   */
+  my_order?: {
+    enabled: boolean
+    available: boolean
+    restaurant: boolean
+    reason: 'platform' | 'plan' | 'restaurant' | null
+  }
   show_other_branches: boolean
   show_logo: boolean
   show_banner: boolean
+  /** Style H · Arabic only. */
+  menu_direction: MenuDirection
+  /** Style I · Islamic only: "Halal" badge and Ramadan mode. */
+  show_halal: boolean
+  ramadan_mode: boolean
+  /** Style K · Black & White only: black-and-white photos, brand colour as a small accent. */
+  photos_greyscale: boolean
+  mono_accent: boolean
+  /** Styles M–Q only: their artwork on or off (the banner and category photos replace it). */
+  show_decoration: boolean
   theme_id: number | null
   logo_media_id: number | null
   cover_media_id: number | null

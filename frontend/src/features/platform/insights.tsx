@@ -131,7 +131,7 @@ const useInsight = <T,>(widget: string, f: InsightFilters) =>
     queryFn: async () =>
       (
         await api.get<{ data: T }>(
-          `/platform/insights/${widget}?${insightParams(f)}`
+          `/super/insights/${widget}?${insightParams(f)}`
         )
       ).data.data,
     staleTime: 60_000,

@@ -9,6 +9,7 @@ use App\Models\AddonOption;
 use App\Models\Tenant;
 use App\Rules\Translations;
 use App\Support\ActivityLogger;
+use App\Support\Features;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -134,6 +135,10 @@ class AddonGroupController extends Controller
                 'is_sold_out' => (bool) ($row['is_sold_out'] ?? false),
                 'sort' => $sort,
             ];
+            // "Sold out" off: existing marks are kept as they are (the screen doesn't show them).
+            if (! Features::here('sold_out') && ! empty($row['id'])) {
+                unset($values['is_sold_out']);
+            }
             $option = ! empty($row['id'])
                 ? tap(AddonOption::where('addon_group_id', $group->id)->findOrFail((int) $row['id']))->update($values)
                 : $group->options()->create($values);

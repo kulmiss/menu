@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Support\PlatformSettings;
+use App\Support\Security\SuperAdminAccess;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
@@ -28,7 +29,7 @@ class BackupProblemNotification extends Notification
             ->greeting(__('backups.mail.greeting'))
             ->line($this->problem)
             ->line(__('backups.mail.line'))
-            ->action(__('backups.mail.action'), url('/platform/backups'))
+            ->action(__('backups.mail.action'), url(SuperAdminAccess::url('backups')))
             ->salutation(__('invoice.mail.salutation', ['platform' => PlatformSettings::get('name')]));
     }
 }

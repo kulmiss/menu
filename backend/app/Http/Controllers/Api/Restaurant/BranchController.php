@@ -14,6 +14,7 @@ use App\Models\QrCode;
 use App\Models\Tenant;
 use App\Rules\Translations;
 use App\Support\ActivityLogger;
+use App\Support\Features;
 use App\Support\PlanLimits;
 use App\Tenancy\CurrentTenant;
 use Illuminate\Http\JsonResponse;
@@ -181,7 +182,7 @@ class BranchController extends Controller
         $data = $rows->keys()->merge($sizes->keys())->unique()->sort()->values()->map(fn ($itemId) => [
             'item_id' => (int) $itemId,
             'price_minor' => $rows->get($itemId)?->price_minor,
-            'is_sold_out' => $rows->get($itemId)?->is_sold_out,
+            'is_sold_out' => Features::here('sold_out') ? $rows->get($itemId)?->is_sold_out : null,
             'is_hidden' => $rows->get($itemId)?->is_hidden,
             // Size id → this branch's price (QUESTIONS #78).
             'sizes' => (object) ($sizes->get($itemId)?->mapWithKeys(fn ($r) => [(string) $r->item_variant_id => (int) $r->price_minor])->all() ?? []),
@@ -219,6 +220,19 @@ class BranchController extends Controller
                     throw ValidationException::withMessages(["overrides.$i.sizes" => __('validation.exists', ['attribute' => 'size'])]);
                 }
             }
+        }
+
+        // "Sold out" off: the screen doesn't show the marks, so the saved ones are kept as they are.
+        if (! Features::here('sold_out')) {
+            $kept = BranchItemOverride::where('branch_id', $model->id)->whereNotNull('is_sold_out')->pluck('is_sold_out', 'item_id')->all();
+            $rows = [];
+            foreach ($data['overrides'] as $row) {
+                $rows[(int) $row['item_id']] = ['is_sold_out' => null, ...$row];
+            }
+            foreach ($kept as $itemId => $mark) {
+                $rows[(int) $itemId] = ['item_id' => (int) $itemId, ...($rows[(int) $itemId] ?? []), 'is_sold_out' => (bool) $mark];
+            }
+            $data['overrides'] = array_values($rows);
         }
 
         DB::transaction(function () use ($model, $data) {

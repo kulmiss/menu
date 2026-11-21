@@ -9,6 +9,7 @@ use App\Models\Tenant;
 use App\Support\ActivityLogger;
 use App\Support\Billing\InvoicePdf;
 use App\Support\Billing\Invoices;
+use App\Support\Csv;
 use App\Support\PlatformSettings;
 use App\Support\Push\Push;
 use App\Support\Tables\TableQuery;
@@ -139,10 +140,10 @@ class PaymentController extends Controller
         fwrite($out, "\xEF\xBB\xBF");
         fputcsv($out, ['Paid on', 'Restaurant', 'Amount', 'Currency', 'Method', 'Reference', 'Period start', 'Period end', 'Plan', 'Notes'], escape: '');
         foreach ($rows as $p) {
-            fputcsv($out, [
+            fputcsv($out, array_map(Csv::cell(...), [
                 $p->paid_at->toDateString(), $p->tenant->name, number_format($p->amount_minor / 100, 2, '.', ''), $p->currency, $p->method,
                 $p->reference, $p->period_start->toDateString(), $p->period_end->toDateString(), $p->plan?->name['en'] ?? '', $p->notes,
-            ], escape: '');
+            ]), escape: '');
         }
         rewind($out);
         $csv = (string) stream_get_contents($out);

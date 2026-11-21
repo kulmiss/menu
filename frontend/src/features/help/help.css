@@ -1,0 +1,96 @@
+/* Help article text (loaded with the Help screens only, not in the first download). */
+.help-prose {
+  font-size: 15px;
+  line-height: 1.65;
+}
+.help-prose h2 {
+  margin: 1.5rem 0 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+.help-prose h3 {
+  margin: 1.25rem 0 0.5rem;
+  font-weight: 600;
+}
+.help-prose p,
+.help-prose ol,
+.help-prose ul {
+  margin: 0.75rem 0;
+}
+.help-prose ol {
+  list-style: decimal;
+  padding-inline-start: 1.5rem;
+}
+.help-prose ul {
+  list-style: disc;
+  padding-inline-start: 1.5rem;
+}
+.help-prose li {
+  margin: 0.375rem 0;
+}
+.help-prose a {
+  font-weight: 500;
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.help-prose code {
+  border-radius: 0.25rem;
+  background: var(--muted);
+  padding: 0.125rem 0.25rem;
+  font-size: 13px;
+}
+.help-prose pre {
+  margin: 0.75rem 0;
+  overflow-x: auto;
+  border-radius: 0.375rem;
+  background: var(--muted);
+  padding: 0.75rem;
+}
+.help-prose pre code {
+  background: transparent;
+  padding: 0;
+}
+.help-prose table {
+  margin: 0.75rem 0;
+  width: 100%;
+  font-size: 0.875rem;
+  border-collapse: collapse;
+}
+.help-prose th,
+.help-prose td {
+  border-bottom: 1px solid var(--border);
+  padding: 0.375rem 0.5rem;
+  text-align: start;
+}
+.help-prose img {
+  margin: 0.75rem 0;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+  max-width: 100%;
+  height: auto;
+}
+.help-prose img[title='phone'],
+.help-prose img[title='app'] {
+  max-width: 300px;
+}
+.help-prose img[title='desktop'] {
+  display: none;
+}
+@media (min-width: 768px) {
+  .help-prose img[title='desktop'] {
+    display: block;
+  }
+  .help-prose img[title='phone'] {
+    display: none;
+  }
+}
+/* The editor's preview: always the phone picture. */
+.help-prose.help-preview img[title='desktop'] {
+  display: none;
+}
+.help-prose.help-preview img[title='phone'] {
+  display: block;
+  max-width: 260px;
+}

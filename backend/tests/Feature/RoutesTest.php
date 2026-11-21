@@ -9,10 +9,10 @@ it('requires an Idempotency-Key on every create/change API route', function () {
 
     $missing = $routes
         ->reject(fn ($route) => in_array('idempotent', $route->gatherMiddleware(), true))
-        // The guest-page visit beacon only counts; replaying it is harmless.
-        ->reject(fn ($route) => $route->uri() === 'api/v1/beacon')
+        // The guest-page visit beacon and the landing page's click counter only count; replaying them is harmless.
+        ->reject(fn ($route) => in_array($route->uri(), ['api/v1/beacon', 'api/v1/landing/click'], true))
         // App sign-in changes nothing, and a stored answer would keep the new token (QUESTIONS #187).
-        ->reject(fn ($route) => in_array($route->uri(), ['api/v1/mobile/auth/login', 'api/v1/mobile/auth/two-factor'], true))
+        ->reject(fn ($route) => in_array($route->uri(), ['api/v1/mobile/auth/login', 'api/v1/mobile/auth/two-factor', 'api/v1/mobile/auth/google', 'api/v1/mobile/auth/google/finish'], true))
         ->map(fn ($route) => implode('|', $route->methods()).' '.$route->uri())
         ->values()->all();
 
@@ -21,6 +21,6 @@ it('requires an Idempotency-Key on every create/change API route', function () {
 
 it('answers 401, not 500, to a signed-out API request without the JSON header (pre-launch check)', function () {
     $this->get('/api/v1/me')->assertUnauthorized();
-    $this->get('/api/v1/platform/restaurants')->assertUnauthorized();
-    $this->get('/api/v1/t/1/items')->assertUnauthorized();
+    $this->get('/api/v1/super/restaurants')->assertUnauthorized();
+    $this->get('/api/v1/restaurant/1/items')->assertUnauthorized();
 });

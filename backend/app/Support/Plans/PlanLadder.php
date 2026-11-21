@@ -29,7 +29,10 @@ final class PlanLadder
     public static function plans(): array
     {
         $all = array_fill_keys(array_keys(Features::DEFAULTS), true);
-        $styles2 = ['style_editorial' => false, 'style_bistro' => false];
+        // Free shows 2 styles (B, D); E–Q are for Plus and up too (owner, 2026-11-18/19, QUESTIONS #228, #229, #232).
+        $styles2 = ['style_editorial' => false, 'style_bistro' => false, 'style_mesob' => false, 'style_lounge' => false, 'style_board' => false,
+            'style_arabic' => false, 'style_islamic' => false, 'style_somali' => false, 'style_mono' => false, 'style_colour' => false,
+            'style_coffee' => false, 'style_grill' => false, 'style_garden' => false, 'style_coastal' => false, 'style_luxe' => false];
 
         return [
             'free' => [

@@ -2,12 +2,12 @@
 
 namespace App\Support\Qr;
 
-use FPDF;
+use App\Support\Pdf\Document;
 
 /**
  * Printable table cards (A4, four A6 cards per page, with cut marks) and
  * single-code cards, drawn as vector squares so they stay sharp at any size.
- * Uses FPDF (MIT, pure PHP, no fonts to install).
+ * Uses App\Support\Pdf\Document (any language; see QUESTIONS #205).
  */
 class TableCards
 {
@@ -20,7 +20,7 @@ class TableCards
      */
     public static function pdf(array $cards, string $colour, bool $sheet = true): string
     {
-        $pdf = new FPDF('P', 'mm', $sheet ? 'A4' : [self::W, self::H]);
+        $pdf = new Document('P', 'mm', $sheet ? 'A4' : [self::W, self::H]);
         $pdf->SetAutoPageBreak(false);
         $pdf->SetMargins(0, 0, 0);
         $pdf->SetCreator('Menu');
@@ -43,7 +43,7 @@ class TableCards
     }
 
     /** @param array{title: string, subtitle: string|null, label: string|null, url: string} $card */
-    private static function card(FPDF $pdf, float $x, float $y, array $card, string $colour): void
+    private static function card(Document $pdf, float $x, float $y, array $card, string $colour): void
     {
         [$r, $g, $b] = sscanf($colour, '#%02x%02x%02x') ?: [0, 0, 0];
         $pdf->SetFillColor((int) $r, (int) $g, (int) $b);
@@ -78,7 +78,7 @@ class TableCards
     }
 
     /** The code as vector squares, quiet zone included, black on white. */
-    public static function qr(FPDF $pdf, float $left, float $top, float $size, string $url): void
+    public static function qr(Document $pdf, float $left, float $top, float $size, string $url): void
     {
         $matrix = QrImages::matrix($url);
         $module = $size / count($matrix);
@@ -99,7 +99,7 @@ class TableCards
         }
     }
 
-    private static function cutMarks(FPDF $pdf): void
+    private static function cutMarks(Document $pdf): void
     {
         $pdf->SetDrawColor(190, 190, 190);
         $pdf->SetLineWidth(0.2);
@@ -111,24 +111,27 @@ class TableCards
         }
     }
 
-    /** FPDF's core fonts use Windows-1252; other letters are approximated. */
+    /** Text as typed (UTF-8); Document picks the font, leaves out emoji and draws right-to-left text. */
     public static function text(string $s): string
     {
-        $converted = @iconv('UTF-8', 'windows-1252//TRANSLIT//IGNORE', $s);
-
-        return $converted === false ? '' : $converted;
+        return $s;
     }
 
-    public static function fit(FPDF $pdf, string $s, float $width): string
+    /** $s, cut with "…" when it is wider than $width. */
+    public static function fit(Document $pdf, string $s, float $width): string
     {
-        $t = self::text($s);
-        if ($pdf->GetStringWidth($t) <= $width) {
-            return $t;
-        }
-        while ($t !== '' && $pdf->GetStringWidth($t.chr(133)) > $width) {
-            $t = substr($t, 0, -1);
-        }
+        $pdf->holdFont($s);
+        try {
+            if ($pdf->GetStringWidth($s) <= $width) {
+                return $s;
+            }
+            while ($s !== '' && $pdf->GetStringWidth($s.'…') > $width) {
+                $s = mb_substr($s, 0, -1);
+            }
 
-        return rtrim($t).chr(133); // "…" in Windows-1252
+            return rtrim($s).'…';
+        } finally {
+            $pdf->releaseFont();
+        }
     }
 }

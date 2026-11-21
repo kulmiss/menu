@@ -27,6 +27,7 @@ import { ConfirmDialog } from '@/components/confirm-dialog'
 import { DataTable } from '@/components/data-table'
 import { AdminHeader } from '@/components/layout/admin-header'
 import { Main } from '@/components/layout/main'
+import { useFeature } from '@/features/auth/use-me'
 import {
   type QrCodeRow,
   branchesQuery,
@@ -41,6 +42,7 @@ import { useMenuContext } from '@/features/menu/use-menu-context'
 /** QR codes (PLAN.md screen 8): every code, downloads, table cards. */
 export function QrCodesPage() {
   const { t } = useTranslation()
+  const printOn = useFeature('print_materials')
   const ctx = useMenuContext()
   const codes = useQuery(qrCodesQuery(ctx.tenantId))
   const branches = useQuery(branchesQuery(ctx.tenantId))
@@ -82,14 +84,16 @@ export function QrCodesPage() {
             </h1>
             <p className='text-muted-foreground'>{t('qr.description')}</p>
           </div>
-          <Button asChild className='min-h-11'>
-            <Link
-              to='/admin/print-materials'
-              title={t('qr.print_materials_hint')}
-            >
-              <Printer /> {t('qr.print_materials')}
-            </Link>
-          </Button>
+          {printOn && (
+            <Button asChild className='min-h-11'>
+              <Link
+                to='/admin/print-materials'
+                title={t('qr.print_materials_hint')}
+              >
+                <Printer /> {t('qr.print_materials')}
+              </Link>
+            </Button>
+          )}
         </div>
         <div className='grid gap-4'>
           <DataTable<QrCodeRow>
@@ -125,16 +129,20 @@ export function QrCodesPage() {
                   ]
                 : []),
             ]}
-            bulk={(rows) => (
-              <Button asChild size='sm' className='min-h-11 sm:min-h-8'>
-                <Link
-                  to='/admin/print-materials'
-                  search={{ codes: rows.map((r) => r.id).join(',') }}
-                >
-                  <Printer aria-hidden /> {t('qr.print_selected')}
-                </Link>
-              </Button>
-            )}
+            bulk={
+              printOn
+                ? (rows) => (
+                    <Button asChild size='sm' className='min-h-11 sm:min-h-8'>
+                      <Link
+                        to='/admin/print-materials'
+                        search={{ codes: rows.map((r) => r.id).join(',') }}
+                      >
+                        <Printer aria-hidden /> {t('qr.print_selected')}
+                      </Link>
+                    </Button>
+                  )
+                : undefined
+            }
             columns={[
               {
                 id: 'code',

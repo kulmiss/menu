@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Tenant;
+use App\Support\MyOrder;
 use App\Support\Stats;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -36,6 +38,10 @@ class BeaconController extends Controller
 
         // "My order" (counts only; the list itself stays on the guest's phone):
         // c = [dish id, quantity, list total] when a dish is added, w = list total when shown to the waiter.
+        // Not counted while My order is off for this restaurant (an old saved page may still send them, QUESTIONS #236).
+        if ((is_array($data['c'] ?? null) || array_key_exists('w', $data)) && ! MyOrder::enabled(Tenant::findOrFail($tenantId))) {
+            return response()->noContent();
+        }
         if (is_array($data['c'] ?? null)) {
             [$item, $qty] = [$data['c'][0] ?? null, $data['c'][1] ?? null];
             if (is_int($item) && is_int($qty) && $qty > 0 && $qty <= 50

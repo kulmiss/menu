@@ -197,7 +197,7 @@ class DashboardWidgetController extends Controller
         $have = Features::for($tenant);
         $gets = PlanLadder::effective($next);
         $adds = [];
-        $styles = count(array_filter(['editorial', 'grid', 'bistro', 'minimal'], fn ($s) => $gets['features']['style_'.$s]));
+        $styles = count(array_filter(TenantAppearance::STYLES, fn ($s) => $gets['features']['style_'.$s]));
         if ($styles > count(Features::styles($tenant))) {
             $adds[] = trans_choice('landing.pricing.feature.styles', $styles, ['n' => $styles]);
         }

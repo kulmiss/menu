@@ -42,7 +42,7 @@ it('shows the visible menu with prices, labels and the item details data', funct
         ->assertDontSee('Secret')
         ->getContent();
 
-    expect($html)->toContain('<html lang="en">')
+    expect($html)->toContain('<html lang="en" dir="ltr">')
         ->not->toContain('<script src')       // nothing to download: CSS and JS are inline
         ->not->toContain('<link rel="stylesheet"');
 });
@@ -196,8 +196,9 @@ it('keeps the demo menu page within the 30 KB budget in every style (PLAN.md §1
     expect($gzip)->toBeLessThanOrEqual(30 * 1024);
     expect(preg_match('#<script>(.*?)</script>#s', (string) $html, $js))->toBe(1);
     expect(strlen($js[1]))->toBeLessThan(5 * 1024);  // inline JS under 5 KB (§15.2.2)
-    expect($html)->toContain('class="S-'.$style.'"');
-})->with(['editorial', 'grid', 'bistro']);
+    // D · Minimal adds " NP" (no dish photos).
+    expect($html)->toMatch('/class="S-'.$style.'( NP)?( dc)?"/');
+})->with(TenantAppearance::STYLES);
 
 it('accepts the visit beacon without an idempotency key', function () {
     $this->postJson('/api/v1/beacon', ['t' => 1])->assertNoContent();

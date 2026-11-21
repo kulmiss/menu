@@ -9,6 +9,7 @@ use App\Models\Impersonation;
 use App\Models\Invitation;
 use App\Models\Invoice;
 use App\Models\Membership;
+use App\Models\MenuRequest;
 use App\Models\Payment;
 use App\Models\RestaurantNote;
 use App\Models\Tenant;
@@ -28,7 +29,7 @@ it('returns 404 for every restaurant route of a restaurant you do not belong to'
     $victim = Tenant::factory()->create();
 
     $this->actingAs($intruder)
-        ->json($method, "/api/v1/t/{$victim->id}{$path}", ['email' => 'x@example.com', 'role' => 'staff', 'slug' => 'stolen-slug'], idem())
+        ->json($method, "/api/v1/restaurant/{$victim->id}{$path}", ['email' => 'x@example.com', 'role' => 'staff', 'slug' => 'stolen-slug'], idem())
         ->assertNotFound();
 })->with([
     ['GET', ''],
@@ -47,9 +48,9 @@ it('cannot reach another restaurant\'s members or invitations through its own re
         'email' => 'x@example.com', 'role' => Role::Staff, 'token_hash' => str_repeat('a', 64), 'expires_at' => now()->addDay(),
     ]));
 
-    $this->actingAs($owner)->patchJson("/api/v1/t/{$tenant->id}/members/{$foreignMember->id}", ['role' => 'manager'], idem())->assertNotFound();
-    $this->actingAs($owner)->deleteJson("/api/v1/t/{$tenant->id}/members/{$foreignMember->id}", [], idem())->assertNotFound();
-    $this->actingAs($owner)->deleteJson("/api/v1/t/{$tenant->id}/invitations/{$foreignInvitation->id}", [], idem())->assertNotFound();
+    $this->actingAs($owner)->patchJson("/api/v1/restaurant/{$tenant->id}/members/{$foreignMember->id}", ['role' => 'manager'], idem())->assertNotFound();
+    $this->actingAs($owner)->deleteJson("/api/v1/restaurant/{$tenant->id}/members/{$foreignMember->id}", [], idem())->assertNotFound();
+    $this->actingAs($owner)->deleteJson("/api/v1/restaurant/{$tenant->id}/invitations/{$foreignInvitation->id}", [], idem())->assertNotFound();
 
     expect($foreignMember->fresh()->role)->toBe(Role::Staff)
         ->and(Invitation::withoutTenancy()->find($foreignInvitation->id))->not->toBeNull();
@@ -60,7 +61,7 @@ it('lists only the current restaurant\'s members', function () {
     member(Role::Staff, $tenant);
     member(Role::Manager); // another restaurant
 
-    $this->actingAs($owner)->getJson("/api/v1/t/{$tenant->id}/members")->assertOk()->assertJsonCount(2, 'data');
+    $this->actingAs($owner)->getJson("/api/v1/restaurant/{$tenant->id}/members")->assertOk()->assertJsonCount(2, 'data');
 });
 
 it('fails closed when tenant-owned data is read without a current tenant', function () {
@@ -98,7 +99,9 @@ it('makes every model with a tenant_id column use BelongsToTenant (except the do
     // Bridges, plus platform records only the Super Admin area reads (payments, "log in as"),
     // and invoices (Settings → Billing filters them by the current restaurant itself; tested in InvoiceTest).
     // App inbox lines are per user; tenant_id only says which restaurant a line is about (QUESTIONS #189).
-    $bridges = [Membership::class, ActivityLog::class, TenantSlugHistory::class, Payment::class, Impersonation::class, Invoice::class, RestaurantNote::class, CampaignRecipient::class, AppNotification::class];
+    // "Add my menu for me" requests: the Super Admin reads them across restaurants; the restaurant's own list
+    // filters by its id (tested in MenuRequestTest, QUESTIONS #235).
+    $bridges = [Membership::class, ActivityLog::class, TenantSlugHistory::class, Payment::class, Impersonation::class, Invoice::class, RestaurantNote::class, CampaignRecipient::class, AppNotification::class, MenuRequest::class];
 
     $offenders = collect(File::files(app_path('Models')))
         ->map(fn ($file) => 'App\\Models\\'.$file->getFilenameWithoutExtension())

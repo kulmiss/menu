@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\Role;
+use App\Models\PersonalAccessToken;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
@@ -8,7 +9,7 @@ use Illuminate\Support\Facades\Hash;
 it('signs out every other browser session but keeps this one, after the password', function () {
     $user = User::factory()->create(['email' => 'o@example.com', 'password' => 'correct-horse-battery']);
     // The admin SPA: a browser on this site, so Sanctum uses the session.
-    $this->withHeader('Referer', 'http://localhost/admin');
+    $this->withHeader('Referer', config('app.url').'/admin');
 
     // Two browsers sign in.
     $this->postJson('/api/v1/auth/login', ['email' => 'o@example.com', 'password' => 'correct-horse-battery'], idem())->assertOk();
@@ -34,6 +35,6 @@ it('signs out every other browser session but keeps this one, after the password
 
 it('is not available to the app (no browser session) or during "log in as"', function () {
     [$owner] = member(Role::Owner);
-    $token = $owner->createToken('Phone', ['mobile'])->plainTextToken;
+    $token = $owner->createToken('Phone', PersonalAccessToken::abilitiesFor($owner))->plainTextToken;
     $this->withToken($token)->postJson('/api/v1/me/sessions/logout-others', ['password' => 'password'], idem())->assertStatus(400);
 });

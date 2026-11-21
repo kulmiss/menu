@@ -19,8 +19,12 @@ use Illuminate\Support\Facades\Artisan;
  *
  * - "Buna & Bread" at /demo: 67 dishes with real photos, 2 branches, team,
  *   tables, promotions, 90 days of insights.
- * - Three showcase restaurants, one per menu style: /demo-fine (A),
- *   /demo-pizza (B), /demo-bakery (C).
+ * - Showcase restaurants, one per menu style: /demo-fine (A),
+ *   /demo-pizza (B), /demo-bakery (C), /demo-mesob (E), /demo-lounge (F),
+ *   /demo-street (G), /demo-mandi (H, in Arabic), /demo-halal (I),
+ *   /demo-xamar (J), /demo-atelier (K), /demo-juicy (L), /demo-jebena (M),
+ *   /demo-firewood (N), /demo-green-spoon (O), /demo-dhow (P, in US dollars),
+ *   /demo-maison (Q); D is /demo-nine-wells-coffee.
  * - About 30 small restaurants in every state with 12 months of payments,
  *   so every Super Admin widget has data.
  *
@@ -55,6 +59,9 @@ class DemoSeeder extends Seeder
 
             return;
         }
+        // A fresh start (migrate:fresh): static guest pages left from the old data would
+        // still be served for the same addresses, so they go first.
+        Artisan::call('menu:refresh-pages', ['--all' => true]);
         // One Photos instance, so each photo is processed once and copied for the next restaurant.
         app()->instance(Photos::class, new Photos(app(ImageProcessor::class)));
         $missing = count(array_filter(DownloadDemoPhotos::manifest(), fn (array $p) => ! Photos::has($p['key'])));
@@ -72,10 +79,10 @@ class DemoSeeder extends Seeder
         $paying = [$cafe];
 
         if (! $this->cafeOnly) {
-            $showcases = $this->step('Showcase restaurants (A, B, C)', fn () => app(Showcase::class)->seed($plans));
+            $showcases = $this->step('Showcase restaurants (A, B, C, E–Q)', fn () => app(Showcase::class)->seed($plans));
             $this->step('Showcase restaurants: insights', function () use ($showcases, $insights) {
                 foreach ($showcases as $i => $tenant) {
-                    $insights->seed($tenant, 90, [60, 85, 45][$i]);
+                    $insights->seed($tenant, 90, [60, 85, 45, 50, 70, 40, 55, 65, 50, 35, 75, 58, 72, 46, 52, 38][$i]);
                 }
             });
             $paying = [...$paying, ...$showcases];

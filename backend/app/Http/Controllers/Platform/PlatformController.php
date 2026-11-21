@@ -13,12 +13,14 @@ use App\Models\TenantAppearance;
 use App\Models\Theme;
 use App\Rules\Translations;
 use App\Support\ActivityLogger;
+use App\Support\Auth\GoogleLogin;
 use App\Support\EmailLogo;
 use App\Support\Features;
 use App\Support\ImageProcessor;
 use App\Support\ImageTooLarge;
 use App\Support\Legal\LegalText;
 use App\Support\MailSettings;
+use App\Support\MobileApp;
 use App\Support\PlatformSettings;
 use App\Support\PublicMenu\ShareImage;
 use App\Support\Security\OutboundHost;
@@ -116,6 +118,7 @@ class PlatformController extends Controller
             'is_public' => ['sometimes', 'boolean'],
             'is_active' => ['sometimes', 'boolean'],
         ]);
+        $before = $model->exists ? DB::table('plan_features')->where('plan_id', $model->id)->pluck('enabled', 'feature_key')->map(fn ($on) => (bool) $on)->all() : [];
         DB::transaction(function () use ($model, $data) {
             $model->fill(array_diff_key($data, ['features' => true]));
             $model->limits ??= [];
@@ -127,7 +130,13 @@ class PlatformController extends Controller
         Features::forget();
         // Restaurants on this plan may show or hide things on their menu now.
         Tenant::where('plan_id', $model->id)->get()->each->bumpCacheVersion();
-        $this->activity->log($plan ? 'platform.plan_updated' : 'platform.plan_created', $model, null, null);
+        // Who changed which feature, from what to what (QUESTIONS #236).
+        $changed = array_filter($data['features'] ?? [], fn ($on, $key) => ($before[$key] ?? null) !== (bool) $on, ARRAY_FILTER_USE_BOTH);
+        $changes = $changed === [] ? null : ['features' => [
+            'from' => array_map(fn (string $key) => $before[$key] ?? null, array_combine(array_keys($changed), array_keys($changed))),
+            'to' => array_map(fn ($on) => (bool) $on, $changed),
+        ]];
+        $this->activity->log($plan ? 'platform.plan_updated' : 'platform.plan_created', $model, $changes, null);
 
         return response()->json(['data' => ['id' => $model->id]], $plan ? 200 : 201);
     }
@@ -276,7 +285,15 @@ class PlatformController extends Controller
 
     public function settings(): JsonResponse
     {
-        return response()->json(['data' => [...PlatformSettings::forScreen(), 'share_image_url' => ShareImage::for(null)['url'], 'logo_url' => EmailLogo::url(), 'plans' => Plan::orderBy('sort')->get(['id', 'name', 'slug'])->map(fn (Plan $p) => ['id' => $p->id, 'name' => $p->name['en'] ?? $p->slug, 'slug' => $p->slug])]]);
+        $settings = PlatformSettings::forScreen();
+        // A page never edited shows its default text (the page itself does the same).
+        foreach (LegalText::PAGES as $page) {
+            if (trim((string) ($settings[$page] ?? '')) === '') {
+                $settings[$page] = LegalText::default($page);
+            }
+        }
+
+        return response()->json(['data' => [...$settings, 'google_configured' => GoogleLogin::configured(), 'share_image_url' => ShareImage::for(null)['url'], 'logo_url' => EmailLogo::url(), 'plans' => Plan::orderBy('sort')->get(['id', 'name', 'slug'])->map(fn (Plan $p) => ['id' => $p->id, 'name' => $p->name['en'] ?? $p->slug, 'slug' => $p->slug])]]);
     }
 
     /** The default link preview for menus without a banner (owner, 2026-11-12). */
@@ -331,12 +348,19 @@ class PlatformController extends Controller
             'default_currency' => ['sometimes', 'string', 'size:3', 'alpha'],
             'terms' => ['sometimes', 'nullable', 'string', 'max:50000'],
             'privacy' => ['sometimes', 'nullable', 'string', 'max:50000'],
+            // About us, Contact us and Cookie info, linked from the footer (#230).
+            'about' => ['sometimes', 'nullable', 'string', 'max:50000'],
+            'contact' => ['sometimes', 'nullable', 'string', 'max:50000'],
+            'cookies' => ['sometimes', 'nullable', 'string', 'max:50000'],
             'owner_two_factor_required' => ['sometimes', 'boolean'],
             // Sign-up (owner, 2026-11-13)
             'signup_open' => ['sometimes', 'boolean'],
             'signup_plan_id' => ['sometimes', 'nullable', 'integer', Rule::exists('plans', 'id')],
             'signup_approval' => ['sometimes', 'boolean'],
+            'google_login' => ['sometimes', 'boolean'],
             'signup_notify' => ['sometimes', 'boolean'],
+            'menu_help_enabled' => ['sometimes', 'boolean'],
+            'welcome_series' => ['sometimes', 'boolean'],
             'turnstile_enabled' => ['sometimes', 'boolean'],
             'turnstile_site_key' => ['sometimes', 'nullable', 'string', 'max:100'],
             'turnstile_secret' => ['sometimes', 'nullable', 'string', 'max:200'],
@@ -366,6 +390,7 @@ class PlatformController extends Controller
             'landing_testimonials.*.quote' => ['required', 'string', 'max:400'],
             'landing_testimonials.*.name' => ['required', 'string', 'max:80'],
             'landing_testimonials.*.role' => ['nullable', 'string', 'max:80'],
+            'landing_testimonials.*.real' => ['sometimes', 'boolean'],
             'socials' => ['sometimes', 'array'],
             'socials.*' => ['nullable', 'string', 'max:255', 'url:https,http'],
         ]);
@@ -376,7 +401,7 @@ class PlatformController extends Controller
             $data['socials'] = array_map(fn ($u) => (string) $u, array_intersect_key($data['socials'], PlatformSettings::DEFAULTS['socials']) + array_map(fn () => '', PlatformSettings::DEFAULTS['socials']));
         }
         if (isset($data['landing_testimonials'])) {
-            $data['landing_testimonials'] = array_values(array_map(fn (array $t) => ['quote' => trim($t['quote']), 'name' => trim($t['name']), 'role' => trim((string) ($t['role'] ?? ''))], $data['landing_testimonials']));
+            $data['landing_testimonials'] = array_values(array_map(fn (array $t) => ['quote' => trim($t['quote']), 'name' => trim($t['name']), 'role' => trim((string) ($t['role'] ?? '')), 'real' => (bool) ($t['real'] ?? false)], $data['landing_testimonials']));
         }
         if (isset($data['invoice_prefix'])) {
             $data['invoice_prefix'] = strtoupper($data['invoice_prefix']);
@@ -412,6 +437,11 @@ class PlatformController extends Controller
             throw ValidationException::withMessages(['turnstile_enabled' => __('signup.turnstile_keys_needed')]);
         }
         PlatformSettings::save($data);
+        // The older version fields now live in Super Admin → Mobile app (QUESTIONS #193).
+        $versions = array_filter(['min_version' => $data['app_min_version'] ?? null, 'latest_version' => $data['app_latest_version'] ?? null]);
+        if ($versions !== []) {
+            MobileApp::save($versions);
+        }
         $this->activity->log('platform.settings_saved', null, ['keys' => ['to' => array_keys($data)]], null);
 
         return $this->settings();

@@ -252,6 +252,7 @@ export function BackupsPage() {
             {t('platform.backups.restore_note')}
           </p>
           <BackupSettings initial={d.settings} />
+          <AlertSettings initial={d.settings} />
         </div>
       )}
       {downloading && (
@@ -294,7 +295,7 @@ function DownloadDialog({
             setError(null)
             try {
               const res = await api.post<{ data: { url: string } }>(
-                `/platform/backups/${backup.id}/link`,
+                `/super/backups/${backup.id}/link`,
                 { [mode]: value }
               )
               window.location.assign(res.data.data.url)
@@ -433,7 +434,7 @@ function BackupSettings({ initial }: { initial: Settings }) {
             }
           }}
         >
-          <div className='flex items-center justify-between gap-4'>
+          <div className='flex min-h-11 items-center justify-between gap-4 sm:min-h-0'>
             <Label htmlFor='bk-enabled'>{t('platform.backups.enabled')}</Label>
             <Switch
               id='bk-enabled'
@@ -450,7 +451,7 @@ function BackupSettings({ initial }: { initial: Settings }) {
             <legend className='px-1 text-sm font-medium'>
               {t('platform.backups.offsite_title')}
             </legend>
-            <div className='flex items-center justify-between gap-4'>
+            <div className='flex min-h-11 items-center justify-between gap-4 sm:min-h-0'>
               <Label htmlFor='bk-s3'>
                 {t('platform.backups.backup_s3_enabled')}
               </Label>
@@ -506,6 +507,165 @@ function BackupSettings({ initial }: { initial: Settings }) {
             {save.isPending && <Loader2 className='animate-spin' />}
             {t('common.save')}
           </Button>
+        </form>
+      </CardContent>
+    </Card>
+  )
+}
+
+type AlertValues = {
+  alerts_email: boolean
+  alerts_telegram_enabled: boolean
+  alerts_telegram_chat: string
+  alerts_telegram_token_set: boolean
+}
+
+/** Alerts (QUESTIONS #233): server errors and failed checks by e-mail and Telegram. */
+function AlertSettings({ initial }: { initial: AlertValues }) {
+  const { t } = useTranslation()
+  const save = usePlatformMutation((body: object) =>
+    send('put', 'alerts', body)
+  )
+  const test = usePlatformMutation(() => send('post', 'alerts/test'), false)
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [v, setV] = useState({
+    alerts_email: initial.alerts_email,
+    alerts_telegram_enabled: initial.alerts_telegram_enabled,
+    alerts_telegram_chat: initial.alerts_telegram_chat ?? '',
+    alerts_telegram_token: '',
+  })
+
+  return (
+    <Card className='max-w-2xl'>
+      <CardHeader>
+        <CardTitle>{t('platform.alerts.title')}</CardTitle>
+        <CardDescription>{t('platform.alerts.hint')}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form
+          className='grid gap-4'
+          onSubmit={async (e) => {
+            e.preventDefault()
+            setErrors({})
+            try {
+              await save.mutateAsync(v)
+              setV({ ...v, alerts_telegram_token: '' })
+              toast.success(t('platform.saved'))
+            } catch (err) {
+              setErrors(validationErrors(err) ?? {})
+            }
+          }}
+        >
+          <div className='flex min-h-11 items-center justify-between gap-4 sm:min-h-0'>
+            <Label htmlFor='al-email'>{t('platform.alerts.email')}</Label>
+            <Switch
+              id='al-email'
+              checked={v.alerts_email}
+              onCheckedChange={(on) => setV({ ...v, alerts_email: on })}
+            />
+          </div>
+          <fieldset className='grid gap-3 rounded-md border p-3'>
+            <legend className='px-1 text-sm font-medium'>
+              {t('platform.alerts.telegram_title')}
+            </legend>
+            <div className='flex min-h-11 items-center justify-between gap-4 sm:min-h-0'>
+              <Label htmlFor='al-tg'>{t('platform.alerts.telegram')}</Label>
+              <Switch
+                id='al-tg'
+                checked={v.alerts_telegram_enabled}
+                onCheckedChange={(on) =>
+                  setV({ ...v, alerts_telegram_enabled: on })
+                }
+              />
+            </div>
+            {errors.alerts_telegram_enabled && (
+              <p className='text-sm text-destructive'>
+                {errors.alerts_telegram_enabled}
+              </p>
+            )}
+            <div className='grid gap-3 sm:grid-cols-2'>
+              <div className='grid gap-1'>
+                <Label htmlFor='al-token'>{t('platform.alerts.token')}</Label>
+                <Input
+                  id='al-token'
+                  type='password'
+                  dir='ltr'
+                  autoComplete='new-password'
+                  placeholder={
+                    initial.alerts_telegram_token_set
+                      ? t('platform.signup.secret_saved')
+                      : '123456789:AA…'
+                  }
+                  value={v.alerts_telegram_token}
+                  onChange={(e) =>
+                    setV({ ...v, alerts_telegram_token: e.target.value })
+                  }
+                />
+                {errors.alerts_telegram_token && (
+                  <p className='text-sm text-destructive'>
+                    {errors.alerts_telegram_token}
+                  </p>
+                )}
+              </div>
+              <div className='grid gap-1'>
+                <Label htmlFor='al-chat'>{t('platform.alerts.chat')}</Label>
+                <Input
+                  id='al-chat'
+                  dir='ltr'
+                  autoComplete='off'
+                  placeholder='-1001234567890'
+                  value={v.alerts_telegram_chat}
+                  onChange={(e) =>
+                    setV({ ...v, alerts_telegram_chat: e.target.value })
+                  }
+                />
+                {errors.alerts_telegram_chat && (
+                  <p className='text-sm text-destructive'>
+                    {errors.alerts_telegram_chat}
+                  </p>
+                )}
+              </div>
+            </div>
+            <p className='text-sm text-muted-foreground'>
+              {t('platform.alerts.telegram_hint')}
+            </p>
+          </fieldset>
+          <div className='flex flex-wrap gap-2'>
+            <Button
+              type='submit'
+              className='min-h-11 sm:min-h-9'
+              disabled={save.isPending}
+            >
+              {save.isPending && <Loader2 className='animate-spin' />}
+              {t('common.save')}
+            </Button>
+            <Button
+              type='button'
+              variant='outline'
+              className='min-h-11 sm:min-h-9'
+              disabled={test.isPending}
+              onClick={async () => {
+                const r = (await test.mutateAsync(undefined)) as {
+                  data: { data: { email: number; telegram: boolean } }
+                }
+                const { email, telegram } = r.data.data
+                if (!email && !telegram)
+                  toast.error(t('platform.alerts.test_none'))
+                else
+                  toast.success(
+                    t('platform.alerts.test_sent', {
+                      count: email,
+                      telegram: telegram
+                        ? t('platform.alerts.test_telegram')
+                        : '',
+                    })
+                  )
+              }}
+            >
+              {test.isPending && <Loader2 className='animate-spin' />}
+              {t('platform.alerts.test')}
+            </Button>
+          </div>
         </form>
       </CardContent>
     </Card>

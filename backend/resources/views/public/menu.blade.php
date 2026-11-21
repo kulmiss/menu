@@ -1,20 +1,24 @@
 @php
     use App\Support\PublicMenu\InlineAssets;
+    use App\Support\PublicMenu\PageTheme;
     $preview ??= false;
+    // A demo menu from the website (not in the admin preview): the Phone / Desktop bar.
+    $demoView = ! $preview && in_array($tenant->slug, \App\Http\Controllers\SiteController::demoSlugs(), true);
     $cover = $theme['cover'];
     $style = $theme['style'];
     // Photo widths per menu style, so the browser picks the right file (§15.2.4).
-    $sizes = ['minimal' => '1px', 'bistro' => '104px', 'grid' => '(min-width:40rem) 220px, 50vw', 'editorial' => '(min-width:44rem) 672px, 100vw'][$style];
+    $styleDef = PageTheme::STYLES[$style];
+    $sizes = $styleDef['photo'];
     // Only photos likely on the first screen load at once; the rest lazily
     // (PLAN.md §15.2.4). How many dishes fit depends on the style and the banner.
     // With a banner, A and B show no dish photo on the first screen (the banner is the LCP).
-    $fold = ['editorial' => [2, 0], 'grid' => [4, 0], 'bistro' => [5, 0], 'minimal' => [0, 0]][$style][$cover ? 1 : 0];
+    $fold = $styleDef['fold'][$cover ? 1 : 0];
     // Without a banner the first photo on screen is the largest paint (LCP, owner 2026-11-12): the first
     // special's photo, else the first dish photo. It is preloaded with high priority.
     $lcp = null;
     // A's first dish photo is full width: on a phone it takes the 320 px file, one size below B/C's pick
     // logic would give (owner, 2026-11-12: same quality, only this photo, only without banner and specials).
-    $lcpSizes = ['minimal' => '1px', 'bistro' => '104px', 'grid' => '(min-width:40rem) 220px, 40vw', 'editorial' => '(min-width:44rem) 672px, 44vw'][$style];
+    $lcpSizes = $styleDef['lcp'];
     if (! $cover) {
         foreach ($promotions as $p) {
             if ($p['type'] !== 'announcement' && ! $p['hidden'] && $p['image']) {
@@ -44,12 +48,16 @@
         if ($orderList) { $cart[$i['id']] = [...$i['cart'], $i['sold_out'] ? 1 : 0]; }
         $anyPhoto = $anyPhoto || $i['media'] !== null;
     } } }
+    // M–Q: the icons of the categories without their own photo.
+    $catIcons = [];
+    foreach ($menus as $m) { foreach ($m['categories'] as $c) { if (! ($c['image'] ?? null) && ($c['icon'] ?? null)) { $catIcons[] = $c['icon']; } } }
     // No dish photo anywhere (switched off, hidden per dish, or none uploaded): the styles use a text layout.
     $data = [
         'id' => $tenant->id,
         'b' => $branch_id,
         'p' => $preview ? 1 : 0,
-        's' => InlineAssets::sheetUrl(),
+        // The sheet file; with "My order" on it holds the list too (QUESTIONS #236).
+        's' => InlineAssets::sheetUrl($orderList),
         'z' => $timezone,
         'h' => $hours,
         'x' => $closures,
@@ -72,8 +80,15 @@
     ];
 
 @endphp
+@php
+    // H · Arabic: right-to-left when set, or (auto) when most of the menu is in Arabic script (owner, 2026-11-18).
+    $dir = $theme['direction'] === 'ltr' ? 'ltr' : \App\Support\PublicMenu\MenuDirection::for($theme['direction'], $tenant->name, $menus);
+    // L · Colourful: each category gets one of six colours, the same in the bar and on the page.
+    $colours = $style === 'colour';
+    $k = 0;
+@endphp
 <!doctype html>
-<html lang="{{ $locale }}">
+<html lang="{{ $locale }}" dir="{{ $dir }}">
 <head>
 <meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy" content="{!! \App\Support\Security\Csp::menu() !!}">
@@ -115,9 +130,15 @@
 @php $preloadAvif = ! empty($lcp['img']['avif']); @endphp
 <link rel="preload" as="image" fetchpriority="high" type="image/{{ $preloadAvif ? 'avif' : 'webp' }}" imagesrcset="{{ $preloadAvif ? $lcp['img']['avif'] : $lcp['img']['webp'] }}" imagesizes="{{ $lcp['sizes'] }}">
 @endif
-<style>{!! InlineAssets::css($style) !!}{!! $theme['css'] !!}</style>
+<style>{!! InlineAssets::css($style, $orderList) !!}{!! $theme['css'] !!}@if ($demoView){!! InlineAssets::demoCss() !!}@endif</style>
 </head>
-<body class="S-{{ $style }}{{ $anyPhoto ? '' : ' NP' }}">
+<body class="S-{{ $style }}{{ $anyPhoto ? '' : ' NP' }}{{ $theme['ramadan'] ? ' rm' : '' }}{{ $theme['greyscale'] ? ' gs' : '' }}{{ $theme['decoration'] ? ' dc' : '' }}">
+{{-- Demo menus on a tablet or computer: see it in a phone frame or as it is (owner, 2026-11-19). Hidden on phones. --}}
+@if ($demoView)<nav class="dvb" aria-label="{{ __('public.demo_view.label') }}"><b>{{ __('public.demo_view.title') }}</b><span class="dvs"><a href="/phone{{ $canonical }}"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg>{{ __('public.demo_view.phone') }}</a><a aria-current="page"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M8 20.5h8M12 17v3.5"/></svg>{{ __('public.demo_view.desktop') }}</a></span></nav>@endif
+@if ($catIcons !== [])
+{{-- M–Q: the category icons used on this page, drawn once (QUESTIONS #232). --}}
+<svg class="sx" aria-hidden="true" width="0" height="0">{!! \App\Support\PublicMenu\CategoryIcons::symbols($catIcons) !!}</svg>
+@endif
 <div @class(['top', 'hc' => $cover, 'ov' => $cover && $cover['over']])>
 @if ($cover)
 {{-- The banner keeps its shape from the first paint (CSS aspect-ratio + placeholder), so nothing moves. --}}
@@ -129,9 +150,11 @@
 </picture></div>
 @endif
 <header>
+@if (! $cover && $theme['decoration']){!! InlineAssets::art($style) !!}@endif
 @if ($theme['logo'])<img class="lg" src="{{ $theme['logo']['320'] ?? '' }}" alt="" width="76" height="76">@endif
 <div><h1>{{ $tenant->name }}</h1>
 @if ($branch)<p class="sub">{{ $branch }}</p>@endif
+@if ($theme['halal'])<p class="hb"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="M7.5 12.5l3 3 6-6.5"/></svg>{{ __('public.halal') }}</p>@endif
 {{-- The open/closed pill is filled in by the script; its space is kept so nothing moves (CLS). --}}
 <p class="st ld" id="st"@if (! $hours) hidden @endif>&nbsp;</p></div>
 </header>
@@ -140,12 +163,13 @@
 @foreach ($notices as $n)<p class="nt">{{ __('public.closed_on', ['dates' => $n['dates']]) }}@if ($n['note'] !== '') · {{ $n['note'] }}@endif</p>@endforeach
 </div>
 <div class="bar"><div class="w">
-<div class="sr"><input id="q" type="search" placeholder="{{ __('public.search') }}" aria-label="{{ __('public.search') }}" autocomplete="off">@if ($theme['show_share'])<button type="button" class="ib" data-x="H" aria-label="{{ __('public.share') }}"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5-5 5 5M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg></button>@endif
+<div class="sr n{{ ($theme['show_share'] ? 1 : 0) + ($hasInfo ? 1 : 0) }}"><input id="q" type="search" placeholder="{{ __('public.search') }}" aria-label="{{ __('public.search') }}" autocomplete="off">@if ($theme['show_share'])<button type="button" class="ib" data-x="H" aria-label="{{ __('public.share') }}"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5-5 5 5M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg></button>@endif
 @if ($hasInfo)<a class="ib" href="#info" aria-label="{{ __('public.info') }}"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></a>@endif</div>
 @if (count($tags) > 1)
 <div class="ch" role="group" aria-label="{{ __('public.filter') }}">@foreach ($tags as $key => $label)<button type="button" data-tag="{{ $key }}" aria-pressed="false">{{ $label }}</button>@endforeach</div>
 @endif
-<nav class="ch cn" aria-label="Categories">@foreach ($menus as $m)@foreach ($m['categories'] as $c)<a href="#c{{ $c['id'] }}">{{ $c['name'] }}</a>@endforeach @endforeach</nav>
+<nav class="ch cn" aria-label="Categories">@foreach ($menus as $m)@foreach ($m['categories'] as $c)<a href="#c{{ $c['id'] }}"@if ($colours) class="k{{ $k++ % 6 + 1 }}"@endif>{{ $c['name'] }}</a>@endforeach @endforeach</nav>
+@php $k = 0; @endphp
 </div></div>
 <main class="w">
 @foreach ($promotions as $p)
@@ -170,8 +194,8 @@
 <div class="mn"@if ($m['scheduled']) data-s="{{ json_encode($m['schedules']) }}"@endif>
 @if (count($menus) > 1)<h2 class="mh" data-off="{{ __('public.not_now') }}">{{ $m['name'] }}</h2>@endif
 @foreach ($m['categories'] as $c)
-<section id="c{{ $c['id'] }}">
-<h2>{{ $c['name'] }}</h2>
+<section id="c{{ $c['id'] }}"@if ($colours) class="k{{ $k++ % 6 + 1 }}"@endif>
+<h2>@if ($c['image'] ?? null)@php $ci = $c['image']; @endphp<span class="ci" style="background-color:{{ $ci['color'] ?? 'transparent' }}"><picture>@if ($ci['avif'])<source type="image/avif" srcset="{{ $ci['avif'] }}" sizes="72px">@endif<source type="image/webp" srcset="{{ $ci['webp'] }}" sizes="72px"><img src="{{ $ci['jpg'] }}" alt="" width="{{ $ci['w'] }}" height="{{ $ci['h'] }}" loading="lazy" decoding="async"></picture></span>@elseif ($c['icon'] ?? null)<svg class="ci" aria-hidden="true" width="24" height="24"><use href="#i-{{ $c['icon'] }}"/></svg>@endif{{ $c['name'] }}</h2>
 @if ($c['description'] !== '')<p class="cd">{{ $c['description'] }}</p>@endif
 <ul>
 @foreach ($c['items'] as $i)
@@ -243,11 +267,12 @@
 @if ($hoursSummary || $info['address'] !== '' || $info['maps'] || $info['links'] || $info['wifi'] || $otherBranches)<div class="fg">
 @if ($hoursSummary)<div><h2>{!! $icon('clock') !!}{{ __('public.hours') }}</h2><dl class="hs">@foreach ($hoursSummary as $h)<div><dt>{{ $h['days'] }}</dt><dd>{{ $h['times'] }}</dd></div>@endforeach</dl></div>@endif
 @if ($info['address'] !== '' || $info['maps'])<div><h2>{!! $icon('pin') !!}{{ __('public.address') }}</h2>@if ($info['address'] !== '')<p>{{ $info['address'] }}</p>@endif @if ($info['maps'])<a class="fbt" href="{{ $info['maps'] }}" rel="noopener" target="_blank">{{ __('public.open_maps') }}</a>@endif</div>@endif
-@if ($info['links'])<div><h2>{{ __('public.contact') }}</h2><ul class="fc">@foreach ($info['links'] as $l)<li><a href="{{ $l['href'] }}" rel="noopener">{!! $icon($l['icon']) !!}<span><small>{{ $l['label'] }}</small>{{ $l['text'] }}</span></a></li>@endforeach</ul></div>@endif
+@if ($info['links'])<div><h2>{{ __('public.contact') }}</h2><ul class="fc">@foreach ($info['links'] as $l)<li><a href="{{ $l['href'] }}" rel="noopener">{!! $icon($l['icon']) !!}<span><small>{{ $l['label'] }}</small><bdi class="v">{{ $l['text'] }}</bdi></span></a></li>@endforeach</ul></div>@endif
 @if ($info['wifi'])<div><h2>{!! $icon('wifi') !!}Wi-Fi</h2><p>{{ __('public.wifi_name') }}: <b>{{ $info['wifi']['name'] }}</b>@if ($info['wifi']['password'])<br>{{ __('public.wifi_password') }}: <b class="pw">{{ $info['wifi']['password'] }}</b>@endif</p></div>@endif
 @if ($otherBranches)<div><h2>{!! $icon('store') !!}{{ __('public.other_branches') }}</h2><ul class="ob">@foreach ($otherBranches as $b)<li><a href="{{ $b['path'] }}">{{ $b['name'] }}</a>@if ($b['address'] !== '')<span>{{ $b['address'] }}</span>@endif</li>@endforeach</ul></div>@endif
 </div>@endif
-@if ($info['socials'])<ul class="fso">@foreach ($info['socials'] as $l)<li><a href="{{ $l['href'] }}" rel="noopener" target="_blank" aria-label="{{ $l['label'] }}" title="{{ $l['label'] }}">{!! $icon($l['icon']) !!}</a></li>@endforeach</ul>@endif
+{{-- Social links: their own centred row with a title, clear of the cards above (owner, 2026-11-19). --}}
+@if ($info['socials'])<div class="fsw"><h2>{{ __('public.follow_us') }}</h2><ul class="fso">@foreach ($info['socials'] as $l)<li><a href="{{ $l['href'] }}" rel="noopener" target="_blank" aria-label="{{ $l['label'] }}" title="{{ $l['label'] }}">{!! $icon($l['icon']) !!}</a></li>@endforeach</ul></div>@endif
 @if ($pdfLink)<p class="pdl"><a href="{{ rtrim($canonical, '/') }}/menu.pdf">{!! $icon('file') !!}{{ __('public.pdf_menu') }}</a></p>@endif
 @if ($branding)<p class="pb">{{ __('public.powered', ['app' => \App\Support\PlatformSettings::get('name')]) }}</p>@endif
 </div></footer>

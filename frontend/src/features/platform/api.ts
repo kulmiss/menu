@@ -16,10 +16,26 @@ export const FEATURES = [
   'pdf_menu',
   'order_list',
   'price_periods',
+  'sold_out',
+  'share',
+  'print_materials',
   'style_editorial',
   'style_grid',
   'style_bistro',
   'style_minimal',
+  'style_mesob',
+  'style_lounge',
+  'style_board',
+  'style_arabic',
+  'style_islamic',
+  'style_somali',
+  'style_mono',
+  'style_colour',
+  'style_coffee',
+  'style_grill',
+  'style_garden',
+  'style_coastal',
+  'style_luxe',
 ] as const
 export const LIMITS = [
   'menus',
@@ -67,6 +83,8 @@ export type Restaurant = {
   health?: { band: 'healthy' | 'at_risk' | 'inactive'; score: number } | null
   views_30d?: number | null
   scans_30d?: number | null
+  /** Does "My order" reach this restaurant's guests (platform, plan, its own switch)? Table rows only. */
+  my_order?: boolean | null
 }
 
 export type TagRef = {
@@ -147,12 +165,12 @@ export const pkeys = { all: ['platform'] as const }
 export const fetchPage = async <T>(path: string, params: URLSearchParams) =>
   (
     await api.get<{ data: T[]; meta: Page<T>['meta'] }>(
-      `/platform/${path}?${params}`
+      `/super/${path}?${params}`
     )
   ).data
 const get = async <T>(path: string) =>
-  (await api.get<{ data: T }>(`/platform/${path}`)).data.data
-const q = <T>(path: string) =>
+  (await api.get<{ data: T }>(`/super/${path}`)).data.data
+export const q = <T>(path: string) =>
   queryOptions({
     queryKey: [...pkeys.all, path] as const,
     queryFn: () => get<T>(path),
@@ -242,6 +260,10 @@ export const backupsQ = () =>
       backup_s3_prefix: string
       backup_s3_key: string
       backup_s3_secret_set: boolean
+      alerts_email: boolean
+      alerts_telegram_enabled: boolean
+      alerts_telegram_chat: string
+      alerts_telegram_token_set: boolean
     }
   }>('backups')
 export const tagsQ = () => q<TagRef[]>('tags')
@@ -261,7 +283,7 @@ export const invoicesQ = (params: string) =>
   q<InvoiceRow[]>(`invoices${params ? `?${params}` : ''}`)
 /** Opened in a new tab; the session cookie authorises it. */
 export const invoicePdfUrl = (id: number) =>
-  `${api.defaults.baseURL}/platform/invoices/${id}/pdf`
+  `${api.defaults.baseURL}/super/invoices/${id}/pdf`
 export const themesQ = () =>
   q<
     {
@@ -335,7 +357,7 @@ export const send = (
 ) =>
   api.request({
     method: method.toUpperCase() as 'POST',
-    url: `/platform/${path}`,
+    url: `/super/${path}`,
     data: body,
   })
 

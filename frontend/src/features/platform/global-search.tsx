@@ -68,7 +68,7 @@ export default function GlobalSearch({
     queryFn: async () =>
       (
         await api.get<{ data: Results }>(
-          `/platform/search?q=${encodeURIComponent(debounced)}`
+          `/super/search?q=${encodeURIComponent(debounced)}`
         )
       ).data.data,
     enabled: debounced.length >= 2,

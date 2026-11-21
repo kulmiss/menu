@@ -6,7 +6,7 @@ use App\Support\Qr\TableCards;
 
 /**
  * Printable posters, table tents, stickers and window signs (owner,
- * 2026-11-14, QUESTIONS #179). Vector PDF (FPDF core fonts, QR as squares),
+ * 2026-11-14, QUESTIONS #179). Vector PDF (Document fonts, QR as squares),
  * exact paper sizes; posters and the window sign can add 3 mm bleed on every
  * side for a print shop. Three designs × light/dark; the QR code itself is
  * always black on white so every phone can read it.
@@ -23,7 +23,8 @@ class PrintMaterials
         'sticker_square' => [210.0, 297.0],
     ];
 
-    public const DESIGNS = ['classic', 'bold', 'minimal'];
+    /** "style": the colours of the restaurant's menu style, A–Q (owner, 2026-11-19, QUESTIONS #234). */
+    public const DESIGNS = ['classic', 'bold', 'minimal', 'style'];
 
     public const BLEED = 3.0;
 
@@ -38,7 +39,7 @@ class PrintMaterials
 
     /**
      * @param  list<array{title: string, subtitle: string|null, label: string|null, url: string}>  $codes
-     * @param  array{material: string, design: string, theme: string, headline: string, scan: string, bleed: bool, colour: string, logo: string|null, branding: string|null}  $o
+     * @param  array{material: string, design: string, theme: string, headline: string, scan: string, bleed: bool, colour: string, logo: string|null, branding: string|null, surface?: array{light: string, dark: string, dark_only?: bool}}  $o
      */
     public function __construct(private array $codes, private array $o)
     {
@@ -49,7 +50,7 @@ class PrintMaterials
         $this->pdf->SetMargins(0, 0, 0);
         $this->pdf->SetCreator('Menu');
         $this->pdf->SetTitle(TableCards::text($o['headline'].' - '.($codes[0]['title'] ?? '')));
-        $this->c = self::palette($o['design'], $o['theme'], self::rgb($o['colour']));
+        $this->c = self::palette($o['design'], $o['theme'], self::rgb($o['colour']), $o['surface'] ?? null);
     }
 
     /** Sizes with bleed: only posters and the window sign; tents and stickers are cut by hand. */
@@ -307,6 +308,8 @@ class PrintMaterials
     private function lines(float $x, float $y, float $w, string $text, string $style, float $max, float $min, int $lines, array $colour, string $align = 'C'): float
     {
         $words = preg_split('/\s+/', trim(TableCards::text($text))) ?: [];
+        // Every row in the font the whole text needs.
+        $this->pdf->holdFont($text);
         for ($size = $max; ; $size -= 0.5) {
             $this->pdf->SetFont('Helvetica', $style, $size);
             $rows = [''];
@@ -330,21 +333,34 @@ class PrintMaterials
             $this->pdf->SetXY($x, $y + $i * $height);
             $this->pdf->Cell($w, $height, $this->pdf->GetStringWidth($row) > $w ? TableCards::fit($this->pdf, $row, $w) : $row, 0, 0, $align);
         }
+        $this->pdf->releaseFont();
 
         return $y + count($rows) * $height;
     }
 
     /**
      * @param  list<int>  $brand
+     * @param  array{light: string, dark: string, dark_only?: bool}|null  $surface  the menu style's page colours (design "style")
      * @return array{bg: list<int>, text: list<int>, muted: list<int>, accent: list<int>, band: list<int>|null, border: list<int>|null}
      */
-    public static function palette(string $design, string $theme, array $brand): array
+    public static function palette(string $design, string $theme, array $brand, ?array $surface = null): array
     {
         $dark = $theme === 'dark';
         $ink = [20, 18, 16];
         $paper = [255, 255, 255];
         $night = [22, 20, 18];
         $onBrand = self::luminance($brand) > 0.45 ? $ink : $paper;
+
+        if ($design === 'style' && $surface !== null) {
+            // The style's own page colour (a night style is dark either way), its text in ink or
+            // paper, and the brand colour for the band, frame and headline when it reads (≥ 3:1).
+            $bg = self::rgb(($dark || ($surface['dark_only'] ?? false)) ? $surface['dark'] : $surface['light']);
+            $light = self::luminance($bg) > 0.4;
+            $text = $light ? $ink : [245, 242, 238];
+            $accent = self::contrast($brand, $bg) >= 3 ? $brand : $text;
+
+            return ['bg' => $bg, 'text' => $text, 'muted' => $light ? [92, 86, 80] : [196, 190, 182], 'accent' => $accent, 'band' => $brand, 'border' => $accent];
+        }
 
         return match ($design) {
             'bold' => $dark
@@ -357,6 +373,17 @@ class PrintMaterials
                 ? ['bg' => $night, 'text' => [245, 242, 238], 'muted' => [180, 174, 168], 'accent' => self::luminance($brand) < 0.12 ? [245, 242, 238] : $brand, 'band' => $brand, 'border' => $brand]
                 : ['bg' => $paper, 'text' => $ink, 'muted' => [105, 100, 95], 'accent' => self::luminance($brand) > 0.6 ? $ink : $brand, 'band' => $brand, 'border' => $brand],
         };
+    }
+
+    /**
+     * @param  list<int>  $a
+     * @param  list<int>  $b
+     */
+    private static function contrast(array $a, array $b): float
+    {
+        [$x, $y] = [self::luminance($a), self::luminance($b)];
+
+        return (max($x, $y) + 0.05) / (min($x, $y) + 0.05);
     }
 
     /** @return list<int> */

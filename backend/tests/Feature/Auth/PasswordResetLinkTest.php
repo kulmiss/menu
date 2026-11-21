@@ -13,7 +13,7 @@ it('links the password reset email to the SPA reset page', function () {
     Notification::assertSentTo($user, ResetPassword::class, function (ResetPassword $n) use ($user) {
         $url = $n->toMail($user)->actionUrl;
 
-        return str_starts_with($url, url('/auth/reset-password?token='))
+        return str_starts_with($url, url('/reset-password?token='))
             && str_contains($url, 'email=reset%40example.com');
     });
 });

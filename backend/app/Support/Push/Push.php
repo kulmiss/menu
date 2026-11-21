@@ -5,6 +5,7 @@ namespace App\Support\Push;
 use App\Jobs\SendPush;
 use App\Models\AppNotification;
 use App\Models\User;
+use App\Support\MobileApp;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -23,7 +24,8 @@ class Push
                 'user_id' => $user->id, 'tenant_id' => $tenantId, 'type' => $type,
                 'title' => mb_substr($title, 0, 200), 'body' => mb_substr($body, 0, 500), 'link' => mb_substr($link, 0, 255),
             ]);
-            if (PushTypes::enabled($user, $type) && $user->pushTokens()->exists()) {
+            // Super Admin → Mobile app → "Push notifications" off: inbox only (QUESTIONS #193).
+            if (MobileApp::appFeature('push') && PushTypes::enabled($user, $type) && $user->pushTokens()->exists()) {
                 DB::afterCommit(fn () => SendPush::dispatch($note->id));
             }
         }

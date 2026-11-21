@@ -2,14 +2,18 @@
 
 use App\Jobs\SendCampaignBatch;
 use App\Models\AppNotification;
+use App\Models\MenuRequest;
 use App\Models\Tenant;
 use App\Support\Backups\Backups;
+use App\Support\Ops\Alerts;
+use App\Support\Ops\Doctor;
 use App\Support\PlatformSettings;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schedule;
+use Illuminate\Support\Facades\Storage;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
@@ -36,6 +40,16 @@ Schedule::command('backup:run --scheduled')->dailyAt('23:30')->withoutOverlappin
 Schedule::call(fn () => app(Backups::class)->check())->hourlyAt(17)->name('backup:check')
     ->when(fn () => (bool) PlatformSettings::get('backup_enabled'));
 
+// Go-live checks every hour on a live server (QUESTIONS #233): something broken (menu:doctor red)
+// reaches the Super Admins by e-mail / Telegram, at most once a day.
+Schedule::call(function () {
+    $checks = app(Doctor::class)->run(quick: true);
+    if (Doctor::overall($checks) === 'down' && Cache::add('alerts:doctor', true, now()->addDay())) {
+        $red = array_map(fn (array $c) => '✗ '.$c['message'].' — '.$c['fix'], array_values(array_filter($checks, fn (array $c) => $c['status'] === 'fail')));
+        Alerts::send((string) __('alerts.doctor_subject', ['platform' => PlatformSettings::get('name')]), implode("\n", $red));
+    }
+})->hourlyAt(23)->name('doctor:check')->environments(['production']);
+
 // Time-based prices: rebuild pages when a period starts or ends (owner, 2026-11-14).
 Schedule::command('menu:price-periods')->everyMinute()->withoutOverlapping();
 // Monthly Insights e-mail: the command itself waits for the 1st, 07:00 local time, and sends each month once.
@@ -57,6 +71,8 @@ Schedule::command('mobile:prune-tokens')->dailyAt('00:25');
 // Messages to owners go out in the Addis Ababa daytime (09:00 UTC = 12:00, 08:00 UTC = 11:00).
 Schedule::command('push:plan-reminders')->dailyAt('09:00');
 Schedule::command('push:followups')->dailyAt('08:00');
+// Welcome e-mails on day 1, 3 and 7 (QUESTIONS #235): mornings in Addis Ababa (06:40 UTC = 09:40), when switched on.
+Schedule::command('onboarding:emails')->dailyAt('06:40')->withoutOverlapping();
 Schedule::command('push:health')->everyFifteenMinutes()->withoutOverlapping(10);
 Schedule::call(fn () => AppNotification::where('created_at', '<', now()->subDays(AppNotification::KEEP_DAYS))->delete())
     ->dailyAt('00:35')->name('notifications:prune');
@@ -64,6 +80,13 @@ Schedule::call(fn () => AppNotification::where('created_at', '<', now()->subDays
 // Insights keep 13 months of daily counters (enough for "same month last year").
 Schedule::call(fn () => DB::table('stats_daily')->where('date', '<', now()->subDays(400)->toDateString())->delete())
     ->dailyAt('00:15')->name('stats:prune');
+
+// "Add my menu for me": photos of done requests are deleted after 30 days (QUESTIONS #235).
+Schedule::call(fn () => MenuRequest::where('status', 'done')->where('updated_at', '<', now()->subDays(30))->get()
+    ->each(function (MenuRequest $r) {
+        Storage::disk('local')->deleteDirectory($r->dir());
+        $r->delete();
+    }))->dailyAt('00:40')->name('menu-requests:prune');
 
 // Deleted restaurants are kept 30 days (Super Admin can restore), then purged.
 Schedule::call(fn () => Tenant::onlyTrashed()->where('deleted_at', '<', now()->subDays(30))->get()->each->forceDelete())

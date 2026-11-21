@@ -30,7 +30,59 @@
       "name": "D · Minimal",
       "hint": "Text only: names, short descriptions and prices. No dish photos. Fastest."
     },
-    "locked": "Not included in your plan."
+    "mesob": {
+      "name": "E · Mesob",
+      "hint": "Warm colours, woven bands and round photos. Made for Ethiopian and Somali food."
+    },
+    "lounge": {
+      "name": "F · Night Lounge",
+      "hint": "Always dark, with a soft glow in your colour. For bars, lounges and late nights."
+    },
+    "board": {
+      "name": "G · Street Board",
+      "hint": "A clean chalkboard with price tags. For fast food, burgers and juice bars."
+    },
+    "arabic": {
+      "name": "H · Arabic",
+      "hint": "Kufi headings, gold ornaments and your colour as a band. Right-to-left for Arabic menus. For Arabic, Yemeni and Middle Eastern food."
+    },
+    "islamic": {
+      "name": "I · Islamic",
+      "hint": "Star patterns, an arch at the top and arched photos. Optional Halal badge and Ramadan mode. For halal and family restaurants."
+    },
+    "somali": {
+      "name": "J · Somali",
+      "hint": "Ocean blues, woven-basket bands and waves. For Somali restaurants and cafés."
+    },
+    "mono": {
+      "name": "K · Black & White",
+      "hint": "Only black, white and greys, big type and fine lines. Light or dark like the guest's phone. For modern cafés and fine dining."
+    },
+    "colour": {
+      "name": "L · Colourful",
+      "hint": "A bright colour for each category, made from your colour, and rounded cards. For juice bars, ice cream and family places."
+    },
+    "locked": "Not included in your plan.",
+    "coffee": {
+      "name": "M · Coffee House",
+      "hint": "A dark-roast band with a jebena and cups, round photos, coffee-bean marks. For coffee houses, cafés and tea rooms."
+    },
+    "grill": {
+      "name": "N · Grill & BBQ",
+      "hint": "Charcoal and embers, flames, tall bold headings, price tags. For tibs, kitfo and grill houses, nyama choma, burgers and steaks."
+    },
+    "garden": {
+      "name": "O · Garden Fresh",
+      "hint": "Leaves and soft greens, white rounded cards. For juice houses, salad bars, healthy cafés and fasting menus."
+    },
+    "coastal": {
+      "name": "P · Coastal",
+      "hint": "A deep-sea band with a dhow, sand and coral, ticket-like cards. For fish and seafood places by the sea."
+    },
+    "luxe": {
+      "name": "Q · Fine Dining",
+      "hint": "Marble, thin gold lines, an elegant serif, centred headings. For hotels, fine dining and events."
+    }
   },
   "flags": {
     "show_prices": "Show prices",
@@ -39,10 +91,31 @@
     "show_calories": "Show calories",
     "show_share": "Show \"Share menu\" button",
     "show_pdf_link": "Show \"Download menu (PDF)\" link",
-    "show_order_list": "Show \"My order\" list (guests note dishes to show the waiter)",
+    "show_order_list": "Show \"Add to my order\" (+) buttons on my menu",
     "show_other_branches": "Show \"Other branches\" at the bottom of the menu (only with more than one branch)",
     "show_logo": "Show the logo",
-    "show_banner": "Show the banner"
+    "show_banner": "Show the banner",
+    "show_order_list_hint": "Guests tap + to note dishes on their own phone, then show the list to the waiter. Nothing is sent to you. Off: no + buttons and no list, your menu looks just as clean."
+  },
+  "direction": "Menu direction",
+  "direction_hint": "Right-to-left puts the text and buttons on the right side, for Arabic menus.",
+  "directions": {
+    "auto": "Automatic (follows your menu's language)",
+    "ltr": "Left to right",
+    "rtl": "Right to left"
+  },
+  "style_options": "Options for this style",
+  "style_flags": {
+    "show_halal": "Show a \"Halal\" badge",
+    "show_halal_hint": "A small badge under your restaurant's name. Turn it on only if all your food is halal.",
+    "ramadan_mode": "Ramadan mode",
+    "ramadan_mode_hint": "A night-sky top with a crescent. Turn it off again after Ramadan.",
+    "photos_greyscale": "Black-and-white photos",
+    "photos_greyscale_hint": "Shows your dish photos and banner in black and white.",
+    "mono_accent": "Use your brand colour as a small accent",
+    "mono_accent_hint": "Your colour on the \"+\" buttons, badges and the chosen category. Prices keep the text colour.",
+    "show_decoration": "Show the style's pictures and icons",
+    "show_decoration_hint": "The header picture, textures and category icons. Your banner replaces the header picture; a category photo (Menu editor) replaces its icon."
   },
   "images": "Logo and banner",
   "images_hint": "The banner is the wide photo at the top of your menu. It is cropped to the shape your menu style uses.",
@@ -54,11 +127,17 @@
   "saved": "Appearance saved. Guests see it now.",
   "preview": "Preview",
   "preview_hint": "Preview of your menu on a phone (not saved yet).",
+  "preview_desktop": "Preview on a computer",
+  "preview_desktop_hint": "Your menu as a computer shows it, with the changes you haven't saved yet.",
   "pick_colour": "Pick a colour",
   "banner_size": "Recommended: {{width}} × {{height}} px or larger.",
   "banner_text": "Logo and name",
   "banner_texts": {
     "over": "On the banner",
     "under": "Below the banner"
+  },
+  "my_order_locked": {
+    "platform": "Turned off by the platform.",
+    "plan": "Not in your plan."
   }
 }

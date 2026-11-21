@@ -67,7 +67,9 @@ final class Csp
     {
         return implode('; ', [
             "default-src 'self'",
-            "script-src '".self::menuScriptHash()."'",
+            // Its own inline script by hash, plus the on-demand sheet.js from /menu-assets
+            // (dish details, "My order", share). Without 'self' that file is blocked.
+            "script-src 'self' '".self::menuScriptHash()."'",
             "style-src 'self' 'unsafe-inline'",
             "img-src 'self' data: blob: https:",
             "font-src 'self' data:",

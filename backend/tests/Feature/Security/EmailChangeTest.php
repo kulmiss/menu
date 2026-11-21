@@ -44,12 +44,12 @@ it('keeps the old address until the link sent to the new one is clicked, and war
     $this->actingAs($user->fresh())->getJson('/api/v1/me')->assertJsonPath('data.pending_email', 'new@example.com');
 
     $this->app['auth']->forgetGuards();
-    $this->get($link)->assertRedirect('/auth/sign-in?verify=change_done');
+    $this->get($link)->assertRedirect('/signin?verify=change_done');
     expect($user->fresh())->email->toBe('new@example.com')->pending_email->toBeNull()
         ->and($user->fresh()->hasVerifiedEmail())->toBeTrue();
 
     // Single use.
-    $this->get($link)->assertRedirect('/auth/sign-in?verify=change_invalid');
+    $this->get($link)->assertRedirect('/signin?verify=change_invalid');
 });
 
 it('rejects expired or tampered links, and a link made stale by a newer change', function () {
@@ -58,15 +58,15 @@ it('rejects expired or tampered links, and a link made stale by a newer change',
     changeEmail($user, ['current_password' => 'correct-horse-battery'])->assertOk();
     $first = EmailChangeConfirm::url($user->id, 'new@example.com');
 
-    $this->get($first.'x')->assertRedirect('/auth/sign-in?verify=change_expired');
+    $this->get($first.'x')->assertRedirect('/signin?verify=change_expired');
     $this->travel(61)->minutes();
-    $this->get($first)->assertRedirect('/auth/sign-in?verify=change_expired');
+    $this->get($first)->assertRedirect('/signin?verify=change_expired');
     $this->travelBack();
 
     $this->actingAs($user)->putJson('/api/v1/auth/user/profile-information', [
         'name' => $user->name, 'email' => 'other@example.com', 'current_password' => 'correct-horse-battery',
     ], idem())->assertOk();
-    $this->get(EmailChangeConfirm::url($user->id, 'new@example.com'))->assertRedirect('/auth/sign-in?verify=change_invalid');
+    $this->get(EmailChangeConfirm::url($user->id, 'new@example.com'))->assertRedirect('/signin?verify=change_invalid');
     expect($user->fresh()->email)->toBe('old@example.com');
 });
 
@@ -77,7 +77,7 @@ it('cancels a pending change when the old address is saved again, and refuses a 
     $link = EmailChangeConfirm::url($user->id, 'new@example.com');
 
     User::factory()->create(['email' => 'new@example.com']);
-    $this->get($link)->assertRedirect('/auth/sign-in?verify=change_invalid');
+    $this->get($link)->assertRedirect('/signin?verify=change_invalid');
     expect($user->fresh())->email->toBe('old@example.com')->pending_email->toBeNull();
 
     $user->forceFill(['pending_email' => 'later@example.com'])->save();

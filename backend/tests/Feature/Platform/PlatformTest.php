@@ -77,6 +77,13 @@ it('records a payment that extends the paid period, and exports payments', funct
 
     $csv = (string) $this->actingAs($admin)->get(p('payments.csv'))->assertOk()->getContent();
     expect($csv)->toContain('TB-123')->toContain('1500.00')->toContain($tenant->name);
+
+    // Bug (2026-11-17): a self-chosen restaurant name like a formula went into the CSV as is.
+    $tenant->update(['name' => '=HYPERLINK("http://evil.example","x")']);
+    $csv = (string) $this->actingAs($admin)->get(p('payments.csv'))->assertOk()->getContent();
+    expect($csv)->toContain('"\'=HYPERLINK(')->not->toContain(',"=HYPERLINK');
+    $csv = (string) $this->actingAs($admin)->get(p('invoices.csv'))->assertOk()->getContent();
+    expect($csv)->not->toContain(',"=HYPERLINK');
 });
 
 it('turns plan features on and off, per plan and per restaurant', function () {
@@ -182,7 +189,7 @@ it('logs in as the owner in one click, records nothing and keeps the safety bloc
     $this->patchJson(t($tenant, "members/{$staff->id}"), ['role' => 'manager'], idem())->assertForbidden();
     expect($staff->fresh()->role)->toBe(Role::Staff);
 
-    $this->postJson('/api/v1/impersonation/stop', [], idem())->assertOk()->assertJsonPath('data.redirect', '/platform')->assertSessionMissing('impersonation_id');
+    $this->postJson('/api/v1/impersonation/stop', [], idem())->assertOk()->assertJsonPath('data.redirect', '/super')->assertSessionMissing('impersonation_id');
     expect(Impersonation::count())->toBe(0)->and(ActivityLog::where('actor_id', $admin->id)->count())->toBe(0);
 });
 

@@ -2,7 +2,7 @@ import { fakeApi } from '@/test-utils/fake-api'
 import { meFixture } from '@/test-utils/fixtures'
 import { renderWithQuery } from '@/test-utils/render'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { userEvent } from 'vitest/browser'
+import { page, userEvent } from 'vitest/browser'
 import { toast } from '@/lib/toast'
 import { PlatformDashboard } from './dashboard'
 import { RestaurantsPage } from './restaurants'
@@ -42,7 +42,7 @@ describe('Super Admin screens', () => {
 
   it('shows the platform at a glance', async () => {
     fake = fakeApi({
-      'GET /platform/dashboard': {
+      'GET /super/dashboard': {
         data: {
           data: {
             states: {
@@ -83,11 +83,45 @@ describe('Super Admin screens', () => {
       .toHaveAttribute('aria-pressed', 'true')
   })
 
+  // QUESTIONS #236: the effective "My order" value per restaurant, and a filter on it.
+  it('shows whether guests see My order, and filters on it', async () => {
+    fake = fakeApi({
+      'GET /super/restaurants': {
+        data: {
+          data: [
+            { ...restaurant, my_order: false },
+            { ...restaurant, id: 8, name: 'Bun Cafe', my_order: true },
+          ],
+        },
+      },
+      'GET /super/plans': { data: { data: [] } },
+    })
+    await page.viewport(1280, 900)
+    window.history.replaceState(null, '', '/super/restaurants?my_order=off')
+    const screen = await renderWithQuery(<RestaurantsPage />, { me: admin })
+    await expect
+      .element(screen.getByRole('columnheader', { name: 'My order' }))
+      .toBeVisible()
+    await expect
+      .element(
+        screen.getByRole('row', { name: /Sahan Grill/ }).getByText('Off')
+      )
+      .toBeVisible()
+    await expect
+      .element(screen.getByRole('row', { name: /Bun Cafe/ }).getByText('On'))
+      .toBeVisible()
+    expect(
+      fake.calls.find((c) => c.url.startsWith('/super/restaurants?'))?.url
+    ).toContain('my_order=off')
+    window.history.replaceState(null, '', '/')
+    await page.viewport(414, 896)
+  })
+
   it('records a payment for a restaurant', async () => {
     fake = fakeApi({
-      'GET /platform/restaurants': { data: { data: [restaurant] } },
-      'GET /platform/plans': { data: { data: [] } },
-      'GET /platform/restaurants/7': {
+      'GET /super/restaurants': { data: { data: [restaurant] } },
+      'GET /super/plans': { data: { data: [] } },
+      'GET /super/restaurants/7': {
         data: {
           data: {
             ...restaurant,
@@ -105,7 +139,7 @@ describe('Super Admin screens', () => {
           },
         },
       },
-      'POST /platform/restaurants/7/payments': {
+      'POST /super/restaurants/7/payments': {
         status: 201,
         data: { data: {} },
       },
@@ -128,9 +162,9 @@ describe('Super Admin screens', () => {
 
   it('resends the set-password e-mail to the owner', async () => {
     fake = fakeApi({
-      'GET /platform/restaurants': { data: { data: [restaurant] } },
-      'GET /platform/plans': { data: { data: [] } },
-      'GET /platform/restaurants/7': {
+      'GET /super/restaurants': { data: { data: [restaurant] } },
+      'GET /super/plans': { data: { data: [] } },
+      'GET /super/restaurants/7': {
         data: {
           data: {
             ...restaurant,
@@ -149,7 +183,7 @@ describe('Super Admin screens', () => {
           },
         },
       },
-      'POST /platform/restaurants/7/resend-welcome': {
+      'POST /super/restaurants/7/resend-welcome': {
         data: {
           data: { sent_to: 'ayaan@example.com', kind: 'reset' },
           message:
@@ -165,7 +199,7 @@ describe('Super Admin screens', () => {
     )
     await expect
       .poll(() => fake.calls.find((c) => c.method === 'POST')?.url)
-      .toBe('/platform/restaurants/7/resend-welcome')
+      .toBe('/super/restaurants/7/resend-welcome')
     // The toast says which e-mail went out.
     await expect
       .poll(
@@ -176,9 +210,9 @@ describe('Super Admin screens', () => {
 
   it('logs in as the owner in one click, without a reason', async () => {
     fake = fakeApi({
-      'GET /platform/restaurants': { data: { data: [restaurant] } },
-      'GET /platform/plans': { data: { data: [] } },
-      'GET /platform/restaurants/7': {
+      'GET /super/restaurants': { data: { data: [restaurant] } },
+      'GET /super/plans': { data: { data: [] } },
+      'GET /super/restaurants/7': {
         data: {
           data: {
             ...restaurant,
@@ -198,7 +232,7 @@ describe('Super Admin screens', () => {
         },
       },
       // Answered with an error so the test page doesn't navigate to /admin.
-      'POST /platform/restaurants/7/impersonate': {
+      'POST /super/restaurants/7/impersonate': {
         status: 422,
         data: { message: 'No owner' },
       },
@@ -211,17 +245,17 @@ describe('Super Admin screens', () => {
 
     await expect
       .poll(() => fake.calls.find((c) => c.method === 'POST')?.url)
-      .toBe('/platform/restaurants/7/impersonate')
+      .toBe('/super/restaurants/7/impersonate')
     const call = fake.calls.find((c) => c.method === 'POST')
-    expect(call?.url).toBe('/platform/restaurants/7/impersonate')
+    expect(call?.url).toBe('/super/restaurants/7/impersonate')
     expect(call?.data ?? {}).toEqual({})
     expect(document.querySelector('#reason')).toBeNull()
   })
 
   it('creates a plan with limits and features', async () => {
     fake = fakeApi({
-      'GET /platform/plans': { data: { data: [] } },
-      'POST /platform/plans': { status: 201, data: { data: { id: 3 } } },
+      'GET /super/plans': { data: { data: [] } },
+      'POST /super/plans': { status: 201, data: { data: { id: 3 } } },
     })
     const screen = await renderWithQuery(<PlansPage />, { me: admin })
     await userEvent.click(screen.getByRole('button', { name: 'New plan' }))

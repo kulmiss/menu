@@ -2,6 +2,22 @@
 
 Digital menu SaaS for restaurants and cafés: a fast public QR menu, a phone-friendly restaurant admin and a Super Admin platform. See [PLAN.md](PLAN.md).
 
+## Start here
+
+| You want to… | Read |
+|---|---|
+| Use the restaurant admin | **Help** in the admin (and the **?** on every page) — sources: `backend/resources/help/restaurant/` |
+| Run the platform as Super Admin | [Super Admin guide](docs/admin-guide/README.md) · [PDF](docs/admin-guide.pdf) · inside the panel: **Guide** |
+| Put it on a server | [docs/deploy.md](docs/deploy.md) · [docs/security.md](docs/security.md) · [go-live checklist](docs/admin-guide/go-live-checklist.md) |
+| Build the mobile app | [kulmiss/menu-admin-app](https://github.com/kulmiss/menu-admin-app) · its API: [docs/mobile-api.md](docs/mobile-api.md) |
+| Look up an endpoint | [docs/api-reference.md](docs/api-reference.md) (generated from the routes) |
+| Know why something is the way it is | [QUESTIONS.md](QUESTIONS.md) (every decision) · [PLAN.md](PLAN.md) |
+| See where the project stands | [handover.md](handover.md) · [docs/final-report.md](docs/final-report.md) |
+| Security | [SECURITY_REPORT.md](SECURITY_REPORT.md) · [SECURITY_FINAL_REPORT.md](SECURITY_FINAL_REPORT.md) |
+| Re-take Help screenshots | [docs/help-screenshots.md](docs/help-screenshots.md) |
+| Link previews | [docs/share-preview.md](docs/share-preview.md) |
+| Change something | [CONTRIBUTING.md](CONTRIBUTING.md): every PR that changes a feature updates its help article, guide page or API doc |
+
 ## Layout
 
 | Folder | What |
@@ -17,6 +33,8 @@ Digital menu SaaS for restaurants and cafés: a fast public QR menu, a phone-fri
 1. Start Laragon (**Start All**, so MySQL runs).
 2. In a terminal at the repository root: `.\setup-local.bat`
 3. Read `setup-log.txt` for the result of every step.
+4. E-mails (optional): run `docker compose up -d mail`, set `MAIL_MAILER=smtp`, `MAIL_HOST=127.0.0.1`, `MAIL_PORT=1025`
+   in `backend/.env`, keep `php artisan queue:work` running (e-mails are queued), and read them at http://localhost:8026.
 
 ### Docker Desktop (any OS)
 1. Start Docker Desktop.
@@ -36,9 +54,9 @@ about 30 small restaurants in every state with 12 months of payments for the Sup
 All people, e-mails and phone numbers are fictional.
 
 Logins (password `password`):
-- Café: `demo@example.com` (owner), `manager@example.com`, `staff@example.com` → `/admin`
+- Café: `demo@example.com` (owner), `manager@example.com`, `staff@example.com` → sign in at `/signin`, then `/admin`
 - Showcases: `fine@example.com`, `pizza@example.com`, `bakery@example.com`
-- Super Admin: `admin@example.com`, two-factor secret `JBSWY3DPEHPK3PXP` (add it to an authenticator app) → `/platform`
+- Super Admin: `admin@example.com`, two-factor secret `JBSWY3DPEHPK3PXP` (add it to an authenticator app) → sign in at `/super/sign-in` (the address is `SUPER_ADMIN_PATH` in `.env`, default `super`)
 
 ## Deploying
 Shared hosting (cPanel) or a VPS: see [docs/deploy.md](docs/deploy.md) — build, `.env`, cron, OPcache, Cloudflare, e-mail (SMTP, SPF, DKIM), the first Super Admin, updates and backups.

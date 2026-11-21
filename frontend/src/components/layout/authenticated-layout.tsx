@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { Outlet, useRouterState } from '@tanstack/react-router'
 import { getCookie } from '@/lib/cookies'
 import { cn } from '@/lib/utils'
@@ -10,10 +10,10 @@ import { PasswordBanner } from '@/components/layout/password-banner'
 import { canOpen } from '@/components/layout/role-access'
 import { SubscriptionBanner } from '@/components/layout/subscription-banner'
 import { SkipToMain } from '@/components/skip-to-main'
+import { useGoogleLinkedNotice } from '@/features/auth/google-linked'
 import { useCurrentTenant, useMe } from '@/features/auth/use-me'
 
 // Rare screens: downloaded only when needed.
-const CheckInbox = lazy(() => import('@/features/signup/check-inbox'))
 const TwoFactorGate = lazy(() =>
   import('@/features/settings/two-factor-gate').then((m) => ({
     default: m.TwoFactorGate,
@@ -41,14 +41,13 @@ export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
   const tenant = useCurrentTenant()
   const path = useRouterState({ select: (s) => s.location.pathname })
   const defaultOpen = getCookie('sidebar_state') !== 'false'
+  useGoogleLinkedNotice()
 
-  // Until the address is confirmed, only "Check your inbox" (owner, 2026-11-13).
+  // Until the address is confirmed, only "Check your inbox" (owner, 2026-11-13),
+  // a server page (QUESTIONS #222). The server sends people there before this
+  // page loads; this covers an address changed while the admin is open.
   if (!me.email_verified && !me.impersonation) {
-    return (
-      <Suspense fallback={null}>
-        <CheckInbox />
-      </Suspense>
-    )
+    return <GoTo href='/verify-email' />
   }
 
   // The Super Admin requires two-factor for Owners and it isn't on yet (M17).
@@ -102,4 +101,10 @@ export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
       </LayoutProvider>
     </SearchProvider>
   )
+}
+
+/** A full page load to a server page. */
+function GoTo({ href }: { href: string }) {
+  useEffect(() => window.location.assign(href), [href])
+  return null
 }

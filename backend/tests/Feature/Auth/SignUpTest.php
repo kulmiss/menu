@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Notifications\SignupNotification;
 use App\Notifications\VerifyEmailNotification;
 use App\Support\PlatformSettings;
+use App\Support\SignUp\SlugMaker;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\RateLimiter;
@@ -96,6 +97,43 @@ it('has a Free plan on every install, with the ladder limits and features (QUEST
     ]);
 });
 
+it('signs up with only name, restaurant, e-mail, password and the terms (owner, 2026-11-17)', function () {
+    PlatformSettings::save(['default_currency' => 'KES']);
+    $short = fn (string $restaurant, string $email) => $this->postJson('/api/v1/signup', [
+        'name' => 'Selam Tesfaye', 'restaurant_name' => $restaurant, 'email' => $email, 'password' => 'correct-horse-battery', 'terms' => true,
+    ], idem());
+
+    $short('Buna & Bread Café', 'a@example.com')->assertCreated()->assertJsonPath('data.status', 'check_inbox');
+    // The menu address comes from the name, the currency from Settings; both can be changed later.
+    expect(Tenant::where('name', 'Buna & Bread Café')->first())->slug->toBe('buna-bread-cafe')->currency_code->toBe('KES');
+
+    $this->post('/api/v1/logout');
+    auth()->guard('web')->logout();
+    $short('Buna & Bread Café', 'b@example.com')->assertCreated();
+    expect(Tenant::where('slug', 'buna-bread-cafe-2')->exists())->toBeTrue();
+
+    // A name in another script still gets a valid address.
+    auth()->guard('web')->logout();
+    $short('ቡና ቤት', 'c@example.com')->assertCreated();
+    expect(Tenant::where('name', 'ቡና ቤት')->value('slug'))->toMatch('/^menu(-[a-z0-9]+)?$/');
+
+    // An older form that still sends a confirmation must match it.
+    auth()->guard('web')->logout();
+    register(['email' => 'd@example.com', 'slug' => 'kaldi', 'password_confirmation' => 'something-else'])->assertUnprocessable()->assertJsonValidationErrors('password');
+});
+
+it('makes a valid, free menu address from any restaurant name', function () {
+    Tenant::factory()->create(['slug' => 'kaldi']);
+    expect(SlugMaker::from('Kaldi'))->toBe('kaldi-2')
+        ->and(SlugMaker::from('Jo'))->toBe('menu-jo')
+        ->and(SlugMaker::from('Admin'))->not->toBe('admin') // reserved
+        ->and(strlen(SlugMaker::from(str_repeat('very long name ', 10))))->toBeLessThanOrEqual(44);
+    foreach (range(2, 9) as $n) {
+        Tenant::factory()->create(['slug' => "kaldi-{$n}"]);
+    }
+    expect(SlugMaker::from('Kaldi'))->toMatch('/^kaldi-[a-z0-9]{4}$/');
+});
+
 it('blocks the admin until the e-mail is confirmed, then goes live with a welcome e-mail', function () {
     register()->assertCreated();
     $user = User::where('email', 'selam@example.com')->sole();
@@ -125,15 +163,15 @@ it('handles the verification link: signed out, reused, expired, tampered', funct
     $this->flushSession();
 
     // Opened on another device: confirmed, then sign in.
-    $this->get($link)->assertRedirect('/auth/sign-in?verify=done');
+    $this->get($link)->assertRedirect('/signin?verify=done');
     // Used again: nothing changes.
-    $this->get($link)->assertRedirect('/auth/sign-in?verify=already');
+    $this->get($link)->assertRedirect('/signin?verify=already');
 
     $other = User::factory()->unverified()->create();
     $expired = VerifyEmailNotification::url($other);
     $this->travel(25)->hours();
-    $this->get($expired)->assertRedirect('/auth/sign-in?verify=expired');
-    $this->get(str_replace(sha1($other->email), sha1('x@example.com'), VerifyEmailNotification::url($other)))->assertRedirect('/auth/sign-in?verify=expired');
+    $this->get($expired)->assertRedirect('/signin?verify=expired');
+    $this->get(str_replace(sha1($other->email), sha1('x@example.com'), VerifyEmailNotification::url($other)))->assertRedirect('/signin?verify=expired');
     expect($other->fresh()->hasVerifiedEmail())->toBeFalse();
 });
 

@@ -34,7 +34,7 @@ it('welcomes a new owner with a friendly e-mail and a set-password link', functi
             ->and($mail->subject)->toBe('Welcome to MenuHub — your menu for Sahan Grill is ready')
             ->and($mail->greeting)->toBe('Hello Ayaan Warsame,')
             ->and($mail->actionText)->toBe('Set my password')
-            ->and($mail->actionUrl)->toContain('/auth/reset-password?token=')->toContain('email=ayaan%40example.com')->toContain('welcome=1')
+            ->and($mail->actionUrl)->toContain('/reset-password?token=')->toContain('email=ayaan%40example.com')->toContain('welcome=1')
             ->and($text)->toContain('/'.$tenant->slug)->toContain('Add your dishes')->toContain('QR codes')
             ->toContain('7 days')->toContain('help@menuhub.example')
             ->and($mail->salutation)->toBe('See you soon, the MenuHub team');

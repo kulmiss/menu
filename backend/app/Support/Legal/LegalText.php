@@ -8,7 +8,7 @@ use Illuminate\Support\Str;
 /**
  * Terms of Service and Privacy Policy (owner, 2026-11-13, QUESTIONS #181).
  *
- * The default texts live in resources/legal/{terms,privacy}.md (copies in
+ * The default texts live in resources/legal/{terms,privacy,about,contact,cookies}.md (copies in
  * docs/legal). The Super Admin edits them as plain text with a tiny format,
  * which is turned into data here and escaped by the Blade view — never HTML:
  *
@@ -22,7 +22,8 @@ use Illuminate\Support\Str;
  */
 final class LegalText
 {
-    public const PAGES = ['terms', 'privacy'];
+    /** Terms and Privacy, and the About us, Contact us and Cookie info pages linked from the footer (#230). */
+    public const PAGES = ['terms', 'privacy', 'about', 'contact', 'cookies'];
 
     public static function default(string $page): string
     {

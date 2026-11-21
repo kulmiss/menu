@@ -19,11 +19,16 @@ export function ViewingAs({ info }: Props) {
 
   async function back() {
     setBusy(true)
+    // The server answers with the Super Admin area's address; /admin sends a
+    // Super Admin there too. A full reload clears every cached screen.
+    let to = '/admin'
     try {
-      await api.post('/impersonation/stop')
+      const res = await api.post<{ data: { redirect: string } }>(
+        '/impersonation/stop'
+      )
+      to = res.data.data.redirect
     } finally {
-      // A full reload clears every cached screen of the restaurant.
-      window.location.assign('/platform')
+      window.location.assign(to)
     }
   }
 

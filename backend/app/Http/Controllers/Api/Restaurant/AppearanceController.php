@@ -13,6 +13,7 @@ use App\Support\ActivityLogger;
 use App\Support\Contrast;
 use App\Support\Features;
 use App\Support\MediaJanitor;
+use App\Support\MyOrder;
 use App\Support\PublicMenu\MenuPageData;
 use App\Support\PublicMenu\PageTheme;
 use App\Tenancy\CurrentTenant;
@@ -92,6 +93,7 @@ class AppearanceController extends Controller
             'font' => [$req, Rule::in(TenantAppearance::FONTS)],
             'style' => [$req, Rule::in($this->allowedStyles())],
             'banner_text' => ['sometimes', 'nullable', Rule::in(PageTheme::BANNER_TEXT)],
+            'menu_direction' => ['sometimes', Rule::in(TenantAppearance::DIRECTIONS)],
             'show_prices' => [$req, 'boolean'],
             'show_photos' => [$req, 'boolean'],
             'show_descriptions' => [$req, 'boolean'],
@@ -120,6 +122,7 @@ class AppearanceController extends Controller
             'style' => TenantAppearance::effectiveStyle($a->style, $this->allowedStyles()),
             'styles' => $this->allowedStyles(),
             'banner_text' => $a->banner_text,
+            'menu_direction' => $a->menu_direction ?? 'auto',
             // Banner shape and where the name goes by default, per style (crop frame in the admin).
             'banner' => array_map(fn (array $s) => ['ratio' => $s['banner'], 'text' => $s['text']], PageTheme::STYLES),
             'show_prices' => $a->show_prices,
@@ -128,6 +131,8 @@ class AppearanceController extends Controller
             'show_calories' => $a->show_calories,
             ...collect(TenantAppearance::EXTRA_FLAGS)->mapWithKeys(fn (string $f) => [$f => (bool) $a->{$f}])->all(),
             'theme_id' => $a->theme_id,
+            // "My order" for the owner's switch: on for guests, and why not (QUESTIONS #236). New field; nothing else changed.
+            'my_order' => MyOrder::state(app(CurrentTenant::class)->get() ?? throw new \LogicException('no restaurant'), $a),
             'logo' => $a->logo ? new MediaResource($a->logo) : null,
             'cover' => $a->cover ? new MediaResource($a->cover) : null,
             'warnings' => array_map(fn (string $key) => ['key' => $key, 'message' => __($key)], Contrast::warnings($a->primary_color)),

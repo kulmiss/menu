@@ -12,6 +12,9 @@ use Illuminate\Database\Eloquent\Model;
  */
 class ActivityLogger
 {
+    /** Request attribute set once this request wrote an entry (see AuditSuperAdmin). */
+    public const LOGGED = 'activity.logged';
+
     /** Attribute names whose values are never written to the log. */
     private const MASKED = ['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes', 'token_hash', 'wifi_password'];
 
@@ -23,6 +26,7 @@ class ActivityLogger
     public function log(string $action, ?Model $subject = null, ?array $changes = null, ?int $tenantId = null): ActivityLog
     {
         $request = request();
+        $request->attributes->set(self::LOGGED, true);
 
         return ActivityLog::create([
             'tenant_id' => $tenantId ?? $this->tenant->id(),
@@ -44,12 +48,15 @@ class ActivityLogger
      */
     public static function diff(Model $model): array
     {
+        // Called after save(): getOriginal() already holds the new values by then, so the
+        // old ones come from getPrevious(), read through the model's casts (QUESTIONS #236).
+        $before = $model->newInstance()->setRawAttributes($model->getPrevious(), true);
         $diff = [];
         foreach ($model->getChanges() as $key => $value) {
             if ($key === 'updated_at') {
                 continue;
             }
-            $diff[$key] = ['from' => $model->getOriginal($key), 'to' => $value];
+            $diff[$key] = ['from' => $before->getOriginal($key), 'to' => $value];
         }
 
         return $diff;

@@ -8,6 +8,7 @@ use App\Models\Backup;
 use App\Support\ActivityLogger;
 use App\Support\Backups\BackupCrypto;
 use App\Support\Backups\Backups;
+use App\Support\Ops\Alerts;
 use App\Support\PlatformSettings;
 use App\Support\Security\OutboundHost;
 use Illuminate\Http\JsonResponse;
@@ -42,6 +43,7 @@ class BackupController extends Controller
             'settings' => array_intersect_key(PlatformSettings::forScreen(), array_flip([
                 'backup_enabled', 'backup_keep_daily', 'backup_keep_weekly', 'backup_keep_monthly',
                 'backup_s3_enabled', 'backup_s3_endpoint', 'backup_s3_region', 'backup_s3_bucket', 'backup_s3_prefix', 'backup_s3_key', 'backup_s3_secret_set',
+                'alerts_email', 'alerts_telegram_enabled', 'alerts_telegram_chat', 'alerts_telegram_token_set',
             ])),
         ]]);
     }
@@ -75,7 +77,7 @@ class BackupController extends Controller
         abort_unless($backup->status === 'ok' && $backup->path() && is_file((string) $backup->path()), 404, __('backups.not_ready'));
         $this->activity->log('platform.backup_downloaded', $backup, [], null);
 
-        return response()->json(['data' => ['url' => URL::temporarySignedRoute('platform.backups.file', now()->addMinutes(5), ['backup' => $backup->id])]]);
+        return response()->json(['data' => ['url' => URL::temporarySignedRoute('super.backups.file', now()->addMinutes(5), ['backup' => $backup->id])]]);
     }
 
     public function file(Backup $backup): BinaryFileResponse
@@ -136,6 +138,41 @@ class BackupController extends Controller
         $this->activity->log('platform.settings_saved', null, ['keys' => ['to' => array_keys($data)]], null);
 
         return $this->index();
+    }
+
+    /** Alerts (QUESTIONS #233): e-mail on/off, Telegram bot token (stored encrypted) and chat id. */
+    public function alerts(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'alerts_email' => ['sometimes', 'boolean'],
+            'alerts_telegram_enabled' => ['sometimes', 'boolean'],
+            'alerts_telegram_chat' => ['sometimes', 'nullable', 'string', 'max:64', 'regex:/^(-?\d{1,20}|@[A-Za-z0-9_]{5,32})$/'],
+            'alerts_telegram_token' => ['sometimes', 'nullable', 'string', 'max:100', 'regex:/^\d{5,15}:[A-Za-z0-9_-]{30,60}$/'],
+        ]);
+        $data['alerts_telegram_chat'] = trim((string) ($data['alerts_telegram_chat'] ?? PlatformSettings::get('alerts_telegram_chat')));
+        if (($data['alerts_telegram_token'] ?? '') === '') {
+            unset($data['alerts_telegram_token']);   // empty keeps the stored token
+        } else {
+            $data['alerts_telegram_token'] = Crypt::encryptString($data['alerts_telegram_token']);
+        }
+        if ($data['alerts_telegram_enabled'] ?? false) {
+            $merged = [...PlatformSettings::all(), ...$data];
+            if ($merged['alerts_telegram_token'] === '' || $merged['alerts_telegram_chat'] === '') {
+                throw ValidationException::withMessages(['alerts_telegram_enabled' => __('platform.alerts_telegram_incomplete')]);
+            }
+        }
+        PlatformSettings::save($data);
+        $this->activity->log('platform.settings_saved', null, ['keys' => ['to' => array_keys($data)]], null);
+
+        return $this->index();
+    }
+
+    /** "Send a test alert": what went out, so the screen can say it. */
+    public function testAlert(): JsonResponse
+    {
+        $name = PlatformSettings::get('name');
+
+        return response()->json(['data' => Alerts::send((string) __('alerts.test_subject', ['platform' => $name]), (string) __('alerts.test_text'))]);
     }
 
     /** @return array<string, mixed> */

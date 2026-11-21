@@ -20,9 +20,11 @@ import { GripVertical } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 
-type SortableListProps = {
-  ids: number[]
-  onReorder: (ids: number[]) => void
+type Id = number | string
+
+type SortableListProps<T extends Id> = {
+  ids: T[]
+  onReorder: (ids: T[]) => void
   children: React.ReactNode
 }
 
@@ -30,7 +32,11 @@ type SortableListProps = {
  * A vertical list reordered by dragging a handle: mouse, touch (after a
  * short press, so scrolling still works) and keyboard (space, arrows).
  */
-export function SortableList({ ids, onReorder, children }: SortableListProps) {
+export function SortableList<T extends Id>({
+  ids,
+  onReorder,
+  children,
+}: SortableListProps<T>) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(TouchSensor, {
@@ -41,8 +47,8 @@ export function SortableList({ ids, onReorder, children }: SortableListProps) {
 
   function onDragEnd({ active, over }: DragEndEvent) {
     if (!over || active.id === over.id) return
-    const from = ids.indexOf(Number(active.id))
-    const to = ids.indexOf(Number(over.id))
+    const from = ids.findIndex((id) => String(id) === String(active.id))
+    const to = ids.findIndex((id) => String(id) === String(over.id))
     if (from < 0 || to < 0) return
     onReorder(arrayMove(ids, from, to))
   }
@@ -61,7 +67,7 @@ export function SortableList({ ids, onReorder, children }: SortableListProps) {
 }
 
 type SortableItemProps = {
-  id: number
+  id: Id
   disabled?: boolean
   handleLabel: string
   className?: string

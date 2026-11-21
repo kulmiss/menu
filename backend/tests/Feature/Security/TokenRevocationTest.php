@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\PersonalAccessToken;
 use App\Models\PushToken;
 use App\Models\User;
 use Illuminate\Support\Facades\Notification;
@@ -8,8 +9,8 @@ use Illuminate\Support\Facades\Password;
 /** SECURITY_REPORT.md H2: a new password signs the app out everywhere. */
 function appSignIns(User $user): array
 {
-    $a = $user->createToken('Phone', ['mobile']);
-    $b = $user->createToken('Tablet', ['mobile']);
+    $a = $user->createToken('Phone', PersonalAccessToken::abilitiesFor($user));
+    $b = $user->createToken('Tablet', PersonalAccessToken::abilitiesFor($user));
     PushToken::create(['user_id' => $user->id, 'personal_access_token_id' => $a->accessToken->id, 'token' => 'fcm-a', 'platform' => 'android']);
 
     return [$a, $b];
@@ -20,7 +21,7 @@ it('revokes every app sign-in and push token after a password reset', function (
     $user = User::factory()->create(['email' => 'reset@example.com']);
     $other = User::factory()->create();
     appSignIns($user);
-    $kept = $other->createToken('Other user', ['mobile']);
+    $kept = $other->createToken('Other user', PersonalAccessToken::abilitiesFor($other));
 
     $token = Password::broker()->createToken($user);
     $this->postJson('/api/v1/auth/reset-password', [

@@ -25,6 +25,14 @@ export function useCurrentTenant(): Tenant | null {
   return pickTenant(me.tenants, storedId)
 }
 
+/**
+ * A plan feature of the current restaurant (with the Super Admin's
+ * switches); missing = on, like the server's defaults.
+ */
+export function useFeature(key: string): boolean {
+  return useCurrentTenant()?.features?.[key] !== false
+}
+
 /** Role in the current restaurant (null without one). */
 export function useRole(): Role | null {
   return useCurrentTenant()?.membership?.role ?? null

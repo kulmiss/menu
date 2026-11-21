@@ -282,6 +282,31 @@ class ImageProcessor
         return $path;
     }
 
+    /** Phone screenshot on the landing page: 300 × 608 shape, centre crop (owner, 2026-11-17). */
+    public const PHONE_WIDTHS = [300, 450, 600];
+
+    /**
+     * A screenshot for the landing page's phone frames, cropped to the frame's
+     * shape and saved at 300, 450 and 600 px wide as WebP (and AVIF when the
+     * server can). Returns whether AVIF copies were made.
+     */
+    public function phoneShot(string $path, string $mime, string $disk, string $folder): bool
+    {
+        $this->webpQuality = self::WEBP_QUALITY;
+        $image = $this->orient($this->load($path, $mime), $path, $mime);
+        $shot = $this->cover($image, 600, 1216);
+        $avif = self::supportsAvif();
+        foreach (self::PHONE_WIDTHS as $width) {
+            $scaled = $width === 600 ? $shot : $this->resample($shot, $width, (int) round($width * 1216 / 600));
+            $this->store($scaled, 'webp', $disk, "{$folder}/{$width}.webp");
+            if ($avif) {
+                $this->store($scaled, 'avif', $disk, "{$folder}/{$width}.avif");
+            }
+        }
+
+        return $avif;
+    }
+
     /** Public wrapper for an uploaded file (Super Admin's default preview). */
     public function shareImageFrom(string $path, string $mime, string $disk, string $target): string
     {

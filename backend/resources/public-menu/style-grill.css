@@ -1,0 +1,51 @@
+/* Style N · Grill & BBQ (owner, 2026-11-19, QUESTIONS #232): always dark; charcoal, an ember
+   glow and flames over grill bars (art/grill.svg), tall bold headings, price tags in the brand
+   colour, dish cards like a grill counter. Original artwork only.
+   Surfaces must match PageTheme::STYLES['grill'] (dark only: one palette). --em is the ember
+   decoration colour (icons, lines), never text on its own. */
+:root{color-scheme:dark;--br:.5rem;--bg:#161311;--fg:#f3e9e0;--mu:#c3b2a3;--ln:#3a312b;--card:#231d1a;--em:#ff8a3d}
+.cv{aspect-ratio:2/1}
+header{position:relative;flex-wrap:wrap;padding:1.1rem 1rem 1.3rem;background:#1d1714}
+.dc header{background:linear-gradient(#0000 55%,#00000059),radial-gradient(120% 85% at 70% 135%,#a83c16 0,#8e2a12 38%,#1d1714 72%),#1d1714}
+.dc header:after{content:"";position:absolute;inset:auto 0 0;height:.5rem;background:repeating-linear-gradient(90deg,#0c0908 0 .7rem,#3a2a22 .7rem .85rem)}
+.ha{display:block;flex:0 0 100%;height:5.5rem;margin-bottom:.4rem}
+[dir=rtl] .ha{transform:scaleX(-1)}
+@media (min-width:30rem){.dc .top:not(.hc) header{min-height:10rem;padding-inline-end:13rem}.ha{position:absolute;inset-inline-end:.75rem;bottom:.5rem;width:12rem;height:8.5rem;margin:0}}
+header>div{min-width:0;position:relative}
+header .sub{color:#ffd9b8}
+header .st{background:var(--card);color:var(--fg)}.st.op{color:#7ee2a8;border-color:#12a15c66;background:#12a15c1f}header .st.op{background:linear-gradient(#12a15c1f,#12a15c1f),var(--card)}
+.lg{border-radius:.4rem;box-shadow:0 0 0 2px var(--em)}
+h1{font-size:2.1rem;line-height:1.02;text-transform:uppercase;letter-spacing:.02em}
+.ov header{background:linear-gradient(#0000,#000d)}
+.bar{border-bottom-color:var(--ln)}
+.sr input,.ib{background:var(--card);border-color:var(--ln)}
+.cn a{background:var(--card);border-color:var(--ln);text-transform:uppercase;letter-spacing:.05em;font-weight:700;font-size:.8rem}
+section{padding-top:1.6rem}
+section h2{display:flex;align-items:center;gap:.6rem;font-size:1.55rem;line-height:1.1;text-transform:uppercase;letter-spacing:.04em;overflow-wrap:anywhere}
+svg.ci{flex:none;width:2.4rem;height:2.4rem;padding:.45rem;border-radius:.4rem;background:#3a2016;color:var(--em)}
+span.ci{flex:none;width:3.25rem;height:3.25rem;border-radius:.4rem;overflow:hidden;box-shadow:0 0 0 2px var(--em)}
+.ci img{display:block;width:100%;height:100%;object-fit:cover}
+section ul{display:grid;gap:.55rem;margin-top:.7rem}
+section li{border:0;border-radius:var(--br);background:var(--card);border-inline-start:3px solid var(--em)}
+li>.it{padding:.6rem .7rem;grid-template-columns:5rem minmax(0,1fr);grid-template-areas:"im ." "im nm" "im sm" "im pr" "im tg" "im .";grid-template-rows:1fr auto auto auto auto 1fr;column-gap:.8rem}
+li>.it.ao,li>.it.ao.np{padding-inline-end:3.1rem}
+li>.it .ad,li>.np>.ad{top:50%;margin-top:-1.375rem;inset-inline-end:.2rem}
+li>.it .im{grid-area:im;align-self:start;width:5rem;height:4rem;border-radius:.35rem}
+li>.it .nm{grid-area:nm;font-size:1.05rem;font-weight:700;line-height:1.25}
+li>.it .sm{grid-area:sm}
+/* Price: a tag in the brand colour. */
+li>.it .pr{grid-area:pr;justify-self:start;margin-top:.4rem;padding:.1rem .55rem;border-radius:.25rem;background:var(--a);color:var(--af);font-weight:800;white-space:nowrap;font-variant-numeric:tabular-nums}
+li>.it .pr s{color:inherit;opacity:.8}
+li.so>.it .pr{background:none;color:var(--mu)}
+li>.it .tg{grid-area:tg}
+/* Small phones (320 px): a smaller photo and tighter gaps, so the longest price tag ("from ETB 12,345.00") stays in its card with wider fonts too (CI). */
+@media (max-width:22.5rem){li>.it{grid-template-columns:4rem minmax(0,1fr);column-gap:.6rem;padding-inline-start:.55rem}li>.it .im{width:4rem;height:3.25rem}li>.it .pr{padding:.1rem .4rem;font-size:.9rem}}
+li>.it.np{grid-template-columns:minmax(0,1fr);grid-template-areas:"nm" "sm" "pr" "tg";grid-template-rows:auto}
+.bd{background:none;border-color:var(--ln)}
+.spc .sp{border:0;border-radius:var(--br);background:var(--card);box-shadow:inset 0 3px 0 var(--em)}
+.sp .pr{display:inline-block;padding:.1rem .55rem;border-radius:.25rem;background:var(--a);color:var(--af)}
+.an{border-radius:var(--br)}
+dialog{border-top:4px solid var(--em)}
+.ft{background:#110e0c;border-top:.5rem solid #0c0908}
+.fg>div{background:var(--card);border-radius:.6rem;padding:1rem}
+.fso a,.fc svg{background:var(--card)}

@@ -37,7 +37,7 @@ it('gives site pages a nonce CSP that matches their inline scripts and forbids f
     expect($m2[1])->not->toBe($m[1]);
 });
 
-it('lets the guest page run only its own inline script, by hash, and stay embeddable', function () {
+it('lets the guest page run only its own inline script, by hash, its own sheet.js, and stay embeddable', function () {
     [, $tenant] = member(Role::Owner);
     sampleMenu($tenant);
     $res = $this->get('/'.$tenant->slug)->assertOk();
@@ -46,7 +46,10 @@ it('lets the guest page run only its own inline script, by hash, and stay embedd
     preg_match('/<meta http-equiv="Content-Security-Policy" content="([^"]+)">/', $html, $meta);
     $policy = html_entity_decode($meta[1] ?? '', ENT_QUOTES);
     $hash = 'sha256-'.base64_encode(hash('sha256', InlineAssets::js(), true));
-    expect($policy)->toContain("script-src '".$hash."'")->toContain("object-src 'none'")->toContain("base-uri 'none'")
+    // The sheet (dish details, "My order", share) loads on demand from this site: 'self' must allow it.
+    preg_match('/"s":"([^"]+)"/', $html, $sheet);
+    expect(stripslashes($sheet[1] ?? ''))->toMatch('#^(/|'.preg_quote(rtrim((string) config('app.url'), '/'), '#').'/)menu-assets/sheet(?:-o)?\.[a-f0-9]+\.js$#');
+    expect($policy)->toContain("script-src 'self' '".$hash."'")->toContain("object-src 'none'")->toContain("base-uri 'none'")
         ->and(Csp::menuScriptHash())->toBe($hash)
         // The meta tag comes before any script or style, so it covers them.
         ->and(strpos($html, 'Content-Security-Policy'))->toBeLessThan(strpos($html, '<style>'))

@@ -15,7 +15,7 @@ describe('Settings → Billing', () => {
 
   it('shows the plan, paid-until date and invoices to download', async () => {
     fake = fakeApi({
-      'GET /t/1/billing': {
+      'GET /restaurant/1/billing': {
         data: {
           data: {
             plan: {
@@ -51,6 +51,6 @@ describe('Settings → Billing', () => {
     await expect.element(screen.getByText('Paid until')).toBeVisible()
     await expect
       .element(screen.getByRole('link', { name: /INV-2026-0005/ }))
-      .toHaveAttribute('href', '/api/v1/t/1/billing/invoices/5/pdf')
+      .toHaveAttribute('href', '/api/v1/restaurant/1/billing/invoices/5/pdf')
   })
 })

@@ -23,13 +23,13 @@ describe('Insights export', () => {
         location.href
       )
     const pdf = href('Report (PDF)')
-    expect(pdf.pathname).toBe('/api/v1/t/1/insights/report.pdf')
+    expect(pdf.pathname).toBe('/api/v1/restaurant/1/insights/report.pdf')
     expect(Object.fromEntries(pdf.searchParams)).toEqual({
       days: '7',
       branch_id: '3',
     })
     const qr = href('Scans per QR code and table (CSV)')
-    expect(qr.pathname).toBe('/api/v1/t/1/insights/export.csv')
+    expect(qr.pathname).toBe('/api/v1/restaurant/1/insights/export.csv')
     expect(Object.fromEntries(qr.searchParams)).toEqual({
       table: 'qr',
       days: '7',
@@ -45,10 +45,12 @@ describe('Insights export', () => {
 
   it('switches the monthly e-mail on', async () => {
     fake = fakeApi({
-      'GET /t/1/insights/settings': {
+      'GET /restaurant/1/insights/settings': {
         data: { data: { monthly_email: false } },
       },
-      'PUT /t/1/insights/settings': { data: { data: { monthly_email: true } } },
+      'PUT /restaurant/1/insights/settings': {
+        data: { data: { monthly_email: true } },
+      },
     })
     const screen = await renderWithQuery(
       <MonthlyReportCard tenantId={1} canEdit />
@@ -66,7 +68,9 @@ describe('Insights export', () => {
 
   it('is read-only when the restaurant can only read', async () => {
     fake = fakeApi({
-      'GET /t/1/insights/settings': { data: { data: { monthly_email: true } } },
+      'GET /restaurant/1/insights/settings': {
+        data: { data: { monthly_email: true } },
+      },
     })
     const screen = await renderWithQuery(
       <MonthlyReportCard tenantId={1} canEdit={false} />

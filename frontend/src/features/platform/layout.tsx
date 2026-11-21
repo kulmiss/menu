@@ -1,13 +1,16 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { Link, Outlet, useLocation, useNavigate } from '@tanstack/react-router'
+import { Link, Outlet, useLocation } from '@tanstack/react-router'
 import { LogOut, Search, Shield } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { useSetupWizard } from '@/stores/setup-wizard-store'
+import { signInUrl } from '@/lib/area'
 import { Button } from '@/components/ui/button'
 import { PasswordBanner } from '@/components/layout/password-banner'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { signOut } from '@/features/auth/api'
 import { useMe } from '@/features/auth/use-me'
+import { HelpButton } from '@/features/help/help-button'
 
 const NAV = [
   'restaurants',
@@ -15,11 +18,17 @@ const NAV = [
   'payments',
   'invoices',
   'messages',
+  'menu-requests',
   'backups',
+  'mobile-app',
   'themes',
   'announcements',
+  'landing',
+  'footer',
   'activity',
   'settings',
+  'help',
+  'help-articles',
 ] as const
 
 const NAV_LINK =
@@ -27,16 +36,20 @@ const NAV_LINK =
 
 // Global search (Ctrl/⌘ + K), downloaded on first use.
 const GlobalSearch = lazy(() => import('./global-search'))
+// Setup wizard: a new install's first sign-in, or Settings → Setup wizard.
+const SetupWizard = lazy(() => import('./setup-wizard'))
 
 /** Super Admin area: a slim top bar, its own route tree (PLAN.md §3.2). */
 export function PlatformLayout() {
   const { t } = useTranslation()
   const me = useMe()
-  const navigate = useNavigate()
   const qc = useQueryClient()
   const path = useLocation({ select: (l) => l.pathname })
   const needs2fa = !me.two_factor_enabled && path !== '/platform/security'
   const [searching, setSearching] = useState(false)
+  const wizardOpen = useSetupWizard((s) => s.open)
+  const showWizard =
+    !needs2fa && (wizardOpen || me.onboarding?.setup_needed === true)
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
@@ -80,11 +93,7 @@ export function PlatformLayout() {
                 </kbd>
               </Button>
             )}
-            {me.tenants.length > 0 && (
-              <Button asChild variant='ghost' size='sm'>
-                <Link to='/admin'>{t('platform.to_admin')}</Link>
-              </Button>
-            )}
+            <HelpButton source={{ audience: 'platform' }} />
             <ThemeSwitch />
             <Button
               variant='ghost'
@@ -94,7 +103,7 @@ export function PlatformLayout() {
                 try {
                   await signOut(qc)
                 } finally {
-                  await navigate({ to: '/auth/sign-in', replace: true })
+                  window.location.assign(signInUrl())
                 }
               }}
             >
@@ -104,7 +113,7 @@ export function PlatformLayout() {
         </div>
         <nav
           aria-label={t('platform.title')}
-          className='flex gap-1 overflow-x-auto px-2 pb-2'
+          className='flex gap-1 overflow-x-auto px-2 pb-2 lg:flex-wrap'
         >
           <Link
             to='/platform'
@@ -128,6 +137,11 @@ export function PlatformLayout() {
       {searching && (
         <Suspense fallback={null}>
           <GlobalSearch open={searching} onOpenChange={setSearching} />
+        </Suspense>
+      )}
+      {showWizard && (
+        <Suspense fallback={null}>
+          <SetupWizard />
         </Suspense>
       )}
       <PasswordBanner platform />

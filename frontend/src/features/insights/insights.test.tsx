@@ -23,6 +23,20 @@ describe('InsightsPage', () => {
   beforeEach(() => useTenantStore.setState({ currentTenantId: 1 }))
   afterEach(() => fake.restore())
 
+  // The loading placeholder sat inside a <p> (React: "<div> cannot be a descendant of <p>").
+  it('keeps the loading placeholders out of paragraphs', async () => {
+    fake = fakeApi({})
+    const screen = await renderWithQuery(<InsightsPage />, {
+      me: meFixture({ tenants: [tenantFixture()] }),
+    })
+    await expect
+      .poll(
+        () => screen.container.querySelectorAll('[data-slot=skeleton]').length
+      )
+      .toBeGreaterThan(0)
+    expect(screen.container.querySelector('p [data-slot=skeleton]')).toBeNull()
+  })
+
   it('shows totals, top dishes and scans per code, and changes the period', async () => {
     const data = (days: number) => ({
       data: {
@@ -45,9 +59,9 @@ describe('InsightsPage', () => {
       },
     })
     fake = fakeApi({
-      'GET /t/1/branches': { data: { data: [] } },
-      'GET /t/1/insights?days=30': data(30),
-      'GET /t/1/insights?days=7': data(7),
+      'GET /restaurant/1/branches': { data: { data: [] } },
+      'GET /restaurant/1/insights?days=30': data(30),
+      'GET /restaurant/1/insights?days=7': data(7),
     })
     const screen = await renderWithQuery(<InsightsPage />, {
       me: meFixture({ tenants: [tenantFixture()] }),
@@ -63,7 +77,9 @@ describe('InsightsPage', () => {
     await userEvent.click(screen.getByRole('combobox', { name: 'Period' }))
     await userEvent.click(screen.getByRole('option', { name: 'Last 7 days' }))
     await expect
-      .poll(() => fake.calls.some((c) => c.url === '/t/1/insights?days=7'))
+      .poll(() =>
+        fake.calls.some((c) => c.url === '/restaurant/1/insights?days=7')
+      )
       .toBe(true)
   })
 })
@@ -74,7 +90,7 @@ describe('Dashboard', () => {
 
   it('shows today and puts a sold-out dish back on sale', async () => {
     fake = fakeApi({
-      'GET /t/1/dashboard': {
+      'GET /restaurant/1/dashboard': {
         data: {
           data: {
             today: { views: 31, scans: 9 },
@@ -83,8 +99,8 @@ describe('Dashboard', () => {
           },
         },
       },
-      'PATCH /t/1/items/5/sold-out': { data: { data: {} } },
-      'GET /t/1/widgets/trend': {
+      'PATCH /restaurant/1/items/5/sold-out': { data: { data: {} } },
+      'GET /restaurant/1/widgets/trend': {
         data: {
           data: {
             days: [],
@@ -106,5 +122,36 @@ describe('Dashboard', () => {
     await expect
       .poll(() => fake.calls.find((c) => c.method === 'PATCH')?.data)
       .toEqual({ is_sold_out: false })
+  })
+
+  it('has no sold-out card while the "sold out" switch is off', async () => {
+    fake = fakeApi({
+      'GET /restaurant/1/dashboard': {
+        data: {
+          data: {
+            today: { views: 31, scans: 9 },
+            yesterday: { views: 28, scans: 7 },
+            sold_out: [],
+          },
+        },
+      },
+      'GET /restaurant/1/widgets/trend': {
+        data: {
+          data: {
+            days: [],
+            today: { date: '2026-11-11', views: 31, scans: 9 },
+            yesterday: { date: '2026-11-10', views: 28, scans: 7 },
+          },
+        },
+      },
+    })
+    const tenant = tenantFixture()
+    tenant.features = { ...tenant.features, sold_out: false }
+    const screen = await renderWithQuery(<Dashboard />, {
+      me: meFixture({ tenants: [tenant] }),
+    })
+
+    await expect.element(screen.getByText('31')).toBeVisible()
+    expect(screen.container.textContent).not.toMatch(/sold out/i)
   })
 })

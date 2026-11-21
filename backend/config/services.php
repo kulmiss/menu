@@ -20,6 +20,17 @@ return [
         'credentials' => env('FCM_CREDENTIALS'),
     ],
 
+    // "Continue with Google" (owner, 2026-11-17; docs/google-login.md). The web
+    // client signs people in on the website; the app sends Google's ID token,
+    // whose audience is this same web client. GOOGLE_ANDROID_CLIENT_IDS (comma-
+    // separated, optional) limits app tokens to your Android app's clients.
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => env('GOOGLE_REDIRECT_URI', '/auth/google/callback'),
+        'android_client_ids' => array_values(array_filter(array_map('trim', explode(',', (string) env('GOOGLE_ANDROID_CLIENT_IDS', ''))))),
+    ],
+
     'postmark' => [
         'key' => env('POSTMARK_API_KEY'),
     ],

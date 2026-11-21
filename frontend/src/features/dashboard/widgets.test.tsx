@@ -14,7 +14,7 @@ const days = ['05', '06', '07', '08', '09', '10', '11'].map((d, i) => ({
   scans: i,
 }))
 const all = {
-  'GET /t/1/widgets/setup': {
+  'GET /restaurant/1/widgets/setup': {
     data: {
       data: {
         steps: [
@@ -27,10 +27,10 @@ const all = {
       },
     },
   },
-  'GET /t/1/widgets/trend': {
+  'GET /restaurant/1/widgets/trend': {
     data: { data: { days, today: days[6], yesterday: days[5] } },
   },
-  'GET /t/1/widgets/plan': {
+  'GET /restaurant/1/widgets/plan': {
     data: {
       data: {
         plan: { en: 'Basic' },
@@ -48,7 +48,7 @@ const all = {
       },
     },
   },
-  'GET /t/1/widgets/orders': {
+  'GET /restaurant/1/widgets/orders': {
     data: {
       data: {
         enabled: true,
@@ -64,7 +64,7 @@ const all = {
       },
     },
   },
-  'GET /t/1/widgets/missing-photos': {
+  'GET /restaurant/1/widgets/missing-photos': {
     data: {
       data: {
         enabled: true,
@@ -82,7 +82,9 @@ describe('Dashboard widgets', () => {
   it('shows every widget for owners and managers', async () => {
     fake = fakeApi({
       ...all,
-      'POST /t/1/widgets/setup/hide': { data: { data: { hidden: true } } },
+      'POST /restaurant/1/widgets/setup/hide': {
+        data: { data: { hidden: true } },
+      },
     })
     const screen = await renderWithQuery(
       <DashboardWidgets tenantId={1} locale='en' manager />
@@ -140,15 +142,17 @@ describe('Dashboard widgets', () => {
     )
 
     await expect.element(screen.getByText('Views and scans')).toBeVisible()
-    expect(fake.calls.map((c) => c.url)).toEqual(['/t/1/widgets/trend'])
+    expect(fake.calls.map((c) => c.url)).toEqual([
+      '/restaurant/1/widgets/trend',
+    ])
     expect(screen.container.textContent).not.toContain('Plan and usage')
   })
 
   it('lets one widget fail without breaking the others', async () => {
-    const { 'GET /t/1/widgets/plan': _plan, ...rest } = all
+    const { 'GET /restaurant/1/widgets/plan': _plan, ...rest } = all
     fake = fakeApi({
       ...rest,
-      'GET /t/1/widgets/plan': { status: 500, data: {} },
+      'GET /restaurant/1/widgets/plan': { status: 500, data: {} },
     })
     const screen = await renderWithQuery(
       <DashboardWidgets tenantId={1} locale='en' manager />

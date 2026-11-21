@@ -6,7 +6,9 @@
     "cancel": "Cancel",
     "close": "Close",
     "continue": "Continue",
-    "save": "Save"
+    "save": "Save",
+    "on": "On",
+    "off": "Off"
   },
   "nav": {
     "general": "General",
@@ -31,7 +33,9 @@
     "insights": "Insights",
     "platform": "Platform",
     "upgrade": "Upgrade",
-    "dishes": "All dishes"
+    "dishes": "All dishes",
+    "support": "Support",
+    "help": "Help"
   },
   "language": {
     "label": "Language",
@@ -48,40 +52,39 @@
   },
   "auth": {
     "email": "Email",
-    "email_placeholder": "name@example.com",
     "password": "Password",
     "password_confirm": "Confirm password",
     "new_password": "New password",
-    "remember": "Keep me signed in on this device",
-    "sign_in": "Sign in",
-    "sign_in_intro": "Enter your email and password. No account yet?",
-    "sign_up_title": "Create your restaurant",
     "your_name": "Your name",
-    "forgot_link": "Forgot password?",
-    "forgot_title": "Forgot password",
-    "forgot_intro": "Enter your email and we will send you a link to choose a new password.",
-    "send_reset_link": "Send link",
-    "reset_link_sent": "If an account exists for {{email}}, a link to reset the password is on its way. Check your inbox and spam folder.",
-    "back_to_sign_in": "Back to sign in",
-    "reset_title": "Choose a new password",
-    "welcome_title": "Welcome! Choose your password",
-    "welcome_hint": "Your restaurant is ready. Pick a password to start.",
-    "welcome_password_set": "Password saved. Sign in to start.",
     "save_password": "Save password",
-    "password_changed": "Password changed. Sign in with your new password.",
-    "reset_link_invalid": "This reset link is incomplete or has expired.",
-    "request_new_link": "Request a new link",
-    "two_factor_title": "Two-factor authentication",
-    "two_factor_intro": "Enter the 6-digit code from your authenticator app.",
     "auth_code": "Authentication code",
-    "recovery_code": "Recovery code",
-    "use_recovery_code": "Use a recovery code instead",
-    "use_auth_code": "Use an authentication code instead",
     "verify": "Verify",
     "sign_out": "Sign out",
     "sign_out_confirm": "Sign out of your account on this device?",
-    "session_expired": "Your session has ended. Please sign in again.",
-    "legal": "By continuing you agree to the <terms>Terms of Service</terms> and the <privacy>Privacy Policy</privacy>."
+    "legal": "By continuing you agree to the <terms>Terms of Service</terms> and the <privacy>Privacy Policy</privacy>.",
+    "google": {
+      "continue": "Continue with Google",
+      "error": {
+        "cancelled": "Google sign-in was cancelled. Try again, or use your e-mail and password.",
+        "failed": "Google sign-in did not work. Please try again.",
+        "unverified": "Google has not confirmed the e-mail of this Google account, so we can't use it. Use another account, or your e-mail and password.",
+        "super_admin": "Super Admin accounts sign in with their password and two-factor code only.",
+        "taken": "This Google account belongs to another account here.",
+        "closed": "New accounts can't be created right now."
+      },
+      "linked": "Google is now linked. Next time, tap “Continue with Google”.",
+      "security": {
+        "title": "Google",
+        "linked": "Linked to {{email}}. You can sign in with “Continue with Google”.",
+        "not_linked": "Link your Google account to sign in with one tap.",
+        "link": "Link Google",
+        "unlink": "Unlink Google",
+        "unlinked": "Google is no longer linked.",
+        "no_password": "You signed up with Google and have no password yet. Set one first, so you can still sign in after you unlink Google.",
+        "set_password": "E-mail me a link to set a password",
+        "link_sent": "We sent a link to {{email}}."
+      }
+    }
   },
   "validation": {
     "email": "Enter a valid email address.",
@@ -94,20 +97,6 @@
     "code": "Enter the 6-digit code.",
     "recovery_code": "Enter a recovery code.",
     "menu_name": "Enter a name."
-  },
-  "invite": {
-    "title": "Join {{restaurant}}",
-    "title_plain": "Invitation",
-    "as_role": "You were invited as {{role}}.",
-    "accept": "Accept invitation",
-    "invalid": "This invitation is no longer valid. Ask the restaurant for a new one.",
-    "wrong_account": "This invitation was sent to {{invited}}, but you are signed in as {{current}}.",
-    "switch_account": "Sign in with another account",
-    "signed_out": "This invitation is for {{email}} ({{role}}).",
-    "create_account": "Create an account",
-    "have_account": "Already have an account?",
-    "sign_up_intro": "Create your account to join the team. Already have one?",
-    "join": "Create account and join"
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",

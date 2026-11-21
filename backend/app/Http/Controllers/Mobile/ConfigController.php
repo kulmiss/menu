@@ -3,34 +3,67 @@
 namespace App\Http\Controllers\Mobile;
 
 use App\Http\Controllers\Controller;
+use App\Support\Auth\GoogleLogin;
+use App\Support\Features;
+use App\Support\MobileApp;
 use App\Support\PlatformSettings;
 use Illuminate\Http\JsonResponse;
 
 /**
- * Public start-up settings for the Menu Admin app (QUESTIONS #190): which
- * versions must update, remote feature switches and the links it shows.
+ * Public start-up settings for the Menu Admin app (QUESTIONS #190, #193):
+ * who may sign in, maintenance, versions, the banner, the platform's feature
+ * switches, app-only switches and links. The app caches the answer and reads
+ * it at start and when it comes back to the foreground; it never waits for it.
  */
 class ConfigController extends Controller
 {
     public function __invoke(): JsonResponse
     {
         $s = PlatformSettings::all();
-        $whatsapp = preg_replace('/\D+/', '', (string) $s['upgrade_whatsapp']);
+        $m = MobileApp::settings();
+        $whatsapp = preg_replace('/\D+/', '', (string) ($m['links']['support_whatsapp'] ?: $s['upgrade_whatsapp']));
+        $legacy = is_array($s['app_flags']) ? $s['app_flags'] : [];
+        $web = url('/admin');
 
         return response()->json(['data' => [
             'name' => $s['name'],
-            'min_version' => $s['app_min_version'],
-            'latest_version' => $s['app_latest_version'],
-            'flags' => (object) (is_array($s['app_flags']) ? $s['app_flags'] : []),
+            // Kept for app versions before #193.
+            'min_version' => $m['min_version'],
+            'latest_version' => $m['latest_version'],
+            'flags' => (object) [...$legacy, ...$m['app_features']],
+            'versions' => [
+                'latest' => $m['latest_version'],
+                'min' => $m['min_version'],
+                'recommended' => $m['recommended_version'] ?: null,
+                'notes' => $m['release_notes'] ?: null,
+            ],
+            'sign_in' => [
+                'restaurant' => (bool) $m['restaurant_sign_in'],
+                'super_admin' => (bool) $m['super_admin_sign_in'],
+                'message' => $m['sign_in_message'] ?: null,
+            ],
+            'maintenance' => ['on' => (bool) $m['maintenance'], 'message' => $m['maintenance_message'] ?: null],
+            // "Continue with Google" (owner, 2026-11-17): the app asks Google for an ID token for this web client.
+            'google' => [
+                'enabled' => GoogleLogin::enabled(),
+                'client_id' => GoogleLogin::enabled() ? (string) config('services.google.client_id') : null,
+            ],
+            'banner' => MobileApp::activeBanner(),
+            'features' => (object) Features::global(),
+            // "My order" on the platform at all (each restaurant's own value is in its settings: my_order).
+            'my_order' => Features::globallyOn('order_list'),
+            'app_features' => (object) $m['app_features'],
             'links' => [
-                'privacy' => url('/privacy'),
-                'terms' => url('/terms'),
-                'forgot_password' => url('/auth/forgot-password'),
-                'signup' => url('/auth/sign-up'),
-                'web_admin' => url('/admin'),
+                'privacy' => $m['links']['privacy'] ?: url('/privacy'),
+                'terms' => $m['links']['terms'] ?: url('/terms'),
+                'forgot_password' => url('/forgot-password'),
+                'signup' => url('/signup'),
+                'web_admin' => $web,
+                'play_store' => $m['links']['play_store'] ?: null,
+                'app_store' => $m['links']['app_store'] ?: null,
                 'support_whatsapp' => $whatsapp !== '' ? 'https://wa.me/'.$whatsapp : null,
                 'support_email' => $s['support_email'] ?: null,
             ],
-        ]])->header('Cache-Control', 'public, max-age=300');
+        ]])->header('Cache-Control', 'public, max-age=60'); // maintenance and forced updates reach phones within a minute
     }
 }

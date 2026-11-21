@@ -40,6 +40,8 @@ return [
         'subject' => ':restaurant: your menu in :month',
         'greeting' => 'Hello :name,',
         'line' => 'Here is how guests used the menu of :restaurant in :month: :views menu views, :scans QR scans and :adds dishes added to “My order”. The full report is attached as a PDF.',
+        // My order switched off (QUESTIONS #236): the same line without it.
+        'line_no_order' => 'Here is how guests used the menu of :restaurant in :month: :views menu views and :scans QR scans. The full report is attached as a PDF.',
         'action' => 'Open Insights',
         'off' => 'You get this e-mail because the monthly report is switched on in Insights. You can switch it off there.',
         'salutation' => 'Best regards, :platform',

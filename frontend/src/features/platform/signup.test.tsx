@@ -1,6 +1,7 @@
 import { fakeApi } from '@/test-utils/fake-api'
 import { meFixture } from '@/test-utils/fixtures'
 import { renderWithQuery } from '@/test-utils/render'
+import { navigate } from '@/test-utils/router-mock'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { userEvent } from 'vitest/browser'
 import { RestaurantsPage } from './restaurants'
@@ -53,10 +54,10 @@ describe('Super Admin sign-up controls', () => {
 
   it('lists pending sign-ups and approves one', async () => {
     fake = fakeApi({
-      'GET /platform/restaurants': { data: { data: [pending] } },
-      'GET /platform/plans': { data: { data: [] } },
-      'GET /platform/restaurants/9': detail,
-      'POST /platform/restaurants/9/approve': { data: { data: pending } },
+      'GET /super/restaurants': { data: { data: [pending] } },
+      'GET /super/plans': { data: { data: [] } },
+      'GET /super/restaurants/9': detail,
+      'POST /super/restaurants/9/approve': { data: { data: pending } },
     })
     const screen = await renderWithQuery(<RestaurantsPage />, { me: admin })
     await expect
@@ -69,15 +70,15 @@ describe('Super Admin sign-up controls', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Approve' }))
     await expect
       .poll(() => fake.calls.find((c) => c.method === 'POST')?.url)
-      .toBe('/platform/restaurants/9/approve')
+      .toBe('/super/restaurants/9/approve')
   })
 
   it('rejects a sign-up with a reason', async () => {
     fake = fakeApi({
-      'GET /platform/restaurants': { data: { data: [pending] } },
-      'GET /platform/plans': { data: { data: [] } },
-      'GET /platform/restaurants/9': detail,
-      'POST /platform/restaurants/9/reject': {
+      'GET /super/restaurants': { data: { data: [pending] } },
+      'GET /super/plans': { data: { data: [] } },
+      'GET /super/restaurants/9': detail,
+      'POST /super/restaurants/9/reject': {
         data: { data: { removed: true } },
       },
     })
@@ -93,13 +94,13 @@ describe('Super Admin sign-up controls', () => {
       .poll(() => fake.calls.find((c) => c.method === 'POST')?.data)
       .toEqual({ reason: 'Not a restaurant, please contact us.' })
     expect(fake.calls.find((c) => c.method === 'POST')?.url).toBe(
-      '/platform/restaurants/9/reject'
+      '/super/restaurants/9/reject'
     )
   })
 
   it('saves the sign-up settings without sending the stored secret', async () => {
     fake = fakeApi({
-      'GET /platform/settings': {
+      'GET /super/settings': {
         data: {
           data: {
             name: 'Menu',
@@ -127,8 +128,8 @@ describe('Super Admin sign-up controls', () => {
           },
         },
       },
-      'GET /platform/settings/mail': { status: 404 },
-      'PUT /platform/settings': { data: { data: {} } },
+      'GET /super/settings/mail': { status: 404 },
+      'PUT /super/settings': { data: { data: {} } },
     })
     const screen = await renderWithQuery(<SettingsPage />, { me: admin })
 
@@ -164,9 +165,11 @@ describe('Super Admin sign-up controls', () => {
 describe('Super Admin landing page settings', () => {
   afterEach(() => fake.restore())
 
-  it('saves texts, colour, sections, real testimonials and footer links', async () => {
+  it('opens the new Landing page from an old "Settings → Landing page" link', async () => {
+    window.history.replaceState(null, '', '#landing')
+    navigate.mockClear()
     fake = fakeApi({
-      'GET /platform/settings': {
+      'GET /super/settings': {
         data: {
           data: {
             name: 'Menu',
@@ -180,68 +183,31 @@ describe('Super Admin landing page settings', () => {
             turnstile_site_key: '',
             turnstile_secret_set: false,
             disposable_domains: [],
-            upgrade_whatsapp: '',
-            plans: [{ id: 1, name: 'Free', slug: 'free' }],
-            brand_color: '#c2410c',
-            landing_headline: '',
-            landing_subline: '',
-            landing_sections: { how: true, features: true, speed: true },
-            landing_testimonials: [],
-            socials: { telegram: '' },
+            plans: [],
           },
         },
       },
-      'GET /platform/settings/mail': { status: 404 },
-      'PUT /platform/settings': { data: { data: {} } },
+      'GET /super/settings/mail': { status: 404 },
     })
     const screen = await renderWithQuery(<SettingsPage />, { me: admin })
 
-    await userEvent.click(screen.getByRole('tab', { name: 'Landing page' }))
-    await userEvent.fill(
-      screen.getByLabelText('Headline'),
-      'QR menus for Addis restaurants'
-    )
-    await userEvent.fill(
-      screen.getByLabelText('WhatsApp number', { exact: true }),
-      '+251 911 000 000'
-    )
-    await userEvent.click(screen.getByRole('checkbox', { name: 'Speed' }))
-    await userEvent.click(
-      screen.getByRole('button', { name: 'Add a testimonial' })
-    )
-    await userEvent.fill(
-      screen.getByLabelText('Quote'),
-      'Guests find the menu on their own now.'
-    )
-    await userEvent.fill(screen.getByLabelText('Name', { exact: true }), 'Hana')
-    await userEvent.fill(
-      screen.getByLabelText('Telegram'),
-      'https://t.me/menu_et'
-    )
-    await userEvent.click(screen.getByRole('button', { name: 'Save' }))
-
-    await expect
-      .poll(() => fake.calls.find((c) => c.method === 'PUT')?.data)
-      .toMatchObject({
-        landing_headline: 'QR menus for Addis restaurants',
-        upgrade_whatsapp: '+251 911 000 000',
-        brand_color: '#c2410c',
-        landing_sections: { speed: false, pricing: true, faq: true },
-        landing_testimonials: [
-          {
-            quote: 'Guests find the menu on their own now.',
-            name: 'Hana',
-            role: '',
-          },
-        ],
-        socials: { telegram: 'https://t.me/menu_et', facebook: '' },
+    await vi.waitFor(() =>
+      expect(navigate).toHaveBeenCalledWith({
+        to: '/platform/$section',
+        params: { section: 'landing' },
+        replace: true,
       })
+    )
+    expect(
+      screen.getByRole('tab', { name: 'Landing page' }).elements()
+    ).toHaveLength(0)
+    window.history.replaceState(null, '', '#')
   })
 
   it('splits settings into tabs, keeps unsaved edits and remembers the tab in the address', async () => {
     window.history.replaceState(null, '', '#email')
     fake = fakeApi({
-      'GET /platform/settings': {
+      'GET /super/settings': {
         data: {
           data: {
             name: 'Menu Hub',
@@ -260,7 +226,7 @@ describe('Super Admin landing page settings', () => {
           },
         },
       },
-      'GET /platform/settings/mail': { status: 404 },
+      'GET /super/settings/mail': { status: 404 },
     })
     const screen = await renderWithQuery(<SettingsPage />, { me: admin })
 
@@ -288,12 +254,15 @@ describe('Super Admin landing page settings', () => {
   it('shows the draft note and resets the Terms to the default text after confirming', async () => {
     window.history.replaceState(null, '', '#general')
     fake = fakeApi({
-      'GET /platform/settings': {
+      'GET /super/settings': {
         data: {
           data: {
             name: 'Menu',
             terms: 'My own terms',
             privacy: 'My own privacy text',
+            about: 'About text',
+            contact: 'Contact text',
+            cookies: 'Cookie text',
             share_image_url: '/img/share.jpg',
             logo_url: null,
             signup_open: true,
@@ -309,8 +278,8 @@ describe('Super Admin landing page settings', () => {
           },
         },
       },
-      'GET /platform/settings/mail': { status: 404 },
-      'POST /platform/settings/legal/terms/reset': {
+      'GET /super/settings/mail': { status: 404 },
+      'POST /super/settings/legal/terms/reset': {
         data: {
           data: { terms: 'Last updated: 13 November 2026\n\nDefault terms' },
         },
@@ -352,9 +321,25 @@ describe('Super Admin landing page settings', () => {
       .toHaveValue('Last updated: 13 November 2026\n\nDefault terms')
     expect(
       fake.calls.filter((c) => c.method === 'POST').map((c) => c.url)
-    ).toEqual(['/platform/settings/legal/terms/reset'])
+    ).toEqual(['/super/settings/legal/terms/reset'])
     await expect
       .element(screen.getByLabelText('Privacy policy'))
       .toHaveValue('My own privacy text')
+
+    // The footer's About us, Contact us and Cookie info pages (#230).
+    await expect
+      .element(screen.getByLabelText('About us page'))
+      .toHaveValue('About text')
+    await expect
+      .element(screen.getByLabelText('Cookie info page'))
+      .toHaveValue('Cookie text')
+    const views = screen.getByRole('link', { name: 'View page' })
+    expect(views.elements().map((a) => a.getAttribute('href'))).toEqual([
+      '/terms',
+      '/privacy',
+      '/about',
+      '/contact',
+      '/cookies',
+    ])
   })
 })

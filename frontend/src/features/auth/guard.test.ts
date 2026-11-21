@@ -8,7 +8,7 @@ import { requireMe } from './guard'
 let fake: ReturnType<typeof fakeApi>
 afterEach(() => fake.restore())
 
-describe('requireMe (the /admin route guard)', () => {
+describe('requireMe (the route guard of both areas)', () => {
   it('loads the signed-in user', async () => {
     fake = fakeApi({ 'GET /me': { data: { data: meFixture() } } })
 
@@ -17,7 +17,7 @@ describe('requireMe (the /admin route guard)', () => {
     expect(me.email).toBe('selam@example.com')
   })
 
-  it('sends signed-out visitors to sign-in and back afterwards', async () => {
+  it('sends signed-out visitors to the sign-in page and back afterwards', async () => {
     fake = fakeApi({ 'GET /me': { status: 401 } })
 
     const result = await requireMe(testQueryClient(), '/admin/team?x=1').catch(
@@ -25,9 +25,10 @@ describe('requireMe (the /admin route guard)', () => {
     )
 
     expect(isRedirect(result)).toBe(true)
+    // A server page (QUESTIONS #222): a full page load.
     expect(result.options).toMatchObject({
-      to: '/auth/sign-in',
-      search: { redirect: '/admin/team?x=1' },
+      href: '/signin?redirect=%2Fadmin%2Fteam%3Fx%3D1',
+      reloadDocument: true,
     })
   })
 

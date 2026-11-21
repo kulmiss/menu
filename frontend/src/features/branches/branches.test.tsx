@@ -1,8 +1,9 @@
+import '@/styles/index.css'
 import { fakeApi } from '@/test-utils/fake-api'
 import { meFixture, tenantFixture } from '@/test-utils/fixtures'
 import { renderWithQuery } from '@/test-utils/render'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { userEvent } from 'vitest/browser'
+import { page, userEvent } from 'vitest/browser'
 import { useTenantStore } from '@/stores/tenant-store'
 import { QrCodesPage } from '@/features/qr'
 import { type Branch, type QrCodeRow } from './api'
@@ -63,8 +64,8 @@ let fake: ReturnType<typeof fakeApi>
 
 function render(ui: React.ReactNode) {
   fake = fakeApi({
-    'GET /t/1/branches': { data: { data: BRANCHES } },
-    'GET /t/1/menus': {
+    'GET /restaurant/1/branches': { data: { data: BRANCHES } },
+    'GET /restaurant/1/menus': {
       data: {
         data: [
           {
@@ -78,13 +79,16 @@ function render(ui: React.ReactNode) {
         ],
       },
     },
-    'GET /t/1/branches/1/tables': { data: { data: [] } },
-    'POST /t/1/branches/1/tables': { status: 201, data: { data: [] } },
-    'POST /t/1/branches': { status: 201, data: { data: branch(3, 'Bole') } },
-    'GET /t/1/qr-codes': { data: { data: CODES } },
-    'GET /t/1/branches/2/overrides': { data: { data: [] } },
-    'PUT /t/1/branches/2/overrides': { data: { data: [] } },
-    'GET /t/1/menus/5/tree': {
+    'GET /restaurant/1/branches/1/tables': { data: { data: [] } },
+    'POST /restaurant/1/branches/1/tables': { status: 201, data: { data: [] } },
+    'POST /restaurant/1/branches': {
+      status: 201,
+      data: { data: branch(3, 'Bole') },
+    },
+    'GET /restaurant/1/qr-codes': { data: { data: CODES } },
+    'GET /restaurant/1/branches/2/overrides': { data: { data: [] } },
+    'PUT /restaurant/1/branches/2/overrides': { data: { data: [] } },
+    'GET /restaurant/1/menus/5/tree': {
       data: {
         data: {
           menu: {
@@ -171,7 +175,7 @@ describe('BranchesPage', () => {
       .poll(
         () =>
           fake.calls.find(
-            (c) => c.url === '/t/1/branches' && c.method === 'POST'
+            (c) => c.url === '/restaurant/1/branches' && c.method === 'POST'
           )?.data
       )
       .toMatchObject({
@@ -179,6 +183,27 @@ describe('BranchesPage', () => {
         slug: 'bole-atlas',
         is_active: true,
       })
+  })
+
+  // Bug (2026-11-17): on a phone the branch's details were squeezed into a
+  // ~30 px column next to its buttons, one or two letters per line.
+  it('on a phone the address keeps its width and the buttons go below it', async () => {
+    await page.viewport(390, 844)
+    try {
+      const screen = await render(<BranchesPage />)
+      const link = screen.getByText('localhost/buna-bread/piassa')
+      await expect.element(link).toBeVisible()
+      const a = link.element().closest('a')!.getBoundingClientRect()
+      expect(a.width).toBeGreaterThan(180)
+      expect(a.height).toBeGreaterThanOrEqual(44) // a 44 px tap target
+      const tables = screen
+        .getByRole('button', { name: '0 tables' })
+        .element()
+        .getBoundingClientRect()
+      expect(tables.top).toBeGreaterThanOrEqual(a.bottom)
+    } finally {
+      await page.viewport(414, 896)
+    }
   })
 })
 
@@ -225,9 +250,12 @@ describe('QrCodesPage', () => {
     // One table for every code, tables included, each with its downloads.
     await expect
       .element(screen.getByRole('link', { name: 'PDF · Whole restaurant' }))
-      .toHaveAttribute('href', '/api/v1/t/1/qr-codes/7.pdf')
+      .toHaveAttribute('href', '/api/v1/restaurant/1/qr-codes/7.pdf')
     await expect
       .element(screen.getByRole('link', { name: 'Print table cards' }))
-      .toHaveAttribute('href', '/api/v1/t/1/branches/1/table-cards.pdf')
+      .toHaveAttribute(
+        'href',
+        '/api/v1/restaurant/1/branches/1/table-cards.pdf'
+      )
   })
 })

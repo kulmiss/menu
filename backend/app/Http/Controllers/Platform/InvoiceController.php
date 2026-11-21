@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Invoice;
 use App\Support\Billing\InvoicePdf;
 use App\Support\Billing\Invoices;
+use App\Support\Csv;
 use App\Support\Tables\TableQuery;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -24,8 +25,7 @@ class InvoiceController extends Controller
             $money = fn (int $m) => number_format($m / 100, 2, '.', '');
 
             return TableQuery::respond(Invoice::query()->with('replaces'), $request, [
-                'search' => fn ($q, string $s) => $q->where(fn ($w) => $w->where('number', 'like', "%{$s}%")
-                    ->orWhere('customer->name', 'like', "%{$s}%")->orWhere('customer->email', 'like', "%{$s}%")),
+                'search' => fn ($q, string $s) => $q->where(fn ($w) => self::matchInvoice($w, $s)),
                 'filters' => [
                     'status' => fn ($q, array $v) => $q->whereIn('status', array_intersect($v, ['paid', 'void'])),
                     'plan' => fn ($q, array $v) => $q->whereIn('plan_id', array_map('intval', $v)),
@@ -68,11 +68,11 @@ class InvoiceController extends Controller
         fputcsv($out, ['Number', 'Issued', 'Status', 'Restaurant', 'Owner e-mail', 'Plan', 'Period start', 'Period end', 'Subtotal', 'VAT %', 'VAT', 'Total', 'Currency', 'Method', 'Reference', 'Paid on', 'Void reason', 'Replaces'], escape: '');
         foreach ($this->filtered($request)->with('replaces')->get() as $i) {
             $money = fn (int $m) => number_format($m / 100, 2, '.', '');
-            fputcsv($out, [
+            fputcsv($out, array_map(Csv::cell(...), [
                 $i->number, $i->issued_at->toDateString(), $i->status, $i->customer['name'] ?? '', $i->customer['email'] ?? '', $i->plan_name,
                 $i->period_start->toDateString(), $i->period_end->toDateString(), $money($i->subtotal_minor), $i->tax_rate, $money($i->tax_minor),
                 $money($i->total_minor), $i->currency, $i->method, $i->reference, $i->paid_at->toDateString(), $i->void_reason, $i->replaces?->number,
-            ], escape: '');
+            ]), escape: '');
         }
         rewind($out);
 
@@ -152,8 +152,7 @@ class InvoiceController extends Controller
 
         return Invoice::query()
             ->when($data['q'] ?? null, function ($q, $term) {
-                $like = '%'.addcslashes($term, '%_\\').'%';
-                $q->where(fn ($w) => $w->where('number', 'like', $like)->orWhere('customer->name', 'like', $like)->orWhere('customer->email', 'like', $like));
+                $q->where(fn ($w) => self::matchInvoice($w, (string) $term));
             })
             ->when($data['from'] ?? null, fn ($q, $d) => $q->where('issued_at', '>=', $d.' 00:00:00'))
             ->when($data['to'] ?? null, fn ($q, $d) => $q->where('issued_at', '<=', $d.' 23:59:59'))
@@ -161,5 +160,19 @@ class InvoiceController extends Controller
             ->when($data['plan_id'] ?? null, fn ($q, $p) => $q->where('plan_id', $p))
             ->when($data['status'] ?? null, fn ($q, $s) => $q->where('status', $s))
             ->latest('issued_at')->latest('id');
+    }
+
+    /**
+     * Number, customer name or e-mail contains the text, whatever the letter case
+     * (the customer is JSON, which MySQL compares case by case).
+     *
+     * @param  Builder<Invoice>  $w
+     */
+    private static function matchInvoice(Builder $w, string $term): void
+    {
+        $like = '%'.addcslashes(mb_strtolower($term), '%_\\').'%';
+        $w->where('number', 'like', $like)
+            ->orWhereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(customer, '$.name'))) LIKE ?", [$like])
+            ->orWhereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(customer, '$.email'))) LIKE ?", [$like]);
     }
 }

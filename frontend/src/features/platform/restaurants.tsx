@@ -33,6 +33,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
 import { type Col, DataTable, type TableFilter } from '@/components/data-table'
+import { MENU_STYLES } from '@/features/appearance/api'
 import {
   FEATURES,
   type Restaurant,
@@ -47,6 +48,7 @@ import {
   usePlatformMutation,
 } from './api'
 import { CrmSection, ManageTagsDialog, TagChip } from './crm'
+import { useGloballyOff } from './feature-switches'
 import { InvoiceActions } from './invoices'
 import { PageTitle } from './layout'
 
@@ -164,6 +166,20 @@ export function RestaurantsPage({ open }: Props) {
       ),
     },
     {
+      id: 'my_order',
+      label: t('platform.restaurants.my_order'),
+      text: (r) =>
+        r.my_order == null ? '' : r.my_order ? t('common.on') : t('common.off'),
+      cell: (r) =>
+        r.my_order == null ? (
+          '—'
+        ) : (
+          <Badge variant={r.my_order ? 'default' : 'outline'}>
+            {r.my_order ? t('common.on') : t('common.off')}
+          </Badge>
+        ),
+    },
+    {
       id: 'created_at',
       label: t('platform.restaurants.created_on'),
       sort: 'created_at',
@@ -218,13 +234,18 @@ export function RestaurantsPage({ open }: Props) {
         'limit_photos',
         'near_photos',
         'limit_branches',
-        'style:editorial',
-        'style:grid',
-        'style:bistro',
-        'style:minimal',
+        ...MENU_STYLES.map((s) => `style:${s}`),
       ].map((k) => ({
         value: k,
         label: t(`platform.ins.u.${k.replace(':', '_')}`),
+      })),
+    },
+    {
+      id: 'my_order',
+      label: t('platform.restaurants.my_order'),
+      options: (['on', 'off'] as const).map((v) => ({
+        value: v,
+        label: t(`platform.restaurants.my_order_${v}`),
       })),
     },
     {
@@ -253,7 +274,7 @@ export function RestaurantsPage({ open }: Props) {
         id='platform-restaurants'
         queryKey={[...pkeys.all, 'restaurants', 'table']}
         fetch={(params) => fetchPage<Restaurant>('restaurants', params)}
-        csvUrl={(params) => `/api/v1/platform/restaurants?format=csv&${params}`}
+        csvUrl={(params) => `/api/v1/super/restaurants?format=csv&${params}`}
         columns={columns}
         filters={filters}
         dateLabel={t('platform.restaurants.created_on')}
@@ -497,6 +518,7 @@ function CreateDialog({ onClose }: { onClose: () => void }) {
 
 function RestaurantSheet({ id, onClose }: { id: number; onClose: () => void }) {
   const { t } = useTranslation()
+  const globallyOff = useGloballyOff()
   const detail = useQuery(restaurantQ(id))
   const plans = useQuery(plansQ())
   const r = detail.data
@@ -811,6 +833,11 @@ function RestaurantSheet({ id, onClose }: { id: number; onClose: () => void }) {
                     <span className='text-muted-foreground'>
                       ({r.features[f] ? t('platform.on') : t('platform.off')})
                     </span>
+                    {globallyOff.has(f) && (
+                      <span className='block text-xs text-destructive'>
+                        {t('platform.switches.global_off')}
+                      </span>
+                    )}
                   </span>
                   <Select
                     value={

@@ -14,13 +14,13 @@ class ConfirmEmailChangeController extends Controller
     public function __invoke(Request $request, int $user, string $hash): RedirectResponse
     {
         if (! $request->hasValidSignature()) {
-            return redirect('/auth/sign-in?verify=change_expired');
+            return redirect('/signin?verify=change_expired');
         }
         $model = User::find($user);
         if ($model === null || ! UpdateUserProfileInformation::confirm($model, $hash)) {
-            return redirect('/auth/sign-in?verify=change_invalid');
+            return redirect('/signin?verify=change_invalid');
         }
 
-        return redirect('/auth/sign-in?verify=change_done');
+        return redirect('/signin?verify=change_done');
     }
 }
