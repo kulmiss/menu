@@ -1,16 +1,16 @@
 # Progress — layouts, new styles R–T, new Appearance page (21 Nov 2026)
 
-📍 Now: PR 2 (styles R–T with demos) into develop, CI running
-📊 Progress: ▓▓▓▓░░░░░░ 40%
+📍 Now: PR 3 (layouts per style) into develop, CI running
+📊 Progress: ▓▓▓▓▓▓░░░░ 60%
 ✅ Just finished: styles R · Burger & Pizza, S · Injera & Tibs, T · Juice & Drinks; demos /demo-bigbite (43 dishes), /demo-shekla (12, short on purpose), /demo-spris (36), a real photo on every dish (QUESTIONS #243)
-⏭️ Next: layout CSS per style; then the new Appearance page
+⏭️ Next: the new Appearance page with the layout picker and a light/dark phone preview
 ⚠️ Waiting for the owner: nothing (merges later)
 ⏱️ Time left: several PRs
 
 ## Steps
 - [x] 1. Layout setting, plan feature, shared CSS, preview light/dark (QUESTIONS #242)
 - [x] 2. New styles R, S, T with demo menus and photos (QUESTIONS #243)
-- [ ] 3. Layout CSS fine-tuned per style (A–G, H–L, M–T) with phone screenshots
+- [x] 3. Layouts fine-tuned for all 20 styles, new browser test (QUESTIONS #244)
 - [ ] 4. New Appearance page: style, layout, colours & font, logo & banner, what guests see; light/dark phone preview
 - [ ] 5. Grid · List · Text switch on the demo bar and /phone/ page; help article
 
