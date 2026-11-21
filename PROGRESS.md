@@ -1,4 +1,22 @@
-# Progress — guest menu footer, demo view bar, styles slider (19 Nov 2026)
+# Progress — long demo menus with photos (21 Nov 2026)
+
+📍 Now: PR into develop, CI running
+📊 Progress: ▓▓▓▓▓▓▓▓▓░ 90%
+✅ Just finished: 35–42 dishes per style demo, a real photo on every dish (not style D), 176 new photos, `demo:live --refresh`
+⏭️ Next: CI green → owner merges → release → on the server: Deploy, then `php artisan demo:live --refresh`
+⚠️ Waiting for the owner: the merge
+⏱️ Time left: CI only
+
+## Steps
+- [x] 1. Find photos for the missing cuisines (Ethiopian, Somali, Arabic, Indian/halal, seafood, drinks, fine dining, bowls, desserts) and look at every one
+- [x] 2. Add them to photos.json, download as WebP, CREDITS.md
+- [x] 3. Long menus for the 16 photo demos; style D without photos
+- [x] 4. `demo:live --refresh` (demo restaurants only, photo files removed)
+- [x] 5. Tests (fail on develop, pass now), PHPStan, Pint, demo tests
+- [x] 6. Real browser: 5 demos in Chrome at 390 px, every image loads
+- [ ] 7. CI green
+
+# Earlier: guest menu footer, demo view bar, styles slider (19 Nov 2026)
 
 📍 Now: done — CI running on the top PR
 📊 Progress: ▓▓▓▓▓▓▓▓▓░ 90%
