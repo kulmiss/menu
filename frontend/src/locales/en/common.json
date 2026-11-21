@@ -8,7 +8,10 @@
     "continue": "Continue",
     "save": "Save",
     "on": "On",
-    "off": "Off"
+    "off": "Off",
+    "changed": "Changed",
+    "expand_all": "Expand all",
+    "collapse_all": "Collapse all"
   },
   "nav": {
     "general": "General",

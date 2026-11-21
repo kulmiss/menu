@@ -1,4 +1,5 @@
-import { fakeApi } from '@/test-utils/fake-api'
+import { axeViolations } from '@/test-utils/axe'
+import { fakeApi, invalid } from '@/test-utils/fake-api'
 import { meFixture, tenantFixture } from '@/test-utils/fixtures'
 import { renderWithQuery } from '@/test-utils/render'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -136,22 +137,28 @@ const APPEARANCE: Appearance = {
 let fake: ReturnType<typeof fakeApi>
 const MY_ORDER = /Show "Add to my order" \(\+\) buttons on my menu/
 
-function render(writable = true, extra: Partial<Appearance> = {}) {
+function render(
+  writable = true,
+  extra: Partial<Appearance> = {},
+  putReply?: ReturnType<typeof invalid>
+) {
   fake = fakeApi({
     'GET /restaurant/1/appearance': {
       data: { data: { ...APPEARANCE, ...extra } },
     },
-    'PUT /restaurant/1/appearance': (req) => ({
-      data: {
+    'PUT /restaurant/1/appearance':
+      putReply ??
+      ((req) => ({
         data: {
-          ...APPEARANCE,
-          ...extra,
-          ...JSON.parse(String(req.body)),
-          logo: null,
-          cover: null,
+          data: {
+            ...APPEARANCE,
+            ...extra,
+            ...JSON.parse(String(req.body)),
+            logo: null,
+            cover: null,
+          },
         },
-      },
-    }),
+      })),
   })
   return renderWithQuery(<AppearancePage />, {
     me: meFixture({
@@ -172,9 +179,26 @@ function render(writable = true, extra: Partial<Appearance> = {}) {
 const frame = (screen: Awaited<ReturnType<typeof render>>) =>
   screen.container.querySelector('iframe') as HTMLIFrameElement
 
+const SECTIONS_KEY = 'menu:sections:appearance:100'
+const ALL_OPEN = {
+  look: true,
+  layout: true,
+  colours: true,
+  images: true,
+  guests: true,
+}
+
 describe('AppearancePage', () => {
-  beforeEach(() => useTenantStore.setState({ currentTenantId: 1 }))
-  afterEach(() => fake.restore())
+  beforeEach(() => {
+    useTenantStore.setState({ currentTenantId: 1 })
+    // These tests use every section; the open/close tests below start from no saved state.
+    localStorage.setItem(SECTIONS_KEY, JSON.stringify(ALL_OPEN))
+  })
+  afterEach(() => {
+    fake.restore()
+    localStorage.removeItem(SECTIONS_KEY)
+    window.history.replaceState(null, '', window.location.pathname)
+  })
 
   it('applies a theme to the live preview and saves it', async () => {
     const screen = await render()
@@ -622,7 +646,9 @@ describe('AppearancePage', () => {
     await expect
       .element(screen.getByRole('radio', { name: /B · Fresh grid/ }))
       .toBeChecked()
-    await userEvent.click(screen.getByRole('button', { name: 'All' }))
+    await userEvent.click(
+      screen.getByRole('button', { name: 'All', exact: true })
+    )
     await expect
       .element(screen.getByRole('radio', { name: /Q · Fine Dining/ }))
       .toBeVisible()
@@ -638,5 +664,243 @@ describe('AppearancePage', () => {
     expect(frame(screen).src).toContain('logo_media_id=&')
     expect(frame(screen).src).toContain('cover_media_id=&')
     expect(frame(screen).src).toContain('banner_text=&')
+  })
+})
+
+describe('AppearancePage sections', () => {
+  const header = (screen: Awaited<ReturnType<typeof render>>, name: RegExp) =>
+    screen.getByRole('button', { name })
+
+  beforeEach(() => {
+    useTenantStore.setState({ currentTenantId: 1 })
+    localStorage.removeItem(SECTIONS_KEY)
+  })
+  afterEach(() => {
+    fake.restore()
+    vi.restoreAllMocks()
+    localStorage.removeItem(SECTIONS_KEY)
+    window.history.replaceState(null, '', window.location.pathname)
+  })
+
+  it('opens only the first section at first, the others show a summary of the choice', async () => {
+    const screen = await render()
+    await expect
+      .element(header(screen, /^1\. Look/))
+      .toHaveAttribute('aria-expanded', 'true')
+    for (const name of [
+      /^2\. Layout\s*Grid$/,
+      /^3\. Colours & font\s*#B4432A · Style default$/,
+      /^4\. Logo & banner\s*No logo · No banner$/,
+      /^5\. What guests see\s*6 of 7 on$/,
+    ])
+      await expect
+        .element(header(screen, name))
+        .toHaveAttribute('aria-expanded', 'false')
+    // Closed: its settings are not on the page; open: aria-controls points at them.
+    expect(screen.container.querySelector('#primary')).toBeNull()
+    await userEvent.click(header(screen, /^3\. Colours/))
+    await expect.element(screen.getByLabelText('Brand colour')).toBeVisible()
+    const trigger = header(screen, /^3\. Colours/).element()
+    expect(trigger.getAttribute('aria-expanded')).toBe('true')
+    expect(
+      document.getElementById(trigger.getAttribute('aria-controls') ?? '')
+    ).toContainElement(document.getElementById('primary'))
+  })
+
+  it('opens and closes with the keyboard (Enter and Space), with a visible focus', async () => {
+    const screen = await render()
+    const layout = header(screen, /^2\. Layout/)
+    await expect.element(layout).toHaveAttribute('aria-expanded', 'false')
+    layout.element().focus()
+    await userEvent.keyboard('{Enter}')
+    await expect.element(layout).toHaveAttribute('aria-expanded', 'true')
+    await expect
+      .element(screen.getByRole('radio', { name: /List/ }))
+      .toBeVisible()
+    await userEvent.keyboard(' ')
+    await expect.element(layout).toHaveAttribute('aria-expanded', 'false')
+    expect(document.activeElement).toBe(layout.element())
+    expect(layout.element().className).toContain('focus-visible:ring-2')
+  })
+
+  it('expands and collapses all, and remembers the choice on this device', async () => {
+    const screen = await render()
+    await userEvent.click(screen.getByRole('button', { name: 'Expand all' }))
+    for (const name of [/^1\. /, /^2\. /, /^3\. /, /^4\. /, /^5\. /])
+      await expect
+        .element(header(screen, name))
+        .toHaveAttribute('aria-expanded', 'true')
+    expect(JSON.parse(localStorage.getItem(SECTIONS_KEY) ?? '{}')).toEqual(
+      ALL_OPEN
+    )
+
+    await userEvent.click(screen.getByRole('button', { name: 'Collapse all' }))
+    await expect
+      .element(header(screen, /^1\. /))
+      .toHaveAttribute('aria-expanded', 'false')
+    await userEvent.click(header(screen, /^4\. /))
+    expect(JSON.parse(localStorage.getItem(SECTIONS_KEY) ?? '{}')).toEqual({
+      look: false,
+      layout: false,
+      colours: false,
+      images: true,
+      guests: false,
+    })
+  })
+
+  it('opens the sections remembered on this device on the next visit', async () => {
+    localStorage.setItem(
+      SECTIONS_KEY,
+      JSON.stringify({ look: false, images: true, broken: 'x' })
+    )
+    const screen = await render()
+    await expect
+      .element(header(screen, /^4\. /))
+      .toHaveAttribute('aria-expanded', 'true')
+    await expect
+      .element(header(screen, /^1\. /))
+      .toHaveAttribute('aria-expanded', 'false')
+    // A section missing from the saved state keeps its default.
+    await expect
+      .element(header(screen, /^2\. /))
+      .toHaveAttribute('aria-expanded', 'false')
+  })
+
+  it('still works when the browser blocks storage', async () => {
+    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new DOMException('blocked', 'SecurityError')
+    })
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new DOMException('blocked', 'SecurityError')
+    })
+    const screen = await render()
+    await expect
+      .element(header(screen, /^1\. /))
+      .toHaveAttribute('aria-expanded', 'true')
+    await userEvent.click(header(screen, /^5\. /))
+    await expect
+      .element(header(screen, /^5\. /))
+      .toHaveAttribute('aria-expanded', 'true')
+    await userEvent.click(screen.getByRole('button', { name: 'Expand all' }))
+    await expect
+      .element(header(screen, /^3\. /))
+      .toHaveAttribute('aria-expanded', 'true')
+  })
+
+  it('opens the section of a link in the address when the page loads', async () => {
+    window.history.replaceState(null, '', '#ap-guests')
+    const screen = await render()
+    await expect
+      .element(header(screen, /^5\. /))
+      .toHaveAttribute('aria-expanded', 'true')
+    await expect
+      .element(screen.getByRole('switch', { name: /Show prices/ }))
+      .toBeVisible()
+  })
+
+  it('opens the section of a step link, and of a link changed later', async () => {
+    const screen = await render()
+    const steps = screen.getByRole('navigation', { name: 'Steps' })
+    await userEvent.click(steps.getByRole('link', { name: /Logo & banner/ }))
+    await expect
+      .element(header(screen, /^4\. /))
+      .toHaveAttribute('aria-expanded', 'true')
+    expect(window.location.hash).toBe('#ap-images')
+
+    window.location.hash = '#ap-layout'
+    await expect
+      .element(header(screen, /^2\. /))
+      .toHaveAttribute('aria-expanded', 'true')
+  })
+
+  it('marks a closed section with unsaved changes, and the mark goes after saving', async () => {
+    const screen = await render()
+    await userEvent.click(header(screen, /^3\. /))
+    await userEvent.click(screen.getByRole('button', { name: 'Bistro' }))
+    await userEvent.click(header(screen, /^3\. /))
+    await expect
+      .element(
+        header(
+          screen,
+          /^3\. Colours & font\s*Changed\s*Bistro · Classic serif$/
+        )
+      )
+      .toBeVisible()
+    // The theme also changed the style (section 1).
+    await expect.element(header(screen, /^1\. Look\s*Changed/)).toBeVisible()
+    await expect
+      .element(header(screen, /^5\. What guests see\s*6 of 7 on$/))
+      .toBeVisible()
+
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await expect
+      .element(header(screen, /^3\. Colours & font\s*Bistro · Classic serif$/))
+      .toBeVisible()
+  })
+
+  it('opens the section with an error and puts the focus on it', async () => {
+    const screen = await render(
+      true,
+      {},
+      invalid({ primary_color: 'Pick a darker colour.' })
+    )
+    await userEvent.click(header(screen, /^3\. /))
+    await userEvent.click(screen.getByRole('button', { name: 'Bistro' }))
+    await userEvent.click(header(screen, /^3\. /))
+    await expect
+      .element(header(screen, /^3\. /))
+      .toHaveAttribute('aria-expanded', 'false')
+
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await expect
+      .element(header(screen, /^3\. /))
+      .toHaveAttribute('aria-expanded', 'true')
+    await expect
+      .element(screen.getByText('Pick a darker colour.'))
+      .toBeVisible()
+    await expect.poll(() => document.activeElement?.id).toBe('primary')
+  })
+
+  it('lists an error with no field of its own at the top of its section', async () => {
+    const screen = await render(
+      true,
+      {},
+      invalid({ show_prices: 'Not allowed.' })
+    )
+    await userEvent.click(header(screen, /^5\. /))
+    await userEvent.click(screen.getByRole('switch', { name: /Show prices/ }))
+    await userEvent.click(header(screen, /^5\. /))
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await expect
+      .element(header(screen, /^5\. /))
+      .toHaveAttribute('aria-expanded', 'true')
+    await expect
+      .element(screen.getByRole('alert'))
+      .toHaveTextContent('Not allowed.')
+    await expect
+      .poll(() => document.activeElement)
+      .toBe(header(screen, /^5\. /).element())
+  })
+
+  it('keeps the live preview working with the sections closed', async () => {
+    const screen = await render()
+    await userEvent.click(header(screen, /^1\. /))
+    await expect
+      .element(header(screen, /^1\. /))
+      .toHaveAttribute('aria-expanded', 'false')
+    expect(frame(screen).src).toContain('style=grid')
+    await userEvent.click(screen.getByRole('button', { name: 'Dark' }))
+    await expect.poll(() => frame(screen).src).toContain('scheme=dark')
+  })
+
+  it('has no accessibility problems, closed and open', async () => {
+    const screen = await render()
+    await expect.element(header(screen, /^1\. /)).toBeVisible()
+    expect(await axeViolations(screen.container)).toEqual([])
+    await userEvent.click(screen.getByRole('button', { name: 'Expand all' }))
+    await expect
+      .element(header(screen, /^5\. /))
+      .toHaveAttribute('aria-expanded', 'true')
+    expect(await axeViolations(screen.container)).toEqual([])
   })
 })

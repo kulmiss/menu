@@ -3,6 +3,8 @@ import { useQuery } from '@tanstack/react-query'
 import {
   AlertTriangle,
   ArrowDown,
+  ChevronsDownUp,
+  ChevronsUpDown,
   Eye,
   EyeOff,
   Image as ImageIcon,
@@ -18,18 +20,13 @@ import { useTranslation } from 'react-i18next'
 import { validationErrors } from '@/lib/api'
 import { toast } from '@/lib/toast'
 import { cn } from '@/lib/utils'
+import { useOpenSections } from '@/hooks/use-open-sections'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Switch } from '@/components/ui/switch'
+import { CollapsibleCard } from '@/components/collapsible-card'
 import { AdminHeader } from '@/components/layout/admin-header'
 import { Main } from '@/components/layout/main'
 import { useFeature } from '@/features/auth/use-me'
@@ -72,6 +69,54 @@ const STEP_ICON: Record<Step, typeof Sparkles> = {
   images: ImageIcon,
   guests: ToggleRight,
 }
+/** Each section's element id: the step links (#ap-look …) open and scroll to it. */
+const SECTION_IDS: Record<Step, string> = {
+  look: 'ap-look',
+  layout: 'ap-layout',
+  colours: 'ap-colours',
+  images: 'ap-images',
+  guests: 'ap-guests',
+}
+/** First visit: only the first step open (owner, 2026-11-21). */
+const SECTION_DEFAULTS: Record<Step, boolean> = {
+  look: true,
+  layout: false,
+  colours: false,
+  images: false,
+  guests: false,
+}
+/** The settings inside each section, for its "Changed" mark and its errors. */
+const SECTION_KEYS: Record<Step, readonly (keyof AppearanceValues)[]> = {
+  look: [
+    'style',
+    'menu_direction',
+    'show_halal',
+    'ramadan_mode',
+    'photos_greyscale',
+    'mono_accent',
+    'show_decoration',
+  ],
+  layout: ['menu_layout', 'show_photos'],
+  colours: ['theme_id', 'primary_color', 'font'],
+  images: [
+    'logo_media_id',
+    'cover_media_id',
+    'banner_text',
+    'show_logo',
+    'show_banner',
+  ],
+  guests: [
+    'show_prices',
+    'show_descriptions',
+    'show_calories',
+    'show_share',
+    'show_pdf_link',
+    'show_order_list',
+    'show_other_branches',
+  ],
+}
+/** Errors shown next to their own field (the others are listed at the top of their section). */
+const FIELD_ERRORS: readonly string[] = ['primary_color']
 /** Options that belong to one menu style (shown only while that style is picked). */
 type StyleFlag =
   | 'show_halal'
@@ -191,6 +236,11 @@ function AppearanceForm({ initial }: { initial: Appearance }) {
   const [loading, setLoading] = useState(true)
   const disabled = !ctx.canManage || !ctx.canWrite
   const dirty = JSON.stringify(values) !== JSON.stringify(saved)
+  const sections = useOpenSections('appearance', SECTION_DEFAULTS, SECTION_IDS)
+  const changedIn = (step: Step) =>
+    SECTION_KEYS[step].some((k) => values[k] !== saved[k])
+  const errorsIn = (step: Step) =>
+    SECTION_KEYS[step].filter((k) => errors[k] && !FIELD_ERRORS.includes(k))
 
   // The preview follows the settings, a moment after the last change.
   useEffect(() => {
@@ -263,7 +313,11 @@ function AppearanceForm({ initial }: { initial: Appearance }) {
       setValues(next)
       toast.success(t('appearance.saved'))
     } catch (err) {
-      setErrors(validationErrors(err) ?? {})
+      const next = validationErrors(err) ?? {}
+      setErrors(next)
+      // The first section with an error opens, scrolls into view and takes the focus.
+      const step = STEPS.find((s) => SECTION_KEYS[s].some((k) => next[k]))
+      if (step) sections.reveal(step, true)
     }
   }
 
@@ -272,13 +326,62 @@ function AppearanceForm({ initial }: { initial: Appearance }) {
   const bannerRatio = initial.banner[values.style].ratio
   const bannerText = values.banner_text ?? initial.banner[values.style].text
 
+  const lockedReason = (flag: string) =>
+    flag === 'show_order_list' &&
+    (initial.my_order?.reason === 'platform' ||
+      initial.my_order?.reason === 'plan')
+      ? initial.my_order.reason
+      : null
+  const guestFlags = (group: keyof typeof GUEST_GROUPS) =>
+    GUEST_GROUPS[group].filter(
+      (f: GuestFlag) =>
+        featureOn[f] !== false ||
+        // "My order" stays visible, switched off with the reason (QUESTIONS #236).
+        (f === 'show_order_list' && !!initial.my_order)
+    )
+  const shownGuestFlags = (
+    Object.keys(GUEST_GROUPS) as (keyof typeof GUEST_GROUPS)[]
+  ).flatMap(guestFlags)
+
+  // What each closed section shows under its title.
+  const theme = initial.themes.find((th) => th.id === values.theme_id)
+  const summaries: Record<Step, string> = {
+    look: [
+      t(`appearance.styles.${values.style}.name`),
+      DIRECTION_STYLES.includes(values.style) &&
+      values.menu_direction !== 'auto'
+        ? t(`appearance.directions.${values.menu_direction}`)
+        : null,
+    ]
+      .filter(Boolean)
+      .join(' · '),
+    layout: t(`appearance.layout.${layout}`),
+    colours: `${theme?.name ?? values.primary_color.toUpperCase()} · ${t(`appearance.fonts.${values.font}`)}`,
+    images: [
+      t(
+        `appearance.summary.${logo ? (values.show_logo ? 'logo' : 'logo_hidden') : 'no_logo'}`
+      ),
+      t(
+        `appearance.summary.${cover ? (values.show_banner ? 'banner' : 'banner_hidden') : 'no_banner'}`
+      ),
+    ].join(' · '),
+    guests: t('appearance.summary.guests', {
+      on: shownGuestFlags.filter((f) => !lockedReason(f) && values[f]).length,
+      total: shownGuestFlags.length,
+    }),
+  }
+  const sectionProps = (step: Step) => ({
+    step,
+    open: sections.open[step],
+    onOpenChange: (open: boolean) => sections.setOpen(step, open),
+    onNext: (next: Step) => sections.reveal(next),
+    changed: changedIn(step),
+    summary: summaries[step],
+    errors: errorsIn(step).map((k) => errors[k]),
+  })
+
   const guestSwitch = (flag: GuestFlag | 'show_logo' | 'show_banner') => {
-    const locked =
-      flag === 'show_order_list' &&
-      (initial.my_order?.reason === 'platform' ||
-        initial.my_order?.reason === 'plan')
-        ? initial.my_order.reason
-        : null
+    const locked = lockedReason(flag)
     return (
       <div
         key={flag}
@@ -307,9 +410,25 @@ function AppearanceForm({ initial }: { initial: Appearance }) {
   return (
     <div className='grid items-start gap-6 lg:grid-cols-[1fr_380px]'>
       <div className='grid min-w-0 gap-5'>
-        <StepBar />
+        <div className='flex flex-wrap items-start justify-between gap-2'>
+          <StepBar onPick={(step) => sections.reveal(step)} />
+          <Button
+            type='button'
+            variant='outline'
+            size='sm'
+            className='min-h-9'
+            onClick={() => sections.setAll(!sections.allOpen)}
+          >
+            {sections.allOpen ? (
+              <ChevronsDownUp aria-hidden />
+            ) : (
+              <ChevronsUpDown aria-hidden />
+            )}
+            {t(sections.allOpen ? 'common.collapse_all' : 'common.expand_all')}
+          </Button>
+        </div>
 
-        <Section step='look'>
+        <Section {...sectionProps('look')}>
           <StylePicker
             value={values.style}
             allowed={initial.styles}
@@ -367,7 +486,7 @@ function AppearanceForm({ initial }: { initial: Appearance }) {
           )}
         </Section>
 
-        <Section step='layout'>
+        <Section {...sectionProps('layout')}>
           <LayoutPicker
             value={layout}
             own={own}
@@ -382,7 +501,7 @@ function AppearanceForm({ initial }: { initial: Appearance }) {
           )}
         </Section>
 
-        <Section step='colours'>
+        <Section {...sectionProps('colours')}>
           <div className='grid gap-2'>
             <p className='text-sm font-medium'>{t('appearance.themes')}</p>
             <div className='grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-5'>
@@ -478,7 +597,7 @@ function AppearanceForm({ initial }: { initial: Appearance }) {
           </fieldset>
         </Section>
 
-        <Section step='images'>
+        <Section {...sectionProps('images')}>
           <div className='grid gap-4 sm:grid-cols-2'>
             <PhotoField
               tenantId={ctx.tenantId}
@@ -537,15 +656,10 @@ function AppearanceForm({ initial }: { initial: Appearance }) {
           </div>
         </Section>
 
-        <Section step='guests' last>
+        <Section {...sectionProps('guests')} last>
           {(Object.keys(GUEST_GROUPS) as (keyof typeof GUEST_GROUPS)[]).map(
             (group) => {
-              const flags = GUEST_GROUPS[group].filter(
-                (f: GuestFlag) =>
-                  featureOn[f] !== false ||
-                  // "My order" stays visible, switched off with the reason (QUESTIONS #236).
-                  (f === 'show_order_list' && !!initial.my_order)
-              )
+              const flags = guestFlags(group)
               return flags.length === 0 ? null : (
                 <div key={group} className='grid gap-3'>
                   <p className='text-xs font-semibold tracking-wide text-muted-foreground uppercase'>
@@ -661,23 +775,26 @@ function AppearanceForm({ initial }: { initial: Appearance }) {
   )
 }
 
-/** The five steps as chips that scroll to their section (easy to find your way). */
-function StepBar() {
+/** The five steps as chips that open and scroll to their section (easy to find your way). */
+function StepBar({ onPick }: { onPick: (step: Step) => void }) {
   const { t } = useTranslation()
   return (
     <nav
       aria-label={t('appearance.steps.label')}
-      className='-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1 sm:flex-wrap sm:overflow-visible'
+      className='-mx-1 flex min-w-0 gap-1.5 overflow-x-auto px-1 pb-1 sm:flex-wrap sm:overflow-visible'
     >
       {STEPS.map((step, i) => (
         <a
           key={step}
-          href={`#ap-${step}`}
+          href={`#${SECTION_IDS[step]}`}
           onClick={(e) => {
             e.preventDefault()
-            document
-              .getElementById(`ap-${step}`)
-              ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            window.history.replaceState(
+              window.history.state,
+              '',
+              `#${SECTION_IDS[step]}`
+            )
+            onPick(step)
           }}
           className='flex min-h-9 flex-none items-center gap-2 rounded-full border bg-background px-3 text-sm whitespace-nowrap hover:bg-accent'
         >
@@ -691,13 +808,25 @@ function StepBar() {
   )
 }
 
-/** One step: its number, icon, title and a one-line hint, then its settings. */
+/** One step: a card that opens and closes, with its number, icon, title and a hint or summary. */
 function Section({
   step,
+  open,
+  onOpenChange,
+  onNext,
+  changed,
+  summary,
+  errors,
   last = false,
   children,
 }: {
   step: Step
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onNext: (next: Step) => void
+  changed: boolean
+  summary: string
+  errors: string[]
   last?: boolean
   children: React.ReactNode
 }) {
@@ -705,39 +834,36 @@ function Section({
   const Icon = STEP_ICON[step]
   const next = STEPS[STEPS.indexOf(step) + 1]
   return (
-    <Card id={`ap-${step}`} className='scroll-mt-20'>
-      <CardHeader>
-        <CardTitle className='flex items-center gap-3 text-lg'>
-          <span className='flex size-9 flex-none items-center justify-center rounded-xl bg-primary/10 text-primary'>
-            <Icon className='size-5' aria-hidden />
-          </span>
-          <span>
-            <span className='me-1.5 text-muted-foreground'>
-              {STEPS.indexOf(step) + 1}.
-            </span>
-            {t(`appearance.steps.${step}`)}
-          </span>
-        </CardTitle>
-        <CardDescription>{t(`appearance.step_hints.${step}`)}</CardDescription>
-      </CardHeader>
-      <CardContent className='grid gap-5'>
-        {children}
-        {!last && next && (
-          <button
-            type='button'
-            onClick={() =>
-              document
-                .getElementById(`ap-${next}`)
-                ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-            }
-            className='flex w-fit items-center gap-1.5 text-sm font-medium text-primary hover:underline'
-          >
-            {t('appearance.next', { step: t(`appearance.steps.${next}`) })}
-            <ArrowDown className='size-4' aria-hidden />
-          </button>
-        )}
-      </CardContent>
-    </Card>
+    <CollapsibleCard
+      id={SECTION_IDS[step]}
+      open={open}
+      onOpenChange={onOpenChange}
+      number={STEPS.indexOf(step) + 1}
+      title={t(`appearance.steps.${step}`)}
+      icon={<Icon className='size-5' aria-hidden />}
+      hint={t(`appearance.step_hints.${step}`)}
+      summary={summary}
+      changed={changed}
+    >
+      {errors.length > 0 && (
+        <div role='alert' className='grid gap-1 text-sm text-destructive'>
+          {errors.map((message, i) => (
+            <p key={`${i}-${message}`}>{message}</p>
+          ))}
+        </div>
+      )}
+      {children}
+      {!last && next && (
+        <button
+          type='button'
+          onClick={() => onNext(next)}
+          className='flex w-fit items-center gap-1.5 text-sm font-medium text-primary hover:underline'
+        >
+          {t('appearance.next', { step: t(`appearance.steps.${next}`) })}
+          <ArrowDown className='size-4' aria-hidden />
+        </button>
+      )}
+    </CollapsibleCard>
   )
 }
 
