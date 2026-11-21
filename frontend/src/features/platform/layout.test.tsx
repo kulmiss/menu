@@ -6,9 +6,10 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { page } from 'vitest/browser'
 import { PlatformLayout } from './layout'
 
+let path = '/platform/restaurants'
 vi.mock('@tanstack/react-router', async (orig) => ({
   ...(await import('@/test-utils/router-mock')).routerMock(await orig()),
-  useLocation: () => '/platform/restaurants',
+  useLocation: () => path,
   Outlet: () => null,
 }))
 
@@ -40,5 +41,34 @@ describe('Super Admin bar', () => {
         a.textContent ?? ''
       ).toBeLessThanOrEqual(window.innerWidth)
     }
+  })
+
+  // Bug (owner, 2026-11-21, first live sign-in): on the two-factor page the setup wizard opened
+  // before two-factor was on. The server holds back its data until then, so the steps were empty
+  // and the wizard covered the "Turn on" button.
+  it('waits with the setup wizard until two-factor sign-in is on', async () => {
+    path = '/platform/security'
+    // As the server answers before two-factor is on.
+    fake = fakeApi({
+      'GET /super/setup': {
+        status: 403,
+        data: { message: 'Turn on two-factor sign-in first.' },
+      },
+    })
+    const screen = await renderWithQuery(<PlatformLayout />, {
+      me: meFixture({
+        is_super_admin: true,
+        two_factor_enabled: false,
+        tenants: [],
+        onboarding: { setup_needed: true, web_tour: false, app_tour: false },
+      }),
+    })
+    await expect
+      .element(screen.getByRole('navigation', { name: 'Platform' }))
+      .toBeVisible()
+    // The wizard is loaded lazily: give it time to appear, then check it did not.
+    await new Promise((r) => setTimeout(r, 1500))
+    expect(document.querySelector('[role=dialog]')).toBeNull()
+    path = '/platform/restaurants'
   })
 })
