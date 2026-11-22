@@ -71,7 +71,43 @@ class SiteController extends Controller
         return [self::DEMO, ...array_values(self::STYLE_DEMOS)];
     }
 
+    /** The home page designs the Super Admin can pick (owner, 2026-11-22). */
+    public const HOME_DESIGNS = ['landing1', 'landing2'];
+
+    /** The home page: Landing 1, or Landing 2 once the Super Admin picks it. */
     public function home(): View
+    {
+        if (PlatformSettings::get('home_design') === 'landing2') {
+            return view('site.landing2', [...$this->landing(), ...$this->landing2Extras(), 'isHome' => true]);
+        }
+
+        return view('site.landing', $this->landing());
+    }
+
+    /** Landing 2 at /landing2, to look at before it is the home page (always noindex, canonical "/"). */
+    public function landing2(): View
+    {
+        return view('site.landing2', [...$this->landing(), ...$this->landing2Extras(), 'isHome' => false]);
+    }
+
+    /**
+     * Landing 2 also shows every menu style A–T (a phone screenshot each, linked to its demo when live).
+     *
+     * @return array<string, mixed>
+     */
+    private function landing2Extras(): array
+    {
+        $live = Tenant::whereIn('slug', array_values(self::STYLE_DEMOS))->whereNull('suspended_at')->pluck('slug')->flip();
+
+        return ['allStyles' => collect(TenantAppearance::STYLES)->map(fn (string $style) => [
+            'style' => $style,
+            'href' => isset($live[self::STYLE_DEMOS[$style]]) ? url('/'.self::STYLE_DEMOS[$style]) : null,
+            'shot' => LandingImages::style($style),
+        ])->all()];
+    }
+
+    /** @return array<string, mixed> everything both home page designs show, from live data */
+    private function landing(): array
     {
         $s = PlatformSettings::all();
         $name = (string) $s['name'];
@@ -94,7 +130,7 @@ class SiteController extends Controller
         $socials = array_filter(Footer::published()['socials']);
         $chat = $contact['whatsapp'] !== null ? $contact['whatsapp'].'?text='.rawurlencode($t('chat.text', ['name' => $name])) : null;
 
-        return view('site.landing', [
+        return [
             'platform' => $name,
             'logo' => EmailLogo::url(),
             'colors' => BrandColor::palette($s['brand_color'] ?? null),
@@ -125,7 +161,7 @@ class SiteController extends Controller
             'shots' => array_combine(['hero', 'hero_dark', 'demo', 'demo_dark'], array_map(LandingImages::phone(...), ['hero', 'hero_dark', 'demo', 'demo_dark'])),
             'ogImage' => LandingImages::og()['url'],
             'jsonLd' => $this->jsonLd($name, $socials, $plans, $sections['faq'], $free !== null, $t),
-        ]);
+        ];
     }
 
     /**

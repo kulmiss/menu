@@ -1,4 +1,4 @@
-import { type ReactNode, useState } from 'react'
+import { createContext, type ReactNode, useContext, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { ArrowDownRight, ArrowRight, ArrowUpRight, Minus } from 'lucide-react'
@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Bar, Widget } from '@/features/dashboard/widget-card'
+import { HBars, LineChart, Sparkline } from './charts'
 
 /**
  * The Super Admin insights (QUESTIONS #186), downloaded on demand. Every
@@ -18,32 +19,80 @@ export type InsightFilters = {
   from?: string
   to?: string
   plan?: number
+  /** With the website demo restaurants (owner, 2026-11-22; off by default). */
+  demo?: boolean
+  /** Changes against the previous period; on unless switched off (compare=0). */
+  compare?: boolean
 }
 
-type Kpi = { value: number; previous: number }
+/** Whether the ↑/↓ % against the previous period is shown. */
+const CompareContext = createContext(true)
+
+type Kpi = { value: number; previous: number | null }
 type Overview = {
   from: string
   to: string
   currency: string
-  kpis: Record<
-    | 'restaurants'
-    | 'active'
-    | 'new_restaurants'
-    | 'paying'
-    | 'free'
-    | 'mrr_minor'
-    | 'revenue_minor'
-    | 'menu_views'
-    | 'qr_scans',
-    Kpi
-  >
-  series: {
-    date: string
-    menu_views: number
-    qr_scans: number
-    new_restaurants: number
-    revenue_minor: number
+  demo: boolean
+  has_payments: boolean
+  kpis: Record<KpiKey, Kpi>
+  series: ({ date: string } & Record<SeriesKey, number>)[]
+}
+type KpiKey =
+  | 'restaurants'
+  | 'active'
+  | 'new_restaurants'
+  | 'activated'
+  | 'paused'
+  | 'deleted_restaurants'
+  | 'paying'
+  | 'free'
+  | 'upgrades'
+  | 'downgrades'
+  | 'cancellations'
+  | 'mrr_minor'
+  | 'revenue_minor'
+  | 'arppu_minor'
+  | 'menu_views'
+  | 'qr_scans'
+  | 'dish_views'
+  | 'dishes_added'
+  | 'menu_changes'
+  | 'order_adds'
+  | 'order_lists'
+type SeriesKey =
+  | 'menu_views'
+  | 'qr_scans'
+  | 'new_restaurants'
+  | 'activated'
+  | 'revenue_minor'
+  | 'dishes_added'
+  | 'menu_changes'
+  | 'order_lists'
+type Mix = {
+  plans: {
+    id: number
+    name: Record<string, string> | null
+    paid: boolean
+    count: number
   }[]
+  changes: {
+    week: string
+    upgrades: number
+    downgrades: number
+    cancellations: number
+  }[]
+}
+type Reach = {
+  total: number
+  styles: { key: string; count: number }[]
+  languages: { key: string; count: number }[]
+  places: { key: string; count: number }[]
+}
+type Activation = {
+  from: string
+  to: string
+  steps: { key: string; count: number; percent: number }[]
 }
 type Growth = {
   from: string
@@ -92,7 +141,7 @@ type Usage = {
   styles: { style: string; count: number }[]
   limits: { key: string; count: number }[]
 }
-type Ranked = { id: number; name: string; total: number }
+type Ranked = { id: number; name: string; total: number; spark?: number[] }
 type Top = {
   currency: string
   windows: { views: string; scans: string; revenue: string }
@@ -122,6 +171,7 @@ const insightParams = (f: InsightFilters) => {
     p.set('to', f.to)
   } else p.set('days', String(f.days ?? 30))
   if (f.plan) p.set('plan', String(f.plan))
+  if (f.demo) p.set('demo', '1')
   return p.toString()
 }
 
@@ -184,23 +234,31 @@ function ToTable({
 
 export default function PlatformInsights({ f }: { f: InsightFilters }) {
   return (
-    <div className='grid min-w-0 gap-4'>
-      <OverviewWidget f={f} />
-      <div className='grid min-w-0 gap-4 lg:grid-cols-2'>
-        <GrowthWidget f={f} />
-        <HealthBandsWidget f={f} />
-        <EngagementWidget f={f} />
-        <UsageWidget f={f} />
-        <TopWidget f={f} />
-        <TeamWidget f={f} />
+    <CompareContext.Provider value={f.compare !== false}>
+      <div className='grid min-w-0 gap-4'>
+        <OverviewWidget f={f} />
+        <div className='grid min-w-0 gap-4 lg:grid-cols-2'>
+          <ActivationWidget f={f} />
+          <MixWidget f={f} />
+          <GrowthWidget f={f} />
+          <HealthBandsWidget f={f} />
+          <EngagementWidget f={f} />
+          <UsageWidget f={f} />
+          <ReachWidget f={f} />
+          <TopWidget f={f} />
+          <TeamWidget f={f} />
+        </div>
+        <CohortWidget f={f} />
       </div>
-      <CohortWidget f={f} />
-    </div>
+    </CompareContext.Provider>
   )
 }
 
 function Trend({ kpi }: { kpi: Kpi }) {
   const { t } = useTranslation()
+  const compare = useContext(CompareContext)
+  // Off, or a number with no history (e.g. paused now).
+  if (!compare || kpi.previous === null) return null
   if (kpi.previous === 0)
     return (
       <span className='text-xs text-muted-foreground'>
@@ -221,6 +279,35 @@ function Trend({ kpi }: { kpi: Kpi }) {
   )
 }
 
+/** The overview's numbers in five groups; each tile may open the matching table. */
+const KPI_GROUPS: {
+  key: 'restaurants' | 'plans' | 'money' | 'guests' | 'engagement'
+  tiles: KpiKey[]
+}[] = [
+  {
+    key: 'restaurants',
+    tiles: [
+      'restaurants',
+      'new_restaurants',
+      'active',
+      'activated',
+      'paused',
+      'deleted_restaurants',
+    ],
+  },
+  {
+    key: 'plans',
+    tiles: ['paying', 'free', 'upgrades', 'downgrades', 'cancellations'],
+  },
+  { key: 'money', tiles: ['revenue_minor', 'mrr_minor', 'arppu_minor'] },
+  { key: 'guests', tiles: ['menu_views', 'qr_scans', 'dish_views'] },
+  {
+    key: 'engagement',
+    tiles: ['dishes_added', 'menu_changes', 'order_adds', 'order_lists'],
+  },
+]
+const MONEY: KpiKey[] = ['revenue_minor', 'mrr_minor', 'arppu_minor']
+
 function OverviewWidget({ f }: { f: InsightFilters }) {
   const { t } = useTranslation()
   const query = useInsight<Overview>('overview', f)
@@ -228,115 +315,166 @@ function OverviewWidget({ f }: { f: InsightFilters }) {
     <Widget
       title={t('platform.ins.overview')}
       hint={t('platform.ins.overview_hint')}
+      info={t('platform.ins.info.overview')}
       query={query}
+      csv={(o) => ({
+        name: `dashboard-overview-${o.from}-${o.to}`,
+        rows: [
+          [
+            t('platform.ins.csv.number'),
+            t('platform.ins.csv.value'),
+            t('platform.ins.csv.previous'),
+          ],
+          ...KPI_GROUPS.flatMap((g) => g.tiles)
+            .filter((k) => o.kpis[k])
+            .map((k) => [
+              t(`platform.ins.kpi.${k}`),
+              o.kpis[k].value,
+              o.kpis[k].previous,
+            ]),
+          [],
+          [
+            t('platform.ins.csv.date'),
+            ...SERIES_KEYS.map((k) => t(`platform.ins.series.${k}`)),
+          ],
+          ...o.series.map((d) => [
+            d.date,
+            ...SERIES_KEYS.map((k) => d[k] ?? 0),
+          ]),
+        ],
+      })}
     >
       {(o) => {
         const range = { from: o.from, to: o.to }
-        const tiles: {
-          key: keyof Overview['kpis']
-          value: string
-          search?: TableSearch
-          section?: 'payments'
-        }[] = [
-          {
-            key: 'restaurants',
-            value: num(o.kpis.restaurants.value),
-            search: {},
-          },
-          {
-            key: 'active',
-            value: num(o.kpis.active.value),
-            search: { health: 'healthy,at_risk' },
-          },
-          {
-            key: 'new_restaurants',
-            value: num(o.kpis.new_restaurants.value),
-            search: range,
-          },
-          {
-            key: 'paying',
-            value: num(o.kpis.paying.value),
-            search: { usage: 'paying' },
-          },
-          {
-            key: 'free',
-            value: num(o.kpis.free.value),
-            search: { usage: 'not_paying' },
-          },
-          {
-            key: 'mrr_minor',
-            value: money(o.kpis.mrr_minor.value, o.currency),
-            section: 'payments',
-          },
-          {
-            key: 'revenue_minor',
-            value: money(o.kpis.revenue_minor.value, o.currency),
-            section: 'payments',
-          },
-          {
-            key: 'menu_views',
-            value: num(o.kpis.menu_views.value),
-            search: { sort: '-views' },
-          },
-          {
-            key: 'qr_scans',
-            value: num(o.kpis.qr_scans.value),
-            search: { sort: '-scans' },
-          },
-        ]
+        const link: Partial<Record<KpiKey, TableSearch>> = {
+          restaurants: {},
+          new_restaurants: range,
+          active: { health: 'healthy,at_risk' },
+          paused: { state: 'read_only,unavailable,suspended' },
+          paying: { usage: 'paying' },
+          free: { usage: 'not_paying' },
+          menu_views: { sort: '-views' },
+          qr_scans: { sort: '-scans' },
+        }
+        const value = (k: KpiKey) =>
+          k.endsWith('_minor')
+            ? money(o.kpis[k].value, o.currency)
+            : num(o.kpis[k].value)
+        const labels = o.series.map((d) => d.date)
+        const line = (k: SeriesKey) => ({
+          key: k,
+          label: t(`platform.ins.series.${k}`),
+          values: o.series.map((d) => d[k] ?? 0),
+        })
+        // Revenue per month (the days, or weeks for long ranges, added up per month).
+        const months = new Map<string, number>()
+        for (const d of o.series)
+          months.set(
+            d.date.slice(0, 7),
+            (months.get(d.date.slice(0, 7)) ?? 0) + (d.revenue_minor ?? 0)
+          )
         return (
-          <div className='grid gap-4'>
-            <ul className='grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5'>
-              {tiles.map((tile) => {
-                const body = (
-                  <>
-                    <span className='text-sm text-muted-foreground'>
-                      {t(`platform.ins.kpi.${tile.key}`)}
-                    </span>
-                    <span className='text-xl font-bold tabular-nums'>
-                      {tile.value}
-                    </span>
-                    <Trend kpi={o.kpis[tile.key]} />
-                  </>
-                )
-                const cls =
-                  'flex min-h-11 flex-col gap-0.5 rounded-lg border p-3 hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none'
-                return (
-                  <li key={tile.key} className='min-w-0'>
-                    {tile.section ? (
-                      <Link
-                        to='/platform/$section'
-                        params={{ section: tile.section }}
-                        search={tile.key === 'revenue_minor' ? range : {}}
-                        className={cls}
-                      >
-                        {body}
-                      </Link>
-                    ) : (
-                      <ToTable f={f} search={tile.search ?? {}} className={cls}>
-                        {body}
-                      </ToTable>
-                    )}
-                  </li>
-                )
-              })}
-            </ul>
-            <div className='grid gap-4 md:grid-cols-2'>
-              <Columns
-                title={t('platform.ins.chart.views')}
-                points={o.series.map((s) => ({
-                  label: s.date,
-                  value: s.menu_views,
-                }))}
+          <div className='grid gap-5'>
+            {o.demo && (
+              <p className='w-fit rounded-md bg-amber-100 px-2 py-1 text-xs font-medium text-amber-900 dark:bg-amber-900/40 dark:text-amber-100'>
+                {t('platform.ins.demo_included')}
+              </p>
+            )}
+            {KPI_GROUPS.map((g) => (
+              <section
+                key={g.key}
+                aria-labelledby={`kpi-${g.key}`}
+                className='grid gap-2'
+              >
+                <h3 id={`kpi-${g.key}`} className='text-sm font-semibold'>
+                  {t(`platform.ins.group.${g.key}`)}
+                </h3>
+                {g.key === 'money' && !o.has_payments ? (
+                  <p className='rounded-lg border border-dashed p-3 text-sm text-muted-foreground'>
+                    {t('platform.ins.no_payments')}
+                  </p>
+                ) : (
+                  <ul className='grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6'>
+                    {/* A number the server doesn't send (an older version) is left out. */}
+                    {g.tiles
+                      .filter((k) => o.kpis[k])
+                      .map((k) => {
+                        const body = (
+                          <>
+                            <span className='text-sm text-muted-foreground'>
+                              {t(`platform.ins.kpi.${k}`)}
+                            </span>
+                            <span className='text-xl font-bold tabular-nums'>
+                              {value(k)}
+                            </span>
+                            <Trend kpi={o.kpis[k]} />
+                          </>
+                        )
+                        const cls =
+                          'flex min-h-11 flex-col gap-0.5 rounded-lg border p-3'
+                        const search = link[k]
+                        return (
+                          <li key={k} className='min-w-0'>
+                            {MONEY.includes(k) ? (
+                              <Link
+                                to='/platform/$section'
+                                params={{ section: 'payments' }}
+                                search={k === 'revenue_minor' ? range : {}}
+                                className={`${cls} hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none`}
+                              >
+                                {body}
+                              </Link>
+                            ) : search ? (
+                              <ToTable
+                                f={f}
+                                search={search}
+                                className={`${cls} hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none`}
+                              >
+                                {body}
+                              </ToTable>
+                            ) : (
+                              <div className={cls}>{body}</div>
+                            )}
+                          </li>
+                        )
+                      })}
+                  </ul>
+                )}
+                {g.key === 'guests' && (
+                  <p className='text-xs text-muted-foreground'>
+                    {t('platform.ins.not_collected_guests')}
+                  </p>
+                )}
+              </section>
+            ))}
+            <div className='grid gap-6 md:grid-cols-2'>
+              <LineChart
+                title={t('platform.ins.chart.signups')}
+                labels={labels}
+                series={[line('new_restaurants'), line('activated')]}
                 format={num}
               />
-              <Columns
-                title={t('platform.ins.chart.revenue')}
-                points={o.series.map((s) => ({
-                  label: s.date,
-                  value: s.revenue_minor,
-                }))}
-                format={(v) => money(v, o.currency)}
+              <LineChart
+                title={t('platform.ins.chart.guests')}
+                labels={labels}
+                series={[line('menu_views'), line('qr_scans')]}
+                format={num}
+              />
+              {o.has_payments ? (
+                <Columns
+                  title={t('platform.ins.chart.revenue_month')}
+                  points={[...months].map(([label, v]) => ({
+                    label,
+                    value: v,
+                  }))}
+                  format={(v) => money(v, o.currency)}
+                />
+              ) : null}
+              <LineChart
+                title={t('platform.ins.chart.team')}
+                labels={labels}
+                series={[line('dishes_added'), line('menu_changes')]}
+                format={num}
               />
             </div>
           </div>
@@ -345,6 +483,17 @@ function OverviewWidget({ f }: { f: InsightFilters }) {
     </Widget>
   )
 }
+
+const SERIES_KEYS: SeriesKey[] = [
+  'new_restaurants',
+  'activated',
+  'menu_views',
+  'qr_scans',
+  'revenue_minor',
+  'dishes_added',
+  'menu_changes',
+  'order_lists',
+]
 
 /** One series of columns with a hover/focus readout; the title names it. */
 function Columns({
@@ -431,7 +580,25 @@ function GrowthWidget({ f }: { f: InsightFilters }) {
   const { t } = useTranslation()
   const query = useInsight<Growth>('growth', f)
   return (
-    <Widget title={t('platform.ins.growth')} query={query}>
+    <Widget
+      title={t('platform.ins.growth')}
+      info={t('platform.ins.info.growth')}
+      query={query}
+      csv={(g) => ({
+        name: `dashboard-growth-${g.from}-${g.to}`,
+        rows: [
+          [t('platform.ins.csv.week'), t('platform.ins.signups_week')],
+          ...g.weeks.map((w) => [w.week, w.count]),
+          [],
+          [t('platform.ins.csv.step'), t('platform.ins.csv.restaurants'), '%'],
+          ...g.funnel.map((s) => [
+            t(`platform.ins.step.${s.key}`),
+            s.count,
+            s.percent,
+          ]),
+        ],
+      })}
+    >
       {(g) => {
         const range = { from: g.from, to: g.to }
         return (
@@ -465,27 +632,27 @@ function GrowthWidget({ f }: { f: InsightFilters }) {
                 </ToTable>
               ))}
             </div>
-            <dl className='grid grid-cols-2 gap-2 text-sm'>
+            <div className='grid grid-cols-2 gap-2 text-sm'>
               <ToTable
                 f={f}
                 search={{ ...range, usage: 'paying' }}
                 className='rounded-lg border p-3 hover:bg-accent'
               >
                 <div>
-                  <dt className='text-muted-foreground'>
+                  <span className='block text-muted-foreground'>
                     {t('platform.ins.conversion')}
-                  </dt>
-                  <dd className='text-lg font-bold tabular-nums'>
+                  </span>
+                  <span className='block text-lg font-bold tabular-nums'>
                     {g.conversion.percent === null
                       ? '–'
                       : `${g.conversion.percent}%`}
-                  </dd>
-                  <dd className='text-xs text-muted-foreground'>
+                  </span>
+                  <span className='block text-xs text-muted-foreground'>
                     {t('platform.ins.conversion_hint', {
                       paid: g.conversion.paid,
                       total: g.conversion.signed_up,
                     })}
-                  </dd>
+                  </span>
                 </div>
               </ToTable>
               <ToTable
@@ -494,21 +661,21 @@ function GrowthWidget({ f }: { f: InsightFilters }) {
                 className='rounded-lg border p-3 hover:bg-accent'
               >
                 <div>
-                  <dt className='text-muted-foreground'>
+                  <span className='block text-muted-foreground'>
                     {t('platform.ins.churn')}
-                  </dt>
-                  <dd className='text-lg font-bold tabular-nums'>
+                  </span>
+                  <span className='block text-lg font-bold tabular-nums'>
                     {g.churn.percent === null ? '–' : `${g.churn.percent}%`}
-                  </dd>
-                  <dd className='text-xs text-muted-foreground'>
+                  </span>
+                  <span className='block text-xs text-muted-foreground'>
                     {t('platform.ins.churn_hint', {
                       churned: g.churn.churned,
                       total: g.churn.paying_at_start,
                     })}
-                  </dd>
+                  </span>
                 </div>
               </ToTable>
-            </dl>
+            </div>
           </div>
         )
       }}
@@ -532,8 +699,21 @@ function CohortWidget({ f }: { f: InsightFilters }) {
   return (
     <Widget
       title={t('platform.ins.cohorts')}
+      info={t('platform.ins.info.cohorts')}
       hint={t('platform.ins.cohorts_hint')}
       query={query}
+      csv={(g) => ({
+        name: 'dashboard-cohorts',
+        rows: [
+          [
+            t('platform.ins.month'),
+            t('platform.ins.step.signed_up'),
+            t('platform.ins.still_active'),
+            t('platform.ins.paying_now'),
+          ],
+          ...g.cohorts.map((c) => [c.month, c.signed_up, c.active, c.paying]),
+        ],
+      })}
     >
       {(g) =>
         g.cohorts.length === 0 ? (
@@ -613,6 +793,7 @@ function HealthBandsWidget({ f }: { f: InsightFilters }) {
   return (
     <Widget
       title={t('platform.ins.health')}
+      info={t('platform.ins.info.health')}
       hint={t('platform.ins.health_hint')}
       query={query}
     >
@@ -704,6 +885,7 @@ function EngagementWidget({ f }: { f: InsightFilters }) {
   return (
     <Widget
       title={t('platform.ins.engagement')}
+      info={t('platform.ins.info.engagement')}
       hint={t('platform.ins.engagement_hint')}
       query={query}
     >
@@ -772,7 +954,19 @@ function UsageWidget({ f }: { f: InsightFilters }) {
     <Widget
       title={t('platform.ins.usage')}
       hint={t('platform.ins.usage_hint')}
+      info={t('platform.ins.info.usage')}
       query={query}
+      csv={(u) => ({
+        name: 'dashboard-feature-use',
+        rows: [
+          [t('platform.ins.csv.name'), t('platform.ins.csv.restaurants'), '%'],
+          ...u.features.map((x) => [
+            t(`platform.ins.feature.${x.key}`),
+            x.count,
+            u.total ? Math.round((x.count * 100) / u.total) : 0,
+          ]),
+        ],
+      })}
     >
       {(u) => {
         const pct = (n: number) =>
@@ -796,16 +990,6 @@ function UsageWidget({ f }: { f: InsightFilters }) {
                 row(x.key, t(`platform.ins.feature.${x.key}`), x.count)
               )}
             </ul>
-            <p className='text-sm font-medium'>{t('platform.ins.styles')}</p>
-            <ul className='grid gap-0.5'>
-              {u.styles.map((s) =>
-                row(
-                  `style:${s.style}`,
-                  t(`platform.ins.style.${s.style}`, { defaultValue: s.style }),
-                  s.count
-                )
-              )}
-            </ul>
             <p className='text-sm font-medium'>{t('platform.ins.limits')}</p>
             <ul className='grid gap-0.5'>
               {u.limits.map((l) =>
@@ -826,7 +1010,30 @@ function TopWidget({ f }: { f: InsightFilters }) {
   const query = useInsight<Top>('top', f)
   const [tab, setTab] = useState<(typeof TOP_TABS)[number]>('views')
   return (
-    <Widget title={t('platform.ins.top')} query={query}>
+    <Widget
+      title={t('platform.ins.top')}
+      info={t('platform.ins.info.top')}
+      query={query}
+      csv={(d) => ({
+        name: 'dashboard-top-restaurants',
+        rows: [
+          [
+            t('platform.ins.csv.list'),
+            '#',
+            t('platform.ins.csv.name'),
+            t('platform.ins.csv.value'),
+          ],
+          ...TOP_TABS.flatMap((k) =>
+            d[k].map((r, i) => [
+              t(`platform.ins.top_tab.${k}`),
+              i + 1,
+              r.name,
+              r.total,
+            ])
+          ),
+        ],
+      })}
+    >
       {(d) => {
         const windowOf =
           tab === 'growth'
@@ -872,7 +1079,13 @@ function TopWidget({ f }: { f: InsightFilters }) {
                         </span>
                         {r.name}
                       </span>
-                      <span className='shrink-0 tabular-nums'>
+                      <span className='flex shrink-0 items-center gap-3 tabular-nums'>
+                        {r.spark && (
+                          <Sparkline
+                            values={r.spark}
+                            label={t('platform.ins.spark', { name: r.name })}
+                          />
+                        )}
                         {tab === 'revenue'
                           ? money(r.total, d.currency)
                           : `${tab === 'growth' ? '+' : ''}${num(r.total)}`}
@@ -903,6 +1116,7 @@ function TeamWidget({ f }: { f: InsightFilters }) {
   return (
     <Widget
       title={t('platform.ins.team')}
+      info={t('platform.ins.info.team')}
       hint={t('platform.ins.team_hint')}
       query={query}
     >
@@ -949,6 +1163,201 @@ function TeamWidget({ f }: { f: InsightFilters }) {
             {t('platform.ins.open_activity')}
             <ArrowRight className='size-4' aria-hidden />
           </Link>
+        </div>
+      )}
+    </Widget>
+  )
+}
+
+/** Signed up in the range → added a dish → chose a style → published → 100 guest views. */
+function ActivationWidget({ f }: { f: InsightFilters }) {
+  const { t } = useTranslation()
+  const query = useInsight<Activation>('activation', f)
+  return (
+    <Widget
+      title={t('platform.ins.activation')}
+      hint={t('platform.ins.activation_hint')}
+      info={t('platform.ins.info.activation')}
+      query={query}
+      csv={(a) => ({
+        name: `dashboard-activation-${a.from}-${a.to}`,
+        rows: [
+          [t('platform.ins.csv.step'), t('platform.ins.csv.restaurants'), '%'],
+          ...a.steps.map((s) => [
+            t(`platform.ins.act.${s.key}`),
+            s.count,
+            s.percent,
+          ]),
+        ],
+      })}
+    >
+      {(a) =>
+        a.steps[0].count === 0 ? (
+          <p className='text-sm text-muted-foreground'>
+            {t('platform.ins.no_signups')}
+          </p>
+        ) : (
+          <HBars
+            title={t('platform.ins.activation_steps')}
+            total={a.steps[0].count}
+            percent
+            rows={a.steps.map((s) => ({
+              key: s.key,
+              label: t(`platform.ins.act.${s.key}`),
+              value: s.count,
+            }))}
+          />
+        )
+      }
+    </Widget>
+  )
+}
+
+/** Restaurants per plan now, and plan changes per week. */
+function MixWidget({ f }: { f: InsightFilters }) {
+  const { t, i18n } = useTranslation()
+  const query = useInsight<Mix>('mix', f)
+  const name = (p: Mix['plans'][number]) =>
+    p.name
+      ? (p.name[i18n.language] ?? p.name.en ?? Object.values(p.name)[0])
+      : t('platform.ins.no_plan')
+  return (
+    <Widget
+      title={t('platform.ins.mix')}
+      hint={t('platform.ins.mix_hint')}
+      info={t('platform.ins.info.mix')}
+      query={query}
+      csv={(m) => ({
+        name: 'dashboard-plans',
+        rows: [
+          [
+            t('platform.ins.csv.plan'),
+            t('platform.ins.csv.paid'),
+            t('platform.ins.csv.restaurants'),
+          ],
+          ...m.plans.map((p) => [name(p), p.paid ? 1 : 0, p.count]),
+          [],
+          [
+            t('platform.ins.csv.week'),
+            t('platform.ins.kpi.upgrades'),
+            t('platform.ins.kpi.downgrades'),
+            t('platform.ins.kpi.cancellations'),
+          ],
+          ...m.changes.map((c) => [
+            c.week,
+            c.upgrades,
+            c.downgrades,
+            c.cancellations,
+          ]),
+        ],
+      })}
+    >
+      {(m) => (
+        <div className='grid gap-5'>
+          <HBars
+            title={t('platform.ins.per_plan')}
+            total={m.plans.reduce((a, p) => a + p.count, 0)}
+            percent
+            rows={m.plans.map((p) => ({
+              key: String(p.id),
+              label: `${name(p)}${p.paid ? '' : ` · ${t('platform.ins.free_plan')}`}`,
+              value: p.count,
+            }))}
+          />
+          <LineChart
+            title={t('platform.ins.plan_changes')}
+            labels={m.changes.map((c) => c.week)}
+            series={(['upgrades', 'downgrades', 'cancellations'] as const).map(
+              (k) => ({
+                key: k,
+                label: t(`platform.ins.kpi.${k}`),
+                values: m.changes.map((c) => c[k]),
+              })
+            )}
+            format={num}
+          />
+        </div>
+      )}
+    </Widget>
+  )
+}
+
+/** Menu styles, menu languages and places, from data the restaurants entered. */
+function ReachWidget({ f }: { f: InsightFilters }) {
+  const { t } = useTranslation()
+  const query = useInsight<Reach>('reach', f)
+  const lang = (code: string) => {
+    try {
+      return (
+        new Intl.DisplayNames(['en'], { type: 'language' }).of(code) ?? code
+      )
+    } catch {
+      return code
+    }
+  }
+  return (
+    <Widget
+      title={t('platform.ins.reach')}
+      hint={t('platform.ins.reach_hint')}
+      info={t('platform.ins.info.reach')}
+      query={query}
+      csv={(r) => ({
+        name: 'dashboard-styles-languages-places',
+        rows: [
+          [
+            t('platform.ins.csv.kind'),
+            t('platform.ins.csv.name'),
+            t('platform.ins.csv.restaurants'),
+          ],
+          ...r.styles.map((s) => [
+            t('platform.ins.styles'),
+            t(`platform.ins.style.${s.key}`, { defaultValue: s.key }),
+            s.count,
+          ]),
+          ...r.languages.map((s) => [
+            t('platform.ins.languages'),
+            lang(s.key),
+            s.count,
+          ]),
+          ...r.places.map((s) => [t('platform.ins.places'), s.key, s.count]),
+        ],
+      })}
+    >
+      {(r) => (
+        <div className='grid gap-5'>
+          <HBars
+            title={t('platform.ins.styles')}
+            total={r.total}
+            percent
+            rows={r.styles.map((s) => ({
+              key: s.key,
+              label: t(`platform.ins.style.${s.key}`, { defaultValue: s.key }),
+              value: s.count,
+            }))}
+          />
+          <HBars
+            title={t('platform.ins.languages')}
+            total={r.total}
+            percent
+            rows={r.languages.map((s) => ({
+              key: s.key,
+              label: lang(s.key),
+              value: s.count,
+            }))}
+          />
+          <HBars
+            title={t('platform.ins.places')}
+            total={r.total}
+            percent
+            rows={r.places.map((s) => ({
+              key: s.key,
+              label: s.key,
+              value: s.count,
+            }))}
+          />
+          <p className='text-xs text-muted-foreground'>
+            {t('platform.ins.not_collected_scheme')}
+          </p>
         </div>
       )}
     </Widget>

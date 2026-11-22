@@ -14,3 +14,16 @@ export function useIsMobile() {
     () => false
   )
 }
+
+/** Whether a CSS media query matches now (follows changes, e.g. turning a tablet). */
+export function useMediaQuery(query: string) {
+  return React.useSyncExternalStore(
+    (callback) => {
+      const mql = window.matchMedia(query)
+      mql.addEventListener('change', callback)
+      return () => mql.removeEventListener('change', callback)
+    },
+    () => window.matchMedia(query).matches,
+    () => false
+  )
+}

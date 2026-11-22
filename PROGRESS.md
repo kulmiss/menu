@@ -1,4 +1,20 @@
-# Progress — layouts, new styles R–T, new Appearance page (21 Nov 2026)
+# Progress — admin improvements and Landing 2 (22 Nov 2026)
+
+📍 Now: one PR into develop (feat/admin-landing2), CI running
+📊 Progress: ▓▓▓▓▓▓▓▓▓░ 95%
+✅ Just finished: collapsible Appearance sections, legal texts closed, theme phone preview, dashboard numbers/charts, Landing 2 with the home page switch
+⏭️ Next: CI green → owner merges → deploy → `php artisan platform:aggregate` on the server (fills the new dashboard numbers)
+⚠️ Waiting for the owner: merge; push the backup tag `landing-v1-2026-11-22` (blocked from here)
+⏱️ Time left: CI only
+
+## Steps
+- [x] 1. Collapsible sections in Appearance (QUESTIONS #247)
+- [x] 2. Legal texts closed in Settings; saving never touches Terms (QUESTIONS #248)
+- [x] 3. Phone preview on Super Admin → Themes (QUESTIONS #249)
+- [x] 4. Dashboard: demo data, compare, more numbers and charts, info, CSV (QUESTIONS #250)
+- [x] 5. Landing 2, backup of Landing 1, home page switch, Lighthouse CI (QUESTIONS #251)
+
+# Earlier: layouts, new styles R–T, new Appearance page (21 Nov 2026)
 
 📍 Now: PR 5 (demo layout switch) into develop, CI running — all 5 steps built
 📊 Progress: ▓▓▓▓▓▓▓▓▓░ 95%

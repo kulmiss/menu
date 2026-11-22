@@ -1,6 +1,7 @@
 import { fakeApi } from '@/test-utils/fake-api'
 import { meFixture } from '@/test-utils/fixtures'
 import { renderWithQuery } from '@/test-utils/render'
+import { navigate } from '@/test-utils/router-mock'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 import { toast } from '@/lib/toast'
@@ -81,6 +82,32 @@ describe('Super Admin screens', () => {
     await expect
       .element(screen.getByRole('button', { name: 'Last 30 days' }))
       .toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('switches "Compare" and "Include demo data", kept in the address', async () => {
+    fake = fakeApi({
+      'GET /super/dashboard': { data: { data: { states: {} } } },
+    })
+    navigate.mockClear()
+    const screen = await renderWithQuery(<PlatformDashboard />, { me: admin })
+    const compare = screen.getByRole('switch', {
+      name: 'Compare with previous period',
+    })
+    const demo = screen.getByRole('switch', { name: 'Include demo data' })
+    // Compare is on and demo data off unless the address says otherwise.
+    await expect.element(compare).toHaveAttribute('aria-checked', 'true')
+    await expect.element(demo).toHaveAttribute('aria-checked', 'false')
+
+    await userEvent.click(demo)
+    expect(navigate).toHaveBeenLastCalledWith({
+      search: { demo: true },
+      replace: true,
+    })
+    await userEvent.click(compare)
+    expect(navigate).toHaveBeenLastCalledWith({
+      search: { compare: false },
+      replace: true,
+    })
   })
 
   // QUESTIONS #236: the effective "My order" value per restaurant, and a filter on it.

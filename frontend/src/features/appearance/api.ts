@@ -49,6 +49,18 @@ export type PreviewScheme = 'light' | 'dark'
 export type Font = 'system' | 'serif' | 'rounded'
 export type BannerText = 'over' | 'under'
 /** Menu direction, style H only: auto = right-to-left when most of the menu is in Arabic script. */
+/** Styles with "Menu direction": H and M–T (QUESTIONS #229, #232, #243). */
+export const DIRECTION_STYLES: readonly MenuStyle[] = [
+  'arabic',
+  'coffee',
+  'grill',
+  'garden',
+  'coastal',
+  'luxe',
+  'burger',
+  'injera',
+  'juice',
+]
 export const MENU_DIRECTIONS = ['auto', 'ltr', 'rtl'] as const
 export type MenuDirection = (typeof MENU_DIRECTIONS)[number]
 

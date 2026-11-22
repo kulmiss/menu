@@ -136,3 +136,31 @@ it('adds the last sign-in line to the Privacy default only when it was not edite
     $run();
     expect(PlatformSettings::get('privacy'))->toEndWith('Our own extra line.');
 });
+
+it('never touches the Terms when other settings are saved (owner, 2026-11-21)', function () {
+    $admin = superAdmin();
+    $this->actingAs($admin)->putJson(p('settings'), ['terms' => "## Our terms\nEdited by hand."], idem())->assertOk();
+    $before = DB::table('platform_settings')->where('key', 'terms')->first();
+
+    $this->actingAs($admin)->putJson(p('settings'), ['name' => 'Menu Plus', 'support_email' => 'help@example.com', 'default_currency' => 'USD'], idem())->assertOk();
+
+    expect(PlatformSettings::get('name'))->toBe('Menu Plus')
+        ->and(PlatformSettings::get('terms'))->toBe("## Our terms\nEdited by hand.")
+        ->and(DB::table('platform_settings')->where('key', 'terms')->first())->toEqual($before);
+});
+
+it('tells the editor when each text was last saved (owner, 2026-11-21)', function () {
+    $admin = superAdmin();
+    // An emptied text shows the default, so it counts as never saved.
+    PlatformSettings::save(['cookies' => '']);
+    DB::table('platform_settings')->where('key', 'about')->delete();
+    $this->travelTo(now()->setDate(2026, 11, 12)->setTime(9, 30));
+    $this->actingAs($admin)->putJson(p('settings'), ['terms' => 'New terms.'], idem())->assertOk();
+    $this->travelBack();
+
+    $this->actingAs($admin)->getJson(p('settings'))->assertOk()
+        ->assertJsonPath('data.legal_updated_at.terms', '2026-11-12T09:30:00+00:00')
+        ->assertJsonPath('data.legal_updated_at.cookies', null)
+        ->assertJsonPath('data.legal_updated_at.about', null)
+        ->assertJsonPath('data.cookies', LegalText::default('cookies'));
+});

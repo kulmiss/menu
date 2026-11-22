@@ -739,7 +739,9 @@
         "branches": "Branches"
       },
       "next": "Upgrade to {{name}}",
-      "next_hint": "Everything you have now, plus:"
+      "next_hint": "Everything you have now, plus:",
+      "about": "About {{title}}",
+      "export_csv": "Export {{title}} as CSV"
     },
     "welcome": {
       "title": "Welcome! Your email is confirmed",

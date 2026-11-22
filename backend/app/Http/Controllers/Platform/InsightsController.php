@@ -18,7 +18,7 @@ use Illuminate\Validation\Rule;
  */
 class InsightsController extends Controller
 {
-    public const WIDGETS = ['overview', 'growth', 'engagement', 'usage', 'top', 'admins'];
+    public const WIDGETS = ['overview', 'growth', 'engagement', 'usage', 'top', 'admins', 'mix', 'reach', 'activation'];
 
     public function show(Request $request, string $widget): JsonResponse
     {
@@ -28,6 +28,7 @@ class InsightsController extends Controller
             'from' => ['sometimes', 'required_with:to', 'date_format:Y-m-d'],
             'to' => ['sometimes', 'required_with:from', 'date_format:Y-m-d', 'after_or_equal:from', 'before_or_equal:today'],
             'plan' => ['sometimes', 'nullable', 'integer', 'min:0'],
+            'demo' => ['sometimes', 'boolean'],
         ]);
         $today = CarbonImmutable::today();
         if (isset($data['from'], $data['to'])) {
@@ -40,11 +41,12 @@ class InsightsController extends Controller
             $to = $today;
             $from = $today->subDays((int) ($data['days'] ?? 30) - 1);
         }
-        $stats = new Stats($from, $to, (int) ($data['plan'] ?? 0));
+        $stats = new Stats($from, $to, (int) ($data['plan'] ?? 0), $request->boolean('demo'));
 
         return response()->json(['data' => [
             'from' => $from->toDateString(),
             'to' => $to->toDateString(),
+            'demo' => $request->boolean('demo'),
             ...$stats->cached($widget, fn () => $stats->{$widget}()),
         ]]);
     }

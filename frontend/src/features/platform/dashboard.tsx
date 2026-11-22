@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Switch } from '@/components/ui/switch'
 import { dashboardQ, STATES } from './api'
 import type { InsightFilters } from './insights'
 import { PageTitle } from './layout'
@@ -151,6 +152,22 @@ export function PlatformDashboard() {
               </option>
             ))}
           </select>
+        </div>
+        <div className='flex flex-wrap items-center gap-x-4 gap-y-2'>
+          <label className='flex min-h-11 items-center gap-2 text-sm sm:min-h-9'>
+            <Switch
+              checked={f.compare !== false}
+              onCheckedChange={(on) => set({ compare: on ? undefined : false })}
+            />
+            {t('platform.ins.compare')}
+          </label>
+          <label className='flex min-h-11 items-center gap-2 text-sm sm:min-h-9'>
+            <Switch
+              checked={!!f.demo}
+              onCheckedChange={(on) => set({ demo: on ? true : undefined })}
+            />
+            {t('platform.ins.include_demo')}
+          </label>
         </div>
         <p className='ms-auto text-xs text-muted-foreground'>
           {meta.data

@@ -58,6 +58,8 @@ class PlatformSettings
         'google_login' => false,
         // Public landing page (owner, 2026-11-13). Empty texts use the translated defaults.
         'brand_color' => '#c2410c',
+        // The home page: Landing 1 (the first design) or Landing 2 (owner, 2026-11-22).
+        'home_design' => 'landing1',
         'landing_headline' => '',
         'landing_subline' => '',
         // Sections between the hero and the footer (owner, 2026-11-17). "Customers say" starts hidden.
