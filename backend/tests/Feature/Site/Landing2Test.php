@@ -2,6 +2,7 @@
 
 use App\Enums\Role;
 use App\Models\Plan;
+use App\Models\Tenant;
 use App\Support\PlatformSettings;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
@@ -87,7 +88,7 @@ it('turns right to left for an Arabic site language', function () {
 });
 
 it('has the owner\'s fixes before the switch (2026-11-22)', function () {
-    \App\Models\Tenant::factory()->create(['slug' => 'demo']);
+    Tenant::factory()->create(['slug' => 'demo']);
     $html = $this->get('/landing2')->assertOk()->getContent();
     // 1. A short header button on phones.
     expect($html)->toContain('<span class="sm">Start free</span>');
