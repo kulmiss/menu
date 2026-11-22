@@ -204,9 +204,9 @@ it('logs a plan change made with a payment, for the upgrade count', function () 
     ['b' => $b, 'pro' => $pro] = dashboardWorld();
     $this->actingAs(superAdmin())->postJson(p("restaurants/{$b->id}/payments"), ['amount_minor' => 49_000, 'currency' => 'ETB', 'method' => 'cash',
         'paid_at' => now()->toDateString(), 'months' => 1, 'plan_id' => $pro->id], idem())->assertCreated();
-    // Compared decoded: MySQL stores JSON in its own order and spacing.
+    // Compared decoded and in any key order: MySQL stores JSON in its own order and spacing.
     expect(json_decode((string) DB::table('activity_log')->where('action', 'platform.plan_changed')->where('subject_id', $b->id)->latest('id')->value('changes'), true))
-        ->toBe(['plan_id' => ['from' => $b->plan_id, 'to' => $pro->id]]);
+        ->toEqual(['plan_id' => ['from' => $b->plan_id, 'to' => $pro->id]]);
 });
 
 it('keeps the new widgets for Super Admins only', function () {

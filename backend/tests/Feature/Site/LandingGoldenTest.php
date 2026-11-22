@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\URL;
 
 /*
  * Landing 1 stays exactly as it was when Landing 2 was added (owner, 2026-11-22): the home
@@ -11,6 +12,9 @@ use Illuminate\Support\Facades\File;
 
 function landingHtml(): string
 {
+    // A fixed site address: it is in the page's links and in the QR code drawn on it.
+    config(['app.url' => 'http://127.0.0.1:8000']);
+    URL::forceRootUrl('http://127.0.0.1:8000');
     $html = test()->get('/')->assertOk()->getContent();
 
     // The random script nonce and the site address (APP_URL differs per machine) are masked.
