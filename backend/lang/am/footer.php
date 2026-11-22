@@ -1,0 +1,60 @@
+<?php
+
+// The website footer in Amharic, for Landing 2's Amharic page (owner, 2026-11-22).
+// Texts the Super Admin typed in Content → Footer are translated in Super Admin → Landing 2.
+// A first draft: NEEDS A NATIVE SPEAKER'S REVIEW.
+return [
+    'columns' => [
+        'product' => 'ምርት',
+        'restaurants' => 'ለምግብ ቤቶች',
+        'company' => 'ድርጅት',
+        'legal' => 'ሕጋዊ',
+    ],
+    'pages' => [
+        'home' => 'መነሻ ገጽ',
+        'features' => 'ባህሪያት',
+        'pricing' => 'እቅዶችና ዋጋዎች',
+        'demo' => 'የማሳያ ሜኑ ይመልከቱ',
+        'styles' => 'የሜኑ ስታይሎች',
+        'app' => 'የሞባይል መተግበሪያ',
+        'how' => 'እንዴት እንደሚሰራ',
+        'faq' => 'ጥያቄዎች',
+        'signup' => 'በነፃ ይመዝገቡ',
+        'signin' => 'ይግቡ',
+        'help' => 'የእርዳታ ማዕከል',
+        'qr_guide' => 'የQR ኮድ ማተሚያ መመሪያ',
+        'about' => 'ስለ እኛ',
+        'contact' => 'ያግኙን',
+        'terms' => 'የአገልግሎት ውል',
+        'privacy' => 'ግላዊነት',
+        'cookies' => 'ስለ ኩኪዎች',
+        'delete_account' => 'መለያዬን ሰርዝ',
+    ],
+    'partners' => 'አጋሮችና ሻጮች',
+    'contact' => [
+        'title' => 'ያነጋግሩን',
+        'whatsapp' => 'በWhatsApp ያውሩን',
+        'phone' => 'ይደውሉልን',
+        'email' => 'ኢሜይል ይላኩልን',
+        'address' => 'አድራሻ',
+        'hours' => 'የሥራ ሰዓት',
+        'whatsapp_text' => 'ሰላም :name፣ ጥያቄ አለኝ።',
+    ],
+    'socials' => [
+        'facebook' => 'Facebook',
+        'instagram' => 'Instagram',
+        'tiktok' => 'TikTok',
+        'youtube' => 'YouTube',
+        'telegram' => 'Telegram',
+        'x' => 'X',
+        'linkedin' => 'LinkedIn',
+    ],
+    'follow' => 'ይከተሉን',
+    'trust' => 'ነፃ እቅድ ለዘላለም · ካርድ አያስፈልግም',
+    'app_badge' => 'ከGoogle Play ያውርዱ',
+    'app_title' => 'ለስልክዎ የአስተዳዳሪ መተግበሪያ',
+    'back_to_top' => 'ወደ ላይ ይመለሱ',
+    'copyright' => '© :year :name',
+    'label' => 'የድረ-ገጹ ግርጌ',
+    'new_tab' => '(በአዲስ ትር ይከፈታል)',
+];

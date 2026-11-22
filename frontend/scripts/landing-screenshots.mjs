@@ -5,7 +5,7 @@
 // copies when PHP's GD can write AVIF (else old AVIF copies are deleted, and
 // the page then uses WebP only). Usage:
 //   node scripts/landing-screenshots.mjs [http://127.0.0.1:8000] [styles]
-// ("styles": only the "More menu styles" pictures, nothing else is touched.)
+// ("styles": only the "More menu styles" and Landing 2 switcher pictures, nothing else is touched.)
 import { chromium } from 'playwright'
 import { execFileSync } from 'node:child_process'
 import { mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:fs'
@@ -84,6 +84,7 @@ const styles = {
   luxe: 'demo-maison', burger: 'demo-bigbite', injera: 'demo-shekla', juice: 'demo-spris',
 }
 mkdirSync(join(out, 'styles'), { recursive: true })
+mkdirSync(join(out, 'switch'), { recursive: true })
 const thumbs = await browser.newContext({ viewport: { width: 375, height: 760 }, deviceScaleFactor: 2, colorScheme: 'light' })
 for (const [style, slug] of Object.entries(styles)) {
   const page = await thumbs.newPage()
@@ -109,6 +110,19 @@ for (const [style, slug] of Object.entries(styles)) {
       ])
     }
     if (!avif) rmSync(join(out, 'styles', `${style}-${width}.avif`), { force: true })
+  }
+  // Landing 2's style switcher in the hero phone (owner, 2026-11-22): WebP, each at most
+  // 20 KB. "-1x" is 220 px wide (the phone's width). "-2x" is 440 px when that fits in 20 KB
+  // at quality 40 or more, else the widest that does (photo-heavy menus: a bit softer on
+  // sharp screens, never heavier).
+  for (const [name, widths] of [['1x', [220]], ['2x', [440, 420, 400, 380, 360, 340, 320]]]) {
+    execFileSync('php', [
+      '-r',
+      `$s=imagecreatefrompng($argv[1]);foreach(array_slice($argv,3) as $w){$w=(int)$w;$h=(int)round(imagesy($s)*$w/imagesx($s));$d=imagecreatetruecolor($w,$h);imagecopyresampled($d,$s,0,0,0,0,$w,$h,imagesx($s),imagesy($s));for($q=72;$q>=40;$q-=4){ob_start();imagewebp($d,null,$q);$b=ob_get_clean();if(strlen($b)<=20480){file_put_contents($argv[2],$b);exit(0);}}}fwrite(STDERR,"no size fits in 20 KB\n");exit(1);`,
+      png,
+      join(out, 'switch', `${style}-${name}.webp`),
+      ...widths.map(String),
+    ])
   }
   console.log(`styles/${style}: /${slug}`)
 }

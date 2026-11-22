@@ -8,21 +8,22 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 
 /*
- * Landing 2 (owner, 2026-11-22): a new home page design at /landing2 (a preview: noindex,
- * canonical "/") that the Super Admin can make the home page, and switch back.
+ * Landing 2 (owner, 2026-11-22): a new home page design at /landing2 (a preview: noindex)
+ * that the Super Admin can make the home page, and switch back. Since the upgrade (QUESTIONS
+ * #253) each language's preview is its own canonical page, with hreflang to the other.
  */
 
-it('shows Landing 2 at /landing2 as a preview: noindex, canonical to the home page', function () {
+it('shows Landing 2 at /landing2 as a preview: noindex, its own canonical address', function () {
     $html = $this->get('/landing2')->assertOk()->getContent();
     expect($html)->toContain('<meta name="robots" content="noindex">')
-        ->toContain('<link rel="canonical" href="'.url('/').'">')
+        ->toContain('<link rel="canonical" href="'.url('/landing2').'">')
         ->toContain('Menus guests love to scan.')
         ->toContain('id="how"')->toContain('id="styles"')->toContain('id="faq"')
         // No structured data while it is only a preview.
         ->not->toContain('application/ld+json');
     // Every style A–T, named, with its phone screenshot.
     expect(substr_count($html, 'class="sty"'))->toBe(20)
-        ->and($html)->toContain('A · Editorial')->toContain('T · Juice &amp; Drinks')->toContain('landing/styles/juice-180.webp');
+        ->and($html)->toContain('A · Editorial')->toContain('T · Juice &amp; Drinks')->toContain('data-src="'.asset('landing/styles/juice-180.webp').'"');
     // The site footer with the legal pages, and no cookies.
     expect($html)->toContain('href="/terms"')->toContain('href="/privacy"');
     $this->get('/landing2')->assertCookieMissing('laravel_session');
@@ -80,11 +81,15 @@ it('keeps /landing2 out of the sitemap and free as a restaurant address', functi
     expect(config('menu.reserved_slugs'))->toContain('landing2');
 });
 
-it('turns right to left for an Arabic site language', function () {
+it('is English or Amharic only, whatever the site language (owner, 2026-11-22)', function () {
+    // Before the upgrade an Arabic site language turned it right to left; Landing 2 now has
+    // exactly two languages, each at its own address, both left to right.
     App::setLocale('ar');
-    expect($this->get('/landing2')->getContent())->toContain('dir="rtl"');
+    expect($this->get('/landing2')->getContent())->toContain('<html lang="en" dir="ltr">');
+    expect($this->get('/am/landing2')->getContent())->toContain('<html lang="am" dir="ltr">');
+    // The page puts the language back after itself.
+    expect(App::getLocale())->toBe('ar');
     App::setLocale('en');
-    expect($this->get('/landing2')->getContent())->toContain('dir="ltr"');
 });
 
 it('has the owner\'s fixes before the switch (2026-11-22)', function () {
@@ -93,12 +98,12 @@ it('has the owner\'s fixes before the switch (2026-11-22)', function () {
     // 1. A short header button on phones.
     expect($html)->toContain('<span class="sm">Start free</span>');
     // 2. Phones: a button to the demo instead of the QR box (the QR stays for computers).
-    expect($html)->toContain('class="btn btn-light qr-open" href="'.url('/demo').'"')->toContain('Open the demo menu')->toContain('.qr figure{display:none}');
+    expect($html)->toContain('class="btn btn-light qr-open" href="'.url('/demo').'"')->toContain('Open the demo menu')->toContain('.qr figure{margin:0;justify-self:center;text-align:center;font-size:.9rem;display:none}');
     // 3. FAQ with a +/− mark instead of the browser's arrow.
     expect($html)->toContain('.faq summary{cursor:pointer;list-style:none')->toContain('.faq summary::-webkit-details-marker{display:none}');
-    // 4. "The problem" and "Paper menu or QR menu?" from the same editable texts as Landing 1.
+    // 4. "The problem" and "Paper menu or QR menu?" (English: Landing 1's edits show here too, see Landing2UpgradeTest).
     expect($html)->toContain('id="problem"')->toContain('Paper menus cost you time and money')
         ->toContain('id="compare"')->toContain('Paper menu or QR menu?')->toContain('Change a price in seconds.');
     // 5. No visible scrollbar under the styles; arrows instead (named for screen readers).
-    expect($html)->toContain('scrollbar-width:none')->toContain('aria-controls="style-row" aria-label="More menu styles"');
+    expect($html)->toContain('scrollbar-width:none')->toContain('aria-controls="style-row" aria-label="More menu styles"')->toContain('aria-controls="style-row" aria-label="Earlier menu styles"');
 });

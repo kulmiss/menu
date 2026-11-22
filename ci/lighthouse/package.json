@@ -1,10 +1,12 @@
 {
   "name": "menu-lighthouse-ci",
   "private": true,
-  "description": "CI only: Lighthouse CI for the guest menu page (PLAN.md \u00a715.5). Exact versions, locked.",
+  "description": "CI only: Lighthouse CI for the guest menu page and the landing pages (PLAN.md §15.5), plus Landing 2's browser checks (landing2-checks.mjs). Exact versions, locked.",
   "license": "UNLICENSED",
   "devDependencies": {
-    "@lhci/cli": "0.16.0"
+    "@lhci/cli": "0.16.0",
+    "axe-core": "4.14.0",
+    "puppeteer-core": "25.16.0"
   },
   "overrides": {
     "puppeteer-core": "25.16.0"

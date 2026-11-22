@@ -66,6 +66,11 @@ return [
         'reset_sent' => 'The owner has signed in before, so :email got a "reset your password" e-mail.',
     ],
     // Super Admin → Footer (QUESTIONS #230).
+    // Super Admin → Landing 2 (owner, 2026-11-22).
+    'landing2' => [
+        'vtt' => 'The captions must be a WebVTT file (it starts with “WEBVTT”) in UTF-8.',
+        'mp4' => 'The video must be an MP4 file (H.264).',
+    ],
     'footer' => [
         'nothing_to_publish' => 'There are no changes to publish.',
         'unsafe_link' => 'Use a web address that starts with https://, a page of this site that starts with /, mailto: or tel:.',

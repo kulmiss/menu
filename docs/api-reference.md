@@ -4,7 +4,7 @@
 
 Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles inside a restaurant are checked by each screen's policy). **Feature**: the feature switch it needs (`402 features.<key>` when off). **Limit**: how many requests are allowed. Create/change requests need an `Idempotency-Key` header. Request and answer examples for the app: [mobile-api.md](mobile-api.md).
 
-**285 endpoints.**
+**294 endpoints.**
 
 ## Sign-in and account (web session)
 
@@ -254,6 +254,15 @@ Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles insid
 | PUT | `super/landing` | Super Admin |  | `super` limiter | Platform\LandingController@update |
 | DELETE | `super/landing/images/{slot}` | Super Admin |  | `super` limiter | Platform\LandingController@deleteImage |
 | POST | `super/landing/images/{slot}` | Super Admin |  | `super, 20,1` limiter | Platform\LandingController@saveImage |
+| GET | `super/landing2` | Super Admin |  | `super` limiter | Platform\Landing2Controller@show |
+| PUT | `super/landing2` | Super Admin |  | `super, 60,1` limiter | Platform\Landing2Controller@update |
+| POST | `super/landing2/restaurants` | Super Admin |  | `super, 30,1` limiter | Platform\Landing2Controller@storeRestaurant |
+| DELETE | `super/landing2/restaurants/{restaurant}` | Super Admin |  | `super` limiter | Platform\Landing2Controller@destroyRestaurant |
+| PUT | `super/landing2/restaurants/{restaurant}` | Super Admin |  | `super` limiter | Platform\Landing2Controller@updateRestaurant |
+| DELETE | `super/landing2/restaurants/{restaurant}/logo` | Super Admin |  | `super` limiter | Platform\Landing2Controller@removeLogo |
+| POST | `super/landing2/restaurants/{restaurant}/logo` | Super Admin |  | `super, 20,1` limiter | Platform\Landing2Controller@saveLogo |
+| DELETE | `super/landing2/video` | Super Admin |  | `super` limiter | Platform\Landing2Controller@deleteVideo |
+| POST | `super/landing2/video` | Super Admin |  | `super, 10,1` limiter | Platform\Landing2Controller@saveVideo |
 | GET | `super/menu-requests` | Super Admin |  | `super` limiter | Platform\MenuRequestController@index |
 | DELETE | `super/menu-requests/{menuRequest}` | Super Admin |  | `super` limiter | Platform\MenuRequestController@destroy |
 | PUT | `super/menu-requests/{menuRequest}` | Super Admin |  | `super` limiter | Platform\MenuRequestController@update |

@@ -49,7 +49,7 @@
 <IfModule mod_headers.c>
     Header setifempty X-Content-Type-Options "nosniff"
     Header setifempty Referrer-Policy "strict-origin-when-cross-origin"
-    Header setifempty Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()"
+    Header setifempty Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
     # Only on HTTPS: browsers then refuse plain http for a year.
     Header always setifempty Strict-Transport-Security "max-age=31536000" "expr=%{HTTPS} == 'on'"
     # Guest menu copies: scripts are limited by the <meta> policy in the page itself.

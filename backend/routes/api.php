@@ -49,6 +49,7 @@ use App\Http\Controllers\Platform\FooterController;
 use App\Http\Controllers\Platform\HelpArticleController;
 use App\Http\Controllers\Platform\InsightsController as PlatformInsightsController;
 use App\Http\Controllers\Platform\InvoiceController;
+use App\Http\Controllers\Platform\Landing2Controller;
 use App\Http\Controllers\Platform\LandingController;
 use App\Http\Controllers\Platform\MenuRequestController;
 use App\Http\Controllers\Platform\MobileAppController;
@@ -276,6 +277,16 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::put('landing', [LandingController::class, 'update']);
             Route::post('landing/images/{slot}', [LandingController::class, 'saveImage'])->whereIn('slot', array_keys(LandingImages::SLOTS))->middleware('throttle:20,1');
             Route::delete('landing/images/{slot}', [LandingController::class, 'deleteImage'])->whereIn('slot', array_keys(LandingImages::SLOTS));
+            // Super Admin → Landing 2 (owner, 2026-11-22).
+            Route::get('landing2', [Landing2Controller::class, 'show']);
+            Route::put('landing2', [Landing2Controller::class, 'update'])->middleware('throttle:60,1');
+            Route::post('landing2/restaurants', [Landing2Controller::class, 'storeRestaurant'])->middleware('throttle:30,1');
+            Route::put('landing2/restaurants/{restaurant}', [Landing2Controller::class, 'updateRestaurant'])->whereNumber('restaurant');
+            Route::delete('landing2/restaurants/{restaurant}', [Landing2Controller::class, 'destroyRestaurant'])->whereNumber('restaurant');
+            Route::post('landing2/restaurants/{restaurant}/logo', [Landing2Controller::class, 'saveLogo'])->whereNumber('restaurant')->middleware('throttle:20,1');
+            Route::delete('landing2/restaurants/{restaurant}/logo', [Landing2Controller::class, 'removeLogo'])->whereNumber('restaurant');
+            Route::post('landing2/video', [Landing2Controller::class, 'saveVideo'])->middleware('throttle:10,1');
+            Route::delete('landing2/video', [Landing2Controller::class, 'deleteVideo']);
             Route::post('settings/share-image', [PlatformController::class, 'saveShareImage']);
             Route::delete('settings/share-image', [PlatformController::class, 'deleteShareImage']);
             Route::post('settings/logo', [PlatformController::class, 'saveLogo']);

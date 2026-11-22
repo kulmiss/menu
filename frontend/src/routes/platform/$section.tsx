@@ -17,6 +17,7 @@ const SECTIONS = [
   'themes',
   'announcements',
   'landing',
+  'landing2',
   'footer',
   'activity',
   'settings',
