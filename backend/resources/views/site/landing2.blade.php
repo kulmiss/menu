@@ -21,15 +21,24 @@
         'chart' => '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
         'check' => '<path d="M5 12.5l4.5 4.5L19 7"/>',
         'whatsapp' => '<path d="M3.5 20.5l1.3-4.2A8.5 8.5 0 1 1 8 19.3z"/>',
+        'x' => '<path d="M6 6l12 12M18 6L6 18"/>',
+        'print' => '<path d="M7 9V3h10v6M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M7 14h10v7H7z"/>',
+        'old' => '<path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v4h-4"/><path d="M12 8v4l3 2"/>',
+        'wait' => '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/>',
+        'receipt' => '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6"/>',
+        'chev' => '<path d="M15 6l-6 6 6 6"/>',
     ];
     $icon = fn (string $k, string $class = 'ic') => '<svg class="'.$class.'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'.$paths[$k].'</svg>';
-    $ctaLink = function (string $class) use ($cta, $icon): string {
+    // $short: a shorter label on phones (the header), so it stays on one line.
+    $ctaLink = function (string $class, ?string $short = null) use ($cta, $icon): string {
         if ($cta === null) {
             return '';
         }
+        $label = $short === null ? e($cta['label'])
+            : '<span class="lg">'.e($cta['label']).'</span><span class="sm">'.e($short).'</span>';
 
         return '<a class="'.e($class).'" href="'.e($cta['href']).'"'.($cta['external'] ? ' target="_blank" rel="noopener"' : '').'>'
-            .e($cta['label']).' '.$icon('arrow', 'ic ar').'</a>';
+            .$label.' '.$icon('arrow', 'ic ar').'</a>';
     };
     $hero = $shots['hero'];
     $heroDark = $shots['hero_dark'];
@@ -97,7 +106,11 @@
         .nav{display:none;gap:1.4rem;margin-inline-start:auto}
         .nav a{text-decoration:none;font-weight:600;color:var(--muted)}
         .nav a:hover{color:var(--fg)}
-        .top .btn{margin-inline-start:auto;min-height:2.75rem;padding:.5rem 1.1rem}
+        .top .btn{margin-inline-start:auto;min-height:2.75rem;padding:.5rem 1.1rem;white-space:nowrap;flex:none}
+        .top .logo{min-width:0}
+        .top .logo span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .top .sm{display:none}
+        @media (max-width:39.99rem){.top .lg{display:none}.top .sm{display:inline}}
         @media (min-width:56rem){.nav{display:flex}.top .btn{margin-inline-start:0}}
         /* Hero */
         .hero{margin:1rem auto 0;background:var(--brand);color:var(--on-brand);border-radius:var(--r);padding:2.25rem 1.5rem 0;display:grid;gap:1.5rem;overflow:hidden}
@@ -121,8 +134,34 @@
         .steps h3{font-size:1.2rem;margin-bottom:.4rem;display:flex;align-items:center;gap:.5rem}
         .steps p{color:var(--muted)}
         @media (min-width:48rem){.steps{grid-template-columns:repeat(3,1fr)}}
+        /* Problem and Paper vs QR (from Landing 1, kept short) */
+        .pains{display:grid;gap:.75rem;margin:1.5rem 0 0;padding:0;list-style:none}
+        .pains li{display:flex;gap:.9rem;align-items:flex-start;background:var(--soft);border-radius:1.1rem;padding:1rem 1.15rem;color:var(--muted)}
+        .pains b{display:block;color:var(--fg);font-size:1.05rem}
+        .pains .ic{width:1.6rem;height:1.6rem;color:#b91c1c;margin-top:.1rem}
+        @media (prefers-color-scheme:dark){.pains .ic,.side.paper .ic{color:#f87171}}
+        .fix{display:flex;gap:.6rem;align-items:center;margin-top:1rem;font-weight:700}
+        .fix .ic{color:var(--ink)}
+        @media (min-width:48rem){.pains{grid-template-columns:repeat(3,1fr)}}
+        .vs{display:grid;gap:1rem;margin-top:1.5rem}
+        .side{border-radius:var(--r);padding:1.4rem}
+        .side h3{display:flex;align-items:center;gap:.5rem;font-size:1.2rem;margin-bottom:.75rem}
+        .side ul{margin:0;padding:0;list-style:none;display:grid;gap:.55rem}
+        .side li{display:flex;gap:.55rem;align-items:flex-start}
+        .side li .ic{width:1.15rem;height:1.15rem;margin-top:.25rem}
+        .side.paper{background:var(--soft);color:var(--muted)}
+        .side.paper .ic{color:#b91c1c}
+        .side.qrm{background:var(--brand);color:var(--on-brand)}
+        @media (min-width:48rem){.vs{grid-template-columns:1fr 1fr}}
         /* Styles */
-        .row{display:flex;gap:1rem;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-inline:1rem;padding:1.5rem 1rem 1rem;margin:1rem -1rem 0;scrollbar-width:thin}
+        .row{display:flex;gap:1rem;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-inline:1rem;padding:1.5rem 1rem 1rem;margin:1rem -1rem 0;scrollbar-width:none}
+        .row::-webkit-scrollbar{display:none}
+        .arrows{display:none;gap:.5rem;justify-content:flex-end;margin-top:.5rem}
+        .arrows button{width:2.75rem;height:2.75rem;border-radius:99px;border:2px solid var(--line);background:var(--card);color:var(--fg);display:grid;place-items:center;cursor:pointer}
+        .arrows button:hover{border-color:var(--fg)}
+        .arrows .nx svg{transform:scaleX(-1)}
+        [dir=rtl] .arrows svg{transform:scaleX(-1)}[dir=rtl] .arrows .nx svg{transform:none}
+        @media (min-width:48rem) and (hover:hover){.js .arrows{display:flex}}
         .sty{flex:none;width:9.5rem;scroll-snap-align:start;text-decoration:none;color:inherit}
         .sty .ph{border:5px solid #0f172a;border-radius:1.4rem;overflow:hidden;background:var(--soft);aspect-ratio:180/365}
         .sty .ph img{width:100%;height:100%;object-fit:cover;object-position:top}
@@ -133,7 +172,10 @@
         .qr .sub{color:#cbd5e1}
         .qr figure{margin:0;justify-self:center;text-align:center;font-size:.9rem}
         .qr svg.code{width:10rem;height:10rem;background:#fff;padding:.6rem;border-radius:1rem}
-        @media (min-width:48rem){.qr{grid-template-columns:1fr auto;padding:3rem}}
+        /* Phones: a button to the demo (no QR to scan on the same phone); computers: the QR. */
+        .qr figure{display:none}
+        .qr-open{justify-self:start}
+        @media (min-width:48rem){.qr{grid-template-columns:1fr auto;padding:3rem}.qr figure{display:block}.qr-open{display:none}}
         @media (prefers-color-scheme:dark){.qr{background:#16213b;border:1px solid var(--line)}.shot,.sty .ph{border-color:#334155}}
         .feats{display:grid;gap:1rem;margin:2rem 0 0;padding:0;list-style:none}
         .feats li{border:2px solid var(--line);border-radius:var(--r);padding:1.4rem}
@@ -158,9 +200,14 @@
         @media (min-width:48rem){.plans{grid-template-columns:repeat(auto-fit,minmax(15rem,1fr))}}
         /* FAQ */
         .faq{margin-top:2rem;display:grid;gap:.75rem;max-width:48rem}
-        .faq details{background:var(--soft);border-radius:1.1rem;padding:0 1.25rem}
-        .faq summary{cursor:pointer;font-weight:700;padding:1rem 0;list-style-position:inside}
-        .faq p{padding:0 0 1.1rem;color:var(--muted)}
+        .faq details{background:var(--soft);border-radius:1.1rem;border:1px solid var(--line)}
+        .faq summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:1rem 1.25rem;min-height:3.5rem;font-weight:700;border-radius:1.1rem}
+        .faq summary::-webkit-details-marker{display:none}
+        .faq summary::after{content:"+";flex:none;font-size:1.6rem;line-height:1;font-weight:500;color:var(--ink);transition:transform .2s}
+        .faq details[open] summary::after{transform:rotate(45deg)}
+        .faq p{padding:0 1.25rem 1.1rem;color:var(--muted)}
+        @media (prefers-reduced-motion:no-preference){.faq details[open] p{animation:open .2s ease-out}@keyframes open{from{opacity:0;transform:translateY(-4px)}}}
+        @media (prefers-reduced-motion:reduce){.faq summary::after{transition:none}}
         /* Final band, sticky phone bar */
         .final{background:var(--brand);color:var(--on-brand);border-radius:var(--r);padding:3rem 1.5rem;text-align:center;display:grid;gap:1rem;justify-items:center;margin-bottom:4.5rem}
         .final h2{max-width:36rem}
@@ -189,7 +236,7 @@
             <a href="#faq">{{ $l2('nav.faq') }}</a>
             <a href="/signin">{{ $l2('nav.signin') }}</a>
         </nav>
-        {!! $ctaLink('btn btn-dark') !!}
+        {!! $ctaLink('btn btn-dark', $l2('sticky')) !!}
     </div>
 </header>
 
@@ -219,6 +266,18 @@
         </div>
     </div>
 
+    <section id="problem" aria-labelledby="problem-t">
+        <div class="wrap">
+            <h2 id="problem-t">{{ $t('problem.title') }}</h2>
+            <ul class="pains">
+                @foreach (array_keys(__('landing.problem.items')) as $key)
+                    <li>{!! $icon(in_array($key, ['print', 'old', 'wait'], true) ? $key : 'x') !!}<span><b>{{ $t("problem.items.{$key}.title") }}</b> {{ $t("problem.items.{$key}.text") }}</span></li>
+                @endforeach
+            </ul>
+            <p class="fix">{!! $icon('check') !!}<span>{{ $t('problem.text') }}</span></p>
+        </div>
+    </section>
+
     <section id="how" aria-labelledby="how-t">
         <div class="wrap">
             <h2 id="how-t">{{ $l2('how.title') }}</h2>
@@ -234,7 +293,11 @@
         <div class="wrap">
             <h2 id="styles-t">{{ $l2('styles.title', ['count' => $count, 'last' => $last]) }}</h2>
             <p class="sub">{{ $l2('styles.text') }}</p>
-            <div class="row">
+            <div class="arrows">
+                <button type="button" class="pv" data-dir="-1" aria-controls="style-row" aria-label="{{ __('landing.demo.styles_prev') }}">{!! $icon('chev') !!}</button>
+                <button type="button" class="nx" data-dir="1" aria-controls="style-row" aria-label="{{ __('landing.demo.styles_next') }}">{!! $icon('chev') !!}</button>
+            </div>
+            <div class="row" id="style-row">
                 @foreach ($allStyles as $i => $s)
                     @php($name = $letter($i).' · '.__('landing.demo.style_names.'.$s['style']))
                     @if ($s['href'])<a class="sty" href="{{ $s['href'] }}" aria-label="{{ $l2('styles.open', ['style' => $name]) }}">@else<div class="sty">@endif
@@ -253,12 +316,40 @@
         </div>
     </section>
 
+    <section id="compare" aria-labelledby="compare-t">
+        <div class="wrap">
+            <h2 id="compare-t">{{ $t('compare.title') }}</h2>
+            <p class="sub">{{ $t('compare.subtitle') }}</p>
+            <div class="vs">
+                <div class="side paper">
+                    <h3>{!! $icon('receipt') !!} {{ $t('compare.before') }}</h3>
+                    <ul>
+                        @foreach (array_keys(__('landing.compare.rows')) as $i)
+                            <li>{!! $icon('x') !!}<span>{{ $t("compare.rows.{$i}.0") }}</span></li>
+                        @endforeach
+                    </ul>
+                </div>
+                <div class="side qrm">
+                    <h3>{!! $icon('qr') !!} {{ $t('compare.after') }}</h3>
+                    <ul>
+                        @foreach (array_keys(__('landing.compare.rows')) as $i)
+                            <li>{!! $icon('check') !!}<span>{{ $t("compare.rows.{$i}.1") }}</span></li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <section aria-labelledby="qr-t">
         <div class="wrap qr">
             <div>
                 <h2 id="qr-t">{{ $l2('qr.title') }}</h2>
                 <p class="sub">{{ $l2('qr.text') }}</p>
             </div>
+            @if ($demoUrl)
+                <a class="btn btn-light qr-open" href="{{ $demoUrl }}">{{ __('landing.demo.open') }} {!! $icon('arrow', 'ic ar') !!}</a>
+            @endif
             @if ($qr)
                 <figure>
                     <svg class="code" viewBox="0 0 {{ $qr['size'] }} {{ $qr['size'] }}" role="img" aria-label="{{ $l2('qr.scan') }}" shape-rendering="crispEdges"><path fill="#0f172a" d="{{ $qr['path'] }}"/></svg>
@@ -344,6 +435,17 @@
     var past = false, atEnd = false, set = function () { bar.classList.toggle('on', past && !atEnd); };
     new IntersectionObserver(function (e) { past = !e[0].isIntersecting; set(); }).observe(hero);
     if (end) new IntersectionObserver(function (e) { atEnd = e[0].isIntersecting; set(); }).observe(end);
+})();
+(function () {
+    // The styles row: arrows on computers (the scrollbar is hidden; phones swipe).
+    var row = document.getElementById('style-row'), rtl = document.dir === 'rtl';
+    if (!row) return;
+    document.querySelectorAll('.arrows button').forEach(function (b) {
+        b.addEventListener('click', function () {
+            var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            row.scrollBy({ left: Number(b.dataset.dir) * (rtl ? -1 : 1) * row.clientWidth * 0.8, behavior: reduce ? 'auto' : 'smooth' });
+        });
+    });
 })();
 </script>
 </body>

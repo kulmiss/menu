@@ -85,3 +85,19 @@ it('turns right to left for an Arabic site language', function () {
     App::setLocale('en');
     expect($this->get('/landing2')->getContent())->toContain('dir="ltr"');
 });
+
+it('has the owner\'s fixes before the switch (2026-11-22)', function () {
+    \App\Models\Tenant::factory()->create(['slug' => 'demo']);
+    $html = $this->get('/landing2')->assertOk()->getContent();
+    // 1. A short header button on phones.
+    expect($html)->toContain('<span class="sm">Start free</span>');
+    // 2. Phones: a button to the demo instead of the QR box (the QR stays for computers).
+    expect($html)->toContain('class="btn btn-light qr-open" href="'.url('/demo').'"')->toContain('Open the demo menu')->toContain('.qr figure{display:none}');
+    // 3. FAQ with a +/− mark instead of the browser's arrow.
+    expect($html)->toContain('.faq summary{cursor:pointer;list-style:none')->toContain('.faq summary::-webkit-details-marker{display:none}');
+    // 4. "The problem" and "Paper menu or QR menu?" from the same editable texts as Landing 1.
+    expect($html)->toContain('id="problem"')->toContain('Paper menus cost you time and money')
+        ->toContain('id="compare"')->toContain('Paper menu or QR menu?')->toContain('Change a price in seconds.');
+    // 5. No visible scrollbar under the styles; arrows instead (named for screen readers).
+    expect($html)->toContain('scrollbar-width:none')->toContain('aria-controls="style-row" aria-label="More menu styles"');
+});
