@@ -247,7 +247,7 @@ class MenuPageData
                 'pdfMenu' => $features['pdf_menu'],
                 'orderList' => $orderList,
                 // QR code → table, so "Show to waiter" can say which table (codes are printed on the tables anyway).
-                'tables' => $orderList ? self::tables($branchId) : [],
+                'tables' => $orderList && $features['tables'] ? self::tables($branchId) : [],
                 'branch' => $branch && $branches->count() > 1 ? $text($branch->name) : null,
                 // One URL per branch, no picker (owner, 2026-11-12): only a footer list of the other branches.
                 'otherBranches' => $branches->count() > 1 && $theme['show_other_branches']

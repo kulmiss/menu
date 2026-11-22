@@ -122,6 +122,7 @@
   "branches": {
     "title": "Branches",
     "description": "Each branch has its own menu address, tables and QR codes. Prices and availability can differ per branch.",
+    "description_no_tables": "Each branch has its own menu address and QR code. Prices and availability can differ per branch.",
     "new": "New branch",
     "edit": "Edit branch",
     "name": "Name",

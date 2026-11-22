@@ -34,10 +34,13 @@ class QrCodeController extends Controller
 
     public function __construct(private readonly CurrentTenant $current) {}
 
-    public function index(): JsonResponse
+    public function index(Tenant $tenant): JsonResponse
     {
         Gate::authorize('restaurant.manage');
-        $codes = QrCode::with(['branch', 'table.branch'])->orderBy('id')->get();
+        $codes = QrCode::with(['branch', 'table.branch'])->orderBy('id')
+            // Tables switched off: table codes are left out of the list (they still open the menu).
+            ->when(! Features::enabled($tenant, 'tables'), fn ($q) => $q->whereNull('dining_table_id'))
+            ->get();
 
         return response()->json(['data' => $codes->map(fn (QrCode $q) => $this->row($q))]);
     }
