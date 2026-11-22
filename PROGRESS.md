@@ -1,6 +1,11 @@
-# Progress — Landing 2 look & feel upgrade, English + Amharic (22 Nov 2026)
+# Progress — Landing 2 demo video (22 Nov 2026)
 
-📍 Now: one PR into develop (feat/landing2-upgrade, stacked on #180), CI running
+📍 Now: one PR into develop (feat/landing2-video), CI running
+
+- The 30-second demo video, recorded from the real app (`frontend/scripts/landing2-video.mjs`): sign up → add a dish → pick a style → print the QR → a guest scans it. 801 KB, 720p H.264, captions EN + AM, built into Landing 2 (QUESTIONS #258). Loads only on ▶.
+- CI browser check: the video tap now tested (the poster is centred first, so the phone's sticky bar doesn't cover it).
+
+# Earlier: Landing 2 look & feel upgrade, English + Amharic (22 Nov 2026)
 
 - English + Amharic: /landing2 and /am/landing2 (/ and /am once it is home), hreflang + canonical, a switch in the header and footer that keeps the section, Amharic font subset (2 × ~16 KB). Amharic is a draft: docs/landing2-amharic-review.csv, `php artisan landing2:amharic --import=… [--dry-run]` (QUESTIONS #253).
 - Super Admin → Landing 2: 22 ON/OFF switches, every text in EN/AM, restaurants, payment methods, numbers, demo video, footer in Amharic (#254–#258).
