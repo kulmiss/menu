@@ -69,6 +69,10 @@
 @if ($logoUrl)<img src="{{ $logoUrl }}" alt="" height="24" loading="lazy">@else<span class="sf-mark" aria-hidden="true">{{ $mark }}</span>@endif
 <span>{{ __('footer.copyright', ['year' => date('Y'), 'name' => $f['company']]) }}</span>
 @if ($f['made_in'])<span>{{ $f['made_in'] }}</span>@endif
+@isset($languages)
+{{-- Landing 2 (owner, 2026-11-22): English / Amharic. --}}
+<nav class="sf-lang" aria-label="{{ $languages['label'] }}">@foreach ($languages['items'] as $l)<a href="{{ $l['href'] }}" lang="{{ $l['code'] }}" hreflang="{{ $l['code'] }}" data-lang @if ($l['current']) aria-current="page" @endif>{{ $l['name'] }}</a>@endforeach</nav>
+@endisset
 @if ($f['back_to_top'])<a class="sf-up" href="#top">{!! $icon('up') !!}{{ __('footer.back_to_top') }}</a>@endif
 </div>
 </div>

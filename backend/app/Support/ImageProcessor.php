@@ -307,6 +307,16 @@ class ImageProcessor
         return $avif;
     }
 
+    /**
+     * An uploaded picture cropped to exactly $width × $height and saved as WebP
+     * (Landing 2: restaurant logos, the video's first picture).
+     */
+    public function coverWebp(string $path, string $mime, string $disk, string $target, int $width, int $height, int $quality = self::WEBP_QUALITY): void
+    {
+        $this->webpQuality = $quality;
+        $this->store($this->cover($this->orient($this->load($path, $mime), $path, $mime), $width, $height), 'webp', $disk, $target);
+    }
+
     /** Public wrapper for an uploaded file (Super Admin's default preview). */
     public function shareImageFrom(string $path, string $mime, string $disk, string $target): string
     {

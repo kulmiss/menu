@@ -71,6 +71,24 @@ class LandingImages
         ];
     }
 
+    /**
+     * Landing 2's style switcher: the style's phone screen for the hero phone, 1x and 2x
+     * (WebP, at most 20 KB each), or null while there is none.
+     *
+     * @return array{src: string, srcset: string}|null
+     */
+    public static function switchShot(string $style): ?array
+    {
+        if (preg_match('/^[a-z]+$/', $style) !== 1 || ! is_file(public_path("landing/switch/{$style}-1x.webp")) || ! is_file(public_path("landing/switch/{$style}-2x.webp"))) {
+            return null;
+        }
+
+        return [
+            'src' => asset("landing/switch/{$style}-1x.webp"),
+            'srcset' => asset("landing/switch/{$style}-1x.webp").' 1x, '.asset("landing/switch/{$style}-2x.webp").' 2x',
+        ];
+    }
+
     /** @return array{url: string, custom: bool} */
     public static function og(): array
     {

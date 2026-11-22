@@ -63,6 +63,8 @@ Schedule::command('plans:move-replaced')->hourlyAt(7)->withoutOverlapping();
 Schedule::command('platform:aggregate --days=2')->hourlyAt(12)->withoutOverlapping(30);
 Schedule::command('platform:aggregate --days=35')->dailyAt('22:10')->withoutOverlapping(60);
 Schedule::command('menu:refresh-pages --all')->dailyAt('21:05');
+// Landing 2's real numbers (owner, 2026-11-22), after the nightly dashboard numbers.
+Schedule::command('landing2:numbers')->dailyAt('22:40')->withoutOverlapping(30);
 // Self sign-ups that never confirmed their e-mail (owner, 2026-11-13).
 Schedule::command('signup:prune')->dailyAt('00:20');
 // Mobile app sign-ins that expired or were unused too long (QUESTIONS #187). At night in Addis Ababa (#91).

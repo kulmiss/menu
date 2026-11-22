@@ -40,6 +40,9 @@ const SCREENS = {
   landing: lazy(() =>
     import('./landing-editor').then((m) => ({ default: m.LandingEditorPage }))
   ),
+  landing2: lazy(() =>
+    import('./landing2-editor').then((m) => ({ default: m.Landing2EditorPage }))
+  ),
   footer: lazy(() =>
     import('./footer-editor').then((m) => ({ default: m.FooterEditorPage }))
   ),

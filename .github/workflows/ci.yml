@@ -64,6 +64,8 @@ jobs:
               - 'backend/resources/views/account/**'
               - 'backend/lang/en/landing.php'
               - 'backend/lang/en/landing2.php'
+              - 'backend/lang/am/**'
+              - 'backend/app/Support/Landing/**'
               - 'backend/lang/en/footer.php'
               - 'backend/lang/en/site.php'
               - 'backend/resources/legal/**'
@@ -403,15 +405,20 @@ jobs:
           curl -sf http://localhost:8125/signin | grep -q 'action="/signin"'
           curl -sf http://localhost:8125/signup | grep -q 'action="/signup"'
           curl -sf http://localhost:8125/landing2 | grep -q 'id="styles"'
+          curl -sf http://localhost:8125/am/landing2 | grep -q '<html lang="am"'
       - name: Lighthouse CI
         working-directory: ci/lighthouse
         run: |
           npm ci --ignore-scripts --no-audit --no-fund
           npx --no-install lhci autorun --config=./lighthouserc.landing.json
-          # Landing 2 (owner, 2026-11-22): same targets; "noindex" until it is the home page.
+          # Landing 2 (owner, 2026-11-22), English and Amharic: same targets plus a page-weight
+          # budget (150 KB first load, no script files); "noindex" until it is the home page.
           mkdir -p .lighthouseci-l1 && cp .lighthouseci/lhr-*.json .lighthouseci-l1/
           npx --no-install lhci autorun --config=./lighthouserc.landing2.json
           cp .lighthouseci-l1/lhr-*.json .lighthouseci/
+      - name: Landing 2 browser checks (both languages, phones to desktop, light and dark)
+        working-directory: ci/lighthouse
+        run: SHOTS=/tmp/landing2-shots node landing2-checks.mjs http://localhost:8125
       - name: Scores (median of 5 runs)
         if: always()
         run: |
@@ -443,4 +450,5 @@ jobs:
           path: |
             /tmp/lhci-landing
             /tmp/lhci-landing2
+            /tmp/landing2-shots
           if-no-files-found: ignore

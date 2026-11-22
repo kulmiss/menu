@@ -24,6 +24,7 @@ const NAV = [
   'themes',
   'announcements',
   'landing',
+  'landing2',
   'footer',
   'activity',
   'settings',
