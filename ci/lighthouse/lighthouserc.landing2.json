@@ -2,7 +2,8 @@
   "ci": {
     "collect": {
       "url": [
-        "http://localhost:8125/landing2"
+        "http://localhost:8125/landing2",
+        "http://localhost:8125/am/landing2"
       ],
       "numberOfRuns": 5,
       "settings": {
@@ -57,13 +58,13 @@
         "cumulative-layout-shift": [
           "error",
           {
-            "maxNumericValue": 0.02
+            "maxNumericValue": 0.001
           }
         ],
         "total-blocking-time": [
           "error",
           {
-            "maxNumericValue": 200
+            "maxNumericValue": 100
           }
         ],
         "resource-summary:script:count": [
@@ -73,6 +74,24 @@
           }
         ],
         "resource-summary:third-party:count": [
+          "error",
+          {
+            "maxNumericValue": 0
+          }
+        ],
+        "resource-summary:total:size": [
+          "error",
+          {
+            "maxNumericValue": 153600
+          }
+        ],
+        "resource-summary:script:size": [
+          "error",
+          {
+            "maxNumericValue": 30720
+          }
+        ],
+        "resource-summary:media:count": [
           "error",
           {
             "maxNumericValue": 0

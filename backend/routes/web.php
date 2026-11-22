@@ -33,6 +33,9 @@ Route::withoutMiddleware($cookieFree)->group(function () {
     Route::get('/', [SiteController::class, 'home']);
     // The new home page design, to look at before the Super Admin picks it (owner, 2026-11-22).
     Route::get('/landing2', [SiteController::class, 'landing2']);
+    // Landing 2 in Amharic (owner, 2026-11-22): /am/landing2 always, /am once it is the home page.
+    Route::get('/am', [SiteController::class, 'homeAm']);
+    Route::get('/am/landing2', [SiteController::class, 'landing2Am']);
     Route::get('/{page}', [SiteController::class, 'legal'])->whereIn('page', ['terms', 'privacy', 'about', 'contact', 'cookies']);
     // Help centre for everyone: the public help articles (footer, owner 2026-11-18). Not /help: that is the
     // screenshots' folder (public/help/shots), which Apache and `php artisan serve` would serve instead.

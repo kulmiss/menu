@@ -1,4 +1,15 @@
-# Progress — admin improvements and Landing 2 (22 Nov 2026)
+# Progress — Landing 2 look & feel upgrade, English + Amharic (22 Nov 2026)
+
+📍 Now: one PR into develop (feat/landing2-upgrade, stacked on #180), CI running
+
+- English + Amharic: /landing2 and /am/landing2 (/ and /am once it is home), hreflang + canonical, a switch in the header and footer that keeps the section, Amharic font subset (2 × ~16 KB). Amharic is a draft: docs/landing2-amharic-review.csv, `php artisan landing2:amharic --import=… [--dry-run]` (QUESTIONS #253).
+- Super Admin → Landing 2: 22 ON/OFF switches, every text in EN/AM, restaurants, payment methods, numbers, demo video, footer in Amharic (#254–#258).
+- The 13 additions: style switcher, price animation, languages, real restaurants (≥ 3 with permission), payment methods (text, no logos), Monthly/Yearly, light bands, blurred hero photo, video player (video not recorded yet), mesob/jebena pattern, QR poster preview, button lift + fade-in, real numbers (#259).
+- Speed: first load 394 KB → 55 KB (EN) / 89 KB (AM); Lighthouse 100/100/100/100 both. CI: Lighthouse for both languages with a 150 KB budget, and landing2-checks.mjs (20 cases: axe, CSP, console, layout shift, width, lazy loading, taps).
+- Also: Permissions-Policy without the retired "interest-cohort" (#260).
+- Report: docs/landing2-upgrade-2026-11-22.md.
+
+# Earlier: admin improvements and Landing 2 (22 Nov 2026)
 
 📍 Now: one PR into develop (feat/admin-landing2), CI running
 📊 Progress: ▓▓▓▓▓▓▓▓▓░ 95%

@@ -11,6 +11,8 @@ use App\Support\EmailLogo;
 use App\Support\Features;
 use App\Support\Help\HelpLibrary;
 use App\Support\Help\HelpRenderer;
+use App\Support\Landing\Landing2;
+use App\Support\Landing\Landing2Texts;
 use App\Support\Landing\LandingImages;
 use App\Support\Landing\LandingTexts;
 use App\Support\Legal\LegalText;
@@ -75,44 +77,132 @@ class SiteController extends Controller
     public const HOME_DESIGNS = ['landing1', 'landing2'];
 
     /** The home page: Landing 1, or Landing 2 once the Super Admin picks it. */
-    public function home(): View
+    public function home(): View|SymfonyResponse
     {
         if (PlatformSettings::get('home_design') === 'landing2') {
-            return view('site.landing2', [...$this->landing(), ...$this->landing2Extras(), 'isHome' => true]);
+            return $this->landing2Page('en', true);
         }
 
-        return view('site.landing', $this->landing());
-    }
-
-    /** Landing 2 at /landing2, to look at before it is the home page (always noindex, canonical "/"). */
-    public function landing2(): View
-    {
-        return view('site.landing2', [...$this->landing(), ...$this->landing2Extras(), 'isHome' => false]);
+        return view('site.landing', $this->landing(LandingTexts::resolver()));
     }
 
     /**
-     * Landing 2 also shows every menu style A–T (a phone screenshot each, linked to its demo when live).
-     *
-     * @return array<string, mixed>
+     * The Amharic home page (Landing 2 only, owner 2026-11-22). While Landing 1 is the home
+     * page there is no Amharic home page: back to "/". A restaurant that had the address
+     * "am" before it was reserved keeps it.
      */
-    private function landing2Extras(): array
+    public function homeAm(): View|SymfonyResponse
     {
-        $live = Tenant::whereIn('slug', array_values(self::STYLE_DEMOS))->whereNull('suspended_at')->pluck('slug')->flip();
+        if (Tenant::where('slug', 'am')->exists()) {
+            return app()->call([app(PublicMenuController::class), 'show'], ['slug' => 'am']);
+        }
+        if (PlatformSettings::get('home_design') !== 'landing2') {
+            return redirect('/');
+        }
 
-        return ['allStyles' => collect(TenantAppearance::STYLES)->map(fn (string $style) => [
-            'style' => $style,
-            'href' => isset($live[self::STYLE_DEMOS[$style]]) ? url('/'.self::STYLE_DEMOS[$style]) : null,
-            'shot' => LandingImages::style($style),
-        ])->all()];
+        return $this->landing2Page('am', true);
     }
 
-    /** @return array<string, mixed> everything both home page designs show, from live data */
-    private function landing(): array
+    /** Landing 2 at /landing2, to look at before it is the home page (always noindex). */
+    public function landing2(): View|SymfonyResponse
+    {
+        return $this->landing2Page('en', false);
+    }
+
+    /** Landing 2 in Amharic at /am/landing2 (always noindex). */
+    public function landing2Am(): View|SymfonyResponse
+    {
+        if (Tenant::where('slug', 'am')->exists()) {
+            return app()->call([app(PublicMenuController::class), 'show'], ['slug' => 'am', 'branch' => 'landing2']);
+        }
+
+        return $this->landing2Page('am', false);
+    }
+
+    /**
+     * Landing 2 in English or Amharic only (owner, 2026-11-22). The language is set for this
+     * page only, then put back.
+     */
+    private function landing2Page(string $locale, bool $isHome): SymfonyResponse
+    {
+        $before = app()->getLocale();
+        app()->setLocale($locale);
+        try {
+            if ($locale === 'am') {
+                Landing2Texts::applyLines();
+            }
+            $t = Landing2Texts::resolver($locale);
+
+            return response(view('site.landing2', [...$this->landing($t, $locale), ...$this->landing2Extras($locale, $isHome, $t), 'isHome' => $isHome])->render());
+        } finally {
+            app()->setLocale($before);
+        }
+    }
+
+    /**
+     * Landing 2's own parts (owner, 2026-11-22): every menu style A–T, the switcher, the
+     * switches, the numbers, restaurants, payment methods, video, poster and languages.
+     *
+     * @param  \Closure(string, array<string, string|int>=): mixed  $t
+     * @return array<string, mixed>
+     */
+    private function landing2Extras(string $locale, bool $isHome, \Closure $t): array
+    {
+        $live = Tenant::whereIn('slug', array_values(self::STYLE_DEMOS))->whereNull('suspended_at')->pluck('slug')->flip();
+        $on = Landing2::sections();
+        // The hero phone shows the demo café; its chip is the café's own style.
+        $demoStyle = DB::table('tenant_appearance')->join('tenants', 'tenants.id', '=', 'tenant_appearance.tenant_id')
+            ->where('tenants.slug', self::DEMO)->value('tenant_appearance.style');
+        $styles = collect(TenantAppearance::STYLES)->map(fn (string $style) => [
+            'style' => $style,
+            'name' => (string) $t('style_names.'.$style),
+            'href' => isset($live[self::STYLE_DEMOS[$style]]) ? url('/'.self::STYLE_DEMOS[$style]) : null,
+            'shot' => LandingImages::style($style),
+            'switch' => LandingImages::switchShot($style),
+        ])->all();
+        $numbers = $on['numbers'] ? Landing2::numbers($locale) : [];
+        $restaurants = $on['restaurants'] ? Landing2::restaurants($locale) : [];
+        $payments = array_values(array_filter(Landing2::payments(), fn (array $p) => $p['on']));
+        $video = $on['video'] ? Landing2::video() : null;
+        $paths = $isHome ? ['en' => '/', 'am' => '/am'] : ['en' => '/landing2', 'am' => '/am/landing2'];
+        $other = $locale === 'en' ? 'am' : 'en';
+
+        return [
+            'allStyles' => $styles,
+            'demoStyle' => in_array($demoStyle, TenantAppearance::STYLES, true) ? $demoStyle : null,
+            'on' => [...$on,
+                'numbers' => $numbers !== [],
+                'restaurants' => $restaurants !== [],
+                'payments' => $on['payments'] && $payments !== [],
+                'video' => $video !== null,
+            ],
+            'numbers' => $numbers,
+            'restaurants' => $restaurants,
+            'payments' => array_map(fn (array $p) => ['label' => $locale === 'am' && $p['label_am'] !== '' ? $p['label_am'] : $p['label_en'], 'icon' => $p['icon']], $payments),
+            'video' => $video,
+            'locale' => $locale,
+            'urls' => ['en' => url($paths['en']), 'am' => url($paths['am'])],
+            'otherLocale' => $other,
+            'canonical' => url($paths[$locale]),
+            // The poster's line in both languages: the poster's language can differ from the page's.
+            'posterScan' => ['en' => (string) Landing2Texts::resolver('en')('poster.scan'), 'am' => (string) Landing2Texts::resolver('am')('poster.scan')],
+            'heroPhoto' => $on['hero_photo'] && is_file(public_path('landing/hero-photo.webp'))
+                ? 'data:image/webp;base64,'.base64_encode((string) file_get_contents(public_path('landing/hero-photo.webp'))) : null,
+            'footer' => Landing2::footer($locale),
+        ];
+    }
+
+    /**
+     * Everything both home page designs show, from live data. $t: the page's texts (Landing 1:
+     * LandingTexts; Landing 2: Landing2Texts in English or Amharic).
+     *
+     * @param  \Closure(string, array<string, string|int>=): mixed  $t
+     * @return array<string, mixed>
+     */
+    private function landing(\Closure $t, string $locale = 'en'): array
     {
         $s = PlatformSettings::all();
         $name = (string) $s['name'];
-        // Every text: the Super Admin's version, else lang/en/landing.php (owner, 2026-11-17).
-        $t = LandingTexts::resolver();
         $sections = array_map('boolval', [...PlatformSettings::DEFAULTS['landing_sections'], ...array_intersect_key((array) $s['landing_sections'], PlatformSettings::DEFAULTS['landing_sections'])]);
         $live = Tenant::whereIn('slug', [self::DEMO, ...array_values(self::STYLE_DEMOS)])->whereNull('suspended_at')->pluck('slug')->flip();
         $demoUrl = isset($live[self::DEMO]) ? url('/'.self::DEMO) : null;
@@ -121,7 +211,7 @@ class SiteController extends Controller
         // Only quotes the Super Admin ticked as from a real customer (owner, 2026-11-17).
         $testimonials = array_values(array_filter((array) $s['landing_testimonials'], fn ($t) => is_array($t) && ($t['real'] ?? false) === true && trim((string) ($t['quote'] ?? '')) !== '' && trim((string) ($t['name'] ?? '')) !== ''));
         $sections['testimonials'] = $sections['testimonials'] && $testimonials !== [];
-        $plans = $this->plans($name, $contact);
+        $plans = $this->plans($name, $contact, $locale === 'am' ? Landing2Texts::all('am') : null);
         // The Free (sign-up) plan is promoted across the page (owner, 2026-11-13).
         $free = collect($plans)->first(fn (array $p) => $p['free'] && $p['highlight']);
         $sections['pricing'] = $sections['pricing'] && $plans !== [];
@@ -334,9 +424,10 @@ class SiteController extends Controller
      * are left out: restaurants can't pick them.
      *
      * @param  array{whatsapp: string|null, email: string|null}  $contact
+     * @param  array<string, string>|null  $amTexts  Landing 2 in Amharic: names for plans without an Amharic name
      * @return list<array<string, mixed>>
      */
-    private function plans(string $platform, array $contact): array
+    private function plans(string $platform, array $contact, ?array $amTexts = null): array
     {
         $signup = SignUp::plan();
         $plans = Plan::where('is_public', true)->where('is_active', true)->orderBy('sort')->orderBy('price_minor')->get()
@@ -375,15 +466,22 @@ class SiteController extends Controller
             // A ladder: each plan lists only what it adds to the one before.
             $included = $previous === null ? $have : array_diff_key($have, $previous['have']);
             $isFree = $p->price_minor === 0;
-            $name = $p->name[app()->getLocale()] ?? $p->name['en'] ?? $p->slug;
+            $name = $p->name[app()->getLocale()] ?? $amTexts["pricing.plan_names.{$p->slug}"] ?? $p->name['en'] ?? $p->slug;
             $message = __('landing.pricing.whatsapp_text', ['plan' => $name]);
             $year = $isFree || $p->interval !== 'month' || ! $p->price_year_minor ? null : __('landing.pricing.yearly', [
                 'price' => MenuPageData::money((int) $p->price_year_minor, $p->currency),
                 'months' => max(0, (int) round(12 - $p->price_year_minor / max(1, $p->price_minor))),
             ]);
 
+            // Landing 2's Monthly / Yearly switch (owner, 2026-11-22): the yearly price and months saved.
+            $yearly = ! $isFree && $p->interval === 'month' && $p->price_year_minor ? [
+                'price' => MenuPageData::money((int) $p->price_year_minor, $p->currency),
+                'months' => max(0, (int) round(12 - $p->price_year_minor / max(1, $p->price_minor))),
+            ] : null;
+
             $out[] = [
                 'name' => $name,
+                'yearly' => $yearly,
                 'free' => $isFree,
                 'highlight' => $p->id === $signup?->id,
                 'price' => $isFree ? __('landing.pricing.free') : MenuPageData::money($p->price_minor, $p->currency),

@@ -14,7 +14,9 @@ it('sends strict headers and a locked-down CSP on API answers', function () {
         ->and($res->headers->get('Referrer-Policy'))->toBe('strict-origin-when-cross-origin')
         ->and($res->headers->get('Content-Security-Policy'))->toBe("default-src 'none'; frame-ancestors 'none'")
         ->and($res->headers->get('Cross-Origin-Resource-Policy'))->toBe('same-origin')
-        ->and($res->headers->get('Permissions-Policy'))->toContain('camera=()');
+        ->and($res->headers->get('Permissions-Policy'))->toContain('camera=()')
+        // No retired feature names: Chrome warns about "interest-cohort" (FLoC) in every page's console.
+        ->and($res->headers->get('Permissions-Policy'))->not->toContain('interest-cohort');
 });
 
 it('gives site pages a nonce CSP that matches their inline scripts and forbids framing', function () {
@@ -102,7 +104,7 @@ it('ships the same static-file headers in .htaccess, the Nginx example and the C
         expect($htaccess)->toContain($h)->and($nginx)->toContain($h)->and($ci)->toContain($h);
     }
     foreach ([$htaccess, $nginx, $ci] as $conf) {
-        expect($conf)->toContain("Content-Security-Policy \"object-src 'none'; base-uri 'none'\"");
+        expect($conf)->toContain("Content-Security-Policy \"object-src 'none'; base-uri 'none'\"")->not->toContain('interest-cohort');
     }
     expect($htaccess)->toContain('Strict-Transport-Security "max-age=31536000" "expr=%{HTTPS} == \'on\'"');
 });

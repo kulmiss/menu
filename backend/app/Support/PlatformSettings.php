@@ -71,6 +71,15 @@ class PlatformSettings
         // lang/en/landing.php) and uploaded pictures (see App\Support\Landing\LandingImages).
         'landing_texts' => [],
         'landing_images' => [],
+        // Landing 2 (owner, 2026-11-22), see App\Support\Landing\Landing2 and Landing2Texts.
+        'landing2_texts' => ['en' => [], 'am' => []],
+        'landing2_sections' => [],
+        'landing2_payments' => null, // null = the built-in list (Landing2::PAYMENTS)
+        'landing2_numbers' => [],
+        'landing2_numbers_counted' => null, // {at, restaurants, dishes, views}: landing2:numbers, daily
+        'landing2_video' => null, // {folder} on the public disk (video.mp4, poster.webp, en.vtt, am.vtt); null = the built-in video, if any
+        'landing2_footer_am' => [], // English footer text (Content → Footer) => Amharic
+        'landing2_lines' => [], // Amharic plan lines and footer texts from the review CSV: "landing.pricing.free" / "footer.trust" => text
         // Footer links: network => URL (empty = hidden).
         // Billing (owner, 2026-11-13): shown on every invoice, copied into it when issued.
         'billing_company' => '',

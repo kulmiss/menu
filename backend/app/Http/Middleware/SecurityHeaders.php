@@ -31,7 +31,7 @@ class SecurityHeaders
 
         $set('X-Content-Type-Options', 'nosniff');
         $set('Referrer-Policy', 'strict-origin-when-cross-origin');
-        $set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()');
+        $set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(), usb=()');
         if ($request->isSecure() && config('security.hsts')) {
             $set('Strict-Transport-Security', 'max-age=31536000'.(config('security.hsts_subdomains') ? '; includeSubDomains' : ''));
         }
