@@ -71,6 +71,7 @@ const GROUPS: { id: string; keys: string[] }[] = [
       'insights',
       'import_export',
       'print_materials',
+      'tables',
     ],
   },
   { id: 'platform', keys: ['signup'] },

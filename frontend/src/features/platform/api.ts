@@ -19,6 +19,7 @@ export const FEATURES = [
   'sold_out',
   'share',
   'print_materials',
+  'tables',
   'style_editorial',
   'style_grid',
   'style_bistro',

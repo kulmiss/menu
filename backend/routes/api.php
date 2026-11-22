@@ -366,13 +366,13 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::post('branches', [BranchController::class, 'store'])->middleware('feature:branches');
             Route::patch('branches/{branch}', [BranchController::class, 'update']);
             Route::delete('branches/{branch}', [BranchController::class, 'destroy']);
-            Route::get('branches/{branch}/tables', [BranchController::class, 'tables']);
-            Route::post('branches/{branch}/tables', [BranchController::class, 'addTables']);
-            Route::delete('tables/{table}', [BranchController::class, 'deleteTable']);
+            Route::get('branches/{branch}/tables', [BranchController::class, 'tables'])->middleware('feature:tables');
+            Route::post('branches/{branch}/tables', [BranchController::class, 'addTables'])->middleware('feature:tables');
+            Route::delete('tables/{table}', [BranchController::class, 'deleteTable'])->middleware('feature:tables');
             Route::get('branches/{branch}/overrides', [BranchController::class, 'overrides']);
             Route::put('branches/{branch}/overrides', [BranchController::class, 'saveOverrides']);
             Route::put('menus/{menu}/branches', [BranchController::class, 'menuBranches']);
-            Route::get('branches/{branch}/table-cards.pdf', [QrCodeController::class, 'tableCards'])->middleware('throttle:exports');
+            Route::get('branches/{branch}/table-cards.pdf', [QrCodeController::class, 'tableCards'])->middleware(['throttle:exports', 'feature:tables']);
 
             Route::get('qr-codes', [QrCodeController::class, 'index']);
             Route::post('qr-codes', [QrCodeController::class, 'store']);

@@ -55,6 +55,10 @@ class Features
         'sold_out' => true,
         'share' => true, // "Share" button on the guest menu (owner, 2026-11-14)
         'print_materials' => true, // table tents, posters, stickers (owner, 2026-11-14)
+        // Tables (owner, 2026-11-22: some owners found them confusing). Off: no Tables in the
+        // admin, no table cards, no table codes in the QR list, no table name on "Show to waiter";
+        // codes already printed on tables keep opening the menu.
+        'tables' => true,
     ];
 
     /**
