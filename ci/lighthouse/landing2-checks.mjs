@@ -121,7 +121,9 @@ for (const lang of Object.keys(pages)) {
   }
   if (await page.$('#vp')) {
     if (log.requests.some((u) => u.endsWith('.mp4'))) fail(where, 'video bytes before the tap')
-    await page.$eval('#video', (s) => s.scrollIntoView())
+    // Centred, so the phone's sticky button bar at the bottom does not cover it.
+    await page.$eval('#vp', (s) => s.scrollIntoView({ block: 'center' }))
+    await new Promise((r) => setTimeout(r, 300))
     await page.click('#vp')
     await page.waitForResponse((r) => r.url().includes('.mp4'), { timeout: 5000 }).catch(() => fail(where, 'tapping ▶ loaded no video'))
   }

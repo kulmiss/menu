@@ -10,9 +10,8 @@ Landing 1 is unchanged byte for byte: its golden test passes.
 - **Switches and texts:** every part has an ON/OFF switch, and its texts can be edited in a new screen, **Super Admin → Landing 2**.
 - **Weight:** the first load went from **394 KB to 55 KB (English) and 89 KB (Amharic)**.
 - **Lighthouse:** **100/100/100/100** in both languages.
-- **Not done here:**
-  - The 30-second video is not recorded here. The player and the upload slot are ready; the recording steps are below.
-  - The Amharic is a draft that needs a native speaker's review.
+- **Video (added later the same day):** the 30-second demo video is recorded from the real app and built in (see #9).
+- **Not done here:** the Amharic is a draft that needs a native speaker's review.
 
 ## Speed (Lighthouse mobile, simulated mid-range phone, slow 4G, behind Nginx + gzip like CI)
 
@@ -74,7 +73,7 @@ Landing 1 is unchanged byte for byte: its golden test passes.
    - The page shows the first picture with ▶. The video and its captions (EN + AM) load only after the tap: 0 video bytes before. CI checks this.
    - No autoplay, no preload.
    - Upload slot: MP4 ≤ 2 MB (checked to really be MP4), a first picture, and .vtt captions.
-   - **Not recorded here.** Steps below.
+   - **Built in** (added later the same day): recorded from the real app by `frontend/scripts/landing2-video.mjs`. Sign up → add Beyaynetu (photo, Br 250) → pick E · Mesob → Poster A4 → a guest opens the QR link. 5 × 6 s, 1280 × 720 H.264, 801 KB, captions EN + AM. The recorded restaurant is put on Plus off camera so it can show a paid style. An uploaded video replaces it.
 10. **Mesob / jebena pattern.** Our own drawing, under 1 KB, very faint on the final band.
 11. **Free QR poster.**
     - A live preview: name, 6 colours, English or Amharic poster line, a sample QR marked "Example".
@@ -131,7 +130,7 @@ Landing 1 is unchanged byte for byte: its golden test passes.
 - Nothing heavy loads on open.
 - Taps:
   - The switcher loads one screen (plus the next two while idle).
-  - The video loads only on the tap. Not tested here, because there is no video yet.
+  - The video loads only on the tap (checked once the built-in video was added).
   - The language switch keeps `#pricing`.
 - In 1 of about 6 local runs, with the CPU busy with tests, one layout shift of 0.0036 was seen at 414 px. I could not repeat it in 18 more runs, even with 6× CPU slowdown.
 
@@ -146,7 +145,7 @@ Landing 1 is unchanged byte for byte: its golden test passes.
 
 ## What I could NOT test here
 - Real phones, Safari and Firefox. I tested Chromium only.
-- The demo video, because none is recorded.
+- The demo video's Amharic captions (native review, like the rest).
 - Golden screenshots are saved, but not compared pixel by pixel. Font rendering differs between machines, and the existing pixel tests already break in this sandbox.
 - Native Amharic quality.
 
@@ -160,13 +159,13 @@ Landing 1 is unchanged byte for byte: its golden test passes.
    - If any row is wrong, nothing is saved.
 2. **Restaurants:** add at least 3 real ones with their permission, in Super Admin → Landing 2 → Restaurants.
 3. **Numbers:** add outside numbers with their source and date, and check our own minimums.
-4. **Video:** record it with the steps below, then upload it in Super Admin → Landing 2 → Demo video.
+4. **Video:** watch the built-in one. To use your own instead, record it with the steps below and upload it in Super Admin → Landing 2 → Demo video.
 5. **Payment list:**
    - Check that telebirr, CBE Birr and bank transfer are what you accept.
    - Check the product name: CBE's site also says "CBE Birr Plus".
 6. **Git tag** (still from before): run `git tag landing-v1-2026-11-22 9b0a73e` and `git push origin landing-v1-2026-11-22`.
 
-### Recording the 30-second video
+### Recording your own 30-second video (optional)
 1. On your PC, start the app: `php artisan serve`.
 2. Open Chrome at 1280 × 720 (DevTools → device toolbar → "Responsive" 1280 × 720).
 3. Start the recorder: Windows Game Bar (Win + Alt + R) or OBS at 720p 30 fps, with no microphone.
