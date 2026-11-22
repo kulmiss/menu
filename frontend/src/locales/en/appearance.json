@@ -198,5 +198,14 @@
   "my_order_locked": {
     "platform": "Turned off by the platform.",
     "plan": "Not in your plan."
+  },
+  "summary": {
+    "logo": "Logo",
+    "logo_hidden": "Logo hidden",
+    "no_logo": "No logo",
+    "banner": "Banner",
+    "banner_hidden": "Banner hidden",
+    "no_banner": "No banner",
+    "guests": "{{on}} of {{total}} on"
   }
 }

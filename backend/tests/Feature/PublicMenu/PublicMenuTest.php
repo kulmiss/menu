@@ -184,21 +184,26 @@ it('removes static pages of restaurants whose subscription ran out', function ()
     File::deleteDirectory($public);
 });
 
-it('keeps the demo menu page within the 30 KB budget in every style (PLAN.md §15.1)', function (string $style) {
+it('keeps the demo menu page within the 30 KB budget in every style (PLAN.md §15.1)', function () {
+    // The demo café is seeded once and shown in each style in turn (seeding it per style took
+    // ~48 s × 20 styles on CI and pushed the backend job past its time limit; same checks).
     Storage::fake('public');
     $this->seed(DemoCafeSeeder::class);
     $demo = Tenant::where('slug', DemoSeeder::SLUG)->firstOrFail();
-    asTenant($demo, fn () => (TenantAppearance::first() ?? new TenantAppearance(TenantAppearance::DEFAULTS))->fill(['style' => $style])->save());
+    foreach (TenantAppearance::STYLES as $style) {
+        asTenant($demo, fn () => (TenantAppearance::first() ?? new TenantAppearance(TenantAppearance::DEFAULTS))->fill(['style' => $style])->save());
+        MenuPageCache::forget($demo->fresh());
 
-    $html = $this->get('/'.DemoSeeder::SLUG)->assertOk()->getContent();
-    $gzip = strlen((string) gzencode((string) $html, 9));
+        $html = $this->get('/'.DemoSeeder::SLUG)->assertOk()->getContent();
+        $gzip = strlen((string) gzencode((string) $html, 9));
 
-    expect($gzip)->toBeLessThanOrEqual(30 * 1024);
-    expect(preg_match('#<script>(.*?)</script>#s', (string) $html, $js))->toBe(1);
-    expect(strlen($js[1]))->toBeLessThan(5 * 1024);  // inline JS under 5 KB (§15.2.2)
-    // D · Minimal adds " NP" (no dish photos).
-    expect($html)->toMatch('/class="S-'.$style.'( NP)?( dc)?"/');
-})->with(TenantAppearance::STYLES);
+        expect($gzip)->toBeLessThanOrEqual(30 * 1024, "style {$style}: {$gzip} bytes gzipped");
+        expect(preg_match('#<script>(.*?)</script>#s', (string) $html, $js))->toBe(1, "style {$style}: one inline script");
+        expect(strlen($js[1]))->toBeLessThan(5 * 1024, "style {$style}: inline JS under 5 KB");  // §15.2.2
+        // D · Minimal adds " NP" (no dish photos).
+        expect($html)->toMatch('/class="S-'.$style.'( NP)?( dc)?"/');
+    }
+});
 
 it('accepts the visit beacon without an idempotency key', function () {
     $this->postJson('/api/v1/beacon', ['t' => 1])->assertNoContent();

@@ -8,7 +8,17 @@
     "continue": "Continue",
     "save": "Save",
     "on": "On",
-    "off": "Off"
+    "off": "Off",
+    "changed": "Changed",
+    "expand_all": "Expand all",
+    "collapse_all": "Collapse all",
+    "preview": {
+      "scheme_label": "Phone colour mode",
+      "light": "Light",
+      "dark": "Dark",
+      "desktop": "Preview on a computer",
+      "desktop_hint": "Your menu as a computer shows it, with the changes you haven't saved yet."
+    }
   },
   "nav": {
     "general": "General",

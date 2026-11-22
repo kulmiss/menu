@@ -3,6 +3,8 @@ import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import {
   AlertTriangle,
+  ChevronsDownUp,
+  ChevronsUpDown,
   ExternalLink,
   Loader2,
   Plus,
@@ -12,6 +14,7 @@ import { useTranslation } from 'react-i18next'
 import { useSetupWizard } from '@/stores/setup-wizard-store'
 import { validationErrors } from '@/lib/api'
 import { toast } from '@/lib/toast'
+import { useOpenSections } from '@/hooks/use-open-sections'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -32,6 +35,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import {
   Select,
   SelectContent,
@@ -43,6 +47,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
+import { CollapsibleCard } from '@/components/collapsible-card'
 import { ConfirmDialog } from '@/components/confirm-dialog'
 import { type Col, DataTable } from '@/components/data-table'
 import { MENU_STYLES } from '@/features/appearance/api'
@@ -71,6 +76,7 @@ import {
   SignupSettings,
   type SignupSettingsData,
 } from './signup-settings'
+import { ThemePreview } from './theme-preview'
 
 function useErrors() {
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -534,104 +540,115 @@ export function ThemesPage() {
         title={t('platform.nav.themes')}
         hint={t('platform.themes.hint')}
       />
-      <div className='grid gap-3 md:grid-cols-2'>
-        {themes.data?.map((th) => (
-          <Card key={th.id} className='py-3'>
-            <CardContent className='flex items-center gap-3 text-sm'>
-              <span
-                className='size-8 rounded-full border'
-                style={{ background: th.primary }}
-              />
-              <div className='flex-1'>
-                <p className='font-medium'>{th.name.en}</p>
-                <p className='text-muted-foreground'>
-                  {t(`platform.themes.fonts.${th.font}`)} ·{' '}
-                  {t(`platform.themes.styles.${th.style}`)}
-                </p>
-              </div>
-              <Switch
-                aria-label={t('platform.themes.offered', { name: th.name.en })}
-                checked={th.is_active}
-                onCheckedChange={(on) =>
-                  save.mutate({ id: th.id, is_active: on })
-                }
-              />
+      <div className='grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_380px]'>
+        <div className='grid min-w-0 gap-4'>
+          <div className='grid gap-3 md:grid-cols-2'>
+            {themes.data?.map((th) => (
+              <Card key={th.id} className='py-3'>
+                <CardContent className='flex items-center gap-3 text-sm'>
+                  <span
+                    className='size-8 rounded-full border'
+                    style={{ background: th.primary }}
+                  />
+                  <div className='flex-1'>
+                    <p className='font-medium'>{th.name.en}</p>
+                    <p className='text-muted-foreground'>
+                      {t(`platform.themes.fonts.${th.font}`)} ·{' '}
+                      {t(`platform.themes.styles.${th.style}`)}
+                    </p>
+                  </div>
+                  <Switch
+                    aria-label={t('platform.themes.offered', {
+                      name: th.name.en,
+                    })}
+                    checked={th.is_active}
+                    onCheckedChange={(on) =>
+                      save.mutate({ id: th.id, is_active: on })
+                    }
+                  />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('platform.themes.new')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form
+                className='flex flex-wrap items-end gap-2'
+                onSubmit={async (ev) => {
+                  ev.preventDefault()
+                  try {
+                    await save.mutateAsync({ ...v, name: { en: v.name } })
+                    setV({ ...v, name: '' })
+                  } catch (err) {
+                    e.catchErr(err)
+                  }
+                }}
+              >
+                <div className='grid gap-1'>
+                  <Label htmlFor='th-name'>{t('platform.themes.name')}</Label>
+                  <Input
+                    id='th-name'
+                    value={v.name}
+                    onChange={(x) => setV({ ...v, name: x.target.value })}
+                  />
+                </div>
+                <div className='grid gap-1'>
+                  <Label htmlFor='th-col'>{t('platform.themes.colour')}</Label>
+                  <input
+                    id='th-col'
+                    type='color'
+                    className='h-9 w-14 rounded border'
+                    value={v.primary}
+                    onChange={(x) => setV({ ...v, primary: x.target.value })}
+                  />
+                </div>
+                {(['font', 'style'] as const).map((k) => (
+                  <div key={k} className='grid gap-1'>
+                    <Label>{t(`platform.themes.${k}`)}</Label>
+                    <Select
+                      value={v[k]}
+                      onValueChange={(x) => setV({ ...v, [k]: x })}
+                    >
+                      <SelectTrigger
+                        className='w-36'
+                        aria-label={t(`platform.themes.${k}`)}
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(k === 'font'
+                          ? ['system', 'serif', 'rounded']
+                          : MENU_STYLES
+                        ).map((o) => (
+                          <SelectItem key={o} value={o}>
+                            {t(
+                              `platform.themes.${k === 'font' ? 'fonts' : 'styles'}.${o}`
+                            )}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                ))}
+                <Button
+                  type='submit'
+                  disabled={!v.name.trim() || save.isPending}
+                >
+                  <Plus /> {t('platform.add')}
+                </Button>
+              </form>
+              {e.first && (
+                <p className='mt-2 text-sm text-destructive'>{e.first}</p>
+              )}
             </CardContent>
           </Card>
-        ))}
+        </div>
+        {/* The new theme on a demo menu, before saving (owner, 2026-11-21). */}
+        <ThemePreview values={v} />
       </div>
-      <Card className='mt-4'>
-        <CardHeader>
-          <CardTitle>{t('platform.themes.new')}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form
-            className='flex flex-wrap items-end gap-2'
-            onSubmit={async (ev) => {
-              ev.preventDefault()
-              try {
-                await save.mutateAsync({ ...v, name: { en: v.name } })
-                setV({ ...v, name: '' })
-              } catch (err) {
-                e.catchErr(err)
-              }
-            }}
-          >
-            <div className='grid gap-1'>
-              <Label htmlFor='th-name'>{t('platform.themes.name')}</Label>
-              <Input
-                id='th-name'
-                value={v.name}
-                onChange={(x) => setV({ ...v, name: x.target.value })}
-              />
-            </div>
-            <div className='grid gap-1'>
-              <Label htmlFor='th-col'>{t('platform.themes.colour')}</Label>
-              <input
-                id='th-col'
-                type='color'
-                className='h-9 w-14 rounded border'
-                value={v.primary}
-                onChange={(x) => setV({ ...v, primary: x.target.value })}
-              />
-            </div>
-            {(['font', 'style'] as const).map((k) => (
-              <div key={k} className='grid gap-1'>
-                <Label>{t(`platform.themes.${k}`)}</Label>
-                <Select
-                  value={v[k]}
-                  onValueChange={(x) => setV({ ...v, [k]: x })}
-                >
-                  <SelectTrigger
-                    className='w-36'
-                    aria-label={t(`platform.themes.${k}`)}
-                  >
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(k === 'font'
-                      ? ['system', 'serif', 'rounded']
-                      : MENU_STYLES
-                    ).map((o) => (
-                      <SelectItem key={o} value={o}>
-                        {t(
-                          `platform.themes.${k === 'font' ? 'fonts' : 'styles'}.${o}`
-                        )}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            ))}
-            <Button type='submit' disabled={!v.name.trim() || save.isPending}>
-              <Plus /> {t('platform.add')}
-            </Button>
-          </form>
-          {e.first && (
-            <p className='mt-2 text-sm text-destructive'>{e.first}</p>
-          )}
-        </CardContent>
-      </Card>
     </>
   )
 }
@@ -966,6 +983,7 @@ function SettingsForm({
     send('put', 'settings', body)
   )
   const e = useErrors()
+  const legal = useOpenSections('platform-settings', LEGAL_CLOSED, LEGAL_IDS)
   const [v, setV] = useState({
     name: initial.name ?? '',
     support_email: initial.support_email ?? '',
@@ -977,6 +995,11 @@ function SettingsForm({
     contact: initial.contact ?? '',
     cookies: initial.cookies ?? '',
   })
+  // The texts as last saved: only changed ones are sent, so saving the name never touches the Terms.
+  const [savedLegal, setSavedLegal] = useState(() => legalOf(v))
+  const legalChanged = (k: LegalPage) => v[k] !== savedLegal[k]
+  const updatedAt = (initial as unknown as { legal_updated_at?: LegalDates })
+    .legal_updated_at
   const input = (
     k: keyof typeof v,
     props: React.ComponentProps<typeof Input> = {}
@@ -1003,15 +1026,26 @@ function SettingsForm({
           className='grid gap-4'
           onSubmit={async (ev) => {
             ev.preventDefault()
+            const sent = legalOf(v)
             try {
               await save.mutateAsync({
-                ...v,
+                name: v.name,
                 support_email: v.support_email || null,
                 domain: v.domain || null,
+                default_currency: v.default_currency,
+                ...Object.fromEntries(
+                  LEGAL_PAGES.filter(legalChanged).map((k) => [k, v[k]])
+                ),
               })
+              setSavedLegal(sent)
+              e.setErrors({})
               toast.success(t('platform.saved'))
             } catch (err) {
-              e.catchErr(err)
+              const errors = validationErrors(err) ?? {}
+              e.setErrors(errors)
+              // A text with an error opens, scrolls into view and takes the focus.
+              const page = LEGAL_PAGES.find((k) => errors[k])
+              if (page) legal.reveal(page, true)
             }
           }}
         >
@@ -1028,14 +1062,46 @@ function SettingsForm({
             </AlertTitle>
             <AlertDescription>{t('platform.legal.format')}</AlertDescription>
           </Alert>
+          <div className='flex justify-end'>
+            <Button
+              type='button'
+              variant='outline'
+              size='sm'
+              className='min-h-11 sm:min-h-9'
+              onClick={() => legal.setAll(!legal.allOpen)}
+            >
+              {legal.allOpen ? (
+                <ChevronsDownUp aria-hidden />
+              ) : (
+                <ChevronsUpDown aria-hidden />
+              )}
+              {t(legal.allOpen ? 'common.collapse_all' : 'common.expand_all')}
+            </Button>
+          </div>
           {LEGAL_PAGES.map((k) => (
-            <LegalField
+            <CollapsibleCard
               key={k}
-              page={k}
-              value={v[k]}
-              onChange={(text) => setV((x) => ({ ...x, [k]: text }))}
-              t={t}
-            />
+              id={LEGAL_IDS[k]}
+              open={legal.open[k]}
+              onOpenChange={(open) => legal.setOpen(k, open)}
+              title={t(`platform.settings.${k}`)}
+              summary={legalSummary(t, v[k], updatedAt?.[k] ?? null)}
+              changed={legalChanged(k)}
+              className='shadow-none'
+            >
+              <LegalField
+                page={k}
+                value={v[k]}
+                error={e.errors[k]}
+                onChange={(text) => setV((x) => ({ ...x, [k]: text }))}
+                onReset={(text) => {
+                  // The reset is saved at once: the text and its saved copy both change.
+                  setV((x) => ({ ...x, [k]: text }))
+                  setSavedLegal((x) => ({ ...x, [k]: text }))
+                }}
+                t={t}
+              />
+            </CollapsibleCard>
           ))}
           <Button
             type='submit'
@@ -1062,7 +1128,12 @@ function SettingsForm({
       <SettingsTabs
         t={t}
         tabs={{
-          general,
+          general: (
+            <div className='grid gap-6'>
+              <HomeDesignCard initial={initial.home_design} t={t} />
+              {general}
+            </div>
+          ),
           features: <FeatureSwitches />,
           signup: (
             <SignupSettings
@@ -1090,19 +1161,155 @@ function SettingsForm({
   )
 }
 
+/**
+ * The home page design (owner, 2026-11-22): Landing 1 or Landing 2. Saved the
+ * moment it is picked; switching back works the same way.
+ */
+function HomeDesignCard({
+  initial,
+  t,
+}: {
+  initial: string | null
+  t: (k: string, o?: Record<string, unknown>) => string
+}) {
+  const [design, setDesign] = useState(
+    initial === 'landing2' ? 'landing2' : 'landing1'
+  )
+  const save = usePlatformMutation((body: object) =>
+    send('put', 'settings', body)
+  )
+  return (
+    <Card className='max-w-2xl'>
+      <CardHeader>
+        <CardTitle>{t('platform.home_design.title')}</CardTitle>
+        <CardDescription>{t('platform.home_design.hint')}</CardDescription>
+      </CardHeader>
+      <CardContent className='grid gap-3'>
+        <RadioGroup
+          aria-label={t('platform.home_design.title')}
+          value={design}
+          disabled={save.isPending}
+          onValueChange={async (next) => {
+            const before = design
+            setDesign(next)
+            try {
+              await save.mutateAsync({ home_design: next })
+              toast.success(
+                t('platform.home_design.saved', {
+                  name: t(`platform.home_design.${next}`),
+                })
+              )
+            } catch {
+              setDesign(before)
+            }
+          }}
+          className='grid gap-2 sm:grid-cols-2'
+        >
+          {(['landing1', 'landing2'] as const).map((k) => (
+            <Label
+              key={k}
+              htmlFor={`hd-${k}`}
+              className='flex min-h-11 cursor-pointer items-start gap-3 rounded-lg border p-3 has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5'
+            >
+              <RadioGroupItem id={`hd-${k}`} value={k} className='mt-0.5' />
+              <span className='grid gap-0.5'>
+                <span className='font-medium'>
+                  {t(`platform.home_design.${k}`)}
+                </span>
+                <span className='font-normal text-muted-foreground'>
+                  {t(`platform.home_design.${k}_hint`)}
+                </span>
+              </span>
+            </Label>
+          ))}
+        </RadioGroup>
+        <div className='flex flex-wrap gap-2'>
+          <Button
+            asChild
+            variant='outline'
+            size='sm'
+            className='min-h-11 sm:min-h-8'
+          >
+            <a href='/' target='_blank' rel='noopener'>
+              <ExternalLink aria-hidden /> {t('platform.home_design.view_home')}
+            </a>
+          </Button>
+          <Button
+            asChild
+            variant='outline'
+            size='sm'
+            className='min-h-11 sm:min-h-8'
+          >
+            <a href='/landing2' target='_blank' rel='noopener'>
+              <ExternalLink aria-hidden />{' '}
+              {t('platform.home_design.view_landing2')}
+            </a>
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
 /** Terms and Privacy (#181), and About us, Contact us and Cookie info, linked from the footer (#230). */
 const LEGAL_PAGES = ['terms', 'privacy', 'about', 'contact', 'cookies'] as const
+type LegalPage = (typeof LEGAL_PAGES)[number]
+type LegalDates = Partial<Record<LegalPage, string | null>>
+/** The long texts start closed (owner, 2026-11-21); #legal-terms opens Terms. */
+const LEGAL_CLOSED: Record<LegalPage, boolean> = {
+  terms: false,
+  privacy: false,
+  about: false,
+  contact: false,
+  cookies: false,
+}
+const LEGAL_IDS: Record<LegalPage, string> = {
+  terms: 'legal-terms',
+  privacy: 'legal-privacy',
+  about: 'legal-about',
+  contact: 'legal-contact',
+  cookies: 'legal-cookies',
+}
+const legalOf = (v: Record<LegalPage, string>) =>
+  Object.fromEntries(LEGAL_PAGES.map((k) => [k, v[k]])) as Record<
+    LegalPage,
+    string
+  >
+
+/** "Last updated 12 Nov 2026 · 2,340 words" (or "Default text · …" when never saved). */
+function legalSummary(
+  t: (k: string, o?: Record<string, unknown>) => string,
+  text: string,
+  updatedAt: string | null
+) {
+  const words = text.trim() === '' ? 0 : text.trim().split(/\s+/).length
+  const count = t('platform.legal.words', {
+    count: words,
+    formatted: words.toLocaleString('en'),
+  })
+  if (!updatedAt) return `${t('platform.legal.default_text')} · ${count}`
+  const date = new Intl.DateTimeFormat('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  }).format(new Date(updatedAt))
+  return `${t('platform.legal.updated', { date })} · ${count}`
+}
 
 /** One page's text with "View page" and "Reset to default text". */
 function LegalField({
   page,
   value,
+  error,
   onChange,
+  onReset,
   t,
 }: {
-  page: (typeof LEGAL_PAGES)[number]
+  page: LegalPage
   value: string
+  error?: string
   onChange: (text: string) => void
+  onReset: (text: string) => void
   t: (k: string) => string
 }) {
   const [confirm, setConfirm] = useState(false)
@@ -1111,8 +1318,10 @@ function LegalField({
   )
   return (
     <div className='grid gap-1'>
-      <div className='flex flex-wrap items-end justify-between gap-2'>
-        <Label htmlFor={`st-${page}`}>{t(`platform.settings.${page}`)}</Label>
+      <div className='flex flex-wrap items-end justify-end gap-2'>
+        <Label htmlFor={`st-${page}`} className='sr-only'>
+          {t(`platform.settings.${page}`)}
+        </Label>
         <div className='flex flex-wrap gap-1'>
           <Button
             asChild
@@ -1140,8 +1349,15 @@ function LegalField({
         rows={14}
         className='font-mono text-sm'
         value={value}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={error ? `st-${page}-error` : undefined}
         onChange={(x) => onChange(x.target.value)}
       />
+      {error && (
+        <p id={`st-${page}-error`} className='text-sm text-destructive'>
+          {error}
+        </p>
+      )}
       <ConfirmDialog
         open={confirm}
         onOpenChange={setConfirm}
@@ -1154,7 +1370,7 @@ function LegalField({
           const res = (await reset.mutateAsync(undefined)) as {
             data: { data: Record<string, string> }
           }
-          onChange(res.data.data[page])
+          onReset(res.data.data[page])
           setConfirm(false)
           toast.success(t('platform.legal.reset_done'))
         }}

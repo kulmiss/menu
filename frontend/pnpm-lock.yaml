@@ -186,6 +186,9 @@ importers:
       '@vitest/ui':
         specifier: ^4.1.12
         version: 4.1.12(vitest@4.1.12)
+      axe-core:
+        specifier: ^4.14.1
+        version: 4.14.1
       eslint:
         specifier: ^10.15.0
         version: 10.15.0(jiti@2.7.0)
@@ -2211,6 +2214,10 @@ packages:
 
   ast-v8-to-istanbul@1.0.8:
     resolution: {integrity: sha512-lPdpagk13ANXV+HClJEpCZM7kUsl5XcvgqKzZhaj6Ve1ZFICcY2sGhAN1n1vT0tML6EclT7bfVgTxqL57Gkpow==}
+
+  axe-core@4.14.1:
+    resolution: {integrity: sha512-FHfa+lmNjQZfJz1q8wKqIDwC6DExcHt/pkjNQb09a3NPjCKg2rhu5qb2S4r76ASyFNNtuFooJpZe37OgudVGtQ==}
+    engines: {node: '>=4'}
 
   babel-dead-code-elimination@1.0.12:
     resolution: {integrity: sha512-GERT7L2TiYcYDtYk1IpD+ASAYXjKbLTDPhBtYj7X1NuRMDTMtAx9kyBenub1Ev41lo91OHCKdmP+egTDmfQ7Ig==}
@@ -5251,6 +5258,8 @@ snapshots:
       '@jridgewell/trace-mapping': 0.3.31
       estree-walker: 3.0.3
       js-tokens: 10.0.0
+
+  axe-core@4.14.1: {}
 
   babel-dead-code-elimination@1.0.12:
     dependencies:
