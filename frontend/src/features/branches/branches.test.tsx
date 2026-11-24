@@ -62,7 +62,7 @@ const CODES: QrCodeRow[] = [
 
 let fake: ReturnType<typeof fakeApi>
 
-function render(ui: React.ReactNode) {
+function render(ui: React.ReactNode, features: Record<string, boolean> = {}) {
   fake = fakeApi({
     'GET /restaurant/1/branches': { data: { data: BRANCHES } },
     'GET /restaurant/1/menus': {
@@ -136,7 +136,9 @@ function render(ui: React.ReactNode) {
       },
     },
   })
-  return renderWithQuery(ui, { me: meFixture({ tenants: [tenantFixture()] }) })
+  return renderWithQuery(ui, {
+    me: meFixture({ tenants: [tenantFixture({ features })] }),
+  })
 }
 
 describe('BranchesPage', () => {
@@ -160,6 +162,19 @@ describe('BranchesPage', () => {
     await expect
       .poll(() => fake.calls.find((c) => c.method === 'POST')?.data)
       .toEqual({ prefix: 'Table', from: 1, to: 12 })
+  })
+
+  it('hides tables when the Super Admin switched them off', async () => {
+    const screen = await render(<BranchesPage />, { tables: false })
+    await expect
+      .element(screen.getByText('localhost/buna-bread/piassa'))
+      .toBeVisible()
+    await expect
+      .element(screen.getByRole('button', { name: '2 tables' }))
+      .not.toBeInTheDocument()
+    await expect
+      .element(screen.getByText(/own menu address and QR code\./))
+      .toBeVisible()
   })
 
   it('creates a branch with an address made from its name', async () => {
@@ -257,5 +272,18 @@ describe('QrCodesPage', () => {
         'href',
         '/api/v1/restaurant/1/branches/1/table-cards.pdf'
       )
+  })
+
+  it('has no table cards when tables are switched off', async () => {
+    const screen = await render(<QrCodesPage />, { tables: false })
+    await expect
+      .element(screen.getByText('Whole restaurant', { exact: true }))
+      .toBeVisible()
+    await expect
+      .element(screen.getByText('Table cards', { exact: true }))
+      .not.toBeInTheDocument()
+    await expect
+      .element(screen.getByRole('link', { name: 'Print table cards' }))
+      .not.toBeInTheDocument()
   })
 })

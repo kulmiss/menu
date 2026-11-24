@@ -43,6 +43,7 @@ import { useMenuContext } from '@/features/menu/use-menu-context'
 export function QrCodesPage() {
   const { t } = useTranslation()
   const printOn = useFeature('print_materials')
+  const tablesOn = useFeature('tables')
   const ctx = useMenuContext()
   const codes = useQuery(qrCodesQuery(ctx.tenantId))
   const branches = useQuery(branchesQuery(ctx.tenantId))
@@ -246,42 +247,46 @@ export function QrCodesPage() {
             ]}
           />
 
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('qr.tables')}</CardTitle>
-              <CardDescription>{t('qr.tables_hint')}</CardDescription>
-            </CardHeader>
-            <CardContent className='grid gap-2'>
-              {branches.data?.map((b) => (
-                <div
-                  key={b.id}
-                  className='flex flex-wrap items-center justify-between gap-2 border-b pb-2 last:border-0'
-                >
-                  <span className='text-sm'>
-                    <span className='font-medium'>
-                      {tr(b.name, ctx.locale)}
-                    </span>{' '}
-                    <span className='text-muted-foreground'>
-                      {t('branches.tables_count', { count: tableCount(b.id) })}
+          {tablesOn && (
+            <Card>
+              <CardHeader>
+                <CardTitle>{t('qr.tables')}</CardTitle>
+                <CardDescription>{t('qr.tables_hint')}</CardDescription>
+              </CardHeader>
+              <CardContent className='grid gap-2'>
+                {branches.data?.map((b) => (
+                  <div
+                    key={b.id}
+                    className='flex flex-wrap items-center justify-between gap-2 border-b pb-2 last:border-0'
+                  >
+                    <span className='text-sm'>
+                      <span className='font-medium'>
+                        {tr(b.name, ctx.locale)}
+                      </span>{' '}
+                      <span className='text-muted-foreground'>
+                        {t('branches.tables_count', {
+                          count: tableCount(b.id),
+                        })}
+                      </span>
                     </span>
-                  </span>
-                  {tableCount(b.id) > 0 && (
-                    <Button asChild size='sm' variant='outline'>
-                      <a
-                        href={downloadUrl(
-                          ctx.tenantId,
-                          `branches/${b.id}/table-cards.pdf`
-                        )}
-                        download
-                      >
-                        <Printer /> {t('branches.print_cards')}
-                      </a>
-                    </Button>
-                  )}
-                </div>
-              ))}
-            </CardContent>
-          </Card>
+                    {tableCount(b.id) > 0 && (
+                      <Button asChild size='sm' variant='outline'>
+                        <a
+                          href={downloadUrl(
+                            ctx.tenantId,
+                            `branches/${b.id}/table-cards.pdf`
+                          )}
+                          download
+                        >
+                          <Printer /> {t('branches.print_cards')}
+                        </a>
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
 
           {canEdit && (
             <Card>

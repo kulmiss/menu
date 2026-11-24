@@ -118,9 +118,9 @@ Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles insid
 | PATCH | `restaurant/{tenant}/branches/{branch}` | restaurant team |  | `restaurant` limiter | Api\Restaurant\BranchController@update |
 | GET | `restaurant/{tenant}/branches/{branch}/overrides` | restaurant team |  | `restaurant` limiter | Api\Restaurant\BranchController@overrides |
 | PUT | `restaurant/{tenant}/branches/{branch}/overrides` | restaurant team |  | `restaurant` limiter | Api\Restaurant\BranchController@saveOverrides |
-| GET | `restaurant/{tenant}/branches/{branch}/table-cards.pdf` | restaurant team |  | `restaurant, exports` limiter | Api\Restaurant\QrCodeController@tableCards |
-| GET | `restaurant/{tenant}/branches/{branch}/tables` | restaurant team |  | `restaurant` limiter | Api\Restaurant\BranchController@tables |
-| POST | `restaurant/{tenant}/branches/{branch}/tables` | restaurant team |  | `restaurant` limiter | Api\Restaurant\BranchController@addTables |
+| GET | `restaurant/{tenant}/branches/{branch}/table-cards.pdf` | restaurant team | `tables` | `restaurant, exports` limiter | Api\Restaurant\QrCodeController@tableCards |
+| GET | `restaurant/{tenant}/branches/{branch}/tables` | restaurant team | `tables` | `restaurant` limiter | Api\Restaurant\BranchController@tables |
+| POST | `restaurant/{tenant}/branches/{branch}/tables` | restaurant team | `tables` | `restaurant` limiter | Api\Restaurant\BranchController@addTables |
 | POST | `restaurant/{tenant}/categories` | restaurant team |  | `restaurant` limiter | Api\Menu\CategoryController@store |
 | POST | `restaurant/{tenant}/categories/reorder` | restaurant team |  | `restaurant` limiter | Api\Menu\CategoryController@reorder |
 | DELETE | `restaurant/{tenant}/categories/{category}` | restaurant team |  | `restaurant` limiter | Api\Menu\CategoryController@destroy |
@@ -193,7 +193,7 @@ Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles insid
 | DELETE | `restaurant/{tenant}/qr-codes/{qr}` | restaurant team |  | `restaurant` limiter | Api\Restaurant\QrCodeController@destroy |
 | PATCH | `restaurant/{tenant}/qr-codes/{qr}` | restaurant team |  | `restaurant` limiter | Api\Restaurant\QrCodeController@update |
 | GET | `restaurant/{tenant}/qr-codes/{qr}.{format}` | restaurant team |  | `restaurant` limiter | Api\Restaurant\QrCodeController@download |
-| DELETE | `restaurant/{tenant}/tables/{table}` | restaurant team |  | `restaurant` limiter | Api\Restaurant\BranchController@deleteTable |
+| DELETE | `restaurant/{tenant}/tables/{table}` | restaurant team | `tables` | `restaurant` limiter | Api\Restaurant\BranchController@deleteTable |
 | GET | `restaurant/{tenant}/tags` | restaurant team |  | `restaurant` limiter | Api\Menu\TagController@index |
 | POST | `restaurant/{tenant}/tags` | restaurant team |  | `restaurant` limiter | Api\Menu\TagController@store |
 | DELETE | `restaurant/{tenant}/tags/{tag}` | restaurant team |  | `restaurant` limiter | Api\Menu\TagController@destroy |

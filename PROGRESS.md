@@ -1,6 +1,10 @@
-# Progress — Landing 2 demo video (22 Nov 2026)
+# Progress — Tables ON/OFF switch (22 Nov 2026)
 
-📍 Now: one PR into develop (feat/landing2-video), CI running
+📍 Now: PR feat/tables-switch (stacked on the video PR #183), CI running
+
+- New feature switch `tables` (Settings → Features, plans, restaurants), on by default. Off: no Tables / table cards / table codes in the admin, no table name on "Show to waiter", help article hidden; printed table codes keep opening the menu (QUESTIONS #261).
+
+# Earlier: Landing 2 demo video (22 Nov 2026)
 
 - The 30-second demo video, recorded from the real app (`frontend/scripts/landing2-video.mjs`): sign up → add a dish → pick a style → print the QR → a guest scans it. 801 KB, 720p H.264, captions EN + AM, built into Landing 2 (QUESTIONS #258). Loads only on ▶.
 - CI browser check: the video tap now tested (the poster is centred first, so the phone's sticky bar doesn't cover it).

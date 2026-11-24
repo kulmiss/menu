@@ -35,6 +35,7 @@ return [
         'sold_out' => '“Sold out” marks',
         'share' => '“Share” button on the menu',
         'print_materials' => 'Print materials (table tents, posters, stickers)',
+        'tables' => 'Tables (one QR per table, table cards)',
         'signup' => 'Self sign-up for new restaurants',
     ],
     'features_need_style' => 'Keep at least one menu style switched on.',

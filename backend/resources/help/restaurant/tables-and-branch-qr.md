@@ -3,6 +3,7 @@ title: Tables and branch QR codes
 topic: branches
 summary: A QR code for each table.
 order: 30
+features: tables
 pages: /admin/branches, /admin/qr-codes
 roles: owner, manager
 keywords: table, table number, card, qr per table

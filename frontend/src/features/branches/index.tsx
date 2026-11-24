@@ -15,6 +15,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { ConfirmDialog } from '@/components/confirm-dialog'
 import { AdminHeader } from '@/components/layout/admin-header'
 import { Main } from '@/components/layout/main'
+import { useFeature } from '@/features/auth/use-me'
 import { menusQuery } from '@/features/menu/api'
 import { tr } from '@/features/menu/text'
 import { useMenuContext } from '@/features/menu/use-menu-context'
@@ -39,6 +40,8 @@ export function BranchesPage() {
   const remove = useDeleteBranch(ctx.tenantId)
   const [open, setOpen] = useState<Open>(null)
   const canEdit = ctx.canManage && ctx.canWrite
+  // Tables can be switched off by the Super Admin (owner, 2026-11-22).
+  const tablesOn = useFeature('tables')
   const name = (b: Branch) => tr(b.name, ctx.locale)
 
   return (
@@ -50,7 +53,13 @@ export function BranchesPage() {
             <h1 className='text-2xl font-bold tracking-tight'>
               {t('branches.title')}
             </h1>
-            <p className='text-muted-foreground'>{t('branches.description')}</p>
+            <p className='text-muted-foreground'>
+              {t(
+                tablesOn
+                  ? 'branches.description'
+                  : 'branches.description_no_tables'
+              )}
+            </p>
           </div>
           {canEdit && (
             <Button onClick={() => setOpen({ kind: 'edit', branch: null })}>
@@ -94,14 +103,16 @@ export function BranchesPage() {
                       </p>
                     )}
                   </div>
-                  <Button
-                    variant='outline'
-                    disabled={!canEdit}
-                    onClick={() => setOpen({ kind: 'tables', branch: b })}
-                  >
-                    <Table2 />{' '}
-                    {t('branches.tables_count', { count: b.tables_count })}
-                  </Button>
+                  {tablesOn && (
+                    <Button
+                      variant='outline'
+                      disabled={!canEdit}
+                      onClick={() => setOpen({ kind: 'tables', branch: b })}
+                    >
+                      <Table2 />{' '}
+                      {t('branches.tables_count', { count: b.tables_count })}
+                    </Button>
+                  )}
                   <Button
                     variant='outline'
                     disabled={!canEdit}
@@ -156,7 +167,7 @@ export function BranchesPage() {
           onClose={() => setOpen(null)}
         />
       )}
-      {open?.kind === 'tables' && (
+      {tablesOn && open?.kind === 'tables' && (
         <TablesSheet
           tenantId={ctx.tenantId}
           branch={open.branch}
