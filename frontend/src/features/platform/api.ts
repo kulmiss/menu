@@ -9,6 +9,7 @@ import { type SubscriptionState } from '@/features/auth/api'
 
 export const FEATURES = [
   'branches',
+  'team',
   'promotions',
   'insights',
   'import_export',

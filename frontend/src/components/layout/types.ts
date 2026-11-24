@@ -9,6 +9,10 @@ type BaseNavItem = {
   roles?: Role[]
   /** Hidden when the restaurant's plan has this feature switched off. */
   feature?: string
+  /** When true, the item is removed entirely (not just marked "Upgrade") if `feature` is off. */
+  hideWhenOff?: boolean
+  /** When true, the item is removed if the plan allows only a single branch (branch_limit === 1). */
+  hideWhenSingleBranch?: boolean
 }
 
 type NavLink = BaseNavItem & {

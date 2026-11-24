@@ -62,7 +62,11 @@ const CODES: QrCodeRow[] = [
 
 let fake: ReturnType<typeof fakeApi>
 
-function render(ui: React.ReactNode, features: Record<string, boolean> = {}) {
+function render(
+  ui: React.ReactNode,
+  features: Record<string, boolean> = {},
+  tenant: Partial<import('@/features/auth/api').Tenant> = {}
+) {
   fake = fakeApi({
     'GET /restaurant/1/branches': { data: { data: BRANCHES } },
     'GET /restaurant/1/menus': {
@@ -137,7 +141,7 @@ function render(ui: React.ReactNode, features: Record<string, boolean> = {}) {
     },
   })
   return renderWithQuery(ui, {
-    me: meFixture({ tenants: [tenantFixture({ features })] }),
+    me: meFixture({ tenants: [tenantFixture({ features, ...tenant })] }),
   })
 }
 
@@ -198,6 +202,24 @@ describe('BranchesPage', () => {
         slug: 'bole-atlas',
         is_active: true,
       })
+  })
+
+  it('hides "New branch" once the plan\'s branch limit is reached', async () => {
+    // Two branches in the fixture; a limit of 2 means no more are allowed.
+    const screen = await render(<BranchesPage />, {}, { branch_limit: 2 })
+    await expect
+      .element(screen.getByText('localhost/buna-bread/piassa'))
+      .toBeVisible()
+    await expect
+      .element(screen.getByRole('button', { name: 'New branch' }))
+      .not.toBeInTheDocument()
+  })
+
+  it('still shows "New branch" below the limit', async () => {
+    const screen = await render(<BranchesPage />, {}, { branch_limit: 3 })
+    await expect
+      .element(screen.getByRole('button', { name: 'New branch' }))
+      .toBeVisible()
   })
 
   // Bug (2026-11-17): on a phone the branch's details were squeezed into a

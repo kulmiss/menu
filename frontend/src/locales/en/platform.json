@@ -110,6 +110,7 @@
   },
   "features": {
     "branches": "More branches",
+    "team": "Team (invite managers and staff)",
     "promotions": "Promotions",
     "insights": "Insights",
     "import_export": "Import and export",

@@ -66,6 +66,7 @@ const GROUPS: { id: string; keys: string[] }[] = [
     id: 'tools',
     keys: [
       'branches',
+      'team',
       'promotions',
       'price_periods',
       'insights',

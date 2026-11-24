@@ -1,6 +1,14 @@
-# Progress — Tables ON/OFF switch (22 Nov 2026)
+# Progress — Branch limit + Team ON/OFF switch (24 Nov 2026)
 
-📍 Now: PR feat/tables-switch (stacked on the video PR #183), CI running
+📍 Now: PR feat/branch-limit-and-team-switch (off develop), CI running
+
+- **Branch limit (QUESTIONS #263).** The tenant payload now carries `branch_limit` (the plan's `branches` limit; null = unlimited). The Branches page hides "+ New branch" once the restaurant is at that limit, and the side menu drops the **Branches** item entirely on a single-branch plan (`branch_limit === 1`) — the address/map/phone are already edited in Restaurant info, and the guest menu for a one-branch restaurant already shows that profile address.
+- **Team switch (QUESTIONS #264).** New feature `team` (Settings → Features, plans, restaurants), on by default. Off: the Team menu item is hidden and the team/invitation API answers 402 `features.team`; members already on the restaurant keep working, and a pending invitation can still be accepted.
+- New sidebar mechanics: `hideWhenOff` (remove, don't badge, when a Super-Admin switch is off) and `hideWhenSingleBranch` (remove on a one-branch plan).
+- Tests: backend `TeamSwitchTest` (4), frontend branches "+ New branch" at/under limit and sidebar Team/Branches hidden. Pint, PHPStan, tsc, eslint, prettier all clean; API reference regenerated.
+- Pre-existing, unrelated failures in this sandbox only (same on clean develop): `DemoSeederTest` payment-month count (date-sensitive), `BackupTest` / `BackupEncryptionTest` (no S3 / no openssl key).
+
+# Earlier: Tables ON/OFF switch (22 Nov 2026)
 
 - New feature switch `tables` (Settings → Features, plans, restaurants), on by default. Off: no Tables / table cards / table codes in the admin, no table name on "Show to waiter", help article hidden; printed table codes keep opening the menu (QUESTIONS #261).
 

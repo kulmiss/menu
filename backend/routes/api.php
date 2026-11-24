@@ -302,13 +302,17 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::get('/', [TenantController::class, 'show']);
             Route::get('help', [HelpController::class, 'restaurant']);
 
-            Route::get('members', [TeamController::class, 'index']);
-            Route::patch('members/{member}', [TeamController::class, 'update'])->whereNumber('member');
-            Route::delete('members/{member}', [TeamController::class, 'destroy'])->whereNumber('member');
+            // Team off (owner, 2026-11-24): the Team page and inviting are blocked; members
+            // already on the restaurant keep working (their access is their membership, not these routes).
+            Route::middleware('feature:team')->group(function () {
+                Route::get('members', [TeamController::class, 'index']);
+                Route::patch('members/{member}', [TeamController::class, 'update'])->whereNumber('member');
+                Route::delete('members/{member}', [TeamController::class, 'destroy'])->whereNumber('member');
 
-            Route::get('invitations', [InvitationController::class, 'index']);
-            Route::post('invitations', [InvitationController::class, 'store']);
-            Route::delete('invitations/{invitation}', [InvitationController::class, 'destroy'])->whereNumber('invitation');
+                Route::get('invitations', [InvitationController::class, 'index']);
+                Route::post('invitations', [InvitationController::class, 'store']);
+                Route::delete('invitations/{invitation}', [InvitationController::class, 'destroy'])->whereNumber('invitation');
+            });
 
             Route::patch('account/slug', [AccountController::class, 'updateSlug']);
 

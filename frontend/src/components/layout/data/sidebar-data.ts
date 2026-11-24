@@ -85,6 +85,9 @@ export const sidebarData: SidebarData = {
           url: '/admin/branches',
           icon: MapPin,
           roles: ['owner', 'manager'],
+          // A single-branch plan has nothing to manage here; the address moves to
+          // Restaurant info (owner, 2026-11-24).
+          hideWhenSingleBranch: true,
         },
         {
           title: 'nav.qr_codes',
@@ -103,6 +106,8 @@ export const sidebarData: SidebarData = {
           url: '/admin/team',
           icon: Users,
           roles: ['owner', 'manager'],
+          feature: 'team',
+          hideWhenOff: true,
         },
         {
           title: 'nav.settings',

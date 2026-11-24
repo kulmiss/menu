@@ -37,6 +37,9 @@ class TenantResource extends JsonResource
                 'stage_ends_at' => $this->subscriptionStageEndsAt()?->toIso8601String(),
             ],
             'features' => Features::for($this->resource),
+            // The plan's branch limit (null = unlimited), so the admin can hide "+ New branch"
+            // once the restaurant is at its limit (owner, 2026-11-24).
+            'branch_limit' => $this->resource->plan?->limits['branches'] ?? null,
             // "My order" for guests (platform, plan and the restaurant's own switch) and why it is off (QUESTIONS #236).
             'my_order' => MyOrder::state($this->resource),
             // Where the "Upgrade" buttons point (QUESTIONS #184).

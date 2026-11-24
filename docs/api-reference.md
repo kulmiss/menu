@@ -142,9 +142,9 @@ Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles insid
 | GET | `restaurant/{tenant}/insights/report.pdf` | restaurant team | `insights` | `restaurant, exports` limiter | Api\Restaurant\InsightsExportController@pdf |
 | GET | `restaurant/{tenant}/insights/settings` | restaurant team | `insights` | `restaurant` limiter | Api\Restaurant\InsightsExportController@settings |
 | PUT | `restaurant/{tenant}/insights/settings` | restaurant team | `insights` | `restaurant` limiter | Api\Restaurant\InsightsExportController@updateSettings |
-| GET | `restaurant/{tenant}/invitations` | restaurant team |  | `restaurant` limiter | Api\InvitationController@index |
-| POST | `restaurant/{tenant}/invitations` | restaurant team |  | `restaurant` limiter | Api\InvitationController@store |
-| DELETE | `restaurant/{tenant}/invitations/{invitation}` | restaurant team |  | `restaurant` limiter | Api\InvitationController@destroy |
+| GET | `restaurant/{tenant}/invitations` | restaurant team | `team` | `restaurant` limiter | Api\InvitationController@index |
+| POST | `restaurant/{tenant}/invitations` | restaurant team | `team` | `restaurant` limiter | Api\InvitationController@store |
+| DELETE | `restaurant/{tenant}/invitations/{invitation}` | restaurant team | `team` | `restaurant` limiter | Api\InvitationController@destroy |
 | GET | `restaurant/{tenant}/items` | restaurant team |  | `restaurant` limiter | Api\Menu\ItemController@index |
 | POST | `restaurant/{tenant}/items` | restaurant team |  | `restaurant` limiter | Api\Menu\ItemController@store |
 | POST | `restaurant/{tenant}/items/bulk` | restaurant team |  | `restaurant` limiter | Api\Menu\ItemController@bulk |
@@ -158,9 +158,9 @@ Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles insid
 | PATCH | `restaurant/{tenant}/items/{item}/sold-out` | restaurant team | `sold_out` | `restaurant` limiter | Api\Menu\ItemController@soldOut |
 | POST | `restaurant/{tenant}/media` | restaurant team |  | `restaurant, 30,1` limiter | Api\Menu\MediaController@store |
 | DELETE | `restaurant/{tenant}/media/{media}` | restaurant team |  | `restaurant` limiter | Api\Menu\MediaController@destroy |
-| GET | `restaurant/{tenant}/members` | restaurant team |  | `restaurant` limiter | Api\TeamController@index |
-| DELETE | `restaurant/{tenant}/members/{member}` | restaurant team |  | `restaurant` limiter | Api\TeamController@destroy |
-| PATCH | `restaurant/{tenant}/members/{member}` | restaurant team |  | `restaurant` limiter | Api\TeamController@update |
+| GET | `restaurant/{tenant}/members` | restaurant team | `team` | `restaurant` limiter | Api\TeamController@index |
+| DELETE | `restaurant/{tenant}/members/{member}` | restaurant team | `team` | `restaurant` limiter | Api\TeamController@destroy |
+| PATCH | `restaurant/{tenant}/members/{member}` | restaurant team | `team` | `restaurant` limiter | Api\TeamController@update |
 | GET | `restaurant/{tenant}/menu-pdf` | restaurant team | `pdf_menu` | `restaurant, 20,1` limiter | Api\Restaurant\PdfMenuController@download |
 | GET | `restaurant/{tenant}/menu-requests` | restaurant team |  | `restaurant` limiter | Api\Restaurant\MenuRequestController@index |
 | POST | `restaurant/{tenant}/menu-requests` | restaurant team |  | `restaurant, 6,60` limiter | Api\Restaurant\MenuRequestController@store |
