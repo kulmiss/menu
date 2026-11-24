@@ -286,4 +286,14 @@ describe('QrCodesPage', () => {
       .element(screen.getByRole('link', { name: 'Print table cards' }))
       .not.toBeInTheDocument()
   })
+
+  it('hides the Extra code box when extra codes are switched off', async () => {
+    const screen = await render(<QrCodesPage />, { extra_codes: false })
+    await expect
+      .element(screen.getByText('Whole restaurant', { exact: true }))
+      .toBeVisible()
+    await expect
+      .element(screen.getByText('Extra code', { exact: true }))
+      .not.toBeInTheDocument()
+  })
 })

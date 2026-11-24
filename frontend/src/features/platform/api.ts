@@ -20,6 +20,7 @@ export const FEATURES = [
   'share',
   'print_materials',
   'tables',
+  'extra_codes',
   'style_editorial',
   'style_grid',
   'style_bistro',

@@ -287,7 +287,7 @@ describe('Super Admin screens', () => {
     const screen = await renderWithQuery(<PlansPage />, { me: admin })
     await userEvent.click(screen.getByRole('button', { name: 'New plan' }))
     await userEvent.type(screen.getByLabelText('Name', { exact: true }), 'Pro')
-    await userEvent.type(screen.getByLabelText('Code'), 'pro')
+    await userEvent.type(screen.getByLabelText('Code', { exact: true }), 'pro')
     await userEvent.type(screen.getByLabelText('Price', { exact: true }), '900')
     await userEvent.type(
       screen.getByLabelText('Branches', { exact: true }),

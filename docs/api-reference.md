@@ -189,7 +189,7 @@ Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles insid
 | DELETE | `restaurant/{tenant}/promotions/{promotion}` | restaurant team |  | `restaurant` limiter | Api\Restaurant\PromotionController@destroy |
 | PATCH | `restaurant/{tenant}/promotions/{promotion}` | restaurant team | `promotions` | `restaurant` limiter | Api\Restaurant\PromotionController@update |
 | GET | `restaurant/{tenant}/qr-codes` | restaurant team |  | `restaurant` limiter | Api\Restaurant\QrCodeController@index |
-| POST | `restaurant/{tenant}/qr-codes` | restaurant team |  | `restaurant` limiter | Api\Restaurant\QrCodeController@store |
+| POST | `restaurant/{tenant}/qr-codes` | restaurant team | `extra_codes` | `restaurant` limiter | Api\Restaurant\QrCodeController@store |
 | DELETE | `restaurant/{tenant}/qr-codes/{qr}` | restaurant team |  | `restaurant` limiter | Api\Restaurant\QrCodeController@destroy |
 | PATCH | `restaurant/{tenant}/qr-codes/{qr}` | restaurant team |  | `restaurant` limiter | Api\Restaurant\QrCodeController@update |
 | GET | `restaurant/{tenant}/qr-codes/{qr}.{format}` | restaurant team |  | `restaurant` limiter | Api\Restaurant\QrCodeController@download |

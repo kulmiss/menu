@@ -375,7 +375,7 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::get('branches/{branch}/table-cards.pdf', [QrCodeController::class, 'tableCards'])->middleware(['throttle:exports', 'feature:tables']);
 
             Route::get('qr-codes', [QrCodeController::class, 'index']);
-            Route::post('qr-codes', [QrCodeController::class, 'store']);
+            Route::post('qr-codes', [QrCodeController::class, 'store'])->middleware('feature:extra_codes');
             Route::patch('qr-codes/{qr}', [QrCodeController::class, 'update']);
             Route::delete('qr-codes/{qr}', [QrCodeController::class, 'destroy']);
             Route::get('print-materials', [QrCodeController::class, 'printInfo'])->middleware('feature:print_materials');

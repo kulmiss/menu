@@ -40,6 +40,8 @@ class QrCodeController extends Controller
         $codes = QrCode::with(['branch', 'table.branch'])->orderBy('id')
             // Tables switched off: table codes are left out of the list (they still open the menu).
             ->when(! Features::enabled($tenant, 'tables'), fn ($q) => $q->whereNull('dining_table_id'))
+            // Extra codes switched off: the flyer/window codes are left out too (they still open the menu).
+            ->when(! Features::enabled($tenant, 'extra_codes'), fn ($q) => $q->where(fn ($w) => $w->whereNull('label')->orWhereNotNull('dining_table_id')))
             ->get();
 
         return response()->json(['data' => $codes->map(fn (QrCode $q) => $this->row($q))]);

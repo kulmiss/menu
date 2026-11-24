@@ -1,4 +1,11 @@
-# Progress — Tables ON/OFF switch (22 Nov 2026)
+# Progress — Extra QR codes ON/OFF switch (24 Nov 2026)
+
+📍 Now: branch feat/extra-codes-switch, PR into develop, CI running
+
+- New feature switch `extra_codes` (Settings → Features, global + plan + restaurant), on by default. Off: the "Extra code" box on the QR codes page is hidden, the create API answers 402, and existing extra codes are hidden from the list (owner's option 2); printed codes keep opening the menu (QUESTIONS #262).
+- Tests: backend ExtraCodesSwitchTest (3; fail on old code), frontend QR page hides the box; fixed a loose "Code" label matcher in platform.test.
+
+# Earlier: Progress — Tables ON/OFF switch (22 Nov 2026)
 
 📍 Now: PR feat/tables-switch (stacked on the video PR #183), CI running
 
