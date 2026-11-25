@@ -42,6 +42,9 @@ export function BranchesPage() {
   const canEdit = ctx.canManage && ctx.canWrite
   // Tables can be switched off by the Super Admin (owner, 2026-11-22).
   const tablesOn = useFeature('tables')
+  // Hide "+ New branch" once the restaurant is at its plan's branch limit (owner, 2026-11-24).
+  const atBranchLimit =
+    ctx.branchLimit !== null && (branches.data?.length ?? 0) >= ctx.branchLimit
   const name = (b: Branch) => tr(b.name, ctx.locale)
 
   return (
@@ -61,7 +64,7 @@ export function BranchesPage() {
               )}
             </p>
           </div>
-          {canEdit && (
+          {canEdit && !atBranchLimit && (
             <Button onClick={() => setOpen({ kind: 'edit', branch: null })}>
               <Plus /> {t('branches.new')}
             </Button>

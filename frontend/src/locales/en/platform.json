@@ -110,6 +110,7 @@
   },
   "features": {
     "branches": "More branches",
+    "team": "Team (invite managers and staff)",
     "promotions": "Promotions",
     "insights": "Insights",
     "import_export": "Import and export",
@@ -142,6 +143,7 @@
     "share": "“Share” button on the menu",
     "print_materials": "Print materials (table tents, posters, stickers)",
     "tables": "Tables (one QR per table, table cards)",
+    "extra_codes": "Extra QR codes (flyer, poster, window)",
     "signup": "Self sign-up for new restaurants"
   },
   "methods": {

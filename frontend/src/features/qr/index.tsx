@@ -44,6 +44,7 @@ export function QrCodesPage() {
   const { t } = useTranslation()
   const printOn = useFeature('print_materials')
   const tablesOn = useFeature('tables')
+  const extraCodesOn = useFeature('extra_codes')
   const ctx = useMenuContext()
   const codes = useQuery(qrCodesQuery(ctx.tenantId))
   const branches = useQuery(branchesQuery(ctx.tenantId))
@@ -288,7 +289,7 @@ export function QrCodesPage() {
             </Card>
           )}
 
-          {canEdit && (
+          {canEdit && extraCodesOn && (
             <Card>
               <CardHeader>
                 <CardTitle>{t('qr.extra')}</CardTitle>

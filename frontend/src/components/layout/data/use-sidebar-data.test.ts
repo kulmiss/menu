@@ -14,6 +14,27 @@ describe('sidebar navigation', () => {
     expect(titles('staff')).not.toContain('nav.team')
   })
 
+  it('removes the Team page entirely when the Super Admin switches Team off', () => {
+    expect(titles('owner')).toContain('nav.team')
+    const off = filterNav(sidebarData.navGroups, 'owner', (k) => k, {
+      team: false,
+    }).flatMap((g) => g.items.map((i) => i.title))
+    // Not merely badged "Upgrade" — gone from the menu.
+    expect(off).not.toContain('nav.team')
+  })
+
+  it('hides Branches when the plan allows only one branch', () => {
+    const titlesAt = (limit: number | null) =>
+      filterNav(sidebarData.navGroups, 'owner', (k) => k, {}, limit).flatMap(
+        (g) => g.items.map((i) => i.title)
+      )
+    // One-branch plan: no Branches item (the address lives in Restaurant info).
+    expect(titlesAt(1)).not.toContain('nav.branches')
+    // More than one, or unlimited: Branches stays.
+    expect(titlesAt(3)).toContain('nav.branches')
+    expect(titlesAt(null)).toContain('nav.branches')
+  })
+
   it('keeps features the plan lacks in the menu, marked "Upgrade"', () => {
     const items = (features?: Record<string, boolean>) =>
       filterNav(sidebarData.navGroups, 'owner', (k) => k, features).flatMap(
