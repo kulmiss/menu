@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { Search } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { api } from '@/lib/api'
 import { toast } from '@/lib/toast'
@@ -12,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Switch } from '@/components/ui/switch'
 import { meQueryOptions } from '@/features/auth/api'
@@ -99,6 +101,7 @@ export function FeatureSwitches() {
   const qc = useQueryClient()
   const q = useQuery(globalQ)
   const [draft, setDraft] = useState<Record<string, boolean>>({})
+  const [search, setSearch] = useState('')
   const save = usePlatformMutation((features: Record<string, boolean>) =>
     send('put', 'settings/features', { features })
   )
@@ -126,6 +129,21 @@ export function FeatureSwitches() {
   const rest = rows.filter((r) => !listed.has(r.key))
   if (rest.length) grouped.push({ id: 'other', keys: [], rows: rest })
 
+  // Filter by the search box (label or key); drop groups left empty.
+  const needle = search.trim().toLowerCase()
+  const visible = grouped
+    .map((g) => ({
+      ...g,
+      rows: needle
+        ? g.rows.filter(
+            (r) =>
+              r.label.toLowerCase().includes(needle) ||
+              r.key.toLowerCase().includes(needle)
+          )
+        : g.rows,
+    }))
+    .filter((g) => g.rows.length > 0)
+
   return (
     <Card>
       <CardHeader>
@@ -136,7 +154,26 @@ export function FeatureSwitches() {
         <p className='text-sm' aria-live='polite'>
           {t('platform.switches.summary', { on, total: rows.length })}
         </p>
-        {grouped.map((g) => (
+        <div className='relative'>
+          <Search
+            className='pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground'
+            aria-hidden
+          />
+          <Input
+            type='search'
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={t('platform.switches.search')}
+            aria-label={t('platform.switches.search')}
+            className='ps-9'
+          />
+        </div>
+        {needle && visible.length === 0 && (
+          <p className='text-sm text-muted-foreground'>
+            {t('platform.switches.no_matches', { q: search.trim() })}
+          </p>
+        )}
+        {visible.map((g) => (
           <section key={g.id} aria-labelledby={`fs-${g.id}`}>
             <h3 id={`fs-${g.id}`} className='mb-2 text-sm font-semibold'>
               {t(`platform.switches.groups.${g.id}`)}

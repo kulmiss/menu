@@ -46,6 +46,24 @@ describe('Settings → Features', () => {
       .toEqual({ features: { promotions: false } })
   })
 
+  it('filters the list with the search box', async () => {
+    fake = fakeApi({
+      'GET /super/settings/features': { data: { data: rows } },
+    })
+    const screen = await renderWithQuery(<FeatureSwitches />)
+    await expect.element(screen.getByText('Promotions')).toBeVisible()
+
+    const box = screen.getByRole('searchbox', { name: 'Search features…' })
+    await userEvent.fill(box, 'promo')
+    await expect.element(screen.getByText('Promotions')).toBeVisible()
+    await expect
+      .element(screen.getByText('“Share” button on the menu'))
+      .not.toBeInTheDocument()
+
+    await userEvent.fill(box, 'nothing-matches-this')
+    await expect.element(screen.getByText(/No features match/)).toBeVisible()
+  })
+
   // QUESTIONS #236: before saving, how many restaurants a change reaches.
   it('says how many menus lose the + buttons before My order is saved off', async () => {
     fake = fakeApi({
