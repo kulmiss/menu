@@ -21,6 +21,7 @@ const ctx = {
   canWrite: true,
   canManage: true,
   canEditPrices: true,
+  branchLimit: null,
 }
 let fake: ReturnType<typeof fakeApi>
 

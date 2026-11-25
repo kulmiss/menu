@@ -13,6 +13,8 @@ export function useMenuContext() {
     canManage: role === 'owner' || role === 'manager',
     canEditPrices: tenant.membership?.can_edit_prices ?? false,
     canWrite: tenant.subscription.allows_writes,
+    /** The plan's branch limit (null = unlimited), for hiding "+ New branch". */
+    branchLimit: tenant.branch_limit ?? null,
   }
 }
 

@@ -16,6 +16,7 @@ class Features
 {
     public const DEFAULTS = [
         'branches' => true,       // more than the main branch
+        'team' => true,           // invite managers and staff (owner, 2026-11-24)
         'promotions' => true,
         'insights' => true,
         'import_export' => true,
