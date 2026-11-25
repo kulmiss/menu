@@ -352,6 +352,8 @@ New rules added by the owner (now in PLAN.md §2): Docker is for local developme
 
 | 266 | Demo café seeded 13 months back (CI date-fragility) | Claude, 2026-11-25 (release #189). Once the `composer audit` CVE was fixed and the backend tests actually ran on CI, `DemoSeederTest` failed on today's date: it asserts the demo has payments in ≥11 distinct calendar months, but the café was created `now()->subMonths(11)` and the 14-day trial pushes its first payment forward, so the monthly loop produced only **10** distinct months (it never reaches the earliest month). Moved the café's `created_at` to `now()->subMonths(13)` (and `qr_downloaded_at` to 12), so it spans a full 12 months regardless of the day of the month. Demo-only; no app behaviour changes. |
 
+| 268 | Search box on the Features screen | Owner, 2026-11-25 ("add feature-switch search at the top"). Settings → Features now has a search box above the groups; it filters the switches by label or key (case-insensitive) and hides groups left empty, with a "No features match" line when nothing does. Client-side only; the on/off summary still counts every feature. |
+
 ## Open
 
 - Owner action: protect `main` in GitHub settings (require PR, no force push, no deletion). Claude's access can't change branch settings.

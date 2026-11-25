@@ -1,6 +1,12 @@
-# Progress — Combined release: switches + sign-up panel (25 Nov 2026)
+# Progress — Feature search (25 Nov 2026)
 
-📍 Now: branch release/switches-and-signup — one PR carrying extra codes (#186), branch limit + Team (#187), the sign-up panel (#188) and the web-auth/webauthn-lib security bump, so the owner merges once. CI running.
+📍 Now: PR feat/feature-search (off develop), CI running
+
+- Settings → Features now has a search box at the top that filters the switches by label or key and hides empty groups, with a "no matches" line (QUESTIONS #268). Client-side only; the on/off summary is unchanged. Test added to feature-switches.test.
+
+# Earlier: Combined release: switches + sign-up panel (25 Nov 2026) — merged as #189
+
+📍 branch release/switches-and-signup — one PR carrying extra codes (#186), branch limit + Team (#187), the sign-up panel (#188) and the web-auth/webauthn-lib security bump, so the owner merges once.
 
 - **Extra QR codes (QUESTIONS #262).** New feature switch `extra_codes` (Settings → Features, global + plan + restaurant), on by default. Off: the "Extra code" box on the QR codes page is hidden, the create API answers 402, and existing extra codes are hidden from the list (owner's option 2); printed codes keep opening the menu.
 - **Security:** bumped `web-auth/webauthn-lib` to clear the advisory that was failing the backend `composer audit` step on every PR.

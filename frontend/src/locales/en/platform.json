@@ -1029,6 +1029,8 @@
     "title": "Features for the whole platform",
     "hint": "Switch a feature off here to turn it off everywhere — web admin, mobile app, guest menus and the API — whatever the plan or restaurant switches say. Switching it back on restores each plan and restaurant setting.",
     "summary": "{{on}} of {{total}} features on",
+    "search": "Search features…",
+    "no_matches": "No features match “{{q}}”.",
     "groups": {
       "guests": "Guest menu",
       "tools": "Restaurant tools",
