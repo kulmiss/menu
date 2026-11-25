@@ -1,4 +1,11 @@
-# Progress — Feature search (25 Nov 2026)
+# Progress — Owner status e-mails (25 Nov 2026)
+
+📍 Now: PR feat/status-emails (off develop), CI running
+
+- The owner wanted an automatic e-mail when a restaurant is blocked or suspended. Added `RestaurantStatusNotification` (queued) sent to every owner from all four Super-Admin actions (QUESTIONS #269): blocked / suspended carry the reason; unblocked / unsuspended are a short "active again" note with an admin link. Texts in `lang/en/restaurant_status.php`; `Tenant::ownerUsers()` helper added.
+- Tests: PlatformTest asserts the right notification + reason on each of the four actions (Notification::fake). Pint, PHPStan clean; all four subjects render.
+
+# Earlier: Feature search (25 Nov 2026)
 
 📍 Now: PR feat/feature-search (off develop), CI running
 

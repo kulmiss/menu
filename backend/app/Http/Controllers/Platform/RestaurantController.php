@@ -12,6 +12,7 @@ use App\Models\PlatformTag;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Notifications\OwnerWelcomeNotification;
+use App\Notifications\RestaurantStatusNotification;
 use App\Rules\ValidSlug;
 use App\Support\ActivityLogger;
 use App\Support\Features;
@@ -27,6 +28,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -329,6 +331,7 @@ class RestaurantController extends Controller
         $tenant->forceFill(['status' => Tenant::STATUS_SUSPENDED, 'suspended_at' => now(), 'suspended_reason' => $data['reason']])->save();
         MenuPageCache::forget($tenant);
         $this->activity->log('platform.restaurant_suspended', $tenant, ['reason' => ['to' => $data['reason']]], null);
+        Notification::send($tenant->ownerUsers(), new RestaurantStatusNotification('suspended', $tenant, $data['reason']));
 
         return response()->json(['data' => $this->row($tenant)]);
     }
@@ -339,6 +342,7 @@ class RestaurantController extends Controller
         $tenant->forceFill(['status' => Tenant::STATUS_ACTIVE, 'suspended_at' => null, 'suspended_reason' => null])->save();
         MenuPageCache::forget($tenant);
         $this->activity->log('platform.restaurant_unsuspended', $tenant, null, null);
+        Notification::send($tenant->ownerUsers(), new RestaurantStatusNotification('unsuspended', $tenant));
 
         return response()->json(['data' => $this->row($tenant)]);
     }
@@ -351,6 +355,7 @@ class RestaurantController extends Controller
         $tenant->forceFill(['status' => Tenant::STATUS_BLOCKED, 'blocked_at' => now(), 'blocked_reason' => $data['reason']])->save();
         MenuPageCache::forget($tenant);
         $this->activity->log('platform.restaurant_blocked', $tenant, ['reason' => ['to' => $data['reason']]], null);
+        Notification::send($tenant->ownerUsers(), new RestaurantStatusNotification('blocked', $tenant, $data['reason']));
 
         return response()->json(['data' => $this->row($tenant)]);
     }
@@ -361,6 +366,7 @@ class RestaurantController extends Controller
         $tenant->forceFill(['status' => Tenant::STATUS_ACTIVE, 'blocked_at' => null, 'blocked_reason' => null])->save();
         MenuPageCache::forget($tenant);
         $this->activity->log('platform.restaurant_unblocked', $tenant, null, null);
+        Notification::send($tenant->ownerUsers(), new RestaurantStatusNotification('unblocked', $tenant));
 
         return response()->json(['data' => $this->row($tenant)]);
     }
