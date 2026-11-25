@@ -76,6 +76,9 @@ class PublicMenuController extends Controller
             return redirect('/'.$current->slug.$tail, 301);
         }
 
+        // Blocked restaurants look gone to guests (owner, 2026-11-25).
+        abort_if($tenant->isBlocked(), 404);
+
         $state = $tenant->subscriptionState();
         if (in_array($state, [SubscriptionState::Unavailable, SubscriptionState::Suspended, SubscriptionState::Pending], true)) {
             return response()->view('public.unavailable', ['tenant' => $tenant], 503, [

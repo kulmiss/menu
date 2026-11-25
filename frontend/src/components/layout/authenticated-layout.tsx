@@ -31,6 +31,11 @@ const NoRestaurant = lazy(() =>
     default: m.NoRestaurant,
   }))
 )
+const RestaurantBlocked = lazy(() =>
+  import('@/features/errors/restaurant-blocked').then((m) => ({
+    default: m.RestaurantBlocked,
+  }))
+)
 
 type AuthenticatedLayoutProps = {
   children?: React.ReactNode
@@ -63,6 +68,15 @@ export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
     return (
       <Suspense fallback={null}>
         <NoRestaurant />
+      </Suspense>
+    )
+  }
+
+  // Blocked by the Super Admin: replace the whole admin with a card and the reason (owner, 2026-11-25).
+  if (tenant.blocked) {
+    return (
+      <Suspense fallback={null}>
+        <RestaurantBlocked reason={tenant.blocked_reason} />
       </Suspense>
     )
   }

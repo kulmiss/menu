@@ -186,6 +186,8 @@ Route::prefix('v1')->middleware('idempotent')->group(function () {
             Route::post('restaurants/{restaurant}/restore', [RestaurantController::class, 'restore'])->whereNumber('restaurant');
             Route::post('restaurants/{restaurant}/suspend', [RestaurantController::class, 'suspend'])->whereNumber('restaurant');
             Route::post('restaurants/{restaurant}/unsuspend', [RestaurantController::class, 'unsuspend'])->whereNumber('restaurant');
+            Route::post('restaurants/{restaurant}/block', [RestaurantController::class, 'block'])->whereNumber('restaurant');
+            Route::post('restaurants/{restaurant}/unblock', [RestaurantController::class, 'unblock'])->whereNumber('restaurant');
             Route::post('restaurants/{restaurant}/approve', [RestaurantController::class, 'approve'])->whereNumber('restaurant');
             Route::post('restaurants/{restaurant}/reject', [RestaurantController::class, 'reject'])->whereNumber('restaurant');
             Route::post('restaurants/{restaurant}/resend-welcome', [RestaurantController::class, 'resendWelcome'])->whereNumber('restaurant')->middleware('throttle:6,1');

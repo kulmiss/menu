@@ -36,6 +36,9 @@ class TenantResource extends JsonResource
                 'shows_banner' => $state->showsBanner(),
                 'stage_ends_at' => $this->subscriptionStageEndsAt()?->toIso8601String(),
             ],
+            // Blocked by the Super Admin: the admin shows a full-screen card with this reason (owner, 2026-11-25).
+            'blocked' => $this->resource->isBlocked(),
+            'blocked_reason' => $this->resource->isBlocked() ? $this->resource->blocked_reason : null,
             'features' => Features::for($this->resource),
             // "My order" for guests (platform, plan and the restaurant's own switch) and why it is off (QUESTIONS #236).
             'my_order' => MyOrder::state($this->resource),
