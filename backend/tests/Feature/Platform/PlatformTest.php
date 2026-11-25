@@ -47,6 +47,30 @@ it('suspends a restaurant (menu unavailable) and brings it back', function () {
     $this->get('/'.$tenant->slug)->assertOk();
 });
 
+it('blocks a restaurant: owner sees a card, guests get 404, writes are refused, then brings it back', function () {
+    $admin = superAdmin();
+    [$owner, $tenant] = member(Role::Owner);
+    sampleMenu($tenant);
+
+    $this->actingAs($admin)->postJson(p("restaurants/{$tenant->id}/block"), ['reason' => 'Fraud report (demo)'], idem())
+        ->assertOk()->assertJsonPath('data.status', 'blocked')->assertJsonPath('data.blocked_reason', 'Fraud report (demo)');
+
+    // Guests: looks gone (404), not the 503 "unavailable" that suspend shows.
+    $this->get('/'.$tenant->slug)->assertStatus(404);
+
+    // The owner still signs in; the tenant payload tells the admin to show the card with the reason.
+    $this->actingAs($owner)->getJson(t($tenant, '/'))
+        ->assertOk()->assertJsonPath('data.blocked', true)->assertJsonPath('data.blocked_reason', 'Fraud report (demo)');
+    // ...but every change is refused, like a suspended restaurant.
+    $this->actingAs($owner)->putJson(t($tenant, 'profile'), [], idem())->assertStatus(402);
+
+    // Unblock: back to normal, the reason is cleared, the menu returns.
+    $this->actingAs($admin)->postJson(p("restaurants/{$tenant->id}/unblock"), [], idem())
+        ->assertOk()->assertJsonPath('data.status', 'active');
+    $this->actingAs($owner)->getJson(t($tenant, '/'))->assertOk()->assertJsonPath('data.blocked', false);
+    $this->get('/'.$tenant->slug)->assertOk();
+});
+
 it('deletes softly and can restore within 30 days', function () {
     $admin = superAdmin();
     $tenant = Tenant::factory()->create();

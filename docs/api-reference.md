@@ -4,7 +4,7 @@
 
 Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles inside a restaurant are checked by each screen's policy). **Feature**: the feature switch it needs (`402 features.<key>` when off). **Limit**: how many requests are allowed. Create/change requests need an `Idempotency-Key` header. Request and answer examples for the app: [mobile-api.md](mobile-api.md).
 
-**294 endpoints.**
+**296 endpoints.**
 
 ## Sign-in and account (web session)
 
@@ -289,6 +289,7 @@ Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles insid
 | GET | `super/restaurants/{restaurant}` | Super Admin |  | `super` limiter | Platform\RestaurantController@show |
 | PATCH | `super/restaurants/{restaurant}` | Super Admin |  | `super` limiter | Platform\RestaurantController@update |
 | POST | `super/restaurants/{restaurant}/approve` | Super Admin |  | `super` limiter | Platform\RestaurantController@approve |
+| POST | `super/restaurants/{restaurant}/block` | Super Admin |  | `super` limiter | Platform\RestaurantController@block |
 | PUT | `super/restaurants/{restaurant}/features` | Super Admin |  | `super` limiter | Platform\RestaurantController@features |
 | PUT | `super/restaurants/{restaurant}/follow-up` | Super Admin |  | `super` limiter | Platform\CrmController@followUp |
 | POST | `super/restaurants/{restaurant}/impersonate` | Super Admin |  | `super` limiter | Platform\RestaurantController@impersonate |
@@ -301,6 +302,7 @@ Every `/api/v1` endpoint, from the routes. **Who**: who may call it (roles insid
 | POST | `super/restaurants/{restaurant}/restore` | Super Admin |  | `super` limiter | Platform\RestaurantController@restore |
 | POST | `super/restaurants/{restaurant}/suspend` | Super Admin |  | `super` limiter | Platform\RestaurantController@suspend |
 | PUT | `super/restaurants/{restaurant}/tags` | Super Admin |  | `super` limiter | Platform\CrmController@setTags |
+| POST | `super/restaurants/{restaurant}/unblock` | Super Admin |  | `super` limiter | Platform\RestaurantController@unblock |
 | POST | `super/restaurants/{restaurant}/unsuspend` | Super Admin |  | `super` limiter | Platform\RestaurantController@unsuspend |
 | GET | `super/search` | Super Admin |  | `super, 120,1` limiter | Platform\SearchController |
 | GET | `super/settings` | Super Admin |  | `super` limiter | Platform\PlatformController@settings |

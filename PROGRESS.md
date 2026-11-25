@@ -1,4 +1,13 @@
-# Progress — Combined release: switches + sign-up panel (25 Nov 2026)
+# Progress — Block action (25 Nov 2026)
+
+📍 Now: PR feat/block-restaurant (off develop), CI running
+
+- The owner said suspend wasn't working well and asked for two buttons. Suspend stays as-is; added a separate **Block** (QUESTIONS #267).
+- Block: Super Admin Block / Unblock button with a reason; the owner can still sign in but the admin is replaced by a full-screen card with the reason (`RestaurantBlocked`); writes are refused (402); the public menu returns **404** (not suspend's 503).
+- Backend: `status = 'blocked'` + `blocked_at` / `blocked_reason` migration, `Tenant::isBlocked()`, `block()` / `unblock()` + routes, `TenantResource` exposes `blocked` + reason, `PublicMenuController` 404s blocked, cache cleared + activity logged. Internally maps to the suspended state for write-gating so suspend is untouched.
+- Tests: backend PlatformTest (block → owner card payload, guest 404, write 402, unblock); frontend card renders the reason + sign-out. Pint, PHPStan, tsc, eslint, prettier clean; API reference regenerated.
+
+# Earlier: Combined release: switches + sign-up panel (25 Nov 2026)
 
 📍 Now: branch release/switches-and-signup — one PR carrying extra codes (#186), branch limit + Team (#187), the sign-up panel (#188) and the web-auth/webauthn-lib security bump, so the owner merges once. CI running.
 

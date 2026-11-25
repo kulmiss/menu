@@ -534,7 +534,7 @@ function RestaurantSheet({ id, onClose }: { id: number; onClose: () => void }) {
     }) => send(m, path, body)
   )
   const [reason, setReason] = useState<{
-    kind: 'suspend' | 'reject'
+    kind: 'suspend' | 'reject' | 'block'
     text: string
   } | null>(null)
   const [pay, setPay] = useState({
@@ -594,6 +594,11 @@ function RestaurantSheet({ id, onClose }: { id: number; onClose: () => void }) {
               </a>
               {r.suspended_reason && (
                 <span className='text-destructive'>{r.suspended_reason}</span>
+              )}
+              {r.blocked_reason && (
+                <span className='text-destructive'>
+                  {t('platform.restaurants.blocked')}: {r.blocked_reason}
+                </span>
               )}
               {r.signup_state && (
                 <span className='text-muted-foreground'>
@@ -928,13 +933,35 @@ function RestaurantSheet({ id, onClose }: { id: number; onClose: () => void }) {
                   >
                     {t('platform.restaurants.unsuspend')}
                   </Button>
-                ) : (
+                ) : r.status === 'blocked' ? (
                   <Button
                     variant='outline'
-                    onClick={() => setReason({ kind: 'suspend', text: '' })}
+                    onClick={() =>
+                      run(
+                        'post',
+                        `restaurants/${id}/unblock`,
+                        {},
+                        t('platform.saved')
+                      )
+                    }
                   >
-                    {t('platform.restaurants.suspend')}
+                    {t('platform.restaurants.unblock')}
                   </Button>
+                ) : (
+                  <>
+                    <Button
+                      variant='outline'
+                      onClick={() => setReason({ kind: 'suspend', text: '' })}
+                    >
+                      {t('platform.restaurants.suspend')}
+                    </Button>
+                    <Button
+                      variant='outline'
+                      onClick={() => setReason({ kind: 'block', text: '' })}
+                    >
+                      {t('platform.restaurants.block')}
+                    </Button>
+                  </>
                 ))}
               {r.deleted_at ? (
                 <Button

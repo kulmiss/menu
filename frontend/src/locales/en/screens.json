@@ -778,6 +778,11 @@
     "title": "No restaurant yet",
     "text": "Your account is not part of any restaurant. Ask an owner or manager to invite you, then open the link in the email."
   },
+  "restaurant_blocked": {
+    "title": "Your restaurant is blocked",
+    "text": "An administrator has blocked this restaurant, so the admin and your public menu are turned off. Please contact support to sort it out.",
+    "reason": "Reason:"
+  },
   "impersonation": {
     "viewing_as": "Viewing as {{name}}",
     "back": "Back to platform"

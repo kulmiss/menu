@@ -36,6 +36,8 @@ use Illuminate\Support\Facades\Storage;
  * @property Carbon|null $setup_hidden_at dashboard setup checklist hidden
  * @property Carbon|null $suspended_at
  * @property string|null $suspended_reason
+ * @property Carbon|null $blocked_at
+ * @property string|null $blocked_reason
  * @property string $timezone
  * @property string $default_locale
  * @property string $currency_code
@@ -55,6 +57,8 @@ class Tenant extends Model
     public const STATUS_ACTIVE = 'active';
 
     public const STATUS_SUSPENDED = 'suspended';
+
+    public const STATUS_BLOCKED = 'blocked';
 
     /** Self sign-up (owner, 2026-11-13): not live until the e-mail is verified / the Super Admin approves. */
     public const SIGNUP_UNVERIFIED = 'unverified';
@@ -98,6 +102,7 @@ class Tenant extends Model
             'qr_downloaded_at' => 'datetime',
             'setup_hidden_at' => 'datetime',
             'suspended_at' => 'datetime',
+            'blocked_at' => 'datetime',
             'follow_up_on' => 'date',
             'currency_format' => 'array',
             'cache_version' => 'integer',
@@ -136,11 +141,19 @@ class Tenant extends Model
      * trial/active → grace (7 days, banner) → read-only (14 days, menu still
      * shown) → unavailable. Suspension by the Super Admin wins over all.
      */
+    /** Blocked by the Super Admin: the owner sees a card, guests get a 404 (owner, 2026-11-25). */
+    public function isBlocked(): bool
+    {
+        return $this->status === self::STATUS_BLOCKED;
+    }
+
     public function subscriptionState(?CarbonInterface $now = null): SubscriptionState
     {
         $now ??= now();
 
-        if ($this->status === self::STATUS_SUSPENDED) {
+        // Blocked gates writes and the public menu exactly like suspended; the
+        // owner-facing card and the guest 404 are handled separately (owner, 2026-11-25).
+        if ($this->status === self::STATUS_SUSPENDED || $this->status === self::STATUS_BLOCKED) {
             return SubscriptionState::Suspended;
         }
 
@@ -187,11 +200,12 @@ class Tenant extends Model
         $readOnly = (int) config('menu.read_only_days');
         $t = $this->getTable();
         $expired = "GREATEST(COALESCE({$t}.paid_until, {$t}.trial_ends_at), COALESCE({$t}.trial_ends_at, {$t}.paid_until))";
-        $base = "{$t}.status <> '".self::STATUS_SUSPENDED."' AND {$t}.signup_state IS NULL";
+        $base = "{$t}.status NOT IN ('".self::STATUS_SUSPENDED."', '".self::STATUS_BLOCKED."') AND {$t}.signup_state IS NULL";
         $over = "{$base} AND ({$t}.paid_until IS NULL OR {$t}.paid_until <= ?) AND ({$t}.trial_ends_at IS NULL OR {$t}.trial_ends_at <= ?) AND {$expired} IS NOT NULL";
         $sql = [
             'suspended' => ["{$t}.status = '".self::STATUS_SUSPENDED."'", []],
-            'pending' => ["{$t}.status <> '".self::STATUS_SUSPENDED."' AND {$t}.signup_state IS NOT NULL", []],
+            'blocked' => ["{$t}.status = '".self::STATUS_BLOCKED."'", []],
+            'pending' => ["{$t}.status NOT IN ('".self::STATUS_SUSPENDED."', '".self::STATUS_BLOCKED."') AND {$t}.signup_state IS NOT NULL", []],
             'active' => ["{$base} AND ({$t}.paid_until > ? OR ({$t}.paid_until IS NULL AND {$t}.trial_ends_at IS NULL))", [$now]],
             'trial' => ["{$base} AND ({$t}.paid_until IS NULL OR {$t}.paid_until <= ?) AND {$t}.trial_ends_at > ?", [$now, $now]],
             'grace' => ["{$over} AND DATE_ADD({$expired}, INTERVAL {$grace} DAY) > ?", [$now, $now, $now]],

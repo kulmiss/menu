@@ -26,6 +26,10 @@ export type Tenant = {
     shows_banner: boolean
     stage_ends_at: string | null
   }
+  /** Blocked by the Super Admin: the admin shows a full-screen card instead of the app. */
+  blocked?: boolean
+  /** Why it was blocked (shown on the card); null unless blocked. */
+  blocked_reason?: string | null
   membership: {
     id: number
     role: Role
