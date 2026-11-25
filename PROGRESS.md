@@ -3,7 +3,6 @@
 📍 Now: branch release/switches-and-signup — one PR carrying extra codes (#186), branch limit + Team (#187), the sign-up panel (#188) and the web-auth/webauthn-lib security bump, so the owner merges once. CI running.
 
 - **Extra QR codes (QUESTIONS #262).** New feature switch `extra_codes` (Settings → Features, global + plan + restaurant), on by default. Off: the "Extra code" box on the QR codes page is hidden, the create API answers 402, and existing extra codes are hidden from the list (owner's option 2); printed codes keep opening the menu.
-- **Branch limit + Team + sign-up panel:** see the sections below.
 - **Security:** bumped `web-auth/webauthn-lib` to clear the advisory that was failing the backend `composer audit` step on every PR.
 
 # Earlier: Branch limit + Team ON/OFF switch (24 Nov 2026)
@@ -12,7 +11,12 @@
 - **Team switch (QUESTIONS #264).** New feature `team` (Settings → Features, plans, restaurants), on by default. Off: the Team menu item is hidden and the team/invitation API answers 402 `features.team`; members already on the restaurant keep working, and a pending invitation can still be accepted.
 - New sidebar mechanics: `hideWhenOff` (remove, don't badge, when a Super-Admin switch is off) and `hideWhenSingleBranch` (remove on a one-branch plan).
 - Tests: backend `TeamSwitchTest` (4), frontend branches "+ New branch" at/under limit and sidebar Team/Branches hidden. Pint, PHPStan, tsc, eslint, prettier all clean; API reference regenerated.
-- Pre-existing, unrelated failures in this sandbox only (same on clean develop): `DemoSeederTest` payment-month count (date-sensitive), `BackupTest` / `BackupEncryptionTest` (no S3 / no openssl key).
+
+# Earlier: Sign-up / sign-in left side (25 Nov 2026)
+
+- The owner said the sign-up left side looked ugly. It did: the benefits and demo phone floated loose in the gap and the phone was cut off. Showed three mockups; the owner chose the unified panel.
+- Fix (QUESTIONS #265): heading + three benefit lines + the full phone now sit in one soft tinted panel (`.aside-card`). CSS/markup only in `account/layout.blade.php`, so it also covers sign-in, forgot/reset and invite pages; the Super Admin `$plain` pages (no aside) are untouched.
+- Verified by rendering the real page with Playwright at 1280 px (light + dark) and 430 px: panel reads as one block, mobile still shows the form first with the phone hidden. `AccountPagesTest` asserts the panel markup; full file green, Pint clean.
 
 # Earlier: Tables ON/OFF switch (22 Nov 2026)
 
