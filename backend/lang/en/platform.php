@@ -36,6 +36,8 @@ return [
         'share' => '“Share” button on the menu',
         'print_materials' => 'Print materials (table tents, posters, stickers)',
         'tables' => 'Tables (one QR per table, table cards)',
+        'extra_codes' => 'Extra QR codes (flyer, poster, window)',
+        'team' => 'Team (invite managers and staff)',
         'signup' => 'Self sign-up for new restaurants',
     ],
     'features_need_style' => 'Keep at least one menu style switched on.',

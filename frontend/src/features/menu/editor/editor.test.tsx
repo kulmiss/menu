@@ -275,6 +275,7 @@ describe('ItemSheet', () => {
     canWrite: true,
     canManage: role !== 'staff',
     canEditPrices: prices,
+    branchLimit: null,
   })
 
   it('creates an item with sizes', async () => {

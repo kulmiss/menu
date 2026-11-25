@@ -16,6 +16,7 @@ class Features
 {
     public const DEFAULTS = [
         'branches' => true,       // more than the main branch
+        'team' => true,           // invite managers and staff (owner, 2026-11-24)
         'promotions' => true,
         'insights' => true,
         'import_export' => true,
@@ -59,6 +60,10 @@ class Features
         // admin, no table cards, no table codes in the QR list, no table name on "Show to waiter";
         // codes already printed on tables keep opening the menu.
         'tables' => true,
+        // Extra QR codes for a flyer, poster or window (owner, 2026-11-24). Off: no "Extra code"
+        // box in the admin, and existing extra codes are hidden from the list; a code already
+        // printed keeps opening the menu.
+        'extra_codes' => true,
     ];
 
     /**

@@ -124,14 +124,15 @@
         .after a{color:var(--ink);font-weight:650;text-underline-offset:4px;display:inline-flex;min-height:44px;align-items:center}
         details{margin-top:20px}
         summary{cursor:pointer;color:var(--ink);font-weight:650;min-height:44px;display:flex;align-items:center}
-        /* Benefits + phone */
-        .aside h2{font-size:clamp(1.6rem,3.6vw,2.4rem);font-weight:850}
-        .points{list-style:none;margin:20px 0 0;padding:0;display:grid;gap:12px;font-size:1.075rem}
+        /* Benefits + phone — one unified panel so nothing floats in the gap (QUESTIONS #265) */
+        .aside h2{font-size:clamp(1.5rem,3.2vw,2.15rem);font-weight:850}
+        .points{list-style:none;margin:20px 0 0;padding:0;display:grid;gap:12px;font-size:1.05rem}
         .points li{display:flex;gap:12px;align-items:flex-start}
         .points .icon{color:var(--on-brand);background:var(--brand);border-radius:999px;padding:4px;width:26px;height:26px;margin-top:1px}
-        .aside-inner{display:grid;gap:32px;align-items:center}
-        @media (min-width:960px){.aside-inner{grid-template-columns:1fr 220px}}
-        .phone{display:none;position:relative;width:220px;border-radius:40px;padding:9px;background:#0b0f19;box-shadow:0 40px 80px -24px rgb(15 23 42/.45);justify-self:center}
+        .aside-card{background:var(--tint);border:1px solid var(--line);border-radius:28px;padding:28px}
+        .aside-inner{display:grid;gap:28px;align-items:center}
+        @media (min-width:960px){.aside-card{padding:32px}.aside-inner{grid-template-columns:1fr 190px}}
+        .phone{display:none;position:relative;width:190px;border-radius:38px;padding:8px;background:#0b0f19;box-shadow:0 30px 64px -24px rgb(15 23 42/.5);justify-self:center}
         .phone::before{content:"";position:absolute;top:16px;left:50%;width:66px;height:18px;margin-left:-33px;background:#0b0f19;border-radius:999px;z-index:2}
         .phone img{width:100%;height:auto;border-radius:31px;background:var(--soft)}
         @media (min-width:960px){.phone{display:block}}
@@ -177,7 +178,7 @@
         </div>
         @unless ($plain)
             <aside class="aside" aria-labelledby="aside-title">
-                <div class="aside-inner">
+                <div class="aside-inner aside-card">
                     <div>
                         <h2 id="aside-title">{{ __('account.aside.title') }}</h2>
                         <ul class="points">

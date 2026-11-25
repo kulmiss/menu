@@ -37,6 +37,8 @@ export type Tenant = {
   } | null
   /** Plan features (with the Super Admin's overrides); missing = on. */
   features?: Partial<Record<string, boolean>>
+  /** The plan's branch limit (null = unlimited), so the admin can hide "+ New branch" at the limit. */
+  branch_limit?: number | null
   /** Where "Upgrade" buttons point (WhatsApp link / support e-mail). */
   upgrade?: { whatsapp: string | null; email: string | null }
 }

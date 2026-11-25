@@ -36,6 +36,8 @@ it('shows the short sign-up form in the landing style, with no script files', fu
         ->assertSee('href="/terms"', false)->assertSee('href="/privacy"', false)
         ->assertSee('data-strength="password-strength"', false)
         ->assertSee('Your menu, on every phone')
+        // The benefits and the phone sit in one unified panel, not floating in the gap (#265).
+        ->assertSee('class="aside-inner aside-card"', false)
         ->assertDontSee('noindex')
         ->assertDontSee('Continue with Google')
         ->getContent();
