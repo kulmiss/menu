@@ -1,6 +1,14 @@
-# Progress — Tables ON/OFF switch (22 Nov 2026)
+# Progress — Sign-up / sign-in left side (25 Nov 2026)
 
-📍 Now: PR feat/tables-switch (stacked on the video PR #183), CI running
+📍 Now: PR fix/account-aside-panel (off develop), CI running
+
+- The owner said the sign-up left side looked ugly. It did: the benefits and demo phone floated loose in the gap and the phone was cut off. Showed three mockups; the owner chose the unified panel.
+- Fix (QUESTIONS #265): heading + three benefit lines + the full phone now sit in one soft tinted panel (`.aside-card`). CSS/markup only in `account/layout.blade.php`, so it also covers sign-in, forgot/reset and invite pages; the Super Admin `$plain` pages (no aside) are untouched.
+- Verified by rendering the real page with Playwright at 1280 px (light + dark) and 430 px: panel reads as one block, mobile still shows the form first with the phone hidden. `AccountPagesTest` asserts the panel markup; full file green, Pint clean.
+
+# Earlier: Tables ON/OFF switch (22 Nov 2026)
+
+📍 PR feat/tables-switch (stacked on the video PR #183), CI running
 
 - New feature switch `tables` (Settings → Features, plans, restaurants), on by default. Off: no Tables / table cards / table codes in the admin, no table name on "Show to waiter", help article hidden; printed table codes keep opening the menu (QUESTIONS #261).
 
