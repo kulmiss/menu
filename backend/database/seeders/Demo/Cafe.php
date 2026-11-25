@@ -46,7 +46,10 @@ class Cafe
             'paid_until' => now()->addYear(), 'timezone' => 'Africa/Addis_Ababa',
             'default_locale' => 'en', 'currency_code' => 'ETB',
         ]);
-        $tenant->forceFill(['created_at' => now()->subMonths(11), 'qr_downloaded_at' => now()->subMonths(10)])->save();
+        // 13 months back so the monthly payments span a full 12 calendar months
+        // regardless of today's day-of-month (QUESTIONS #266; the +14-day trial else
+        // drops the earliest month and the revenue demo/test can land on only 10).
+        $tenant->forceFill(['created_at' => now()->subMonths(13), 'qr_downloaded_at' => now()->subMonths(12)])->save();
         foreach ([
             [Role::Owner, 'demo@example.com', 'Demo Owner'],
             [Role::Manager, 'manager@example.com', 'Demo Manager'],
