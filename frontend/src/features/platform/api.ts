@@ -72,6 +72,7 @@ export type Restaurant = {
   /** Self sign-up not finished: 'unverified' or 'pending_approval'. */
   signup_state?: 'unverified' | 'pending_approval' | null
   suspended_reason: string | null
+  blocked_reason: string | null
   plan: { id: number; name: string } | null
   trial_ends_at: string | null
   paid_until: string | null

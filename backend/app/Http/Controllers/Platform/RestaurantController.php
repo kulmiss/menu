@@ -343,6 +343,28 @@ class RestaurantController extends Controller
         return response()->json(['data' => $this->row($tenant)]);
     }
 
+    /** Block (owner, 2026-11-25): owner still signs in but the admin is a card; guests get a 404. */
+    public function block(Request $request, int $restaurant): JsonResponse
+    {
+        $tenant = Tenant::findOrFail($restaurant);
+        $data = $request->validate(['reason' => ['required', 'string', 'max:300']]);
+        $tenant->forceFill(['status' => Tenant::STATUS_BLOCKED, 'blocked_at' => now(), 'blocked_reason' => $data['reason']])->save();
+        MenuPageCache::forget($tenant);
+        $this->activity->log('platform.restaurant_blocked', $tenant, ['reason' => ['to' => $data['reason']]], null);
+
+        return response()->json(['data' => $this->row($tenant)]);
+    }
+
+    public function unblock(int $restaurant): JsonResponse
+    {
+        $tenant = Tenant::findOrFail($restaurant);
+        $tenant->forceFill(['status' => Tenant::STATUS_ACTIVE, 'blocked_at' => null, 'blocked_reason' => null])->save();
+        MenuPageCache::forget($tenant);
+        $this->activity->log('platform.restaurant_unblocked', $tenant, null, null);
+
+        return response()->json(['data' => $this->row($tenant)]);
+    }
+
     /** Soft delete: kept 30 days (restore possible), then purged by the scheduler. */
     public function destroy(int $restaurant): Response
     {
@@ -423,6 +445,7 @@ class RestaurantController extends Controller
             'signup_state' => $t->signup_state,
             'status' => $t->status,
             'suspended_reason' => $t->suspended_reason,
+            'blocked_reason' => $t->blocked_reason,
             'plan' => $t->plan ? ['id' => $t->plan->id, 'name' => $t->plan->name['en'] ?? $t->plan->slug] : null,
             'trial_ends_at' => $t->trial_ends_at?->toDateString(),
             'paid_until' => $t->paid_until?->toDateString(),
