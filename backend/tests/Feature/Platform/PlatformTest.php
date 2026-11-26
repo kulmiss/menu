@@ -8,6 +8,7 @@ use App\Models\Promotion;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Notifications\OwnerWelcomeNotification;
+use App\Notifications\RestaurantStatusNotification;
 use Illuminate\Support\Facades\Notification;
 
 it('is only for Super Admins with two-factor sign-in', function () {
@@ -69,6 +70,24 @@ it('blocks a restaurant: owner sees a card, guests get 404, writes are refused, 
         ->assertOk()->assertJsonPath('data.status', 'active');
     $this->actingAs($owner)->getJson(t($tenant, '/'))->assertOk()->assertJsonPath('data.blocked', false);
     $this->get('/'.$tenant->slug)->assertOk();
+});
+
+it('emails the owner when a restaurant is blocked, suspended or lifted', function () {
+    Notification::fake();
+    $admin = superAdmin();
+    [$owner, $tenant] = member(Role::Owner);
+
+    $this->actingAs($admin)->postJson(p("restaurants/{$tenant->id}/block"), ['reason' => 'Chargebacks (demo)'], idem())->assertOk();
+    Notification::assertSentTo($owner, RestaurantStatusNotification::class, fn ($n) => $n->kind === 'blocked' && $n->reason === 'Chargebacks (demo)');
+
+    $this->actingAs($admin)->postJson(p("restaurants/{$tenant->id}/unblock"), [], idem())->assertOk();
+    Notification::assertSentTo($owner, RestaurantStatusNotification::class, fn ($n) => $n->kind === 'unblocked');
+
+    $this->actingAs($admin)->postJson(p("restaurants/{$tenant->id}/suspend"), ['reason' => 'Unpaid invoice'], idem())->assertOk();
+    Notification::assertSentTo($owner, RestaurantStatusNotification::class, fn ($n) => $n->kind === 'suspended' && $n->reason === 'Unpaid invoice');
+
+    $this->actingAs($admin)->postJson(p("restaurants/{$tenant->id}/unsuspend"), [], idem())->assertOk();
+    Notification::assertSentTo($owner, RestaurantStatusNotification::class, fn ($n) => $n->kind === 'unsuspended');
 });
 
 it('deletes softly and can restore within 30 days', function () {

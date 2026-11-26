@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Role;
 use App\Enums\SubscriptionState;
 use App\Support\PublicMenu\MenuPageCache;
 use App\Support\Qr\QrMap;
@@ -18,6 +19,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -120,6 +122,22 @@ class Tenant extends Model
     public function memberships(): HasMany
     {
         return $this->hasMany(Membership::class);
+    }
+
+    /**
+     * The owner users, for status e-mails (blocked / suspended / lifted).
+     *
+     * @return Collection<int, User>
+     */
+    public function ownerUsers(): Collection
+    {
+        return $this->memberships()
+            ->where('role', Role::Owner)
+            ->with('user')
+            ->get()
+            ->pluck('user')
+            ->filter()
+            ->values();
     }
 
     /** @return BelongsToMany<User, $this> */
