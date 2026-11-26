@@ -5,6 +5,12 @@
 - The owner wanted an automatic e-mail when a restaurant is blocked or suspended. Added `RestaurantStatusNotification` (queued) sent to every owner from all four Super-Admin actions (QUESTIONS #269): blocked / suspended carry the reason; unblocked / unsuspended are a short "active again" note with an admin link. Texts in `lang/en/restaurant_status.php`; `Tenant::ownerUsers()` helper added.
 - Tests: PlatformTest asserts the right notification + reason on each of the four actions (Notification::fake). Pint, PHPStan clean; all four subjects render.
 
+# Earlier: Flutter app into the monorepo (26 Nov 2026) — merged as #193
+
+- The owner wanted everything in one folder like the guul12 project. Brought the Flutter app (`kulmiss/menu-admin-app`) into this repo under `app/` — only git-tracked files (352, 14 MB; no build artifacts) (QUESTIONS #270).
+- New `.github/workflows/app.yml` (analyze, format, tests, Android size budget), path-filtered to `app/**`, modelled on the app's own green CI; backend/frontend CI untouched. README documents the `app/` folder.
+- No history preservation (the app has no more changes). The old `menu-admin-app` repo is left intact — owner decides its fate later.
+
 # Earlier: Feature search (25 Nov 2026)
 
 📍 Now: PR feat/feature-search (off develop), CI running

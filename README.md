@@ -24,6 +24,7 @@ Digital menu SaaS for restaurants and cafés: a fast public QR menu, a phone-fri
 |---|---|
 | `backend/` | Laravel 13 JSON API + Blade public menu (PHP 8.3+, MySQL 8 / MariaDB 10.6+) |
 | `frontend/` | Admin + Super Admin SPA (React, TanStack Router, shadcn/ui), built into `backend/public/app` |
+| `app/` | Flutter mobile app for restaurant admins and the Super Admin (Dart 3, Flutter 3.47.9) |
 | `docker/`, `docker-compose.yml` | Local development only — production runs without Docker |
 | `scripts/` | Helper scripts |
 
