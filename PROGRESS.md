@@ -1,4 +1,12 @@
-# Progress — Owner status e-mails (25 Nov 2026)
+# Progress — Appearance page as tabs (26 Nov 2026)
+
+📍 Now: PR feat/appearance-tabs (off develop), CI running
+
+- The owner said the Appearance page was crowded and asked tabs or sidebar; showed a mockup, they chose tabs. Reorganised the five sections (Look, Layout, Colours & font, Logo & banner, What guests see) from a stack of collapsible cards into **tabs** — one at a time, live preview always beside (QUESTIONS #271).
+- Each tab shows a dot for unsaved changes / errors; a save error opens its tab. Dropped the step-bar, expand/collapse-all and the open-state memory. Settings/saving/preview unchanged; net −81 lines.
+- `appearance.test` rewritten for tabs: 30 tests pass (incl. axe, zero violations); tsc, eslint, prettier clean.
+
+# Earlier: Owner status e-mails (25 Nov 2026)
 
 📍 Now: PR feat/status-emails (off develop), CI running
 
