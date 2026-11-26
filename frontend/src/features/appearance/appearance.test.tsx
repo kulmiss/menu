@@ -774,10 +774,12 @@ describe('AppearancePage tabs', () => {
     const phone = frame(screen).parentElement as HTMLElement
     // On a computer the phone caps its height to the viewport, so the whole
     // preview stays in view instead of scrolling off the bottom.
-    expect(phone.className).toContain('100dvh-12rem')
-    // Its column sticks beside the settings rather than scrolling away.
+    expect(phone.className).toContain('100dvh-14rem')
+    // Its column pins near the top and holds still beside the settings (a
+    // fixed sidebar) rather than scrolling away.
     const column = phone.closest('[class*="lg:sticky"]')
     expect(column).not.toBeNull()
+    expect(column?.className).toContain('lg:top-6')
     expect(column?.className).toContain('lg:self-start')
   })
 

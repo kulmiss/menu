@@ -670,7 +670,7 @@ function AppearanceForm({ initial }: { initial: Appearance }) {
 
       <div
         className={cn(
-          'lg:sticky lg:top-20 lg:block lg:self-start',
+          'lg:sticky lg:top-6 lg:block lg:self-start',
           showPreview ? 'block' : 'hidden'
         )}
       >
@@ -680,9 +680,10 @@ function AppearanceForm({ initial }: { initial: Appearance }) {
           onScheme={setScheme}
           title={t('appearance.preview')}
           hint={t('appearance.preview_hint')}
-          // On a computer the phone shrinks to fit the screen, so the whole
-          // preview stays pinned in view instead of scrolling off the bottom.
-          frameClassName='lg:h-[min(640px,calc(100dvh-12rem))]'
+          // On a computer the whole preview (switches, phone, buttons) fits the
+          // screen height, so it pins like a fixed sidebar and never scrolls —
+          // even on the long Look tab. The phone shrinks to make room.
+          frameClassName='lg:h-[min(640px,calc(100dvh-14rem))]'
         />
       </div>
     </div>
