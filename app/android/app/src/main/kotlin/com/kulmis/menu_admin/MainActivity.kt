@@ -1,0 +1,52 @@
+package com.kulmis.menu_admin
+
+import android.content.ClipData
+import android.content.ClipDescription
+import android.content.ClipboardManager
+import android.content.Context
+import android.os.Build
+import android.os.PersistableBundle
+import android.view.WindowManager
+import io.flutter.embedding.android.FlutterFragmentActivity
+import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.plugin.common.MethodChannel
+
+// FlutterFragmentActivity: needed by local_auth (biometric app lock).
+class MainActivity : FlutterFragmentActivity() {
+    override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
+        super.configureFlutterEngine(flutterEngine)
+        // Secret screens (SECURITY_REPORT.md M13, M14): no screenshots, and a hidden clipboard preview.
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "menuadmin/secure").setMethodCallHandler { call, result ->
+            when (call.method) {
+                "setSecure" -> {
+                    if (call.arguments == true) {
+                        window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
+                    } else {
+                        window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+                    }
+                    result.success(null)
+                }
+                "copySensitive" -> {
+                    val clip = ClipData.newPlainText("", call.arguments as? String ?: "")
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        clip.description.extras = PersistableBundle().apply {
+                            putBoolean(ClipDescription.EXTRA_IS_SENSITIVE, true)
+                        }
+                    }
+                    (getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(clip)
+                    result.success(true)
+                }
+                // Warning only (SECURITY_REPORT.md L12): su binaries or a test-keys build.
+                "looksRooted" -> {
+                    val paths = listOf(
+                        "/system/bin/su", "/system/xbin/su", "/sbin/su", "/su/bin/su", "/data/local/su",
+                        "/data/local/bin/su", "/data/local/xbin/su", "/system/app/Superuser.apk", "/data/adb/magisk",
+                    )
+                    val tags = Build.TAGS ?: ""
+                    result.success(tags.contains("test-keys") || paths.any { java.io.File(it).exists() })
+                }
+                else -> result.notImplemented()
+            }
+        }
+    }
+}

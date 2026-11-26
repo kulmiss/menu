@@ -1,0 +1,6 @@
+tags:
+  golden:
+  store:
+    skip: "Store screenshots: run with `flutter test --run-skipped -t store --update-goldens test/store`"
+  compare:
+    skip: "Before/after screens: run with `COMPARE_DIR=after flutter test --run-skipped -t compare --update-goldens test/compare`"
