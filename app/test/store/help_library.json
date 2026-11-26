@@ -1,0 +1,1127 @@
+{
+    "data": {
+        "topics": [
+            {
+                "key": "getting_started",
+                "title": "Getting started"
+            },
+            {
+                "key": "menu",
+                "title": "Your menu"
+            },
+            {
+                "key": "look",
+                "title": "Menu look"
+            },
+            {
+                "key": "branches",
+                "title": "Branches"
+            },
+            {
+                "key": "sharing",
+                "title": "Sharing and QR codes"
+            },
+            {
+                "key": "promotions",
+                "title": "Promotions and happy hour"
+            },
+            {
+                "key": "my_order",
+                "title": "My order"
+            },
+            {
+                "key": "insights",
+                "title": "Insights and numbers"
+            },
+            {
+                "key": "team",
+                "title": "Team"
+            },
+            {
+                "key": "account",
+                "title": "Account and security"
+            },
+            {
+                "key": "plans",
+                "title": "Plans and upgrades"
+            },
+            {
+                "key": "app",
+                "title": "The mobile app"
+            },
+            {
+                "key": "problems",
+                "title": "Problems and answers"
+            },
+            {
+                "key": "faq",
+                "title": "FAQ and contact"
+            }
+        ],
+        "articles": [
+            {
+                "slug": "sign-up",
+                "topic": "getting_started",
+                "title": "Create your free account",
+                "summary": "Make an account and your menu address in two minutes.",
+                "pages": [],
+                "app": [],
+                "keywords": [
+                    "register",
+                    "new account",
+                    "free",
+                    "start"
+                ],
+                "body": "You can make a menu for free. You don't need a card.\n\n1. Open **http://127.0.0.1:8000/auth/sign-up**.\n2. Type your **Restaurant name**.\n3. Choose your **Menu address**. Your menu will be at http://127.0.0.1:8000/your-address. Use small letters, numbers and hyphens.\n4. Type your name, your e-mail and a password. Use at least 10 characters.\n5. Choose your **Currency**. Your prices are shown in it.\n6. Tick the box for the Terms and the Privacy Policy.\n7. Tap **Create free account**.\n8. Open the e-mail we send you and tap the link. The link works for 24 hours.\n\n![The sign-up page](/help/shots/signup-phone.webp \"phone\") ![The sign-up page](/help/shots/signup-desktop.webp \"desktop\")\n\nYou start on the **Free** plan. See [what each plan includes](help:plans-compared).\n\n**No e-mail?** Look in your spam folder. On the \"Check your inbox\" page you can tap **Resend email** or **Change it** if you typed the wrong address.\n\n**\"Your account is waiting for approval\"?** Sometimes our team checks new restaurants first. You can set up your menu now. Guests can see it once it is approved.\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "first-sign-in",
+                "topic": "getting_started",
+                "title": "Sign in for the first time",
+                "summary": "Where to sign in, and what you see first.",
+                "pages": [],
+                "app": [],
+                "keywords": [
+                    "login",
+                    "log in",
+                    "password"
+                ],
+                "body": "1. Open **http://127.0.0.1:8000/admin** on your phone or computer.\n2. Type your e-mail and password. Tap **Sign in**.\n3. If you turned on two-factor sign-in, type the 6-digit code from your phone.\n\nYou now see your **Dashboard**. It shows today's menu views and QR scans, and a list called **Finish setting up**.\n\n![The dashboard after the first sign-in](/help/shots/dashboard-phone.webp \"phone\") ![The dashboard after the first sign-in](/help/shots/dashboard-desktop.webp \"desktop\")\n\nA short tour shows you the most important places. Tap **Next**, or **Skip tour**. You can open it again from **Help → Take the tour**.\n\n![The welcome tour](/help/shots/tour-phone.webp \"phone\") ![The welcome tour](/help/shots/tour-desktop.webp \"desktop\")\n\nWere you invited by someone? Open the invitation e-mail and tap the link. Make a password. Then sign in like above.\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "setup-steps",
+                "topic": "getting_started",
+                "title": "The setup steps",
+                "summary": "The \"Finish setting up\" list makes your menu ready for guests.",
+                "pages": [
+                    "/admin"
+                ],
+                "app": [
+                    "/r/:tid"
+                ],
+                "keywords": [
+                    "checklist",
+                    "setup",
+                    "ready",
+                    "percent"
+                ],
+                "body": "The **Finish setting up** list on your dashboard shows what is still missing. Each step opens the right page.\n\n1. **Add your logo.** Go to **Appearance → Logo**. See [Logo and banner](help:logo-and-banner).\n2. **Add a banner photo.** The wide photo at the top of your menu.\n3. **Add at least 5 dishes.** See [Add a dish](help:add-a-dish).\n4. **Add dish photos.** Dishes with photos get opened more.\n5. **Set opening hours.** Go to **Restaurant info → Opening hours**.\n6. **Add address and contact.** Also on **Restaurant info**.\n7. **Download your QR codes.** See [QR codes](help:qr-codes).\n\nWhen all steps are done, the list says 100 %. Tap **Hide this list** to remove it.\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "dashboard",
+                "topic": "getting_started",
+                "title": "Your dashboard",
+                "summary": "What the cards on the dashboard mean.",
+                "pages": [
+                    "/admin"
+                ],
+                "app": [
+                    "/r/:tid"
+                ],
+                "keywords": [
+                    "home",
+                    "today",
+                    "views",
+                    "scans"
+                ],
+                "body": "The dashboard shows **today** at your restaurant.\n\n- **Menu views today**: how many times your menu was opened. Under it: yesterday's number.\n- **QR scans today**: views that came from one of your QR codes.\n- **Sold out now**: dishes guests see as sold out. Tap **Available again** when they are back.\n- **Views and scans**: a small chart of the last 7 days. Tap **Insights** for more.\n- **Dishes without a photo**: the most viewed dishes without a photo come first.\n- **\"My order\" lists**: how many lists guests made on their phones. See [My order](help:my-order).\n- **Plan and usage**: your plan, the days left and how much you use.\n\n![The dashboard on a phone and a computer](/help/shots/dashboard-phone.webp \"phone\") ![The dashboard on a phone and a computer](/help/shots/dashboard-desktop.webp \"desktop\")\n\nThe numbers update within a minute. Search engines and link previews are not counted.\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "menus-and-categories",
+                "topic": "menu",
+                "title": "Menus and categories",
+                "summary": "A menu has categories. Categories have dishes.",
+                "pages": [
+                    "/admin/menu"
+                ],
+                "app": [
+                    "/r/:tid/menu"
+                ],
+                "keywords": [
+                    "category",
+                    "section",
+                    "breakfast",
+                    "lunch",
+                    "order",
+                    "sort",
+                    "schedule"
+                ],
+                "body": "Your menu has three levels:\n\n- **Menus**, for example \"All day\" or \"Drinks\".\n- **Categories** inside a menu, for example \"Coffee\" or \"Breakfast\".\n- **Dishes** inside a category.\n\n**Add a menu**\n\n1. Open **Menu editor**.\n2. Tap **New menu**. Type a name. Tap **Save**.\n\n**Add a category**\n\n1. Open the menu.\n2. Tap **Add category**. Type a name, for example \"Coffee\". Tap **Save**.\n\n**Change the order.** Drag a category or a dish by its handle. Guests see the new order at once.\n\n**Show a menu only at some times.** Open the menu, tap **Edit menu**, then **When it is shown → At set times**. Add a time window, for example Monday 07:00 to 11:00. Times are in your restaurant's time zone.\n\n![The menu editor](/help/shots/menu-editor-phone.webp \"phone\") ![The menu editor](/help/shots/menu-editor-desktop.webp \"desktop\")\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "add-a-dish",
+                "topic": "menu",
+                "title": "Add a dish",
+                "summary": "Name, price, photo and description, step by step.",
+                "pages": [
+                    "/admin/menu"
+                ],
+                "app": [
+                    "/r/:tid/menu",
+                    "/r/:tid/dishes/new"
+                ],
+                "keywords": [
+                    "item",
+                    "new dish",
+                    "food",
+                    "drink"
+                ],
+                "body": "1. Open **Menu editor** (in the app: **Menu**) and the category.\n2. Tap **Add item**.\n3. Type the **Name**, for example \"Macchiato\".\n4. Type the **Price**, for example 120 or 120.50.\n5. Add a **Short line**. Guests see it under the name.\n6. Add a **Photo** (see [Dish photos](help:dish-photos)).\n7. Tap **Save**.\n\n![The dish editor](/help/shots/dish-editor-phone.webp \"phone\") ![The dish editor](/help/shots/dish-editor-desktop.webp \"desktop\")\n\nMore tabs in the dish editor:\n\n- **Prices & sizes**: for example Small and Large, each with its own price.\n- **Add-ons**: choices like extra cheese. Guests see them as information.\n- **Tags & allergens**: Vegan, Spicy, Halal, and allergens like milk or gluten.\n- **New** and **Popular** badges. \"New\" can end by itself on a date.\n\n**In the app:** tap **Add dish with photo** on Home. Take the photo, type the name and price, and tap **Save**.\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "dish-photos",
+                "topic": "menu",
+                "title": "Dish photos",
+                "summary": "Up to 5 photos for each dish. How to take good ones.",
+                "pages": [
+                    "/admin/menu"
+                ],
+                "app": [
+                    "/r/:tid/dishes/:id"
+                ],
+                "keywords": [
+                    "picture",
+                    "image",
+                    "camera",
+                    "crop",
+                    "heic"
+                ],
+                "body": "Each dish can have up to **5 photos**. The first one is the main photo. Guests swipe to see the others.\n\n1. Open the dish.\n2. Tap **Add photo**. On a phone you can tap **Take photo**.\n3. Drag the photo to move it. Use the slider to zoom.\n4. Tap **Use photo**.\n\nTo change the main photo, tap **Main** on another photo.\n\n**Good photos**\n\n- Use daylight from a window. Don't use the flash.\n- Take the photo from above or from the side of the plate.\n- Fill the picture with the food.\n- A file can be up to 8 MB. JPEG, PNG and WebP work.\n\n**iPhone:** HEIC photos can't be used. On the iPhone open **Settings → Camera → Formats** and choose **Most Compatible**.\n\nYour plan allows 100 photos in total on the Free plan. See [plans](help:plans-compared).\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "prices",
+                "topic": "menu",
+                "title": "Change prices",
+                "summary": "One price, many prices at once, or prices for one branch.",
+                "pages": [
+                    "/admin/dishes"
+                ],
+                "app": [
+                    "/r/:tid/all-dishes"
+                ],
+                "keywords": [
+                    "price",
+                    "percent",
+                    "increase",
+                    "round"
+                ],
+                "body": "**One dish**\n\n1. Open the dish.\n2. Change the **Price**. Tap **Save**.\n\nIn the app you can also tap **Change a price** on Home.\n\n**Many dishes at once**\n\n1. Open **All dishes**.\n2. Tick the dishes. You can also search or filter first.\n3. Tap **Change price**.\n4. Type a percent, for example 10. For lower prices use a minus: -5.\n5. Choose **Round to**, for example to whole numbers.\n6. Tap **Apply**.\n\nSizes change too.\n\n![All dishes with selected dishes](/help/shots/dishes-phone.webp \"phone\") ![All dishes with selected dishes](/help/shots/dishes-desktop.webp \"desktop\")\n\n**Staff** can change prices only when the owner allowed it (**Team → Can edit prices**).\n\n**A different price at one branch?** See [Branch prices](help:branch-prices).\n**Prices that change by themselves**, for example a happy hour? See [Happy hour](help:happy-hour).\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "hide-a-dish",
+                "topic": "menu",
+                "title": "Hide or show a dish",
+                "summary": "Take a dish off the menu without deleting it.",
+                "pages": [
+                    "/admin/dishes"
+                ],
+                "app": [
+                    "/r/:tid/menu"
+                ],
+                "keywords": [
+                    "hide",
+                    "show",
+                    "remove",
+                    "visible",
+                    "invisible"
+                ],
+                "body": "A hidden dish stays saved, with its photos and prices. Guests don't see it.\n\n1. Open the dish.\n2. Turn off **Visible to guests**. Tap **Save**.\n\nTo show it again, turn **Visible to guests** on.\n\n**Many dishes:** open **All dishes**, tick them and tap **Hide** or **Show**.\n\n**In the app:** tap **Hide or show a dish** on Home.\n\nOnly out of stock for today? Use [Sold out](help:sold-out) instead. Then guests still see the dish.\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "sold-out",
+                "topic": "menu",
+                "title": "Sold out",
+                "summary": "Show guests that a dish is finished for now.",
+                "pages": [
+                    "/admin/dishes"
+                ],
+                "app": [
+                    "/r/:tid/sold-out"
+                ],
+                "keywords": [
+                    "out of stock",
+                    "finished",
+                    "available again",
+                    "sold"
+                ],
+                "body": "A sold-out dish stays on the menu with the label **Sold out**. Guests know it exists, but can't have it now.\n\n**Mark a dish sold out**\n\n1. Open **Menu editor** or **All dishes** (in the app: **Menu**).\n2. Turn on the **Sold out** switch next to the dish.\n\n**In the app:** tap **Mark sold out** on Home and tap the dishes.\n\n**When it is back:** on the dashboard, find **Sold out now** and tap **Available again**.\n\n![The sold-out list in the app](/help/shots/app-sold-out.webp \"app\")\n\nStaff can mark dishes sold out too.\nEach branch can have its own sold-out dishes: see [Branch prices](help:branch-prices).\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "add-ons-and-tags",
+                "topic": "menu",
+                "title": "Add-ons, tags and allergens",
+                "summary": "Extra choices, labels like Vegan, and allergens.",
+                "pages": [
+                    "/admin/addons",
+                    "/admin/tags"
+                ],
+                "app": [],
+                "keywords": [
+                    "topping",
+                    "extra",
+                    "vegan",
+                    "halal",
+                    "spicy",
+                    "allergy",
+                    "gluten"
+                ],
+                "body": "**Add-ons** are choices guests can add, like extra toppings or milk type. They are information only.\n\n1. Open **Add-ons**. Tap **New add-on group**.\n2. Type a name, for example \"Extra toppings\".\n3. Add options, each with an **Extra price** if needed.\n4. Choose **At least** and **At most**, for example \"choose up to 2\".\n5. Tap **Save**. Then open a dish, tab **Add-ons**, and tick the group.\n\n**Tags** are labels on a dish. Built-in tags (Vegan, Spicy, Halal, Gluten-free, New, Popular) are translated by themselves. Add your own on **Tags**, for example \"Chef's pick\".\n\n**Allergens:** open a dish, tab **Tags & allergens**, and tick them. Guests see them in the dish details.\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "all-dishes",
+                "topic": "menu",
+                "title": "All dishes in one list",
+                "summary": "Find, check and change many dishes at once.",
+                "pages": [
+                    "/admin/dishes"
+                ],
+                "app": [
+                    "/r/:tid/all-dishes"
+                ],
+                "keywords": [
+                    "list",
+                    "search",
+                    "filter",
+                    "bulk",
+                    "delete many"
+                ],
+                "body": "**All dishes** shows every dish of every menu in one list.\n\n- **Search** by name.\n- **Filter** by menu, category or status: On the menu, Hidden, No photo, Sold out.\n- **Sort** by name, price or last change.\n\nTick dishes to change many at once: **Hide**, **Show**, **Change price**, **Delete**, **Sold out**, **Available**.\n\nDeleting removes the dishes and their photos from every menu. It can't be undone.\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "import-export",
+                "topic": "menu",
+                "title": "Import and export with a spreadsheet",
+                "summary": "Add or change many dishes with Excel or CSV.",
+                "pages": [
+                    "/admin/import"
+                ],
+                "app": [],
+                "keywords": [
+                    "excel",
+                    "csv",
+                    "spreadsheet",
+                    "upload",
+                    "download",
+                    "backup",
+                    "bulk"
+                ],
+                "body": "**Export** downloads every menu, category and dish in one file.\n\n1. Open **Import & export**.\n2. Under **Export**, tap **Excel** or **CSV**.\n\n**Import** adds or changes many dishes at once. You see a preview before anything is saved.\n\n1. Download the **Empty template** or an export.\n2. Fill it in. One row is one dish.\n3. Tap **Choose file**. The file can be up to 5 MB.\n4. Check the **Preview**: New, Changed, Unchanged and Errors.\n5. Fix rows with errors in the file and upload it again.\n6. Tap **Import**.\n\nHow the file works:\n\n- Dishes are matched by menu, category and dish name.\n- An empty cell keeps the current value.\n- Sizes: `Small=60; Large=80`. Prices: `120` or `120.50`.\n- Tags and allergens: separated by commas.\n\n![The import preview](/help/shots/import-phone.webp \"phone\") ![The import preview](/help/shots/import-desktop.webp \"desktop\")\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "menu-styles",
+                "topic": "look",
+                "title": "Menu styles A, B, C and D",
+                "summary": "Choose how your menu looks to guests.",
+                "pages": [
+                    "/admin/appearance"
+                ],
+                "app": [
+                    "/r/:tid/appearance"
+                ],
+                "keywords": [
+                    "style",
+                    "design",
+                    "theme",
+                    "layout",
+                    "editorial",
+                    "grid",
+                    "bistro",
+                    "minimal"
+                ],
+                "body": "Open **Appearance → Menu style**. The preview shows the change at once. Guests see it after you tap **Save**.\n\n- **A · Warm editorial**: big photos first and serif headings, like a printed café menu.\n- **B · Fresh grid**: your name on the banner and two photo cards per row, like a food app.\n- **C · Quiet bistro**: a calm list with small photos on the right. Quickest to scan.\n- **D · Minimal**: text only. Names, short descriptions and prices. No dish photos. Fastest.\n\nA style with a lock is not in your plan. See [plans](help:plans-compared).\n\n![Appearance with the preview](/help/shots/appearance-phone.webp \"phone\") ![Appearance with the preview](/help/shots/appearance-desktop.webp \"desktop\")\n\n**Themes** are ready-made looks. Pick one, then change the colour or font.\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "logo-and-banner",
+                "topic": "look",
+                "title": "Logo and banner",
+                "summary": "Add your logo and the wide photo at the top.",
+                "pages": [
+                    "/admin/appearance"
+                ],
+                "app": [
+                    "/r/:tid/appearance"
+                ],
+                "keywords": [
+                    "logo",
+                    "banner",
+                    "cover",
+                    "header",
+                    "image"
+                ],
+                "body": "1. Open **Appearance → Logo and banner**.\n2. Tap **Logo** and choose your logo. A square picture works best.\n3. Tap **Banner** and choose a wide photo. The page shows the best size.\n4. Under **Logo and name**, choose **On the banner** or **Below the banner**.\n5. Tap **Save**.\n\nThe banner is cropped to the shape of your menu style. It is also the picture people see when you share your menu link (see [Social preview](help:social-preview)).\n\nTo hide them, turn off **Show the logo** or **Show the banner**.\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "colours-and-fonts",
+                "topic": "look",
+                "title": "Colours and fonts",
+                "summary": "Your brand colour and the font of your menu.",
+                "pages": [
+                    "/admin/appearance"
+                ],
+                "app": [],
+                "keywords": [
+                    "colour",
+                    "color",
+                    "brand",
+                    "font",
+                    "dark"
+                ],
+                "body": "1. Open **Appearance**.\n2. Tap **Brand colour** and pick your colour.\n3. Choose a **Font**: Style default, Classic serif or Rounded.\n4. Tap **Save**.\n\nIf your colour is hard to read on white, guests see a darker shade of it. Then the text stays readable.\n\nGuests whose phone is in dark mode see a dark menu by themselves.\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "photo-free-menu",
+                "topic": "look",
+                "title": "A menu without photos",
+                "summary": "A fast text menu, or hide photos for a while.",
+                "pages": [
+                    "/admin/appearance"
+                ],
+                "app": [],
+                "keywords": [
+                    "no photos",
+                    "text only",
+                    "fast",
+                    "slow internet"
+                ],
+                "body": "Two ways:\n\n1. Choose style **D · Minimal**. It shows names, short lines and prices, with no dish photos. It opens fastest, also on slow internet.\n2. In any style, turn off **Show photos** in **Appearance**. Your photos stay saved. Turn it on again to show them.\n\nYou can also hide the photos of one dish: open the dish and turn off **Show photo on menu**.\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "guest-menu-switches",
+                "topic": "look",
+                "title": "What guests see on the menu",
+                "summary": "Show or hide prices, descriptions, calories and buttons.",
+                "pages": [
+                    "/admin/appearance"
+                ],
+                "app": [],
+                "keywords": [
+                    "show prices",
+                    "calories",
+                    "share button",
+                    "pdf link"
+                ],
+                "body": "In **Appearance** you can turn these on or off:\n\n- **Show prices**\n- **Show photos**\n- **Show descriptions**\n- **Show calories**\n- **Show \"Share menu\" button**\n- **Show \"Download menu (PDF)\" link**\n- **Show \"My order\" list** (see [My order](help:my-order))\n\nTap **Save**. Guests see it at once.\n\nOpening hours, address and Wi-Fi come from **Restaurant info**. Leave a field empty to hide it.\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "restaurant-info",
+                "topic": "look",
+                "title": "Opening hours, address and Wi-Fi",
+                "summary": "What guests see under \"Info & opening hours\".",
+                "pages": [
+                    "/admin/info"
+                ],
+                "app": [
+                    "/r/:tid/info"
+                ],
+                "keywords": [
+                    "hours",
+                    "open",
+                    "closed",
+                    "holiday",
+                    "address",
+                    "phone",
+                    "wifi",
+                    "instagram"
+                ],
+                "body": "Open **Restaurant info**.\n\n**About and contact:** a short description, address, map link, phone, e-mail, social media and website. Leave a field empty to hide it.\n\n**Wi-Fi:** type the network name and password. Turn on **Show Wi-Fi on the menu**.\n\n**Opening hours**\n\n1. For each day, tap **Add hours** and set the times.\n2. Closed for lunch? Tap **Add time after a break**.\n3. Same hours every weekday? Tap **Copy to Tuesday–Friday**.\n4. Tap **Save hours**.\n\nA closing time earlier than the opening time runs past midnight.\n\n**Holidays:** under **Holidays and closed days**, add the dates and a note. Guests see \"Closed today\" and a notice before.\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "branches",
+                "topic": "branches",
+                "title": "Add a branch",
+                "summary": "Each branch has its own address, tables and QR codes.",
+                "pages": [
+                    "/admin/branches"
+                ],
+                "app": [
+                    "/r/:tid/branches"
+                ],
+                "keywords": [
+                    "branch",
+                    "location",
+                    "second shop",
+                    "outlet"
+                ],
+                "body": "1. Open **Branches**. Tap **New branch**.\n2. Type the **Name**, for example \"Bole\".\n3. Check the **Web address**. It is part of the branch menu address.\n4. Add the address, phone and map link.\n5. Choose the **Menus shown at this branch**.\n6. Tap **Save**.\n\nThe main branch opens at your restaurant's own address. To change it, open a branch and tap **Make this the main branch**.\n\nYour plan allows 1 branches on the Free plan. See [plans](help:plans-compared).\n\n![Branches](/help/shots/branches-phone.webp \"phone\") ![Branches](/help/shots/branches-desktop.webp \"desktop\")\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "branch-prices",
+                "topic": "branches",
+                "title": "Branch prices and availability",
+                "summary": "A different price, or a hidden dish, at one branch.",
+                "pages": [
+                    "/admin/branches"
+                ],
+                "app": [],
+                "keywords": [
+                    "branch price",
+                    "override",
+                    "different price"
+                ],
+                "body": "1. Open **Branches**.\n2. Tap **Prices & availability** on the branch.\n3. Type a new price next to a dish. Leave it blank to use the main menu price.\n4. Under availability choose **As main menu**, **Sold out**, or **Hide**.\n5. Tap **Save**. Guests at this branch see it at once.\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "tables-and-branch-qr",
+                "topic": "branches",
+                "title": "Tables and branch QR codes",
+                "summary": "A QR code for each table.",
+                "pages": [
+                    "/admin/branches",
+                    "/admin/qr-codes"
+                ],
+                "app": [],
+                "keywords": [
+                    "table",
+                    "table number",
+                    "card",
+                    "qr per table"
+                ],
+                "body": "Every table gets its own QR code. Then you can see which tables scan most in Insights.\n\n1. Open **Branches**. Tap **Tables** on the branch.\n2. Under **Add numbered tables**, type a name (for example \"Table\") and From 1 To 12. Tap **Add tables**.\n3. Or add one table, for example \"Terrace 2\".\n4. Tap **Print table cards**. You get four cards per A4 page, with cut lines.\n\nDeleting a table makes its printed QR code stop working.\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "menu-link",
+                "topic": "sharing",
+                "title": "Your menu link",
+                "summary": "Share your menu on WhatsApp, Instagram and Telegram.",
+                "pages": [
+                    "/admin",
+                    "/admin/qr-codes"
+                ],
+                "app": [
+                    "/r/:tid"
+                ],
+                "keywords": [
+                    "link",
+                    "url",
+                    "address",
+                    "share",
+                    "whatsapp",
+                    "instagram"
+                ],
+                "body": "Your menu is at **http://127.0.0.1:8000/demo**.\n\n- On the dashboard, tap **View menu** to open it.\n- In the app, tap **Share menu link / QR** on Home. Choose WhatsApp, Telegram or any app.\n- Put the link in your Instagram bio and your Google Maps listing.\n\n![Your menu as guests see it](/help/shots/guest-menu-phone.webp \"phone\") ![Your menu as guests see it](/help/shots/guest-menu-desktop.webp \"desktop\")\n\nGuests can share it too, with the **Share menu** button on the menu.\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "qr-codes",
+                "topic": "sharing",
+                "title": "QR codes",
+                "summary": "Download, print and test your QR codes.",
+                "pages": [
+                    "/admin/qr-codes"
+                ],
+                "app": [
+                    "/r/:tid/qr"
+                ],
+                "keywords": [
+                    "qr",
+                    "scan",
+                    "print",
+                    "download",
+                    "poster",
+                    "sticker"
+                ],
+                "body": "Open **QR codes**. You see a code for your restaurant, each branch and each table.\n\n1. Under **Download**, tap **PDF**, **PNG** or **SVG** next to a code.\n2. Print it at 100 % size, at least 3 cm wide.\n3. **Scan one test copy** with your phone before you print many.\n\n**Extra codes** are for a flyer, a poster or the window. They are counted on their own in Insights.\n\n1. Under **Extra code**, type a name, for example \"Window poster\".\n2. Choose what it **Opens**. Tap **Add code**.\n\nA printed code keeps working, even if you change your menu address. Deleting a code makes its copies stop working.\n\n![QR codes](/help/shots/qr-codes-phone.webp \"phone\") ![QR codes](/help/shots/qr-codes-desktop.webp \"desktop\")\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "print-materials",
+                "topic": "sharing",
+                "title": "Print materials",
+                "summary": "Table tents, posters, stickers and a window sign with your QR code.",
+                "pages": [
+                    "/admin/print-materials"
+                ],
+                "app": [
+                    "/r/:tid/print"
+                ],
+                "keywords": [
+                    "poster",
+                    "tent",
+                    "sticker",
+                    "window",
+                    "flyer",
+                    "print shop"
+                ],
+                "body": "1. Open **QR codes → Print materials**.\n2. Choose **What to print**: Table tent, Poster A5, Poster A4, Window sign, Round or Square stickers.\n3. Choose a **Design** (Classic, Bold, Minimal) and **Colours** (Light or Dark).\n4. Type a **Headline** if you like (up to 40 letters).\n5. Choose **Which QR codes**. You get one page, tent or sticker for each code.\n6. Tap **Download PDF**.\n\nGoing to a print shop? Turn on **For a print shop (3 mm bleed)**.\n\n**For social media:** download a **Square post** or a **Story** picture with your code.\n\n![Print materials](/help/shots/print-materials-phone.webp \"phone\") ![Print materials](/help/shots/print-materials-desktop.webp \"desktop\")\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "pdf-menu",
+                "topic": "sharing",
+                "title": "PDF menu",
+                "summary": "A printable A4 menu from your online menu.",
+                "pages": [
+                    "/admin/menu"
+                ],
+                "app": [],
+                "keywords": [
+                    "pdf",
+                    "print menu",
+                    "a4",
+                    "paper menu"
+                ],
+                "body": "1. Open **Menu editor**.\n2. Tap **Download PDF menu**.\n3. Choose the **Menu** (or All menus), the **Branch**, **With photos** or not, and the **Layout** (1 or 2 columns).\n4. Tap **Download PDF**.\n\nThe PDF uses your colour and style. Hidden and sold-out dishes are left out.\n\nGuests can download it too, when **Show \"Download menu (PDF)\" link** is on in **Appearance**.\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "social-preview",
+                "topic": "sharing",
+                "title": "The picture when you share a link",
+                "summary": "What WhatsApp, Telegram and Facebook show for your link.",
+                "pages": [
+                    "/admin/appearance"
+                ],
+                "app": [],
+                "keywords": [
+                    "preview",
+                    "whatsapp preview",
+                    "facebook",
+                    "thumbnail",
+                    "og image"
+                ],
+                "body": "When you share your menu link, apps show a small card: a picture, your name and a short text.\n\n- **The picture** is your banner. No banner? Then a default picture is used.\n- **The name** is your restaurant name (and the branch).\n- **The text** is the short description from **Restaurant info**.\n\nChanged your banner, but WhatsApp still shows the old picture? Apps keep their own copy for a while. Share the link again later, or in a new chat.\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "promotions",
+                "topic": "promotions",
+                "title": "Promotions",
+                "summary": "Specials and announcements at the top of your menu.",
+                "pages": [
+                    "/admin/promotions"
+                ],
+                "app": [
+                    "/r/:tid/promotions"
+                ],
+                "keywords": [
+                    "special",
+                    "offer",
+                    "announcement",
+                    "news",
+                    "banner"
+                ],
+                "body": "A promotion is shown at the top of your menu. It can start and end by itself.\n\n1. Open **Promotions**. Tap **New promotion**.\n2. Choose the **Type**: **Special** (a dish) or **Announcement** (news, for example \"Live music on Friday\").\n3. Type the **Title** and the **Text**. Add a **Photo** if you like.\n4. For a special, choose the **Linked dish**. Guests can tap it to see the dish.\n5. Set **Starts** and **Ends**. Leave Ends empty for no end.\n6. Choose the **Branch**, or All branches.\n7. Tap **Save**.\n\nUse the arrows to change the order. Turn off **Show on the menu** to pause a promotion.\n\n![Promotions](/help/shots/promotions-phone.webp \"phone\") ![Promotions](/help/shots/promotions-desktop.webp \"desktop\")\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "happy-hour",
+                "topic": "promotions",
+                "title": "Happy hour and lunch prices",
+                "summary": "Special prices that switch on and off by themselves.",
+                "pages": [
+                    "/admin/promotions"
+                ],
+                "app": [
+                    "/r/:tid/happy-hour"
+                ],
+                "keywords": [
+                    "happy hour",
+                    "lunch price",
+                    "discount",
+                    "time",
+                    "automatic price",
+                    "price period"
+                ],
+                "body": "A **price period** changes prices at set times, for example every day from 17:00 to 19:00. Guests see the normal price crossed out and the special price.\n\n1. Open **Promotions → Price periods**. Tap **New price period**.\n2. Type the **Name shown to guests**, for example \"Happy hour\".\n3. Choose the **Days** and the times **From** and **Until**.\n4. Tap **Add a dish**. For each dish choose **% off** or **New price**.\n5. Turn on **Use this price period**. Tap **Save**.\n\n**What guests see now** shows if a period is running. The menu changes by itself when a period starts or ends. Times are in your restaurant's time zone. An end time earlier than the start runs past midnight.\n\n![A price period](/help/shots/happy-hour-phone.webp \"phone\") ![A price period](/help/shots/happy-hour-desktop.webp \"desktop\")\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "my-order",
+                "topic": "my_order",
+                "title": "\"My order\": the list guests show the waiter",
+                "summary": "Guests note dishes on their phone, then show the list.",
+                "pages": [
+                    "/admin/appearance"
+                ],
+                "app": [
+                    "/r/:tid/orders"
+                ],
+                "keywords": [
+                    "my order",
+                    "list",
+                    "waiter",
+                    "cart",
+                    "basket"
+                ],
+                "body": "With **My order**, guests tap **Add to my order** on dishes. They see the total at the bottom. Then they show the list to the waiter.\n\nIt is **not** an online order. Nothing is sent to you. The list says: \"This is not an order. Show it to your waiter.\"\n\n![My order on a guest's phone](/help/shots/guest-my-order-phone.webp \"phone\") ![My order on a guest's phone](/help/shots/guest-my-order-desktop.webp \"desktop\")\n\n**Turn it on or off:** open **Appearance** and use **Show \"My order\" list**.\n\n**Numbers:** the dashboard and Insights show how many lists guests made, the average value, and the most added dishes. They are counted without names. In the app, open the **Orders** tab.\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "insights",
+                "topic": "insights",
+                "title": "Insights explained",
+                "summary": "Views, scans, top dishes and QR codes, and the monthly report.",
+                "pages": [
+                    "/admin/insights"
+                ],
+                "app": [
+                    "/r/:tid/insights"
+                ],
+                "keywords": [
+                    "statistics",
+                    "numbers",
+                    "report",
+                    "analytics",
+                    "views",
+                    "scans"
+                ],
+                "body": "Open **Insights**. Choose the **Period** (last 7, 30 or 90 days) and the **Branch**.\n\n- **Menu views**: how many times your menu page was opened.\n- **QR scans**: views that came from a QR code.\n- **Dish details opened**: how often guests opened a dish.\n- **Most viewed dishes**: your most popular dishes.\n- **Scans per QR code**: which tables and posters bring guests in.\n\nSearch engines, link previews and speed tests are not counted. We count without cookies and without storing anyone's address.\n\n![Insights](/help/shots/insights-phone.webp \"phone\") ![Insights](/help/shots/insights-desktop.webp \"desktop\")\n\n**Export:** tap **Export** for a PDF report or CSV files.\n\n**Monthly report:** turn on **E-mail me the monthly report**. Owners get last month's report as a PDF on the 1st.\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "team",
+                "topic": "team",
+                "title": "Add your team",
+                "summary": "Invite staff and managers, and choose what they may do.",
+                "pages": [
+                    "/admin/team"
+                ],
+                "app": [
+                    "/r/:tid/team"
+                ],
+                "keywords": [
+                    "staff",
+                    "waiter",
+                    "manager",
+                    "invite",
+                    "employee",
+                    "user"
+                ],
+                "body": "1. Open **Team**. Tap **Invite**.\n2. Type their e-mail and choose a **Role**.\n3. Tap **Send invitation**. The link works for 7 days.\n\nThey open the e-mail, make a password and sign in.\n\n![The team page](/help/shots/team-phone.webp \"phone\") ![The team page](/help/shots/team-desktop.webp \"desktop\")\n\n**Pending invitations** shows who has not joined yet. Tap the cross to cancel one.\n\n**Remove someone:** tap **Remove from team**. They lose access at once.\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "roles",
+                "topic": "team",
+                "title": "Roles and permissions",
+                "summary": "What owners, managers and staff can do.",
+                "pages": [
+                    "/admin/team"
+                ],
+                "app": [],
+                "keywords": [
+                    "role",
+                    "permission",
+                    "rights",
+                    "access",
+                    "owner",
+                    "manager",
+                    "staff"
+                ],
+                "body": "| | Owner | Manager | Staff |\n|---|---|---|---|\n| Menu, dishes, photos | ✓ | ✓ | |\n| Prices | ✓ | ✓ | only if allowed |\n| Sold out | ✓ | ✓ | ✓ |\n| Appearance, QR codes, branches | ✓ | ✓ | |\n| Invite people | ✓ | staff only | |\n| Billing and plan | ✓ | | |\n\n- **Owners** do everything, also billing.\n- **Managers** edit the menu, branches and settings, and can invite staff.\n- **Staff** see the menu and mark dishes sold out. Turn on **Can edit prices** to let them change prices.\n\nTo change a role, open **Team** and choose a new role next to the name.\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "password",
+                "topic": "account",
+                "title": "Change your password or e-mail",
+                "summary": "Keep your account safe.",
+                "pages": [
+                    "/admin/settings"
+                ],
+                "app": [
+                    "/account"
+                ],
+                "keywords": [
+                    "password",
+                    "email",
+                    "name",
+                    "language"
+                ],
+                "body": "**Password**\n\n1. Open **Settings → Security**.\n2. Type your **Current password** and a new one (at least 10 characters).\n3. Tap **Save password**.\n\nForgot it? On the sign-in page tap **Forgot password?**. We send you a link.\n\n**E-mail:** open **Settings → Profile**, type the new address and your password. We send a link to the new address. Your address changes when you tap it (within 1 hour).\n\nChanging your password in the app signs out your other phones.\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "two-factor",
+                "topic": "account",
+                "title": "Two-factor sign-in (2FA)",
+                "summary": "A code from your phone, so a stolen password is not enough.",
+                "pages": [
+                    "/admin/settings/security"
+                ],
+                "app": [
+                    "/account"
+                ],
+                "keywords": [
+                    "2fa",
+                    "two factor",
+                    "authenticator",
+                    "code",
+                    "google authenticator",
+                    "recovery codes"
+                ],
+                "body": "After your password, you also type a 6-digit code from an app on your phone.\n\n1. Install an authenticator app, for example Google Authenticator or Microsoft Authenticator.\n2. Open **Settings → Security → Two-factor sign-in**. Tap **Turn on**.\n3. Type your password.\n4. Scan the QR code with the authenticator app.\n5. Type the 6-digit code it shows. Tap **Verify**.\n6. **Save the recovery codes** somewhere safe, for example on paper. Each one lets you sign in once if you lose your phone.\n\n![Security settings](/help/shots/security-phone.webp \"phone\") ![Security settings](/help/shots/security-desktop.webp \"desktop\")\n\nLost your phone and your codes? Contact support:\n\nAsk the person who set up your account.\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "sign-out-devices",
+                "topic": "account",
+                "title": "Sign out other browsers and phones",
+                "summary": "Signed in on a shared or lost device? End it here.",
+                "pages": [
+                    "/admin/settings/security"
+                ],
+                "app": [
+                    "/account"
+                ],
+                "keywords": [
+                    "sign out",
+                    "logout",
+                    "lost phone",
+                    "other devices",
+                    "session"
+                ],
+                "body": "**Other browsers:** open **Settings → Security → Other browsers**. Tap **Sign out of all other browsers**. This browser stays signed in.\n\n**Phones with the app:** in the app, open **More → Profile → Devices**. Tap **Sign out this device** next to the phone.\n\nChanging your password also signs out your other phones.\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "plans-compared",
+                "topic": "plans",
+                "title": "What each plan includes",
+                "summary": "Prices, limits and features of every plan.",
+                "pages": [
+                    "/admin/settings/billing"
+                ],
+                "app": [
+                    "/r/:tid/billing"
+                ],
+                "keywords": [
+                    "price",
+                    "cost",
+                    "plan",
+                    "free",
+                    "pro",
+                    "plus",
+                    "business",
+                    "limits"
+                ],
+                "body": "These are today's plans:\n\n- **Free** — Free, no end date. Unlimited dishes · 100 photos · 1 branch · unlimited team members · 2 menu styles. Includes: import and export, PDF menu, \"My order\".\n- **Plus** — Br 490 a month. Unlimited dishes · 500 photos · 1 branch · unlimited team members · 4 menu styles. Adds: promotions, Insights.\n- **Pro** — Br 990 a month. Unlimited dishes · 2,000 photos · 3 branches · unlimited team members · 4 menu styles. Adds: more branches, happy hour prices, menu without our name.\n- **Business** — Br 2,490 a month. Unlimited dishes · unlimited photos · unlimited branches · unlimited team members · 4 menu styles.\n\nNew restaurants start on **Free**. Your data stays when you change plans.\n\nTo upgrade, see [Upgrade your plan](help:upgrade).\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "upgrade",
+                "topic": "plans",
+                "title": "Upgrade your plan",
+                "summary": "How to change plans and pay.",
+                "pages": [
+                    "/admin/settings/billing"
+                ],
+                "app": [
+                    "/r/:tid/billing"
+                ],
+                "keywords": [
+                    "upgrade",
+                    "pay",
+                    "payment",
+                    "invoice",
+                    "renew",
+                    "mobile money",
+                    "bank"
+                ],
+                "body": "1. Choose a plan from [What each plan includes](help:plans-compared).\n2. Contact us:\n\nAsk the person who set up your account.\n\n3. Pay by mobile money or bank transfer.\n4. We record your payment. Your plan changes at once. You get an invoice.\n\nOpen **Settings → Billing** to see your plan, **Paid until** and your **Invoices** (PDF).\n\n![Billing](/help/shots/billing-phone.webp \"phone\") ![Billing](/help/shots/billing-desktop.webp \"desktop\")\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "plan-ended",
+                "topic": "plans",
+                "title": "When your plan ends",
+                "summary": "What happens after the paid-until date.",
+                "pages": [
+                    "/admin/settings/billing"
+                ],
+                "app": [],
+                "keywords": [
+                    "expired",
+                    "ended",
+                    "offline",
+                    "read only",
+                    "renew",
+                    "grace"
+                ],
+                "body": "1. **Grace time:** for 7 days you can still edit everything. A banner asks you to renew.\n2. **Read-only:** for 14 more days, guests still see your menu, but you can't change it.\n3. **Offline:** then your menu goes offline until you renew.\n\nYour data is not deleted. Renew any time: see [Upgrade your plan](help:upgrade).\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "install-app",
+                "topic": "app",
+                "title": "Install the Menu Admin app",
+                "summary": "Manage your menu from your phone.",
+                "pages": [],
+                "app": [
+                    "/r/:tid/more"
+                ],
+                "keywords": [
+                    "app",
+                    "android",
+                    "iphone",
+                    "play store",
+                    "install",
+                    "download"
+                ],
+                "body": "The **Menu Admin** app does the daily jobs on your phone: prices, photos, sold out, sharing.\n\n1. Open the **Google Play Store** (Android) or the **App Store** (iPhone).\n2. Search for **Menu Admin**.\n3. Tap **Install**.\n4. Open the app and sign in with the same e-mail and password as the website.\n\n![The app's sign-in screen](/help/shots/app-sign-in.webp \"app\")\n\nThe app asks to send notifications, for example when your monthly report is ready. You can change this later in **Settings**.\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "app-home",
+                "topic": "app",
+                "title": "The app's Home and quick actions",
+                "summary": "The buttons for the jobs you do every day.",
+                "pages": [],
+                "app": [
+                    "/r/:tid"
+                ],
+                "keywords": [
+                    "home",
+                    "quick actions",
+                    "shortcuts"
+                ],
+                "body": "**Home** shows today's views and scans and how many dishes are sold out. Under **Quick actions**:\n\n- **Change a price**\n- **Hide or show a dish**\n- **Add dish with photo**\n- **Share menu link / QR**\n- **Mark sold out**\n- **Promotions**\n\n![The app's Home](/help/shots/app-home.webp \"app\")\n\nAt the bottom: **Home**, **Menu**, **Orders** and **More**. **More** has everything else: All dishes, branches, QR codes, appearance, team, billing and Help.\n\nPull down on a screen to load the newest data.\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "app-offline",
+                "topic": "app",
+                "title": "Using the app offline",
+                "summary": "What works without internet.",
+                "pages": [],
+                "app": [
+                    "/r/:tid"
+                ],
+                "keywords": [
+                    "offline",
+                    "no internet",
+                    "connection",
+                    "slow"
+                ],
+                "body": "The app saves what you saw last. Without internet you can still open your menu, your numbers and this Help.\n\nA bar says **\"You're offline. Showing saved data; changes need a connection.\"**\n\nTo change something (a price, a photo, sold out), you need a connection. When you are online again, pull down to refresh.\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "app-update",
+                "topic": "app",
+                "title": "\"Update required\" and other app messages",
+                "summary": "What to do when the app asks you to update.",
+                "pages": [],
+                "app": [],
+                "keywords": [
+                    "update",
+                    "new version",
+                    "maintenance",
+                    "not available"
+                ],
+                "body": "- **\"Update required\"**: your app is too old. Tap **Update now**, or open the Play Store or App Store and update **Menu Admin**.\n- **\"A new version of the app is ready\"**: an update is ready. Tap **Update now**, or close the line and update later.\n- **\"Down for maintenance\"**: we are updating the system. Wait a few minutes and tap **Try again**.\n- **\"The app is not available\"**: use the website for now. Tap **Open the website**.\n\nYou can always use the website at http://127.0.0.1:8000/admin.\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "qr-does-not-open",
+                "topic": "problems",
+                "title": "My QR code doesn't open",
+                "summary": "Check these five things.",
+                "pages": [
+                    "/admin/qr-codes"
+                ],
+                "app": [],
+                "keywords": [
+                    "qr not working",
+                    "scan",
+                    "camera",
+                    "broken code"
+                ],
+                "body": "1. **Print size:** the code must be at least 3 cm wide. Print at 100 %, not \"fit to page\".\n2. **Paper:** shiny paper reflects light. Use matt paper.\n3. **Deleted code:** if you deleted the code, the table or the branch, its copies stop working. Download the code again.\n4. **Light:** scan in good light. Hold the phone 20–30 cm away.\n5. **Plan ended:** if your menu is offline, the code opens a page that says so. See [When your plan ends](help:plan-ended).\n\nTest one copy before you print many.\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "blurry-photos",
+                "topic": "problems",
+                "title": "My photos look blurry",
+                "summary": "How to get sharp dish photos.",
+                "pages": [],
+                "app": [],
+                "keywords": [
+                    "blurry",
+                    "pixelated",
+                    "low quality",
+                    "dark photo"
+                ],
+                "body": "- Use a photo of at least 1000 pixels wide. Photos from WhatsApp are often made small: send them as a **document**, or use the original from the camera.\n- Clean the camera lens.\n- Use daylight. Don't zoom in with the camera: move closer.\n- Crop less. When you crop a small part, it gets blurry.\n\nThe menu makes small versions for fast loading. A sharp original stays sharp.\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "dish-does-not-show",
+                "topic": "problems",
+                "title": "A dish doesn't show on my menu",
+                "summary": "Check these things.",
+                "pages": [],
+                "app": [],
+                "keywords": [
+                    "missing dish",
+                    "not showing",
+                    "invisible",
+                    "hidden"
+                ],
+                "body": "1. **Hidden?** Open the dish. Is **Visible to guests** on?\n2. **Hidden category?** Open the category. Is it visible?\n3. **Menu at set times?** A menu with **At set times** shows only in its time windows.\n4. **Other branch?** Check **Branches → Prices & availability**. The dish may be hidden at that branch. Also check which menus the branch shows.\n5. **Old page?** Pull down on the phone, or close and open the menu again.\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "cant-sign-in",
+                "topic": "problems",
+                "title": "I can't sign in",
+                "summary": "Wrong password, no code, or a locked account.",
+                "pages": [],
+                "app": [],
+                "keywords": [
+                    "login problem",
+                    "password wrong",
+                    "locked",
+                    "no code",
+                    "two factor lost"
+                ],
+                "body": "- **Wrong password?** Tap **Forgot password?** on the sign-in page. We send a link to your e-mail. Look in spam too.\n- **\"Too many tries\"?** Wait one minute and try again.\n- **No 2FA code?** Use one of your recovery codes instead.\n- **Lost your phone and codes?** Contact support (below).\n- **E-mail not confirmed?** Open the link from our first e-mail, or tap **Resend email**.\n- **\"Your account is not part of any restaurant\"?** Ask the owner to invite you again.\n\nAsk the person who set up your account.\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "app-problems",
+                "topic": "problems",
+                "title": "The app doesn't work",
+                "summary": "Update, maintenance, or a sign-in problem.",
+                "pages": [],
+                "app": [],
+                "keywords": [
+                    "app crash",
+                    "app not loading",
+                    "update",
+                    "maintenance"
+                ],
+                "body": "1. **Update the app** in the Play Store or App Store.\n2. **\"Down for maintenance\"?** Wait a few minutes and tap **Try again**.\n3. **Signed out?** Sign in again. A phone not used for 60 days is signed out by itself.\n4. **No internet?** See [Using the app offline](help:app-offline).\n5. Still not working? Use the website at http://127.0.0.1:8000/admin and contact us.\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "using-help",
+                "topic": "faq",
+                "title": "How to use Help",
+                "summary": "Search, the ? button, and asking us.",
+                "pages": [
+                    "/admin/help"
+                ],
+                "app": [
+                    "/help"
+                ],
+                "keywords": [
+                    "help",
+                    "search",
+                    "question mark",
+                    "tour"
+                ],
+                "body": "- **Search:** type a few words, for example \"price\" or \"QR\".\n- **The ? button** at the top of every page opens the article for that page.\n- **Was this helpful?** Tap Yes or No under an article. It tells us which articles to make better.\n- In the app, Help works **without internet** too. It shows the articles you loaded last.\n\n![Help on a phone and a computer](/help/shots/help-centre-phone.webp \"phone\") ![Help on a phone and a computer](/help/shots/help-centre-desktop.webp \"desktop\")\n\nStill stuck? See [Contact support](help:contact-support).\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "faq",
+                "topic": "faq",
+                "title": "FAQ: the 20 most asked questions",
+                "summary": "Short answers to common questions.",
+                "pages": [],
+                "app": [],
+                "keywords": [
+                    "questions",
+                    "faq",
+                    "how"
+                ],
+                "body": "**1. Is it really free?** Yes. The Free plan has no end date. Paid plans add more. See [plans](help:plans-compared).\n\n**2. Do guests need an app?** No. They scan the QR code and the menu opens in their browser.\n\n**3. Can guests order and pay online?** No. \"My order\" is a list they show the waiter. Nothing is sent or paid.\n\n**4. Do I need to print new QR codes when I change the menu?** No. The code always opens your newest menu.\n\n**5. Do I need new QR codes when I change my menu address?** No. Printed codes keep working.\n\n**6. How many dishes can I add?** no limit on the Free plan.\n\n**7. How many photos?** Up to 5 per dish. In total 100 on the Free plan.\n\n**8. Can I hide a dish for a day?** Yes: [hide it](help:hide-a-dish) or mark it [sold out](help:sold-out).\n\n**9. Can prices change by themselves?** Yes, with [happy hour prices](help:happy-hour).\n**10. Can I have more than one branch?** Yes: see [Add a branch](help:branches).\n**11. Can my staff help?** Yes. [Invite them](help:team) as Staff.\n\n**12. Can I see how many people look at my menu?** The dashboard shows today. [Insights](help:insights) shows more.\n**13. Does the menu work on slow internet?** Yes. It is small and fast. Style D is fastest.\n\n**14. Can I print a paper menu?** Yes: [PDF menu](help:pdf-menu).\n**15. Is my data safe?** Yes. We make backups every day. Turn on [two-factor sign-in](help:two-factor).\n\n**16. Can I use my phone only?** Yes. The website works on phones, and there is [an app](help:install-app).\n\n**17. How do I pay?** By mobile money or bank transfer. See [Upgrade your plan](help:upgrade).\n\n**18. What happens when my plan ends?** See [When your plan ends](help:plan-ended).\n\n**19. Can I change the currency?** Contact us. Prices are not converted.\n\n**20. Can I delete my account?** Yes. Contact us. We delete your restaurant and data.\n",
+                "html": "",
+                "updated_at": null
+            },
+            {
+                "slug": "contact-support",
+                "topic": "faq",
+                "title": "Contact support",
+                "summary": "How to reach us.",
+                "pages": [],
+                "app": [],
+                "keywords": [
+                    "support",
+                    "help",
+                    "contact",
+                    "whatsapp",
+                    "email",
+                    "phone"
+                ],
+                "body": "We are happy to help.\n\nAsk the person who set up your account.\n\nPlease tell us:\n\n- your restaurant name or menu address,\n- what you wanted to do,\n- what happened (a screenshot helps).\n\nNever send us your password.\n",
+                "html": "",
+                "updated_at": null
+            }
+        ],
+        "voted": {}
+    }
+}

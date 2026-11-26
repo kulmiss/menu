@@ -1,4 +1,12 @@
-# Progress — Feature search (25 Nov 2026)
+# Progress — Flutter app into the monorepo (26 Nov 2026)
+
+📍 Now: PR feat/monorepo-app (off develop), CI running
+
+- The owner wanted everything in one folder like the guul12 project. Brought the Flutter app (`kulmiss/menu-admin-app`) into this repo under `app/` — only git-tracked files (352, 14 MB; no build artifacts) (QUESTIONS #270).
+- New `.github/workflows/app.yml` (analyze, format, tests, Android size budget), path-filtered to `app/**`, modelled on the app's own green CI; backend/frontend CI untouched. README documents the `app/` folder.
+- No history preservation (the app has no more changes). The old `menu-admin-app` repo is left intact — owner decides its fate later.
+
+# Earlier: Feature search (25 Nov 2026)
 
 📍 Now: PR feat/feature-search (off develop), CI running
 
