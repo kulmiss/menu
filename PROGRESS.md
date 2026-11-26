@@ -5,7 +5,8 @@
 - The owner said the Appearance page was crowded and asked tabs or sidebar; showed a mockup, they chose tabs. Reorganised the five sections (Look, Layout, Colours & font, Logo & banner, What guests see) from a stack of collapsible cards into **tabs** — one at a time, live preview always beside (QUESTIONS #271).
 - Each tab shows a dot for unsaved changes / errors; a save error opens its tab. Dropped the step-bar, expand/collapse-all and the open-state memory. Settings/saving/preview unchanged; net −81 lines.
 - Follow-up (owner, 26 Nov): on a laptop the phone preview was taller than the screen, so the sticky column still scrolled off the bottom. The phone now caps its height to the viewport on desktop (`lg:h-[min(640px,calc(100dvh-12rem))]`) and the column is `lg:self-start`, so the whole preview stays pinned beside the settings. Scoped to Appearance via `frameClassName`; Super-Admin Themes (same `PhonePreview`) untouched.
-- `appearance.test` rewritten for tabs: 31 tests pass (incl. the new preview-pin test + axe, zero violations); tsc, eslint, prettier clean.
+- Follow-up 2 (owner, 26 Nov): on the long Look tab the preview still drifted — the whole block (switch row + phone + buttons, measured ~184px of chrome) was ~48px taller than the viewport, so the sticky pane could not fully engage. Pinned higher (`lg:top-6`, the admin header scrolls away on this page) and shrank the phone to `calc(100dvh-14rem)`, so the entire preview fits the screen and holds still like a fixed sidebar. Verified by a layout-measurement render at 1280×720 (preview bottom now within the fold).
+- `appearance.test` rewritten for tabs: 31 tests pass (incl. the preview-pin test + axe, zero violations); tsc, eslint, prettier clean.
 
 # Earlier: Owner status e-mails (25 Nov 2026)
 
