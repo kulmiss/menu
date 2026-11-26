@@ -4,7 +4,8 @@
 
 - The owner said the Appearance page was crowded and asked tabs or sidebar; showed a mockup, they chose tabs. Reorganised the five sections (Look, Layout, Colours & font, Logo & banner, What guests see) from a stack of collapsible cards into **tabs** — one at a time, live preview always beside (QUESTIONS #271).
 - Each tab shows a dot for unsaved changes / errors; a save error opens its tab. Dropped the step-bar, expand/collapse-all and the open-state memory. Settings/saving/preview unchanged; net −81 lines.
-- `appearance.test` rewritten for tabs: 30 tests pass (incl. axe, zero violations); tsc, eslint, prettier clean.
+- Follow-up (owner, 26 Nov): on a laptop the phone preview was taller than the screen, so the sticky column still scrolled off the bottom. The phone now caps its height to the viewport on desktop (`lg:h-[min(640px,calc(100dvh-12rem))]`) and the column is `lg:self-start`, so the whole preview stays pinned beside the settings. Scoped to Appearance via `frameClassName`; Super-Admin Themes (same `PhonePreview`) untouched.
+- `appearance.test` rewritten for tabs: 31 tests pass (incl. the new preview-pin test + axe, zero violations); tsc, eslint, prettier clean.
 
 # Earlier: Owner status e-mails (25 Nov 2026)
 

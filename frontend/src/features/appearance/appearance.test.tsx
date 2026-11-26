@@ -3,7 +3,7 @@ import { fakeApi, invalid } from '@/test-utils/fake-api'
 import { meFixture, tenantFixture } from '@/test-utils/fixtures'
 import { renderWithQuery } from '@/test-utils/render'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { userEvent } from 'vitest/browser'
+import { page, userEvent } from 'vitest/browser'
 import { useTenantStore } from '@/stores/tenant-store'
 import { type Appearance } from './api'
 import { AppearancePage } from './index'
@@ -763,6 +763,22 @@ describe('AppearancePage tabs', () => {
     expect(frame(screen).src).toContain('style=grid')
     await userEvent.click(screen.getByRole('button', { name: 'Dark' }))
     await expect.poll(() => frame(screen).src).toContain('scheme=dark')
+  })
+
+  it('pins the preview and fits the phone to the screen on a computer', async () => {
+    await page.viewport(1280, 900)
+    const screen = await render()
+    await expect
+      .element(screen.getByRole('tab', { name: 'Look' }))
+      .toBeVisible()
+    const phone = frame(screen).parentElement as HTMLElement
+    // On a computer the phone caps its height to the viewport, so the whole
+    // preview stays in view instead of scrolling off the bottom.
+    expect(phone.className).toContain('100dvh-12rem')
+    // Its column sticks beside the settings rather than scrolling away.
+    const column = phone.closest('[class*="lg:sticky"]')
+    expect(column).not.toBeNull()
+    expect(column?.className).toContain('lg:self-start')
   })
 
   it('has no accessibility problems on a tab', async () => {
