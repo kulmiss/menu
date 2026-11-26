@@ -670,7 +670,7 @@ function AppearanceForm({ initial }: { initial: Appearance }) {
 
       <div
         className={cn(
-          'lg:sticky lg:top-20 lg:block',
+          'lg:sticky lg:top-20 lg:block lg:self-start',
           showPreview ? 'block' : 'hidden'
         )}
       >
@@ -680,6 +680,9 @@ function AppearanceForm({ initial }: { initial: Appearance }) {
           onScheme={setScheme}
           title={t('appearance.preview')}
           hint={t('appearance.preview_hint')}
+          // On a computer the phone shrinks to fit the screen, so the whole
+          // preview stays pinned in view instead of scrolling off the bottom.
+          frameClassName='lg:h-[min(640px,calc(100dvh-12rem))]'
         />
       </div>
     </div>
